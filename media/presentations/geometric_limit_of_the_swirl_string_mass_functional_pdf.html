@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Mass Functional Simulator</title>
+    <style>
+        :root {
+            --bg-base: #0a0a0f;
+            --bg-panel: #14141d;
+            --bg-input: #1f1f2e;
+            --text-main: #e0e0f0;
+            --text-muted: #8a8a9f;
+            --accent-cyan: #00f3ff;
+            --accent-pink: #ff00e6;
+            --accent-yellow: #ffea00;
+            --border: #2a2a3f;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--bg-panel) 0%, #1a1a26 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .value-display {
+            font-family: var(--font-mono);
+            color: var(--accent-pink);
+            font-size: 0.9rem;
+            background: var(--bg-input);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: var(--bg-input);
+            border-radius: 2px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background-color: var(--bg-input);
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        input[type="checkbox"]:checked + .toggle-switch {
+            background-color: var(--accent-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 230, 0.4);
+        }
+
+        input[type="checkbox"]:checked + .toggle-switch::after {
+            left: 22px;
+            background-color: white;
+        }
+
+        /* Dashboard Panel */
+        .dashboard-panel {
+            flex: 2;
+            min-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .readouts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .readout-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .readout-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-cyan);
+        }
+
+        .readout-card:nth-child(2)::before { background: var(--accent-pink); }
+        .readout-card:nth-child(3)::before { background: var(--accent-yellow); }
+        .readout-card:nth-child(4)::before { background: #00ff88; }
+
+        .readout-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .readout-value {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            margin-top: 0.5rem;
+            color: white;
+        }
+
+        .visuals {
+            display: flex;
+            gap: 1.5rem;
+            flex: 1;
+            min-height: 300px;
+        }
+
+        .viz-box {
+            flex: 1;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .viz-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            position: absolute;
+            z-index: 2;
+        }
+
+        #string-svg-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a1a26 0%, var(--bg-panel) 70%);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted var(--text-muted);
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+            border: 1px solid var(--border);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .visuals {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Swirl-String Theory (SST) Explorer</h1>
+        <p>Interactive dashboard for bridging Topological Impedance and Gravitational Time Dilation based on O. Iskandarani's formulations.</p>
+    </header>
+
+    <main>
+        <!-- Left Panel: Controls -->
+        <aside class="controls-panel">
+            <div class="panel-title">Foliation Parameters</div>
+
+            <div class="control-group">
+                <div class="control-header">
+                    <label class="tooltip">Core Radius (r<sub>c</sub>)
+                        <span class="tooltiptext">Localized swirl core radius. Affects kinetic energy density.</span>
+                    </label>
+                    <span class="value-display" id="val-rc">0.5</span>
+                </div>
+                <input type="range" id="in-rc" min="0.1" max="2.0" step="0.05" value="0.5">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header">
+                    <label class="tooltip">Compton Wavelength (λ<sub>c</sub>)
+                        <span class="tooltiptext">Fundamental wavelength bridging the fine-structure amplification.</span>
+                    </label>
+                    <span class="value-display" id="val-lc">5.0</span>
+                </div>
+                <input type="range" id="in-lc" min="1.0" max="15.0" step="0.1" value="5.0">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header">
+                    <label class="tooltip">Ropelength Factor (L<sub>tot</sub>)
+                        <span class="tooltiptext">Dimensionless topological length of the knotted string.</span>
+                    </label>
+                    <span class="value-display" id="val-ltot">10</span>
+                </div>
+                <input type="range" id="in-ltot" min="1" max="50" step="1" value="10">
+            </div>
+
+            <div class="panel-title" style="margin-top: 1rem;">Topological State</div>
+
+            <div class="control-group">
+                <label class="toggle-container tooltip">
+                    <input type="checkbox" id="in-gate" checked>
+                    <div class="toggle-switch"></div>
+                    <span>Exposure Gate G(T) ∈ {0,1}</span>
+                    <span class="tooltiptext">Activates the geometric shielding gate (impedance mismatch).</span>
+                </label>
+            </div>
+
+            <div class="control-group" style="margin-top: 0.5rem;">
+                <div class="control-header">
+                    <label class="tooltip">Topology Kernel 𝓚(T)
+                        <span class="tooltiptext">Dimensionless kernel specific to the knot type.</span>
+                    </label>
+                    <span class="value-display" id="val-k">1.0</span>
+                </div>
+                <input type="range" id="in-k" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="panel-title" style="margin-top: 1rem;">Observation</div>
+
+            <div class="control-group">
+                <div class="control-header">
+                    <label class="tooltip">Distance (r)
+                        <span class="tooltiptext">Distance from the core for calculating potential and time dilation.</span>
+                    </label>
+                    <span class="value-display" id="val-r">2.0</span>
+                </div>
+                <input type="range" id="in-r" min="0.5" max="10.0" step="0.1" value="2.0">
+            </div>
+        </aside>
+
+        <!-- Right Panel: Dashboard -->
+        <section class="dashboard-panel">
+            
+            <!-- Readouts -->
+            <div class="readouts">
+                <div class="readout-card">
+                    <div class="readout-label">Kinematic Velocity (v<sub>⟲</sub> / c)</div>
+                    <div class="readout-value" id="out-vc">0.000</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">Eq 4: 2πr<sub>c</sub> / λ<sub>c</sub></div>
+                </div>
+                <div class="readout-card">
+                    <div class="readout-label">Mass Functional M(T)</div>
+                    <div class="readout-value" id="out-mass">0.000</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">Eq 10 (Normalized A.U.)</div>
+                </div>
+                <div class="readout-card">
+                    <div class="readout-label">GR Potential Φ(r)</div>
+                    <div class="readout-value" id="out-phi">0.000</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">∝ M(T) / r</div>
+                </div>
+                <div class="readout-card">
+                    <div class="readout-label">Time Dilation Factor</div>
+                    <div class="readout-value" id="out-time">0.000</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">Eq 17: √(1 - Φ - ...)</div>
+                </div>
+            </div>
+
+            <!-- Visualizations -->
+            <div class="visuals">
+                <!-- String Visualization -->
+                <div class="viz-box">
+                    <div class="viz-title">Topological Core Visualizer</div>
+                    <div id="string-svg-container">
+                        <svg id="string-svg" viewBox="-100 -100 200 200" width="100%" height="100%">
+                            <defs>
+                                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="4" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                                <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#fff" stop-opacity="1" />
+                                    <stop offset="100%" stop-color="var(--accent-cyan)" stop-opacity="0" />
+                                </radialGradient>
+                            </defs>
+                            
+                            <!-- Background Grid -->
+                            <g stroke="#2a2a3f" stroke-width="0.5" opacity="0.5">
+                                <line x1="-100" y1="0" x2="100" y2="0" />
+                                <line x1="0" y1="-100" x2="0" y2="100" />
+                                <circle cx="0" cy="0" r="25" fill="none" />
+                                <circle cx="0" cy="0" r="50" fill="none" />
+                                <circle cx="0" cy="0" r="75" fill="none" />
+                            </g>
+
+                            <!-- Core -->
+                            <circle id="viz-core" cx="0" cy="0" r="10" fill="url(#coreGrad)" />
+                            <circle id="viz-core-outline" cx="0" cy="0" r="10" fill="none" stroke="var(--accent-cyan)" stroke-width="1" stroke-dasharray="2,2" />
+                            
+                            <!-- Swirl String -->
+                            <g id="viz-swirl-group">
+                                <path id="viz-swirl" d="" fill="none" stroke="var(--accent-pink)" stroke-width="2" filter="url(#glow)" />
+                            </g>
+
+                            <!-- Observation Radius -->
+                            <circle id="viz-obs" cx="0" cy="0" r="40" fill="none" stroke="var(--accent-yellow)" stroke-width="1" opacity="0.6" stroke-dasharray="4,4" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Graph Visualization -->
+                <div class="viz-box">
+                    <div class="viz-title">Gravitational Potential Φ(r)</div>
+                    <canvas id="graph-canvas"></canvas>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // DOM Elements
+        const inputs = {
+            rc: document.getElementById('in-rc'),
+            lc: document.getElementById('in-lc'),
+            ltot: document.getElementById('in-ltot'),
+            gate: document.getElementById('in-gate'),
+            k: document.getElementById('in-k'),
+            r: document.getElementById('in-r')
+        };
+
+        const displays = {
+            rc: document.getElementById('val-rc'),
+            lc: document.getElementById('val-lc'),
+            ltot: document.getElementById('val-ltot'),
+            k: document.getElementById('val-k'),
+            r: document.getElementById('val-r')
+        };
+
+        const outputs = {
+            vc: document.getElementById('out-vc'),
+            mass: document.getElementById('out-mass'),
+            phi: document.getElementById('out-phi'),
+            time: document.getElementById('out-time')
+        };
+
+        // Visual Elements
+        const vizCore = document.getElementById('viz-core');
+        const vizCoreOutline = document.getElementById('viz-core-outline');
+        const vizSwirl = document.getElementById('viz-swirl');
+        const vizSwirlGroup = document.getElementById('viz-swirl-group');
+        const vizObs = document.getElementById('viz-obs');
+        const canvas = document.getElementById('graph-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // State & Animation
+        let rotationAngle = 0;
+        let currentVc = 0;
+        let animationId;
+
+        // Constants for visualization scaling
+        const SCALE_MASS = 1000; 
+        const MAX_GRAPH_Y = 2.0;
+
+        function init() {
+            // Resize canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Add event listeners to inputs
+            for (let key in inputs) {
+                inputs[key].addEventListener('input', updateSimulation);
+            }
+
+            // Start loop
+            updateSimulation();
+            animate();
+        }
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 32; // padding
+            canvas.height = rect.height - 48; // padding + title
+            drawGraph(); // Redraw immediately
+        }
+
+        function updateSimulation() {
+            // 1. Get Values
+            const rc = parseFloat(inputs.rc.value);
+            const lc = parseFloat(inputs.lc.value);
+            const ltot = parseFloat(inputs.ltot.value);
+            const gate = inputs.gate.checked ? 1 : 0;
+            const k = parseFloat(inputs.k.value);
+            const r = parseFloat(inputs.r.value);
+
+            // Update displays
+            displays.rc.textContent = rc.toFixed(2);
+            displays.lc.textContent = lc.toFixed(1);
+            displays.ltot.textContent = ltot;
+            displays.k.textContent = k.toFixed(1);
+            displays.r.textContent = r.toFixed(1);
+
+            // 2. Physics Calculations (Based on paper equations, scaled for UI)
+            
+            // Eq 4: v_swirl / c = 2*pi*rc / lambda_c
+            let vc_ratio = (2 * Math.PI * rc) / lc;
+            currentVc = vc_ratio; // Save for animation speed
+
+            // Eq 10: M(T) = (lambda_c / (pi*rc))^G * K * (rc^5 / lambda_c^2) * Ltot
+            // Note: We add a constant multiplier SCALE_MASS so numbers are readable in UI
+            let impedance = Math.pow(lc / (Math.PI * rc), gate);
+            let geometric_base = (Math.pow(rc, 5) / Math.pow(lc, 2)) * ltot;
+            let mass = impedance * k * geometric_base * SCALE_MASS;
+
+            // Potential: Phi(r) proportional to M / r
+            let phi = mass / r;
+
+            // Eq 17 (Simplified): t_adj = sqrt(1 - Phi - (v/c)^2 * e^(-r/rc))
+            let kinematic_term = Math.pow(vc_ratio, 2) * Math.exp(-r / rc);
+            let inner_sqrt = 1 - phi - kinematic_term;
+            let time_dilation = inner_sqrt > 0 ? Math.sqrt(inner_sqrt) : 0; // Prevent NaN if collapse
+
+            // 3. Update Readouts
+            outputs.vc.textContent = vc_ratio.toFixed(4);
+            // Color code velocity (red if > 1, impossible in reality but possible in toy sliders)
+            outputs.vc.style.color = vc_ratio > 1 ? '#ff4444' : 'white';
+            
+            outputs.mass.textContent = mass.toFixed(4);
+            outputs.phi.textContent = phi.toFixed(4);
+            
+            if (inner_sqrt <= 0) {
+                outputs.time.textContent = "COLLAPSE";
+                outputs.time.style.color = '#ff4444';
+            } else {
+                outputs.time.textContent = time_dilation.toFixed(4);
+                outputs.time.style.color = 'white';
+            }
+
+            // 4. Update Visuals
+            updateSVG(rc, lc, ltot, r);
+            drawGraph(rc, lc, ltot, gate, k);
+        }
+
+        function updateSVG(rc, lc, ltot, r) {
+            // Scale factors for SVG viewBox (-100 to 100)
+            const baseScale = 20;
+
+            // Update Core
+            const coreRadius = rc * baseScale;
+            vizCore.setAttribute('r', coreRadius);
+            vizCoreOutline.setAttribute('r', coreRadius);
+
+            // Update Observation Radius
+            vizObs.setAttribute('r', r * baseScale);
+
+            // Generate Swirl Path (A torus knot projection or sine wave wrapped around core)
+            // We use Ltot for number of lobes, lc for amplitude
+            let pathD = "";
+            const numPoints = 100;
+            const lobes = Math.max(2, Math.floor(ltot / 2)); 
+            const amplitude = (lc / 15) * 20; // Scale lambda_c to visual amplitude
+
+            for (let i = 0; i <= numPoints; i++) {
+                const theta = (i / numPoints) * Math.PI * 2;
+                // Radius modulates based on lobes (Ltot) and amplitude (lc)
+                const rad = coreRadius + amplitude * Math.sin(lobes * theta);
+                
+                const x = rad * Math.cos(theta);
+                const y = rad * Math.sin(theta);
+
+                if (i === 0) {
+                    pathD += `M ${x} ${y} `;
+                } else {
+                    pathD += `L ${x} ${y} `;
+                }
+            }
+            pathD += "Z";
+            vizSwirl.setAttribute('d', pathD);
+        }
+
+        function drawGraph(rc, lc, ltot, gate, k) {
+            if (!ctx) return;
+            
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Clear
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Axes
+            ctx.strokeStyle = '#2a2a3f';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            // X axis (bottom)
+            ctx.moveTo(30, h - 20);
+            ctx.lineTo(w, h - 20);
+            // Y axis (left)
+            ctx.moveTo(30, 0);
+            ctx.lineTo(30, h - 20);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#8a8a9f';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('r (distance)', w - 60, h - 5);
+            ctx.fillText('Φ(r)', 5, 15);
+
+            // If parameters are missing (initial load), skip drawing curve
+            if (rc === undefined) return;
+
+            // Calculate curve points
+            ctx.beginPath();
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2;
+
+            const rMin = 0.1;
+            const rMax = 10.0;
+            
+            // Recalculate Mass constant for this state
+            let impedance = Math.pow(lc / (Math.PI * rc), gate);
+            let mass = impedance * k * (Math.pow(rc, 5) / Math.pow(lc, 2)) * ltot * SCALE_MASS;
+
+            let firstPoint = true;
+
+            for (let px = 30; px < w; px++) {
+                // Map pixel X to r value
+                let r_val = rMin + ((px - 30) / (w - 30)) * (rMax - rMin);
+                
+                // Calculate Phi
+                let phi_val = mass / r_val;
+
+                // Map Phi to pixel Y
+                // Cap Y for visualization
+                let display_phi = Math.min(phi_val, MAX_GRAPH_Y);
+                let py = (h - 20) - ((display_phi / MAX_GRAPH_Y) * (h - 40));
+
+                if (firstPoint) {
+                    ctx.moveTo(px, py);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // Draw current 'r' marker
+            let current_r = parseFloat(inputs.r.value);
+            let markerX = 30 + ((current_r - rMin) / (rMax - rMin)) * (w - 30);
+            let markerPhi = mass / current_r;
+            let markerY = (h - 20) - ((Math.min(markerPhi, MAX_GRAPH_Y) / MAX_GRAPH_Y) * (h - 40));
+
+            ctx.beginPath();
+            ctx.fillStyle = '#ffea00';
+            ctx.arc(markerX, markerY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Dotted line to axis
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 234, 0, 0.5)';
+            ctx.setLineDash([2, 2]);
+            ctx.moveTo(markerX, markerY);
+            ctx.lineTo(markerX, h - 20);
+            ctx.stroke();
+            ctx.setLineDash([]); // reset
+        }
+
+        function animate() {
+            // Rotate the swirl group based on kinematic velocity
+            // Base speed multiplier
+            const speedMult = 2.0; 
+            rotationAngle += currentVc * speedMult;
+            
+            if (vizSwirlGroup) {
+                vizSwirlGroup.setAttribute('transform', `rotate(${rotationAngle})`);
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Initialize on load
+        window.onload = init;
+
+    </script>
+</body>
+</html>

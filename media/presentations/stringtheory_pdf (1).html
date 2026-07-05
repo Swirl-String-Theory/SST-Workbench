@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Swirl-String Topology Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #e5e7eb;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Grid Background for Canvas Area */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        .panel-glow {
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+
+        /* Math equation styling */
+        .math-block {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 3px solid #0ea5e9;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #bae6fd;
+        }
+    </style>
+</head>
+<body class="flex h-screen w-screen">
+
+    <!-- Left Control Panel -->
+    <div class="w-96 bg-gray-900 h-full flex flex-col z-10 panel-glow overflow-y-auto">
+        <div class="p-6 border-b border-gray-800">
+            <h1 class="text-xl font-bold text-sky-400 tracking-wide mb-1">Swirl-String Explorer</h1>
+            <p class="text-xs text-gray-400">Topological Parametrization & Dynamics</p>
+        </div>
+
+        <div class="p-6 flex-grow flex flex-col gap-6">
+            <!-- Topology Section -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-end">
+                    <h2 class="text-sm uppercase tracking-wider text-sky-500 font-semibold">1. Topology (p, q)</h2>
+                    <span id="knot-type" class="text-xs px-2 py-1 bg-sky-900/50 text-sky-300 rounded border border-sky-700/50">Single Knot</span>
+                </div>
+                <p class="text-xs text-gray-500">Determines the torus knot configuration.</p>
+                
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <label class="font-mono text-gray-300">p (Poloidal)</label>
+                        <span id="val-p" class="font-mono text-sky-400">3</span>
+                    </div>
+                    <input type="range" id="slider-p" min="1" max="10" value="3" step="1">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <label class="font-mono text-gray-300">q (Toroidal)</label>
+                        <span id="val-q" class="font-mono text-sky-400">2</span>
+                    </div>
+                    <input type="range" id="slider-q" min="1" max="10" value="2" step="1">
+                </div>
+            </div>
+
+            <hr class="border-gray-800">
+
+            <!-- Geometry Section -->
+            <div class="space-y-4">
+                <h2 class="text-sm uppercase tracking-wider text-sky-500 font-semibold">2. Geometry (R, r)</h2>
+                <div class="math-block">
+                    x(σ) = (R + r·cos(qσ)) cos(pσ)<br>
+                    y(σ) = (R + r·cos(qσ)) sin(pσ)<br>
+                    z(σ) = -r·sin(qσ)
+                </div>
+                
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <label class="font-mono text-gray-300">R (Major Radius)</label>
+                        <span id="val-R" class="font-mono text-sky-400">150</span>
+                    </div>
+                    <input type="range" id="slider-R" min="50" max="300" value="150" step="5">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <label class="font-mono text-gray-300">r (Minor Radius)</label>
+                        <span id="val-r" class="font-mono text-sky-400">60</span>
+                    </div>
+                    <input type="range" id="slider-r" min="10" max="150" value="60" step="5">
+                </div>
+            </div>
+
+            <hr class="border-gray-800">
+
+            <!-- Derived Scales Section -->
+            <div class="space-y-3">
+                <h2 class="text-sm uppercase tracking-wider text-sky-500 font-semibold">3. Derived Scales</h2>
+                <p class="text-xs text-gray-500">Based on canonical inputs ω<sub>c</sub>, ρ<sub>f</sub>, v<sub>⟲</sub></p>
+                
+                <div class="bg-gray-950 p-3 rounded border border-gray-800 font-mono text-xs space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">r<sub>c</sub> (Core Radius):</span>
+                        <span class="text-emerald-400">1.408 × 10<sup>-15</sup> m</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">A<sub>core</sub>:</span>
+                        <span class="text-emerald-400">6.236 × 10<sup>-30</sup> m<sup>2</sup></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">μ<sub>eff</sub> (Line Density):</span>
+                        <span class="text-emerald-400">4.365 × 10<sup>-36</sup> kg m<sup>-1</sup></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 flex justify-center">
+            <button id="btn-reset" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 rounded transition-colors w-full border border-gray-700">
+                Reset Viewpoint
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Visualization Area -->
+    <div class="flex-grow relative bg-grid flex items-center justify-center cursor-move" id="canvas-container">
+        <!-- Overlay HUD -->
+        <div class="absolute top-6 right-6 text-right pointer-events-none">
+            <div class="text-3xl font-light text-white/20 font-mono tracking-widest mb-2">SST-VISUALIZER</div>
+            <div class="text-xs text-sky-400/50 font-mono">DRAG TO ROTATE • SCROLL TO ZOOM</div>
+        </div>
+        
+        <canvas id="knot-canvas"></canvas>
+    </div>
+
+    <script>
+        // --- Math Utilities ---
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        // --- State Management ---
+        const state = {
+            p: 3,
+            q: 2,
+            R: 150,
+            r: 60,
+            rotX: 0.5,
+            rotY: 0.5,
+            zoom: 1,
+            isDragging: false,
+            lastMouseX: 0,
+            lastMouseY: 0
+        };
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('knot-canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        
+        const sliders = {
+            p: document.getElementById('slider-p'),
+            q: document.getElementById('slider-q'),
+            R: document.getElementById('slider-R'),
+            r: document.getElementById('slider-r')
+        };
+        
+        const displays = {
+            p: document.getElementById('val-p'),
+            q: document.getElementById('val-q'),
+            R: document.getElementById('val-R'),
+            r: document.getElementById('val-r'),
+            knotType: document.getElementById('knot-type')
+        };
+
+        // --- Initialization ---
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Event Listeners ---
+        Object.keys(sliders).forEach(key => {
+            sliders[key].addEventListener('input', (e) => {
+                state[key] = parseFloat(e.target.value);
+                displays[key].innerText = state[key];
+                updateKnotType();
+                draw();
+            });
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            state.rotX = 0.5;
+            state.rotY = 0.5;
+            state.zoom = 1;
+            draw();
+        });
+
+        function updateKnotType() {
+            const val = gcd(state.p, state.q);
+            if (val === 1) {
+                displays.knotType.innerText = "Single Knot";
+                displays.knotType.className = "text-xs px-2 py-1 bg-sky-900/50 text-sky-300 rounded border border-sky-700/50";
+            } else {
+                displays.knotType.innerText = `Link (${val} components)`;
+                displays.knotType.className = "text-xs px-2 py-1 bg-purple-900/50 text-purple-300 rounded border border-purple-700/50";
+            }
+        }
+
+        // --- Mouse/Touch Interaction for Rotation ---
+        container.addEventListener('mousedown', (e) => {
+            state.isDragging = true;
+            state.lastMouseX = e.clientX;
+            state.lastMouseY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => {
+            state.isDragging = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!state.isDragging) return;
+            const deltaX = e.clientX - state.lastMouseX;
+            const deltaY = e.clientY - state.lastMouseY;
+            
+            state.rotY += deltaX * 0.01;
+            state.rotX += deltaY * 0.01;
+            
+            state.lastMouseX = e.clientX;
+            state.lastMouseY = e.clientY;
+            draw();
+        });
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            state.zoom += e.deltaY * -0.001;
+            state.zoom = Math.min(Math.max(0.1, state.zoom), 4);
+            draw();
+        });
+
+        // --- Rendering Logic ---
+        function generateKnotPoints() {
+            const points = [];
+            // Generate enough points for smooth curves. If it's a link, we need to ensure we close all loops.
+            // A full period for a torus knot is 2*PI.
+            const numPoints = 1000; 
+            const maxSigma = 2 * Math.PI;
+
+            for (let i = 0; i <= numPoints; i++) {
+                const sigma = (i / numPoints) * maxSigma;
+                
+                // Equations from the paper (Section 3)
+                // x(σ) = (R + r cos(qσ)) cos(pσ)
+                // y(σ) = (R + r cos(qσ)) sin(pσ)
+                // z(σ) = -r sin(qσ)
+                
+                const R = state.R;
+                const r = state.r;
+                const p = state.p;
+                const q = state.q;
+
+                const x = (R + r * Math.cos(q * sigma)) * Math.cos(p * sigma);
+                const y = (R + r * Math.cos(q * sigma)) * Math.sin(p * sigma);
+                const z = -r * Math.sin(q * sigma);
+
+                points.push({x, y, z, sigma});
+            }
+            return points;
+        }
+
+        function project3D(x, y, z) {
+            // Apply rotations
+            const cosX = Math.cos(state.rotX);
+            const sinX = Math.sin(state.rotX);
+            const cosY = Math.cos(state.rotY);
+            const sinY = Math.sin(state.rotY);
+
+            // Rotate around Y axis
+            let x1 = x * cosY - z * sinY;
+            let z1 = z * cosY + x * sinY;
+
+            // Rotate around X axis
+            let y2 = y * cosX - z1 * sinX;
+            let z2 = z1 * cosX + y * sinX;
+
+            // Simple orthographic projection with zoom and center offset
+            const scale = state.zoom;
+            const screenX = canvas.width / 2 + x1 * scale;
+            const screenY = canvas.height / 2 + y2 * scale;
+
+            return { x: screenX, y: screenY, z: z2 };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const points = generateKnotPoints();
+            const projectedPoints = points.map(p => {
+                const proj = project3D(p.x, p.y, p.z);
+                return { ...proj, sigma: p.sigma };
+            });
+
+            // Sort points by Z depth for pseudo-3D rendering (painters algorithm)
+            // Actually, for a continuous line, sorting segments is better, but sorting points
+            // and drawing them as overlapping circles gives a cool volumetric tube effect.
+            
+            projectedPoints.sort((a, b) => a.z - b.z);
+
+            // Draw the swirl-string
+            for (let i = 0; i < projectedPoints.length; i++) {
+                const p = projectedPoints[i];
+                
+                // Calculate color based on position in the string (sigma) and depth (z)
+                const hue = (p.sigma / (2 * Math.PI)) * 360;
+                // Fade out points further away
+                const alpha = Math.max(0.1, Math.min(1, (p.z + 300) / 600));
+                
+                // Base tube
+                ctx.beginPath();
+                // Tube thickness changes slightly with perspective
+                const radius = Math.max(1, 8 * state.zoom * ((p.z + 500) / 1000));
+                ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
+                
+                // Styling to look like glowing energy
+                ctx.fillStyle = `hsla(190, 100%, 60%, ${alpha * 0.8})`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `hsla(190, 100%, 50%, ${alpha})`;
+                ctx.fill();
+
+                // Core highlight
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, radius * 0.3, 0, 2 * Math.PI);
+                ctx.fillStyle = `hsla(0, 0%, 100%, ${alpha})`;
+                ctx.shadowBlur = 0;
+                ctx.fill();
+            }
+
+            // Draw a faint bounding torus wireframe for context
+            drawBoundingTorus();
+        }
+
+        function drawBoundingTorus() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 0;
+            
+            const R = state.R;
+            const r = state.r;
+            
+            // Draw a few rings
+            for(let u = 0; u < Math.PI * 2; u += Math.PI / 4) {
+                ctx.beginPath();
+                for(let v = 0; v <= Math.PI * 2; v += 0.1) {
+                    const x = (R + r * Math.cos(v)) * Math.cos(u);
+                    const y = (R + r * Math.cos(v)) * Math.sin(u);
+                    const z = -r * Math.sin(v);
+                    const proj = project3D(x, y, z);
+                    if(v === 0) ctx.moveTo(proj.x, proj.y);
+                    else ctx.lineTo(proj.x, proj.y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // Initial setup
+        resizeCanvas();
+        updateKnotType();
+        
+        // Auto-rotation animation
+        let lastTime = 0;
+        function animate(time) {
+            if (!state.isDragging) {
+                const dt = time - lastTime;
+                state.rotY += 0.002;
+                state.rotX += 0.001;
+                draw();
+            }
+            lastTime = time;
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

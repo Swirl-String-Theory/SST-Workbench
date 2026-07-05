@@ -1,0 +1,923 @@
+% =====================================================================
+% SST Paper Draft (single-file) -- Thermodynamic Origin of Quantization
+% Step-2 update: triad normalized to (rho_f, r_c, ||v_swirl||),
+%                Gamma0 derived, expanded numerical anchors table.
+% =====================================================================
+\newcommand{\paperdoi}{10.5281/zenodo.18388696}
+\documentclass[pdflatex,sn-mathphys-num]{revtex4-2}
+
+% -------------------------
+% Core packages
+% -------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{physics}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+
+% -------------------------
+% SST macro prelude (house)
+% -------------------------
+\newcommand{\VolH}[1]{\operatorname{Vol}_{\!\mathbb{H}}(#1)}
+\newcommand{\swirlarrow}{\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\swirlarrowcw}{\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+\newcommand{\Vol}{\operatorname{Vol}}
+\newcommand{\rhoF}{\rho_{\!f}}   % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}   % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}   % mass-equivalent density = rho_E/c^2
+\newcommand{\rhocore}{\rho_{\text{core}}}
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClock}{S_t^{\swirlarrow}}
+\newcommand{\SwirlClockcw}{S_t^{\swirlarrowcw}}
+\newcommand{\vnorm}{\lVert \vswirl \rVert}
+\providecommand{\rc}{r_c}
+
+% -------------------------
+% Useful constants (SI)
+% NOTE: c and h are exact in SI post-2019 redefinition.
+% -------------------------
+\newcommand{\clight}{c}
+\newcommand{\hexact}{h}
+\newcommand{\hbarexact}{\hbar}
+
+% -------------------------
+% Metadata
+% -------------------------
+\begin{document}
+\title{Thermodynamic Origin of Quantization in Swirl--String Theory:\\
+From Clausius Work--Heat Structure to Parameter-Free Constants}
+
+\author[1]{Omar Iskandarani}
+\affil[1]{Independent Researcher, Groningen, The Netherlands}
+\thanks{ORCID: 0009-0006-1686-3961, DOI: \paperdoi}
+\abstract{
+    We present a thermodynamic foundation for quantization within Swirl--String Theory (SST),
+    a hydrodynamic model in which matter is represented by closed circulation-carrying filaments
+    (``swirl strings'') embedded in an inviscid, incompressible vacuum-like medium.
+    The central claim is that Planck-scale quantization need not be postulated: discretization
+    arises from a topological circulation invariant together with a Clausius-consistent
+    work/heat decomposition. Using the Abe--Okuyama mapping between Clausius equality and the
+    Shannon/von Neumann structure, we formalize a controlled route from pure-state mechanics
+    to quantum thermodynamics and identify the mechanical meaning of SST work (geometric deformation)
+    and SST heat (redistribution over internal Kelvin-wave modes). We then define a minimal
+    primitive set of medium parameters and show how familiar constants may be expressed as derived
+    quantities under a ``zero-free-parameter'' program, with explicit dimensional checks and
+    numerical anchors. Finally, we state falsifiable predictions, including a low-temperature
+    heat-capacity scaling tied to filament mode structure and an acceleration-induced echo channel
+    analogous to Unruh response.
+}
+
+\keywords{thermodynamics, quantization, circulation, hydrodynamic quantum analogs, Clausius equality}
+
+
+
+\
+    \maketitle
+
+% ============================================================
+    \section{Scope, notation, and claim taxonomy}
+% ============================================================
+
+        \subsection{Terminology}
+            To minimize ambiguity we use:
+
+            \begin{itemize}
+                \item \textbf{Swirl medium:} an inviscid, incompressible condensate-like vacuum model (effective density \(\rhoF\)).
+                \item \textbf{Swirl string:} a closed, circulation-carrying filament (topological defect) supporting internal wave modes.
+                \item \textbf{Circulation:} \(\Gamma \equiv \oint \mathbf{v}\cdot d\mathbf{l}\).
+                \item \textbf{Zero-free-parameter principle:} after fixing a minimal primitive set of mechanical inputs, all other
+                constants (e.g.\ \(h,e,m_e\)) are derived without additional tuning.
+            \end{itemize}
+
+        \subsection{Claim taxonomy}
+            We distinguish:
+            \begin{description}
+                \item[Postulates:] medium properties and invariants (incompressible, inviscid, circulation invariants).
+                \item[Derivations:] results that follow from postulates (thermodynamic mapping, derived constants, scaling laws).
+                \item[Speculations:] consistent hypotheses lacking direct experimental validation (e.g.\ log-periodic ``Golden Layer'' selection).
+            \end{description}
+
+% ------------------------------------------------------------
+        \subsection{What is proven here (and what remains an assumption)}
+        \label{sec:what_proved}
+
+        For clarity we separate theorem-level statements (conditional on explicit assumptions) from SST-specific
+        identifications that are currently postulated or calibrated.
+
+        \paragraph{Proved statements (conditional).}
+            Under the assumptions listed in Sec.~\ref{sec:ACderive} and the mediator EFT of Sec.~\ref{sec:eft_mediator},
+            the paper establishes:
+
+            \begin{enumerate}
+                \item \textbf{(Monopole uniqueness)} If the static mediator equation outside the core is Laplacian,
+                \(\nabla^2 \delta p=0\) for \(r>\rc\), and the far field is isotropic and decays at infinity, then the
+                unique solution is \(\delta p(r)\propto 1/r\) (Appendix~\ref{app:greens}).
+
+                \item \textbf{(Screened variant)} If the mediator has a quadratic mass term in the EFT, then the static
+                equation is Helmholtz and the unique isotropic tail is Yukawa,
+                \(\delta p(r)\propto e^{-r/\lambda}/r\) with \(\lambda=m_\phi^{-1}\) (Sec.~\ref{sec:eft_mediator},
+                Appendix~\ref{app:greens}).
+
+                \item \textbf{(Flux carrier)} Time-dependent sources in the quadratic EFT necessarily carry energy and momentum
+                flux \(S_i=T_{0i}=Z(\partial_t\phi)(\partial_i\phi)\), enabling a concrete wave/echo channel (Appendix~\ref{app:stress}).
+
+                \item \textbf{(Closed constant chain, given calibrated micro-inputs)} Given the calibrated micro-scale inputs
+                \((\rhocore,\rc,\vnorm)\) and the identification \(\alpha=2\vnorm/\clight\), the chain
+                \((\rhocore,\rc,\vnorm)\to A_C^{\mathrm{(SST)}}\) and \((A_C^{\mathrm{(SST)}},\alpha)\to(\hbar,h)\) reproduces the SI values numerically.
+            \end{enumerate}
+
+        \paragraph{Assumptions / calibrated identifications (not proven here).}
+            The following are treated as SST identifications or calibrations to be justified elsewhere:
+            (i) \(\alpha \equiv 2\vnorm/\clight\);
+            (ii) the existence and numerical value of \(\rhocore\) as a microphysical stiffness density;
+            (iii) the pressure-work interaction model \(V=-V_{\mathrm{eff}}\delta p\) as the correct coarse-grained
+            two-body energy functional;
+            (iv) the selection principle that maps \(\Gamma_0\) (and topology) to the observed particle mass spectrum.
+
+% ============================================================
+    \section{Primitive inputs and parameter logic (normalized triad)}
+% ============================================================
+
+        \subsection{The primitive triad}
+            In this paper we normalize the SST primitive set to
+            \begin{equation}
+                \boxed{\quad \{\rhoF,\;\rc,\;\vnorm\}\quad}
+                \label{eq:triad}
+            \end{equation}
+            where \(\rhoF\) is the effective inertial density of the medium, \(\rc\) is the filament core radius,
+            and \(\vnorm\) is the characteristic tangential swirl speed.
+
+            \paragraph{Canonical numerical values (SST).}
+                We will use the canonical SST values (SI):
+                \begin{equation}
+                    \rhoF = 7.0\times 10^{-7}\ \mathrm{kg\,m^{-3}},\qquad
+                    \rc = 1.40897017\times 10^{-15}\ \mathrm{m},\qquad
+                    \vnorm = 1.09384563\times 10^{6}\ \mathrm{m\,s^{-1}}.
+                    \label{eq:canonvals}
+                \end{equation}
+
+    \subsection{Derived circulation quantum (removes an input)}
+        A derived circulation quantum consistent with \eqref{eq:triad} is
+        \begin{equation}
+            \boxed{\quad \Gamma_0 \;\equiv\; 2\pi \rc \,\vnorm\quad}
+            \label{eq:Gamma0}
+        \end{equation}
+        with units \([\Gamma_0]=\mathrm{m^2\,s^{-1}}\).
+        Using \eqref{eq:canonvals},
+        \begin{equation}
+            \Gamma_0 \;=\; 9.683619203\times 10^{-9}\ \mathrm{m^2\,s^{-1}}.
+            \label{eq:Gamma0num}
+        \end{equation}
+
+        \paragraph{Legacy note.}
+            Some earlier drafts used \(\Gamma_0\) as an independent primitive input. Equation~\eqref{eq:Gamma0}
+            eliminates that redundancy by treating \(\Gamma_0\) as a derived invariant once \((\rc,\vnorm)\) are fixed.
+
+    \subsection{A natural dimensionless constant: \(\alpha\) from the swirl speed}
+    A central numerical anchor is the dimensionless ratio \(\vnorm/\clight\).
+    In SST the fine-structure constant is identified as
+    \begin{equation}
+        \boxed{\quad \alpha \;\equiv\; \frac{2\vnorm}{\clight}\quad}
+        \label{eq:alpha}
+    \end{equation}
+    so that \(\vnorm = (\alpha/2)\clight\). With \(\clight=299\,792\,458\ \mathrm{m/s}\),
+    \begin{equation}
+        \alpha = 7.297352557\times 10^{-3},\qquad \alpha^{-1}=137.035999312.
+        \label{eq:alphanum}
+    \end{equation}
+    This will be used below to derive \(\hbar\) and \(h\) from a single coupling scale.
+
+    \subsection{Two-density structure and microphysical stiffness scale}
+    While \(\rhoF\) governs the far-field inertial response of the medium, SST also employs a microphysical
+    core stiffness density \(\rhocore\) for the filament core.
+    We treat \(\rhocore\) as a fixed (canonically calibrated) material property of the string core:
+    \begin{equation}
+        \rhocore = 3.8934358266918687\times 10^{18}\ \mathrm{kg\,m^{-3}}.
+        \label{eq:rhocore}
+    \end{equation}
+    Operationally:
+    \begin{itemize}
+        \item \(\rhoF\) controls large-scale inertia/transport and thermodynamic bookkeeping of the medium.
+        \item \(\rhocore\) controls near-core pressures/energetics relevant for the interaction coupling scale.
+    \end{itemize}
+    This separation is not an added free parameter once \(\rhocore\) is fixed by independent SST calibration; it is a
+    two-scale constitutive structure.
+
+% ============================================================
+    \section{Mechanical theory of heat in SST}
+% ============================================================
+
+    \subsection{Clausius structure and the Abe--Okuyama mapping}
+        A key structural input is the Clausius equality for reversible processes,
+        \begin{equation}
+            \oint \frac{\delta Q}{T} = 0,
+            \label{eq:clausius}
+        \end{equation}
+        viewed here as a constraint on admissible state transformations of filament excitations.
+        Following Abe and Okuyama, imposing a Clausius-consistent definition of ``heat'' on Shannon entropy yields a
+        formal coincidence with von Neumann entropy of a canonical density matrix, providing an isomorphism-like bridge
+        between pure-state mechanics and ``quantum thermodynamics'' \cite{AbeOkuyama2011PRE,AbeOkuyama2010arXiv}.
+
+    \subsection{Work--heat decomposition from spectral data}
+        Let \(\{E_n\}\) denote a discrete internal mode spectrum (e.g.\ Kelvin-wave eigenmodes on the filament) and
+        \(\{p_n\}\) their occupation probabilities.
+        Define
+        \begin{equation}
+            \delta W \equiv \sum_n p_n\, dE_n,\qquad
+            \delta Q \equiv \sum_n E_n\, dp_n.
+            \label{eq:WQsplit}
+        \end{equation}
+        This matches standard quantum-thermodynamic decompositions of energy change into ``level shift'' and
+        ``population change'' parts \cite{AbeOkuyama2011PRE}.
+
+    \subsection{SST interpretation}
+        Within SST we interpret:
+        \begin{itemize}
+            \item \textbf{Work \(\delta W\):} geometric deformation energy required to change filament geometry
+            (core radius \(\rc\), envelope size \(R\), curvature/torsion class) against medium pressure.
+            \item \textbf{Heat \(\delta Q\):} redistribution of energy over internal filament modes (Kelvin-wave degrees of freedom),
+            at fixed instantaneous spectrum.
+        \end{itemize}
+
+    \subsection{Temperature as geometric strain parameter}
+        We introduce a swirl-temperature \(T_{\text{swirl}}\) as a parameter controlling the mode population distribution,
+        and we posit it correlates with a geometric strain measure \(\epsilon\) (radial swelling or envelope deformation):
+        \begin{equation}
+            T_{\text{swirl}} \propto \epsilon.
+            \label{eq:Tswirl}
+        \end{equation}
+        The equilibrium vacuum corresponds to \(\epsilon=0\) and \(T_{\text{swirl}}=0\).
+
+% ============================================================
+    \section{Derived constants: strategy and closed consistency chain}
+% ============================================================
+
+    \subsection{The Coulomb coupling scale as a near-core pressure invariant}
+
+    \paragraph{Empirical SI comparison scale.}
+        For comparison with standard SI electromagnetism, define the empirical Coulomb coupling scale
+        \begin{equation}
+            A_C^{\mathrm{(SI)}} \;\equiv\; \frac{e^2}{4\pi\epsilon_0},
+            \label{eq:ACdef}
+        \end{equation}
+        with units \([\mathrm{J\,m}]\).
+        This quantity is \emph{not} taken as an SST primitive; it is used only as a numerical benchmark.
+
+    \paragraph{SST prediction (magnitude).}
+        Section~\ref{sec:ACderive} yields the SST coupling magnitude
+        \[
+        A_C^{\mathrm{(SST)}} = 4\pi\,\rhocore\,\vnorm^2\,\rc^4,
+        \]
+        which is dimensionally \([\mathrm{J\,m}]\) and subsequently fixes \(\hbar\) and \(h\) via Eq.~\eqref{eq:hfromAC}
+        once the identification step below is made.
+
+    \paragraph{Identification step (comparison to nature).}
+        The ``zero-free-parameter'' program asserts that after calibrating \((\rhocore,\rc,\vnorm)\),
+        the predicted magnitude should match the empirical SI benchmark within uncertainty,
+        \begin{equation}
+            A_C^{\mathrm{(SST)}} \stackrel{!}{\approx} A_C^{\mathrm{(SI)}}.
+            \label{eq:AC_identification}
+        \end{equation}
+
+    \paragraph{Numerical value (SST prediction).}
+        With \eqref{eq:canonvals} and \eqref{eq:rhocore},
+        \begin{equation}
+            A_C^{\mathrm{(SST)}} \;=\; 2.307077328\times 10^{-28}\ \mathrm{J\,m}.
+            \label{eq:ACnum}
+        \end{equation}
+        This is a parameter-free anchor once \((\rhocore,\rc,\vnorm)\) are fixed.
+
+    \subsection{Far-field monopole from EFT (Laplace/Helmholtz) and core matching (fixing the \(4\pi\))}
+    \label{sec:ACderive}
+
+    We now derive Eq.~\eqref{eq:ACsst} from a minimal far-field construction.
+
+    \paragraph{Assumptions (explicit).}
+        (i) The medium is inviscid and incompressible; (ii) we consider a quasi-static interaction regime
+        in which the relevant mediator is a scalar pressure/foliation perturbation \(\delta p(\mathbf{x})\)
+        generated by a compact swirl-string core of radius \(\rc\); (iii) at distances \(r\gg \rc\) the closed loop
+        coarse-grains to an isotropic monopole in \(\delta p\) (all multipoles beyond \(\ell=0\) are neglected).
+
+    \paragraph{Mediator equation outside the core (from the quadratic EFT).}
+        The quasi-static far-field is controlled by the scalar mediator \(\phi\) introduced in
+        Sec.~\ref{sec:eft_mediator}, with \(\delta p \equiv g_p\,\phi\) [Eq.~\eqref{eq:dp_phi}].
+        Outside the compact core (\(r>\rc\)) the source vanishes, \(J=0\), and the static limit of
+        Eq.~\eqref{eq:eom_phi} gives
+        \begin{equation}
+            (\nabla^2 - m_\phi^2)\phi = 0 \qquad (r>\rc).
+        \end{equation}
+        Hence the physical pressure/foliation perturbation obeys
+        \begin{equation}
+            (\nabla^2 - \lambda^{-2})\,\delta p = 0 \qquad (r>\rc),
+            \qquad \lambda \equiv m_\phi^{-1},
+            \label{eq:dp_helmholtz_outside}
+        \end{equation}
+        with the unscreened Laplacian limit recovered as \(\lambda\to\infty\):
+        \begin{equation}
+            \nabla^2 \delta p = 0 \qquad (r>\rc,\ \lambda\to\infty).
+            \label{eq:laplace_dp}
+        \end{equation}
+        The uniqueness of the isotropic \(1/r\) tail (and its screened Yukawa generalization) is shown explicitly in
+        Appendix~\ref{app:greens}.
+
+    \paragraph{Isotropic monopole tail (unscreened).}
+        In the unscreened case, spherical symmetry implies the unique decaying solution
+        \begin{equation}
+            \delta p(r) = -\chi_1\,p_\star\,\frac{\rc}{r}, \qquad r\ge \rc,\qquad \chi_1\in\{+1,-1\},
+            \label{eq:dp_monopole}
+        \end{equation}
+        where the discrete sign \(\chi_1\) labels the two polarity classes of the source (the ``charge'' analogue),
+        and boundary matching fixes \(|\delta p(\rc)|=p_\star\).
+
+    \paragraph{Core matching: fixing \(p_\star\) by a momentum-flux stress scale.}
+        The near-core interaction scale is set by a normal stress (momentum flux density) rather than a purely kinetic-energy
+        density. We therefore match to
+        \begin{equation}
+            p_\star \equiv \sigma_\star \equiv \rhocore\,\vnorm^2,
+            \label{eq:pstar}
+        \end{equation}
+        which has units of pressure and is the canonical stress scale associated with a tangential swirl speed \(\vnorm\)
+        in a stiff core medium of density \(\rhocore\).
+        (Using the aerodynamic ``dynamic pressure'' \(\tfrac12\rhocore\vnorm^2\) would shift the final prefactor by \(1/2\);
+        SST fixes the choice \eqref{eq:pstar} by matching to momentum-flux normalization.)
+
+    \paragraph{Effective excluded volume from isotropic stress normalization.}
+        For a spherical core the geometric volume is \(V_{\text{core}}=\tfrac{4\pi}{3}\rc^3\).
+        In an isotropic 3D medium, the scalar pressure corresponds to the trace of the momentum-flux tensor,
+        and the appropriate normalization implies an effective factor of \(3\) in the pressure-work channel
+        (derivation in Appendix~\ref{app:isotropic3}):
+        \begin{equation}
+            V_{\text{eff}} \equiv 3\,V_{\text{core}} = 3\cdot \frac{4\pi}{3}\rc^3 = 4\pi \rc^3.
+            \label{eq:Veff}
+        \end{equation}
+
+    \paragraph{Two-body sign and magnitude.}
+        To separate the \emph{magnitude} of the coupling from the \emph{sign} (attraction/repulsion), we assign each
+        swirl-string core a discrete polarity \(\chi\in\{+1,-1\}\).
+        Core~1 generates \(\delta p_1(r)\) as in Eq.~\eqref{eq:dp_monopole}. The interaction energy of core~2 placed in that
+        background is modeled by pressure-work on an excluded effective volume,
+        \begin{equation}
+            V_{12}(r) \;=\; -\,\chi_2\,V_{\text{eff}}\,\delta p_1(r),
+            \label{eq:Vfromdp}
+        \end{equation}
+        so that like polarities (\(\chi_1\chi_2=+1\)) give repulsion and opposite polarities (\(\chi_1\chi_2=-1\)) give attraction.
+
+        Using Eqs.~\eqref{eq:dp_monopole}, \eqref{eq:pstar}, and \eqref{eq:Veff} we obtain
+        \begin{equation}
+            V_{12}(r)
+            =
+            -\chi_2\Big(4\pi \rc^3\Big)\Big(-\chi_1\,\rhocore\vnorm^2\frac{\rc}{r}\Big)
+            =
+            \chi_1\chi_2\,\frac{A_C^{\mathrm{(SST)}}}{r},
+            \label{eq:V_Coulomb_like}
+        \end{equation}
+        where the positive coupling magnitude is
+        \begin{equation}
+            \boxed{\quad A_C^{\mathrm{(SST)}} = 4\pi\,\rhocore\,\vnorm^2\,\rc^4.\quad}
+            \label{eq:ACsst}
+        \end{equation}
+
+    \paragraph{Screened (Yukawa) variant.}
+        If \(m_\phi>0\) (finite \(\lambda\)), the isotropic tail is Yukawa (Appendix~\ref{app:greens}), and the two-body
+        potential becomes
+        \begin{equation}
+            V_{12}(r)=\chi_1\chi_2\,\frac{A_C^{\mathrm{(SST)}}}{r}\,e^{-r/\lambda}.
+        \end{equation}
+
+    \paragraph{Origin of the \(4\pi\) (summary).}
+        The overall coefficient in Eq.~\eqref{eq:ACsst} is fixed without continuous tuning by two standard normalizations:
+        (i) \(\delta p\) has an isotropic monopole tail determined by the Laplace/Helmholtz Green's function and boundary matching
+        (Appendix~\ref{app:greens}); (ii) the pressure-work channel couples to the trace part of the isotropic stress,
+        which yields \(V_{\mathrm{eff}}=3V_{\mathrm{core}}=4\pi \rc^3\) (Appendix~\ref{app:isotropic3}).
+        Together with the core stress scale \(p_\star=\rhocore\vnorm^2\), this fixes \(A_C\) uniquely.
+
+        \paragraph{Sign and ``charge'' assignment.}
+        Equation~\eqref{eq:ACsst} fixes the positive coupling magnitude \(A_C^{\mathrm{(SST)}}\).
+        The interaction sign is encoded by the discrete polarity labels \(\chi_1,\chi_2\in\{+1,-1\}\) via
+        Eq.~\eqref{eq:V_Coulomb_like}. Mapping \(\chi\) to a microscopic SST chirality/polarization invariant is deferred to the
+        topological selection sector.
+
+    \subsection{Planck's constant as a derived quantity (no postulate)}
+    In SI, the fine-structure constant satisfies
+    \begin{equation}
+        \alpha \;=\; \frac{A_C^{\mathrm{(SI)}}}{\hbar \clight}.
+        \label{eq:alphaStandard}
+    \end{equation}
+    Using \eqref{eq:alpha} and identifying \(A_C^{\mathrm{(SST)}}\approx A_C^{\mathrm{(SI)}}\) as in
+    Eq.~\eqref{eq:AC_identification}, we obtain
+    \begin{equation}
+        \boxed{\quad \hbar \;=\; \frac{A_C^{\mathrm{(SST)}}}{\alpha \clight}\quad},\qquad
+        \boxed{\quad h \;=\; 2\pi\hbar \;=\; \frac{2\pi A_C^{\mathrm{(SST)}}}{\alpha \clight}\quad}.
+        \label{eq:hfromAC}
+    \end{equation}
+    This is the precise sense in which SST ``bypasses Planck'': \(h\) becomes a derived constant fixed by
+    (i) a topological/kinematic dimensionless ratio \(\alpha=2\vnorm/\clight\) and (ii) a mechanically predicted coupling magnitude \(A_C^{\mathrm{(SST)}}\).
+
+    \paragraph{Numerical value.}
+        Using \eqref{eq:ACnum} and \eqref{eq:alphanum},
+        \begin{equation}
+            \hbar \;=\; 1.0545717167\times 10^{-34}\ \mathrm{J\,s},\qquad
+            h \;=\; 6.6260695157\times 10^{-34}\ \mathrm{J\,s}.
+            \label{eq:hnum}
+        \end{equation}
+
+    \subsection{Action from circulation: the structural identity}
+    A robust identity in superfluid circulation quantization is
+    \begin{equation}
+        \kappa = \frac{h}{m},
+        \label{eq:superfluid}
+    \end{equation}
+    where \(\kappa\) is a circulation quantum \cite{Onsager1949,Feynman1955}.
+    SST retains the structural form
+    \begin{equation}
+        h \sim m_{\text{eff}}\,\Gamma_0,
+        \label{eq:hmgamma}
+    \end{equation}
+    but \(\Gamma_0\) is now fixed by \eqref{eq:Gamma0} and \(h\) by \eqref{eq:hfromAC}. Hence \eqref{eq:hmgamma}
+    becomes an \emph{equation that fixes} \(m_{\text{eff}}\) for the relevant excitation class:
+    \begin{equation}
+        m_{\text{eff}} \;\sim\; \frac{h}{\Gamma_0}.
+    \end{equation}
+    The ``selection problem'' is then: which filament configuration realizes that \(m_{\text{eff}}\) as a stable extremum?
+
+    \subsection{Quadratic EFT for the pressure/foliation mediator (deriving Helmholtz/Yukawa)}
+    \label{sec:eft_mediator}
+
+    To make the screened alternative of Appendix~\ref{app:greens} structurally unavoidable (rather than optional),
+    we introduce a minimal quadratic effective field theory (EFT) for a scalar mediator \(\phi\) that encodes the
+    relevant pressure/foliation perturbation channel.
+
+    \paragraph{Field content and calibration.}
+        We treat \(\phi\) as a coarse-grained scalar degree of freedom sourced by a compact swirl-string core.
+        The physical pressure perturbation is taken to be proportional to the field,
+        \begin{equation}
+            \delta p \equiv g_p\,\phi,
+            \label{eq:dp_phi}
+        \end{equation}
+        where the proportionality constant \(g_p\) is fixed by one calibration condition (e.g.\ matching the boundary
+        value \(\delta p(\rc)=-p_\star\) used in Sec.~\ref{sec:ACderive}).
+
+    \paragraph{Minimal quadratic action.}
+        In a flat background and at leading order in derivatives, the most general stable quadratic Lagrangian density is
+        \begin{equation}
+            \mathcal{L}_\phi
+            =
+            \frac{Z}{2}\left(
+            \frac{1}{c_\phi^{2}}(\partial_t \phi)^2
+            -
+            (\nabla \phi)^2
+            -
+            m_\phi^{2}\phi^2
+            \right)
+            +\phi\,J,
+            \label{eq:Lphi}
+        \end{equation}
+        with wave speed \(c_\phi>0\), normalization \(Z>0\), mass parameter \(m_\phi\ge 0\), and a source \(J\)
+        representing the compact core.
+
+    \paragraph{Equation of motion and the static limit.}
+        Varying \eqref{eq:Lphi} gives
+        \begin{equation}
+            \frac{1}{c_\phi^{2}}\partial_t^2\phi - \nabla^2\phi + m_\phi^2\phi = \frac{J}{Z}.
+            \label{eq:eom_phi}
+        \end{equation}
+        In the quasi-static regime relevant for the Coulomb-like interaction,
+        \(\partial_t\phi \approx 0\), so \eqref{eq:eom_phi} reduces to the screened Poisson (Helmholtz) equation
+        \begin{equation}
+            (\nabla^2 - m_\phi^2)\phi = -\frac{J}{Z}.
+            \label{eq:helmholtz_phi}
+        \end{equation}
+        For a pointlike monopole source \(J=q_\phi\,\delta^{(3)}(\mathbf{x})\),
+        the Green's function solution is
+        \begin{equation}
+            \phi(r)=\frac{q_\phi}{4\pi Z}\,\frac{e^{-m_\phi r}}{r}.
+            \label{eq:phi_yukawa}
+        \end{equation}
+        Using \(\delta p=g_p\phi\) in \eqref{eq:dp_phi} gives precisely the Yukawa form
+        \(\delta p(r)\propto e^{-r/\lambda}/r\) of Appendix~\ref{app:greens}, with identification
+        \begin{equation}
+            \boxed{\quad \lambda = m_\phi^{-1}\quad}
+            \label{eq:lambda_m}
+        \end{equation}
+        and effective monopole strength \(Q_p=(g_p q_\phi/Z)\).
+
+    \paragraph{Unscreened limit.}
+        When \(m_\phi\to 0\) (equivalently \(\lambda\to\infty\)), \eqref{eq:phi_yukawa} reduces to \(\phi\propto 1/r\),
+        recovering the Laplacian monopole channel and the \(1/r\) interaction potential.
+
+    \paragraph{Why this matters for the ``echo'' channel.}
+        Equation~\eqref{eq:eom_phi} is hyperbolic for time-dependent sources. Hence acceleration pulses can launch
+        propagating \(\phi\)-waves that carry energy and momentum to boundaries. This supplies a concrete dynamical
+        carrier for the ``Unruh-echo'' phenomenology, independent of whether \(m_\phi=0\) or \(m_\phi>0\).
+
+    \paragraph{10-year-old analogy (brief).}
+        Imagine a stretchy drum skin (\(\phi\)). If you press it and hold it (static), the dent spreads like \(1/r\).
+        If the skin is heavier or stiffer (a ``mass term''), the dent fades away faster with distance (the exponential).
+        If you tap it (time-dependent), waves run outward and carry the tap's energy away.
+
+% ============================================================
+    \section{Consistency anchors (numerical checks and SI bookkeeping)}
+% ============================================================
+
+    \subsection{Kinematic and pressure scales}
+        Two useful derived scales from the triad are:
+        \begin{equation}
+            \omega_\star \equiv \frac{\vnorm}{\rc},\qquad
+            q_f \equiv \frac{1}{2}\rhoF\vnorm^2,\qquad
+            q_{\text{core}} \equiv \frac{1}{2}\rhocore\vnorm^2.
+            \label{eq:scales}
+        \end{equation}
+        Numerically,
+        \begin{equation}
+            \omega_\star = 7.763440655\times 10^{20}\ \mathrm{s^{-1}},\qquad
+            q_f = 4.187743918\times 10^{5}\ \mathrm{Pa},\qquad
+            q_{\text{core}} = 2.329244600\times 10^{30}\ \mathrm{Pa}.
+        \end{equation}
+
+    \subsection{Closed chain summary}
+        The central ``parameter-free'' chain, in its leanest form, is:
+        \begin{equation}
+        (\rc,\vnorm)\Rightarrow \Gamma_0,\ \alpha;\qquad
+        (\rhocore,\rc,\vnorm)\Rightarrow A_C^{\mathrm{(SST)}};\qquad
+        (A_C^{\mathrm{(SST)}},\alpha)\Rightarrow \hbar,\ h.
+        \end{equation}
+
+    \subsection{Anchor table}
+        Table~\ref{tab:anchors} collects the above anchors. Where available we also list reference values for comparison.
+
+        \begin{table}[h]
+            \centering
+            \caption{SST numerical anchors derived from the normalized primitive set.}
+            \label{tab:anchors}
+            \begin{tabular}{@{}llll@{}}
+                \toprule
+                Quantity & Formula & Value (SST) & Units \\ \midrule
+                \(\rhoF\) & input & \(7.0\times 10^{-7}\) & \(\mathrm{kg\,m^{-3}}\) \\
+                \(\rc\) & input & \(1.40897017\times 10^{-15}\) & \(\mathrm{m}\) \\
+                \(\vnorm\) & input & \(1.09384563\times 10^{6}\) & \(\mathrm{m\,s^{-1}}\) \\
+                \(\Gamma_0\) & \(2\pi\rc\vnorm\) & \(9.683619203\times 10^{-9}\) & \(\mathrm{m^2\,s^{-1}}\) \\
+                \(\alpha\) & \(2\vnorm/\clight\) & \(7.297352557\times 10^{-3}\) & (dimensionless) \\
+                \(\alpha^{-1}\) & \(1/\alpha\) & \(137.035999312\) & (dimensionless) \\
+                \(\rhocore\) & input (micro-scale) & \(3.8934358267\times 10^{18}\) & \(\mathrm{kg\,m^{-3}}\) \\
+                \(A_C^{\mathrm{(SST)}}\) & \(4\pi\rhocore\vnorm^2\rc^4\) & \(2.307077328\times 10^{-28}\) & \(\mathrm{J\,m}\) \\
+                \(A_C^{\mathrm{(SI)}}\) & \(e^2/(4\pi\epsilon_0)\) & (benchmark) & \(\mathrm{J\,m}\) \\
+                \(\hbar\) & \(A_C^{\mathrm{(SST)}}/(\alpha\clight)\) & \(1.0545717167\times 10^{-34}\) & \(\mathrm{J\,s}\) \\
+                \(h\) & \(2\pi\hbar\) & \(6.6260695157\times 10^{-34}\) & \(\mathrm{J\,s}\) \\
+                \(\omega_\star\) & \(\vnorm/\rc\) & \(7.763440655\times 10^{20}\) & \(\mathrm{s^{-1}}\) \\
+                \(q_f\) & \(\tfrac{1}{2}\rhoF\vnorm^2\) & \(4.187743918\times 10^{5}\) & \(\mathrm{Pa}\) \\
+                \(q_{\text{core}}\) & \(\tfrac{1}{2}\rhocore\vnorm^2\) & \(2.329244600\times 10^{30}\) & \(\mathrm{Pa}\) \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+    \subsection{Hydrogen ground state energy (external comparison; not an SST input)}
+        For later cross-checking, standard hydrogen binding energy can be written as
+        \begin{equation}
+            E_B = \frac{1}{2}m_e \alpha^2 \clight^2.
+        \end{equation}
+        Using \(\alpha=2\vnorm/\clight\) from \eqref{eq:alpha} gives the equivalent form
+        \begin{equation}
+            E_B = 2 m_e \vnorm^2.
+            \label{eq:EBv}
+        \end{equation}
+        With the standard electron mass \(m_e\) (used here \emph{only} for comparison, not as an SST primitive),
+        \eqref{eq:EBv} evaluates to \(E_B \approx 13.6057\,\mathrm{eV}\), consistent with the known value.
+        In SST, the objective is to derive \(m_e\) (or its effective analog) from topological/thermodynamic selection,
+        at which point \eqref{eq:EBv} becomes a genuine parameter-free prediction.
+
+        \paragraph{10-year-old analogy (brief).}
+            Think of a rubber ring in water: you can stretch the ring (work) or make it wiggle (heat). The ``quantum numbers''
+            are like special wiggle patterns the ring is allowed to have, because the ring is closed and cannot wiggle any random way.
+
+% ============================================================
+    \section{Predictions and experimental tests}
+% ============================================================
+
+    \subsection{Low-temperature heat capacity scaling}
+        If internal excitations are effectively one-dimensional gapless modes on a filament,
+        then the low-\(T\) specific heat generically scales linearly,
+        \begin{equation}
+            C_V^{\text{SST}} \propto T_{\text{swirl}},
+            \label{eq:CVlinear}
+        \end{equation}
+        in contrast with exponentially suppressed heat capacity in gapped spectra.
+        A decisive falsifier is the observation of exponential suppression in regimes where SST predicts a mode continuum.
+
+    \subsection{A direct falsifier of the monopole pressure-mediator hypothesis}
+        The derivation of Eq.~\eqref{eq:ACsst} assumes that the relevant far-field mediator is an isotropic monopole in
+        \(\delta p\), implying \(\delta p(r)\propto r^{-1}\) and \(V(r)\propto r^{-1}\).
+        A direct falsifier is any robust observation (in an SST-analog system or a proposed proxy experiment) that the
+        dominant far-field scaling is instead \(r^{-2}\) (or faster), which would indicate that the leading monopole channel
+        is absent or screened and that the coupling must arise from higher multipoles or a different mediator sector.
+
+    \subsection{Acceleration-induced echo channel (Unruh-analog)}
+        A uniformly accelerating detector in relativistic QFT experiences thermal response at temperature
+        \begin{equation}
+            T_U = \frac{\hbar a}{2\pi c k_B},
+        \end{equation}
+        the Unruh effect \cite{Unruh1976}.
+        SST posits that an accelerating filament couples to medium degrees of freedom in a way that can produce a delayed boundary
+        transduction ``echo'' under suitable impedance mismatch between characteristic speeds.
+        This is presented as a phenomenological prediction; a full calculation requires the quadratic EFT of the mediating SST field
+        and its stress tensor (planned follow-up).
+
+% ============================================================
+    \section{Speculative extension: Golden-layer selection}
+    The ``Golden Layer'' hypothesis introduces a log-periodic weighting
+    \[
+        w(K)\propto \varphi^{-g(K)},
+    \]
+    with \(\varphi\) the golden ratio and \(g(K)\) a topological index, acting as a thermodynamic filter selecting
+    stable mass islands. This is explicitly classified as speculation until a concrete mapping \(g(K)\) and an experimental discriminator are supplied.
+
+% ============================================================
+    \section{Discussion and paper map}
+    This step-2 version makes the ``bypass Planck'' claim concrete:
+    \(h\) is not assumed but obtained from the SST-normalized primitive set via the chain
+    \((\rhocore,\rc,\vnorm)\to A_C^{\mathrm{(SST)}}\) and \((\vnorm/\clight)\to \alpha\), then \((A_C^{\mathrm{(SST)}},\alpha)\to \hbar,h\).
+    Future work must (i) derive \(\rhocore\) and (ii) supply the selection principle for \(m_{\text{eff}}\)
+    that ties circulation \(\Gamma_0\) to particle masses.
+
+% ============================================================
+    \appendix
+    \section{Isotropic stress normalization and the factor \(3\) in \(V_{\text{eff}}\)}
+    \label{app:isotropic3}
+
+    This appendix justifies the factor \(3\) used in Eq.~\eqref{eq:Veff} using only standard continuum-mechanics
+    identities (no group-theory assumptions).
+
+    \subsection{Pressure as the trace of the momentum-flux tensor}
+        In an inviscid medium the Cauchy stress tensor is
+        \begin{equation}
+            \sigma_{ij} = -p\,\delta_{ij},
+        \end{equation}
+        so the scalar pressure is related to the trace by
+        \begin{equation}
+            p = -\frac{1}{3}\,\mathrm{tr}(\sigma) = -\frac{1}{3}\,\sigma_{ii}.
+            \label{eq:p_trace}
+        \end{equation}
+        Equivalently, a pressure perturbation \(\delta p\) corresponds to an isotropic perturbation in the normal stresses
+        \(\delta\sigma_{ii}=-3\,\delta p\).
+
+    \subsection{Work of inserting an excluded core: why the trace contributes}
+        Consider inserting a small spherical excluded region (the core) into a background stress field.
+        The incremental mechanical work can be written as a contraction of stress with an isotropic strain/volume change.
+        For a purely isotropic insertion channel, the relevant scalar work is proportional to the trace part of the stress,
+        hence to \(\delta\sigma_{ii}\), not to a single component \(\delta\sigma_{rr}\) alone.
+
+        A convenient way to package this into a scalar pressure-work form is to write the interaction energy shift as
+        \begin{equation}
+            \Delta E \equiv -\,\delta p\,V_{\text{eff}},
+        \end{equation}
+        and then absorb the conversion between \(\delta p\) and \(\delta\sigma_{ii}\) into \(V_{\text{eff}}\).
+        Using Eq.~\eqref{eq:p_trace}, \(\delta\sigma_{ii}=-3\,\delta p\), so the isotropic channel effectively counts three
+        equal normal-stress contributions (one per spatial axis) in the trace.
+
+    \subsection{Result: \(V_{\text{eff}}=3V_{\text{core}}\)}
+        If \(V_{\text{core}}\) is the geometric excluded volume, then the trace-normalized scalar work channel corresponds to
+        \begin{equation}
+            V_{\text{eff}} = 3\,V_{\text{core}},
+        \end{equation}
+        which yields Eq.~\eqref{eq:Veff}:
+        \(
+        V_{\text{eff}} = 3\cdot\frac{4\pi}{3}\rc^3 = 4\pi \rc^3.
+        \)
+
+    \subsection{Scope and limitation}
+        This argument fixes only the \emph{normalization} of the isotropic pressure-work channel under the assumptions of
+        (i) inviscid isotropic stress, (ii) monopole far-field \(\delta p\propto 1/r\), and (iii) a compact spherical core.
+        If the core is strongly anisotropic, or if higher multipoles dominate, the factorization into \(\delta p\) times a
+        single \(V_{\text{eff}}\) must be revisited.
+
+    \section{Monopole solution for \(\delta p\): Green's function derivation and screened variant}
+    \label{app:greens}
+
+    \subsection{Laplace equation and uniqueness of the \(1/r\) far field}
+        Outside a compact source region (the core), the quasi-static pressure/foliation perturbation satisfies
+        \begin{equation}
+            \nabla^2 \delta p = 0 \qquad (r>\rc).
+        \end{equation}
+        The general spherically symmetric harmonic function in 3D is
+        \begin{equation}
+            \delta p(r)=a+\frac{b}{r}.
+        \end{equation}
+        Imposing \(\delta p(\infty)=0\) gives \(a=0\), hence \(\delta p(r)=b/r\).
+        Matching the boundary magnitude \(|\delta p(\rc)|=p_\star\) fixes the amplitude up to a discrete polarity
+        \(\chi_1\in\{+1,-1\}\), yielding
+        \begin{equation}
+            \delta p(r) = -\chi_1\,p_\star\,\frac{\rc}{r},\qquad r\ge \rc,\qquad \chi_1\in\{+1,-1\},
+        \end{equation}
+        which is Eq.~\eqref{eq:dp_monopole}. This establishes the uniqueness of the \(1/r\) tail given (i) Laplace outside,
+        (ii) spherical symmetry, and (iii) decay at infinity.
+
+    \subsection{Equivalent source formulation with a monopole strength}
+        The same result can be written using the Poisson equation with a pointlike monopole source:
+        \begin{equation}
+            \nabla^2 \delta p(\mathbf{x}) = -Q_p\,\delta^{(3)}(\mathbf{x}),
+            \label{eq:poisson_source}
+        \end{equation}
+        whose solution is
+        \begin{equation}
+            \delta p(r) = \frac{Q_p}{4\pi r}.
+            \label{eq:greens_sol}
+        \end{equation}
+        Comparing \eqref{eq:greens_sol} with \(\delta p(r)=-\chi_1 p_\star \rc/r\) gives the effective monopole strength
+        \begin{equation}
+            Q_p = -4\pi\,\chi_1\,p_\star \rc.
+            \label{eq:Qp}
+        \end{equation}
+        In this form, the \(4\pi\) appears directly from the Green's function normalization
+        \(\nabla^2(1/r)=-4\pi \delta^{(3)}(\mathbf{x})\) \cite{Jackson1999}.
+
+    \subsection{Screened mediator: Yukawa tail and a falsifiable length scale}
+        If the mediator sector has a finite correlation length \(\lambda\) (e.g.\ from a mass term in an effective field theory),
+        then the quasi-static equation becomes the screened Poisson (Helmholtz) equation
+        \begin{equation}
+            (\nabla^2-\lambda^{-2})\,\delta p(\mathbf{x}) = -Q_p\,\delta^{(3)}(\mathbf{x}).
+            \label{eq:helmholtz}
+        \end{equation}
+        The corresponding Green's function yields the Yukawa form
+        \begin{equation}
+            \delta p(r)=\frac{Q_p}{4\pi r}\,e^{-r/\lambda}.
+            \label{eq:yukawa_dp}
+        \end{equation}
+        Substituting into the two-body pressure-work model of Sec.~\ref{sec:ACderive} gives the Yukawa-screened interaction
+        \begin{equation}
+            V_{12}(r)= \chi_1\chi_2\,\frac{A_C^{\mathrm{(SST)}}}{r}\,e^{-r/\lambda},
+            \label{eq:yukawa_V}
+        \end{equation}
+        with the same short-distance coupling magnitude \(A_C^{\mathrm{(SST)}}>0\) but exponential suppression beyond \(\lambda\).
+
+        \paragraph{Falsifier (operational).}
+            The unscreened monopole channel predicts
+            \(\lim_{r\to\infty} r\,V_{12}(r)=\chi_1\chi_2\,A_C^{\mathrm{(SST)}}\),
+            whereas the screened model predicts
+            \(\lim_{r\to\infty} r\,e^{+r/\lambda}V_{12}(r)=\chi_1\chi_2\,A_C^{\mathrm{(SST)}}\).
+            Equivalently, the magnitude obeys \(\lim_{r\to\infty} |rV_{12}(r)|=A_C^{\mathrm{(SST)}}\) (unscreened) and
+            \(\lim_{r\to\infty} |r e^{+r/\lambda}V_{12}(r)|=A_C^{\mathrm{(SST)}}\) (screened).
+            Any robust evidence for exponential suppression of the effective coupling at large
+            separation would falsify the strictly Laplacian mediator assumption and instead indicate a finite \(\lambda\).
+
+    \section{Stress tensor of the mediator field and far-field momentum flux}
+    \label{app:stress}
+
+    This appendix records the canonical stress-energy tensor for the scalar mediator \(\phi\) and identifies the
+    energy/momentum flux channel relevant for pulse/echo phenomenology.
+
+    \subsection{Stress-energy tensor}
+        From the quadratic Lagrangian \eqref{eq:Lphi}, the symmetric stress-energy tensor (in flat space) can be written as
+        \begin{equation}
+            T_{\mu\nu}
+            =
+            Z\,\partial_\mu \phi\,\partial_\nu \phi
+            -
+            \eta_{\mu\nu}\,\mathcal{L}_\phi^{(0)},
+            \label{eq:Tmunu}
+        \end{equation}
+        where \(\mathcal{L}_\phi^{(0)}\) denotes \(\mathcal{L}_\phi\) without the source term \(\phi J\), and \(\eta_{\mu\nu}\)
+        is the Minkowski metric.
+
+    \subsection{Energy density and flux}
+        Writing explicitly in \(3+1\) form, the energy density \(u\equiv T_{00}\) and the energy flux (Poynting-like) vector
+        \(S_i\equiv T_{0i}\) are
+        \begin{align}
+            u
+            &=
+            \frac{Z}{2}\left(
+            \frac{1}{c_\phi^2}(\partial_t\phi)^2
+            +
+            (\nabla\phi)^2
+            +
+            m_\phi^2\phi^2
+            \right),
+            \label{eq:u_phi}
+            \\
+            S_i
+            &=
+            T_{0i}
+            =
+            Z\,(\partial_t\phi)(\partial_i\phi).
+            \label{eq:flux_phi}
+        \end{align}
+        Thus, \emph{static} configurations \(\partial_t\phi=0\) carry no flux:
+        \begin{equation}
+            \partial_t\phi=0 \quad\Rightarrow\quad S_i=0.
+        \end{equation}
+        Time-dependent excitations (pulses) have \(S_i\neq 0\) and transport energy and momentum outward.
+
+    \subsection{Implication for echo phenomenology}
+        If a localized acceleration episode produces a transient source \(J(t,\mathbf{x})\), Eq.~\eqref{eq:eom_phi} generates
+        outgoing \(\phi\)-waves whose far-field flux is given by \eqref{eq:flux_phi}. Reflection/transduction at boundaries
+        can then yield delayed responses (``echoes'') without modifying the static \(1/r\) coupling in the \(m_\phi\to 0\) limit.
+
+    \backmatter
+
+    \section*{Data availability}
+    No new experimental data are reported.
+
+% -------------------------
+% Bibliography (thebibliography / \bibitem)
+% -------------------------
+    \begin{thebibliography}{99}
+
+        \bibitem{Clausius1879}
+        R.~Clausius (1879).
+        \textit{The Mechanical Theory of Heat: with its Applications to the Steam-Engine and to Physical Properties of Bodies}.
+        Macmillan, London.
+
+        \bibitem{Clausius1865}
+        R.~Clausius (1865).
+        ``Concerning Several Conveniently Applicable Forms for the Main Equations of the Mechanical Theory of Heat''.
+        \textit{Annalen der Physik und der Chemie} \textbf{125}, 353--400.
+
+        \bibitem{AbeOkuyama2010arXiv}
+        S.~Abe and S.~Okuyama (2010).
+        ``Similarity between quantum mechanics and thermodynamics: Entropy, temperature, and Carnot cycle''.
+        \textit{arXiv:1012.5581}.
+        Permalink: \texttt{https://arxiv.org/abs/1012.5581}.
+
+        \bibitem{AbeOkuyama2011PRE}
+        S.~Abe and S.~Okuyama (2011).
+        ``Similarity between quantum mechanics and thermodynamics: Entropy, temperature, and Carnot cycle''.
+        \textit{Physical Review E} \textbf{83}, 021121.
+        DOI: 10.1103/PhysRevE.83.021121.
+
+        \bibitem{Madelung1926}
+        E.~Madelung (1926).
+        ``Quantentheorie in hydrodynamischer Form''.
+        \textit{Zeitschrift f\"ur Physik} \textbf{40}, 322--326.
+
+        \bibitem{Bohm1952a}
+        D.~Bohm (1952).
+        ``A Suggested Interpretation of the Quantum Theory in Terms of `Hidden' Variables. I''.
+        \textit{Physical Review} \textbf{85}, 166--179.
+        DOI: 10.1103/PhysRev.85.166.
+
+        \bibitem{Bohm1952b}
+        D.~Bohm (1952).
+        ``A Suggested Interpretation of the Quantum Theory in Terms of `Hidden' Variables. II''.
+        \textit{Physical Review} \textbf{85}, 180--193.
+        DOI: 10.1103/PhysRev.85.180.
+
+        \bibitem{CouderFort2006}
+        Y.~Couder, E.~Fort (2006).
+        ``Single-Particle Diffraction and Interference at a Macroscopic Scale''.
+        \textit{Physical Review Letters} \textbf{97}, 154101.
+        DOI: 10.1103/PhysRevLett.97.154101.
+
+        \bibitem{Onsager1949}
+        L.~Onsager (1949).
+        ``Statistical Hydrodynamics''.
+        \textit{Nuovo Cimento} (Supplement) \textbf{6}, 279--287.
+
+        \bibitem{Feynman1955}
+        R.~P.~Feynman (1955).
+        ``Application of Quantum Mechanics to Liquid Helium''.
+        In: C.~J.~Gorter (ed.), \textit{Progress in Low Temperature Physics}, Vol.\ 1.
+        North-Holland, Amsterdam.
+
+        \bibitem{BIPMSI2019}
+        BIPM (2019).
+        \textit{The International System of Units (SI Brochure), 9th edition}.
+        Bureau International des Poids et Mesures.
+        Permalink: \texttt{https://www.bipm.org/en/publications/si-brochure}.
+
+        \bibitem{Unruh1976}
+        W.~G.~Unruh (1976).
+        ``Notes on black-hole evaporation''.
+        \textit{Physical Review D} \textbf{14}, 870--892.
+        DOI: 10.1103/PhysRevD.14.870.
+
+        \bibitem{LandauLifshitzFluid1987}
+        L.~D.~Landau and E.~M.~Lifshitz (1987).
+        \textit{Fluid Mechanics}, 2nd ed. (Course of Theoretical Physics, Vol.~6).
+        Pergamon Press.
+        (See sections on stress tensor in inviscid fluids and pressure as isotropic normal stress.)
+
+        \bibitem{Jackson1999}
+        J.~D.~Jackson (1999).
+        \textit{Classical Electrodynamics}, 3rd ed.
+        Wiley.
+        (See the Green's function identity \(\nabla^2(1/r)=-4\pi\delta^{(3)}(\mathbf{x})\) and Yukawa/Helmholtz Green's functions.)
+
+        \bibitem{PeskinSchroeder1995}
+        M.~E.~Peskin and D.~V.~Schroeder (1995).
+        \textit{An Introduction to Quantum Field Theory}.
+        Westview Press.
+        (For quadratic scalar field actions, Green's functions, and Yukawa/Helmholtz structure.)
+
+        \bibitem{GoldbergerRothstein2006}
+        W.~D.~Goldberger and I.~Z.~Rothstein (2006).
+        ``An Effective Field Theory of Gravity for Extended Objects''.
+        \textit{Physical Review D} \textbf{73}, 104029.
+        DOI: 10.1103/PhysRevD.73.104029.
+        (General EFT methodology; useful precedent for organizing long-distance fields sourced by compact objects.)
+
+    \end{thebibliography}
+
+\end{document}

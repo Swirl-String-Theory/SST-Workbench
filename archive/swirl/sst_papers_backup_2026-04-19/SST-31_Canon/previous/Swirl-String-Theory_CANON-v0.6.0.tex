@@ -1,0 +1,496 @@
+%! Author = Omar Iskandarani
+%! Title = Swirl String Theory (SST) Canon v0.5
+%! Date = Dec 12, 2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17899592
+% NOTE(v0.6.1): Appendix B corrected (near-field Euler gives ~1/r^2; far-field 1/r from Poisson mediator).
+
+\newcommand{\canonversion}{\textbf{v0.6.0}} % Semantic versioning: vMAJOR.MINOR.PATCH
+\newcommand{\papertitle}{Swirl String Theory (SST) Canon \canonversion: \\ Core Axioms, Postulates, Constants, Master Equations, and Lagrangian Framework}
+\newcommand{\paperdoi}{10.5281/zenodo.17899592}
+
+%========================================================================================
+% PACKAGES AND DOCUMENT CONFIGURATION
+%========================================================================================
+\documentclass[10pt,reprint,aps,onecolumn,nofootinbib]{revtex4-2}
+
+% ====== minimal packages ======
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{microtype}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+% ==== Packages ====
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,decorations.pathmorphing}
+% Tables and Figures
+\usepackage{float}
+
+
+% TOC Customization
+\usepackage{tocloft}
+\setcounter{tocdepth}{1}
+\renewcommand{\cftsecfont}{\footnotesize}
+\renewcommand{\cftsubsecfont}{\footnotesize\itshape}
+\renewcommand{\cftsecleader}{\cftdotfill{5}}
+% Simple compact TOC macro (tight line spacing)
+%\renewcommand\cftsecpresnum{Chapter\space} % name before title
+%\setlength{\cftsecnumwidth}{\widthof{Chapter XX: }}% calculate width to leave enough room
+\newcommand{\compacttoc}{%
+  \begingroup
+  \setlength{\cftparskip}{0pt}%
+  \setlength{\cftbeforesecskip}{0.1pt}%
+  \setlength{\cftbeforesubsecskip}{0.1pt}%
+  \renewcommand{\cftsecfont}{\scriptsize}%
+  \renewcommand{\cftsubsecfont}{\scriptsize\itshape}%
+  \renewcommand{\cftsecpagefont}{\scriptsize}%
+  \renewcommand{\cftsubsecpagefont}{\scriptsize}%
+  \setlength{\cftsecnumwidth}{3.2em}%
+  \setlength{\cftsubsecindent}{1.0em}%
+  \renewcommand{\cftdotsep}{2}%
+  \setlength{\parskip}{0pt}%
+  \linespread{0.70}\selectfont
+  \tableofcontents
+  \endgroup
+}
+
+% ===== Gauge sector macros =====
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\ii}{\mathrm{i}}
+% Gauge fields (adjoints; indices a=1..8, i=1..3)
+\newcommand{\GsA}{G^a_{\mu\nu}}
+\newcommand{\WsI}{W^i_{\mu\nu}}
+\newcommand{\Bmn}{B_{\mu\nu}}
+\sloppy
+% ===============================
+% Macros (canonicalized)
+% ===============================
+%=== SST macros (minimal set for this snippet) =========================
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{ \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+% swirl arrows Counter Clockwise
+\newcommand{\swirlarrowcw}{ \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\Fmaxswirlcw}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+\newcommand{\Fmax}{\Fmaxswirl} % default maximal force (left swirl)
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}               % swirl speed magnitude
+\newcommand{\Ce}{\vswirl}                                % canonical swirl-speed constant
+
+
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rhoM}{\rho_{\!m}}     % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+\newcommand{\Golden}{\phi}
+\newcommand{\GoldenSq}{\phi^{2}}
+
+
+% Status tags (house style)
+\newcommand{\statusResearch}{\textsf{[Research-track]}}
+\newcommand{\statusCalibration}{\textsf{[Calibration]}}
+\newcommand{\statusCanonical}{\textsf{[Canonical clarification]}}
+
+\newcommand{\omegaVec}{\boldsymbol{\omega}}
+
+\newcommand{\OmegaCore}{\Omega_{\mathrm{core}}}
+\newcommand{\bg}{\mathrm{bg}}
+\newcommand{\core}{\mathrm{core}}
+\newcommand{\Vol}{\operatorname{Vol}}   % now \Vol_{\!\mathbb{H}}(K) works
+
+% ===============================
+% Policy: the golden constant is only allowed via hyperbolic functions.
+\newcommand{\xig}{\operatorname{asinh}\!\left(\tfrac{1}{2}\right)}
+\newcommand{\phig}{\exp(\xig)}
+\newcommand{\phialg}{\bigl(1+\sqrt{5}\bigr)/2}
+\newcommand{\xigold}{\tfrac{3}{2}\,\xig}
+\newcommand{\GoldenDeclare}{%
+    \textbf{Golden (hyperbolic)}:\ \(\ln\phi=\xig\), hence \(\phi=\phig\).
+    \ \emph{(Algebraic form \(\phi=\phialg\) is equivalent.)}%
+}
+
+\newcommand{\vswirltext}{\mathbf{v}_{\mathrm{swirl}}}
+
+% Misc
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ee}{\mathrm{e}}
+% Theorem-like environments (only if absent)
+\makeatletter
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{corollary}{\newtheorem{corollary}{Corollary}}{}
+\@ifundefined{definition}{\newtheorem{definition}{Definition}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\makeatother
+
+
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{amsthm}
+\usepackage{amstext}
+
+\begin{document}
+
+	\title{\papertitle}
+	\author{Omar Iskandarani}
+	\affiliation{Independent Researcher, Groningen, The Netherlands}
+    \thanks{ORCID: 0009-0006-1686-3961, DOI: \paperdoi}
+	\date{\today}
+
+    \begin{abstract}
+    This Canon is the single source of truth for \emph{Swirl String Theory (SST)}: definitions, constants, boxed master equations, and notational conventions. It unifies the core hydrodynamic, electromagnetic, and gauge principles of the theory.
+    \textbf{This version canonizes the following principles:}
+
+    \begin{tabular}{r@{\quad}p{0.75\linewidth}}
+        \textbf{I} & The foundational hydrodynamic laws, including the Chronos–Kelvin Invariant and Swirl Coulomb constant $\Lam$ \\
+        \textbf{II} & The Swirl–Electromagnetic Bridge, linking swirl dynamics directly to Maxwell's equations.\\
+        \textbf{III} & The emergence of the $\mathrm{SU}(3)\times\mathrm{SU}(2)\times\mathrm{U}(1)$ gauge sector and a first-principles derivation of the weak mixing angle $\theta_W$.\\
+        \textbf{IV} & A parameter-free prediction for the Electroweak Symmetry Breaking (EWSB) scale. \\
+        \textbf{V} & A formal dynamical rule for quantum measurement via R$\leftrightarrow$T phase transitions. \\
+    \end{tabular}
+
+
+    \subsection*{Core Axioms (SST)}
+        \begin{tabular}{r@{\quad}p{0.75\linewidth}}
+            \textbf{1.} & \textbf{Swirl Medium:} Physics is formulated on $\mathbb{R}^3$ with absolute reference time. Dynamics occur in a frictionless, incompressible \emph{swirl condensate}, which serves as a universal substrate. \\
+            \textbf{2.} & \textbf{Swirl Strings (Circulation and Topology):} Particles and field quanta correspond to closed vortex filaments (\emph{swirl strings}). The circulation of the swirl velocity around any closed loop is quantized: \\
+            & $\displaystyle \Gamma = \oint \vswirl \cdot d\boldsymbol{\ell} = n\,\Gamma_0,\qquad n\in\mathbb{Z},\qquad \Gamma_0 = 2\pi r_c \vnorm.$ \\
+            & Discrete quantum numbers (mass, charge, spin) track to the topological invariants of the swirl string. \\
+            \textbf{3.} & \textbf{String-induced gravitation:} Macroscopic attraction emerges from coherent swirl flows and swirl-pressure gradients. The effective gravitational coupling $G_{\text{swirl}}$ is fixed by canonical constants. \\
+            \textbf{4.} & \textbf{Swirl Clocks:} Local proper-time rate depends on tangential swirl speed $v$, ticking slower by the factor $S_t=\sqrt{\,1-v^2/c^2\,}$ relative to an observer at rest in the medium. \\
+            \textbf{5.} & \textbf{Dual Phases (Wave–Particle):} Each swirl string has two limiting phases: an extended \emph{R-phase} (unknotted, wave-like) and a localized \emph{T-phase} (knotted, particle-like). Measurement is a dynamical transition between these phases. \\
+            \textbf{6.} & \textbf{Taxonomy:} Unknotted excitations correspond to bosonic modes,
+            with photons realized as \emph{pulsed torsional R-phase excitations} (rotational wave packets of the swirl director field). Torus knots correspond to leptons (e.g. electron = $3_1$), and chiral hyperbolic knots to quarks (proton = $5_2+5_2+6_1$ composite). Linked knots describe nuclei and bound states. \\
+            \subsection*{Preface: Reader Pathways}
+                This document formalizes SST in a self-contained manner, but it is structured to accommodate different levels of reader expertise.\\
+                \textbf{Beginner-level readers} are encouraged to focus on the physical descriptions and boxed highlights in the main text, skipping the more technical derivations (which are relegated to the appendices and side notes).\\
+                \textbf{Expert readers} can delve into the detailed derivations and dimensional analyses in the appendices to verify consistency and connect SST formulas to classical limits.\\
+                \textbf{Active researchers} should consult the formal axiomatic system section and appendices for the rigorous foundation, as well as the traceability tables and glossary that link each canonical statement to established physics or experimental context. Throughout the text, important equations, axioms, and theorems are presented in numbered, boxed form for quick reference. Pedagogical sidebars can be expanded in future versions to provide intuitive explanations, historical notes, or illustrative diagrams without interrupting the flow of the formal development.
+        \end{tabular}
+    \end{abstract}
+
+        \maketitle
+        \newpage
+        %\tableofcontents
+        \compacttoc
+
+            \subsection*{SST Canon v0.5.12 Glossary}
+                % TABLE 1: PRIMITIVE & DERIVED CONSTANTS
+                \begin{table}[h!]
+                    \centering
+                    \scriptsize
+                    \caption{Primitive and Derived Canonical Constants (see Section~\ref{sec:canonical-constants})}
+                    \label{tab:glossary-constants}
+
+                    \begin{tabular}{|l|l|l|}
+                        \hline
+                        \textbf{Symbol} & \textbf{Definition} & \textbf{Canonical Value / Relation} \\
+                        \hline
+                        $\Gamma_{0}$ & Primitive Circulation Quantum & $6.4 \times 10^{3} \, \text{m}^{2}\text{s}^{-1}$ (Table~\ref{tab:constants}) \\
+                        \hline
+                        $r_{c}$ & Swirl String Core Radius & $1.40897017 \times 10^{-15} \, \text{m}$ (Table~\ref{tab:constants}) \\
+                        \hline
+                        $\rho_{\!f}$ & Effective Fluid Density & $7.0 \times 10^{-7} \, \text{kg m}^{-3}$ (Table~\ref{tab:constants}) \\
+                        \hline
+                        $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}$ & Canonical Swirl Speed ($||v_{\mathcal{G}}||$) & $1.09384563 \times 10^{6} \, \text{m s}^{-1}$ (Table~\ref{tab:constants}) \\
+                        \hline
+                        $\rho_{\!m}$ & Mass-Equivalent Density & $\rho_{\!E}/c^2 \approx 3.89 \times 10^{18} \, \text{kg m}^{-3}$ (Table~\ref{tab:constants}) \\
+                        \hline
+                        $\Lambda$ & Swirl Coulomb Constant & $4\pi \rho_{\!m} \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} r_{c}^{3}$ (Eq.~\ref{eq:swirl-coulomb-potential}) \\
+                        \hline
+                        $G_{swirl}$ & Gravitational Coupling & $\frac{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}} c^{5} t_{p}^{2}}{2 F_{\text{max}} r_{c}^{2}} \approx G_{N}$ (Eq.~\ref{eq:swirl-gravity-coupling}) \\
+                        \hline
+                    \end{tabular}
+                \end{table}
+
+                % TABLE 2: CORE ONTOLOGY & MECHANICS
+                \begin{table}[h!]
+                    \centering
+                    \scriptsize
+                    \caption{Core Ontology and Hydrodynamic Mechanics (see Section~\ref{sec:cosmogony-seven})}
+                    \label{tab:glossary-ontology}
+                    \renewcommand{\arraystretch}{1.5}
+                    \begin{tabular}{|l|p{9cm}|}
+                        \hline
+                        \textbf{Concept} & \textbf{Canonical Definition} \\
+                        \hline
+                        Swirl Medium & Frictionless, incompressible swirl condensate on $\mathbb{R}^{3}$ with absolute time $t$ (Axiom~\ref{axiom:swirl-medium}). \\
+                        \hline
+                        Swirl String & Closed vortex filament where circulation is quantized ($\Gamma=n\Gamma_0$) and particles are topological knots (Axiom~\ref{axiom:swirl-strings}). \\
+                        \hline
+                        Chronos-Kelvin Invariant & Conservation law generalizing Kelvin's theorem to include time dilation: $\frac{D}{Dt}(R^{2}\omega) = 0$ (Section~\ref{canon58:classical-invariants}). \\
+                        \hline
+                        Swirl Clock ($S_{t}$) & Local proper-time rate factor dependent on tangential swirl speed: $S_{t} = \sqrt{1 - v^{2}/c^{2}}$ (Axiom~\ref{axiom:swirl-clocks}). \\
+                        \hline
+                        Zero-Parameter Principle & Axiom stating all dimensional constants are determined by the triplet $(\Gamma_{0}, \rho_{\!f}, r_{c})$ and topology (Section~\ref{sec:zero-parameter-principle}). \\
+                        \hline
+                        Swirl Pressure Law & Radial pressure gradient sustaining centripetal force: $\frac{dp_{swirl}}{dr} = \rho_{\!f}\frac{v_{\theta}^{2}}{r}$ (Eq.~\ref{eq:swirl-pressure-law}). \\
+                        \hline
+                    \end{tabular}
+                \end{table}
+
+                % TABLE 3: PARTICLE & PHASE TAXONOMY
+                \begin{table}[h!]
+                    \centering
+                    \scriptsize
+                    \caption{Topological Phase and Particle Taxonomy (see Section~\ref{sec:knot-taxonomy})}
+                    \label{tab:glossary-taxonomy}
+                    \renewcommand{\arraystretch}{1.5}
+                    \begin{tabular}{|l|l|l|}
+                        \hline
+                        \textbf{Entity} & \textbf{Topological Class} & \textbf{Physical Realization} \\
+                        \hline
+                        R-Phase & Unknotted ($0_1$) & Radiative, wave-like, massless (Bosons) (Axiom~\ref{axiom:dual-phases}). \\
+                        \hline
+                        T-Phase & Knotted & Tangible, particle-like, massive (Fermions) (Axiom~\ref{axiom:dual-phases}). \\
+                        \hline
+                        Photon & Torsional Pulse & Rotating oscillation of the director field (helicity $\pm 1$) (Axiom~\ref{axiom:taxonomy}). \\
+                        \hline
+                        Electron ($e^-$) & Torus Knot ($3_1$) & Trefoil knot; simplest lepton (Axiom~\ref{axiom:taxonomy}). \\
+                        \hline
+                        Up Quark ($u$) & Twist Knot ($5_2$) & Chiral hyperbolic knot (Axiom~\ref{axiom:taxonomy}). \\
+                        \hline
+                        Down Quark ($d$) & Twist Knot ($6_1$) & Chiral hyperbolic knot (Axiom~\ref{axiom:taxonomy}). \\
+                        \hline
+                        Proton & Composite Linkage & $5_2 + 5_2 + 6_1$ (uud) configuration (Axiom~\ref{axiom:taxonomy}). \\
+                        \hline
+                    \end{tabular}
+                \end{table}
+
+                % TABLE 4: ADVANCED CONCEPTS & SYMBOLS
+                \begin{table}[h!]
+                    \centering
+                    \scriptsize
+                    \caption{Advanced Gauge, Logic, and Field Concepts (see Sections~\ref{sec:golden-principle}, \ref{sec:kairos-bifurcations})}
+                    \label{tab:glossary-advanced}
+                    \renewcommand{\arraystretch}{1.5}
+                    \begin{tabular}{|l|l|p{6cm}|}
+                        \hline
+                        \textbf{Symbol} & \textbf{Term} & \textbf{Definition} \\
+                        \hline
+                        $\phi$ & Golden Principle & Scaling factor $\phi \approx 1.618$ controlling mass/energy layers: $E_{n} = E_{0}\phi^{2n}$ (Eq.~\ref{eq:phi-hyperbolic-def}). \\
+                        \hline
+                        $\mathcal{K}$ & Kairos Event & Topological bifurcation or phase jump in $S_{t}$ (reconnection event) (Section~\ref{sec:kairos-bifurcations}). \\
+                        \hline
+                        $\varrho$ & Swirl Areal Density & Density of vortex cores per unit area; sources emergent EM fields via $\nabla \times \mathbf{E}$ (Definition~\ref{def:swirl-areal-density}). \\
+                        \hline
+                        $\theta_W$ & Weak Mixing Angle & Ratio of director stiffness constants for $U(1)$ and $SU(2)$ sectors (Theorem~\ref{thm:weak-mixing-angle}). \\
+                        \hline
+                        BASC & Bulk Signaling Channel & Engineered region allowing scalar bulk field $p(x,t)$ transduction (Section~\ref{sec:BASC}). \\
+                        \hline
+                        $\omega$ & Vorticity Magnitude & Local vorticity $||\nabla \times \mathbf{v}||$; defines the wave proxy in duality relations (Section~\ref{sec:duality-ellipse-sst}). \\
+                        \hline
+                    \end{tabular}
+                \end{table}
+        \newpage
+
+    \part{Fundamental Considerations for the Swirl--String Theory}
+
+    \section{Introduction}
+    The theory presented herein, which we will refer to as Swirl--String Theory (SST), encompasses what is conventionally referred to as ``æther theory'' in contemporary discourse, but reformulates it explicitly as a hydrodynamic model of the vacuum. In this work, I aim to conceptualize the vacuum as a flowing, non-viscous, incompressible vacuum fluid (historically called ``æther''), characterized by an effective fluid density \(\rho_{\!f}\), a characteristic swirl speed \(\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\), and a core radius \(r_c\), fundamentally founded on the five postulates of Euclid. Rather than postulating an undefined æther, we treat this vacuum fluid as a concrete continuum governed by the equations of incompressible fluid dynamics. My conviction in this conceptualization was inspired by an in-depth study of the original contributions of J.~C.~Maxwell, H.~Helmholtz, W.~Thomson, and A.~Einstein.\cite{Maxwell1865,Helmholtz1858,Thomson1867,Einstein1905}
+
+    In this model, atoms are envisioned as vortex currents in the vacuum fluid or other forms of vortex structures, as originally proposed by W.~Thomson.\cite{Thomson1867} It is well established that Einstein's special theory of relativity complements Maxwell's dynamical theory of the electromagnetic field,\cite{Maxwell1865} which provides a framework for simultaneous interactions between distant bodies in electromagnetic experiments. However, this model diverges from the traditional dynamical approach, opting instead for the theory of molecular vortices formulated by J.~C.~Maxwell. Here, we endeavor to reinterpret certain principles from the general theory of relativity and other facets of modern physics in terms of an incompressible vacuum fluid, while emphasizing a strictly non-relativistic (Galilean) framework where accelerations are considered the primary forces of nature, and vorticity is treated as a fundamental descriptor of the rotational motion of the vacuum fluid.
+
+    A vortex, within this context, is a mass of vacuum fluid in a state of rotational motion. In the case of an atom, this model posits a small vortex knot (a ``swirl string'') at the core, which embodies a central element with its own temporal evolution, characterized by vortex circulation. Furthermore, this model seeks to explain thermal phenomena by invoking the concept of the swelling of elastic spherical equilibrium conditions due to changes in vorticity, linking these effects to entropy variations, as articulated in the vortex atom framework of W.~Thomson.\cite{Thomson1867}
+
+    The notion of relative time-space is addressed here through the concept of relative vorticity within the vacuum fluid, explicitly excluding relativistic effects in favor of purely vorticity-driven temporal differentiation, where the local clock rate (the Swirl Clock \(S_t^{\boldsymbol{\circlearrowleft}}\)) is set by the swirl energy density. Part~I of this work will present foundational considerations, articulated with the intention of minimizing the necessity for advanced mathematical understanding, thereby making the content accessible to a broader audience. Part~II will delve into the mathematical formalism underpinning the model, which cannot be assumed to be known to every physicist. The ultimate objective is to establish the foundations for a comprehensive non-viscous vacuum-fluid theory (a hydrodynamic realization of the historical æther concept), capable of providing a visual and conceptual representation of inertia as an emergent property of vortex circulation within the vacuum fluid, particularly influenced by the proposed constants.
+
+
+    \section{The Demand for an Extension for the Propositions of Physics}
+
+        Any rigorous consideration of a physical theory must differentiate between objective reality, which exists independently of any theoretical framework, and the physicist's statements that attempt to articulate that theory. These theoretical statements aim to correspond to objective reality, and it is through these approximations that we attempt to construct an intelligible representation of the universe. By recognising patterns in nature which are explained with philosophy and mathematics to predict an outcome we created different branches of physics that at first sight seem unrelated, but later get discovered to be fusible.
+
+        The contemporary scientific understanding of reality is shaped predominantly by the theory of relativity and modern physics. When we inquire whether the descriptions furnished by these theories are exhaustive, it is critical to recognize that such completeness is contingent upon a narrowly defined set of conditions---specifically, the behavior of clocks and measuring rods, as well as the statistical properties of electrons. Neither the general theory of relativity nor modern physics adequately captures the objective reality of a structured vacuum fluid, as both frameworks explicitly dismiss the concept of an underlying medium in favor of a purely relativistic interpretation. In contrast, the model presented here emphasizes a non-relativistic, vorticity-driven framework in an incompressible vacuum fluid (the swirl medium). The theory of relativity excels in providing a precise account of phenomena such as the rotation of clock hands and, for practical purposes, may well remain unparalleled as a descriptive tool.
+
+        In special relativity, simultaneity is defined through the synchronized positions of multiple clocks and the reception of light signals exchanged between them.\cite{Einstein1905} We must revise this definition of simultaneity to align with a strictly non-relativistic vacuum-fluid model (historically associated with æther theories), taking into consideration that quantum entanglement implies the possibility of non-local transmission of mechanical information within the swirl medium, exceeding the conventional limits imposed by the speed of light.
+
+        The non-viscous liquid vacuum-fluid model posits that variations in temporal experience among atoms, as indicated by discrepancies in clock synchronization, are fundamentally determined by the vorticity and internal circulation of vortex knots. The characteristic swirl speed \(\vswirl\) plays a pivotal role in this temporal differentiation. Within this model, the nucleus of an atom is conceptualized as a spherical equilibrium of pressure surrounding a rotating vortex knot. Specifically, for the hydrogen atom's nucleus, commonly referred to as the proton, this structure is represented by the simplest vortex knot: the three-fold ``Trefoil knot.'' This knot is chosen as the most elementary and stable configuration for representing atomic nuclei.
+
+        The tangential velocity at the boundary of the vortex is conceived to be set by the canonical swirl speed \(\vswirl\), symbolizing the lower limit, while the speed of light \(c\) symbolizes the upper limit for the velocity of vacuum-fluid elements within the vortex or for those particles intrinsically linked to the vortex itself.
+
+        Knot theory provides a critical mathematical framework for analyzing vortex knots in fluid systems, including the æther.\cite{Ricca2009} Research has established that helicity---a conserved quantity in ideal fluid dynamics---is analogous to quantum spin, linking macroscopic fluid phenomena with atomic-scale behavior.\cite{Moffatt1969} Stable knotted structures, such as trefoil knots, exhibit robust energy distribution and stability, underscoring their fundamental role in matter's architecture.
+
+        These knotted configurations in the æther are inherently dynamic, facilitating energy and angular momentum exchange with their surroundings. Their behavior adheres to the Navier--Stokes equations for inviscid, incompressible flows, modified by absolute vorticity conservation constraints.\cite{Batchelor1967,LandauLifshitz1987} This dynamism enables the model to address complex interactions within the æther framework.
+
+        Future investigations will incorporate topological invariants, such as linking numbers and higher-order polynomial measures, to quantify vortex knottedness.\cite{Moffatt1969,Ricca2009} These invariants correlate directly with measurable quantities like energy, momentum, and angular momentum, providing a bridge between theoretical constructs and empirical observations. By establishing these connections, the model could yield novel insights into quantum field interactions and macroscopic phenomena, potentially unifying disparate domains of physics.
+
+        Expanding the scope of physical propositions to encompass dynamical systems, helicity dynamics, and nonlinear vacuum-fluid interactions offers a pathway to reconcile fluid dynamics with quantum mechanics. This approach maintains a foundation in Euclidean spatial geometry and absolute time, advancing a cohesive framework that transcends the limitations of existing relativistic and quantum paradigms.
+
+        \subsection*{§2. Observations on the Theory of Relativity and Vacuum Fluid (Æther)}
+
+            General relativity, as formulated by Einstein, does not explicitly negate the possibility of an underlying medium; rather, it provides a heuristic that explains the behavior of space, time, and matter with mass, absent an explicitly specified physical fluid.\cite{Einstein1916} Einstein illustrated how mass induces curvature in spacetime, effectively bending particle trajectories. Consequently, the vacuum appears unanchored in any absolute, three-dimensional space, yet imbued with properties directly affecting the experiential passage of time and space for matter. In our non-relativistic Swirl--String Theory (SST) vacuum-fluid model, we assume that a potential flow of fluid elements exists between two identically and uniformly moving atoms, establishing a connection between them through their shared experience of time and space. This potential flow between two vortex knots (swirl strings) can be considered as a unified vortex structure, where the vortex line along the \(z\)-axis acts as a rotary connecting shaft. Thus, each atom maintains a physical link to another via vortex lines in the vacuum fluid, implying that identical vortex knots share identical values for core rotation and tangential velocity components.
+
+            The Theory of Relativity, in both its special and general manifestations, has profoundly reshaped our understanding of the interrelationship between time and space.\cite{Einstein1905,Einstein1916} Special relativity, through its assertion of the invariance of the speed of light and the resulting effects on simultaneity, redefined how observers in different inertial frames perceive temporal and spatial relationships. General relativity advanced these ideas by coupling the geometry of spacetime to mass and energy, offering an encompassing framework for the description of gravitation. Despite their profundity, these theories rest upon specific postulates that may not capture the entirety of physical reality, particularly regarding the nature and dynamics of an underlying vacuum medium.
+
+            A central tenet of special relativity is the relativistic interpretation of simultaneity, where two spatially separated events are simultaneous if synchronized clocks, using exchanged light signals, record identical times for those events.\cite{Einstein1905} In this framework, simultaneity becomes an observer-dependent property, effectively entangling time and space into a unified yet subjective experience. This paradigm has driven significant advances in modern physics, yet it also introduces limitations when confronted with phenomena like quantum entanglement, where correlations between spatially distant particles appear to surpass relativistic boundaries.\cite{EinsteinPodolskyRosen1935,Aspect1982}
+
+            The notion of an æther, dismissed by relativity in favor of an empty vacuum that serves as a passive backdrop to dynamic spacetime, provides an alternative conceptual framework. In our SST-based model, the time experienced by rotation of the pointer clocks for atoms will be slightly altered due to the rotation of the vortex cores, i.e., due to differences in local vorticity and swirl energy density. The vacuum fluid (historically called æther) is characterized in SST by two fundamental constants: the characteristic swirl speed
+            \[
+                \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \approx 1.09384563 \times 10^{6}\,\mathrm{m/s},
+            \]
+            and the maximum swirl force
+            \[
+                F_{\text{swirl}}^{\max} \approx 29.053507\,\mathrm{N}.
+            \]
+            These constants are pivotal in determining the dynamic behavior of the vacuum fluid---regulating vortex circulation velocity and providing limits for interactions within the medium. Unlike the archaic notion of a luminiferous medium, our vacuum fluid is envisioned as a fundamental, dynamic, incompressible, non-viscous entity analogous to a superfluid, supporting vortex (swirl-string) structures and enabling vorticity-driven interactions. This perspective suggests that simultaneity could, in principle, be restored to an absolute form, mediated by the intrinsic properties of the vacuum fluid, which plays a crucial role in governing such interactions, allowing the exchange of mechanical information to appear to exceed the traditional speed of light along non-local swirl configurations. The potential for non-local information transfer points to an underlying structure more intricate than the purely relativistic description, challenging us to expand our foundational understanding of physics.
+
+            General relativity's depiction of gravitation as a manifestation of spacetime curvature is a profound and elegant achievement.\cite{Einstein1916} Nevertheless, our model aims to reinterpret gravitational interactions as emergent phenomena stemming from vorticity within the vacuum fluid. In this view, mass can be understood as a localized concentration of increased vorticity, which governs the rotational dynamics and contributes to the formation of a pressure gradient. Such a pressure gradient creates an effective force that manifests as gravitational attraction, influencing surrounding fluid elements. This reinterpretation invites a reformulation of Einstein's field equations in terms of vorticity and the internal fluidic dynamics of the vacuum, suggesting that gravitation might emerge from fluidic interactions rather than a purely geometrical deformation of spacetime.
+
+            These observations imply that while the Theory of Relativity is an exceptionally powerful framework for describing macroscopic and high-energy phenomena, it may ultimately lack completeness. By incorporating a non-viscous, incompressible vacuum fluid into our model, we endeavor to provide a more nuanced and comprehensive understanding of the physical universe---accommodating quantum behaviors, non-locality, and the notion of an absolute time. These concepts appear discordant within the relativistic framework, yet they find coherence in a model where the vacuum fluid serves as the fundamental substrate of reality. This approach does not seek to invalidate relativity but to enhance our understanding by proposing an underlying medium through which relativistic effects are mediated, thereby bridging classical, quantum, and relativistic physics into a cohesive and unified Swirl--String Theory (SST) framework.
+
+
+%=========================================================
+    \section{Observations on Light Quanta in a Swirl Medium}
+%=========================================================
+
+        The atom persistently emits light, leading to a continual dissipation of its internal energy. In Swirl--String Theory (SST), we reinterpret this radiation not as the emission of fundamental point particles, but as the excitation of torsional shear waves in a structured, inviscid, incompressible vacuum fluid (the ``swirl medium'') characterized by an effective density \(\rhof\) and an effective shear stiffness \(K\).\cite{Helmholtz1858,Thomson1867,Maxwell1875,Unruh1981,Volovik2003,Barcelo2011,IskandaraniPhoton2025,IskandaraniHydrogenGS} In the gauge-fixed, hydrodynamic representation, the photon appears as a massless transverse oscillation of a vector potential \(A(\mathbf{x},t)\) or \(a(\mathbf{x},t)\), with substrate velocity
+        \begin{equation}
+            \mathbf{u} = \partial_t A,
+            \qquad
+            \nabla\!\cdot A = 0,
+        \end{equation}
+        so that incompressibility of the medium enforces purely transverse (shear-like) modes.\cite{IskandaraniPhoton2025}
+
+        The effective Lagrangian density for small-amplitude, unknotted excitations of this medium can be written in either of two equivalent forms:
+        \begin{align}
+            \mathcal{L}_{\text{torsion}}
+            &=
+            \frac{1}{2}\,\rho_{\text{eff}} \,\lVert \mathbf{u} \rVert^2
+            - \frac{1}{2}\,K \,\lVert \nabla\times A \rVert^2,
+            \label{eq:L_torsion}
+            \\
+            \mathcal{L}_{\text{swirl-EM}}
+            &=
+            \frac{\rhof}{2}\,\lvert \partial_t a \rvert^2
+            - \frac{\rhof c^2}{2}\,\lvert \nabla\times a \rvert^2,
+            \label{eq:L_swirl_em}
+        \end{align}
+        with the identifications \(\rho_{\text{eff}}\equiv\rhof\) and \(K \equiv \rhof c^2\).\cite{IskandaraniPhoton2025,IskandaraniHydrogenGS} Varying either \eqref{eq:L_torsion} or \eqref{eq:L_swirl_em} yields the massless vector wave equation
+        \begin{equation}
+            \Box A \equiv
+            \left( \frac{1}{c^2}\,\partial_t^2 - \nabla^2 \right) A = 0,
+        \end{equation}
+        with wave speed
+        \begin{equation}
+            c = \sqrt{\frac{K}{\rho_{\text{eff}}}},
+        \end{equation}
+        so that the speed of light emerges as the transverse shear speed of the swirl medium.\cite{IskandaraniPhoton2025,IskandaraniHydrogenGS}
+
+        In this hydrodynamic picture, light quanta are modeled as localized torsional wave packets of these transverse modes. In the geometric-optics limit, a narrow packet may be visualized as an unknotted swirl string forming a toroidal wavefront---a ``dipole'' swirl string---whose core traces a closed loop in three-dimensional space. The core of this loop carries a localized torsional distortion (a twist of the director field), while its surrounding flow is organized into two contra-rotating strands in cross-section. This representation preserves the essential vorticity structure of the original æther-vortex picture, but embeds it consistently within the torsion-wave Lagrangian framework.
+
+        Within the swirl medium, the total energy of such a dipole wave packet is controlled by both the local swirl energy density
+        \begin{equation}
+            \rhoE = \frac{1}{2}\,\rhof \,\lVert \mathbf{v} \rVert^2,
+        \end{equation}
+        and the geometric volume effectively occupied by the packet. Here \(\mathbf{v}\) denotes the local fluid velocity associated with the torsional mode. The dependence of the energy on frequency and cross-sectional scale naturally reproduces the quantized energy levels observed in atomic spectra once circulation quantization and boundary conditions are imposed.\cite{IskandaraniHydrogenGS}
+
+        From the vorticity-driven viewpoint, what is usually called the ``wave--particle duality'' of light becomes a manifestation of the coherent swirl structure of these torsional dipoles:
+
+        \begin{itemize}
+            \item The \emph{wave-like} behavior arises from the fact that \(A(\mathbf{x},t)\) obeys the linear wave equation, with interference, diffraction, and polarization encoded in the transverse patterns of the substrate velocity \(\mathbf{u} = \partial_t A\).\cite{Jackson1999}
+            \item The \emph{particle-like} behavior is associated with the topological and energetic discreteness of localized wave packets: circulation quantization, fixed knotting class of the supporting swirl string, and finite support of the torsional distortion in the medium.\cite{Helmholtz1858,Thomson1867}
+        \end{itemize}
+
+        Polarization acquires a geometric interpretation. Linear and circular polarizations correspond to distinct orientations and helicities of the torsional distortion relative to the propagation direction. In particular, circular polarization can be viewed as a helical torsional mode in which the director field traces a screw-like path along the ray, in direct correspondence with the helical substrate velocity patterns of the shear-wave solution.\cite{IskandaraniPhoton2025}
+
+        The interaction between light and matter is mediated by the pressure and vorticity fields induced by the torsional wave as it traverses the swirl medium. When a torsional wave packet encounters the pressure well generated by a bound swirl string (such as the proton--electron linkage in hydrogen), the local vorticity and pressure gradients are modified. In SST, atomic transitions are interpreted as shifts between discrete flow-regime resonances: for hydrogen, a transition from \(n=1\) to \(n=2\) corresponds to a change in the electron's orbital swirl velocity from \(\alpha c\) to \(\alpha c/2\), and the emitted photon is precisely the torsional wave packet carrying the associated change in angular momentum and energy.\cite{IskandaraniHydrogenGS}
+
+        In this way, the hydrodynamic torsion model of light, the swirl-EM Lagrangian, and the knot-based architecture of matter remain mutually consistent: photons are not independent point particles but emergent torsional excitations of the same swirl medium that supports the knotted swirl strings of atomic structure.
+
+%=====================================================================
+    \section{The Principle of Pressure Equilibrium in Swirl-String Vortex Models}
+%=====================================================================
+
+        Within SST, bound states such as the hydrogen atom are modeled as knotted swirl strings (e.g., a trefoil core for the proton) surrounded by an irrotational envelope that we identify with the electronic cloud. The swirl medium is treated as an incompressible, inviscid condensate with density \(\rhof\), so that its dynamics are governed by the Euler equation and Bernoulli's principle for incompressible flow.\cite{Batchelor1967,IskandaraniHydrogenGS} The notion of a ``spherical pressure boundary'' then arises naturally as the surface on which the pressure of the irrotational flow matches the ambient pressure of the undisturbed medium; this surface will expand or contract in response to changes in the local swirl velocity, providing a direct hydrodynamic analogue of thermal expansion.
+
+        For an incompressible fluid, the Euler equation can be written as
+        \begin{equation}
+            \frac{1}{\rhof}\,\nabla p = -(\mathbf{v}\cdot\nabla)\mathbf{v},
+            \label{eq:Euler}
+        \end{equation}
+        where \(p\) is the pressure and \(\mathbf{v}\) the local velocity field.\cite{Batchelor1967} For a purely azimuthal flow around a straight swirl string with circulation \(\Gamma\), the tangential velocity scales as
+        \begin{equation}
+            v_\theta(r) \simeq \frac{\Gamma}{2\pi r},
+        \end{equation}
+        so that the radial pressure gradient is
+        \begin{equation}
+            \frac{dp}{dr}
+            =
+            \rhof\,\frac{v_\theta^2}{r}
+            =
+            \rhof\,\frac{\Gamma^2}{4\pi^2 r^3}.
+            \label{eq:pressure_gradient}
+        \end{equation}
+        Integrating \eqref{eq:pressure_gradient} from infinity to a finite radius \(r\) yields a pressure deficit \(\Delta p(r)\propto -1/r^2\), which acts as an attractive potential on any other swirl string placed in this field---the swirl-Coulomb potential.\cite{IskandaraniHydrogenGS} This is the hydrodynamic mechanism by which SST recovers the effective \(1/r\)-like binding structure of the hydrogen atom.
+
+        The spherical pressure boundary associated with a trefoil core is defined as the locus where the pressure in the irrotational envelope equals the ambient pressure of the undisturbed swirl medium. Along a streamline in the irrotational region, Bernoulli's principle states that
+        \begin{equation}
+            p + \frac{1}{2}\,\rhof v^2 = \text{constant},
+            \label{eq:Bernoulli}
+        \end{equation}
+        so that increases in the local speed \(v\) must be accompanied by decreases in the local pressure \(p\) and vice versa.\cite{Batchelor1967}
+
+        This leads to a simple, physically transparent picture:
+
+        \begin{itemize}
+            \item \textbf{If the irrotational flow accelerates} (for instance, when energy is injected into the system via torsional waves or thermal input), the kinetic term \(\frac{1}{2}\rhof v^2\) increases, forcing the pressure \(p\) within the envelope to drop. To maintain pressure equilibrium with the far-field medium, the spherical boundary must expand outward until the flow decelerates sufficiently and the Bernoulli constant is restored. In this sense, the bound state ``breathes out'' under excitation.
+            \item \textbf{If the irrotational flow decelerates} (for example, during radiative relaxation or cooling), the kinetic term decreases and the internal pressure rises. The spherical boundary then contracts, shrinking the envelope until the internal and external pressures again match. The bound state ``breathes in'' as it relaxes toward the ground configuration.
+        \end{itemize}
+
+        The energy stored in the envelope region can be approximated as
+        \begin{equation}
+            E_{\text{env}}
+            \simeq
+            \frac{1}{2}\,\rhof\,V\,v^2 + p\,V,
+            \label{eq:env_energy}
+        \end{equation}
+        where \(V\) is the volume enclosed by the pressure boundary, \(v\) is a suitably averaged irrotational speed on that boundary, and \(p\) is the corresponding pressure. Differentiating \eqref{eq:env_energy} with respect to time gives
+        \begin{equation}
+            \frac{dE_{\text{env}}}{dt}
+            \simeq
+            \rhof\,V\,v\,\frac{dv}{dt}
+            + \frac{d(pV)}{dt},
+        \end{equation}
+        showing explicitly how changes in flow velocity and pressure drive the dynamics of the boundary radius. When this evolution is constrained by circulation quantization and the canonical SST constants \((\rhof, \vswirl, r_c)\), the allowed radii and velocities organize into discrete families that may be mapped onto the hydrogenic energy levels.\cite{IskandaraniHydrogenGS}
+
+        Thus, the ``pressure equilibrium'' principle in SST is nothing more than incompressible Euler--Bernoulli hydrodynamics applied to knotted swirl strings in the calibrated swirl medium. The spherical boundary surrounding a trefoil core is the geometric surface along which the swirl-Coulomb pressure deficit balances the ambient pressure. Its expansion and contraction under changes in swirl velocity provide a direct hydrodynamic mechanism for linking vorticity, thermal input, and entropy-like measures, while remaining fully consistent with the hydrogen ground-state derivation and the torsion-wave description of photon emission and absorption.
+
+
+
+
+
+
+\input{part-1_foundations}
+\input{part-2_Geometry_Fields_Lagrangian}
+\input{part-3_Gravity_Hydrogen_Cosmology}
+\appendix
+\input{part-4_Appendix}
+\input{part-end_References}
+
+\end{document}

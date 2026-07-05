@@ -1,0 +1,194 @@
+%! Author = mr
+%! Date = 8/31/2025
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+%=========================================================
+% Swirl–String Theory (SST) — Canon v0.3.4 Cheat Sheet
+%=========================================================
+
+\section*{SST Canon v0.3.4 — Cheat Sheet}
+
+    \subsection*{Core setup (arena \& objects)}
+        \begin{itemize}
+        \item \textbf{Arena:} $\mathbb{R}^3$ with absolute time; incompressible, inviscid swirl medium.
+        \item \textbf{Strings:} closed, thin \emph{swirl strings} with core radius $\rc$ and tangential speed $\vscore$ at $r=\rc$; excitations can be knotted/linked.
+        \item \textbf{Topological labels:} braid index $b$, genus $g$, component count $n$; dimensionless ropelength $L_{\textrm tot}$.
+        \end{itemize}
+
+    \subsection*{Canonical constants (SI)}
+        \[
+            \vscore=\num{1.09384563e6}\;\mathrm{m\,s^{-1}},\quad
+            \rc=\num{1.40897017e-15}\;\mathrm{m},\quad
+            \rho_{\textrm core}=\num{3.8934358266918687e18}\;\mathrm{kg\,m^{-3}},
+        \]
+        \[
+            \rho_f=\num{7.0e-7}\;\mathrm{kg\,m^{-3}},\quad
+            \alpha_{\textrm fs}=\num{7.2973525643e-3},\quad
+            c=\num{2.99792458e8}\;\mathrm{m\,s^{-1}}.
+        \]
+
+    \subsection*{Master energy \& mass (volume form)}
+        \[
+            \boxed{~E_{\textrm SST}(V)=\frac{4}{\alpha\,\varphi}\Big(\tfrac12\,\rho_f\,\vscore^2\Big)V~,}
+            \qquad
+            \boxed{~M_{\textrm SST}(V)=E_{\textrm SST}/c^2~.}
+        \]
+        (Heuristic volume law; used for quick scaling checks.)
+
+    \subsection*{Invariant mass law (canonical, used in code)}
+        Define the swirl energy density scale on the core
+        \[
+            u=\tfrac12\,\rho_{\textrm core}\,\vscore^2,
+            \qquad
+            V(K)=\pi \rc^2 (r_c L_{\textrm tot})=\pi \rc^3 L_{\textrm tot}.
+        \]
+        With the canonical topological multiplier
+        \[
+            \Xi_{\textrm top}(K)=\frac{4}{\alpha_{\textrm fs}}\,b^{-3/2}\,\varphi^{-g}\,n^{-1/\varphi},
+        \]
+        the \emph{invariant mass law} is
+        \[
+            \boxed{~
+            M(K)=\frac{4}{\alpha_{\textrm fs}}\,b^{-3/2}\,\varphi^{-g}\,n^{-1/\varphi}\,
+            \frac{u\,\pi \rc^3\,L_{\textrm tot}}{c^2}.
+            ~}
+        \]
+        \textbf{Leptons:} invert to solve $L_{\textrm tot}$ from $M_\ell^{\textrm (exp)}$.
+        \[
+            L_{\textrm tot}^{(\ell)}=
+            \frac{M_\ell^{\textrm (exp)} c^2}
+            {\big(\tfrac{4}{\alpha_{\textrm fs}}b^{-3/2}\varphi^{-g}n^{-1/\varphi}\big)\,u\,\pi \rc^3}.
+        \]
+        \textbf{Baryons (exact\_closure):}
+        \[
+            L_p=\lambda_b(2s_u+s_d)\mathcal S,\quad
+            L_n=\lambda_b(s_u+2s_d)\mathcal S,\quad
+            \mathcal S=2\pi^2\kappa_R,\ \kappa_R=2,\ \lambda_b=1.
+        \]
+        Let
+        \[
+            K=\Big[\tfrac{4}{\alpha_{\textrm fs}}\,3^{-3/2}\,\varphi^{-2}\,3^{-1/\varphi}\Big]
+            \frac{u\,\pi \rc^3\mathcal S}{c^2}.
+        \]
+        Fitting $(s_u,s_d)$ from $M_p^{\textrm (exp)},M_n^{\textrm (exp)}$:
+        \[
+            \begin{bmatrix}2&1\\[2pt]1&2\end{bmatrix}\!\!
+            \begin{bmatrix}s_u\\ s_d\end{bmatrix}
+            =\frac{1}{K}\begin{bmatrix}M_p^{\textrm (exp)}\\ M_n^{\textrm (exp)}\end{bmatrix},
+            \quad
+            s_u=\frac{2M_p^{\textrm (exp)}-M_n^{\textrm (exp)}}{3K},\quad
+            s_d=\frac{M_p^{\textrm (exp)}}{K}-2s_u.
+        \]
+
+    \subsection*{Swirl Clock (local time rate)}
+        \[
+            \boxed{~
+            \frac{dt_{\textrm local}}{dt_\infty}=\sqrt{1-\frac{\|\vswirl\|^{2}}{c^{2}}}
+                =\sqrt{1-\frac{\|\boldsymbol\omega\|^{2}\rc^{2}}{c^{2}}}\quad(r=\rc).
+                ~}
+        \]
+
+    \subsection*{Swirl pressure law (Euler corollary)}
+        Steady azimuthal drift $v_\theta(r)$:
+        \[
+            \boxed{~
+            \frac{1}{\rho_f}\frac{dp_{\textrm swirl}}{dr}=\frac{v_\theta(r)^2}{r}.
+            ~}
+        \]
+        Flat $v_\theta\to v_0$ gives $p_{\textrm swirl}(r)=p_0+\rho_f v_0^2\ln(r/r_0)$.
+
+    \subsection*{Photon sector (unknot boson, lossless waves)}
+        Transverse swirl potential $\mathbf a$ with $\mathbf v=\partial_t\mathbf a$, $\mathbf b=\nabla\times\mathbf a$,
+        \[
+            \mathcal L_{\textrm swirl}=\frac{\rho_f}{2}\big(|\mathbf v|^2-c^2|\mathbf b|^2\big),\quad
+            \partial_t^2\mathbf a-c^2\nabla\times(\nabla\times\mathbf a)=0,\ \nabla\!\cdot\!\mathbf a=0,
+        \]
+        lossless radiation; map to $(\mathbf E,\mathbf B)$ by a constant rescaling.
+
+%-------------------------------------------------
+    \subsection*{Calibration modes (mass tables)}
+        \begin{itemize}
+        \item \textbf{exact\_closure (used below):} $e,\mu,\tau$ exact via solved $L_{\textrm tot}$; $(s_u,s_d)$ fit so $p,n$ exact.
+        \item \textbf{canonical:} fixed $(s_u,s_d)$; baryons predicted.
+        \item \textbf{sector\_norm:} fixed $(s_u,s_d)$ with one $\lambda_b$ to make $p$ exact; $n$ predicted.
+        \end{itemize}
+
+    \subsection*{Benchmarks (exact\_closure mode)}
+        \emph{Caption: Errors in atoms/molecules = missing binding energy contribution, not model failure.}
+        \begin{center}
+        \begin{tabular}{lccc}
+        \toprule
+        Species & Known mass (kg) & Predicted mass (kg) & Error (\%)\\
+        \midrule
+        electron e- & 9.109384e-31 & 9.109384e-31 & 0.0000\\
+        muon $\mu$- & 1.883532e-28 & 1.883532e-28 & 0.0000\\
+        tau $\tau$- & 3.167540e-27 & 3.167540e-27 & 0.0000\\
+        proton p & 1.672622e-27 & 1.672622e-27 & 0.0000\\
+        neutron n & 1.674927e-27 & 1.674927e-27 & 0.0000\\
+        Hydrogen-1 atom & 1.673533e-27 & 1.673533e-27 & 0.0000\\
+        Helium-4 atom & 6.646477e-27 & 6.689952e-27 & 0.6549\\
+        Carbon-12 atom & 1.992647e-26 & 2.005276e-26 & 0.6330\\
+        Oxygen-16 atom & 2.656017e-26 & 2.674532e-26 & 0.6980\\
+        H$_2$ molecule & 3.367403e-27 & 3.347066e-27 & -0.6040\\
+        H$_2$O molecule & 2.991507e-26 & 3.009885e-26 & 0.6139\\
+        CO$_2$ molecule & 7.305355e-26 & 7.354340e-26 & 0.6704\\
+        \bottomrule
+        \end{tabular}
+        \end{center}
+
+    \subsection*{Diagnostics (exact\_closure)}
+        $u=\tfrac12\rho_{\textrm core}\vscore^2,\ \mathcal S=2\pi^2\kappa_R$ with $\kappa_R=2$;\
+        $(s_u,s_d)$ from the 2$\times$2 closure system;\
+        $\lambda_b=1$.
+
+%-------------------------------------------------
+    \subsection*{Dimensional checks (spot)}
+        \[
+            [u]=\mathrm{J\,m^{-3}},\quad [\pi \rc^3 L_{\textrm tot}] = \mathrm{m^3},\quad
+            \Rightarrow\ [M] = \frac{\mathrm{J}}{c^2}=\mathrm{kg}.
+        \]
+
+%-------------------------------------------------
+    \subsection*{Bib\TeX (non-original background)}
+        \begin{verbatim}
+@article{Helmholtz1858,
+  author  = {Helmholtz, Hermann von},
+  title   = {Über Integrale der hydrodynamischen Gleichungen...},
+  journal = {J. Reine Angew. Math.}, year = {1858},
+  doi     = {10.1515/crll.1858.55.25}
+}
+@article{Kelvin1869,
+  author  = {Thomson, William (Lord Kelvin)},
+  title   = {On Vortex Motion}, journal = {Trans. R. Soc. Edinburgh},
+  year    = {1869}, doi = {10.1017/S0080456800019378}
+}
+@book{Batchelor1967,
+  author = {Batchelor, G. K.}, title  = {An Introduction to Fluid Dynamics},
+  year   = {1967}, publisher = {Cambridge Univ. Press}
+}
+@book{Saffman1992,
+  author = {Saffman, P. G.}, title  = {Vortex Dynamics},
+  year   = {1992}, publisher = {Cambridge Univ. Press}
+}
+@misc{NISTCODATA2018,
+  author = {NIST},
+  title  = {CODATA Recommended Values of the Fundamental Constants (2018)},
+  howpublished = {\url{https://physics.nist.gov/cuu/Constants/}},
+  year   = {2019}
+}
+@book{Jackson1999,
+  author = {Jackson, J. D.}, title = {Classical Electrodynamics},
+  edition= {3rd}, year = {1999}, publisher = {Wiley}
+}
+        \end{verbatim}
+
+
+\end{document}

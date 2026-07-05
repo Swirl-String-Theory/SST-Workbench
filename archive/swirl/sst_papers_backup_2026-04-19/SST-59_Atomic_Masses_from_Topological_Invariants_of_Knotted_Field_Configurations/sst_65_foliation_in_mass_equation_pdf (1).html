@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST: Swirl-String Theory Laboratory</title>
+    <style>
+        :root {
+            --bg-color: #050a0f;
+            --panel-bg: #0b141e;
+            --text-main: #a0c0d0;
+            --accent-cyan: #00f0ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --grid-line: rgba(0, 240, 255, 0.1);
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CRT Effect Overlay */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.6;
+        }
+
+        /* Header */
+        header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--accent-cyan);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 20, 30, 0.9);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 5px var(--accent-cyan);
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Main Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+            height: calc(100vh - 60px);
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--grid-line);
+            border-radius: 4px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--grid-line);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            color: #667;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--grid-line);
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .value-display {
+            font-size: 0.8rem;
+            float: right;
+            color: var(--accent-green);
+        }
+
+        /* Canvas Areas */
+        canvas {
+            background: #000;
+            width: 100%;
+            height: 100%;
+            border: 1px solid #222;
+        }
+
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        /* Specific Layouts */
+        #experiment-view {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #signal-view {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        #theory-view {
+            grid-column: 3;
+            grid-row: 2;
+            overflow-y: auto;
+        }
+
+        #controls-view {
+            grid-column: 1;
+            grid-row: 1 / span 2;
+        }
+
+        /* Theory Content */
+        .math-block {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-left: 2px solid var(--accent-cyan);
+            margin: 10px 0;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .result-output {
+            font-size: 1.2rem;
+            color: var(--accent-green);
+            text-align: right;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 0.7; box-shadow: 0 0 5px var(--accent-green); }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--accent-green); }
+            100% { opacity: 0.7; box-shadow: 0 0 5px var(--accent-green); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                overflow-y: auto;
+                height: auto;
+            }
+            #experiment-view, #signal-view, #theory-view, #controls-view {
+                grid-column: 1;
+                grid-row: auto;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <header>
+        <div>
+            <h1>SST Laboratory</h1>
+            <span style="font-size: 0.7rem; color: #666;">REF: ISKANDARANI 2026</span>
+        </div>
+        <div class="status-badge">SYSTEM OPTIMAL</div>
+    </header>
+
+    <div class="dashboard">
+        
+        <!-- Controls Panel -->
+        <div class="panel" id="controls-view">
+            <div class="panel-header">
+                <span>Apparatus Control</span>
+                <span>EXP-A</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Turntable Rotation (ω_rot) <span id="val-rot" class="value-display">0.5 Hz</span></label>
+                <input type="range" id="slider-rot" min="0" max="5" step="0.1" value="0.5">
+            </div>
+
+            <div class="control-group">
+                <label>Cryostat Temperature (K) <span id="val-temp" class="value-display">4.2 K</span></label>
+                <input type="range" id="slider-temp" min="0.1" max="300" step="0.1" value="4.2">
+                <div style="font-size: 0.7rem; color: #888; margin-top: 5px;">
+                    Warning: T > 10K induces thermal noise masking SST effects.
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Foliation Velocity (v/c) <span id="val-vel" class="value-display">0.001</span></label>
+                <input type="range" id="slider-vel" min="0" max="0.1" step="0.001" value="0.001">
+            </div>
+
+            <div class="control-group">
+                <label>Preferred Frame Alpha (α1) <span id="val-alpha" class="value-display">1.0</span></label>
+                <input type="range" id="slider-alpha" min="0" max="10" step="0.1" value="1.0">
+            </div>
+
+            <div style="margin-top: auto; border-top: 1px solid var(--grid-line); padding-top: 15px;">
+                <div class="panel-header">System Logs</div>
+                <div id="log-console" style="font-size: 0.7rem; color: #667; height: 100px; overflow-y: hidden; display: flex; flex-direction: column-reverse;">
+                    <div>> Initializing Cryogenic Sapphires...</div>
+                    <div>> Vacuum pumps active...</div>
+                    <div>> Swirl-String Topology Loaded...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experiment Visualization -->
+        <div class="panel" id="experiment-view">
+            <div class="panel-header">
+                <span>Cryogenic Resonator (Top View)</span>
+                <span>LIVE FEED</span>
+            </div>
+            <div class="canvas-container">
+                <canvas id="sim-canvas"></canvas>
+            </div>
+            <div style="padding: 10px; font-size: 0.8rem; color: #889;">
+                <p>Visualizing two orthogonal sapphire resonators. According to SST, rotation through the clock-foliation field induces a mass variation Δm, detectable as frequency shift Δf.</p>
+            </div>
+        </div>
+
+        <!-- Signal Output -->
+        <div class="panel" id="signal-view">
+            <div class="panel-header">
+                <span>Heterodyne Readout (Δf/f)</span>
+                <span>10^-17 Scale</span>
+            </div>
+            <div class="canvas-container">
+                <canvas id="graph-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Theory & Calc -->
+        <div class="panel" id="theory-view">
+            <div class="panel-header">
+                <span>SST Mass Functional</span>
+                <span>THEORY</span>
+            </div>
+            
+            <div style="font-size: 0.8rem; line-height: 1.4;">
+                <p>Calculate the <strong>Maximum Attainable Energy</strong> allowed by Quantum Gravitational Foliation.</p>
+                <div class="math-block">
+                    E_max = m c² cosh(2π² / ln 2)
+                </div>
+                
+                <div class="control-group">
+                    <label>Particle Mass (Rest Energy)</label>
+                    <select id="particle-select" style="width: 100%; background: #000; color: var(--accent-cyan); border: 1px solid var(--grid-line); padding: 5px;">
+                        <option value="0.511">Electron (0.511 MeV)</option>
+                        <option value="938.27">Proton (938.27 MeV)</option>
+                        <option value="125000">Higgs (125 GeV)</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculateEnergy()">Compute Bound</button>
+                
+                <div id="calc-result" class="result-output">--</div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">
+                    Factor γ_max ≈ 1.17 × 10¹²
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration & State ---
+        const state = {
+            rotSpeed: 0.5, // Hz
+            temperature: 4.2, // Kelvin
+            velocity: 0.001, // v/c
+            alpha: 1.0, // PPN parameter
+            time: 0,
+            signalHistory: new Array(200).fill(0)
+        };
+
+        // --- DOM Elements ---
+        const simCanvas = document.getElementById('sim-canvas');
+        const simCtx = simCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graph-canvas');
+        const graphCtx = graphCanvas.getContext('2d');
+        const logConsole = document.getElementById('log-console');
+
+        // --- Resize Handlers ---
+        function resizeCanvases() {
+            const panels = document.querySelectorAll('.canvas-container');
+            panels.forEach(p => {
+                const c = p.querySelector('canvas');
+                c.width = p.clientWidth;
+                c.height = p.clientHeight;
+            });
+        }
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
+
+        // --- UI Listeners ---
+        document.getElementById('slider-rot').addEventListener('input', (e) => {
+            state.rotSpeed = parseFloat(e.target.value);
+            document.getElementById('val-rot').textContent = state.rotSpeed.toFixed(1) + " Hz";
+            log("Rotation adjusted to " + state.rotSpeed + " Hz");
+        });
+
+        document.getElementById('slider-temp').addEventListener('input', (e) => {
+            state.temperature = parseFloat(e.target.value);
+            document.getElementById('val-temp').textContent = state.temperature.toFixed(1) + " K";
+            if(state.temperature > 10 && Math.random() > 0.9) log("WARNING: Thermal noise rising");
+        });
+
+        document.getElementById('slider-vel').addEventListener('input', (e) => {
+            state.velocity = parseFloat(e.target.value);
+            document.getElementById('val-vel').textContent = state.velocity.toFixed(3);
+        });
+
+        document.getElementById('slider-alpha').addEventListener('input', (e) => {
+            state.alpha = parseFloat(e.target.value);
+            document.getElementById('val-alpha').textContent = state.alpha.toFixed(1);
+        });
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = "> " + msg;
+            logConsole.prepend(div);
+            if(logConsole.children.length > 5) logConsole.lastChild.remove();
+        }
+
+        // --- Physics Engine ---
+        
+        // Constants derived from paper
+        const GAMMA_MAX = 1.1658965 * Math.pow(10, 12); 
+
+        function calculateEnergy() {
+            const select = document.getElementById('particle-select');
+            const massMeV = parseFloat(select.value);
+            
+            // E_max = m * gamma_max
+            // Result in eV (approx)
+            const eMaxMeV = massMeV * GAMMA_MAX;
+            
+            // Format nicely
+            let display = "";
+            if (eMaxMeV > 1e9) {
+                display = (eMaxMeV / 1e9).toFixed(2) + " PeV"; // Peta-electronVolts
+            } else if (eMaxMeV > 1e6) {
+                display = (eMaxMeV / 1e6).toFixed(2) + " TeV";
+            } else {
+                display = eMaxMeV.toExponential(2) + " MeV";
+            }
+
+            document.getElementById('calc-result').textContent = display;
+            log("Energy Bound Calculated for m=" + massMeV + " MeV");
+        }
+
+        // --- Simulation Loop ---
+
+        function drawResonator(ctx, width, height, angle) {
+            const cx = width / 2;
+            const cy = height / 2;
+            const scale = Math.min(width, height) * 0.35;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw "Vacuum Chamber" ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, scale * 1.2, 0, Math.PI * 2);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            // Draw "Foliation Field" (Subtle background grid moving)
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+            ctx.lineWidth = 1;
+            const flowOffset = (Date.now() / 50) % 20;
+            for(let i = 0; i < width; i+=20) {
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw Turntable
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+
+            // Base plate
+            ctx.beginPath();
+            ctx.arc(0, 0, scale, 0, Math.PI * 2);
+            ctx.fillStyle = '#111';
+            ctx.fill();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Resonator 1 (Sapphire Block)
+            ctx.fillStyle = 'rgba(0, 100, 255, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#00f0ff';
+            ctx.fillRect(-scale/4, -scale*0.8, scale/2, scale*1.6);
+            
+            // Resonator 2 (Orthogonal)
+            ctx.fillStyle = 'rgba(0, 100, 255, 0.5)';
+            ctx.fillRect(-scale*0.8, -scale/4, scale*1.6, scale/2);
+
+            // Center Hub
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, Math.PI*2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // Velocity Vector Indicator (Relative to foliation)
+            // In the paper, effective mass depends on v dot u.
+            // We visualize this as the alignment changes.
+            ctx.restore();
+
+            // Overlay Text
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px monospace';
+            ctx.fillText("T: " + state.temperature.toFixed(1) + "K", 10, 20);
+            ctx.fillText("ω: " + state.rotSpeed.toFixed(2) + "Hz", 10, 35);
+        }
+
+        function updateSignal() {
+            // Paper Eq 9: Delta f / f = S2 cos(2 w_rot t) + ...
+            // We simulate the signal based on rotation and velocity
+            
+            // Base signal from rotation (Preferred Frame Effect)
+            // Magnitude depends on velocity relative to foliation (v/c) and alpha
+            const signalMagnitude = state.velocity * state.alpha * 50; 
+            
+            // The signal oscillates at 2 * omega_rot
+            const signalFreq = 2 * state.rotSpeed;
+            
+            let val = signalMagnitude * Math.cos(signalFreq * state.time);
+
+            // Add Thermal Noise
+            // Noise scales with Temperature. 
+            // At 4.2K noise is low. At 300K noise is high.
+            const noiseLevel = (state.temperature / 4.2) * 5; 
+            const noise = (Math.random() - 0.5) * noiseLevel;
+
+            // Intrinsic Stochasticity (Paper Section 5)
+            // "Intrinsic fluctuations in clock readouts"
+            // Occasional spikes if temperature is low enough to reveal quantum effects
+            let quantumJitter = 0;
+            if (state.temperature < 1.0 && Math.random() > 0.98) {
+                quantumJitter = (Math.random() - 0.5) * 20;
+            }
+
+            const totalSignal = val + noise + quantumJitter;
+
+            state.signalHistory.push(totalSignal);
+            state.signalHistory.shift();
+        }
+
+        function drawGraph(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Grid
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+
+            // Signal
+            ctx.beginPath();
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+            
+            const step = width / state.signalHistory.length;
+            
+            for (let i = 0; i < state.signalHistory.length; i++) {
+                const x = i * step;
+                // Scale signal to fit height. 0 is center.
+                const y = (height / 2) - (state.signalHistory[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Scanline effect on graph
+            ctx.fillStyle = 'rgba(0, 255, 136, 0.1)';
+            ctx.fillRect(width - 20, 0, 20, height);
+        }
+
+        function loop() {
+            // Update Time
+            state.time += 0.05;
+
+            // Rotation Angle
+            const angle = state.time * state.rotSpeed;
+
+            // Render
+            drawResonator(simCtx, simCanvas.width, simCanvas.height, angle);
+            updateSignal();
+            drawGraph(graphCtx, graphCanvas.width, graphCanvas.height);
+
+            requestAnimationFrame(loop);
+        }
+
+        // Start
+        log("System Online.");
+        calculateEnergy(); // Initial calc
+        loop();
+
+    </script>
+</body>
+</html>

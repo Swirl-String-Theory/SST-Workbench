@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relational TOA Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-red: #f87171;
+            --accent-green: #4ade80;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .math-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Simulation Area */
+        #sim-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        #detector {
+            position: absolute;
+            right: 20%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--accent-red);
+            box-shadow: 0 0 15px var(--accent-red);
+            z-index: 10;
+            transition: box-shadow 0.2s, filter 0.2s;
+        }
+
+        #particle {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, var(--accent-blue) 40%, transparent 80%);
+            box-shadow: 0 0 20px var(--accent-blue);
+            opacity: 0;
+        }
+
+        @keyframes moveParticle {
+            0% { left: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            80% { left: 80%; opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        .animating {
+            animation: moveParticle 3s linear forwards;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="max-w-5xl w-full space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                Relational Time-of-Arrival (TOA) Simulator
+            </h1>
+            <p class="text-muted max-w-2xl mx-auto text-sm md:text-base">
+                Interactive visualization of covariant field observables. 
+                Observe how the intrinsic width of a quantum wavepacket (<span class="text-blue-400 math-font">σ_t</span>) 
+                and the variance of a physical clock (<span class="text-red-400 math-font">σ_τ</span>) 
+                combine to broaden the measured arrival time distribution.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Column: Controls & Math -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Controls Panel -->
+                <div class="glass-panel p-6 rounded-xl shadow-xl">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span>🎛️</span> Parameters
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Wavepacket Width -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-medium text-blue-300">Wavepacket Width (σ_t)</label>
+                                <span id="val-sigmat" class="text-sm math-font text-blue-400">1.0</span>
+                            </div>
+                            <input type="range" id="slider-sigmat" min="0.2" max="3.0" step="0.1" value="1.0">
+                            <p class="text-xs text-muted mt-1">Intrinsic spread of the incoming particle.</p>
+                        </div>
+
+                        <!-- Clock Variance -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-medium text-red-300">Clock Variance (σ_τ)</label>
+                                <span id="val-sigmatau" class="text-sm math-font text-red-400">0.5</span>
+                            </div>
+                            <input type="range" id="slider-sigmatau" min="0.0" max="3.0" step="0.1" value="0.5">
+                            <p class="text-xs text-muted mt-1">Quantum fluctuations of the detector's physical clock.</p>
+                        </div>
+
+                        <button id="btn-fire" class="w-full py-3 mt-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-lg shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex justify-center items-center gap-2">
+                            <span>⚡</span> Fire Wavepacket
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Equations Panel -->
+                <div class="glass-panel p-6 rounded-xl shadow-xl">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span>📐</span> Theory
+                    </h2>
+                    <div class="space-y-4 text-sm">
+                        <p class="text-muted">The total observed variance is the sum of the wavepacket variance and the clock variance (Eq 8.16):</p>
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-center">
+                            <span class="math-font text-lg">Var(Θ) = <span class="text-blue-400">σ_t²</span> + <span class="text-red-400">σ_τ²</span></span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-800 p-2 rounded">
+                            <span class="text-muted">Calculated Var(Θ):</span>
+                            <span id="calc-var" class="math-font font-bold text-emerald-400 text-lg">1.25</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-800 p-2 rounded">
+                            <span class="text-muted">Observed Spread (σ_obs):</span>
+                            <span id="calc-std" class="math-font font-bold text-emerald-400 text-lg">1.12</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Visuals -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Physical Simulation -->
+                <div class="glass-panel p-1 rounded-xl shadow-xl">
+                    <div id="sim-container">
+                        <div class="grid-bg"></div>
+                        <div id="detector">
+                            <div class="absolute -top-6 -left-10 text-xs text-red-400 font-semibold bg-slate-900 px-2 py-1 rounded border border-red-900">Detector Σ</div>
+                        </div>
+                        <div id="particle"></div>
+                    </div>
+                </div>
+
+                <!-- Probability Distribution Graph -->
+                <div class="glass-panel p-4 rounded-xl shadow-xl h-80 relative">
+                    <h3 class="absolute top-4 left-6 text-sm font-semibold text-slate-300 z-10">Arrival Time Distribution p(Θ)</h3>
+                    
+                    <!-- Legend -->
+                    <div class="absolute top-4 right-6 text-xs space-y-1 z-10 bg-slate-900/80 p-2 rounded border border-slate-700">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-0.5 bg-blue-400"></div>
+                            <span class="text-slate-300">Ideal Flux F(t)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-0.5 bg-emerald-400"></div>
+                            <span class="text-slate-300">Relational TOA p(Θ)</span>
+                        </div>
+                    </div>
+
+                    <canvas id="graph-canvas"></canvas>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const sliderSigmaT = document.getElementById('slider-sigmat');
+        const sliderSigmaTau = document.getElementById('slider-sigmatau');
+        const valSigmaT = document.getElementById('val-sigmat');
+        const valSigmaTau = document.getElementById('val-sigmatau');
+        const calcVar = document.getElementById('calc-var');
+        const calcStd = document.getElementById('calc-std');
+        const canvas = document.getElementById('graph-canvas');
+        const ctx = canvas.getContext('2d');
+        const particle = document.getElementById('particle');
+        const detector = document.getElementById('detector');
+        const btnFire = document.getElementById('btn-fire');
+
+        // State
+        let sigma_t = parseFloat(sliderSigmaT.value);
+        let sigma_tau = parseFloat(sliderSigmaTau.value);
+        const t_cl = 0; // Center of the graph
+
+        // Resize canvas to fit container
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 32; // padding adjustment
+            canvas.height = rect.height - 32;
+            drawGraph();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // Gaussian function
+        function gaussian(x, mu, sigma) {
+            return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+        }
+
+        // Draw the graph
+        function drawGraph() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Axes
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            // X axis
+            ctx.moveTo(0, h - 30);
+            ctx.lineTo(w, h - 30);
+            // Y axis (center)
+            ctx.moveTo(w / 2, 0);
+            ctx.lineTo(w / 2, h - 30);
+            ctx.stroke();
+
+            // Axis labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText('Time (t)', w - 30, h - 10);
+            ctx.fillText('t_cl', w / 2, h - 10);
+
+            // Calculate combined variance (Eq 8.16)
+            const var_total = Math.pow(sigma_t, 2) + Math.pow(sigma_tau, 2);
+            const sigma_total = Math.sqrt(var_total);
+
+            // Graph settings
+            const xRange = 10; // -5 to 5
+            const scaleX = w / xRange;
+            // Scale Y so the max possible peak (sigma=0.2) fits nicely
+            const maxY = gaussian(0, 0, 0.2); 
+            const scaleY = (h - 50) / maxY;
+
+            // Draw Ideal Flux F(t) [Blue]
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)'; // blue-400
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            for (let px = 0; px <= w; px++) {
+                let x = (px / scaleX) - (xRange / 2);
+                let y = gaussian(x, t_cl, sigma_t);
+                let py = (h - 30) - (y * scaleY);
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset dash
+
+            // Draw Relational TOA p(Θ) [Emerald]
+            ctx.beginPath();
+            ctx.strokeStyle = '#4ade80'; // emerald-400
+            ctx.lineWidth = 3;
+            // Add a slight glow
+            ctx.shadowColor = '#4ade80';
+            ctx.shadowBlur = 10;
+            for (let px = 0; px <= w; px++) {
+                let x = (px / scaleX) - (xRange / 2);
+                let y = gaussian(x, t_cl, sigma_total);
+                let py = (h - 30) - (y * scaleY);
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            
+            // Reset shadow
+            ctx.shadowBlur = 0;
+        }
+
+        // Update UI and Math
+        function updateState() {
+            sigma_t = parseFloat(sliderSigmaT.value);
+            sigma_tau = parseFloat(sliderSigmaTau.value);
+            
+            valSigmaT.textContent = sigma_t.toFixed(1);
+            valSigmaTau.textContent = sigma_tau.toFixed(1);
+
+            const variance = Math.pow(sigma_t, 2) + Math.pow(sigma_tau, 2);
+            calcVar.textContent = variance.toFixed(2);
+            calcStd.textContent = Math.sqrt(variance).toFixed(2);
+
+            // Update Particle Visuals based on sigma_t (spread)
+            const baseSize = 10;
+            const spread = baseSize + (sigma_t * 15);
+            particle.style.width = `${spread}px`;
+            particle.style.height = `${spread}px`;
+            particle.style.filter = `blur(${sigma_t * 2}px)`;
+
+            // Update Detector Visuals based on sigma_tau (jitter/fuzziness)
+            if (sigma_tau === 0) {
+                detector.style.boxShadow = `0 0 2px var(--accent-red)`;
+                detector.style.filter = `blur(0px)`;
+                detector.style.width = '2px';
+            } else {
+                detector.style.boxShadow = `0 0 ${sigma_tau * 15}px var(--accent-red)`;
+                detector.style.filter = `blur(${sigma_tau}px)`;
+                detector.style.width = `${4 + sigma_tau * 2}px`;
+            }
+
+            drawGraph();
+        }
+
+        // Event Listeners
+        sliderSigmaT.addEventListener('input', updateState);
+        sliderSigmaTau.addEventListener('input', updateState);
+
+        btnFire.addEventListener('click', () => {
+            // Reset animation
+            particle.classList.remove('animating');
+            void particle.offsetWidth; // trigger reflow
+            
+            // Calculate animation duration based on a fixed speed
+            // The particle crosses the detector at 80% of the animation
+            particle.classList.add('animating');
+            
+            // Optional: Add a flash effect to detector when particle hits
+            setTimeout(() => {
+                const currentShadow = detector.style.boxShadow;
+                detector.style.boxShadow = `0 0 40px #fff, 0 0 60px var(--accent-red)`;
+                detector.style.backgroundColor = '#fff';
+                
+                setTimeout(() => {
+                    updateState(); // Revert to normal state based on sliders
+                    detector.style.backgroundColor = 'var(--accent-red)';
+                }, 150);
+            }, 3000 * 0.8); // 80% of 3s animation
+        });
+
+        // Initial setup
+        setTimeout(() => {
+            resizeCanvas();
+            updateState();
+        }, 100);
+
+    </script>
+</body>
+</html>

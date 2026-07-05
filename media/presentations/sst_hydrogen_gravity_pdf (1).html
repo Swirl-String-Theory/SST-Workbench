@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST: Swirl-String Theory Laboratory</title>
+    <style>
+        :root {
+            --bg: #0b0c15;
+            --panel: #15192b;
+            --primary: #00f2ff;
+            --secondary: #ff0055;
+            --accent: #bcff00;
+            --text: #e0e6ed;
+            --dim: #6b7280;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: var(--panel);
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--dim);
+            margin-left: 10px;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid var(--dim);
+            color: var(--dim);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        nav button:hover, nav button.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .view-section.active {
+            display: flex;
+            opacity: 1;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: var(--accent);
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-family: var(--font-mono);
+        }
+
+        /* Canvas Styles */
+        canvas {
+            width: 100%;
+            height: 200px;
+            background: #0f111a;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: var(--dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+        }
+
+        button.action-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s;
+        }
+
+        button.action-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Specific Visuals */
+        .stat-value {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            color: var(--dim);
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        /* Intro Text */
+        .intro-text {
+            max-width: 800px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.1);
+            margin-right: 5px;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px var(--primary); }
+            50% { box-shadow: 0 0 20px var(--primary); }
+            100% { box-shadow: 0 0 5px var(--primary); }
+        }
+
+        .active-swirl {
+            animation: pulse-glow 2s infinite;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST Laboratory <span class="subtitle">v0.5.9</span></h1>
+    </div>
+    <nav>
+        <button onclick="switchView('theory')" class="active">Theory</button>
+        <button onclick="switchView('baryon')">Baryon Builder</button>
+        <button onclick="switchView('galaxy')">Galactic Rotation</button>
+        <button onclick="switchView('detector')">EM Detector</button>
+    </nav>
+</header>
+
+<main>
+    <!-- VIEW 1: THEORY SUMMARY -->
+    <div id="theory" class="view-section active">
+        <div class="card" style="max-width: 800px; width: 100%;">
+            <h2>Abstract: Swirl-String Theory</h2>
+            <p class="intro-text">
+                Based on the work of <strong>Omar Iskandarani</strong>, SST proposes that long-range attraction arises from the topology of <strong>chiral swirling knots</strong>. 
+                <br><br>
+                Key Concepts:
+            </p>
+            <ul class="intro-text">
+                <li><strong>Knots & Holes:</strong> Matter consists of vortex filaments (Trefoil 3<sub>1</sub>, Cinquefoil 5<sub>1</sub>) with a central hole.</li>
+                <li><strong>Circulation ($\kappa$):</strong> Quantized circulation around the core. $\kappa = h / m_{eff}$.</li>
+                <li><strong>Swirl Clock ($S_\circlearrowleft$):</strong> Local time is defined by the rotation speed of the swirl.</li>
+                <li><strong>Swirl Gravity:</strong> Attraction is a hydrodynamic pressure deficit caused by shared circulation axes.</li>
+            </ul>
+            <div style="text-align: center; margin-top: 2rem;">
+                <div class="formula">
+                    $\Gamma_{baryon} = 3\kappa$ &nbsp;|&nbsp; $\Delta\Phi = \pm\Phi_\star$
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: BARYON BUILDER -->
+    <div id="baryon" class="view-section">
+        <div class="dashboard">
+            <div class="card">
+                <h2>Quark Knot Visualization</h2>
+                <canvas id="knotCanvas"></canvas>
+                <div class="controls">
+                    <label>Knot Type</label>
+                    <select id="knotSelect" style="background:#222; color:white; padding:5px; border:1px solid #444;">
+                        <option value="trefoil">Trefoil (3-1)</option>
+                        <option value="cinquefoil">Cinquefoil (5-1)</option>
+                        <option value="ring">Torus (Unknotted)</option>
+                    </select>
+                    <label>Swirl Velocity ($v_\circlearrowleft$)</label>
+                    <input type="range" id="swirlSpeed" min="1" max="10" value="3">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Composite Baryon Assembly</h2>
+                <p style="font-size: 0.9rem; color: #aaa;">Combine 3 Quark Knots to form a Baryon Tube.</p>
+                <div id="baryonStage" style="height: 200px; position: relative; border: 1px dashed #444; border-radius: 4px; background: #0b0c15; display: flex; justify-content: center; align-items: center;">
+                    <!-- JS will populate this -->
+                    <div id="core-text" style="position: absolute; color: var(--dim); font-size: 0.8rem;">Click 'Add Knot'</div>
+                </div>
+                <div class="controls">
+                    <button class="action-btn" onclick="addQuark()">Add Quark Knot ($\kappa$)</button>
+                    <button class="action-btn" style="background: #333; margin-top: 5px;" onclick="resetBaryon()">Reset</button>
+                </div>
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                    <div>
+                        <div class="subtitle">Total Circulation</div>
+                        <div class="stat-value" id="totalCirculation">0 $\kappa$</div>
+                    </div>
+                    <div>
+                        <div class="subtitle">Effective Mass</div>
+                        <div class="stat-value" id="effMass">0 GeV</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: GALACTIC ROTATION -->
+    <div id="galaxy" class="view-section">
+        <div class="dashboard">
+            <div class="card" style="grid-column: span 2;">
+                <h2>Galactic Rotation Curves</h2>
+                <p style="font-size: 0.9rem; color: #aaa;">SST predicts flattened rotation curves due to "Swirl Tail" saturation, without Dark Matter halos.</p>
+                <canvas id="rotationCanvas" height="300"></canvas>
+                <div class="controls">
+                    <label>Core Mass (Baryonic) <span id="massVal">50%</span></label>
+                    <input type="range" id="coreMass" min="10" max="100" value="50">
+                    
+                    <label>Swirl Tail Strength ($C_{tail}$) <span id="tailVal">50%</span></label>
+                    <input type="range" id="tailStrength" min="0" max="100" value="50">
+                </div>
+                <div class="formula">
+                    $v_\phi(r) = v_{core}(r) + C_{tail}(1 - e^{-r/r_c})$
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 4: EM DETECTOR -->
+    <div id="detector" class="view-section">
+        <div class="dashboard">
+            <div class="card" style="width: 100%; max-width: 800px;">
+                <h2>Swirl-Induced Electromotive Impulse</h2>
+                <p style="font-size: 0.9rem; color: #aaa;">Detect quantized voltage spikes ($\Delta\Phi_\star$) caused by topological transitions (reconnection/nucleation).</p>
+                
+                <div style="position: relative;">
+                    <canvas id="scopeCanvas" height="250"></canvas>
+                    <div style="position: absolute; top: 10px; right: 10px; color: var(--primary); font-family: monospace;">
+                        SIGNAL: <span id="signalStatus">NOISE</span>
+                    </div>
+                </div>
+
+                <div class="controls" style="flex-direction: row; gap: 1rem; margin-top: 1rem;">
+                    <button class="action-btn" style="flex: 1; background: var(--primary); color: #000;" onclick="triggerTransition(1)">Nucleate Vortex (+$\Phi_\star$)</button>
+                    <button class="action-btn" style="flex: 1;" onclick="triggerTransition(-1)">Annihilate Vortex (-$\Phi_\star$)</button>
+                </div>
+                
+                <div style="margin-top: 1rem; border-top: 1px solid #333; padding-top: 1rem;">
+                    <div class="subtitle">Detected Events</div>
+                    <div id="eventLog" style="height: 100px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: var(--dim);">
+                        > System Ready...<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let currentView = 'theory';
+    
+    function switchView(viewId) {
+        // Update Nav
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`nav button[onclick="switchView('${viewId}')"]`).classList.add('active');
+        
+        // Update Sections
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        
+        currentView = viewId;
+        
+        // Trigger specific inits
+        if(viewId === 'baryon') initKnotCanvas();
+        if(viewId === 'galaxy') initGalaxyCanvas();
+        if(viewId === 'detector') initScopeCanvas();
+    }
+
+    // --- BARYON / KNOT VISUALIZER ---
+    let knotCtx, knotReq;
+    let t = 0;
+    
+    function initKnotCanvas() {
+        const canvas = document.getElementById('knotCanvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        knotCtx = canvas.getContext('2d');
+        if(!knotReq) animateKnot();
+    }
+
+    function animateKnot() {
+        if(currentView !== 'baryon') {
+            knotReq = requestAnimationFrame(animateKnot);
+            return;
+        }
+
+        const speed = document.getElementById('swirlSpeed').value / 100;
+        t += speed;
+        const type = document.getElementById('knotSelect').value;
+        const w = knotCtx.canvas.width;
+        const h = knotCtx.canvas.height;
+        const cx = w/2;
+        const cy = h/2;
+        const scale = Math.min(w,h) / 4;
+
+        knotCtx.fillStyle = '#0f111a';
+        knotCtx.fillRect(0, 0, w, h);
+        
+        knotCtx.beginPath();
+        knotCtx.strokeStyle = '#00f2ff';
+        knotCtx.lineWidth = 3;
+        knotCtx.shadowBlur = 10;
+        knotCtx.shadowColor = '#00f2ff';
+
+        // Parametric equations
+        for(let i = 0; i < Math.PI * 4; i += 0.05) {
+            let x, y, z;
+            let angle = i + t; // Rotation
+
+            if (type === 'trefoil') {
+                // Trefoil (3_1)
+                x = Math.sin(angle) + 2 * Math.sin(2 * angle);
+                y = Math.cos(angle) - 2 * Math.cos(2 * angle);
+                z = -Math.sin(3 * angle);
+            } else if (type === 'cinquefoil') {
+                // Cinquefoil (5_1) approx
+                x = Math.cos(angle) * (2 + Math.cos(5*angle/2));
+                y = Math.sin(angle) * (2 + Math.cos(5*angle/2));
+            } else {
+                // Ring
+                x = 2.5 * Math.cos(angle);
+                y = 2.5 * Math.sin(angle);
+            }
+
+            // Simple 3D projection
+            let px = cx + x * scale * 0.4;
+            let py = cy + y * scale * 0.4;
+            
+            if(i===0) knotCtx.moveTo(px, py);
+            else knotCtx.lineTo(px, py);
+        }
+        knotCtx.stroke();
+        
+        // Draw "Swirl" particles
+        for(let j=0; j<3; j++) {
+            let pT = t * 5 + (j * 2);
+            let px, py;
+            if (type === 'trefoil') {
+                px = cx + (Math.sin(pT) + 2 * Math.sin(2 * pT)) * scale * 0.4;
+                py = cy + (Math.cos(pT) - 2 * Math.cos(2 * pT)) * scale * 0.4;
+            } else if (type === 'cinquefoil') {
+                 px = cx + (Math.cos(pT) * (2 + Math.cos(5*pT/2))) * scale * 0.4;
+                 py = cy + (Math.sin(pT) * (2 + Math.cos(5*pT/2))) * scale * 0.4;
+            } else {
+                px = cx + (2.5 * Math.cos(pT)) * scale * 0.4;
+                py = cy + (2.5 * Math.sin(pT)) * scale * 0.4;
+            }
+            
+            knotCtx.beginPath();
+            knotCtx.fillStyle = '#fff';
+            knotCtx.arc(px, py, 3, 0, Math.PI*2);
+            knotCtx.fill();
+        }
+
+        knotReq = requestAnimationFrame(animateKnot);
+    }
+
+    // --- BARYON LOGIC ---
+    let quarks = 0;
+    
+    function addQuark() {
+        if(quarks >= 3) return;
+        quarks++;
+        updateBaryonUI();
+    }
+
+    function resetBaryon() {
+        quarks = 0;
+        updateBaryonUI();
+    }
+
+    function updateBaryonUI() {
+        const stage = document.getElementById('baryonStage');
+        const coreText = document.getElementById('core-text');
+        const circDisplay = document.getElementById('totalCirculation');
+        const massDisplay = document.getElementById('effMass');
+
+        stage.innerHTML = '';
+        if(quarks === 0) stage.appendChild(coreText);
+
+        // Draw quarks
+        let colors = ['#00f2ff', '#ff0055', '#bcff00'];
+        
+        // If 3, merge them
+        if(quarks === 3) {
+            // Composite Tube
+            let tube = document.createElement('div');
+            tube.style.width = '100px';
+            tube.style.height = '100px';
+            tube.style.borderRadius = '50%';
+            tube.style.border = '4px solid white';
+            tube.style.boxShadow = '0 0 20px white';
+            tube.style.display = 'flex';
+            tube.style.alignItems = 'center';
+            tube.style.justifyContent = 'center';
+            tube.style.color = '#000';
+            tube.style.fontWeight = 'bold';
+            tube.style.background = 'radial-gradient(circle, #fff 0%, #aaa 100%)';
+            tube.innerHTML = "BARYON<br>3&kappa;";
+            tube.style.textAlign = 'center';
+            tube.style.fontSize = '0.8rem';
+            stage.appendChild(tube);
+        } else {
+            // Individual knots
+            for(let i=0; i<quarks; i++) {
+                let k = document.createElement('div');
+                k.style.width = '40px';
+                k.style.height = '40px';
+                k.style.borderRadius = '50%';
+                k.style.border = `2px solid ${colors[i]}`;
+                k.style.boxShadow = `0 0 10px ${colors[i]}`;
+                k.style.margin = '10px';
+                k.style.display = 'flex';
+                k.style.alignItems = 'center';
+                k.style.justifyContent = 'center';
+                k.innerText = 'κ';
+                stage.appendChild(k);
+            }
+        }
+
+        circDisplay.innerHTML = `${quarks} $\\kappa$`;
+        // Approx mass scaling
+        massDisplay.innerHTML = `${(quarks * 0.33).toFixed(2)} GeV`;
+        
+        // Re-render MathJax if available (simulated here by just text replacement)
+        // In a real app we'd trigger MathJax.typeset()
+    }
+
+    // --- GALAXY ROTATION ---
+    let galCtx;
+    function initGalaxyCanvas() {
+        const canvas = document.getElementById('rotationCanvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        galCtx = canvas.getContext('2d');
+        drawGalaxyGraph();
+        
+        document.getElementById('coreMass').addEventListener('input', drawGalaxyGraph);
+        document.getElementById('tailStrength').addEventListener('input', drawGalaxyGraph);
+    }
+
+    function drawGalaxyGraph() {
+        if(!galCtx) return;
+        const w = galCtx.canvas.width;
+        const h = galCtx.canvas.height;
+        const mass = parseInt(document.getElementById('coreMass').value);
+        const tail = parseInt(document.getElementById('tailStrength').value);
+        
+        document.getElementById('massVal').innerText = mass + '%';
+        document.getElementById('tailVal').innerText = tail + '%';
+
+        galCtx.clearRect(0,0,w,h);
+        
+        // Axes
+        galCtx.strokeStyle = '#444';
+        galCtx.lineWidth = 1;
+        galCtx.beginPath();
+        galCtx.moveTo(40, h-30);
+        galCtx.lineTo(w, h-30); // X axis (Radius)
+        galCtx.moveTo(40, h-30);
+        galCtx.lineTo(40, 0); // Y axis (Velocity)
+        galCtx.stroke();
+        
+        // Labels
+        galCtx.fillStyle = '#888';
+        galCtx.font = '10px monospace';
+        galCtx.fillText("Radius (r)", w-60, h-10);
+        galCtx.fillText("Velocity (v)", 10, 20);
+
+        // Plot Newtonian (Keplerian falloff)
+        galCtx.beginPath();
+        galCtx.strokeStyle = '#ff0055'; // Red
+        galCtx.lineWidth = 2;
+        for(let x=0; x<w-40; x+=5) {
+            let r = x; 
+            if(r===0) continue;
+            // v ~ sqrt(M/r)
+            let v = Math.sqrt(mass * 500 / r); 
+            // Clamp for visual
+            if(v > h-50) v = h-50;
+            
+            let plotX = 40 + x;
+            let plotY = (h-30) - v;
+            
+            if(x===0) galCtx.moveTo(plotX, plotY);
+            else galCtx.lineTo(plotX, plotY);
+        }
+        galCtx.stroke();
+        
+        // Plot SST (Flat)
+        galCtx.beginPath();
+        galCtx.strokeStyle = '#00f2ff'; // Cyan
+        galCtx.lineWidth = 2;
+        for(let x=0; x<w-40; x+=5) {
+            let r = x;
+            if(r===0) continue;
+            
+            // v_core ~ sqrt(M/r)
+            let v_core = Math.sqrt(mass * 500 / r);
+            
+            // v_tail ~ C_tail * (1 - e^-r/rc)
+            let v_tail = (tail * 1.5) * (1 - Math.exp(-r/100));
+            
+            let v_total = v_core + v_tail;
+             // Clamp
+            if(v_total > h-50) v_total = h-50;
+
+            let plotX = 40 + x;
+            let plotY = (h-30) - v_total;
+            
+            if(x===0) galCtx.moveTo(plotX, plotY);
+            else galCtx.lineTo(plotX, plotY);
+        }
+        galCtx.stroke();
+
+        // Legend
+        galCtx.fillStyle = '#ff0055';
+        galCtx.fillText("Newtonian", w-100, 30);
+        galCtx.fillStyle = '#00f2ff';
+        galCtx.fillText("SST (Swirl)", w-100, 45);
+    }
+
+    // --- EM DETECTOR (OSCILLOSCOPE) ---
+    let scopeCtx, scopeReq;
+    let scopeData = [];
+    let impulse = 0;
+    
+    function initScopeCanvas() {
+        const canvas = document.getElementById('scopeCanvas');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        scopeCtx = canvas.getContext('2d');
+        
+        // Fill initial data
+        scopeData = new Array(Math.floor(canvas.width / 2)).fill(0);
+        
+        if(!scopeReq) animateScope();
+    }
+
+    function triggerTransition(polarity) {
+        // polarity 1 or -1
+        impulse = polarity * 50; // Spike magnitude
+        
+        const log = document.getElementById('eventLog');
+        const time = new Date().toLocaleTimeString();
+        const type = polarity > 0 ? "NUCLEATION" : "ANNIHILATION";
+        const color = polarity > 0 ? "#00f2ff" : "#ff0055";
+        log.innerHTML = `<div style="color:${color}">[${time}] ${type} DETECTED (ΔΦ = ${polarity > 0 ? '+' : '-'}Φ⋆)</div>` + log.innerHTML;
+    }
+
+    function animateScope() {
+        if(currentView !== 'detector') {
+            scopeReq = requestAnimationFrame(animateScope);
+            return;
+        }
+
+        const w = scopeCtx.canvas.width;
+        const h = scopeCtx.canvas.height;
+        const cy = h/2;
+
+        // Shift data
+        scopeData.shift();
+        
+        // Add new point (Noise + Impulse)
+        let noise = (Math.random() - 0.5) * 5;
+        
+        // Decay impulse
+        let val = noise + impulse;
+        impulse *= 0.9; // Damping
+        
+        scopeData.push(val);
+
+        // Draw
+        scopeCtx.fillStyle = '#000';
+        scopeCtx.fillRect(0, 0, w, h);
+
+        // Grid
+        scopeCtx.strokeStyle = '#1a1a1a';
+        scopeCtx.lineWidth = 1;
+        scopeCtx.beginPath();
+        for(let x=0; x<w; x+=20) { scopeCtx.moveTo(x,0); scopeCtx.lineTo(x,h); }
+        for(let y=0; y<h; y+=20) { scopeCtx.moveTo(0,y); scopeCtx.lineTo(w,y); }
+        scopeCtx.stroke();
+
+        // Signal
+        scopeCtx.strokeStyle = '#bcff00';
+        scopeCtx.lineWidth = 2;
+        scopeCtx.shadowBlur = 5;
+        scopeCtx.shadowColor = '#bcff00';
+        scopeCtx.beginPath();
+        
+        const step = w / scopeData.length;
+        
+        for(let i=0; i<scopeData.length; i++) {
+            let x = i * step;
+            let y = cy - scopeData[i];
+            if(i===0) scopeCtx.moveTo(x, y);
+            else scopeCtx.lineTo(x, y);
+        }
+        scopeCtx.stroke();
+
+        // Status Text
+        const status = document.getElementById('signalStatus');
+        if(Math.abs(impulse) > 5) {
+            status.innerText = "TOPOLOGICAL EVENT";
+            status.style.color = "#fff";
+        } else {
+            status.innerText = "BACKGROUND NOISE";
+            status.style.color = "#444";
+        }
+
+        scopeReq = requestAnimationFrame(animateScope);
+    }
+
+    // Initial load
+    window.onload = () => {
+        // Start animation loops but they check visibility
+        animateKnot();
+        animateScope();
+    };
+
+</script>
+
+</body>
+</html>

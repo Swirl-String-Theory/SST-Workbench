@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0a0b10;
+            --panel-bg: #14161f;
+            --text-color: #e0e6ed;
+            --accent-cyan: #00f3ff;
+            --accent-magenta: #ff0055;
+            --accent-green: #00ff9d;
+            --grid-line: #1f222e;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            height: 60px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--grid-line);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: 10px;
+        }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            height: calc(100vh - 60px);
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--panel-bg);
+            border-right: 1px solid var(--grid-line);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-right {
+            border-right: none;
+            border-left: 1px solid var(--grid-line);
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #666;
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid var(--grid-line);
+            padding-bottom: 5px;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--grid-line);
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            float: right;
+        }
+
+        /* Canvas Area */
+        #simulation-container {
+            position: relative;
+            background: radial-gradient(circle at center, #1a1d29 0%, #000 100%);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #overlay-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--grid-line);
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-green);
+        }
+
+        /* Metric Display */
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-magenta);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Clocks */
+        .clock-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .clock {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clock::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 2px;
+            height: 35px;
+            background: var(--accent-cyan);
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(0deg);
+        }
+
+        .clock-label {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            color: #aaa;
+        }
+
+        /* Theory Box */
+        .theory-box {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #aaa;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .equation {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            text-align: center;
+            margin: 10px 0;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                overflow-y: auto;
+            }
+            .panel {
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--grid-line);
+            }
+            #simulation-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; align-items:baseline;">
+        <h1>SST SIMULATOR</h1>
+        <span class="subtitle">Time from Swirl: Hydrodynamic Origin of Proper Time</span>
+    </div>
+    <div style="font-size: 0.8rem; color: #666;">v0.6.0 Rosetta Framework</div>
+</header>
+
+<main>
+    <!-- Left Panel: Controls -->
+    <div class="panel">
+        <h2>Swirl Parameters</h2>
+        
+        <div class="control-group">
+            <label>Core Radius (rc) <span id="val-rc" class="value-display">1.0</span></label>
+            <input type="range" id="input-rc" min="0.5" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+            <label>Swirl Intensity (||v||) <span id="val-v" class="value-display">1.0</span></label>
+            <input type="range" id="input-v" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+            <label>Particle Density <span id="val-p" class="value-display">2000</span></label>
+            <input type="range" id="input-p" min="500" max="5000" step="100" value="2000">
+        </div>
+
+        <h2>Theory Reference</h2>
+        <div class="theory-box">
+            <p>Matter is modeled as knotted swirl strings. Internal time is controlled by local tangential swirl speed.</p>
+            <div class="equation">
+                v<sub>&theta;</sub>(r) = ||v<sub>&circlearrowleft</sub>|| (r/r<sub>c</sub>) e<sup>-r/r<sub>c</sub></sup>
+            </div>
+            <p>The "Swirl Clock" runs slower near the core where velocity is highest.</p>
+            <div class="equation">
+                S(r) = &radic;(1 - v<sub>&perp;</sub><sup>2</sup> / ||v<sub>&circlearrowleft</sub>||<sup>2</sup>)
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Panel: Simulation -->
+    <div id="simulation-container">
+        <canvas id="swirlCanvas"></canvas>
+        <div id="overlay-info">
+            <div>PROBE STATUS: ACTIVE</div>
+            <div>POS: <span id="probe-pos">0,0</span></div>
+            <div>r/rc: <span id="probe-r">0.00</span></div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Data -->
+    <div class="panel panel-right">
+        <h2>Local Measurements</h2>
+        
+        <div class="metric-card" style="border-color: var(--accent-green);">
+            <div class="metric-value" id="readout-time">1.000</div>
+            <div class="metric-label">Time Dilation Factor (S)</div>
+        </div>
+
+        <div class="metric-card" style="border-color: var(--accent-cyan);">
+            <div class="metric-value" id="readout-vel">0.000</div>
+            <div class="metric-label">Tangential Velocity (v<sub>&theta;</sub>)</div>
+        </div>
+
+        <div class="metric-card" style="border-color: var(--accent-magenta);">
+            <div class="metric-value" id="readout-energy">0.000</div>
+            <div class="metric-label">Swirl Energy Density (H)</div>
+        </div>
+
+        <h2>Clock Comparison</h2>
+        <div class="clock-container">
+            <div>
+                <div class="clock" style="border-color: #666;">
+                    <div class="hand" id="hand-lab"></div>
+                </div>
+                <div class="clock-label">Lab Time (t<sub>&infin;</sub>)</div>
+            </div>
+            <div>
+                <div class="clock" style="border-color: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,157,0.2);">
+                    <div class="hand" id="hand-local" style="background: var(--accent-green);"></div>
+                </div>
+                <div class="clock-label">Proper Time (t<sub>loc</sub>)</div>
+            </div>
+        </div>
+        
+        <div class="theory-box" style="margin-top: 20px;">
+            <p><strong>Observation:</strong> Move your mouse (the probe) towards the glowing ring (r = rc). Notice the local clock slows down significantly as velocity peaks.</p>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Configuration & State ---
+    const canvas = document.getElementById('swirlCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width, height, centerX, centerY;
+    
+    // Physics Parameters
+    let rc = 1.0; // Core radius (scaled)
+    let vMax = 1.0; // Characteristic swirl speed
+    let particleCount = 2000;
+    
+    // Scale factor for visualization (pixels per unit distance)
+    let scale = 100; 
+
+    // Particles array
+    let particles = [];
+
+    // Probe State
+    let mouseX = 0;
+    let mouseY = 0;
+    let probeR = 0; // Distance from center in physics units
+    let probeS = 1.0; // Time dilation factor
+
+    // Clock State
+    let labTime = 0;
+    let localTime = 0;
+
+    // DOM Elements
+    const elRc = document.getElementById('input-rc');
+    const elV = document.getElementById('input-v');
+    const elP = document.getElementById('input-p');
+    const dispRc = document.getElementById('val-rc');
+    const dispV = document.getElementById('val-v');
+    const dispP = document.getElementById('val-p');
+    
+    const elProbePos = document.getElementById('probe-pos');
+    const elProbeR = document.getElementById('probe-r');
+    const elReadoutTime = document.getElementById('readout-time');
+    const elReadoutVel = document.getElementById('readout-vel');
+    const elReadoutEnergy = document.getElementById('readout-energy');
+    
+    const handLab = document.getElementById('hand-lab');
+    const handLocal = document.getElementById('hand-local');
+
+    // --- Initialization ---
+    function resize() {
+        width = canvas.parentElement.clientWidth;
+        height = canvas.parentElement.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        centerX = width / 2;
+        centerY = height / 2;
+        scale = Math.min(width, height) / 8; // Adjust zoom based on screen size
+        initParticles();
+    }
+
+    window.addEventListener('resize', resize);
+
+    // --- Physics Engine ---
+
+    // The Swirl Profile: v_theta(r) = ||v|| * (r/rc) * e^(-r/rc)
+    // Note: The peak is at r = rc. The value at peak is ||v||/e.
+    // To make visuals intuitive, we normalize so that input vMax is the PEAK velocity.
+    // Original: v(rc) = vMax / e. 
+    // Adjusted for visual slider: v_theta(r) = (vMax * e) * (r/rc) * e^(-r/rc)
+    function getVelocity(r) {
+        if (r < 0.001) return 0;
+        const term = (r / rc);
+        // Using the paper's exact profile form but scaling vMax to be the parameter ||v_swirl||
+        // The paper says v_theta(rc) = ||v|| / e.
+        // We will stick to the paper's formula: v = vMax * (r/rc) * exp(-r/rc)
+        // This means the actual peak velocity is vMax/2.718.
+        // Let's boost it slightly for visual effect so particles don't look too slow.
+        const visualBoost = 2.718; 
+        return (vMax * visualBoost) * term * Math.exp(-term);
+    }
+
+    // Time Dilation Factor S(r)
+    // S = sqrt( 1 - v_perp^2 / ||v||^2 )
+    // From paper eq 7: S(r) = sqrt( 1 - (r/rc)^2 * e^(-2r/rc) )
+    function getTimeDilation(r) {
+        const term = r / rc;
+        const insideSqrt = 1 - (term * term * Math.exp(-2 * term));
+        // Clamp to 0 just in case of float errors, though math says it's >= 1-e^-2
+        return Math.sqrt(Math.max(0, insideSqrt));
+    }
+
+    // Energy Density H
+    // H ~ v^2 + (curl v)^2 ... simplified for visualization as just kinetic + gradient intensity
+    function getEnergy(r, v) {
+        // Simple visual approximation based on velocity squared
+        return 0.5 * v * v * 10; // *10 for readable numbers
+    }
+
+    // --- Particle System ---
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            // Distribute particles: more near the core for visual density
+            // Random angle
+            this.angle = Math.random() * Math.PI * 2;
+            
+            // Random radius: biased towards center but with a tail
+            // We want to visualize the flow field up to r = 4*rc or so
+            const rRand = Math.random();
+            this.r = (rRand * rRand * 4 * rc) + (Math.random() * 0.5); 
+            if (this.r < 0.1) this.r = 0.1;
+            
+            this.size = Math.random() * 1.5 + 0.5;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+
+        update() {
+            const v = getVelocity(this.r);
+            // Angular velocity = v / r
+            const omega = v / this.r;
+            
+            // Update angle (dt is roughly constant 1/60)
+            this.angle += omega * 0.05; // 0.05 is time step scaling
+
+            // Draw
+            const x = centerX + Math.cos(this.angle) * this.r * scale;
+            const y = centerY + Math.sin(this.angle) * this.r * scale;
+
+            // Color based on velocity (Heatmap style)
+            // Peak velocity is at r = rc.
+            // Map velocity to color: Blue (slow) -> Cyan -> Green -> Yellow -> Red (fast)
+            const speedRatio = v / vMax; // roughly 0 to 1
+            
+            let color;
+            if (speedRatio < 0.2) color = `rgba(0, 100, 255, ${this.opacity})`;
+            else if (speedRatio < 0.5) color = `rgba(0, 243, 255, ${this.opacity})`;
+            else if (speedRatio < 0.8) color = `rgba(0, 255, 157, ${this.opacity})`;
+            else color = `rgba(255, 0, 85, ${this.opacity})`;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    // --- Interaction ---
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        
+        // Calculate physics coordinates
+        const dx = (mouseX - centerX) / scale;
+        const dy = (mouseY - centerY) / scale;
+        probeR = Math.sqrt(dx*dx + dy*dy);
+        
+        updateProbeData();
+    });
+
+    function updateProbeData() {
+        // Calculate physics values at probe location
+        const v = getVelocity(probeR);
+        probeS = getTimeDilation(probeR);
+        const energy = getEnergy(probeR, v);
+
+        // Update UI
+        elProbePos.innerText = `${Math.round(mouseX - centerX)}, ${Math.round(mouseY - centerY)}`;
+        elProbeR.innerText = (probeR / rc).toFixed(2);
+        
+        elReadoutTime.innerText = probeS.toFixed(4);
+        elReadoutVel.innerText = v.toFixed(3);
+        elReadoutEnergy.innerText = energy.toExponential(2);
+
+        // Color code the time readout
+        if (probeS < 0.94) elReadoutTime.style.color = "var(--accent-magenta)";
+        else elReadoutTime.style.color = "var(--accent-green)";
+    }
+
+    // Input Listeners
+    elRc.addEventListener('input', (e) => {
+        rc = parseFloat(e.target.value);
+        dispRc.innerText = rc.toFixed(1);
+        initParticles(); // Re-distribute to match new scale feel
+    });
+
+    elV.addEventListener('input', (e) => {
+        vMax = parseFloat(e.target.value);
+        dispV.innerText = vMax.toFixed(1);
+    });
+
+    elP.addEventListener('input', (e) => {
+        particleCount = parseInt(e.target.value);
+        dispP.innerText = particleCount;
+        initParticles();
+    });
+
+    // --- Main Loop ---
+    function animate() {
+        // Clear Canvas with trail effect
+        ctx.fillStyle = 'rgba(10, 11, 16, 0.2)';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw Core Circle (Visual Guide)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, rc * scale, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw Particles
+        particles.forEach(p => p.update());
+
+        // Draw Probe Crosshair
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(mouseX - 10, mouseY);
+        ctx.lineTo(mouseX + 10, mouseY);
+        ctx.moveTo(mouseX, mouseY - 10);
+        ctx.lineTo(mouseX, mouseY + 10);
+        ctx.stroke();
+
+        // Draw Probe Circle (Current R)
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, probeR * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Update Clocks
+        // Lab time ticks constantly
+        labTime += 2; 
+        // Local time ticks based on probeS (Time Dilation Factor)
+        localTime += 2 * probeS;
+
+        handLab.style.transform = `translateX(-50%) rotate(${labTime}deg)`;
+        handLocal.style.transform = `translateX(-50%) rotate(${localTime}deg)`;
+
+        requestAnimationFrame(animate);
+    }
+
+    // Start
+    resize();
+    animate();
+
+</script>
+</body>
+</html>

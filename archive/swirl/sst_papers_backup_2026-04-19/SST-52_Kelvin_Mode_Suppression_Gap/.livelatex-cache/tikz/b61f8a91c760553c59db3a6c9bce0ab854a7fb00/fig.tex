@@ -1,0 +1,97 @@
+\documentclass[border=1pt]{standalone}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{siunitx}
+
+
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\pgfplotsset{compat=newest}
+
+
+
+
+\newcommand{\papertitle}{Spectroscopic Constraints on Kelvin-Like Internal Modes in Effective Filament Models of Atomic Bound States}
+\newcommand{\papershorttitle}{Kelvin-Like Internal Modes in Atomic Bound States}
+\newcommand{\paperdoi}{10.5281/zenodo.18018084}
+\newcommand{\paperorcid}{0009-0006-1686-3961}
+\newcommand{\paperemail}{info@omariskandarani.com}
+\newcommand{\papercity}{Groningen}
+\newcommand{\papercountry}{The Netherlands}
+\newcommand{\paperkeywords}{Kelvin modes, effective filament models, atomic spectroscopy, excitation gap, low-energy reduction}
+
+\raggedbottom
+\\pgfplotsset{compat=1.18}
+
+
+\providecommand{\papertitle}{Spectroscopic Constraints on Kelvin-Like Internal Modes in Effective Filament Models of Atomic Bound States}
+\providecommand{\papershorttitle}{Kelvin-Like Internal Modes in Atomic Bound States}
+\providecommand{\paperdoi}{10.5281/zenodo.18018084}
+\providecommand{\paperorcid}{0009-0006-1686-3961}
+\providecommand{\paperemail}{info@omariskandarani.com}
+\providecommand{\papercity}{Groningen}
+\providecommand{\papercountry}{The Netherlands}
+\providecommand{\paperkeywords}{Kelvin modes, effective filament models, atomic spectroscopy, excitation gap, low-energy reduction}
+\providecommand{\epsilonK}{\varepsilon_K}
+
+\usetikzlibrary{
+    spath3,
+    intersections,
+    arrows,
+    arrows.meta,
+    knots,
+    calc,
+    hobby,
+    decorations.pathreplacing,
+    shapes.geometric,
+}
+
+% ---------------- Global styles (safe for 'knots') ----------------
+\tikzset{
+    knot diagram/every strand/.append style={
+        line cap=round,
+        line join=round,
+        ultra thick,
+        black
+    },
+    every knot/.style={line cap=round,line join=round,very thick},
+    strand/.style={line cap=round,line join=round,line width=3pt,draw=black},
+    over/.style={preaction={draw=white,line width=6.5pt}},
+% DO NOT set a global "every path" here; it breaks internal clip paths.
+}
+\providecommand{\swirlarrow}{\rightsquigarrow}
+\begin{document}
+\begin{tikzpicture}
+[
+                width=6cm,
+                height=4.5cm,
+                title={Kelvin Excitation Spectrum},
+                title style={font=\bfseries\tiny},
+                xlabel={$k_m$ (mode index)},
+                ylabel={$E_m$ [eV]},
+                axis lines=left,
+                ticks=none,
+                xmin=0, xmax=6,
+                ymin=0, ymax=800,
+                clip=false
+                ]
+                \pgfmathsetmacro{\DeltaK}{500} 
+                \fill[gray!20] (axis cs:0,0) rectangle (axis cs:6,\DeltaK);
+                \draw[dashed, gray!60] (axis cs:0,\DeltaK) -- (axis cs:6,\DeltaK);
+                \node[align=center,font=\tiny] at (axis cs:3,250) {Forbidden\\ region};
+                \foreach \x in {1,2,3,4,5} {
+                    \addplot[only marks, mark=*, red, mark size=2pt] coordinates {(\x, {\DeltaK + 40*\x})};
+                }
+                \node[anchor=west,font=\tiny] at (axis cs:6,\DeltaK+10) {$\Delta_K$};
+\end{tikzpicture}
+\end{document}

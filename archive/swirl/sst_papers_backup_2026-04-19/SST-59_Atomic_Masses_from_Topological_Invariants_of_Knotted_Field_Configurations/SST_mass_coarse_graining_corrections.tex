@@ -1,0 +1,198 @@
+\documentclass[11pt]{article}
+
+%============================
+% SST house macros (minimal)
+%============================
+\usepackage{amsmath,amssymb,bm,physics}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% Robust swirl arrows
+\newcommand{\swirlarrow}{\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\swirlarrowcw}{\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+% Canonical symbols
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\vnorm}{\lVert \vswirl \rVert}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+
+\title{Coarse-Graining Corrections to the SST Mass Functional:\\
+A Gradient/Curvature Expansion Inspired by NGM4 Turbulence Closure}
+\author{Omar Iskandarani}
+\date{Feb 15, 2026}
+
+\begin{document}
+\maketitle
+
+\section{Purpose}
+This note records a minimal, orthodox-friendly correction to the SST energy/mass functional under coarse-graining at scale $\ell$ (filter width). The structure is inspired by the key fact that filtering quadratic nonlinearities produces a gradient-expansion hierarchy, and that including the $O(\ell^4)$ term can restore physically correct inter-scale energy transfer and stability in LES closures (NGM4).
+
+\section{Setup: Quadratic Coarse-Graining and Subgrid Stress}
+Let $\bar{\mathbf{v}} = G_\ell * \mathbf{v}$ be a filtered (coarse-grained) velocity field at scale $\ell$. Define the coarse-grained quadratic mismatch (``subgrid stress'')
+\begin{equation}
+\tau_{ij} \;\equiv\; \overline{v_i v_j} - \bar v_i \bar v_j.
+\end{equation}
+For smooth fields and symmetric filters, $\tau_{ij}$ admits a local series in even powers of $\ell$:
+\begin{equation}
+\tau_{ij} \;\approx\; \kappa_2\,\ell^2\,\partial_k \bar v_i\,\partial_k \bar v_j
+\;+\;
+\kappa_4\,\ell^4\,\partial_{kl} \bar v_i\,\partial_{kl} \bar v_j
+\;+\; O(\ell^6),
+\label{eq:tau_expansion}
+\end{equation}
+with dimensionless constants $\kappa_2,\kappa_4$ determined by the filter (e.g.\ Gaussian). This is the generic SST-agnostic mathematical consequence of filtering quadratic quantities.
+
+\section{Effective energy density with gradient/curvature corrections}
+The naive coarse-grained kinetic energy density is
+\begin{equation}
+\rhoE^{(0)}(\ell) \;=\; \frac12 \rhoF\,\lVert \bar{\mathbf{v}}\rVert^2.
+\end{equation}
+However, quadratic coarse-graining implies that the energy budget must include SGS contributions that are local surrogates of the nonlocal operator. A minimal local truncation is
+\begin{equation}
+\rhoE^{\mathrm{eff}}(\ell)
+\;=\;
+\frac12 \rhoF\Big(
+\lVert \bar{\mathbf{v}} \rVert^2
++\kappa_2\,\ell^2\,\lVert \nabla \bar{\mathbf{v}} \rVert^2
++\kappa_4\,\ell^4\,\lVert \nabla\nabla \bar{\mathbf{v}} \rVert^2
+\Big),
+\label{eq:rhoE_eff}
+\end{equation}
+where $\lVert \nabla \bar{\mathbf{v}} \rVert^2 = \partial_i \bar v_j\,\partial_i \bar v_j$ and $\lVert \nabla\nabla \bar{\mathbf{v}} \rVert^2 = \partial_{ik}\bar v_j\,\partial_{ik}\bar v_j$.
+Dimensional consistency:
+\begin{align}
+[\rhoF] &= \mathrm{kg\,m^{-3}}, \quad [\bar v] = \mathrm{m\,s^{-1}},\\
+[\ell^2 \lVert \nabla \bar{\mathbf{v}}\rVert^2] &= \mathrm{m^2}\cdot (\mathrm{s^{-1}})^2 = \mathrm{m^2\,s^{-2}},\\
+\Rightarrow [\rhoE^{\mathrm{eff}}] &= \mathrm{kg\,m^{-1}\,s^{-2}} = \mathrm{J\,m^{-3}}.
+\end{align}
+
+\section{Mass functional and resolution dependence}
+Define the coarse-grained inertial/rest mass functional by
+\begin{equation}
+M(\ell) \;\equiv\; \frac{1}{c^2}\int \rhoE^{\mathrm{eff}}(\ell)\,dV.
+\label{eq:M_def}
+\end{equation}
+Then
+\begin{equation}
+M(\ell) = M_0(\ell) + \Delta M_2(\ell) + \Delta M_4(\ell),
+\end{equation}
+with
+\begin{align}
+M_0(\ell) &= \frac{\rhoF}{2c^2}\int \lVert \bar{\mathbf{v}}\rVert^2\,dV,\\
+\Delta M_2(\ell) &= \frac{\rhoF\,\kappa_2\,\ell^2}{2c^2}\int \lVert \nabla \bar{\mathbf{v}} \rVert^2\,dV,\\
+\Delta M_4(\ell) &= \frac{\rhoF\,\kappa_4\,\ell^4}{2c^2}\int \lVert \nabla\nabla \bar{\mathbf{v}} \rVert^2\,dV.
+\end{align}
+Scaling estimate for a characteristic variation length $L$:
+\begin{equation}
+\frac{\Delta M_2}{M_0}\sim \kappa_2\left(\frac{\ell}{L}\right)^2,
+\qquad
+\frac{\Delta M_4}{M_0}\sim \kappa_4\left(\frac{\ell}{L}\right)^4.
+\end{equation}
+Hence for localized structures with $L\sim \ell$, gradient/curvature corrections can be $O(1)$ and must be accounted for to obtain an $\ell$-stable mass estimate.
+
+\section{Concrete SST action item: implementation in the SST engine}
+\subsection*{Goal}
+Implement the two-term corrected estimator
+\begin{equation}
+M_{(2)}(\ell) \equiv M_0(\ell)+\Delta M_2(\ell),
+\end{equation}
+and optionally the four-term estimator $M_{(4)}(\ell)$ including $\Delta M_4$. Test sensitivity of your current mass-fit pipeline to $\ell$ and quantify reduction of scale-dependence.
+
+\subsection*{Field inputs}
+Assume you already have (from simulation or reconstruction):
+\begin{itemize}
+\item $\bar{\mathbf{v}}(\mathbf{x})$ on a 3D grid (or a filament/tube parametrization mapped to a grid),
+\item grid spacing $\delta x$ and domain volume element $dV$,
+\item a chosen coarse-grain scale $\ell$ (often an integer multiple of $\delta x$).
+\end{itemize}
+
+\subsection*{Numerical derivatives}
+Use spectral derivatives when periodic, or high-order finite differences otherwise. Compute:
+\begin{align}
+\lVert \bar{\mathbf{v}}\rVert^2 &= \bar v_x^2+\bar v_y^2+\bar v_z^2,\\
+\lVert \nabla \bar{\mathbf{v}}\rVert^2 &= \sum_{i\in\{x,y,z\}}\sum_{j\in\{x,y,z\}} (\partial_i \bar v_j)^2,\\
+\lVert \nabla\nabla \bar{\mathbf{v}}\rVert^2 &= \sum_{i,k\in\{x,y,z\}}\sum_{j\in\{x,y,z\}} (\partial_{ik}\bar v_j)^2.
+\end{align}
+
+\subsection*{Estimator formulas}
+\begin{align}
+M_0(\ell) &= \frac{\rhoF}{2c^2}\sum_{\text{grid}} \lVert \bar{\mathbf{v}}\rVert^2\,dV,\\
+\Delta M_2(\ell) &= \frac{\rhoF\,\kappa_2\,\ell^2}{2c^2}\sum_{\text{grid}} \lVert \nabla \bar{\mathbf{v}}\rVert^2\,dV,\\
+\Delta M_4(\ell) &= \frac{\rhoF\,\kappa_4\,\ell^4}{2c^2}\sum_{\text{grid}} \lVert \nabla\nabla \bar{\mathbf{v}}\rVert^2\,dV.
+\end{align}
+\textbf{Practical default:} start with $\kappa_2=1$ (calibration-free diagnostic), then fit $\kappa_2$ by demanding minimal $\ell$-dependence across a range of $\ell$ values for a fixed configuration.
+
+\section{Appendix: Implementation-ready Python skeleton}
+\begin{verbatim}
+def mass_functional_with_gradients(vx, vy, vz, dx, rho_f, c,
+                                  ell, kappa2=1.0, kappa4=0.0,
+                                  derivative_backend="spectral"):
+    # vx,vy,vz: 3D arrays of filtered velocity components (bar{v})
+    # dx: grid spacing (assume isotropic); dV = dx**3
+    # ell: coarse-grain/filter scale in meters
+    # kappa2,kappa4: dimensionless coefficients (filter-dependent)
+
+    import numpy as np
+
+    dV = dx**3
+    v2 = vx*vx + vy*vy + vz*vz
+
+    # --- compute first derivatives: dvj/dxi ---
+    # Replace grad3/hess_norm2 with your engine’s derivative routines
+    dvx_dx, dvx_dy, dvx_dz = grad3(vx, dx, backend=derivative_backend)
+    dvy_dx, dvy_dy, dvy_dz = grad3(vy, dx, backend=derivative_backend)
+    dvz_dx, dvz_dy, dvz_dz = grad3(vz, dx, backend=derivative_backend)
+
+    gradv2 = (dvx_dx**2 + dvx_dy**2 + dvx_dz**2 +
+              dvy_dx**2 + dvy_dy**2 + dvy_dz**2 +
+              dvz_dx**2 + dvz_dy**2 + dvz_dz**2)
+
+    # --- compute second derivatives if needed ---
+    if kappa4 != 0.0:
+        d2vx = hess_norm2(vx, dx, backend=derivative_backend)
+        d2vy = hess_norm2(vy, dx, backend=derivative_backend)
+        d2vz = hess_norm2(vz, dx, backend=derivative_backend)
+        hessv2 = d2vx + d2vy + d2vz
+    else:
+        hessv2 = 0.0
+
+    M0  = (rho_f/(2*c**2)) * np.sum(v2)      * dV
+    dM2 = (rho_f*kappa2*ell**2/(2*c**2)) * np.sum(gradv2) * dV
+    dM4 = (rho_f*kappa4*ell**4/(2*c**2)) * np.sum(hessv2) * dV
+
+    return {"M0": M0, "dM2": dM2, "dM4": dM4, "M": M0 + dM2 + dM4}
+\end{verbatim}
+
+\section{Falsifiable diagnostic}
+For a fixed configuration (same physical state), compute $M(\ell)$ over a sweep of $\ell$ (e.g.\ $\ell\in\{1,2,4,8\}\delta x$). The corrected estimator should reduce variation:
+\begin{equation}
+\mathrm{Var}_\ell\big(M_{(2)}(\ell)\big)\;<\;\mathrm{Var}_\ell\big(M_0(\ell)\big).
+\end{equation}
+If it does not, the chosen derivative backend, boundary treatment, or assumed locality is insufficient, and a nonlocal (kernel) correction should be considered.
+
+\section{References (minimal)}
+\begin{thebibliography}{99}
+
+\bibitem{Jakhar2026NGM4}
+K.~Jakhar, Y.~Guan, and P.~Hassanzadeh (2026),
+\emph{An Analytical and AI-discovered Stable, Accurate, and Generalizable Subgrid-scale Closure for Geophysical Turbulence},
+arXiv:2509.20365v3 (Jan 5, 2026).
+
+\bibitem{Eyink2006}
+G.~L. Eyink (2006),
+\emph{Multi-scale gradient expansion of the turbulent stress tensor},
+Journal of Fluid Mechanics \textbf{549}, 159--190.
+DOI: 10.1017/S002211200500759X.
+
+\bibitem{Sagaut2006}
+P.~Sagaut (2006),
+\emph{Large Eddy Simulation for Incompressible Flows: An Introduction},
+Springer.
+DOI: 10.1007/978-3-540-26347-2.
+
+\end{thebibliography}
+
+\end{document}

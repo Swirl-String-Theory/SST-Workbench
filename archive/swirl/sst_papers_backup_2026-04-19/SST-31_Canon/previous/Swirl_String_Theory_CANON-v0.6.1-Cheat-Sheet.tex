@@ -1,0 +1,330 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\newcommand{\vswirl}{v_{\!\!\circlearrowleft}} % Swirl velocity (assuming macro for v with swirl arrow)
+\newcommand{\rc}{r_c}         % core radius
+\newcommand{\rhof}{\rho_f}    % fluid (condensate) density
+% NOTE(v0.6.1): Fix density labels and Swirl--Coulomb section (near-field Euler != 1/r).
+
+\begin{document}
+
+    \begin{center}
+    {\LARGE \textbf{Swirl--String Theory (SST) Canon v0.6.1 Cheat-Sheet}}\\[1ex]
+    {\large \textbf{(Key Equations, Definitions, and Results)}}\\[2ex]
+    {\small DOI: 10.5281/zenodo.18018197, ORCID: 0009-0006-1686-3961}
+    \end{center}
+
+
+    \section*{Fundamental Constants and Canonical Values}
+        \begin{itemize}
+            \item \textbf{Fine-Structure Constant:} $\alpha \equiv \alpha_{\text{fs}} = 7.29735\times10^{-3}$ (dimensionless).
+            \item \textbf{Speed of Light:} $c = 2.99792\times10^8~\text{m/s}$.
+            \item \textbf{Swirl Velocity Scale:} $\|\vswirl\| = 1.09385\times10^6~\text{m/s}$ (canonical tangential ``swirl'' speed).
+            \item \textbf{Core Radius:} $\rc = 1.40897\times10^{-15}~\text{m}$ (effective vortex core radius).
+            \item \textbf{Effective Fluid Density:} $\rhof = 7.0\times10^{-7}~\text{kg/m}^3$ (far-field effective density).
+            \item \textbf{Core Density:} $\rho_{\text{core}} = 3.89344\times10^{18}~\text{kg/m}^3$ (core/condensate density used for invariant mass kernels).
+            \item \textbf{Golden Ratio:} $\phi = \frac{1+\sqrt{5}}{2} \approx 1.61803$. (Defined via $\ln\phi = \sinh^{-1}(0.5)$ in SST.) The \textbf{Golden Layer Factor} is $\lambda = \phi^2 \approx 2.618$, which sets a discrete self-similar scaling for masses/energies.
+        \end{itemize}
+
+        \noindent\textbf{Canonical SST Derived Units:}
+        Using the above, one can form the characteristic \emph{swirl energy density}:
+        \[
+            u \;=\; \frac{1}{2}\,\rhof\,\|\vswirl\|^2,
+        \]
+        which represents the kinetic energy density in a fully-developed swirl core (units: J/m$^3$). Numerically $u \approx 2.33\times10^{30}~\text{J/m}^3$. This, together with the core volume scale $\pi \rc^3$, sets the order of magnitude for particle rest energies in SST.
+
+        \vspace{1ex}
+
+    \section*{Swirl Clocks, Proper Time, and Foliation}
+        \noindent \textbf{Preferred Foliation (Swirl-Clock Field):} SST posits a \emph{universal timelike unit field} $u^\mu$ associated with the swirl condensate's rest frame (``vertical swirl'' direction). This field defines a preferred foliation of spacetime (a gentle spontaneous Lorentz symmetry breaking) and provides an absolute reference for time flow. All matter swirl-strings align with or against this field.
+
+        \noindent \textbf{Local Swirl Clock Factor:} A moving swirl condensate slows down local proper time. For a fluid element with local velocity $\mathbf{v}(\mathbf{x})$, decompose $\mathbf{v} = \mathbf{v}_\perp + \mathbf{v}_\parallel$ where $\mathbf{v}_\parallel$ is along the swirl axis and $\mathbf{v}_\perp$ is tangential. Define the \emph{swirl clock} at location $\mathbf{x}$ as
+        \[
+            S_{\!\circlearrowleft}(\mathbf{x}) \;=\; \sqrt{\,1 - \frac{|\mathbf{v}_\perp(\mathbf{x})|^2}{\|\vswirl\|^2}\,}\,.
+        \]
+        The local proper time increment $dt(\mathbf{x})$ relates to far-away (undilated) time $dt_\infty$ by
+        \[
+            dt(\mathbf{x}) \;=\; S_{\!\circlearrowleft}(\mathbf{x})\,dt_\infty\,,
+        \]
+        so $0 < S_{\!\circlearrowleft} \le 1$ acts as a Lorentz-like time dilation factor induced by swirl motion (with $S_{\!\circlearrowleft}\to1$ when local swirl speed $\mathbf{v}_\perp$ is zero).
+
+        \noindent \textbf{Swirl-Clock Analogy:} Think of the swirl condensate as a moving aether: where the fluid rushes faster, internal clocks tick slower, similar to gravitational time dilation but caused by rotation in a physical medium.
+
+        \noindent \textbf{Proper Time and Effective Metric:} Internal dynamics in SST follow this swirl-based clock rather than purely geometric time. One can encode the effect as an \emph{effective metric} on a flat background:
+        \[
+            ds^2 \;=\; -\Big(1 - \frac{v_\perp^2}{\|\vswirl\|^2}\Big)\,dt^2 \;+\; \big[\delta_{ij} + \gamma_{ij}(\bm{\omega})\big]\,dx^i dx^j\,,
+        \]
+        where $\bm{\omega}=\nabla\times\mathbf{v}$ is the vorticity of the condensate flow and $\gamma_{ij}(\omega) \propto \omega_i \omega_j - \frac{1}{2}\delta_{ij}|\bm{\omega}|^2$ represents spatial curvature induced by swirl tension. This metric is an emergent, \emph{flow-dependent} geometry: time is redshifted by local swirl motion (the coefficient of $dt^2$), and space can be slightly distorted by intense vorticity.
+
+        \noindent \textbf{Swirl Energy (Hamiltonian) Density:} The swirl condensate has an energy density combining kinetic and “swirl tension” terms:
+        \[
+            \mathcal{H}_{\text{swirl}} \;=\; \frac{1}{2}\,\rhof\,|\mathbf{v}|^2 \;+\; \frac{1}{2}\,\rhof\,\ell_\omega^2\,|\bm{\omega}|^2\,,
+        \]
+        with $\ell_\omega \sim \rc$ a small length scale associated with the core. The second term acts like a short-range ``vortex tension'' (analogous to a magnetic energy density for the swirling flow). This form yields stable, quantized vortex structures (see below) and leads to a conservative swirl dynamics that respects both Kelvin's circulation theorem and time-dilation effects.
+
+        \noindent \textbf{Chronos--Kelvin Invariant:} (Conceptual) Kelvin's theorem on conservation of circulation generalizes in SST to include the swirl-clock. For an ideal (inviscid, incompressible) flow, a loop of fluid carrying vorticity will preserve the combination $R^2\omega$ adjusted for time dilation. In essence, as a swirl-string loop contracts (decreasing $R$), the local swirl clock $S_{\!\circlearrowleft}$ slows such that
+        \[ \frac{d}{dt}\big(R^2\omega\big) = 0, \]
+        keeping $R^2\omega$ (or equivalently $R^2(1-S_{\!\circlearrowleft})$) constant. This \emph{Chronos--Kelvin law} ensures self-consistency of vortex stretching with the rate at which the internal clock runs.
+
+        \begin{flushright}
+            \it (Analogy: A spinning ice skater pulling in their arms spins faster (Kelvin’s circulation), and SST adds that the skater’s ``internal clock'' slows down in just the right way to keep a certain combination of spin and time constant.)
+        \end{flushright}
+
+    \section*{Master Equations and Canonical Relations}
+
+        \noindent \textbf{Swirl--Coulomb (Effective potential + mediator):} A steady swirl motivates a near-field
+        pressure deficit $\Delta p\propto -1/r^2$ (Euler radial balance for $v_\theta\propto 1/r$), which does \emph{not} by itself yield a $1/r$ potential.
+        The far-field $1/r$ tail is carried by the SST clock/foliation mediator (Poisson/Green function on $\mathbb{R}^3$).
+        The canonical regularized effective potential is
+        \[
+            V_{\text{SST}}(r) = -\frac{\Lambda}{\sqrt{r^2+\rc^2}},
+        \]
+        with $V(r)\sim -\Lambda/r$ for $r\gg \rc$.
+        Dimensional consistency requires $[\Lambda]=\mathrm{J\cdot m}$, and the Canon uses
+        \[
+        \boxed{\;\Lambda = 4\pi\,\rho_{\text{core}}\,\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^{2}\,\rc^{4}\;}
+        \qquad (\mathrm{J\cdot m}).
+        \]
+
+        \begin{flushright}
+            \it (Analogy: The swirl-string’s pressure field is like the electric field of a proton. Far away, they both fall off as $1/r$, but near the core the swirl’s “soft” core avoids the infinite self-energy of a point charge.)
+        \end{flushright}
+
+        \noindent \textbf{Swirl Pressure Law (Euler Radial Balance):} In a steady circular swirl (rotational flow) with tangential speed $v_\theta(r)$, Euler’s equation yields
+        \[
+            \frac{1}{\rhof}\,\frac{dp_{\text{swirl}}}{dr} \;=\; -\,\frac{v_\theta^2(r)}{r}\,.
+        \]
+        Equivalently, $dp_{\text{swirl}}/dr = \,-\,\rhof\,v_\theta^2/r$. This radial pressure gradient provides exactly the centripetal force density needed to sustain rotation. One useful solution is a flat rotation curve $v_\theta(r)=v_0$ (constant): then $dp/dr = \rhof v_0^2/r$, which integrates to
+        \[
+            p_{\text{swirl}}(r) = p_0 + \rhof\,v_0^2 \ln\!\frac{r}{r_0}\,,
+        \]
+        a logarithmic pressure profile. (This model is invoked in SST as a mechanism for galaxy rotation curves without dark matter: a diffuse swirl background can provide an effectively flat rotation curve through the pressure distribution.)
+
+        \noindent \textbf{Swirl–Clock Coupling (Neutrino Chirality):} Fermions can couple to the swirl foliation field $u^\mu$. The lowest-dimension coupling consistent with symmetries is an axial current interaction
+        \[
+            \mathcal{L}_{\text{int}} \;=\; \frac{\lambda}{M_*}\; u_\mu\;\bar{\nu}\,\gamma^\mu\gamma^5\,\nu\,,
+        \]
+        where $\nu$ is a Dirac neutrino field. This term effectively acts like a chiral ``mass'' term derived from the background swirl field. SST predicts that integrating out the right-chiral component yields a single left-chiral neutrino state at low energy. In other words, the swirl-clock field selects a preferred chirality: \textit{only left-handed neutrinos remain light and dynamical}, naturally explaining the observed parity violation in the weak sector. The coupling strength $\lambda/M_*$ is set by the canonical maximum swirl force (related to an electron’s Compton frequency and classical radius), ensuring the effect is small except for neutrinos.
+
+        \begin{flushright}
+            \it (Analogy: The universal swirl field acts like a cosmic wind that blows in a preferred direction through spacetime. Lightweight particles like neutrinos get ``pushed'' to spin with the wind (left-handed), while right-handed ones face a headwind and effectively stall out.)
+        \end{flushright}
+
+        \noindent \textbf{Hydrogenic Quantization and Kelvin Mode Suppression:} In SST, an electron in a hydrogen atom is a closed knotted vortex filament. The hydrogen bound-state emerges from a balance of fluid forces: pressure (from swirl circulation) versus tension. The \textit{quantized orbits} correspond to discrete vortex equilibrium states. Crucially, internal helical waves on the vortex (Kelvin modes) could, in principle, carry thermal energy and spoil the sharpness of atomic energy levels. SST resolves this with a large \textbf{Kelvin-mode energy gap}:
+        \[
+            \frac{\Delta_K}{k_B T_{\rm eff}} \gtrsim 60\,,
+        \]
+        implying $\Delta_K$ (the lowest Kelvin excitation energy) is on the order of $>5\times10^2~\text{eV}$ or more. Even for an effective internal temperature as high as $T_{\rm eff}\sim10^5~\text{K}$, such a gap means Kelvin excitations are exponentially suppressed. $\Delta_K \sim 500~\text{eV}$ is tiny compared to an electron’s rest energy ($511~\text{keV}$) but enormous compared to atomic binding energies ($\sim10$~eV), hence \emph{Kelvin modes are essentially frozen out under normal atomic conditions}.
+
+        This guarantees that the electron vortex moves as a coherent object without internal thermal jitter. The result is that the familiar Schrödinger hydrogen spectrum is recovered as a low-energy limit of the fluid equations. In fact, with Kelvin modes inert, the electron's free-energy functional reduces to
+        \[
+            F[\psi] \;=\; \int d^3r \Big[\,\frac{\hbar^2}{2m_e}|\nabla\psi|^2 + V_{\text{SST}}(r)\,|\psi|^2\,\Big]\,,
+        \]
+        where $V_{\text{SST}}(r)\propto -1/r$ arises from the swirl pressure field. Varying this $F$ (with normalization) yields the stationary Schrödinger equation
+        \[
+            -\frac{\hbar^2}{2m_e}\nabla^2\psi + V_{\text{SST}}(r)\,\psi = E\,\psi\,,
+        \]
+        showing that \emph{quantum mechanics emerges as an effective description of a Kelvin-frozen vortex}. The hydrogen Bohr quantization conditions are interpreted as conditions for steady vortex flows.
+
+        Moreover, SST provides concrete values: the ground-state orbital corresponds to a laminar vortex with swirl speed
+        \[ v_1 = \alpha\,c \]
+        at the classical electron radius (on the order of the Bohr radius), and higher excited states have
+        \[ v_n = \frac{\alpha\,c}{n}\,. \]
+        Thus the kinetic energy (and hence total energy) scales as $v_n^2 \propto \alpha^2 c^2/n^2$, reproducing the $E_n \propto 1/n^2$ Rydberg spectrum. The Bohr radius, Rydberg energy, etc., are obtained within a few percent using the canonical constants above:\cite{Iskandarani2025-Canon060}. SST predicts that only when one pumps extremely high energy or acceleration (enough to overcome $\Delta_K$) will the atom deviate from quantum behavior, entering a new regime of vortex dynamics.
+
+        \begin{flushright}
+            \it (Analogy: The electron is like a tiny smoke ring. It has certain stable ``orbit'' shapes where it flows smoothly. Small ripples on the ring (Kelvin waves) would blur these orbits, but nature ties the ring so tightly that those ripples need huge energy to start -- so at ordinary energies, the ring behaves as if it were perfectly rigid, giving us the exact hydrogen spectrum.)
+        \end{flushright}
+
+        \noindent \textbf{Invariant Mass Kernel (Topology to Mass Mapping):} SST unifies the inertial mass of particles with the topology of their knotted swirl-strings. Each particle is characterized by a set of topological invariants:
+        - $b$: a braid or crossing number (knot complexity index),
+        - $g$: the Seifert genus or layers of knotting (handles),
+        - $n$: the number of linked components or twist insertions (swirl count),
+        - $L_{\text{tot}}$: the dimensionless total \emph{ropelength} of the string (length/thickness, a measure of how extended the knot is).
+
+        The \textbf{master mass formula} for any object $T$ with invariants $(b_T, g_T, n_T, L_{\text{tot}}(T))$ is:
+        \[
+            M(T) \;=\; \frac{4}{\alpha_{\rm fs}}\; b_T^{-3/2}\; \phi^{-\,g_T}\; n_T^{-\,1/\phi}\;\frac{u\,\pi \rc^3\,L_{\text{tot}}(T)}{c^2}\,.
+        \]
+        All factors preceding the $u\,\pi \rc^3 L_{\text{tot}}/c^2$ term are dimensionless. Here $u = \frac{1}{2}\rhof \|\vswirl\|^2$ (as above) and $\pi \rc^3 L_{\text{tot}}$ has units of volume (the effective volume occupied by the knotted string). Thus $u \pi \rc^3 L_{\text{tot}}$ is an energy, and dividing by $c^2$ converts to mass, ensuring the dimensional consistency of $M(T)$.
+
+        \begin{flushright}
+            \it (Analogy: Think of $u$ as how \emph{packed with energy} the swirl medium is, and $V_{\text{eff}} = \pi \rc^3 L_{\text{tot}}$ as the \emph{volume} of fluid that the string's presence ``agitates.'' More packed energy, and more volume of it being stirred by the knot, yields more mass.)
+        \end{flushright}
+
+        Several notable points about this mass law:
+        \begin{itemize}
+            \item The golden ratio $\phi$ appears naturally in the exponent factors ($\phi^{-g}$ and $n^{-1/\phi}$). This reflects a discrete self-similarity or log-periodicity in the mass spectrum (the \emph{golden-layer hierarchy}). In fact, requiring both discrete scale invariance and additive composition of mass levels uniquely leads to the golden ratio as the scaling factor, so $\phi$ is \emph{not a fit parameter but a consequence of these axioms}\cite{Iskandarani2025-Canon060,Iskandarani2025-SSTAtomMassInvariantSoftware}.
+            \item The fine-structure constant $\alpha_{\rm fs}$ appears inversely: a smaller $\alpha$ (weaker EM coupling) yields a larger mass scale, capturing the intuition that if the swirl is less ``leaky'' to EM, more energy remains as mass.
+            \item For fundamental leptons, one assigns simple base topologies and uses their known masses to calibrate $L_{\text{tot}}$. For example:
+            - Electron base: $(b,g,n)=(2,1,1)$,
+            - Muon base: $(5,2,1)$,
+            - Tau base: $(7,3,1)$.
+
+            By inverting the formula for each lepton, $L_{\text{tot}}$ is solved to exactly reproduce the observed $M(e), M(\mu), M(\tau)$. This gives, in the canonical “exact closure” calibration,
+            \[
+                L_{\text{tot}}(e)\approx 3.34\times10^{-2},\quad
+                L_{\text{tot}}(\mu)\approx 4.42\times10^{1},\quad
+                L_{\text{tot}}(\tau)\approx 1.99\times10^{3}\,,
+            \]
+            indicating that higher-generation leptons correspond to vastly longer (or more tangled) strings.
+            \item Protons and neutrons (baryons) are composed of three linked swirl segments. In exact-closure mode, one solves a $2\times2$ linear system to assign effective sector lengths to up and down quark sub-knots such that the formula yields $M_p$ and $M_n$ exactly\cite{Weizsaecker1935-Kernmassen,PDG2024-RPP}. The result is $L_{\text{tot}}(p) \approx 3.594\times10^2$ and $L_{\text{tot}}(n)\approx 3.599\times10^2$ (dimensionless). That is, the proton and neutron have almost the same total ropelength, consistent with their nearly equal masses.
+        \end{itemize}
+
+        Using this invariant kernel, SST is able to predict composite masses:
+        - For an atomic nucleus with $Z$ protons and $N$ neutrons (and $Z$ bound electrons), a simple additive prediction is $M_{\rm atom}^{\rm pred}= Z\,M_p + N\,M_n + Z\,M_e$. A more refined prediction subtracts a binding mass defect $\Delta m(Z,N)$ given by a nuclear semi-empirical mass formula (to account for nuclear binding energy), and neglects tiny chemical binding energies\cite{Weizsaecker1935-Kernmassen,PDG2024-RPP}.
+        - The predictions for all stable atoms from Hydrogen ($Z=1$) to Uranium ($Z=92$) show a mean absolute error of $\sim0.2\%$ and maximum error $\sim1.8\%$ in the exact-closure calibration. A sample: $M_{\rm pred}(\text{O}_2)$ differs from the experimental mass by $<0.1\%$. Even for complex molecules, simply summing predicted atomic masses yields errors typically below $0.2\%$. This level of accuracy (achieved with a handful of fixed constants and topological inputs) underscores the viability of the SST mass mechanism.
+
+    \section*{Falsifiable Predictions and Experimental Signatures}
+        SST deviates from standard physics in specific ways, offering clear tests:
+
+        \begin{enumerate}
+            \item \textbf{Neutrino Chirality and Sterile Neutrinos:} SST predicts the right-handed neutrino is not just heavy, but effectively \emph{absent} at low energies because of the swirl-clock alignment. Any experiment attempting to detect light right-handed (sterile) neutrinos should instead find evidence of a large mass gap or suppression. Additionally, if the swirl field $u^\mu$ varies across the cosmos, extremely high-energy neutrino signals (e.g. cosmological neutrinos) might show direction-dependent differences (anisotropic propagation or flavor oscillation patterns) correlated with a cosmic preferred frame. In regions of intense swirl density (such as near neutron stars or inside cosmic strings), SST predicts an enhanced effective coupling (the parameter $\mu_5$ in the axial term), which could manifest as slight deviations in neutrino behavior in strong gravity or spin-polarized environments.
+
+            \item \textbf{Cosmic Redshift Drift:} The presence of a universal swirl foliation means cosmic time might not exactly coincide with proper time assumed in standard $\Lambda$CDM cosmology. SST suggests a small correction to the rate of cosmological redshift change over time (the ``redshift drift''). Over decades of observation, the gradual drift in galaxy spectral lines might differ from the pure-expansion prediction. A detection of redshift drift inconsistent with the standard model (once observational accuracy improves) could indicate an underlying swirl-clock effect (e.g. an additional frequency shift component from motion relative to the swirl frame).
+
+            \item \textbf{BAO Anisotropy (Large-Scale Structure):} If a cosmic swirl frame exists, the large-scale distribution of matter need not be perfectly isotropic. SST allows for a subtle anisotropy in Baryon Acoustic Oscillation (BAO) measurements or galaxy correlation functions: the characteristic BAO length scale might vary with orientation relative to the swirl frame (perhaps at the $10^{-5}$ level or below, but in principle measurable with enough data). Any confirmed violation of the Cosmological Principle (large-scale anisotropy) aligned with some absolute frame (perhaps related to the CMB dipole) would lend credence to the idea of an SST condensate rest frame.
+
+            \item \textbf{Two-Timescale Unruh Effect Signals:} (As an aside, SST predicts a dramatic signature in the Unruh effect for accelerating observers.) Unlike standard Unruh radiation (single timescale thermal emission), an accelerated mirror or atom in SST should produce a prompt burst of ``swirl-radiation'' at the swirl timescale ($\sim10^{-10}$~s) followed by a delayed electromagnetic echo. The primary burst is heavily suppressed in ordinary cavities (due to impedance mismatch with the walls), but could be detected with a swirl-matched (e.g. superfluid) detector. Observing a two-component Unruh signal where only one is expected would strongly support SST’s two-sector vacuum structure.
+        \end{enumerate}
+
+        \noindent \textbf{Concluding Remarks:} Swirl--String Theory provides a hydrodynamic unification where particles are topological vortices in a real fluid-like medium. The v0.6.1 Canon updates incorporate a refined proper-time treatment, new quantum-scale consistency checks, and a calibrated mass model. Key SST features --- like the swirl clock and golden layering --- ensure that, while reproducing known physics at low energies, the theory remains highly predictive. Upcoming experiments in precision cosmology (redshift drift, BAO mapping), neutrino physics, and high-acceleration systems will decisively test these ideas. Each boxed equation above encapsulates a fundamental principle or result of SST, and dimensional consistency checks (performed in earlier Canons) verify that they reduce to known physics in appropriate limits (see Table~\ref{tab:dim_recovery_checks} for summary).
+
+        \begin{flushright}
+            \emph{This cheat-sheet is intended as a quick reference for the main equations and concepts of SST Canon~v0.6.1. All notation and macros (e.g.~$\vswirl$, $\rc$, $\rhof$) follow the previous Canon conventions.}
+        \end{flushright}
+
+        \begin{thebibliography}{99}
+
+            \bibitem{Iskandarani2025-Canon060}
+            O.~Iskandarani (2025),
+            \textit{Swirl String Theory (SST) Canon v0.6.0},
+            Zenodo preprint.
+            DOI: 10.5281/zenodo.17899592.
+
+            \bibitem{Iskandarani2025-SSTAtomMassInvariantSoftware}
+            O.~Iskandarani (2025),
+            \textit{SST\_Atom\_Mass\_Invariant.py (SST Invariant Master Mass reference implementation)},
+            software manuscript (unpublished; accompanying code for the paper).
+
+            \bibitem{Einstein1905-massenergy}
+            A.~Einstein (1905),
+            \textit{Ist die Trägheit eines Körpers von seinem Energieinhalt abhängig?},
+            Annalen der Physik \textbf{323}(13), 639--641.
+            DOI: 10.1002/andp.19053231314.
+
+            \bibitem{MohrNewellTaylor2021-CODATA2018}
+            P.~J.~Mohr, D.~B.~Newell, and B.~N.~Taylor (2021),
+            \textit{CODATA Recommended Values of the Fundamental Physical Constants: 2018},
+            Reviews of Modern Physics \textbf{93}, 025010.
+            DOI: 10.1103/RevModPhys.93.025010.
+
+            \bibitem{PDG2024-RPP}
+            Particle Data Group (2024),
+            \textit{Review of Particle Physics},
+            Physical Review D \textbf{110}, 030001.
+            DOI: 10.1103/PhysRevD.110.030001.
+
+            \bibitem{Batchelor1967-FluidDynamics}
+            G.~K.~Batchelor (1967),
+            \textit{An Introduction to Fluid Dynamics},
+            Cambridge University Press.
+            ISBN: 978-0-521-66396-0.
+
+            \bibitem{Saffman1992-VortexDynamics}
+            P.~G.~Saffman (1992),
+            \textit{Vortex Dynamics},
+            Cambridge University Press.
+            ISBN: 978-0-521-42058-7.
+
+            \bibitem{Weizsaecker1935-Kernmassen}
+            C.~F.~von~Weizsäcker (1935),
+            \textit{Zur Theorie der Kernmassen},
+            Zeitschrift für Physik \textbf{96}, 431--458.
+            DOI: 10.1007/BF01341391.
+
+        \end{thebibliography}
+
+        \newpage
+        \appendix
+        % =======================
+% Dimensional & Recovery Checks (Canon v0.6.1 cheat-sheet)
+% =======================
+    \section*{Appendix A: Dimensional & Recovery Checks}
+
+        \begin{table}[h]
+            \centering
+            \footnotesize
+            \setlength{\tabcolsep}{5pt}
+            \renewcommand{\arraystretch}{1.25}
+            \begin{tabular}{@{}p{0.23\linewidth}p{0.27\linewidth}p{0.18\linewidth}p{0.25\linewidth}@{}}
+                \toprule
+                \textbf{Item} & \textbf{Key expression (cheat-sheet form)} & \textbf{Units} & \textbf{Limit / recovery} \\
+                \midrule
+
+                Chronos--Kelvin invariant &
+                \(\displaystyle \frac{D}{Dt_{\mathrm{ae}}}\!\left(R^2\,\omega\right)=0\) &
+                \([R^2\omega]=\si{m^2.s^{-1}}\) &
+                Ideal incompressible Euler \(\Rightarrow\) Kelvin circulation conservation \\
+
+                Swirl circulation quantum &
+                \(\displaystyle \Gamma_0 \equiv 2\pi\,\rc\,\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert\) &
+                \([\Gamma_0]=\si{m^2.s^{-1}}\) &
+                Defines the primitive circulation scale; used in coarse-graining \\
+
+                Effective density (coarse-graining) &
+                \(\displaystyle \rho_{\!f}=\mu^\ast \nu,\;\langle\omega\rangle=\Gamma^\ast \nu,\;
+                \Rightarrow\;
+                \rho_{\!f}=\frac{\rho_{\!m}\,\rc\,\langle\omega\rangle}{2\,\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}\) &
+                \([\rho_{\!f}]=\si{kg.m^{-3}}\) &
+                Bulk/incompressible normalization; eliminates \(\nu\) consistently \\
+
+                Swirl-clock factor &
+                \(\displaystyle S_t=\sqrt{1-\frac{v^2}{c^2}},\qquad dt_{\mathrm{local}}=S_t\,dt_\infty\) &
+                dimensionless &
+                \(v\ll c\Rightarrow S_t\simeq 1-\tfrac12 v^2/c^2\) (Galilean limit + first correction) \\
+
+                Hamiltonian density (swirl medium) &
+                \(\displaystyle \mathcal{H}_{\mathrm{SST}}
+                =\tfrac12\rho_{\!f}\lVert \mathbf{v}\rVert^2
+                +\tfrac12\rho_{\!f}\rc^2\lVert \boldsymbol{\omega}\rVert^2
+                +\tfrac12\rho_{\!f}\rc^4\lVert \nabla\boldsymbol{\omega}\rVert^2
+                +\lambda(\nabla\!\cdot\!\mathbf{v})\) &
+                \([\mathcal{H}]=\si{J.m^{-3}}\) &
+                \(\rc\to 0\Rightarrow \tfrac12\rho_{\!f}\lVert \mathbf{v}\rVert^2\) (classical Euler energy density) \\
+
+                Swirl pressure law (radial Euler balance) &
+                \(\displaystyle \frac{1}{\rho_{\!f}}\frac{dp}{dr}=\frac{v_\theta^2(r)}{r}\) &
+                \(\si{m.s^{-2}}\) &
+                Recover Newtonian-like attraction when \(v_\theta(r)\) yields \(g(r)=v_\theta^2/r\) \\
+
+                Hydrogen soft-core sector &
+                (\(a_0,\,E_1\) from SST “Swirl-Coulomb” constant \(\Lambda\); soft-core removes \(r=0\) singularity) &
+                \(a_0:\si{m}\), \(E_1:\si{J}\) &
+                Bohr/Coulomb spectrum recovered in the appropriate limit (soft-core \(\to 0\)) \\
+
+                Invariant mass kernel (slender-tube) &
+                \(\displaystyle
+                M(K)=\Big(\frac{4}{\alpha_{\mathrm{fs}}}\Big)\,
+                b^{-3/2}\,\phi^{-g}\,n^{-1/\phi}\;
+                \frac{u\,\big(\pi\,\rc^{3}\,L_{\mathrm{tot}}(K)\big)}{c^{2}},
+                \quad
+                u=\tfrac12\rho_{\mathrm{core}}\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2
+                \) &
+                \([\text{rhs}]=\si{kg}\) &
+                \(M=E/c^2\) with \(E=uV\); exact-closure reproduces \((e,\mu,\tau,p,n)\) by construction \\
+
+                Lorentz sector from torsional cone invariance &
+                \(\displaystyle x'=\gamma(x-Vt),\;\;
+                t'=\gamma\!\left(t-\frac{V}{c^2}x\right)\) &
+                \(t':\si{s}\) &
+                \(V\ll c\Rightarrow x'\simeq x-Vt,\; t'\simeq t-(V/c^2)x\) \\
+
+                \bottomrule
+            \end{tabular}
+            \caption{Dimensional and recovery-limit consistency checks (stand-alone v0.6.1 cheat-sheet table; consolidates the Canon’s “dimensional & recovery checks” list and the “Table XI” summary items).}
+            \label{tab:dim_recovery_checks}
+        \end{table}
+
+\end{document}

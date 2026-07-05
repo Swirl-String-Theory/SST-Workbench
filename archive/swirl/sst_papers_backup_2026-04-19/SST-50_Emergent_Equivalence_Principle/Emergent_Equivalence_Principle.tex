@@ -1,0 +1,393 @@
+% =====================================================================
+% Foundations of Physics (FoP) -- Converted Manuscript to Reusable Template
+% Omar Iskandarani
+% Date: 2025-12-22
+% Affiliation: Independent Researcher, Groningen, The Netherlands
+% License: © 2025 Omar Iskandarani. All rights reserved. Academic reading/citation only.
+% ORCID: 0009-0006-1686-3961
+% DOI: 10.5281/zenodo.18018114
+%
+% Notes:
+% - Single .tex file (no \input{...}); figures attached separately.
+% - This file is already in the Springer Nature sn-jnl format (FoP-compatible).
+% =====================================================================
+
+% =========================
+% 1) Document class choice
+% =========================
+% referee option -> double line spacing for review
+% \documentclass[referee,pdflatex,sn-mathphys-num]{sn-jnl}
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+% =========================
+% 2) Core packages (keep lean)
+% =========================
+% NOTE: sn-jnl.cls already loads hyperref; to avoid option clashes we
+% do not load it again here. Use sn-jnl's built-in hyperlink setup.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+
+% Optional (only if needed)
+% \usepackage{bm}
+% \usepackage{siunitx}
+% \usepackage[title]{appendix}
+% \usepackage{xcolor}
+
+% ====================================
+% 3) Theorem environments (as needed)
+% ====================================
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{thmstyletwo}
+\newtheorem{remark}{Remark}
+
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+% ====================================
+% 4) Paper metadata macros (edit here)
+% ====================================
+\newcommand{\paperdoi}{10.5281/zenodo.18018114}
+\newcommand{\papertitle}{Emergent Equivalence Principle from Relational Time and Connection Dynamics}
+\newcommand{\papershorttitle}{Emergent Equivalence Principle}
+\newcommand{\paperorcid}{0009-0006-1686-3961}
+\newcommand{\paperemail}{info@omariskandarani.com}
+\newcommand{\papercity}{Groningen}
+\newcommand{\papercountry}{The Netherlands}
+\newcommand{\paperkeywords}{relational time, equivalence principle, teleparallel gravity, causal structure, quantum clocks}
+
+% ====================================
+% 5) Document starts
+% ====================================
+\raggedbottom
+
+\begin{document}
+
+    \title[\papershorttitle]{\papertitle}
+
+% ---- Single-author block (FoP style)
+    \author*[1]{\fnm{Omar} \sur{Iskandarani}}\email{\paperemail}
+
+    \affil*[1]{\orgname{Independent Researcher}, \orgaddress{\city{\papercity}, \country{\papercountry}}}
+
+% ====================================
+% 6) Abstract and keywords
+% ====================================
+    \abstract{%
+        The Equivalence Principle (EP) has long guided the geometric interpretation of gravitation, yet its foundational status has become increasingly ambiguous. This ambiguity arises from three independent developments: operational derivations of relativistic kinematics from causality alone, relational formulations of quantum dynamics based on clock--system correlations, and the geometric trinity of gravity, in which curvature-, torsion-, and non-metricity-based formulations are dynamically equivalent but conceptually distinct. In this work, we synthesize these lines into a unified framework. Lorentzian causal structure is fixed operationally, while gravitational redshift and effective Newtonian interaction terms emerge from relational time dynamics under mild deformations of the Hamiltonian constraint. Within this setting, the EP is naturally reinterpreted as an emergent low-energy symmetry rather than a fundamental axiom. The main contribution is a structural synthesis that identifies which components of the usual EP narrative are logically primary and which are recovered as low-energy consequences of relational clock dynamics and connection-based encodings. We delineate the domain in which this reinterpretation is valid, clarify the role of the affine connection in mediating inertial and gravitational effects, and identify coherence-dependent corrections to redshift as a well-defined target for quantum-clock experiments.%
+    }
+
+    \keywords{\paperkeywords}
+
+    \maketitle
+
+% ============================================================
+    \section{Introduction}\label{sec:intro}
+        The Equivalence Principle (EP) is often presented as the conceptual cornerstone of General Relativity (GR), motivating the identification of gravitation with spacetime curvature and the universality of free fall \cite{Will2014}. At the same time, multiple strands of contemporary research suggest that the EP may be (at least partially) \emph{theory-laden} and not uniquely decisive for gravitational foundations. First, relativistic kinematics can be derived from operational assumptions about observers, signaling, and causality, without privileged reference to electromagnetism \cite{Pineda2026,Zeeman1964}. Second, relational-time approaches to quantum dynamics show that effective gravitational redshift and Newtonian interaction terms can arise from clock--energy couplings in a Wheeler--DeWitt-like constraint, even when the underlying subsystems are otherwise non-interacting \cite{SinghFriedrich2025,PageWootters1983}. Third, the ``geometric trinity'' demonstrates that curvature-, torsion-, and non-metricity-based formulations of gravity can be dynamically equivalent while remaining conceptually inequivalent, with distinct relationships to EP assumptions \cite{ManciniTinoCapozziello2025,BeltranJimenez2018,AldrovandiPereira2013}.
+
+        This paper develops a conservative synthesis of these ideas in strictly mainstream terms. We adopt (i) an operational causal scaffold for inertial structure, (ii) a relational-time framework for conditional dynamics, and (iii) a metric-affine viewpoint on gravitation. The central claim is interpretive and structural: \emph{the EP is naturally reinterpreted as an emergent low-energy symmetry that can be recovered without being postulated}. The goal is not to modify established phenomenology, but to clarify which components are logically prior, which are emergent, and where quantum-coherence effects may introduce controlled deviations.
+
+        \paragraph{Scope and claims.}
+            This article is a foundations-level synthesis. It does not propose a modification of General Relativity as a phenomenological framework, nor does it posit additional long-range forces or composition-dependent violations of equivalence. The objective is to clarify logical dependencies among (i) operational derivations of inertial structure from causality, (ii) relational-time dynamics for quantum systems, and (iii) connection-based encodings of gravitation, and to identify a controlled regime in which the Equivalence Principle is most naturally interpreted as an emergent low-energy symmetry.
+
+        \paragraph{Contributions and roadmap.}
+            The main contributions are:
+            \begin{enumerate}
+                \item an operational summary of how Lorentzian inertial structure is fixed by causal order and signaling assumptions (Section~\ref{sec:causality});
+                \item a concise operator-theoretic statement of the low-energy expansion of the relational effective Hamiltonian and the resulting universal energy--energy cross-term (Section~\ref{sec:relationaltime}, Proposition~\ref{prop:neumann});
+                \item a perspectival interpretation of relational time and gravitational encoding as mutually compatible local descriptions without a globally preferred clock (Section~\ref{sec:perspectival});
+                \item a clarification of how weak-field redshift and Newtonian limits appear in the relational description, together with an explicit statement of what remains open regarding distance dependence (Section~\ref{sec:redshift_newton});
+                \item an interpretation of the geometric trinity as geometric underdetermination of the same empirical content (Section~\ref{sec:trinity});
+                \item a synthesis in which the Equivalence Principle is reinterpreted as an emergent low-energy organizing symmetry, with coherence-dependent redshift corrections as a concrete target for quantum-clock experiments (Sections~\ref{sec:emergence}--\ref{sec:phenom}).
+            \end{enumerate}
+
+% ============================================================
+    \section{Causality as the Origin of Relativistic Kinematics}\label{sec:causality}
+        \subsection{Operational definition of observers and events}\label{subsec:observers}
+            An operational approach begins by treating an ``observer'' as a localized system equipped with a clock and measurement/emission capabilities. Events are indexed by the observer's proper-time reading. This minimal structure formalizes the intuition that space and time acquire meaning only through procedures of registration and communication \cite{Pineda2026}.
+
+        \subsection{Finite signal propagation and universal distance}\label{subsec:distance}
+            If distinct observers require finite time to exchange information, then ``distance'' can be operationalized via round-trip signaling times. Minimizing over available messengers defines a universal distance notion and singles out ``limit messengers'' that saturate the minimum. This construction yields a maximal information-transfer speed without postulating any specific field theory \cite{Pineda2026}.
+
+        \subsection{Causal automorphisms and the Lorentz group}\label{subsec:lorentz}
+            For inertial frames defined by Euclidean spatial distance properties, preservation of causal order constrains admissible transformations. Classic results (Alexandrov--Zeeman type) show that causal automorphisms in Minkowski space generate the inhomogeneous Lorentz group (Poincar\'e group) times dilatations \cite{Zeeman1964}. This supplies a kinematic backbone: Lorentzian causal structure is fixed by causality and operational distinguishability, rather than by any particular interaction.
+
+% ============================================================
+    \section{Relational Time in Quantum Mechanics}\label{sec:relationaltime}
+        \subsection{Page--Wootters conditional dynamics}\label{subsec:pw}
+            Relational-time approaches address the ``problem of time'' by embedding dynamics in correlations between a clock subsystem and the rest of the system. In the Page--Wootters construction, physical states satisfy a Hamiltonian constraint, while conditional states defined at clock readings exhibit Schr\"odinger evolution \cite{PageWootters1983,Wootters1984,DeWitt1967}. The essential structural point is that a global stationary constraint can encode effective temporal flow relative to an internal clock.
+
+        \subsection{Constraint deformations and clock--energy coupling}\label{subsec:deformations}
+            To incorporate backreaction-like effects, one may deform the constraint by adding coupling terms between the clock degree of freedom and the system Hamiltonian. A representative ansatz is
+            \begin{equation}
+                \hat{J} \;\equiv\; \hat{p}_t\otimes \hat{I}_S \;+\; \hat{I}_t\otimes \hat{H}_S \;+\; \frac{1}{\Lambda}\,\hat{p}_t\otimes \hat{H}_S \;\approx\; 0,
+                \label{eq:deformed_constraint}
+            \end{equation}
+            where $\Lambda$ is an energy scale controlling the deformation \cite{SinghFriedrich2025}. Conditioning on clock readings yields an effective, energy-dependent phase rate, and in suitable regimes can be summarized by an effective Hamiltonian
+            \begin{equation}
+                \hat{H}_{\rm eff} \;=\; \hat{H}_S \bigl(\hat{I}_S + \hat{H}_S/\Lambda\bigr)^{-1},
+                \label{eq:Heff}
+            \end{equation}
+            under assumptions on domains and spectral support (Appendix~\ref{app:domains}).
+
+        \begin{proposition}[Low-energy expansion of the relational effective Hamiltonian]
+        \label{prop:neumann}
+        Let $\hat{H}_S$ be a self-adjoint operator on a Hilbert space with a spectral restriction to a subspace on which $\|\hat{H}_S\| < \Lambda$ for some $\Lambda>0$. Then the operator $(\hat{I}_S+\hat{H}_S/\Lambda)^{-1}$ exists on that subspace and admits the convergent Neumann series
+        \begin{equation}
+        (\hat{I}_S+\hat{H}_S/\Lambda)^{-1}
+        =\sum_{n=0}^{\infty}(-1)^n(\hat{H}_S/\Lambda)^n,
+        \end{equation}
+        so that the effective Hamiltonian
+        $\hat{H}_{\rm eff}=\hat{H}_S(\hat{I}_S+\hat{H}_S/\Lambda)^{-1}$
+        has the expansion
+        \begin{equation}
+        \hat{H}_{\rm eff}
+        =\hat{H}_S-\frac{1}{\Lambda}\hat{H}_S^2 + O(\Lambda^{-2})
+        \qquad (\|\hat{H}_S\|/\Lambda \ll 1).
+        \end{equation}
+        If $\hat{H}_S=\hat{H}_A+\hat{H}_B$ with $[\hat{H}_A,\hat{H}_B]=0$ on the subspace, then the $O(\Lambda^{-1})$ contribution contains the universal cross-term
+        \begin{equation}
+        -\frac{2}{\Lambda}\,\hat{H}_A\otimes \hat{H}_B.
+        \end{equation}
+        \end{proposition}
+
+        \begin{remark}
+        The spectral restriction can be interpreted as a low-energy sector condition or enforced by a bounded-spectrum truncation of the clock and system degrees of freedom. This is the natural regime in which the perturbative interpretation of $\Lambda$ as controlling ``weak'' relational deformation is operationally meaningful \cite{SinghFriedrich2025}.
+        \end{remark}
+
+        \subsection{Emergent interaction terms for composite systems}\label{subsec:emergent}
+            For a bipartite system with $\hat{H}_S=\hat{H}_A+\hat{H}_B$ and $|\hat{H}_S|\ll \Lambda$, expansion of \eqref{eq:Heff} yields
+            \begin{equation}
+                \hat{H}_{\rm eff} \;\approx\;
+                \hat{H}_A+\hat{H}_B \;-\;\frac{1}{\Lambda}\bigl(\hat{H}_A^2+\hat{H}_B^2+2\,\hat{H}_A\otimes \hat{H}_B\bigr)\;+\;O(\Lambda^{-2}),
+                \label{eq:Heff_expand}
+            \end{equation}
+        confirming the appearance of the universal cross-term $-(2/\Lambda)\hat{H}_A\otimes \hat{H}_B$ already identified in Proposition~\ref{prop:neumann} \cite{SinghFriedrich2025}.
+        This term has the same algebraic form as an energy--energy interaction, and can be parameter-matched to Newtonian gravity in the weak-field limit when a distance dependence is supplied as an external identification (see Section~\ref{sec:redshift_newton}).
+
+        % ============================================================
+    \section{Perspectival Structure of Relational Time and Gravity}
+    \label{sec:perspectival}
+
+    A recurring lesson from quantum foundations is that physically meaningful descriptions are formulated relative to internally specified contexts, rather than from a single global ``view from nowhere.'' In an endo-theoretic formulation of perspectivism, perspectives are theory-internal structures characterized by finite resolution, context-dependent Boolean event algebras, and locally well-defined truth assignments \cite{KarakostasZafiris2025}. In this setting, global non-Boolean structure is recovered from the network of interrelated local perspectives, while no globally valid Boolean valuation exists.
+
+    Relational formulations of time fit naturally into this viewpoint. In Page--Wootters-type constructions, effective temporal evolution arises conditionally relative to a chosen clock subsystem, while the global state satisfies a stationary constraint \cite{PageWootters1983,Wootters1984}. Each choice of clock thereby defines a local temporal ordering and a corresponding domain of operationally meaningful events. From a perspectival standpoint, the absence of a globally preferred clock is a structural feature rather than a defect: different clocks instantiate different, internally consistent temporal perspectives.
+
+    When gravitational effects are modeled through universal clock--energy couplings in a deformed Hamiltonian constraint, the perspectival character becomes unavoidable \cite{SinghFriedrich2025}. Proper time is then most naturally treated as a dynamical observable encoded in correlations, and gravitational time dilation is understood as a relational distortion between clock perspectives rather than as an externally imposed effect of a background metric. This interpretation is compatible with the geometric trinity: curvature-, torsion-, and non-metricity-based formulations provide dynamically equivalent encodings of the same empirical content while remaining conceptually distinct \cite{BeltranJimenez2018,AldrovandiPereira2013,ManciniTinoCapozziello2025}. Within a perspectival framework, such geometric underdetermination is expected: global geometric objects function as effective summaries of how locally valid dynamical descriptions are consistently ``glued'' together.
+
+    This motivates a refined reading of the Equivalence Principle. In the present synthesis, equivalence is not treated as a fundamental axiom but as a low-energy symmetry governing the mutual compatibility of local perspectives. Universality of free fall and the effective equality of inertial and gravitational mass correspond to regimes in which relational time distortions become insensitive to coherence details and internal structure, while departures from that regime naturally motivate coherence-dependent redshift corrections as the relevant experimental signature.
+
+% ============================================================
+    \section{Gravitational Redshift and Newtonian Limit from Relational Dynamics}\label{sec:redshift_newton}
+        \subsection{Proper time as an internal clock observable}\label{subsec:propertime}
+            To discuss redshift relationally, one models a subsystem as an internal clock (proper-time degree of freedom) and studies how its conditional evolution compares with an external coordinate time parameter derived from the global clock \cite{SinghFriedrich2025}. Proper time becomes an observable encoded in correlations, not a background parameter.
+
+        \subsection{Weak-field redshift}\label{subsec:weakfield}
+            For a massive source subsystem and a light clock subsystem, the deformation scale $\Lambda$ induces a shift in the clock's effective tick rate relative to coordinate time. In the appropriate low-energy regime, this reproduces leading-order gravitational time dilation (Schwarzschild weak-field redshift) upon identifying $1/\Lambda$ with a Newtonian potential scale \cite{SinghFriedrich2025,Will2014}.
+
+        \subsection{Remarks on distance dependence}\label{subsec:distance_dependence}
+            In the relational constraint model, the functional dependence on separation $r$ is not derived unless spatial degrees of freedom (or spatial reference frames) are modeled explicitly. Consequently, the emergence is best stated as: the deformation generates an \emph{energy--energy} coupling and associated redshift structure; matching to Newtonian $GM/r$ requires an additional modeling step for spatial separation. This motivates future work incorporating quantum reference frames for position or operational distance assignments consistent with causal structure \cite{Pineda2026}.
+
+        \subsection{High-energy saturation and UV softening}\label{subsec:uv}
+            A notable feature of \eqref{eq:Heff} is the saturation of phase rates at high energies, which can soften divergences in certain regimes and provides a principled place to investigate ultraviolet behavior without committing to a full quantum-gravity completion \cite{SinghFriedrich2025}. We treat this as an effective-theory observation rather than a fundamental claim.
+
+% ============================================================
+    \section{Metric-Affine Gravity and the Geometric Trinity}\label{sec:trinity}
+        \subsection{Metric and connection as independent structures}\label{subsec:metric_affine}
+            In a metric-affine framework the metric $g_{\mu\nu}$ and connection $\Gamma^\lambda_{\mu\nu}$ are conceptually distinct. Curvature, torsion, and non-metricity characterize different geometric properties of $\Gamma^\lambda_{\mu\nu}$, and different gravitational formulations can be organized by which of these is taken as primary \cite{AldrovandiPereira2013,BeltranJimenez2018}.
+
+        \subsection{GR, TEGR, and STEGR: dynamical equivalence}\label{subsec:equivalence}
+            The geometric trinity shows that GR (curvature) is dynamically equivalent to TEGR (torsion) and STEGR (non-metricity) up to boundary terms in the action, yielding identical classical field equations in their standard ``equivalent'' forms \cite{BeltranJimenez2018,AldrovandiPereira2013}. This equivalence underwrites a form of geometric underdetermination: multiple geometric interpretations can encode the same empirical content.
+
+        \subsection{Conceptual inequivalence and the status of the EP}\label{subsec:conceptual}
+            Despite dynamical equivalence, the conceptual role of the EP differs across these formulations, especially regarding whether inertial and gravitational effects are unified \emph{by postulate} or \emph{by derived structure}. A detailed discussion of how EP formulations map onto the trinity, and how empirical indistinguishability coexists with conceptual distinctions, is given in \cite{ManciniTinoCapozziello2025}.
+
+% ============================================================
+    \section{The Equivalence Principle Reconsidered}\label{sec:ep}
+        \subsection{EP variants and their empirical role}\label{subsec:variants}
+            It is useful to separate weak equivalence (universality of free fall), Einstein equivalence (local Lorentz and position invariance for non-gravitational physics), and strong equivalence (including gravitational self-energy). Precision tests constrain violations tightly in many regimes \cite{Will2014}.
+
+        \subsection{EP as an axiom in curvature-based gravity}\label{subsec:axiom}
+            In standard presentations of GR, the EP motivates local identification of gravity with geometry: locally inertial frames eliminate gravitational effects by coordinate choice, suggesting gravity is not a force but spacetime curvature. This narrative is powerful, but it is not the only viable foundation, particularly in metric-affine or gauge formulations \cite{ManciniTinoCapozziello2025}.
+
+        \subsection{EP as emergent in teleparallel and symmetric teleparallel formulations}\label{subsec:teleparallel}
+            In TEGR and STEGR, inertial and gravitational contributions can be separated at the level of the connection (e.g., inertial spin connection versus torsion/contortion contributions), and EP-like phenomenology can be recovered without treating the EP as fundamental. This supports the interpretive stance that the EP may be a low-energy symmetry emergent from deeper connection dynamics \cite{ManciniTinoCapozziello2025,BeltranJimenez2018,AldrovandiPereira2013}.
+
+% ============================================================
+    \section{Emergence of the Equivalence Principle from Relational Time and Connection Dynamics}\label{sec:emergence}
+        \subsection{Synthesis: causal scaffold, relational dynamics, and geometric underdetermination}\label{subsec:synthesis}
+            We now combine the three pillars:
+            (i) causality fixes the Lorentzian kinematic scaffold \cite{Pineda2026,Zeeman1964};
+            (ii) relational constraints generate effective redshift and energy--energy interaction structure \cite{SinghFriedrich2025,PageWootters1983};
+            (iii) the same phenomenology can be encoded in curvature, torsion, or non-metricity language \cite{ManciniTinoCapozziello2025,BeltranJimenez2018}.
+            Within this synthesis, the EP is naturally reinterpreted as an emergent organizing principle governing the low-energy regime where (a) operational causal structure is Minkowskian locally, (b) relational deformations are perturbative, and (c) different geometric codings are empirically equivalent.
+
+        \subsection{Low-energy universality and effective mass equivalence}\label{subsec:universality}
+            In the weak-deformation regime, the effective coupling is universal in the sense that it depends on subsystem Hamiltonians (energy content), not on composition-specific couplings. Universality of free fall and effective equality of inertial and gravitational mass can then be seen as a consequence of the relational structure rather than an independent postulate \cite{SinghFriedrich2025,ManciniTinoCapozziello2025}.
+
+        \subsection{Controlled conditions for deviations}\label{subsec:deviations}
+            This viewpoint suggests clear conditions under which deviations might occur: finite-resolution clocks, energy superpositions of ``source'' subsystems, or regimes where the effective constraint deformation is not perturbative. Such deviations are not generic EP violations in the classical sense; rather, they manifest as coherence- or state-dependent corrections to conditional time evolution \cite{SinghFriedrich2025}. This motivates an experimental focus on quantum-clock coherence and relational redshift signatures \cite{SmithAhmadi2020,CastroRuiz2017}.
+
+% ============================================================
+    \section{Phenomenology and Experimental Outlook}\label{sec:phenom}
+        \subsection{Consistency with established weak-field tests}\label{subsec:consistency}
+            Any foundational reinterpretation must reproduce standard redshift and Newtonian limits in the domain where GR is validated \cite{Will2014}. The relational-clock mechanism does so at leading order after appropriate identification of the deformation scale with the Newtonian potential scale \cite{SinghFriedrich2025}. The geometric trinity ensures equivalent classical phenomenology across curvature/torsion/non-metricity codings \cite{ManciniTinoCapozziello2025,BeltranJimenez2018}.
+
+        \subsection{Quantum-clock probes}\label{subsec:qclocks}
+            Quantum-clock interferometry and related proposals provide a natural arena in which coherence-dependent corrections could be bounded \cite{SmithAhmadi2020,CastroRuiz2017}. The key advantage is conceptual: one can target deviations that are \emph{intrinsically relational} rather than ``fifth-force''-like.
+
+        \subsection{Open problem: deriving distance dependence}\label{subsec:openproblem}
+            A central open task is deriving (or operationally implementing) the separation dependence that, in Newtonian gravity, yields $1/r$. Operational distance notions consistent with causality exist \cite{Pineda2026}; integrating them into relational constraint models is a concrete route forward.
+
+% ============================================================
+    \section{Discussion}\label{sec:discussion}
+        We have presented a conservative unification of operational causality, relational time, and connection-based gravity. The synthesis supports an interpretation in which Lorentzian causal structure is operationally primary, while gravitational redshift and Newtonian interactions can arise effectively from relational constraints, and the EP is a low-energy emergent symmetry compatible with multiple geometric codings. This view does not compete with GR as a predictive framework; rather it clarifies the logical dependencies among its standard postulates, and highlights well-defined targets for quantum-coherence experiments.
+
+% ============================================================
+    \section{Conclusion}\label{sec:conclusion}
+        Causality-based operational constructions fix relativistic kinematics without privileged reference to electromagnetism \cite{Pineda2026,Zeeman1964}. Relational-time dynamics with mild constraint deformations can generate effective gravitational redshift and energy--energy interactions \cite{SinghFriedrich2025,PageWootters1983}. The geometric trinity establishes that identical classical phenomenology admits inequivalent geometric interpretations, and that the EP is not obligatorily fundamental in teleparallel or symmetric teleparallel formulations \cite{ManciniTinoCapozziello2025,BeltranJimenez2018}. Taken together, these results motivate treating the EP as emergent, and they identify coherence-dependent redshift corrections as a natural experimental frontier.
+
+% ============================================================
+        \backmatter
+
+        \bmhead{Acknowledgements}
+        Not applicable.
+
+        \bmhead{Declarations}
+
+        \subsection*{Funding}
+            Not applicable.
+
+        \subsection*{Competing interests}
+            The author declares no competing interests.
+
+        \subsection*{Ethics approval}
+            Not applicable.
+
+        \subsection*{Consent to participate}
+            Not applicable.
+
+        \subsection*{Consent for publication}
+            Not applicable.
+
+        \subsection*{Data availability}
+            Not applicable.
+
+        \subsection*{Code availability}
+            Not applicable.
+
+        \subsection*{Author contributions}
+            O.I. conceived the study, developed the analysis, performed the derivations, and wrote the manuscript.
+
+% ============================================================
+            \appendix
+    \section{Operator Domains and Regularization of Effective Evolution}\label{app:domains}
+        The expression $\hat{H}_{\rm eff}=\hat{H}_S(\hat{I}+\hat{H}_S/\Lambda)^{-1}$ requires care when $\hat{H}_S$ is unbounded or when the spectrum overlaps $-\Lambda$. In practice, one may:
+        (i) restrict to low-energy sectors $|\hat{H}_S|\ll \Lambda$ and work perturbatively as in \eqref{eq:Heff_expand};
+        (ii) model clocks and systems with bounded spectra (finite-dimensional truncations);
+        (iii) introduce spectral cutoffs or smearing corresponding to finite clock resolution.
+        These choices are standard in effective treatments of relational time \cite{SinghFriedrich2025,PageWootters1983}.
+
+% ============================================================
+% References
+% ============================================================
+% If you prefer single-file submission without BibTeX, keep thebibliography below.
+        \begin{thebibliography}{99}
+
+            \bibitem{Pineda2026}
+            A.~Pineda,
+            \textit{Relativity: A Matter of Causality},
+            Foundations of Physics \textbf{56} (2026) 2.
+            doi:10.1007/s10701-025-00897-4
+
+            \bibitem{Zeeman1964}
+            E.~C.~Zeeman,
+            \textit{Causality implies the Lorentz group},
+            Journal of Mathematical Physics \textbf{5} (1964) 490--493.
+            doi:10.1063/1.1704140
+
+            \bibitem{Kreinovich1994}
+            V.~Kreinovich,
+            \textit{Approximately measured causality implies the Lorentz group: Alexandrov--Zeeman result made more realistic},
+            International Journal of Theoretical Physics \textbf{33} (1994) 1733--1747.
+            doi:10.1007/BF00672697
+
+            \bibitem{PageWootters1983}
+            D.~N.~Page and W.~K.~Wootters,
+            \textit{Evolution without evolution: Dynamics described by stationary observables},
+            Physical Review D \textbf{27} (1983) 2885.
+            doi:10.1103/PhysRevD.27.2885
+
+            \bibitem{Wootters1984}
+            W.~K.~Wootters,
+            \textit{``Time'' replaced by quantum correlations},
+            International Journal of Theoretical Physics \textbf{23} (1984) 701--711.
+            doi:10.1007/BF02214098
+
+            \bibitem{DeWitt1967}
+            B.~S.~DeWitt,
+            \textit{Quantum Theory of Gravity. II. The Manifestly Covariant Theory},
+            Physical Review \textbf{162} (1967) 1195--1239.
+            doi:10.1103/PhysRev.162.1195
+
+            \bibitem{ManciniTinoCapozziello2025}
+            C.~Mancini, G.~M.~Tino, and S.~Capozziello,
+            \textit{Equivalent Gravities and Equivalence Principle: Foundations and Experimental Implications},
+            Foundations of Physics \textbf{56} (2026) 1 (online 2025).
+            doi:10.1007/s10701-025-00882-x
+
+            \bibitem{AldrovandiPereira2013}
+            R.~Aldrovandi and J.~G.~Pereira,
+            \textit{Teleparallel Gravity: An Introduction},
+            Springer (2013).
+            doi:10.1007/978-94-007-5143-9
+
+            \bibitem{BeltranJimenez2018}
+            J.~Beltr\'an~Jim\'enez, L.~Heisenberg, and T.~S.~Koivisto,
+            \textit{Coincident General Relativity},
+            Physical Review D \textbf{98} (2018) 044048.
+            doi:10.1103/PhysRevD.98.044048
+
+            \bibitem{Will2014}
+            C.~M.~Will,
+            \textit{The Confrontation between General Relativity and Experiment},
+            Living Reviews in Relativity \textbf{17} (2014) 4.
+            doi:10.12942/lrr-2014-4
+
+            \bibitem{SmithAhmadi2020}
+            A.~R.~H.~Smith and M.~Ahmadi,
+            \textit{Quantum clocks observe classical and quantum time dilation},
+            Nature Communications \textbf{11} (2020) 5360.
+            doi:10.1038/s41467-020-18264-4
+
+            \bibitem{CastroRuiz2017}
+            E.~Castro-Ruiz, F.~Giacomini, and \v{C}.~Brukner,
+            \textit{Entanglement of quantum clocks through gravity},
+            Proceedings of the National Academy of Sciences \textbf{114} (2017) E2303--E2309.
+            doi:10.1073/pnas.1616427114
+
+            \bibitem{SinghFriedrich2025}
+            A.~Singh and O.~Friedrich,
+            \textit{Emergence of Gravitational Potential and Time Dilation from Non-interacting Systems Coupled to a Global Quantum Clock},
+            Foundations of Physics \textbf{55} (2025) 82.
+            doi:10.1007/s10701-025-00893-8
+% Optional: arXiv:2304.01263
+
+            \bibitem{KarakostasZafiris2025}
+            V.~Karakostas and E.~Zafiris,
+            \textit{Contemporary Perspectivism as a Framework of Scientific Inquiry in Quantum Mechanics and Beyond},
+            Foundations of Physics \textbf{55} (2025) 76.
+            doi:10.1007/s10701-025-00888-5
+% Optional: arXiv:2511.05504
+
+        \end{thebibliography}
+
+\end{document}

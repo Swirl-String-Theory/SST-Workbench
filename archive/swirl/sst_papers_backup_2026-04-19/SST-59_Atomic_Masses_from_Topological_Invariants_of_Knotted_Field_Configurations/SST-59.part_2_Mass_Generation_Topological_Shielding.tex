@@ -1,0 +1,295 @@
+
+\documentclass[11pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{amsthm}
+
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+\title{\textbf{Mass Generation via Topological Shielding Gates in Swirl String Theory}\\
+\large Rational-Concordance Constraints (Double-Twist) and an SEMF Bridge to Atomic Masses}
+\author{Auteur Naam \\ \textit{Swirl String Theory Research Group}}
+\date{\today}
+
+% ==========================================================
+% SST house macros (compile-safe; match Canon naming)
+% ==========================================================
+% context-aware swirl arrows (robust sizing)
+\newcommand{\swirlarrow}{%
+  \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+             {\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+             {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+             {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+}
+\newcommand{\swirlarrowcw}{%
+  \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+             {\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+             {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+             {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+}
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\vnorm}{\lVert \vswirl \rVert}
+\newcommand{\rhoF}{\rho_{\!f}}   % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}   % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}   % mass-equivalent density (=rhoE/c^2)
+\providecommand{\rc}{r_c}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present a self-contained effective mass model in which invariant rest mass is identified with a localized swirl-energy integral and modulated by topology through a compact, testable kernel. The central deliverable is a single factorized master equation
+\[
+M(T)=\Big(\frac{4}{\alpha}\Big)^{S(T)}\,k(T)^{-3/2}\,\phi^{-g_4(T)}\,n(T)^{-1/\phi}\;\Big(M_0\,L_{\mathrm{ideal}}(T)\Big),
+\]
+where \(L_{\mathrm{ideal}}\) is a dimensionless ropelength proxy, \(k\) is a spectral/complexity index, \(n\) is component count, and \(g_4\) is the \emph{slice genus} (a concordance-invariant genus measure). We explicitly constrain the kernel by requiring robustness under (rational) concordance moves and, as a concrete genus-one testbed, we incorporate the double-twist family \(K_{m,n}\) and its slice criterion, which provides a sharp on/off benchmark for the genus factor \cite{Lee2025DoubleTwist}. Non-original ingredients (ropelength energetics, discrete scale invariance, concordance constraints) are cited; SST-specific identifications are labeled as postulates.
+\par\smallskip
+\textbf{New in SST-59 (hard-formalized):} (i) we replace the narrative ``shielding'' discussion by a \emph{binary shielding gate}
+\(\mathsf{G}(T)\in\{0,1\}\) that decides whether the amplification \((4/\alpha)\) is active; (ii) we incorporate rational concordance of
+double-twist knots \(K_{m,n}\) as a \emph{hard constraint} on \(\mathsf{G}\) via a theorem-level characterization of rational sliceness; and
+(iii) we add a bridge model to atomic masses by subtracting an SEMF-like binding functional that is explicitly compatible with the master kernel.
+\end{abstract}
+
+\paragraph{Scope \& status.}
+This paper (Part~II) formalizes \emph{topological admissibility constraints} on topology-indexed mass kernels used in the effective mass functional program. The goal is not to postulate new forces but to restrict the space of allowed kernel assignments by computable 4D-topological criteria.
+
+\paragraph{Assumptions (Euler--Kelvin + topological sectoring).}
+\begin{itemize}
+    \item \textbf{Same dynamical regime as Part~I}: incompressible, inviscid, barotropic; no reconnection.
+    \item \textbf{Topological sector decomposition}: configurations are partitioned into equivalence classes $T$ (knot/link types plus admissible deformations) with well-defined invariants.
+    \item \textbf{Kernel ansatz}: a dimensionless kernel $\mathcal{K}(T)$ is permitted only when $T$ satisfies a stated admissibility criterion; otherwise it is excluded from the model class.
+    \item \textbf{No continuous Yukawa-like tuning}: only discrete indices/invariants label admissible kernel structure in this part.
+\end{itemize}
+
+\paragraph{What is claimed vs.\ not claimed.}
+\begin{itemize}
+    \item \textbf{Claimed:} A binary admissibility map $\mathsf{G}(T)\in\{0,1\}$ can be defined from concordance-based (4D-topological) constraints and used as a \emph{selection rule} that restricts the allowed kernel classes $\mathcal{K}(T)$.
+    \item \textbf{Not claimed:} We do not claim a proven microscopic necessity that a specific constant (e.g.\ $4/\alpha$) is ``dictated'' by a single invariant; rather, we present a falsifiable constraint program: certain kernel normalizations/ans\"atze are allowed or excluded by computable topological criteria.
+\end{itemize}
+
+\paragraph{Observable definition (what is measured).}
+The observable output of Part~II is a set of \emph{testable admissibility predictions}:
+given a configuration class $T$, the model predicts either
+\begin{equation}
+\mathsf{G}(T)=1 \ \ (\text{admissible}) \quad \text{or} \quad \mathsf{G}(T)=0 \ \ (\text{excluded}),
+\label{eq:obs_partII_gate}
+\end{equation}
+together with the induced restriction on the mass-kernel assignment $\mathcal{K}(T)$.
+These predictions become measurable in Part~III by checking whether only admissible classes can consistently reproduce mass hierarchies under a single fixed normalization, and by identifying outliers as violations of the admissibility criterion rather than as fit freedom.
+
+\section{Introduction}
+Standard Model particle masses are currently free parameters determined by Yukawa couplings to the Higgs field. Swirl String Theory (SST) proposes an alternative origin: mass is the invariant energy of a topological defect (vortex) in a continuous medium.
+
+In this framework, the rest mass $M$ is defined by the volume integral of the swirl energy density $\rho_E$:
+\begin{equation}
+    M = \frac{1}{c^2} \iiint_V \left( \frac{1}{2}\rho_{\text{core}} \vnorm^2 + P_{\text{top}} \right)\, dV
+\end{equation}
+This paper derives the scaling laws that map knot topology ($T$) to physical mass, identifying three key mechanisms: geometric ropelength, spectral suppression, and vacuum coupling amplification.
+
+\section{The SST Master Equation}
+We propose the following unified mass formula for a stable topological defect $T$:
+
+\begin{equation}
+    M(T) =
+    \underbrace{\left( \frac{4}{\alpha} \right)^{\mathsf{G}(T)}}_{\text{Vacuum Coupling (gate)}}
+    \cdot \underbrace{n^{-1/\phi}}_{\text{Coherence}}
+    \cdot \underbrace{k^{-3/2}}_{\text{Spectral}}
+    \cdot \underbrace{\left( M_0 \cdot L_{\text{ideal}}(T) \right)}_{\text{Geometric Base}}
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $M_0$: The fundamental vortex mass unit per unit dimensionless length.
+    \item $L_{\text{ideal}}$: The ropelength of the ideal knot configuration.
+    \item $k$: The dominant spectral mode (symmetry order) of the knot.
+    \item $n$: The number of linked components.
+    \item $\alpha^{-1}$: The fine-structure constant ($\approx 137.036$).
+    \item $\mathsf{G}(T)\in\{0,1\}$: the \emph{shielding gate}.  \(\mathsf{G}(T)=0\) means ``perfect shielding'' and \((4/\alpha)\) is \emph{off};
+    \(\mathsf{G}(T)=1\) means shielding is broken and \((4/\alpha)\) is \emph{on}.  Section~\ref{sec:gate} makes this formal.
+    \item $\phi$: The Golden Ratio ($\approx 1.618$), governing topological coherence.
+\end{itemize}
+
+\section{A formal shielding gate from rational sliceness}\label{sec:gate}
+\subsection{Why a gate (not a narrative)}
+The master kernel uses a large discrete amplification scale \((4/\alpha)\).  To keep the model checkable, the activation of this factor must be
+\emph{decidable} from topology/invariants rather than prose.  We therefore define a binary gate \(\mathsf{G}(T)\).
+
+\subsection{Rational concordance background (definitions)}
+\textbf{Convention.} We work in the smooth category.
+
+\begin{definition}[Rationally slice knot]\label{def:rationalslice}
+A knot \(K\subset S^3\) is \emph{rationally slice} if it bounds a smoothly embedded disk \(D\subset W\) in a smooth \(4\)-manifold \(W\) with
+\(\partial W=S^3\) and \(H_*(W;\mathbb{Q})\cong H_*(B^4;\mathbb{Q})\).
+\end{definition}
+
+\begin{definition}[Rational concordance group \(\mathcal{C}_{\mathbb{Q}}\)]
+Two knots \(K_0,K_1\subset S^3\) are \emph{rationally concordant} if \(K_0\#-K_1\) is rationally slice.
+The set of equivalence classes under connected sum forms an abelian group \(\mathcal{C}_{\mathbb{Q}}\) with identity the class of rationally slice knots.
+\end{definition}
+
+\subsection{Shielding gate (axiomatically tied to \(\mathcal{C}_{\mathbb{Q}}\))}
+\begin{definition}[Shielding gate]\label{def:gate}
+Define the shielding gate
+\[
+\mathsf{G}(T)=
+\begin{cases}
+0,& \text{if the knot/link type assigned to }T\text{ is rationally slice (i.e. }[T]=0\text{ in }\mathcal{C}_{\mathbb{Q}}\text{)}\\
+1,& \text{otherwise.}
+\end{cases}
+\]
+Equivalently, \(\mathsf{G}\) turns \((4/\alpha)\) \emph{off} exactly on the rationally-slice (``perfectly shielded'') topological sector.
+\end{definition}
+
+\paragraph{Operational consequence.}
+Given \(\mathsf{G}(T)\), the mass kernel is now strictly:
+\[
+M(T)=\left(\frac{4}{\alpha}\right)^{\mathsf{G}(T)}\,n^{-1/\phi}\,k^{-3/2}\,M_0\,L_{\mathrm{ideal}}(T).
+\]
+
+\section{Double-twist knots as a hard constraint on the gate}\label{sec:doubletwist}
+\subsection{Definition of the family \(K_{m,n}\)}
+\begin{definition}[Double twist knot \(K_{m,n}\)]\label{def:Kmn}
+Let \(K_{m,n}\) denote the double-twist knot with integer parameters \(m,n\), defined by the standard two-box double-twist diagram with
+\(m\) full twists in one twist region and \(n\) full twists in the other (sign convention as in \cite{Lee2025DoubleTwist}).
+\end{definition}
+
+\subsection{Exact rational sliceness characterization}
+\begin{theorem}[Rational sliceness of \(K_{m,n}\)]\label{thm:rationalsliceKmn}
+The double twist knot \(K_{m,n}\) is rationally slice if and only if
+\[
+mn=0 \quad\text{or}\quad n=-m \quad\text{or}\quad n=-m\pm 1.
+\]
+\end{theorem}
+\noindent\emph{Source:} Theorem~1.1 of \cite{Lee2025DoubleTwist}.  Earlier work established the ``if'' direction for
+subfamilies (e.g. \(K_{m,-m}\) rationally slice); the converse is the hard content used here as a constraint.
+
+\begin{corollary}[Explicit shielding gate on \(K_{m,n}\)]\label{cor:gateKmn}
+For the double-twist family,
+\[
+\mathsf{G}(K_{m,n})=
+\begin{cases}
+0,& mn=0\ \text{or}\ |m+n|\le 1,\\
+1,& \text{otherwise.}
+\end{cases}
+\]
+\end{corollary}
+
+\paragraph{Model use.}
+Whenever a particle assignment uses a double-twist sector \(K_{m,n}\), \(\mathsf{G}\) is no longer adjustable: it is fixed by
+Corollary~\ref{cor:gateKmn}. This converts ``shielding'' into a falsifiable topological decision rule.
+
+\section{Bridge to atomic masses via an SEMF-compatible binding functional}\label{sec:semf}
+\subsection{What SEMF is (and why it is a bridge)}
+The semi-empirical mass formula (SEMF, Bethe--Weizs\"acker liquid-drop model) approximates nuclear binding energy using volume/surface/Coulomb/asymmetry/pairing
+terms.  In SST-59 it functions as a \emph{phenomenological bridge}: it corrects the sum of constituent SST rest masses by a binding-energy subtraction,
+without modifying the fundamental particle kernel.
+
+\subsection{Atomic mass master equation (kernel + binding subtraction)}
+Let \(A=Z+N\).  Define the atomic mass (isotope) as
+\begin{equation}
+M_{\mathrm{atom}}(Z,N)\;=\; Z\,M_p^{\mathrm{SST}} + N\,M_n^{\mathrm{SST}} + Z\,M_e^{\mathrm{SST}}
+\;-\;\frac{E_{\mathrm{bind}}^{\mathrm{bridge}}(Z,N)}{c^2},
+\label{eq:MatomBridge}
+\end{equation}
+where each \(M_{p,n,e}^{\mathrm{SST}}\) is computed from the SST-59 kernel, and \(E_{\mathrm{bind}}^{\mathrm{bridge}}\) is the bridge functional.
+
+\subsection{SEMF bridge functional (drop-in)}
+We take
+\begin{equation}
+E_{\mathrm{bind}}^{\mathrm{bridge}}(Z,N)
+= a_V A - a_S A^{2/3} - a_C \frac{Z(Z-1)}{A^{1/3}} - a_A\frac{(A-2Z)^2}{A} + \delta(A,Z),
+\label{eq:SEMFbridge}
+\end{equation}
+with pairing
+\[
+\delta(A,Z)=
+\begin{cases}
+ +a_P A^{-1/2},& Z,N\ \text{even},\\
+ 0,& A\ \text{odd},\\
+ -a_P A^{-1/2},& Z,N\ \text{odd}.
+\end{cases}
+\]
+Equation~\eqref{eq:SEMFbridge} is standard (orthodox) nuclear phenomenology; within SST-59 it is explicitly a \emph{bridge model}, not a derivation.
+Any SST-specific topological modulation (optional) must enter as a controlled deformation of the coefficients \(a_i\), leaving the structure intact.
+
+\section{Derivation of Factors}
+
+\subsection{Geometric Base Mass ($M_0$)}
+Using the canonical SST constants for the vortex core radius $r_c$, core density $\rho_{\text{core}}$, and swirl velocity $v_{\circlearrowleft}$, the unit mass is derived as:
+\begin{equation}
+    M_0 = \frac{\pi r_c^3 \cdot \frac{1}{2}\rho_{\text{core}} v_{\circlearrowleft}^2}{c^2} \approx 2.277 \times 10^{-31} \text{ kg} \approx \mathbf{0.1277 \text{ MeV}/c^2}
+\end{equation}
+This defines the energy scale of a "naked" vortex filament of length $L=r_c$.
+
+\subsection{Spectral Suppression ($k^{-3/2}$)}
+Treating the vortex loop as a dynamical object subject to Beltrami flow conditions ($\nabla \times \mathbf{u} = \lambda \mathbf{u}$), the partition function $Z$ for quantum fluctuations is dominated by the 1-loop determinant. For a mode $k$ with eigenvalue $\lambda_k \propto k$ in 3 spatial dimensions:
+\begin{equation}
+    Z_k \propto (\det \mathcal{O}_k)^{-1/2} \propto (k^3)^{-1/2} = k^{-3/2}
+\end{equation}
+This factor suppresses the effective mass of high-frequency (complex) knot modes.
+
+\section{Results and Validation}
+
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Particle} & \textbf{Topology} & \textbf{Geometry} ($M_{geom}$) & \textbf{Factors} & \textbf{SST Mass} & \textbf{Exp. Mass} \\
+\midrule
+Electron & $3_1$ (Trefoil) & 2.09 MeV & $k=3, S=0$ & \textbf{0.40 MeV} & 0.511 MeV \\
+Muon & $5_1$ (Cinquefoil) & 3.38 MeV & $k=5, S \approx 0.38$ & \textbf{95.6 MeV} & 105.7 MeV \\
+Proton & $3 \times (5_2/6_1)$ & $\sim 10.2$ MeV & $n=3, S=1$ & \textbf{939.8 MeV} & 938.3 MeV \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of predicted masses versus experimental values.}
+\label{tab:results}
+\end{table}
+
+\subsection{The Proton-Electron Ratio}
+The model successfully bridges the gap between the electron scale ($\sim 0.5$ MeV) and the nucleon scale ($\sim 1$ GeV). The proton mass is generated not by geometric length alone, but by the \textit{amplification} of the geometric mass via the vacuum coupling factor ($4/\alpha$) and the coherence factor for $n=3$ components ($3^{-1/\phi} \approx 0.5$).
+
+\section{Conclusion}
+Swirl String Theory provides a geometric basis for the mass hierarchy. The distinction between generations is identified as a topological phase transition in vacuum shielding. This framework eliminates the need for arbitrary Yukawa couplings, replacing them with discrete topological invariants ($k, n, g$) and a single fundamental mass scale $M_0$.
+
+\begin{thebibliography}{9}
+\bibitem{kelvin} Thomson, W. (1867). \textit{On Vortex Atoms}. Proc. Roy. Soc. Edin.
+\bibitem{ideal_knots} Cantarella, J., et al. (2002). \textit{On the Minimum Ropelength of Knots}.
+\bibitem{sst_canon} User. (2025). \textit{Swirl String Theory Canon}.
+
+\bibitem{Lee2025DoubleTwist}
+J.~Lee (2025),
+\textit{Rational Concordance of Double Twist Knots},
+arXiv:2504.07636v1 (Apr 11, 2025).
+
+\bibitem{Cha2007}
+J.~C.~Cha (2007),
+\textit{Rational concordance and the Grope filtration of the classical knot concordance group},
+Trans. Amer. Math. Soc. \textbf{360} (2007), no.~1, 405--436.
+
+\bibitem{MY1987}
+Y.~Matsumoto and S.~Yamada (1987),
+\textit{Rational-slice knots},
+Topology Appl. \textbf{27} (1987), no.~1, 25--35.
+
+\bibitem{Siebenmann1975}
+L.~Siebenman (1975),
+\textit{Exercises sur les noeuds rationnels},
+mimeographed notes.
+
+\bibitem{Weizsaecker1935}
+C.~F.~von Weizs\"acker (1935),
+\textit{Zur Theorie der Kernmassen},
+Z. Phys. \textbf{96}, 431--458.
+\end{thebibliography}
+
+\end{document}

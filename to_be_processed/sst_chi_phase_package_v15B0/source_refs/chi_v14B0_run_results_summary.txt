@@ -1,0 +1,55 @@
+SST chi-phase package v14B.0 summary
+========================================================
+
+Track: B — internal A=B=C gate for the GP/NLSE core-envelope reduction
+Status: Derived-conditional theorem / proposed CANON gate
+
+Core claim tested:
+  If the SST resolved core envelope is a single isotropic complex order
+  parameter with one stiffness modulus, then the dimensionless radial energy
+  has A_grad=B_phase=C_depletion. For winding n=1 this gives exactly the
+  GP/NLSE ODE used in v10B.1-v12B.0.
+
+Radial Lagrangian convention:
+  L_r = A F'^2 r + B n^2 F^2/r + (C/2)(F^2-1)^2 r
+
+Euler-Lagrange reduction:
+  F'' + F'/r - (B/A)n^2 F/r^2 + (C/A)F(1-F^2) = 0
+
+PASS case:
+  name: single_isotropic_core_modulus
+  A=1.0, B=1.0, C=1.0, n=1
+  phase coefficient:     1
+  depletion coefficient: 1
+  energy potential prefactor C/2: 0.5
+  matches unit GP ODE: True
+
+v10B.0 failure case:
+  name: v10B0_old_potential_prefactor_quarter
+  A=1.0, B=1.0, C=0.5, n=1
+  phase coefficient:     1
+  depletion coefficient: 0.5
+  energy potential prefactor C/2: 0.25
+  matches unit GP ODE: False
+
+Dimensionless reduction from a single isotropic envelope energy:
+  E = kappa ∫ [ |grad Psi|^2 + (1/(2 xi^2))(1-|Psi|^2)^2 ] d^2x
+  Psi = F(r/xi) exp(i n theta)
+  => A=B=C=1 after rho=xi r, up to the common factor 2π kappa.
+
+Alpha-ring context inherited from v12B.0:
+  alpha_ring^GP(infinity) ≈ 1.619350923
+  alpha_ring^GP - legacy NLS 1.61 = +0.009350923
+  alpha_ring^GP - phi = +0.001316934
+
+Canon gate:
+  v14B.0 proves A=B=C only under the single-isotropic-core-envelope axiom.
+  To label the GP/NLSE alpha_ring result CANON-derived, the canon must accept
+  that the resolved SST core envelope is described by this one-modulus isotropic
+  complex order parameter in the long-wavelength core limit.
+
+Files exported:
+  chi_v14B0_coefficient_gate.csv
+  chi_v14B0_dimensionless_reduction.json
+  chi_v14B0_alpha_proximity.json
+  chi_v14B0_coefficient_gate.png

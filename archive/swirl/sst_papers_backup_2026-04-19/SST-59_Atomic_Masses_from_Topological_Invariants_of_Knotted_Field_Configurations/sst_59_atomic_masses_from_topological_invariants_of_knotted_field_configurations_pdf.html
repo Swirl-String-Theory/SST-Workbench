@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topological Invariant Mass Forge</title>
+    <style>
+        :root {
+            --bg: #0a0b10;
+            --panel: #14161f;
+            --accent: #00f0ff;
+            --accent-dim: #00f0ff44;
+            --text: #e0e6ed;
+            --text-dim: #8b9bb4;
+            --success: #00ff9d;
+            --danger: #ff0055;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* Main Layout */
+        main {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Panels */
+        .panel {
+            padding: 1.5rem;
+            overflow-y: auto;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-right {
+            border-left: 1px solid #222;
+            border-right: none;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Visualization Area */
+        .viz-container {
+            position: relative;
+            background: radial-gradient(circle at center, #1a1d29 0%, #000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.1);
+        }
+
+        .overlay-stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent);
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-dim);
+        }
+
+        /* Controls */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value-display {
+            font-family: var(--font-mono);
+            color: var(--accent);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: #000;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #333;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #888;
+        }
+        .formula-active {
+            color: var(--text);
+        }
+        .highlight { color: var(--accent); }
+
+        /* Output Display */
+        .mass-display {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid var(--accent-dim);
+            border-radius: 8px;
+        }
+
+        .mass-value {
+            font-size: 1.8rem;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            color: var(--text);
+            margin: 0.5rem 0;
+        }
+
+        .mass-unit {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* Targets List */
+        .target-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .target-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .target-item:hover {
+            background: #252525;
+        }
+
+        .target-item.matched {
+            background: rgba(0, 255, 157, 0.1);
+            border-left: 3px solid var(--success);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+        }
+
+        .target-name { font-weight: bold; font-size: 0.9rem; }
+        .target-mass { font-family: var(--font-mono); font-size: 0.8rem; color: #888; }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #333;
+        }
+        .matched .status-indicator { background: var(--success); box-shadow: 0 0 5px var(--success); }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 400px auto;
+                overflow-y: auto;
+            }
+            .panel { border-right: none; border-bottom: 1px solid #222; }
+            body { overflow: auto; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Topological <span>Mass Forge</span></h1>
+        <div class="subtitle">Based on "Atomic Masses from Topological Invariants" by O. Iskandarani</div>
+    </div>
+    <div style="text-align: right; font-size: 0.7rem; color: #666;">
+        OFFLINE MODE<br>NO EXTERNAL API
+    </div>
+</header>
+
+<main>
+    <!-- Left Panel: Controls -->
+    <div class="panel">
+        <div class="panel-title">Topological Inputs</div>
+        
+        <div class="control-group">
+            <label>
+                Kernel Index (k)
+                <span id="val-k" class="value-display">3</span>
+            </label>
+            <input type="range" id="input-k" min="1" max="10" step="1" value="3">
+            <small style="color:#666">Complexity of energy localization</small>
+        </div>
+
+        <div class="control-group">
+            <label>
+                Seifert Genus (g)
+                <span id="val-g" class="value-display">1</span>
+            </label>
+            <input type="range" id="input-g" min="0" max="6" step="1" value="1">
+            <small style="color:#666">Geometric complexity (handles)</small>
+        </div>
+
+        <div class="control-group">
+            <label>
+                Components (n)
+                <span id="val-n" class="value-display">1</span>
+            </label>
+            <input type="range" id="input-n" min="1" max="5" step="1" value="1">
+            <small style="color:#666">Number of linked loops</small>
+        </div>
+
+        <div class="control-group">
+            <label>
+                Ropelength (L<sub>tot</sub>)
+                <span id="val-l" class="value-display">15.4</span>
+            </label>
+            <input type="range" id="input-l" min="10" max="5000" step="0.1" value="15.4">
+            <small style="color:#666">Effective filament length</small>
+        </div>
+
+        <div class="panel-title" style="margin-top: 1rem;">Equation (10) Logic</div>
+        <div class="formula-box">
+            M(T) = <span id="f-amp" class="highlight">A</span> · 
+            k<sup>-1.5</sup> · 
+            exp(-g·<span id="f-sinh">asinh(0.5)</span>) · 
+            n<sup>...</sup> · 
+            <span id="f-vol">Volume</span>
+        </div>
+        <div style="font-size: 0.7rem; color: #666;">
+            *Simulated based on paper parameters.
+        </div>
+    </div>
+
+    <!-- Center: Visualization -->
+    <div class="viz-container">
+        <canvas id="knotCanvas"></canvas>
+        <div class="overlay-stats">
+            <div>Topology: <span id="topo-type">Trefoil (3,1)</span></div>
+            <div>Suppression: <span id="suppression-val">0.004</span></div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Results -->
+    <div class="panel panel-right">
+        <div class="panel-title">Calculated Mass</div>
+        
+        <div class="mass-display">
+            <div class="mass-unit">INVARIANT MASS</div>
+            <div class="mass-value" id="mass-kg">9.109e-31</div>
+            <div class="mass-unit">kg</div>
+            <hr style="border:0; border-top:1px solid #333; margin: 10px 0;">
+            <div class="mass-value" id="mass-u" style="font-size: 1.2rem; color: var(--accent);">0.000548</div>
+            <div class="mass-unit">Atomic Mass Units (u)</div>
+        </div>
+
+        <div class="panel-title" style="margin-top: 1rem;">Target Identification</div>
+        <div style="font-size: 0.8rem; color: #888; margin-bottom: 0.5rem;">
+            Adjust sliders to match known particles.
+        </div>
+
+        <div class="target-list" id="target-list">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Physics Engine ---
+    // Constants derived/inferred from the paper
+    const ALPHA_FS = 1 / 137.035999;
+    const C = 299792458; // m/s
+    const ASINH_HALF = Math.asinh(0.5);
+    
+    // Calibration factors to match the paper's Electron result
+    // The paper states: M_electron = 9.10938e-31 kg
+    // For Electron: k=3, g=1, n=1. L_tot is calibrated.
+    // We will reverse engineer the 'Energy Density Scale' (u * r_c^3) to make the math work for the UI.
+    
+    const M_ELECTRON_KG = 9.10938e-31;
+    const M_PROTON_KG = 1.67262e-27;
+    const M_NEUTRON_KG = 1.67493e-27;
+    const AMU_KG = 1.66054e-27;
+
+    // Paper Eq 10 components:
+    // Amplification A = 4 / alpha
+    const AMPLIFICATION = 4.0 / ALPHA_FS;
+
+    // We need a base scalar to convert the dimensionless result to kg.
+    // Let's call the combination of (u * pi * rc^3 / c^2) the "BaseMassScale".
+    // Using Electron (Trefoil 3_1) as calibration:
+    // k=3, g=1, n=1. 
+    // Kernel = 3^(-1.5) * exp(-1 * asinh(0.5)) * 1^(...) = 0.19245 * 0.6065 = 0.1167
+    // Mass = Amplification * Kernel * L_tot * BaseMassScale
+    // We'll assume a "Standard" L_tot for electron if not provided, but the paper says L_tot is derived.
+    // For the sake of this "Forge", we let the user drive L_tot.
+    // Let's set the BaseMassScale such that at L_tot ~ 15.4 (approx ropelength of tight trefoil), we get electron mass.
+    
+    // Electron Params
+    const E_K = 3;
+    const E_G = 1;
+    const E_N = 1;
+    const E_L = 15.4; // Approximate ideal ropelength for 3.1 knot
+
+    function getSuppression(k, g, n) {
+        const k_supp = Math.pow(k, -1.5);
+        const g_supp = Math.exp(-g * ASINH_HALF);
+        // Eq 8: S_n = n ^ (-exp(-asinh(0.5)))
+        // exp(-asinh(0.5)) is roughly 0.618 (Golden ratio conjugate-ish)
+        const exponent_n = -Math.exp(-ASINH_HALF);
+        const n_supp = Math.pow(n, exponent_n);
+        return k_supp * g_supp * n_supp;
+    }
+
+    const E_SUPP = getSuppression(E_K, E_G, E_N);
+    // M = Amp * Supp * L * Base
+    // Base = M / (Amp * Supp * L)
+    const BASE_MASS_SCALE = M_ELECTRON_KG / (AMPLIFICATION * E_SUPP * E_L);
+
+    function calculateMass(k, g, n, l) {
+        const supp = getSuppression(k, g, n);
+        return AMPLIFICATION * supp * l * BASE_MASS_SCALE;
+    }
+
+    // --- Data: Known Particles/Atoms ---
+    // Based on Table 1 in the paper
+    const TARGETS = [
+        { name: "Electron (e⁻)", massKg: 9.109e-31, k:3, g:1, n:1, l_hint: 15.4 },
+        { name: "Muon (μ)", massKg: 1.883e-28, k:5, g:2, n:1, l_hint: 22.0 }, // Cinquefoil guess
+        { name: "Proton (p⁺)", massKg: 1.672e-27, k:7, g:3, n:3, l_hint: 45.0 }, // Complex topology
+        { name: "Helium (He)", massKg: 6.646e-27, k:8, g:4, n:2, l_hint: 180 },
+        { name: "Carbon (C)", massKg: 1.994e-26, k:9, g:5, n:1, l_hint: 540 },
+        { name: "Iron (Fe)", massKg: 9.273e-26, k:10, g:6, n:1, l_hint: 2500 },
+        { name: "Gold (Au)", massKg: 3.270e-25, k:10, g:6, n:1, l_hint: 8800 } // High L
+    ];
+
+    // --- UI Logic ---
+    const inputs = {
+        k: document.getElementById('input-k'),
+        g: document.getElementById('input-g'),
+        n: document.getElementById('input-n'),
+        l: document.getElementById('input-l')
+    };
+
+    const displays = {
+        k: document.getElementById('val-k'),
+        g: document.getElementById('val-g'),
+        n: document.getElementById('val-n'),
+        l: document.getElementById('val-l'),
+        massKg: document.getElementById('mass-kg'),
+        massU: document.getElementById('mass-u'),
+        topoType: document.getElementById('topo-type'),
+        suppression: document.getElementById('suppression-val'),
+        targetList: document.getElementById('target-list')
+    };
+
+    // Initialize Targets List
+    function renderTargets() {
+        displays.targetList.innerHTML = '';
+        TARGETS.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'target-item';
+            div.id = `target-${t.name.split(' ')[0]}`;
+            div.innerHTML = `
+                <div>
+                    <div class="target-name">${t.name}</div>
+                    <div class="target-mass">${t.massKg.toExponential(3)} kg</div>
+                </div>
+                <div class="status-indicator"></div>
+            `;
+            // Click to auto-set (Cheat mode)
+            div.onclick = () => {
+                inputs.k.value = t.k;
+                inputs.g.value = t.g;
+                inputs.n.value = t.n;
+                inputs.l.value = t.l_hint;
+                updateAll();
+            };
+            displays.targetList.appendChild(div);
+        });
+    }
+
+    function checkTargets(currentMass) {
+        TARGETS.forEach(t => {
+            const el = document.getElementById(`target-${t.name.split(' ')[0]}`);
+            // Tolerance of 5%
+            const ratio = currentMass / t.massKg;
+            if (ratio > 0.95 && ratio < 1.05) {
+                el.classList.add('matched');
+            } else {
+                el.classList.remove('matched');
+            }
+        });
+    }
+
+    function updateAll() {
+        // Read inputs
+        const k = parseInt(inputs.k.value);
+        const g = parseInt(inputs.g.value);
+        const n = parseInt(inputs.n.value);
+        const l = parseFloat(inputs.l.value);
+
+        // Update Text
+        displays.k.innerText = k;
+        displays.g.innerText = g;
+        displays.n.innerText = n;
+        displays.l.innerText = l.toFixed(1);
+
+        // Calculate Physics
+        const mass = calculateMass(k, g, n, l);
+        const massU = mass / AMU_KG;
+        const supp = getSuppression(k, g, n);
+
+        // Update Results
+        displays.massKg.innerText = mass.toExponential(4);
+        displays.massU.innerText = massU < 0.01 ? massU.toExponential(4) : massU.toFixed(4);
+        displays.suppression.innerText = supp.toFixed(5);
+
+        // Update Topology Name Guess
+        let type = "Unknown Configuration";
+        if (k===3 && g===1) type = "Trefoil (3₁)";
+        else if (k===5 && g===2) type = "Cinquefoil (5₁)";
+        else if (g===0) type = "Unknot / Trivial";
+        else if (n > 1) type = `Link (${n} components)`;
+        else type = `Torus Knot T(${k}, ${g+1})`; // Rough mapping
+        displays.topoType.innerText = type;
+
+        // Check Matches
+        checkTargets(mass);
+
+        // Update Visuals
+        targetKnotParams.p = Math.max(2, Math.round(k/1.5)); // Map K to P (loops)
+        targetKnotParams.q = Math.max(1, g + 1); // Map G to Q (twists)
+        targetKnotParams.tube = 2 + (n * 1.5); // Map N to thickness
+    }
+
+    // Listeners
+    Object.values(inputs).forEach(input => {
+        input.addEventListener('input', updateAll);
+    });
+
+    // --- Canvas Visualization (The "Knot") ---
+    const canvas = document.getElementById('knotCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width, height;
+    let time = 0;
+
+    // Knot parameters
+    let targetKnotParams = { p: 2, q: 3, tube: 3 };
+    let currentKnotParams = { p: 2, q: 3, tube: 3 };
+
+    function resize() {
+        width = canvas.parentElement.clientWidth;
+        height = canvas.parentElement.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function lerp(start, end, amt) {
+        return (1 - amt) * start + amt * end;
+    }
+
+    function drawKnot() {
+        ctx.fillStyle = '#000'; // Clear transparently or solid
+        ctx.clearRect(0, 0, width, height);
+
+        // Smooth transition of parameters
+        currentKnotParams.p = lerp(currentKnotParams.p, targetKnotParams.p, 0.05);
+        currentKnotParams.q = lerp(currentKnotParams.q, targetKnotParams.q, 0.05);
+        currentKnotParams.tube = lerp(currentKnotParams.tube, targetKnotParams.tube, 0.05);
+
+        const p = currentKnotParams.p;
+        const q = currentKnotParams.q;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = currentKnotParams.tube;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Center of screen
+        const cx = width / 2;
+        const cy = height / 2;
+        const scale = Math.min(width, height) / 3.5;
+
+        // 3D Rotation
+        const rotX = time * 0.5;
+        const rotY = time * 0.8;
+
+        const steps = 300;
+        let firstPoint = null;
+
+        for (let i = 0; i <= steps; i++) {
+            const t = (i / steps) * Math.PI * 2 * p; // Multiply by P to close loop depending on P/Q ratio
+            
+            // Torus Knot Parametric Equations
+            // r = cos(q * t) + 2
+            // x = r * cos(p * t)
+            // y = r * sin(p * t)
+            // z = -sin(q * t)
+            
+            // Modified for better visual variety based on inputs
+            const r = Math.cos(q/p * t) + 2; 
+            let x = r * Math.cos(t);
+            let y = r * Math.sin(t);
+            let z = -Math.sin(q/p * t);
+
+            // Rotate 3D
+            // Rotate Y
+            let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+            let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+            // Rotate X
+            let y1 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
+            // let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+            // Project 2D
+            const px = cx + x1 * scale;
+            const py = cy + y1 * scale;
+
+            if (i === 0) {
+                ctx.moveTo(px, py);
+                firstPoint = {x: px, y: py};
+            } else {
+                ctx.lineTo(px, py);
+            }
+        }
+        
+        // Glow effect
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#00f0ff";
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        time += 0.01;
+        requestAnimationFrame(drawKnot);
+    }
+
+    // Init
+    renderTargets();
+    updateAll();
+    drawKnot();
+
+</script>
+</body>
+</html>

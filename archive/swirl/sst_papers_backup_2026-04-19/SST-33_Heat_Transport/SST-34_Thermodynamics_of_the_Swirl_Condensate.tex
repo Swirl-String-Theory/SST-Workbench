@@ -1,0 +1,985 @@
+%! Author = Omar Iskandarani
+%! Date = 12/3/2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.18388672}
+\newcommand{\papertitle}{Thermodynamics of the Swirl Condensate:\\
+Temperature, Heat, and the Geometric Deformation of Equilibrium Boundaries in Swirl--String Theory}
+
+%=========================================
+% PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+% swirl arrows Counter Clockwise
+\newcommand{\swirlarrowcw}{ \mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\Fmaxswirlcw}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+\newcommand{\Fmax}{\Fmaxswirl} % default maximal force (left swirl)
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\swirlarrow} \rVert}               % swirl speed magnitude
+\newcommand{\Ce}{\vswirl}                                % canonical swirl-speed constant
+
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+\newcommand{\rhoM}{\rho_{\!m}}          % mass-equivalent density
+\newcommand{\rhocore}{\rho_{\text{core}}}
+
+
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+    \Large \bfseries \papertitle \par \vspace{1cm}
+    {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par}
+    \vspace{0.5cm}
+    {\today \par}
+    \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+    \vfill \raggedright \null
+    \begin{picture}(0,0)
+    \put(0,-45){  % Shift 200pt left, 40pt down
+        \begin{minipage}[b]{0.7\textwidth} \footnotesize
+        \renewcommand{\arraystretch}{1.0}
+        \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+        \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+        Email: \texttt{info@omariskandarani.com} \\
+        ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+        \end{minipage}
+    }
+    \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+    \begin{abstract}
+        In Swirl--String Theory (SST), a bound electronic state is represented by a closed swirl filament whose geometry contains two intrinsic length scales: the core radius \(r_c\), which characterises the topological filament itself, and the Bohr radius \(a_0\), which sets the equilibrium size of the Coulomb envelope. Although previous SST thermodynamic formulations were expressed solely in terms of \(r_c\), a physically complete treatment of atomic systems requires both scales. Using the canonical SST relation
+        \[
+            a_0 = \frac{c^2}{2\,\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2}\, r_c ,
+        \]
+        we show that \(a_0\) is not an independent constant but an emergent, dynamically coupled outer boundary of the ground--state hydrogen torus. This leads naturally to a two--scale swelling theory in which thermodynamic deformation involves simultaneous variations of the core and orbital radii, \((r,R)=(r_c,a_0)\rightarrow(r_c+\delta r,\,a_0+\delta R)\). We define a unified swirl temperature
+        \[
+            T_{\text{swirl}} = \Theta\,\epsilon,
+            \qquad
+            \epsilon \simeq \frac{r-r_c}{r_c} \simeq \frac{R-a_0}{a_0},
+        \]
+        showing that orbital and core strains coincide to first order because \(a_0\) inherits its variation from \(r_c\). The resulting enthalpy \(H_{\text{swirl}}(R,r)\) produces an effective stiffness
+        \[
+            K_{\rm eff} = K_{RR}a_0^2 + 2K_{Rr}a_0 r_c + K_{rr} r_c^2,
+        \]
+        yielding a low--temperature equation of state
+        \[
+            E(T_{\text{swirl}})-E(0)\propto T_{\text{swirl}}^2,
+            \qquad
+            C_V\propto T_{\text{swirl}},
+        \]
+        with both thermodynamic and chronometric behaviour dominated by the coupling between the two geometric scales. This framework unifies swelling dynamics, heat capacity, and swirl--clock time dilation in a single analytic structure, providing a consistent thermodynamic description of hydrogen and establishing a foundation for SST--based models of atomic stability and excitation.
+    \end{abstract}
+    \titlepageClose
+%=========================================
+% Title Page End
+%=========================================
+
+
+%========================================================
+% THERMODYNAMICS OF THE SWIRL CONDENSATE
+%========================================================
+
+    \section{Introduction: Ontological Necessity of a Hydrodynamic Thermodynamics}
+        \label{sec:swirl-thermo-intro}
+
+        The unifying framework of Swirl--String Theory (SST) posits a fundamental
+        reorientation of physical ontology: the vacuum is not a passive geometric
+        manifold nor a probabilistic quantum field, but a physical, frictionless,
+        incompressible fluid condensate---the ``swirl medium''. Within this paradigm,
+        the elementary constituents of matter---electrons, quarks, and neutrinos---are
+        identified not as point particles, but as topologically stable knotted vortex
+        filaments, or ``swirl strings'', characterized by quantized circulation
+        \(\Gamma_0\) and discrete topological invariants.
+
+        Kinematic and electromagnetic sectors of SST have been formulated via the
+        Chronos--Kelvin invariants and the Swirl--EM bridge, while the thermodynamic
+        sector remains the critical frontier for a complete description of physical
+        reality. This work establishes the \emph{Thermodynamics of Swirl Boundaries}:
+        a theoretical extension of the SST Canon that defines Temperature \(T\) and
+        Heat \(Q\) through the geometric deformation of vortex atoms.
+
+        We reject the standard kinetic theory definition of heat as random agitation
+        of microscopic constituents, since the ground-state flow of the swirl medium
+        is laminar, inviscid, and deterministic. Instead, thermodynamic variables
+        emerge from the elasticity of the vacuum condensate itself. Specifically:
+
+        \begin{itemize}
+            \item \textbf{Temperature} is defined as the measure of the radial swelling
+            of a vortex core's equilibrium boundary against the confining pressure of
+            the vacuum.
+            \item \textbf{Heat} is defined as the mechanical work performed to induce
+            this geometric expansion.
+        \end{itemize}
+
+        The necessity of this thermodynamic formulation arises from the
+        \emph{Zero--Parameter Principle} of SST: all dimensional constants must be
+        derived from the primitive triplet \((\Gamma_0,\rhof,\rc)\). If mass, charge,
+        and time are hydrodynamic consequences of this triplet, then entropy and
+        temperature must also originate in the fluid mechanics of the substrate.
+
+        We show that the laws of thermodynamics emerge as consequences of
+        Euler--Lagrange dynamics applied to topological defects. Phenomena as diverse
+        as the hydrogen spectrum, the time-resolved Unruh ``echo'' in superradiance,
+        and the stability of nuclear isomers are unified under a thermodynamic
+        description of boundary swelling.
+
+        \subsection{The Equilibrium Boundary Hypothesis}
+            \label{subsec:equilibrium-boundary}
+
+            The central postulate is that every stable particle (T-phase knot) exists in
+            a state of hydrodynamic equilibrium defined by the balance of two opposing
+            pressures:
+
+            \begin{enumerate}
+                \item \emph{Internal centrifugal pressure} \(P_{\text{cent}}\), generated
+                by the quantized circulation \(\Gamma\) of the fluid spinning around the
+                vortex core (tending to expand the loop).
+                \item \emph{Vacuum confining pressure} \(P_{\text{vac}}\), the ambient
+                hydrostatic pressure of the swirl condensate, identified with the SST
+                cosmological term \(\Lambda_{\text{SST}}\) and the background energy
+                density (tending to collapse the loop).
+            \end{enumerate}
+
+            The \emph{equilibrium boundary} \(\rc\) is the radial distance at which these
+            pressures balance. Thermodynamics in SST is thus the study of perturbations
+            of this boundary. When energy is injected (heat), the circulation \(\Gamma\) is
+            topologically protected; it cannot vary continuously. The system instead
+            accommodates excess energy by expanding the volume of the vortex core
+            (temperature). This swelling alters the coupling of the particle to the
+            vacuum, modifying its effective mass, gravitational signature, and interaction
+            cross-sections.
+
+    \section{Foundations of Hydrodynamic Equilibrium}
+        \label{sec:foundations-equilibrium}
+
+        \subsection{Primitive Substrate and Canonical Constants}
+            \label{subsec:primitive-substrate}
+
+            The thermodynamic state of any swirl string is anchored in the properties of
+            the underlying medium. The SST Canon defines the primitive constants of the
+            condensate, which serve as the ``atomic units'' of the thermodynamic system.
+
+            \begin{center}
+                \begin{tabular}{llll}
+                    \hline
+                    Constant & Symbol & Value (SI) & Thermodynamic significance \\
+                    \hline
+                    Circulation quantum
+                    & \(\Gamma_0\)
+                    & \(\approx 6.4\times 10^3~\mathrm{m^2/s}\)
+                    & Adiabatic invariant; circulation conserved in reversible processes. \\[3pt]
+                    Effective density
+                    & \(\rhof\)
+                    & \(\approx 7.0\times 10^{-7}~\mathrm{kg/m^3}\)
+                    & ``Thermal mass'' of the vacuum; sets heat capacity scale of swirl fluid. \\[3pt]
+                    Core radius
+                    & \(\rc\)
+                    & \(\approx 1.41\times 10^{-15}~\mathrm{m}\)
+                    & Zero-point geometric scale; volume at \(T=0\). \\[3pt]
+                    Swirl speed limit
+                    & \(v_{\mathcal{G}}\)
+                    & \(\approx 1.09\times 10^6~\mathrm{m/s}\)
+                    & Effective sound speed of swirl excitations (``swirlons''). \\[3pt]
+                    Mass-equivalent density
+                    & \(\rhoM\)
+                    & \(\approx 3.89\times 10^{18}~\mathrm{kg/m^3}\)
+                    & Energy density of fluid motion; relates enthalpy to geometry. \\
+                    \hline
+                \end{tabular}
+            \end{center}
+
+            These values, calibrated from the electron mass and the hydrogen spectrum,
+            define the mechanical properties of the vacuum ``material'' that undergoes
+            thermodynamic deformation.
+
+        \subsection{Euler--Bernoulli Balance and Swirl Pressure Law}
+            \label{subsec:euler-bernoulli}
+
+            In the inviscid limit, the governing equations reduce to Euler's equations.
+            For a steady, axisymmetric vortex filament with purely azimuthal velocity
+            \(v_\theta(r)\), the radial component of Euler's equation reads
+            \begin{equation}
+                \frac{1}{\rhof}\frac{dp}{dr}
+                = \frac{v_\theta^2}{r},
+                \qquad
+                \text{(Swirl Pressure Law)}
+                \label{eq:swirl-pressure-law}
+            \end{equation}
+            so that
+            \begin{equation}
+                \frac{dp}{dr} = \rhof \frac{v_\theta^2}{r}.
+                \label{eq:dpdr}
+            \end{equation}
+
+
+            For SST applications we identify the canonical swirl speed with the
+            tangential velocity at the core boundary,
+            \[
+                \vnorm \equiv v_\theta (\rc)
+                = \frac{\Gamma}{2\pi \rc},
+            \]
+            so that the full profile can be written as
+            \[
+                v_\theta(r) = \vnorm,\frac{\rc}{r}.
+            \]
+
+
+        For a potential vortex outside the core,
+            \begin{equation}
+                v_\theta(r) = \frac{\Gamma}{2\pi r},
+                \label{eq:vtheta-potential}
+            \end{equation}
+            and we obtain
+            \begin{equation}
+                \frac{dp}{dr} = \rhof\,\frac{\Gamma^2}{4\pi^2}\,\frac{1}{r^3}.
+            \end{equation}
+            Integrating from radius \(r\) to infinity (where \(p\to P_\infty\)) yields
+            \begin{equation}
+                \int_{p(r)}^{P_\infty} dp
+                = \int_{r}^{\infty} \rhof \frac{\Gamma^2}{4\pi^2 r'^3}\,dr'
+                = \frac{1}{2}\,\rhof\,\frac{\Gamma^2}{4\pi^2}\,\frac{1}{r^2},
+            \end{equation}
+            hence the Bernoulli pressure deficit
+            \begin{equation}
+                P(r) = P_\infty - \frac{1}{2}\,\rhof
+                \left(\frac{\Gamma}{2\pi r}\right)^2
+                = P_\infty - \frac{1}{2}\,\rhof\,v_\theta^2(r).
+                \label{eq:pressure-boundary}
+            \end{equation}
+            Thus the pressure at the vortex boundary is lower than the ambient vacuum
+            pressure by the dynamic pressure \(\tfrac{1}{2}\rhof v^2\). In SST, this
+            pressure deficit encodes the attractive potential well of the particle.
+
+            \paragraph*{Analogy.}
+                Voor een kind: imagine spinning water in a bucket; the faster the water spins,
+                the deeper the surface becomes in de middel. Hier is de ``emmer'' het vacuum
+                en de diepe plek is waar het deeltje zit.
+
+    \subsection{Stability Condition and Ground State}
+        \label{subsec:stability-condition}
+
+        For the vortex core to be stable (no collapse or runaway expansion), the
+        internal core pressure \(P_{\text{core}}\) must match the boundary pressure at
+        equilibrium radius \(\rc\). At \(T=0\) we define the \emph{ground state} by
+        \begin{equation}
+            P_{\text{core}}(\rc) = P(\rc)
+            = P_\infty - \frac{1}{2}\,\rhof\,v_{\mathcal{G}}^2,
+            \label{eq:ground-state-balance}
+        \end{equation}
+        where \(v_{\mathcal{G}} = v_\theta(\rc)\) is the canonical swirl speed at the
+        equilibrium boundary. Equation \eqref{eq:ground-state-balance} encodes the
+        mechanical balance of the ``cold'' atom; any energy injection (heat) perturbs
+        this balance, forcing \(r\) away from \(\rc\) until a new equilibrium is
+        reached. This displacement realizes temperature.
+
+%========================================================
+% 3. THE SWELLING HYPOTHESIS: THERMODYNAMIC VARIABLES
+%========================================================
+
+    \section{The Swelling Hypothesis: Defining Thermodynamic Variables}
+    \label{sec:swelling-hypothesis}
+
+    In SST, a bound electronic state such as hydrogen \(1s\) is represented by a
+    swirl string forming a torus with:
+    \begin{equation}
+        R_0 = a_0,
+        \qquad
+        r_0 = \rc,
+        \label{eq:ground-state-radii}
+    \end{equation}
+    where \(R_0\) is the major (orbital) radius and \(r_0\) the minor (core)
+    radius. The Bohr radius \(a_0\) is not an independent constant: the Canon
+    relates it to the core scale \(\rc\) and the characteristic swirl speed
+    \(\vnorm\) via
+    \begin{equation}
+        a_0
+        = \frac{c^2}{2\vnorm^2}\,\rc,
+        \label{eq:a0-from-rc-main}
+    \end{equation}
+    which numerically reproduces the CODATA Bohr radius to within
+    \(\mathcal{O}(10^{-8})\). This establishes a two-scale geometry:
+    \(\rc\) controls the knot core, while \(a_0\) controls the Coulomb envelope
+    of the hydrogen ground state.
+
+    We now define temperature, heat, and the SST equation of state including
+    both scales.
+
+%--------------------------------------------------------
+    \subsection{Two-Scale Temperature as Radial Strain}
+        \label{subsec:two-scale-temperature}
+%--------------------------------------------------------
+
+        We introduce dimensionless radial strains for the core and the orbital
+        envelope:
+        \begin{equation}
+            \epsilon_{\text{c}} \equiv \frac{r - \rc}{\rc},
+            \qquad
+            \epsilon_{\text{o}} \equiv \frac{R - a_0}{a_0},
+            \label{eq:epsilon-core-orb}
+        \end{equation}
+        with corresponding swirl temperatures
+        \begin{equation}
+            T_{\text{core}} \equiv \Theta_{\text{c}}\,\epsilon_{\text{c}}
+            = \Theta_{\text{c}} \frac{r-\rc}{\rc},
+            \qquad
+            T_{\text{orb}} \equiv \Theta_{\text{o}}\,\epsilon_{\text{o}}
+            = \Theta_{\text{o}} \frac{R-a_0}{a_0}.
+            \label{eq:T-core-orb}
+        \end{equation}
+        Here \(\Theta_{\text{c}}\) and \(\Theta_{\text{o}}\) are scaling constants
+        with dimensions of Kelvin, determined by the effective bulk moduli of the
+        core and orbital sectors of the swirl medium.
+
+        Because \(a_0\) and \(\rc\) are linked by Eq.~\eqref{eq:a0-from-rc-main},
+        small variations around the ground state obey
+        \begin{equation}
+            \frac{\delta a_0}{a_0}
+            = \frac{\delta \rc}{\rc}
+            \quad\Rightarrow\quad
+            \epsilon_{\text{o}} \approx \epsilon_{\text{c}}
+            \quad (\text{linear order}).
+            \label{eq:strain-link}
+        \end{equation}
+        Thus, to first order near the hydrogen ground state,
+        \begin{equation}
+            T_{\text{orb}} \approx
+            \frac{\Theta_{\text{o}}}{\Theta_{\text{c}}}\,T_{\text{core}}.
+        \end{equation}
+        For simplicity in what follows, and in the hydrogenic limit, we choose a
+        single canonical scaling \(\Theta_{\text{c}} = \Theta_{\text{o}} \equiv
+    \Theta\), and define a unified swirl temperature
+        \begin{equation}
+            T_{\text{swirl}} \equiv \Theta\,\epsilon,
+            \qquad
+            \epsilon \equiv
+            \frac{r-\rc}{\rc}
+            \simeq
+            \frac{R-a_0}{a_0},
+            \label{eq:T-swirl-unified}
+        \end{equation}
+        so that both core and Bohr-envelope swelling are encoded in the same
+        dimensionless strain \(\epsilon\).
+
+        Physical regimes:
+
+        \begin{itemize}
+            \item \(T_{\text{swirl}}=0\): \(r=\rc\), \(R=a_0\). The torus matches the
+            hydrogen ground-state geometry.
+            \item \(T_{\text{swirl}}>0\): \(r>\rc\), \(R>a_0\); the core and/or orbital
+            radius are swollen, corresponding to excited electronic or bound
+            states.
+            \item \(T_{\text{swirl}}<0\): would correspond to over-compression below
+            the vacuum ground state, typically forbidden except in extreme collapse
+            regimes.
+        \end{itemize}
+
+%--------------------------------------------------------
+    \subsection{Heat as Combined Boundary Work}
+        \label{subsec:heat-combined-work}
+%--------------------------------------------------------
+
+        The torus volume of a swirl atom is
+        \begin{equation}
+            V(R,r) = 2\pi^2 R r^2.
+            \label{eq:torus-volume-two-scale}
+        \end{equation}
+        Small variations yield
+        \begin{equation}
+            dV = 2\pi^2 \bigl( r^2\,dR + 2R r\,dr \bigr).
+            \label{eq:dV-two-scale}
+        \end{equation}
+        We define heat as the enthalpy increment needed to change \((R,r)\) against
+        vacuum pressure:
+        \begin{equation}
+            \delta Q
+            = dU_{\text{internal}} + P_{\text{vac}}\,dV,
+            \label{eq:deltaQ-two-scale}
+        \end{equation}
+        where \(U_{\text{internal}}\) is the total swirl kinetic energy, which we
+        decompose as
+        \begin{equation}
+            U_{\text{internal}}(R,r)
+            = E_{\text{core}}(r) + E_{\text{orb}}(R)
+            + E_{\text{coupling}}(R,r).
+            \label{eq:U-internal-two-scale}
+        \end{equation}
+        Here \(E_{\text{core}}\) describes the energy associated with the tightly
+        curved core flow, \(E_{\text{orb}}\) the large-scale orbital flow, and
+        \(E_{\text{coupling}}\) the interaction (e.g.\ shared envelope of the proton
+        and electron swirl fields).
+
+        Linearising around the ground state \((R_0,r_0)=(a_0,\rc)\), we obtain
+        \begin{equation}
+            dU_{\text{internal}}
+            \simeq
+            \left.\frac{\partial U_{\text{internal}}}{\partial r}\right|_0 dr
+            + \left.\frac{\partial U_{\text{internal}}}{\partial R}\right|_0 dR.
+        \end{equation}
+        Substituting \(dr = \rc\,d\epsilon\) and \(dR = a_0\,d\epsilon\) (along the
+        unified swelling path \(\epsilon_{\text{c}}\simeq \epsilon_{\text{o}} \equiv
+    \epsilon\)), Eq.~\eqref{eq:dV-two-scale} becomes
+        \begin{equation}
+            dV \simeq 2\pi^2
+            \bigl( r_0^2 a_0 + 2 R_0 r_0^2 \bigr)\,d\epsilon
+            = 2\pi^2 \rc^2 a_0 (1+2)\,d\epsilon
+            = 6\pi^2 \rc^2 a_0\,d\epsilon,
+            \label{eq:dV-epsilon}
+        \end{equation}
+        and we can rewrite \(\delta Q\) as
+        \begin{equation}
+            \delta Q
+            \simeq
+            \mathcal{A}\,d\epsilon
+            + P_{\text{vac}}\,6\pi^2 \rc^2 a_0\,d\epsilon,
+            \label{eq:deltaQ-epsilon}
+        \end{equation}
+        where
+        \begin{equation}
+            \mathcal{A} \equiv
+            \left.\frac{\partial U_{\text{internal}}}{\partial r}\right|_0 \rc
+            + \left.\frac{\partial U_{\text{internal}}}{\partial R}\right|_0 a_0
+        \end{equation}
+        collects the first derivatives of the kinetic energy. Using
+        \(T_{\text{swirl}} = \Theta \epsilon\) and \(d\epsilon = dT_{\text{swirl}}/
+    \Theta\), Eq.~\eqref{eq:deltaQ-epsilon} becomes
+        \begin{equation}
+            \delta Q
+            = C_{\text{eff}}(T)\,dT_{\text{swirl}},
+            \qquad
+            C_{\text{eff}}(T) \equiv
+            \frac{1}{\Theta}
+            \Bigl[
+                \mathcal{A} + 6\pi^2 P_{\text{vac}} \rc^2 a_0
+                \Bigr],
+            \label{eq:deltaQ-T}
+        \end{equation}
+        which defines an effective heat capacity combining core and orbital
+        contributions.
+
+        \paragraph*{Analogy.}
+            Voor een kind: je hebt een donut (orbitaal) met een dikkere ring (kern).
+            Verwarmen is alsof je de hele donut opblaast: zowel de grote straal als de
+            dikte groeien, en je moet op beide tegelijk werk verrichten.
+
+%--------------------------------------------------------
+    \subsection{Swirl Equation of State for the Hydrogen Ground State}
+    \label{subsec:ses-two-scale}
+%--------------------------------------------------------
+
+    For a thin vortex ring of radius \(R\) and core radius \(r\) in an
+    incompressible fluid the kinetic energy is approximately
+    \cite{Saffman1992}
+    \begin{equation}
+        E_{\text{kin}}(R,r)
+        \simeq \frac{1}{2}\,\rhof\,\Gamma^2 R
+        \Bigl[\ln\Bigl(\frac{8R}{r}\Bigr) - \alpha\Bigr],
+        \qquad \alpha\sim\mathcal{O}(1),
+    \end{equation}
+    which we rewrite in SST as
+    \begin{equation}
+        E_{\text{kin}}(R,r)
+        \approx \frac{1}{2}\,\rhof\,\Gamma^2 R
+        \ln\!\left(\frac{R}{r}\right)
+        + \text{const}.
+        \label{eq:Ekin-two-scale}
+    \end{equation}
+    The vacuum displacement energy is
+    \begin{equation}
+        E_{\text{vac}}(R,r)
+        = P_\infty\,V(R,r)
+        = 2\pi^2 P_\infty R r^2.
+        \label{eq:Evac-two-scale}
+    \end{equation}
+    The swirl enthalpy for a hydrogenic ring is then
+    \begin{equation}
+        H_{\text{swirl}}(R,r)
+        = E_{\text{kin}}(R,r) + E_{\text{vac}}(R,r)
+        + E_{\text{surf}}(R,r),
+        \label{eq:Hswirl-two-scale}
+    \end{equation}
+    where \(E_{\text{surf}}\) encodes surface tension and director-gradient
+    terms.
+
+    We expand \(H_{\text{swirl}}\) around the ground state
+    \((R_0,r_0)=(a_0,\rc)\):
+    \begin{equation}
+        H_{\text{swirl}}(R,r)
+        \simeq H_0
+        + \frac{1}{2}
+        \begin{pmatrix}
+            \delta R & \delta r
+        \end{pmatrix}
+        \mathbf{K}
+        \begin{pmatrix}
+            \delta R \\ \delta r
+        \end{pmatrix},
+        \label{eq:H-quadratic-two-scale}
+    \end{equation}
+    with \(\delta R \equiv R-R_0\), \(\delta r \equiv r-r_0\), \(H_0 =
+    H_{\text{swirl}}(R_0,r_0)\), and stiffness matrix
+    \begin{equation}
+        \mathbf{K} =
+        \begin{pmatrix}
+            K_{RR} & K_{Rr} \\
+            K_{rR} & K_{rr}
+        \end{pmatrix}
+        =
+        \left.
+            \begin{pmatrix}
+                \partial^2 H/\partial R^2 & \partial^2 H/\partial R\partial r \\
+                \partial^2 H/\partial r\partial R & \partial^2 H/\partial r^2
+            \end{pmatrix}
+        \right|_{(R_0,r_0)}.
+        \label{eq:K-matrix}
+    \end{equation}
+
+    Along the unified swelling path
+    \(\delta R = a_0\epsilon\), \(\delta r = \rc\epsilon\) with
+    \(\epsilon = T_{\text{swirl}}/\Theta\), we find
+    \begin{equation}
+        H_{\text{swirl}}(T_{\text{swirl}})
+        \simeq H_0
+        + \frac{1}{2}\,K_{\text{eff}}\,
+        \left(\frac{T_{\text{swirl}}}{\Theta}\right)^2,
+        \label{eq:H-of-T-two-scale}
+    \end{equation}
+    where the effective stiffness
+    \begin{equation}
+        K_{\text{eff}} =
+        K_{RR} a_0^2
+        + 2K_{Rr} a_0\rc
+        + K_{rr} \rc^2.
+        \label{eq:Keff}
+    \end{equation}
+    Thus the internal energy above the ground state scales as
+    \begin{equation}
+        E(T_{\text{swirl}}) - E(0)
+        \propto T_{\text{swirl}}^2,
+        \label{eq:E-T2-two-scale}
+    \end{equation}
+    and the heat capacity at fixed knot topology is
+    \begin{equation}
+        C_V(T_{\text{swirl}})
+        \equiv \frac{dE}{dT_{\text{swirl}}}
+        \simeq K_{\text{eff}}\frac{T_{\text{swirl}}}{\Theta^2},
+        \label{eq:Cv-linear-two-scale}
+    \end{equation}
+    linear in \(T_{\text{swirl}}\) at low temperature. The two-scale structure
+    is fully absorbed into \(K_{\text{eff}}\), which combines core and orbital
+    stiffness.
+
+%--------------------------------------------------------
+    \subsection{Inverse-Time Cooling with Core--Orbital Coupling}
+    \label{subsec:inverse-time-cooling-two-scale}
+%--------------------------------------------------------
+
+    The SST Chronos--Kelvin relation ties local proper time to swirl speed via
+    \begin{equation}
+        S_t = \sqrt{1 - \frac{v^2}{c^2}},
+        \qquad
+        v = v_\theta(r) = \frac{\Gamma}{2\pi r},
+        \label{eq:swirl-clock-two-scale}
+    \end{equation}
+    so that the core radius \(r\) directly controls time dilation. Heating the
+    swirl atom along the unified swelling path increases both \(r\) and \(R\)
+    (\(T_{\text{swirl}}>0\)), but the dominant effect on the clock is via the
+    core:
+    \begin{equation}
+        r = \rc (1 + \epsilon),
+        \qquad
+        v(r) = \frac{\Gamma}{2\pi \rc}\,\frac{1}{1+\epsilon}.
+    \end{equation}
+    For small \(\epsilon\),
+    \begin{equation}
+        v^2(r) \simeq v_0^2 (1 - 2\epsilon),
+        \qquad
+        v_0 \equiv \frac{\Gamma}{2\pi \rc},
+    \end{equation}
+    and
+    \begin{equation}
+        S_t(\epsilon)
+        = \sqrt{1 - \frac{v^2(r)}{c^2}}
+        \simeq
+        \sqrt{1 - \frac{v_0^2}{c^2} + 2\epsilon\frac{v_0^2}{c^2}}.
+    \end{equation}
+    Hence, as \(T_{\text{swirl}}\) increases (\(\epsilon>0\)), \(v^2/c^2\)
+    decreases and \(S_t\) moves closer to unity: the internal clock of a swollen,
+    excited atom runs \emph{faster} than that of the compact ground state. The
+    two-scale structure is cruciaal: experimentele verhitting zie je macroscopisch
+    als orbitaalzwelling \(R\to a_0+\delta R\), maar via de SST-relaties
+    \(a_0(\rc,\vnorm)\) en de gezamenlijke rek \(\epsilon\) koppelt dat direct aan
+    coreswelling en dus aan tijdsdilatatie.
+
+    In summary:
+
+    \begin{itemize}
+        \item Cold hydrogen: \(r\approx \rc\), \(R\approx a_0\), large swirl speed
+        \(v(r)\), strong time dilation, maximal stability.
+        \item Hot/excited hydrogen: \(r>\rc\), \(R>a_0\), reduced \(v(r)\),
+        weaker time dilation, accelerated decay.
+    \end{itemize}
+
+    Excited states are therefore thermodynamically and chronologically unstable:
+    they occupy a shallower enthalpy minimum in the two-scale potential and
+    experience less swirl-induced time dilation than the ground state.
+
+%========================================================
+% (Golden-layer thermodynamics etc.)
+%========================================================
+
+    \section{Thermodynamics of the Golden Layer}
+    \label{sec:golden-thermo}
+
+    \subsection{Discrete Scale Invariance and Fractal Heat Capacity}
+        \label{subsec:dsi-heat-capacity}
+
+        The Golden Principle of SST introduces a distinguished constant \(\phi>1\)
+        (defined in Canon G1 via a hyperbolic parametrization) and a log-periodic
+        structure for mass and energy layers. A convenient potential for the energy
+        density \(\rhoE\) supporting discrete scale invariance is
+        \begin{equation}
+            V_\phi(\rhoE) =
+            \Lambda^4\left[
+                         1 - \cos\!\left(
+                                       \frac{2\pi}{\ln\phi}
+                                       \ln\frac{\rhoE}{\rhoE^\ast}
+                \right)
+            \right],
+            \label{eq:golden-potential}
+        \end{equation}
+        with minima log-periodic in \(\rhoE\). Since \(\rhoE \propto v^2 \propto
+    1/r^2\), the stability landscape in \(r\) is likewise log-periodic, so a
+        swirl core resists continuous swelling and instead prefers discrete jumps
+        between ``Golden Layers''.
+
+        At the thermodynamic level, this leads to a \emph{fractal heat capacity}. A
+        simple phenomenological ansatz for a single vortex atom or a small ensemble
+        is
+        \begin{equation}
+            C_V(T) \simeq C_0
+            \Biggl[
+                1 + A\cos\!\left(
+                               \frac{2\pi}{\ln\phi}\,
+                               \ln\frac{T}{T_\ast}
+                               + \delta
+                \right)
+                \Biggr],
+            \label{eq:Cv-fractal}
+        \end{equation}
+        with baseline \(C_0\), modulation amplitude \(A\), reference temperature
+        \(T_\ast\), and phase \(\delta\). The log-periodicity
+        \(\Delta\ln T = \ln\phi\) is a direct, falsifiable signature of Golden
+        Layering, analogous to log-periodic corrections in discrete-scale invariant
+        systems \cite{Sornette1998}.
+
+    \subsection{Thermal Protection and the Golden Filter}
+        \label{subsec:golden-filter}
+
+        The SST mass functional includes a suppression factor \(\phi^{-2k}\) for
+        deeper topological layers indexed by \(k\). This implies that inner
+        structures of composite knots (e.g.\ proton quark linkages) are exponentially
+        decoupled from thermal noise:
+
+        \begin{itemize}
+            \item Outer, small-\(k\) layers can swell and fluctuate with ambient
+            temperature (meson cloud, orbital dynamics).
+            \item Inner, large-\(k\) layers remain effectively frozen until thermal
+            energy crosses the Golden gap.
+        \end{itemize}
+
+        The Golden Filter thereby explains proton stability: ordinary thermal
+        turbulence cannot bridge the hierarchy between accessible outer layers and
+        deep core topology.
+
+%========================================================
+% APPENDICES
+%========================================================
+
+        \appendix
+
+    \section{Swirl Enthalpy Functional}
+    \label{app:swirl-enthalpy}
+
+    The specific enthalpy \(h\) of a given vortex state is
+    \begin{equation}
+        h = u + P\,v,
+        \qquad
+        v = \frac{1}{\rhof},
+    \end{equation}
+    where \(u\) is the specific internal energy and \(v\) the specific volume.
+    For a single ring:
+    \begin{align}
+        E_{\text{kin}}(r)
+        &\approx
+        \frac{1}{2}\,\rhof\,\Gamma^2 R
+        \ln\!\left(\frac{R}{r}\right), \\
+        E_{\text{vac}}(r)
+        &= P_\infty\,2\pi^2 R r^2, \\
+        E_{\text{surf}}(r)
+        &\sim \sigma\,4\pi^2 R r
+        \propto \frac{\kappa_{\text{elastic}}}{r}\,4\pi^2 R r
+        = 4\pi^2 R \kappa_{\text{elastic}},
+    \end{align}
+    where \(\sigma\) is an effective surface tension of the director field.
+    Collecting terms:
+    \begin{equation}
+        H_{\text{swirl}}(r)
+        = E_{\text{kin}}(r)
+        + E_{\text{vac}}(r)
+        + E_{\text{surf}}(r),
+    \end{equation}
+    and the stiffness \(K_r\) that enters the single-scale harmonic expansion
+    of \(H_{\text{swirl}}\) is
+    \begin{equation}
+        K_r =
+        \left.\frac{d^2H_{\text{swirl}}}{dr^2}\right|_{r=\rc}.
+    \end{equation}
+    The breathing mode frequency for small oscillations follows as
+    \begin{equation}
+        \omega_{\text{breath}}^2
+        \sim \frac{K_r}{M_{\text{eff}}},\qquad
+        M_{\text{eff}} \sim \rhof\,V(\rc),
+    \end{equation}
+    with \(V(\rc)=2\pi^2 R \rc^2\). This provides a direct mapping between
+    thermodynamic stiffness, spectroscopy of scalar resonances, and SST geometry.
+
+    \section{Boltzmann--Swirl Probability Distribution}
+    \label{app:boltzmann-swirl}
+
+    For a vacuum with effective noise temperature \(\Theta_{\text{vac}}\), the
+    probability of a given core radius \(r\) is
+    \begin{equation}
+        P(r) \propto
+        \exp\!\left[
+                  -\frac{H_{\text{swirl}}(r)}{k_{\text{SST}}\Theta_{\text{vac}}}
+        \right],
+    \end{equation}
+    where \(k_{\text{SST}}\) is the Boltzmann analogue of the swirl medium.
+    Near equilibrium, using a harmonic expansion of \(H_{\text{swirl}}\),
+    \begin{equation}
+        P(r) \propto
+        \exp\!\left[
+                  -\frac{K_r (r-\rc)^2}{2k_{\text{SST}}\Theta_{\text{vac}}}
+        \right],
+    \end{equation}
+    so radius fluctuations are Gaussian:
+    \begin{equation}
+        \langle (r-\rc)^2\rangle
+        = \frac{k_{\text{SST}}\Theta_{\text{vac}}}{K_r}.
+    \end{equation}
+    The positional fuzziness van het elektron (en andere deeltjes) kan zo
+    geïnterpreteerd worden als thermische fluctuaties van een vortexrand in
+    plaats van fundamentele onbepaaldheid.
+
+    \section{Log-Periodic Heat Capacity}
+    \label{app:log-periodic-Cv}
+
+    Starting from the Golden potential \eqref{eq:golden-potential} one can model
+    the density of states as a sum over discrete minima
+    \begin{equation}
+        E_n = E_0\,\phi^n,
+        \qquad n\in\mathbb{Z},
+    \end{equation}
+    with degeneracies \(g_n\). The canonical partition function is
+    \begin{equation}
+        Z(\beta)
+        = \sum_{n} g_n \exp(-\beta E_n),
+        \quad \beta = 1/(k_{\text{SST}}T),
+    \end{equation}
+    which is a Mellin-like sum known to yield log-periodic corrections in
+    thermodynamic derivatives \cite{Sornette1998}. Taking
+    \[
+        C_V(T)
+        = \frac{\partial}{\partial T}
+        \bigl(T^2 \partial_T \ln Z\bigr)
+    \]
+    produces oscillations with \(\Delta\ln T = \ln\phi\), as in
+    \eqref{eq:Cv-fractal}. This supports the fractal thermodynamics picture in
+    the Golden Layer regime.
+
+    \section{Golden-ladder toy model for \(Z(\beta)\) and \(C_V(T)\)}
+    \label{app:golden-ladder-Cv}
+
+    To make the fractal-thermodynamics picture of
+    Sec.~\ref{subsec:dsi-heat-capacity} explicit, we introduce a simple
+    Golden ladder for the proton's internal excitation spectrum. We model
+    a set of discrete levels
+    \begin{equation}
+        E_n = E_0\,\phi^{\,n},
+        \qquad
+        n = n_{\min},\dots,n_{\max},
+        \label{eq:golden-ladder-levels}
+    \end{equation}
+    with constant degeneracies \(g_n \equiv 1\) and
+    \(\phi = (1+\sqrt{5})/2\). Here \(E_0\) sets the overall scale. For a
+    proton, a natural choice is to take \(E_0\) of the order of the lowest
+    inelastic nucleon excitation above the ground state, e.g.
+    \begin{equation}
+        E_0 \sim \Delta_p
+        \equiv M_{\Delta}-M_p
+        \sim \mathcal{O}(300~\text{MeV}),
+    \end{equation}
+    so that the internal Golden ladder lives in the same range as known
+    baryon resonances.
+
+    For notational convenience we introduce a dimensionless temperature
+    \(\theta\) defined by
+    \begin{equation}
+        \theta \equiv \frac{k_{\text{SST}} T}{E_0},
+        \qquad
+        \beta = \frac{1}{k_{\text{SST}}T}
+        = \frac{1}{E_0}\,\frac{1}{\theta},
+    \end{equation}
+    where \(k_{\text{SST}}\) is the Boltzmann analogue for the swirl
+    medium (in a pure toy model one may simply take \(k_{\text{SST}}=k_B\)).
+    In terms of \(\theta\) the partition function reads
+    \begin{equation}
+        Z(\theta)
+        = \sum_{n=n_{\min}}^{n_{\max}}
+        g_n \exp\!\left[-\frac{E_n}{k_{\text{SST}}T}\right]
+        = \sum_{n=n_{\min}}^{n_{\max}}
+        \exp\!\left[-\frac{\phi^{\,n}}{\theta}\right].
+        \label{eq:Z-golden}
+    \end{equation}
+
+    The internal energy is
+    \begin{equation}
+        U(\theta)
+        = \frac{1}{Z(\theta)}
+        \sum_{n=n_{\min}}^{n_{\max}}
+        E_n \exp\!\left[-\frac{E_n}{k_{\text{SST}}T}\right]
+        = E_0\,
+        \frac{\sum_{n} \phi^{\,n}
+            \exp[-\phi^{\,n}/\theta]}
+        {\sum_{n} \exp[-\phi^{\,n}/\theta]}.
+        \label{eq:U-golden}
+    \end{equation}
+    It is often convenient to use the fluctuation formula for the heat
+    capacity,
+    \begin{equation}
+        C_V(T)
+        = \frac{\partial U}{\partial T}
+        = k_{\text{SST}}\beta^2
+        \left(
+            \langle E^2 \rangle - \langle E \rangle^2
+        \right),
+        \label{eq:Cv-fluctuation}
+    \end{equation}
+    with
+    \begin{align}
+        \langle E^m \rangle
+        &= \frac{1}{Z}
+        \sum_{n} E_n^{\,m}
+        \exp(-\beta E_n) \\[3pt]
+        &= \frac{E_0^{\,m}}{Z}
+        \sum_{n} \phi^{\,mn}
+        \exp\!\left(-\frac{\phi^{\,n}}{\theta}\right).
+    \end{align}
+    Inserting Eq.~\eqref{eq:Cv-fluctuation} and the ladder
+    \eqref{eq:golden-ladder-levels} gives
+    \begin{equation}
+        C_V(T)
+        = k_{\text{SST}}
+        \left(\frac{E_0}{k_{\text{SST}}T}\right)^2
+        \left(
+            \langle \phi^{2n} \rangle
+            - \langle \phi^{n} \rangle^2
+        \right),
+        \label{eq:Cv-golden-final}
+    \end{equation}
+    where the averages \(\langle\cdot\rangle\) are taken with respect to
+    the Boltzmann weights \(\exp[-\phi^{\,n}/\theta]\).
+
+    \paragraph{Numerical toy evaluation.}
+        For a concrete numerical model one may, for example, take
+        \(n_{\min}=-N\), \(n_{\max}=+N\) with \(N\sim 10\text{--}20\) and
+        \(g_n=1\) for all \(n\). Evaluating Eqs.~\eqref{eq:Z-golden}--\eqref{eq:Cv-golden-final}
+        on a logarithmic grid of \(\theta\) then produces a heat capacity
+        \(C_V(T)\) which is a smooth function of \(T\) with only mild
+        oscillatory corrections when plotted as a function of \(\ln T\). In
+        other words, the Golden structure manifests itself as a small,
+        log-periodic modulation on top of a broad background, consistent with
+        the discrete scale invariance analysis of
+        Ref.~\cite{Sornette1998}.
+
+    \bibliographystyle{unsrt}
+
+%========================================================
+% BIBLIOGRAPHY
+%========================================================
+
+    \begin{thebibliography}{9}
+
+        \bibitem{Saffman1992}
+        P.~G.~Saffman,
+        \newblock \emph{Vortex Dynamics},
+        \newblock Cambridge University Press, Cambridge (1992).
+
+        \bibitem{Unruh1976}
+        W.~G.~Unruh,
+        \newblock Notes on black-hole evaporation,
+        \newblock Phys.\ Rev.\ D \textbf{14}, 870 (1976).
+        \newblock \doi{10.1103/PhysRevD.14.870}.
+
+        \bibitem{Jacobson1995}
+        T.~Jacobson,
+        \newblock Thermodynamics of spacetime: The Einstein equation of state,
+        \newblock Phys.\ Rev.\ Lett.\ \textbf{75}, 1260--1263 (1995).
+        \newblock \doi{10.1103/PhysRevLett.75.1260}.
+
+        \bibitem{Verlinde2011}
+        E.~P.~Verlinde,
+        \newblock On the origin of gravity and the laws of Newton,
+        \newblock J.\ High Energy Phys.\ \textbf{2011}, 29 (2011).
+        \newblock \doi{10.1007/JHEP04(2011)029}.
+
+        \bibitem{Sornette1998}
+        D.~Sornette,
+        \newblock Discrete scale invariance and complex dimensions,
+        \newblock Phys.\ Rep.\ \textbf{297}, 239--270 (1998).
+        \newblock \doi{10.1016/S0370-1573(97)00076-8}.
+
+    \end{thebibliography}
+
+
+\end{document}

@@ -1,0 +1,1475 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{booktabs,array,longtable}
+\usepackage[hidelinks]{hyperref}
+\usepackage{physics}
+\usepackage{setspace}
+\setstretch{1.06}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,decorations.pathmorphing}
+% Tables and Figures
+\usepackage{float}
+\usepackage{import}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{appendix}
+
+%-------------------------- SST minimal macro prelude (compile-safe) --------------------
+% Vector swirl velocity + clock/vorticity symbols (aligned with Rosetta)
+\newcommand{\omegas}{\boldsymbol{\omega}_{\!\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\rc}{r_c}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rhocore}{\rho_{\text{core}}}
+%----------------------------------------------------------------------------------------
+
+\title{A Branch-Resolved Atomic Bridge Model in Swirl-String Theory\\
+\large Hydrogenic Consistency, Circulation-Sensitive Couplings, and a Handed Atomic Benchmark}
+\author{Omar Iskandarani \\
+Independent Researcher, Groningen, The Netherlands \\
+\texttt{info@omariskandarani.com} \\
+ORCID: 0009-0006-1686-3961}
+\date{March 2026}
+
+\begin{document}
+    \maketitle
+    
+    \begin{abstract}
+        We formulate a branch-resolved phenomenological atomic bridge model within Swirl-String Theory (SST). The conservative baseline retains the Coulomb core and Hartree screening, while the SST-specific sector is encoded in a circulation-normalized interaction fixed by canonical medium scales. We show that the Bohr radius appears as a consistency identity of the chosen scale relations rather than as an independent prediction. We then define a helical circulation packet and derive a handed interaction operator whose linearized action on the hydrogenic $1s$ sector yields a nonzero source-level asymmetry. Claims concerning shell capacities $N_n=2n^2$, Pauli-like exclusion, and heavy-atom contraction are not derived here from first principles; instead, they are identified as conjectural or qualitative extensions whose decisive mathematical steps remain open, including the acoustic eigenvalue problem in a $1/r$ background flow and the link between hard-core overlap penalties and eV-scale exchange physics. The result is therefore a sharply delimited bridge model with one benchmarkable chiral channel, rather than a derivation of atomic structure in full.
+        
+        \vspace{0.5cm}
+        \noindent \textbf{Keywords:} Swirl-String Theory, Topological Fluid Dynamics, Effective Field Theory, Analogue Gravity, Atomic Bridge Model
+    \end{abstract}
+    
+    \section{Introduction and Epistemic Framing}
+    \label{sec:intro}
+        The mathematical formalism of quantum mechanics (QM) provides an exceptionally accurate description of atomic physics, yet its reliance on abstract operator algebras leaves the ontological nature of elementary particles unresolved. A parallel tradition in physics---spanning from Kelvin's vortex atoms \cite{Kelvin1869} to Madelung's hydrodynamic formulation \cite{Madelung1927}, Volovik's superfluid vacuum \cite{Volovik2003}, and 't Hooft's deterministic quantum mechanics \cite{tHooft2016}---explores whether quantum phenomenology can emerge as an effective low-energy limit of an underlying deterministic substrate. Hydrodynamic, pilot-wave \cite{Bohm1952,CouderFort2006,Bush2015}, analogue-gravity \cite{BarceloLiberatiVisser2011}, and topological-soliton \cite{Skyrme1962,FaddeevNiemi1997} programmes provide useful analogies but do not by themselves solve shell counting, exchange physics, or atomic structure from a classical substrate.
+        
+        In this paper, we formulate Swirl-String Theory (SST) as a hydrodynamic effective field theory. By modeling the vacuum as a continuous, inviscid, incompressible condensate, we represent elementary matter not as point particles, but as localized, topologically stable vortex filaments (trefoils).
+        
+        \paragraph{Relationship to Quantum Mechanics.} This work does not claim to replace QM, nor does it merely reinterpret it. Rather, SST proposes a specific hydrodynamic sub-structure for which QM serves as the effective low-energy continuum limit. Where standard QM utilizes axiomatic operators (e.g., Pauli matrices, anticommutation relations), SST relies on topological fluid constraints (e.g., circulation invariance, fluid cavitation limits). The objective is to test whether a restricted set of atomic-physics structures can be represented within a classical fluid-topological bridge model, while explicitly separating what is derived, what is assumed, and what is only benchmarked against standard quantum mechanics.
+        
+        To function as a useful bridge model for atomic structure, the framework is organized around four targets:
+        \begin{enumerate}[label=(C\arabic*)]
+            \item \textbf{Hydrogenic consistency:} recover the standard one-electron Coulomb limit when the SST-specific circulation sector is switched off;
+            \item \textbf{Branch-resolved coupling:} define an SST-specific interaction that is fixed by canonical medium scales and can be benchmarked in at least one atomic transition channel;
+            \item \textbf{Many-electron outlook:} identify, but not yet solve, the open problems required to connect shell counting and exclusion-like behavior to the continuum model;
+            \item \textbf{Falsifiability:} isolate at least one potential branch-sensitive observable whose null result would collapse the added SST structure to a relabeling.
+        \end{enumerate}
+        
+        To ensure epistemic clarity, we explicitly distinguish the logical status of the components in this framework: (1) \emph{Derived results} include the thermodynamic Euler balance mapping of the Bohr radius and the macroscopic topological hard-core collision energy. (2) \emph{Modeled mechanisms} include the delayed Adler phase-locking analogy for orbital quantization and the proposed SO(4) acoustic mapping for shell capacity. (3) \emph{Imported frameworks} include standard quantum tools (Fermi's golden rule, Hartree screening, $Y_{\ell m}$ angular momentum states) used here to establish phenomenological benchmarks rather than derived directly from the Navier-Stokes equations.
+    
+    \subsection{Logical status of the main claims}
+    To keep the epistemic status of the manuscript explicit, Table~\ref{tab:status} separates quantities that are fixed by canonical scale choices, quantities that are recovered only as benchmark limits, quantities that remain conditional or conjectural, and quantities that are computed only at an intermediate operator level. The purpose of this separation is to prevent structural consistency checks from being misread as independent predictions.
+
+    \begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.23\textwidth} >{\raggedright\arraybackslash}p{0.18\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.17\textwidth}}
+    \toprule
+    Quantity / statement & Status & Origin in manuscript & Interpretation \\
+    \midrule
+    $a_0^{\rm SST}=2r_c/\alpha^2$ & Fixed consistency identity & Canonical scale relation & Not an independent prediction \\
+    Hydrogenic spectrum in the $\gamma\to 0$ limit & Imported benchmark / recovered limit & Coulomb baseline Hamiltonian & Consistency with standard atomic physics baseline \\
+    $N_n=2n^2$ shell capacity & Conditional conjecture & Proposed SO(4)-type acoustic mapping & Not derived in this paper \\
+    Pauli-like exclusion barrier & Hard-core overlap estimate & Core-overlap kinetic penalty & Not a derivation of exchange integrals or spin-statistics \\
+    $A_{\rm tot}=-8/17$ (axisymmetric benchmark) & Completed reduced-model benchmark & Coulomb-continuum helicity asymmetry (Sec.~\ref{sec:continuum-benchmark}) & Observable total-rate asymmetry of the reduced model; null and stronger controls in Sec.~\ref{sec:continuum-benchmark} \\
+    Heavy-$Z$ contraction & Qualitative extension & Clock-weighted kinetic operator & Not benchmarked against Dirac or many-electron data \\
+    \bottomrule
+    \end{tabularx}
+    \caption{Logical status of the central quantities and claims in the present SST atomic bridge model.}
+    \label{tab:status}
+    \end{table}
+    
+    \section{Axiomatic Foundations and Fluid-Mechanical Ingredients}
+    \label{sec:axiomatic}
+        To make this manuscript strictly self-contained, we establish the framework upon a continuous, incompressible, inviscid background medium, characterized entirely by three primitive constants: an effective mass density $\rho_{\!f}$, a fundamental core radius $r_c$, and a characteristic internal wave speed $\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert$.
+        
+        From this fluid substrate, three functional ingredients are constructed.
+        
+        \paragraph{(i) Propagating transverse torsion.} Electromagnetic-like radiation is modeled not as point particles, but as transverse director/shear waves in the continuum. Using Cartan's geometric framework for teleparallelism \cite{HehlObukhov2007}, an electromagnetic-strength two-form can be identified as a projection of torsion,
+            \begin{equation}
+                \label{eq:Ftorsion}
+                F \equiv \kappa\,u_a T^a.
+            \end{equation}
+            We model the propagating radiation sector as a transverse director field with velocity
+            \begin{equation}
+                \label{eq:uA}
+                \mathbf{u}=\partial_t \mathbf{A},
+                \qquad
+                \nabla\cdot \mathbf{A}=0.
+            \end{equation}
+            The vector potential $\mathbf{A}$ acts as a spatial displacement field carrying dimensions of length.
+        
+        \paragraph{(ii) Rotating-fluid source law.} The generation of local circulation from linear forcing is governed by the standard rotating Euler equations \cite{Greenspan1968, Batchelor1967}. For axisymmetric perturbations in a uniformly rotating fluid volume, the axial velocity $w = \partial_t \xi$ sources vertical vorticity $\omega_z$:
+            \begin{equation}
+                \label{eq:wz}
+                \partial_t \omega_z = 2\Omega\,\partial_z w,
+            \end{equation}
+            which integrates from rest to
+            \begin{equation}
+                \label{eq:wzxi}
+                \omega_z(r,z,t)=2\Omega\,\partial_z \xi(r,z,t).
+            \end{equation}
+            The azimuthal swirl velocity follows kinematically from Stokes' theorem,
+            \begin{equation}
+                \label{eq:utheta}
+                \omega_z = \frac{1}{r}\partial_r(r u_\theta)
+                \quad\Longrightarrow\quad
+                u_\theta(r,z,t)=\frac{1}{r}\int_0^r \omega_z(r',z,t)\,r'\,dr'.
+            \end{equation}
+            This yields a reversible leading-order swirl response for symmetric up-down forcing, converting macroscopic mechanical displacement into localized vortex circulation.
+        
+        \paragraph{(iii) Circulation quantization and the Swirl-Clock.}
+            Following the topological vortex legacy of Kelvin and Helmholtz \cite{Kelvin1869, Helmholtz1858}, we elevate quantized circulation to a primitive invariant of the medium. The fundamental circulation quantum is defined by the core boundary parameters:
+            \begin{equation}
+                \label{eq:Gamma0}
+                \boxed{
+                    \Gamma_0 \equiv 2\pi \rc\,\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert,
+                    \qquad
+                    \Gamma = \oint \mathbf v\cdot d\boldsymbol\ell = n\,\Gamma_0, \quad n \in \mathbb{Z}.
+                }
+            \end{equation}
+            To recover relativistic kinematics without a Lorentzian spacetime manifold, we define a scalar bookkeeping field---the Swirl-Clock---which tracks the local time-dilation induced by the fluid's kinetic energy density. We cleanly distinguish the local material turnover scale,
+            \begin{equation}
+                \label{eq:Omega0}
+                \Omega_0 \equiv \frac{\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}{\rc},
+            \end{equation}
+            from the laboratory frame, and assign the local clock factors
+            \begin{equation}
+                \label{eq:SwirlClock}
+                \mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowleft}} = \sqrt{1-\frac{v_{\!\boldsymbol{\circlearrowleft}}^{2}}{c^2}},
+                \qquad
+                \mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowright}} = \sqrt{1-\frac{v_{\!\boldsymbol{\circlearrowright}}^{2}}{c^2}}.
+            \end{equation}
+            The labels $(\!\boldsymbol{\circlearrowleft}, \!\boldsymbol{\circlearrowright})$ track the two internal chiral branches (handedness) of the vortex knots, fundamentally reproducing the two-valued internal sector ordinarily encoded by fermionic spin $m_s=\pm \tfrac12$.
+        
+        \paragraph{(iv) Scale-Dependent Densities and Elastic Closure.}
+            Mass is not a fundamental charge in this framework; it is an emergent property of localized kinetic energy. Following the canonical density definitions, we strictly distinguish the sparse background effective fluid density $\rhoF$ from the saturated material density of the vortex core, $\rhocore$. The generic mass-equivalent density field is $\rhoM(x) = \rhoE(x)/c^2$. At the structural limit inside a vortex core, this density saturates to the macroscopic calibration constant $\rhocore$.
+            To mechanically anchor this core scale without circular dependence on electromagnetism, we invoke an elastic Hooke-law closure. A fundamental unshielded trefoil collapses into a ``degenerate fat torus'' whose major radius equals its minor radius $\rc$ (yielding an effective classical diameter of $2\rc$). Equating the rest energy to the elastic strain stored across this geometry defines the core density solely in terms of the substrate's mechanical stiffness $k$:
+            \begin{equation}
+                \label{eq:ElasticClosure}
+                E_{\rm rest} = \frac{1}{2} k (2\rc)^2 \quad \Longrightarrow \quad \rhocore \propto \frac{k}{c^2 \rc}.
+            \end{equation}
+            This establishes $\rhocore$ and $\rc$ as independent continuum-mechanical parameters, ensuring subsequent mass derivations are strictly geometric.
+    
+    \section{Minimal retained field sector}
+    \label{sec:field-sector}
+    The first retained sector is a transverse torsion/shear field. The minimal Lagrangian is
+    \begin{equation}
+        \label{eq:Ltorsion}
+        \mathcal{L}_{\rm torsion}
+        =
+        \frac12\rhoF\,\lVert \partial_t \mathbf{A}\rVert^2
+        -
+        \frac12 K\,\lVert \nabla\times\mathbf{A}\rVert^2,
+        \qquad
+        \nabla\cdot\mathbf{A}=0.
+    \end{equation}
+    Varying with respect to $\mathbf{A}$ gives
+    \begin{equation}
+        \label{eq:Awave-pre}
+        \rhoF\left(\partial_t^2\mathbf{A}+c^2\nabla\times\nabla\times\mathbf{A}\right)=0,
+        \qquad
+        c^2\equiv \frac{K}{\rhoF},
+    \end{equation}
+    which reduces, under $\nabla\cdot\mathbf{A}=0$, to
+    \begin{equation}
+        \label{eq:Awave}
+        \boxed{
+            \left(\frac{1}{c^2}\partial_t^2-\nabla^2\right)\mathbf{A}=0.
+        }
+    \end{equation}
+    This is the propagating field retained from the older torsion/photon sector. No magneto-optical or parity-odd vacuum extensions are retained in the present canonical core.
+    
+    \section{Minimal retained source sector}
+    \label{sec:source-sector}
+    The second retained sector is the rotating-medium source law. The atomic theory proposed below does not require that every torsion excitation originate in a macroscopic rotating cylinder, but the rotating-cylinder calculation provides the cleanest explicit production mechanism for an SST circulation amplitude.
+    
+    The circulation-foundational choice is to normalize the source by local circulation, not by local clock shift. Using Eq.~\eqref{eq:utheta}, define the local loop circulation by
+    \begin{equation}
+        \label{eq:GammaLoc}
+        \boxed{
+            \Gamma_{\rm loc}(r,z,t)
+            :=
+            2\pi r\,u_\theta(r,z,t)
+            =
+            2\pi\int_0^r \omega_z(r',z,t)\,r'\,dr'.
+        }
+    \end{equation}
+    The canon-level dimensionless circulation driver is then
+    \begin{equation}
+        \label{eq:gammaDef}
+        \boxed{
+            \gamma(\mathbf r,t)
+            \equiv
+            \frac{\Gamma_{\rm loc}(\mathbf r,t)}{\Gamma_0}.
+        }
+    \end{equation}
+    Equivalently, via Eq.~\eqref{eq:wzxi},
+    \begin{equation}
+        \label{eq:gammaXi}
+        \gamma(r,z,t)
+        =
+        \frac{4\pi\Omega}{\Gamma_0}
+        \int_0^r \partial_z \xi(r',z,t)\,r'\,dr'.
+    \end{equation}
+    Thus the new source chain is
+    \begin{equation}
+        \label{eq:source-chain}
+        \xi \longrightarrow \omega_z \longrightarrow u_\theta \longrightarrow \Gamma_{\rm loc} \longrightarrow \gamma,
+    \end{equation}
+    with the clock sector treated downstream of circulation rather than as the primitive driver.
+    
+    For a localized helical packet, a practical canon-compatible ansatz is
+    \begin{equation}
+        \label{eq:gammaPacket}
+        \gamma(r,\phi,z,t)
+        =
+        A_\gamma
+        \exp\!\left(-\frac{r^2}{2w_r^2}\right)
+        \exp\!\left(-\frac{(z-vt)^2}{2w_z^2}\right)
+        \cos\!\left(m\phi+kz-\omega t\right).
+    \end{equation}
+    This profile is retained because it carries finite amplitude, axial propagation, helical winding, and finite support, while remaining directly interpretable as a circulation-bearing packet.
+    
+    \section{Atomic sector: branch-resolved minimal Hamiltonian}
+    \label{sec:atomic-H}
+    The atomic bridge model is built by retaining the ordinary Coulomb core and many-electron screening, and placing the novel SST content entirely in a circulation-sensitive branch potential. The working Hamiltonian is
+    \begin{equation}
+        \label{eq:master-H}
+        \boxed{
+            \left[
+                -\frac{\hbar^2}{2\mu}\nabla^2
+            +V_{\rm core}(r)
+            +V_{\rm screen}[\rho](\mathbf r)
+            +V_{\rm circ}^{(\sigma)}[\gamma]
+            \right]\Psi_{i,\sigma}
+            =\varepsilon_{i,\sigma}\Psi_{i,\sigma},
+        }
+    \end{equation}
+    with
+    \begin{equation}
+        \label{eq:Vcore}
+        V_{\rm core}(r)=-\frac{Ze^2}{4\pi\varepsilon_0 r}
+    \end{equation}
+    for the conservative baseline.
+    
+    To establish a canonical baseline, we remove free branch couplings in favor of fixed SST scales. First, define the branch-coupling strength by the small dimensionless material ratio
+    \begin{equation}
+        \label{eq:eta0}
+        \boxed{
+            \eta_0 \equiv \frac{\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}{c} = \frac{\alpha}{2} \approx 3.648676\times 10^{-3}.
+        }
+    \end{equation}
+    Then take the unperturbed atomic baseline to be branch-symmetric,
+    \begin{equation}
+        \label{eq:St0freeze}
+        S_{t,0}(r)\equiv 1,
+    \end{equation}
+    and define the two branch sectors by a circulation-driven clock bookkeeping field
+    \begin{equation}
+        \label{eq:StBranches}
+        \boxed{
+            S_t^{(\sigma)}(\mathbf r,t)=1+\sigma\,\eta_0\,\gamma(\mathbf r,t),
+            \qquad
+            \sigma=\pm 1,
+        }
+    \end{equation}
+    where $\sigma=+1$ corresponds to $\mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowleft}}$ and $\sigma=-1$ to $\mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowright}}$. The clock is therefore retained, but only as a downstream representation of circulation-bearing dynamics.
+    
+    Next, freeze the energy scale to the Rydberg binding scale,
+    \begin{equation}
+        \label{eq:ERfreeze}
+        \boxed{
+            E_R \equiv \frac{\hbar^2}{2\mu (a_0^{\rm SST})^2}
+            = \frac{\mu e^4}{2(4\pi\varepsilon_0)^2\hbar^2}.
+        }
+    \end{equation}
+    Once circulation is promoted to the primitive atomic driver, spatial and chiral structure is carried directly by the explicit circulation field $\gamma(\mathbf r,t)$ and by the orbit-coupled anticommutator term introduced below. The baseline model therefore utilizes the algebraic clock shift in $V_{\rm clock}^{(\sigma)}$ and treats spatial orientation as belonging to the circulation sector.
+    
+    The scalar clock-derived contribution is then
+    \begin{equation}
+        \label{eq:Vclock}
+        \boxed{
+            V_{\rm clock}^{(\sigma)}
+            =
+            E_R\Bigl[1-\bigl(S_t^{(\sigma)}\bigr)^2\Bigr].
+        }
+    \end{equation}
+    At first order this gives
+    \begin{equation}
+        \label{eq:Vclock-linear}
+        \boxed{
+            \delta V_{\rm clock}^{(\sigma)}
+            \approx
+            -2\sigma E_R\eta_0\,\gamma.
+        }
+    \end{equation}
+    
+    The genuinely circulation-foundational addition is an orbit-coupled term. To avoid introducing a new fitted constant, the same small canonical factor $\eta_0$ is reused and the coupling is frozen at the same atomic energy scale. The minimal Hermitian choice is the anticommutator form
+    \begin{equation}
+        \label{eq:HintCirc}
+        \boxed{
+            \delta H_{\rm circ}^{(\sigma)}
+            =
+            \frac{E_R\eta_0\,\sigma}{2}
+            \left\{\frac{\hat L_z}{\hbar},\gamma\right\}.
+        }
+    \end{equation}
+    This form makes the scaling explicit: $\hat L_z/\hbar$ is dimensionless, so the anticommutator is dimensionless before multiplication by the common frozen atomic energy scale $E_R\eta_0$. The anticommutator is important: for an initial $s$-state with $\hat L_z\psi_{1s}=0$, the operator still yields a nonzero contribution because $\hat L_z$ can act on the helical packet factor inside $\gamma$.
+    
+    The full frozen linear interaction is therefore
+    \begin{equation}
+        \label{eq:HintTotal}
+        \boxed{
+            \delta H_{\rm int}^{(\sigma)}
+            =
+            -2\sigma E_R\eta_0\,\gamma
+            +
+            \frac{E_R\eta_0\,\sigma}{2}
+            \left\{\frac{\hat L_z}{\hbar},\gamma\right\}.
+        }
+    \end{equation}
+    This is the main circulation-foundational upgrade relative to earlier scalar-clock baselines: the atomic sector now responds directly to handed circulation, not only to a scalar branch shift.
+    
+    \subsection{Controlled approximation regime}
+    The present atomic bridge is not claimed as a first-principles derivation from the full SST continuum field equations. Rather, it is a restricted effective closure proposed only in the perturbative regime
+    \begin{equation}
+        \eta_0=\frac{\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}{c}\ll 1,
+        \qquad
+        |\gamma|\ll 1,
+        \qquad
+        \hbar\omega \ll \hbar\Omega_0,
+        \qquad
+        \frac{r_c}{a_0^{\rm SST}}\ll 1.
+    \end{equation}
+    In this regime, the internal Kelvin sector is treated as frozen, the branch splitting is perturbative, and the Hamiltonian of Eq.~\eqref{eq:master-H} is interpreted as a phenomenological bridge model rather than as a controlled reduction of the full nonlinear continuum dynamics.
+    
+    \subsection{Radiative Stability and the Kelvin-Mode Gap}
+        A persistent structural objection to classical orbital models is the Larmor formula, which predicts continuous radiation from accelerating charges. In the present fluid framework, continuous dissipation is obstructed by the internal stiffness of the circulation core. The vortex filament supports transverse acoustic oscillations (Kelvin waves). For a straight classical Rankine vortex of radius $\rc$ and circulation $\Gamma_0$, the lowest-order Kelvin wave dispersion relation is governed by the core rotation rate \cite{Kelvin1880}:
+        \begin{equation}
+            \label{eq:KelvinDispersion}
+            \omega_K(k) \approx \frac{\Gamma_0}{2\pi \rc^2} \left(1 - \dots \right) = \frac{\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}{\rc} \equiv \Omega_0.
+        \end{equation}
+        While the exact dispersion relation for a trefoil knot will contain geometric modifications due to the localized induction of curved filament segments, this straight-vortex limit establishes an order-of-magnitude topological excitation gap for the string's internal degrees of freedom:
+        \begin{equation}
+            \label{eq:KelvinGap}
+            \Delta K \sim \hbar \Omega_0 \sim \mathcal{O}(10^2 - 10^3)\ \mathrm{eV}.
+        \end{equation}
+        Because resonant atomic transition energies ($\hbar\omega \approx 1\text{--}10\ \mathrm{eV}$) are orders of magnitude below this internal structural gap, the transverse Kelvin modes of the trefoil core remain dynamically frozen. The electron filament therefore acts as a rigid, non-dissipative topological obstruction to the fluid background. The system cannot radiate continuously; energy transfer is strictly gated by the resonant exchange of discrete torsion packets matching the orbital turnover frequencies. This scale separation rigorously justifies truncating the continuous fluid dynamics to the frozen, branch-resolved Hamiltonian of Eq.~\eqref{eq:master-H}.
+    
+    \section{Many-electron closure and screening}
+    \label{sec:many-electron}
+    To reach shell structure, a many-electron mean-field closure is required. The electron density is defined by
+    \begin{equation}
+        \label{eq:rho-def}
+        \rho(\mathbf r)=\sum_{i,\sigma} f_{i,\sigma}\,\abs{\Psi_{i,\sigma}(\mathbf r)}^2,
+    \end{equation}
+    with occupation numbers $f_{i,\sigma}\in\{0,1\}$ at the effective level. The minimal retained screening functional is the Hartree term \cite{Hartree1928},
+    \begin{equation}
+        \label{eq:Vscreen}
+        \boxed{
+            V_{\rm screen}[\rho](\mathbf r)
+            =
+            \frac{e^2}{4\pi\varepsilon_0}
+            \int \frac{\rho(\mathbf r')}{\abs{\mathbf r-\mathbf r'}}\,d^3r'.
+        }
+    \end{equation}
+    No SST-specific correction to screening is introduced in the canonical starter model. This is deliberate: a useful bridge model must first be consistent with the ordinary many-electron limit before attempting branch- or medium-induced corrections to screening.
+    
+    At the level of the working atomic Hamiltonian, the shell-state capacity follows the standard counts:
+    \begin{equation}
+        \label{eq:subshell-count}
+        N_{n\ell}=2(2\ell+1),
+    \end{equation}
+    and
+    \begin{equation}
+        \label{eq:shell-count}
+        N_n=\sum_{\ell=0}^{n-1}2(2\ell+1)=2n^2.
+    \end{equation}
+    In the present bridge model, the factor $2\ell+1$ arises from the ordinary rotational sectors $m_\ell=-\ell,\ldots,+\ell$, while the factor $2$ is interpreted as the low-energy branch doublet associated with $\mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowleft}}$ and $\mathbf{S}_{(t)}^{\!\boldsymbol{\circlearrowright}}$.
+    
+    Crucially, this exclusion is not an axiomatic algebraic postulate in SST, but is modeled as an emergent hydrodynamic necessity. As evaluated in Appendix~\ref{app:PauliBarrier} and formalized in Section~\ref{sec:MultiElectronShells}, forcing two identically handed trefoils into the same spatial domain generates a large macroscopic dynamic pressure excursion. The appendix supplies a hard-core occupancy analogue (a qualitative overlap obstruction) rather than a derivation of the Pauli principle or eV-scale exchange integrals; the link to atomic exchange physics remains open.
+    
+    \section{Hydrogenic limit and SST length scale}
+    \label{sec:hydrogenic}
+    This section establishes a consistency relation, not an independent prediction. The Bohr-scale match below follows because the canonical SST scales have already been chosen to reproduce the standard atomic length scale. The point of the calculation is therefore structural: to show that the bridge Hamiltonian reduces to the standard Coulomb problem when the circulation-sensitive sector is switched off.
+    
+    The model reproduces the ordinary hydrogenic spectrum when
+    \begin{equation}
+        V_{\rm screen}\to 0,
+        \qquad
+        \gamma\to 0,
+        \qquad
+        S_t^{(+)}=S_t^{(-)}.
+    \end{equation}
+    Then~\eqref{eq:master-H} reduces to the standard one-electron Coulomb problem,
+    \begin{equation}
+        \label{eq:En}
+        E_n=-\frac{\mu Z^2 e^4}{2(4\pi\varepsilon_0)^2\hbar^2}\frac{1}{n^2}.
+    \end{equation}
+    The SST atomic scale is tied to the canonical constants by
+    \begin{equation}
+        \label{eq:a0-sst}
+        \boxed{
+            a_0^{\rm SST}
+            =
+            \frac{F_{\rm swirl}^{\max}\,\rc^2}{M_e\,\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2}
+            =
+            \frac{2\rc}{\alpha^2}.
+        }
+    \end{equation}
+    Using the canonical values
+    \begin{equation}
+        \lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert \approx 1.094\times 10^6\ \mathrm{m\,s^{-1}},
+        \quad
+        \rc \approx 1.409\times 10^{-15}\ \mathrm{m},
+        \quad
+        F_{\rm swirl}^{\max}\approx 29.05\ \mathrm{N},
+    \end{equation}
+    this gives
+    \begin{equation}
+        \label{eq:a0-num}
+        a_0^{\rm SST}
+        =
+        5.29177161\times 10^{-11}\ \mathrm{m},
+    \end{equation}
+    while the equivalent relation $2\rc/\alpha^2$ yields
+    \begin{equation}
+        \label{eq:a0-num2}
+        \frac{2\rc}{\alpha^2}=5.29177214\times 10^{-11}\ \mathrm{m},
+    \end{equation}
+    consistent with the ordinary Bohr scale to the expected rounding level.
+    
+    This gives the hydrogenic SST radius law
+    \begin{equation}
+        \label{eq:RnZ}
+        R_{n,Z}^{\rm SST}\sim \frac{n^2}{Z}\,a_0^{\rm SST}.
+    \end{equation}
+    Thus the atomic bridge model retains the tested size law while reinterpreting $a_0$ as an emergent hydrodynamic length scale. We explicitly note that this is not an independent numerical prediction, as the canonical scales $(F_{\rm swirl}^{\max},\rc,\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert)$ are geometrically locked to the empirical constants. Rather, this serves as a structural closure identity: it demonstrates that the phenomenological framework of standard quantum mechanics is mathematically isomorphic to the classical steady-state Euler balance of a fluid continuum. Quantum mechanics is thus interpreted as the effective low-energy acoustic theory of this fluid substrate.
+    
+    \paragraph{Thermodynamic Equilibrium of the Ground State.}
+        We explicitly note that Eq.~\eqref{eq:a0-sst} is a structural consistency identity, not an independent numerical prediction, as the canonical scales are locked to empirical constants. However, this isomorphism demonstrates that the Bohr radius can be rigorously reinterpreted as a stationary hydrodynamic equilibrium surface. In the surrounding swirl condensate, the unperturbed ground state corresponds to a zero effective ``swirl temperature'' ($T_{\rm swirl} = 0$), where geometric strain vanishes.
+        
+        The stable orbital radius $a_0^{\rm SST}$ emerges precisely at the surface where the outward dynamic swirl pressure balances the inward coherent vacuum tension. Treating the core as a source of persistent circulation, the local dynamic pressure scales as $P_{\rm dyn} \sim \frac{1}{2}\rhoF v_\theta^2$. Enforcing a steady-state Euler balance between the core circulation and the far-field envelope yields the ratio of the core radius to the equilibrium boundary:
+        \begin{equation}
+            \label{eq:PressureBalance}
+            \frac{a_0^{\rm SST}}{\rc}
+            =
+            \frac{2}{\alpha^2}
+            =
+            \frac{1}{2\eta_0^2}.
+        \end{equation}
+        Within the present canonical scale assignment, the hydrogenic orbital may therefore be reinterpreted heuristically as a stationary flow boundary of the effective medium. This should be read as an interpretive consistency picture rather than as a standalone derivation from the full Euler system.
+    
+    \section{Conjectural Extensions: Many-Electron Structure and Aufbau-like Counting}
+    \label{sec:MultiElectronShells}
+    
+    The present manuscript does not derive many-electron shell structure from first principles. Instead, this section records the open conjectural steps that would be required to extend the branch-resolved atomic bridge toward shell counting and exclusion-like behavior. These extensions are included to make the research program explicit, not to claim that the periodic-table architecture has already been recovered.
+    
+    \subsection{Screened Swirl Circulation and the Effective Euler Balance}
+        Consider a central nucleus of topological charge $Z$. In the ideal fluid limit, this acts as a macroscopic circulation sink/source, establishing a baseline azimuthal swirl field $\mathbf{v}_{\theta}^{\rm nuc}(r) = Z \Gamma_0 / (2\pi r) \hat{\boldsymbol{\theta}}$.
+        
+        As $N$ electron trefoils are added to the atomic basin, they act as localized, screened circulation defects. The macroscopic steady-state fluid velocity at a radial distance $r$ is determined by the total enclosed circulation via Stokes' theorem:
+        \begin{equation}
+            \label{eq:GammaEff}
+            \Gamma_{\rm eff}(r) = \oint_{\partial S_r} \mathbf{v}_{\theta} \cdot d\mathbf{l} = \Gamma_0 \left( Z - \int_0^r \rho_\sigma(\mathbf{r}') \, d^3r' \right) \equiv \Gamma_0 Z_{\rm eff}(r),
+        \end{equation}
+        where $\rho_\sigma(\mathbf{r}')$ is the number density of electron trefoils. The resulting outward dynamic pressure of the macroscopic atomic vortex is governed by the Euler equation for steady, incompressible flow:
+        \begin{equation}
+            \label{eq:EulerDynamicPressure}
+            \nabla P_{\rm dyn} = \rho_{\!f} \left( \mathbf{v}_{\theta} \cdot \nabla \right) \mathbf{v}_{\theta} \quad \Longrightarrow \quad P_{\rm dyn}(r) = \frac{1}{2}\rho_{\!f} \left( \frac{\Gamma_{\rm eff}(r)}{2\pi r} \right)^2.
+        \end{equation}
+    
+    \subsection{Delay-Induced Orbital Quantization}
+        In the ideal fluid limit, a coherent localized excitation is governed by the Gross-Pitaevskii or Nonlinear Schr\"odinger (NLS) equation for the macroscopic wavefunction of the condensate \cite{Pitaevskii2003}. A macroscopic electron shell corresponds to a coherent, phase-locked soliton envelope within the atomic basin.
+        
+        Closed circulation loops with finite propagation speeds constitute a generic class of delayed feedback systems. As established in the dynamics of delay-differential equations (DDEs), temporal feedback delays alone are sufficient to enforce spectral discreteness through dynamical stability \cite{Erneux2009}. The internal phase $\phi(t)$ of the circulating excitation is governed by a delayed Adler equation of the form:
+        \begin{equation}
+            \label{eq:AdlerDelay}
+            \dot{\phi}(t) = \omega_0 - \kappa \sin\bigl(\phi(t) - \phi(t-\tau_c)\bigr),
+        \end{equation}
+        where $\tau_c = 2\pi r_c / \lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert$ is the strict temporal feedback delay of the trefoil core. We model this phase-locking mechanism using the fluid-mechanical equivalent of the Adler equation with delay \cite{Adler1946}. While a full derivation of the effective coupling constant $\kappa$ from the nonlinear self-interaction of the fluid equations is beyond the scope of this paper, the generic DDE behavior provides an exact analogue for how a continuous phase spectrum collapses into discrete synchronized bands. Assuming this locking occurs, for a mode of order $n$, the orbital action scales quadratically with the integer winding index $n \in \mathbb{Z}^+$:
+        \begin{equation}
+            \label{eq:DelayLocking}
+            r_n v_{\theta}(r_n) = n \left( r_c \lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert \right) \left( \frac{2}{\eta_0^2} \right) \frac{1}{Z_{\rm eff}(r_n)}.
+        \end{equation}
+        Substituting the canonical definition of the SST Bohr radius $a_0^{\rm SST} = 2r_c/\alpha^2$ (Eq.~\eqref{eq:a0-sst}) yields the radial quantization of the atomic shells:
+        \begin{equation}
+            \label{eq:SST_OrbitRadii}
+            \boxed{
+                r_n = \frac{n^2}{Z_{\rm eff}(r_n)} \, a_0^{\rm SST}.
+            }
+        \end{equation}
+        Within this delay-locking model, the hydrogenic radial scale is thus obtained as the discrete set of radii where the macroscopic circulation delay phase-locks with the topological core of the constituent $2{:}3$ trefoils, rather than from a probability-wave interpretation.
+    
+    \subsection{Conditional SO(4)-Type Acoustic Mapping and Aufbau-like Counting}
+        We model the Aufbau shell limits by proposing a mapping to the acoustic geometry of the atomic fluid basin. A macroscopic shell of index $n$ forms a dynamic pressure basin governed by the $1/r$ effective Swirl-Coulomb potential.
+        
+        Small acoustic perturbations within this continuous fluid basin are governed by the classical acoustic wave equation $(\partial_t + \mathbf{v}_0 \cdot \nabla)^2 p = c_s^2 \nabla^2 p$ \cite{Rayleigh1877}. Because the background fluid velocity scales as $v_\theta \propto 1/r$, it acts as a spatially varying refractive index. Writing this equation formally identifies the open mathematical problem: extracting the exact eigenvalue structure for this specific background flow. The specific mathematical obstruction is that the azimuthal $1/r$ flow term explicitly couples the radial and angular differential operators, frustrating standard separation of variables. While generic 3D spherical cavities admit fully separable radial and angular modes without restricting the angular momentum index $\ell$, classical orbits in a $1/r$ potential possess a hidden SO(4) symmetry, manifest as the conservation of the Laplace-Runge-Lenz vector. 
+        
+        To formally prove an $\ell \le n-1$ restriction, one must explicitly solve the classical fluid eigenvalue problem for pressure perturbations in this $1/r$ flow and demonstrate that the solutions exhibit this exact SO(4) degeneracy. That eigenvalue problem is not solved in the present paper. Accordingly, the shell-counting discussion below should be read as a conjectural route to $n^2$ spatial counting, not as a derived result. As this remains an open mathematical challenge, we explicitly frame this step as a conditional proposal. If this acoustic mapping holds, summing the geometric degeneracy $(2\ell + 1)$ across all allowable orientations yields the exact spatial mode count:
+        \begin{equation}
+            \label{eq:SphericalHarmonics}
+            \sum_{\ell=0}^{n-1} (2\ell + 1) = n^2.
+        \end{equation}
+        Under this assumption, each of these $n^2$ spatial acoustic nodes provides a localized minimum in the dynamic pressure envelope where an electron trefoil can stably reside.
+        
+        We must now invoke only a qualitative hard-core occupancy obstruction. If two identical trefoils are forced into the same spatial pressure node, the model predicts a large local kinetic-pressure excursion of order
+        \begin{equation}
+            \Delta P \sim \frac{1}{2}\rho_{\!f}\lVert 2\mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \rVert^2.
+        \end{equation}
+        In the present manuscript this pressure scale is used only as evidence for a possible hydrodynamic obstruction to like-handed co-localization. A quantitative cavitation criterion would require either a separate pressure threshold or an explicit conversion from pressure to force through a specified interface area, neither of which is provided here. We therefore do not claim a derived atomic cavitation threshold for exchange physics.
+        
+        If, by contrast, two trefoils occupy the same coarse spatial region with opposite branch labels, the overlap geometry may reduce the local kinetic penalty relative to the like-handed case. At the present level this remains only a qualitative occupancy picture; it is not yet a derivation of antisymmetry, spin-statistics, or eV-scale exchange integrals.
+        
+        Under the proposed acoustic SO(4) mapping, every spatial acoustic node can support exactly two trefoils of opposite internal handedness before the fluid physically cavitates. The conditional maximum electron capacity of the $n$-th hydrodynamic shell is therefore:
+        \begin{equation}
+            \label{eq:AufbauDerived}
+            \boxed{
+                N_n = 2 \times (\text{spatial fluid nodes}) = 2n^2.
+            }
+        \end{equation}
+        If the SO(4)-type acoustic mapping holds, then an Aufbau-like shell-counting rule and a hard-core occupancy analogue could emerge from the discrete geometry of the fluid basin together with a branch-sensitive overlap obstruction. In the present paper, however, this remains a conjectural extension rather than a completed derivation of the periodic table.
+    
+    \subsection{Qualitative High-$Z$ Extension}
+        To encompass all known elements across the periodic table, the theory must also account for the relativistic kinematics of inner-shell electrons in heavy atoms. For high-$Z$ nuclei, the macroscopic fluid velocity near the nucleus $v_{\theta}^{\rm nuc} = Z \Gamma_0 / (2\pi r)$ becomes a significant fraction of the canonical medium speed $\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert$. In this regime, the static Swirl-Clock field $S_t^{(\sigma)}(\mathbf r)$ strongly deviates from unity.
+        
+        The kinetic operator in the effective Hamiltonian (Eq.~\eqref{eq:master-H}) must be covariant with respect to the local clock foliation, modifying the effective inertial mass:
+        \begin{equation}
+            \label{eq:Hkin_HighZ}
+            -\frac{\hbar^2}{2\mu}\nabla^2 \quad \longrightarrow \quad -\frac{\hbar^2}{2\mu} \nabla \cdot \left( \bigl(S_t^{(\sigma)}(\mathbf r)\bigr)^2 \nabla \right).
+        \end{equation}
+        Because $S_t < 1$ deep in the nuclear swirl basin, the effective radial kinetic energy is suppressed, requiring the inner orbitals to contract further inward to maintain the Euler pressure balance of Eq.~\eqref{eq:EulerDynamicPressure}. This suggests a qualitative contraction mechanism analogous to relativistic inner-shell shrinkage. A genuine recovery claim would require benchmark comparison against Dirac hydrogenic or many-electron results, which is not attempted here.
+    
+    \section{Transition amplitudes and torsion capture}
+    \label{sec:transition-amplitudes}
+    A circulation-bearing torsion packet~\eqref{eq:gammaPacket} drives atomic transitions through the frozen interaction~\eqref{eq:HintTotal}. For an initial state $\ket{i,\sigma}$ and final state $\ket{f,\sigma'}$, the first-order matrix element is
+    \begin{equation}
+        \label{eq:Mfi}
+        M_{fi}^{\sigma'\sigma}=\matrixel{f,\sigma'}{\delta H_{\rm int}}{i,\sigma}.
+    \end{equation}
+    The conservative resonance condition is
+    \begin{equation}
+        \label{eq:resonance}
+        \hbar\omega \approx \varepsilon_f-\varepsilon_i.
+    \end{equation}
+    If the packet carries azimuthal phase factor $e^{im\phi}$, then the orbital projection rule remains
+    \begin{equation}
+        \label{eq:dm}
+        \Delta m_\ell = m.
+    \end{equation}
+    The new feature is that the anticommutator term in Eq.~\eqref{eq:HintCirc} is explicitly odd under $m\mapsto -m$. For the helical packet ansatz of Eq.~\eqref{eq:gammaPacket}, the radial and axial Gaussian envelopes are $\phi$-independent, so $\hat L_z=-i\hbar\partial_\phi$ acts only on the azimuthal factor. One therefore has the exact identity
+    \begin{equation}
+        \label{eq:Lzgamma}
+        \hat L_z\,\gamma = m\hbar\,\gamma,
+    \end{equation}
+    so the interaction can distinguish opposite-handed packets at operator level rather than only after selecting final states. This is exactly the chiral handle absent from the scalar-only baseline.
+    
+    \paragraph{Operator-level $1s$ asymmetry remark.}
+        For the hydrogenic ground state, $\hat L_z\psi_{1s}=0$. Applying Eq.~\eqref{eq:HintTotal} together with Eq.~\eqref{eq:Lzgamma} gives
+        \begin{equation}
+            \label{eq:Hint1s}
+            \boxed{
+                \delta H_{\rm int}^{(\sigma)}\psi_{1s}
+                =
+                E_R\eta_0\,\sigma\left(-2+\frac{m}{2}\right)\gamma\,\psi_{1s}.
+            }
+        \end{equation}
+        Thus the helical packet channels are already inequivalent before continuum integration:
+        \begin{equation}
+            \label{eq:Hint1sPm}
+            m=+1:\quad \delta H_{\rm int}^{(\sigma)}\psi_{1s}=-\frac{3}{2}E_R\eta_0\,\sigma\,\gamma\,\psi_{1s},
+            \qquad
+            m=-1:\quad \delta H_{\rm int}^{(\sigma)}\psi_{1s}=-\frac{5}{2}E_R\eta_0\,\sigma\,\gamma\,\psi_{1s}.
+        \end{equation}
+        If the corresponding continuum overlap integrals satisfy $|I_{+1}(k,\omega)|=|I_{-1}(k,\omega)|$ to leading order, then the source-level rate asymmetry is already nonzero. For the Coulomb baseline this equality is the natural leading-order expectation: the bound--continuum matrix element factorizes into radial and angular pieces, the radial integral depends on $k$ and the radial profile of $\gamma$ but not on the sign of $m$, and the sign of $m$ enters only through the azimuthal selection rule $\Delta m_\ell=m$.
+        \begin{equation}
+            \label{eq:A1sSource}
+            \boxed{
+                \mathcal A_{1s}^{\rm(source)}
+                =
+                \frac{|{-3}/{2}|^2-|{-5}/{2}|^2}{|{-3}/{2}|^2+|{-5}/{2}|^2}
+                =
+                -\frac{8}{17}
+                \approx -0.4706.
+            }
+        \end{equation}
+        Equation~\eqref{eq:A1sSource} represents an analytic proof-of-concept for operator-level chiral symmetry breaking. We explicitly note that this is an intermediate theoretical quantity, not the final observable cross-section. A complete quantitative benchmark of the differential cross-section $\mathcal{A}(\omega)$ requires the evaluation of the Coulomb-continuum matrix elements, whose energy-dependent phases could alter the final magnitude. However, this result demonstrates that the SST Hamiltonian intrinsically distinguishes left- and right-handed topological torsion waves at the source level.
+        
+    
+    \section{Continuum sector and photoionization benchmark}
+    \label{sec:continuum-benchmark}
+    The sharpest benchmark retained in the present manuscript is photoionization rather than further shell bookkeeping. Even here, the result is not yet a first-principles prediction of an observable cross section. Rather, the purpose of this section is to test whether the handed interaction operator introduced above produces a nontrivial branch-sensitive transition structure once coupled to a standard continuum benchmark.
+    
+    The minimal conservative choice is to define the continuum as the positive-energy sector of the same branch-resolved Hamiltonian already introduced in Eq.~\eqref{eq:master-H}.
+    
+    Because $S_{t,0}\equiv 1$ in the present freeze, the static clock contribution vanishes identically. The unperturbed branch Hamiltonian is therefore simply
+    \begin{equation}
+        \label{eq:H0sigma}
+        \boxed{
+            H_0^{(\sigma)}
+            =
+            -\frac{\hbar^2}{2\mu}\nabla^2
+            +
+            V_{\rm core}(r)
+            +
+            V_{\rm screen}[\rho](\mathbf r),
+            \qquad
+            \sigma=\pm 1.
+        }
+    \end{equation}
+    The corresponding effective potential is
+    \begin{equation}
+        \label{eq:Veffsigma}
+        V_{\rm eff}^{(\sigma)}(\mathbf r)
+        =
+        V_{\rm core}(r)
+        +
+        V_{\rm screen}[\rho](\mathbf r).
+    \end{equation}
+    Bound states satisfy
+    \begin{equation}
+        \label{eq:boundstates}
+        H_0^{(\sigma)}\psi_{n\ell m_\ell}^{(\sigma)}
+        =
+        E_{n\ell}^{(\sigma)}\psi_{n\ell m_\ell}^{(\sigma)},
+        \qquad
+        E_{n\ell}^{(\sigma)}<0,
+    \end{equation}
+    whereas continuum scattering states satisfy
+    \begin{equation}
+        \label{eq:continuumstates}
+        H_0^{(\sigma)}\psi_{\mathbf k}^{(\sigma)}
+        =
+        E_{\mathbf k}^{(\sigma)}\psi_{\mathbf k}^{(\sigma)},
+        \qquad
+        E_{\mathbf k}^{(\sigma)}>0.
+    \end{equation}
+    Under the localized-packet assumption
+    \begin{equation}
+        \label{eq:gammaAsymptotic}
+        \gamma(\mathbf r,t)\to 0 \qquad (\lVert \mathbf r\rVert\to\infty),
+    \end{equation}
+    we have $S_t^{(\sigma)}\to 1$ and hence no asymptotic branch-dependent offset. The continuum threshold is therefore branch-degenerate and may be taken as
+    \begin{equation}
+        \label{eq:continuum-threshold}
+        E_{\rm cont}^{(+)}(0)=E_{\rm cont}^{(-)}(0)=0.
+    \end{equation}
+    
+    The next required step is to close the dynamical link between the propagating torsion field and the circulation driver $\gamma$. The canonical closure is to extract vorticity from the field velocity $\mathbf u=\partial_t\mathbf A$ and then build the loop circulation from that vorticity. Define
+    \begin{equation}
+        \label{eq:omegaA}
+        \omega_z^{(A)}(\mathbf r,t)
+        :=
+        \hat{\mathbf z}\cdot\left(\nabla\times \partial_t \mathbf A\right)(\mathbf r,t),
+    \end{equation}
+    then
+    \begin{equation}
+        \label{eq:GammaA}
+        \Gamma_{\rm loc}^{(A)}(r,z,t)
+        :=
+        2\pi\int_0^r \omega_z^{(A)}(r',z,t)\,r'\,dr',
+    \end{equation}
+    and finally
+    \begin{equation}
+        \label{eq:gammaA}
+        \boxed{
+            \gamma^{(A)}(\mathbf r,t)
+            =
+            \frac{\Gamma_{\rm loc}^{(A)}(\mathbf r,t)}{\Gamma_0}.
+        }
+    \end{equation}
+    This is the key circulation-foundational replacement for the older scalar-insertion strategy. The field now drives the atom through canon-normalized circulation.
+    
+    To permit back-reaction one must source the field equation itself. The branch-sensitive sourced wave equation is retained as
+    \begin{equation}
+        \label{eq:Awave-source}
+        \boxed{
+            \left(\frac{1}{c^2}\partial_t^2-\nabla^2\right)\mathbf A
+            =
+            g_J \,\widetilde{\mathbf J}_{\rm br},
+        }
+    \end{equation}
+    with the source length frozen to the canonical core scale
+    \begin{equation}
+        \label{eq:gJfreeze}
+        \boxed{
+            g_J \equiv r_c = \frac{\alpha^2}{2}\,a_0^{\rm SST}.
+        }
+    \end{equation}
+    Because a rigorous fluid-mechanical derivation of the matter-field coupling is not yet established, we explicitly import the standard quantum mechanical probability current and append an ad hoc SST branch weight $\sigma$. The corresponding phenomenological branch current is:
+    \begin{equation}
+        \label{eq:Jbr}
+        \boxed{
+            \mathbf J_{\rm br}
+            =
+            \frac{\hbar}{2 i \mu}
+            \sum_{\sigma=\pm 1}
+            \sigma
+            \left(
+                \Psi_\sigma^*\nabla\Psi_\sigma
+                -
+                (\nabla\Psi_\sigma^*)\Psi_\sigma
+            \right),
+            \qquad
+            \widetilde{\mathbf J}_{\rm br}\equiv \frac{\mathbf J_{\rm br}}{\Omega_0}.
+        }
+    \end{equation}
+    This explicit borrowing from QM structure means the following photoionization calculation serves purely as a phenomenological benchmark of the interaction operator's kinematic asymmetry, not a first-principles hydrodynamic derivation. Accordingly, all quantities derived in this section should be interpreted as intermediate model outputs unless and until the full continuum matrix elements are evaluated and converted into observable differential cross sections.
+    
+    Once $\gamma$ is defined by Eq.~\eqref{eq:gammaA}, the frozen circulation interaction from Eq.~\eqref{eq:HintTotal} becomes the genuine photoionization operator. The branch-resolved ionization threshold from an initial bound state $i$ to a final continuum branch $\sigma_f$ is
+    \begin{equation}
+        \label{eq:IonizationThresholdGeneral}
+        I_i^{(\sigma_i\to \sigma_f)}
+        =
+        E_{\rm cont}^{(\sigma_f)}(0)-E_i^{(\sigma_i)}.
+    \end{equation}
+    Under the asymptotic choice~\eqref{eq:continuum-threshold}, this reduces to
+    \begin{equation}
+        \label{eq:IonizationThresholdSimple}
+        I_i^{(\sigma_i)}=-E_i^{(\sigma_i)}.
+    \end{equation}
+    The photoionization condition is then frequency-thresholded,
+    \begin{equation}
+        \label{eq:PhotoThreshold}
+        \boxed{
+            \hbar\omega \ge I_i^{(\sigma_i\to \sigma_f)}.
+        }
+    \end{equation}
+    For an emitted free electron with asymptotic kinetic energy $K$, one obtains
+    \begin{equation}
+        \label{eq:KineticEnergyAtom}
+        \boxed{
+            K
+            =
+            \hbar\omega - I_i^{(\sigma_i\to \sigma_f)}.
+        }
+    \end{equation}
+    For a condensed system with work function $\phi^{(\sigma_i\to \sigma_f)}$, the analogous relation is
+    \begin{equation}
+        \label{eq:PhotoelectricSolid}
+        \boxed{
+            K_{\max}
+            =
+            \hbar\omega - \phi^{(\sigma_i\to \sigma_f)}.
+        }
+    \end{equation}
+    Thus the threshold is controlled by frequency, while the intensity enters only through the occupation number of the incoming torsion mode.
+    
+    To show this explicitly, let $N_\omega$ denote the occupation number of an incoming torsion packet of frequency $\omega$. Then the continuous version of Fermi's golden rule \cite{Dirac1927} becomes
+    \begin{equation}
+        \label{eq:GoldenRuleContinuum}
+        \boxed{
+            \Gamma_{i\to \mathbf k,\sigma_f}
+            =
+            \frac{2\pi}{\hbar}
+            N_\omega
+            \left|
+                \matrixel{\psi_{\mathbf k}^{(\sigma_f)}}{\delta H_{\rm int}^{(\sigma_f)}}{\psi_i^{(\sigma_i)}}
+            \right|^2
+            \delta\!\left(
+                        E_{\mathbf k}^{(\sigma_f)}-E_i^{(\sigma_i)}-\hbar\omega
+            \right).
+        }
+    \end{equation}
+    This is the required rate structure if the SST torsion packet is to reproduce the key empirical logic of the photoelectric effect: an immediate threshold in frequency, and an emission rate proportional to flux or intensity rather than a threshold controlled by amplitude.
+    
+    A useful distinction therefore emerges between two regimes. In the \emph{weak-field quantum absorption regime}, Eqs.~\eqref{eq:PhotoThreshold}--\eqref{eq:GoldenRuleContinuum} define the canonical baseline. In a possible later \emph{strong-field nonlinear regime}, sufficiently large coherent $\gamma$ could reshape the effective barrier and produce field-emission or over-the-barrier escape. That second regime should be treated as an extension and not conflated with the baseline photoelectric benchmark.
+    
+    The branch-sensitive content now enters through an explicitly handed operator. Define the handedness observable
+    \begin{equation}
+        \label{eq:Asymmetry}
+        \boxed{
+            \mathcal A(\omega)
+            =
+            \frac{\Gamma_{h=+1}-\Gamma_{h=-1}}{\Gamma_{h=+1}+\Gamma_{h=-1}},
+        }
+    \end{equation}
+    where $h=\pm 1$ labels the handedness of the incoming torsion packet. For the helical packet ansatz~\eqref{eq:gammaPacket} at fixed propagation direction, the handedness is identified with the sign of the azimuthal winding number,
+    \begin{equation}
+        \label{eq:h-sign-m}
+        \boxed{h\equiv \mathrm{sgn}(m).}
+    \end{equation}
+    Combined with the orbital rule $\Delta m_\ell=m$ from Eq.~\eqref{eq:dm}, the anticommutator term in Eq.~\eqref{eq:HintCirc} implies that same-handed channels acquire an operator-level factor proportional to $m$. The corresponding starter-model overlap preference is
+    \begin{equation}
+        \label{eq:handed-selection}
+        h=+1:\ \sigma_i=\sigma_f=+1\ \text{favored},
+        \qquad
+        h=-1:\ \sigma_i=\sigma_f=-1\ \text{favored},
+    \end{equation}
+    with opposite-handed channels suppressed by reduced helical overlap and branch-flip channels absent at linear order. This preference is traceable directly to the interaction operator rather than only to packet labeling. If $\mathcal A(\omega)=0$ identically, the circulation extension collapses to a relabeling. If instead $\mathcal A(\omega)\neq 0$ with a definite symmetry and scale, the theory acquires a genuinely SST-specific atomic signal. Note that the dynamic transition rate relies on the provisional current closure ansatz (Eq.~\eqref{eq:Jbr}); therefore, this benchmark explores the kinematic asymmetry of the interaction operator rather than the absolute magnitude of the cross-section.
+    
+    \subsection{Completed Coulomb-continuum benchmark and stronger-control deformation}
+
+    The benchmark discussed above can now be stated at the observable level within the reduced model. Define the total-rate helicity asymmetry by
+    \begin{equation}
+        \mathcal A_{\rm tot}(\omega)
+        =
+        \frac{\Gamma_{h=+1}(\omega)-\Gamma_{h=-1}(\omega)}
+             {\Gamma_{h=+1}(\omega)+\Gamma_{h=-1}(\omega)}.
+    \end{equation}
+    Within the axisymmetric Coulomb-continuum benchmark, the exact harmonic selection rule preserves the reduced-model result
+    \begin{equation}
+        \boxed{
+        \mathcal A_{\rm tot}(\omega)=-\frac{8}{17}\approx -0.4705882353.
+        }
+    \end{equation}
+    Thus the handed interaction yields a completed benchmark observable of the reduced model rather than only a source-level coefficient.
+
+    Two internal null controls collapse the asymmetry identically. First, removing the anticommutator term from the interaction gives
+    \begin{equation}
+        \mathcal A_{\rm tot}(\omega)=0.
+    \end{equation}
+    Second, replacing the helical probe by a non-helical probe likewise gives
+    \begin{equation}
+        \mathcal A_{\rm tot}(\omega)=0.
+    \end{equation}
+    These controls show that the benchmark asymmetry is carried specifically by the handed anticommutator structure together with the helical content of the external probe.
+
+    To test whether the exact \(-8/17\) pinning is merely a fragile artifact of the axisymmetric benchmark, we introduce the one-sided Fourier perturbation
+    \begin{equation}
+        \gamma_h^{(\mathrm{strong})}(\mathbf r,t)
+        \propto
+        e^{i h\phi}\bigl(1+\varepsilon e^{i\phi}\bigr).
+    \end{equation}
+    This perturbation opens different additional channel sets for the two probe helicities and therefore breaks the exact pinning of the benchmark ratio. At the representative point
+    \begin{equation}
+        \hbar\omega = 30\,\mathrm{eV},
+        \qquad
+        \varepsilon = 0.25,
+    \end{equation}
+    the converged stronger-control result is
+    \begin{equation}
+        \boxed{
+        \mathcal A_{\rm tot}^{(\mathrm{strong})}
+        \approx
+        -0.4775682233,
+        }
+    \end{equation}
+    corresponding to the shift
+    \begin{equation}
+        \Delta \mathcal A
+        \equiv
+        \mathcal A_{\rm tot}^{(\mathrm{strong})}
+        +\frac{8}{17}
+        \approx
+        -6.98\times 10^{-3}.
+    \end{equation}
+    The one-sided perturbation therefore produces a controlled deformation of the benchmark asymmetry rather than leaving the exact value symmetry-protected.
+
+    \subsection{Convergence of the stronger-control deformation}
+
+    To verify that the stronger-control shift is not a discretization artifact, we performed a dedicated convergence study at
+    \begin{equation}
+        \hbar\omega = 30\,\mathrm{eV},
+        \qquad
+        \varepsilon = 0.25,
+    \end{equation}
+    while varying the radial cutoff \(R_{\max}\), the radial quadrature resolution \(N_r\), the angular quadrature resolution \(N_\theta\), and the partial-wave truncation \(\ell_{\max}\). The stronger-control asymmetry converges to
+    \begin{equation}
+        \mathcal A_{\rm tot}^{(\mathrm{strong})}
+        \approx
+        -0.4775682233,
+    \end{equation}
+    with stability under refinement of \(R_{\max}\), \(N_r\), and \(N_\theta\). In the \(\ell_{\max}\) sweep, the truncation \(\ell_{\max}=2\) is visibly under-resolved, but the shifted value is stable at the displayed precision once
+    \begin{equation}
+        \ell_{\max}\ge 4.
+    \end{equation}
+    Accordingly, the deviation from
+    \begin{equation}
+        \mathcal A_{\rm tot}=-\frac{8}{17}
+    \end{equation}
+    under the one-sided Fourier perturbation should be interpreted as a genuine response of the reduced benchmark model rather than as a numerical artifact.
+
+
+    \section{From a closed circulation ring and a torsion wave to trefoil closure}
+    \label{sec:ring-to-trefoil}
+    
+    We now sharpen the circulation-foundational picture behind the frozen interaction by asking what additional condition is required for a closed circulation carrier plus a helical torsion mode to realize a trefoil closure. The primitive SST ingredients remain the circulation and turnover scales
+    \begin{equation}
+        \Gamma_0 = 2\pi r_c\,\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert,
+        \qquad
+        \Omega_0 = \frac{\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}{r_c},
+        \qquad
+        f_0 = \frac{\Omega_0}{2\pi},
+        \label{eq:Gamma0Omega0Trefoil}
+    \end{equation}
+    with numerical values
+    \begin{equation}
+        \Gamma_0 \approx 9.68361920\times 10^{-9}\ \mathrm{m^2\,s^{-1}},
+        \qquad
+        \Omega_0 \approx 7.76344066\times 10^{20}\ \mathrm{s^{-1}},
+        \qquad
+        f_0 \approx 1.23558996\times 10^{20}\ \mathrm{Hz}.
+        \label{eq:Gamma0Omega0TrefoilNum}
+    \end{equation}
+    In the present canonical parameter set, \(\Omega_0\) coincides numerically with the electron Compton angular scale.
+    
+    \subsection{Step 1: the unknotted closed ring}
+        Take a closed circulation ring of major radius \(R\), with centerline parameter \(\theta\in[0,2\pi)\):
+        \begin{equation}
+            \mathbf{X}_{\mathrm{ring}}(\theta)
+            =
+            \begin{pmatrix}
+                R\cos\theta\\
+                R\sin\theta\\
+                0
+            \end{pmatrix}.
+            \label{eq:ringcenterlineTrefoil}
+        \end{equation}
+        This is topologically the unknot, and the circulation-preserving ideal-flow reading traces back to Helmholtz and Kelvin \cite{Helmholtz1858,Kelvin1869}.
+    
+    \subsection{Step 2: a helical torsion mode on the ring}
+        Let a torsion/Kelvin-like mode propagate on the ring with phase
+        \begin{equation}
+            \Phi(\theta,t)=q\theta-\omega_\tau t+\phi_0,
+            \label{eq:poloidalphaseTrefoil}
+        \end{equation}
+        where \(q\in\mathbb Z\) is the integer winding number of the torsion modulation and \(\omega_\tau\) is the torsion-wave frequency. A minimal toroidal--poloidal embedding is
+        \begin{equation}
+            \mathbf{X}(\theta,t)
+            =
+            \begin{pmatrix}
+                \bigl(R+a\cos\Phi(\theta,t)\bigr)\cos\!\bigl(p\theta-\Omega t\bigr)\\[4pt]
+                \bigl(R+a\cos\Phi(\theta,t)\bigr)\sin\!\bigl(p\theta-\Omega t\bigr)\\[4pt]
+                a\sin\Phi(\theta,t)
+            \end{pmatrix},
+            \qquad 0<a\ll R,
+            \label{eq:torusknotansatzTrefoil}
+        \end{equation}
+        where \(p\in\mathbb Z\) counts the toroidal winding and \(q\in\mathbb Z\) the poloidal winding.
+    
+    \subsection{Step 3: closure condition}
+        A torus-knot closure occurs only if the toroidal and poloidal windings close after a common period; this is the standard torus-knot closure condition used across vortex and wave-knot constructions \cite{Kedia2013,BerryDennis2001}:
+        \begin{equation}
+            p,q\in\mathbb Z,
+            \qquad
+            \gcd(p,q)=1.
+            \label{eq:torusknotclosureTrefoil}
+        \end{equation}
+        The simplest nontrivial knot is the trefoil:
+        \begin{equation}
+            T_{2,3}\quad\text{or equivalently}\quad T_{3,2}.
+            \label{eq:trefoiltypesTrefoil}
+        \end{equation}
+        Here \(T_{2,3}\) and \(T_{3,2}\) denote the same knot type; they differ only by which winding is called toroidal and which poloidal.
+    
+    \subsection{Step 4: Delay-induced mode selection and phase locking}
+        In a closed swirl string, the finite transport speed $\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert$ along the geometric circumference $L \approx 2\pi R$ defines a fundamental circulation delay,
+        \begin{equation}
+            \label{eq:CirculationDelay}
+            \tau_c = \frac{L}{\lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert}.
+        \end{equation}
+        When the transverse torsion field propagates on this closed topology, the string acts as a delayed feedback system. The internal state of the excitation is characterized by the phase variable $\Phi(\theta,t)$ from Eq.~\eqref{eq:poloidalphaseTrefoil}, which functions as an intrinsic clock associated with the circulating structure.
+        
+        Because the torsion wave continuously self-interacts after one round-trip delay $\tau_c$, the temporal delay alone acts as a dynamical selection filter. The transcendental locking condition for a circulating phase oscillator with delay forces the spectral continuous band to collapse into a discrete ladder of stability-selected modes. Trefoil closure therefore requires rational phase locking between the toroidal and poloidal turnover frequencies:
+        \begin{equation}
+            \frac{\Omega_{\mathrm{pol}}}{\Omega_{\mathrm{tor}}}
+            =
+            \frac{q}{p}
+            =
+            \frac{3}{2}
+            \quad\text{or}\quad
+            \frac{2}{3},
+            \label{eq:trefoilphaselockTrefoil}
+        \end{equation}
+        depending on which motion is designated toroidal and which poloidal. In the present SST reading, the primitive turnover scale is set by \(\Omega_0\), so the natural delay-induced stability resonance is
+        \begin{equation}
+            \Omega_{\mathrm{tor}}\sim \Omega_0,
+            \qquad
+            \Omega_{\mathrm{pol}}\sim \frac{3}{2}\Omega_0
+            \quad\text{or}\quad
+            \Omega_{\mathrm{tor}}\sim \frac{2}{3}\Omega_{\mathrm{pol}}.
+            \label{eq:trefoilOmega0Trefoil}
+        \end{equation}
+        
+        \medskip\noindent\textit{The primitive internal rate $\Omega_0 \approx \omega_c$ supplies the natural turnover scale, but discrete trefoil formation is dynamically modeled by the temporal circulation delay $\tau_c$, which stabilizes only the rational $2{:}3$ mode lock.}
+    
+    \subsection{Step 5: circulation-first ordering}
+        The local circulation carried by the ring is
+        \begin{equation}
+            \Gamma_C(t)=\oint_C \mathbf{u}\cdot d\boldsymbol{\ell},
+            \label{eq:loopcirculationTrefoil}
+        \end{equation}
+        and in the SST ideal limit the primitive circulation unit is \(\Gamma_0\). A minimal quantized closure condition is therefore
+        \begin{equation}
+            \Gamma_C = N_\Gamma\,\Gamma_0,
+            \qquad
+            N_\Gamma\in\mathbb Z.
+            \label{eq:circulationquantizationTrefoil}
+        \end{equation}
+        The ontological order is then, in a circulation-first spirit consistent with helicity-based knot dynamics \cite{Moffatt1969},
+        \begin{equation}
+            \Gamma,\ \boldsymbol{\omega},\ u_\theta
+            \;\longrightarrow\;
+            \text{closure/helicity}
+            \;\longrightarrow\;
+            S_t^{\boldsymbol{\circlearrowleft}},\ S_t^{\boldsymbol{\circlearrowright}}.
+            \label{eq:circulationbeforeclockTrefoil}
+        \end{equation}
+        
+        \medskip\noindent\textit{Circulation, vorticity, and swirl are primary; the clock fields are downstream bookkeeping of circulation-bearing structure.}
+    
+    \subsection{Step 6: Why temporal delay is required for quantization}
+        A small-amplitude helical disturbance of an unknot generically gives a deformed, radiatively unstable ring, not a nontrivial knot. Spatial boundary conditions are traditionally invoked to enforce mode discretization. However, the closed-loop delay framework demonstrates that temporal circulation delays alone are sufficient to enforce spectral discreteness through dynamical stability. Trefoil formation definitively requires:
+        \begin{enumerate}
+            \item a \emph{closed} circulation carrier defining a strict feedback delay $\tau_c$,
+            \item a \emph{rational} toroidal--poloidal phase lock induced by the self-interaction of the torsion field over this delay,
+            \item topological persistence against continuous relaxation back to the unknot.
+        \end{enumerate}
+        Thus the trefoil must be viewed as a delay-induced, mode-locked closure state, not as a generic kinematic consequence of any torsion wave.
+        
+        \medskip\noindent\textit{A torsion wave does not automatically create a trefoil; it does so only if the combined toroidal and poloidal motions lock into the coprime $2{:}3$ or $3{:}2$ closure ratio.}
+    
+    \subsection{Step 7: energetic admissibility without reopening free parameters}
+        To avoid reopening unfrozen coefficients, we write the energetic admissibility condition in normalized form,
+        \begin{equation}
+            E_{\mathrm{eff}}[K]
+            =
+            E_R\,\mathcal E_{\mathrm{top}}[K],
+            \label{eq:EeffTopNormalized}
+        \end{equation}
+        where \(E_R\) is the frozen atomic scale already used in the main text and \(\mathcal E_{\mathrm{top}}[K]\) is a dimensionless topological-functional placeholder. In the present working draft, \(\mathcal E_{\mathrm{top}}[K]\) is \emph{not} canonically derived; it is introduced only to mark the distinction between kinematic closure and dynamical admissibility. The trefoil becomes a viable electron-like candidate only if
+        \begin{equation}
+            \delta E_{\mathrm{eff}}[T_{2,3}] = 0,
+            \qquad
+            \delta^2 E_{\mathrm{eff}}[T_{2,3}] > 0
+            \quad\text{(local minimum or long-lived metastable sector).}
+            \label{eq:trefoilstabilityTrefoil}
+        \end{equation}
+    
+    \subsection{Step 8: relation to the branch index \(\sigma\)}
+        The two-valued internal branch index of the main text should \emph{not} be identified with \(T_{2,3}\) versus \(T_{3,2}\), because those denote the same knot type under exchanged toroidal/poloidal naming. The more precise SST statement is \medskip\noindent\textit{$\sigma=\pm 1$ labels the two internal handed circulation--torsion realizations of a fixed closure class, naturally associated with opposite chiral trefoils (mirror pair), not with $T_{2,3}$ versus $T_{3,2}$.}
+        Equivalently, \(\sigma=+1\) and \(\sigma=-1\) are interpreted as the two opposite handed realizations of the trefoil closure sector relative to a chosen axis.
+    
+    \subsection{Step 9: connection back to the frozen interaction}
+        This subsection does not replace the frozen interaction of the main text; it constrains the admissible circulation profile entering it. The circulation-based driver
+        \begin{equation}
+            \gamma(\mathbf r,t)=\frac{\Gamma_{\mathrm{loc}}(\mathbf r,t)}{\Gamma_0}
+            \label{eq:gammaFromTrefoil}
+        \end{equation}
+        is therefore not an arbitrary helical packet once trefoil closure is imposed. In the trefoil sector we denote the constrained field by
+        \begin{equation}
+            \gamma_{2{:}3}(\mathbf r,t)
+            \equiv
+            \gamma(\mathbf r,t)\Big|_{q/p=3/2\ \text{or}\ 2/3},
+            \label{eq:gamma23Def}
+        \end{equation}
+        with the branch label \(\sigma=\pm 1\) selecting the handed realization inside that trefoil-compatible sector. Thus the generic packet ansatz is restricted to the trefoil-compatible winding ratio and branch assignment. The frozen interaction remains
+        \begin{equation}
+            \delta H_{\mathrm{int}}^{(\sigma)}
+            =
+            -2\sigma E_R\eta_0\,\gamma
+            +
+            \frac{E_R\eta_0\,\sigma}{2}
+            \left\{\frac{\hat L_z}{\hbar},\gamma\right\},
+            \label{eq:HintTotalTrefoil}
+        \end{equation}
+        but the present subsection says that, in a trefoil-closure regime, the \(\gamma\) entering Eq.~\eqref{eq:HintTotalTrefoil} should be understood as the mode-locked circulation field \(\gamma_{2{:}3}\) rather than as a generic helical packet.
+        
+        \medskip\noindent\textit{Trefoil closure does not replace the frozen interaction; it constrains the allowed circulation field $\gamma(\mathbf r,t)$ entering $\delta H_{\mathrm{int}}^{(\sigma)}$.}
+    
+    \subsection{Step 10: working SST interpretation of spin and folding}
+        At the present working level, the safer SST statement is
+        \begin{equation}
+            m_s=\pm\frac12
+            \quad\leadsto\quad
+            \sigma=\pm 1
+            \quad\leadsto\quad
+            \text{two internal handed circulation--torsion branches relative to a chosen axis,}
+            \label{eq:spinbranchworkingTrefoil}
+        \end{equation}
+        rather than a literal classical clockwise/counterclockwise mechanical spin. Then ``folding into a trefoil'' means: a closed circulation ring at the primitive turnover scale \(\Omega_0\) supports a helical torsion mode which phase-locks into the \(2{:}3\) closure ratio and is dynamically stable enough to persist.
+        
+        \medskip\noindent\textit{The strongest defensible SST claim is not that the electron is already proven to be a trefoil, but that if the primitive internal rate is $\Omega_0 \approx \omega_c$, then trefoil realization requires a rational $2{:}3$ mode lock on a closed circulation ring.}
+    
+    \subsection{Summary of Trefoil Kinematics}
+        Equations~\eqref{eq:torusknotansatzTrefoil}--\eqref{eq:trefoilphaselockTrefoil} establish the kinematic trefoil criterion based on delay locking. Equations~\eqref{eq:EeffTopNormalized}--\eqref{eq:trefoilstabilityTrefoil} outline the open dynamical admissibility conditions required to finalize the model. Equations~\eqref{eq:gamma23Def} and~\eqref{eq:HintTotalTrefoil} formally connect the topological closure mechanism back to the branch index \(\sigma\) evaluated in the photoionization benchmark.
+    
+    \section{Extensions and High-Energy Limits}
+    \label{sec:extensions}
+    The present framework establishes the low-energy, incompressible atomic baseline. Several physical extensions naturally arise but are deferred to future work to preserve the strict phenomenological closure of the atomic Hamiltonian.
+    
+    First, longitudinal compressional modes (acoustic phonons in the condensate) are excluded here, as their kinematic front speed $c_P \gg c$ decouples them from standard atomic spectra. Second, the explicit topological inheritance mechanisms during photon emission---whereby the helical torsion wave is modeled as an emitted skyrmion texture---remain to be formalized dynamically. Finally, vacuum magneto-optical effects, such as parity-odd Faraday rotation induced by the substrate's intrinsic chirality, are predicted as downstream consequences of the torsion field sector but are not strictly required to recover the Aufbau principle.
+    
+    \subsection{Outlook: Topological Mass Functional}
+        To fully close the framework in future work, the invariant rest mass must decouple from electromagnetic coupling parameters like $\alpha$. We hypothesize that in the geometric limit of SST, the inter-sector amplification factor emerges strictly as a geometric impedance mismatch between the Compton boundary $\lambda_c$ and the vortex core radius $\rc$. The invariant rest mass is modeled by the heuristic postulate:
+        \begin{equation}
+            \label{eq:MassFunctional}
+            M(T_{2,3}) = \left( \frac{\lambda_c}{\pi \rc} \right)^{G(T)} \phi^{-g(T)} k(T)^{-3/2} n(T)^{-1/\phi} \left( \frac{\frac{1}{2}\rhocore \lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2 \mathcal{V}_{\rm core}}{c^2} \right),
+        \end{equation}
+        where $\phi = (1+\sqrt{5})/2$ is the Golden Ratio, $g(T)$ is the Seifert genus, and $k(T)$ is the complexity index. Because these specific topological invariants are not yet derived directly from the fluid equations, this functional remains an empirical scaling hypothesis for future evaluation.
+    
+    \section{Falsifiable Predictions and Symmetries}
+    \label{sec:falsifiable}
+    The present model constitutes a viable physical theory only because its parameters are highly constrained. Within the reduced axisymmetric Coulomb-continuum benchmark, the core predictive commitments include:
+    \begin{enumerate}[label=(P\arabic*)]
+    \item \emph{Hydrogenic consistency}: The Bohr radius appears as a structural identity (consistency relation) via the chosen scale relations, not as an independent prediction.
+    \item \emph{Orbital quantization}: The discrete energy spectrum is modeled by an NLS delay-locking mechanism, conditional on resolving the exact fluid self-interaction coupling.
+    \item \emph{The Aufbau architecture}: The $2n^2$ shell capacity is conditionally modeled via the spatial acoustic limits of the medium coupled with the topological cavitation barrier.
+    \item \emph{Branch symmetry}: In the absence of an external circulation driver ($\gamma=0$), the two chiral branches ($\sigma = \pm 1$) must remain strictly degenerate.
+    \item \emph{Handed asymmetry benchmark}: Within the reduced axisymmetric Coulomb-continuum benchmark, the handed interaction yields the observable total-rate asymmetry $A_{\rm tot}=-8/17$. This asymmetry collapses to zero under two internal null controls: (i)~removal of the anticommutator term, (ii)~removal of probe helicity. A one-sided Fourier perturbation of the probe, $e^{i h\phi}(1+\varepsilon e^{i\phi})$, breaks the exact pinning and produces a numerically stable deformation of the asymmetry. This remains a benchmark of the reduced model, not a full atomic prediction beyond the benchmark assumptions.
+    \item \emph{Fixed couplings}: The parameters $\Gamma_0$, $\gamma$, $\eta_0$, and $g_J$ are fixed analytically by the medium constants and allow no atom-by-atom phenomenological retuning.
+    \end{enumerate}
+    
+    The strongest falsifier of this framework is the absence of chiral asymmetry in resonant interactions. If no branch-sensitive effects survive once the couplings are fixed, the branch interpretation reduces to a mere relabeling of ordinary spin. If branch-sensitive effects are observed, their magnitude and symmetry scaling would provide concrete targets for further calculation and experiment.
+        
+    \section{Conclusion}
+    \label{sec:conclusion}
+    We have not derived atomic structure in full from SST continuum dynamics. Rather, we have formulated a sharply delimited branch-resolved atomic bridge model whose conservative baseline reproduces the ordinary hydrogenic limit and whose SST-specific content enters through a circulation-normalized handed interaction. Within the reduced axisymmetric Coulomb-continuum benchmark, the handed interaction yields the computed observable $\mathcal A_{\rm tot}=-8/17$, this asymmetry collapses to zero under the two internal null controls, and a one-sided Fourier perturbation $e^{i h\phi}(1+\varepsilon e^{i\phi})$ produces a numerically converged deformation away from the pinned value.
+    
+    By contrast, the shell-capacity rule $N_n=2n^2$, the relation between hard-core overlap barriers and fermionic exchange, and the heavy-$Z$ contraction mechanism remain open extensions rather than derived results. The present manuscript should therefore be read as a controlled phenomenological bridge with explicit falsifiers and clearly identified mathematical gaps, not as a complete derivation of atomic structure from first principles.
+        
+    \begin{thebibliography}{99}
+        
+        \bibitem{Rayleigh1877}
+        J. W. Strutt (Lord Rayleigh),
+        \textit{The Theory of Sound},
+        Macmillan and Co., London, 1877.
+        
+        \bibitem{Helmholtz1858}
+        H. von Helmholtz,
+        ``Über Integrale der hydrodynamischen Gleichungen, welche den Wirbelbewegungen entsprechen,''
+        \textit{Journal für die reine und angewandte Mathematik} \textbf{55} (1858), 25--55.
+        
+        \bibitem{Kelvin1869}
+        W. Thomson (Lord Kelvin),
+        ``On Vortex Motion,''
+        \textit{Transactions of the Royal Society of Edinburgh} \textbf{25} (1869), 217--260.
+        
+        \bibitem{Moffatt1969}
+        H. K. Moffatt,
+        ``The degree of knottedness of tangled vortex lines,''
+        \textit{Journal of Fluid Mechanics} \textbf{35} (1969), 117--129.
+        DOI: 10.1017/S0022112069000991.
+        
+        \bibitem{Batchelor1967}
+        G. K. Batchelor,
+        \textit{An Introduction to Fluid Dynamics},
+        Cambridge University Press, 1967.
+        
+        \bibitem{Greenspan1968}
+        H. P. Greenspan,
+        \textit{The Theory of Rotating Fluids},
+        Cambridge University Press, 1968.
+        
+        \bibitem{HehlObukhov2007}
+        F. W. Hehl and Y. N. Obukhov,
+        \textit{Elie Cartan's Torsion in Geometry and in Field Theory, an Essay},
+        Annales de la Fondation Louis de Broglie \textbf{32} (2007), 157--194.
+        
+        \bibitem{Dirac1927}
+        P. A. M. Dirac,
+        ``The Quantum Theory of the Emission and Absorption of Radiation,''
+        \textit{Proceedings of the Royal Society A} \textbf{114} (1927), 243--265.
+        DOI: 10.1098/rspa.1927.0039.
+        
+        \bibitem{Dirac1928}
+        P. A. M. Dirac,
+        ``The Quantum Theory of the Electron,''
+        \textit{Proceedings of the Royal Society A} \textbf{117} (1928), 610--624.
+        DOI: 10.1098/rspa.1928.0023.
+        
+        \bibitem{Hartree1928}
+        D. R. Hartree,
+        ``The Wave Mechanics of an Atom with a Non-Coulomb Central Field. Part I. Theory and Methods,''
+        \textit{Mathematical Proceedings of the Cambridge Philosophical Society} \textbf{24} (1928), 89--110.
+        DOI: 10.1017/S030500410001191X.
+        
+        \bibitem{Pitaevskii2003}
+        L. Pitaevskii and S. Stringari,
+        \textit{Bose-Einstein Condensation},
+        Oxford University Press, 2003.
+        
+        \bibitem{Erneux2009}
+        T. Erneux,
+        \textit{Applied Delay Differential Equations},
+        Springer, 2009.
+        
+        \bibitem{Adler1946}
+        R. Adler,
+        ``A Study of Locking Phenomena in Oscillators,''
+        \textit{Proceedings of the IRE} \textbf{34} (1946), 351--357.
+        DOI: 10.1109/JRPROC.1946.229930.
+        
+        \bibitem{Kedia2013}
+        H. Kedia, I. Bialynicki-Birula, D. Peralta-Salas, and W. T. M. Irvine,
+        ``Tying knots in light fields,''
+        \textit{Physical Review Letters} \textbf{111} (2013), 150404.
+        DOI: 10.1103/PhysRevLett.111.150404.
+        
+        \bibitem{BerryDennis2001}
+        M. V. Berry and M. R. Dennis,
+        ``Knotted and linked phase singularities in monochromatic waves,''
+        \textit{Proceedings of the Royal Society A} \textbf{457} (2001), 2251--2263.
+        DOI: 10.1098/rspa.2001.0826.
+        
+        \bibitem{Unruh1981PRL}
+        W. G. Unruh,
+        ``Experimental black-hole evaporation?,''
+        \textit{Physical Review Letters} \textbf{46} (1981), 1351--1353.
+        DOI: 10.1103/PhysRevLett.46.1351.
+        
+        \bibitem{Volovik2003}
+        G. E. Volovik,
+        \textit{The Universe in a Helium Droplet},
+        Oxford University Press, 2003.
+        
+        \bibitem{tHooft2016}
+        G. 't Hooft,
+        \textit{The Cellular Automaton Interpretation of Quantum Mechanics},
+        Fundamental Theories of Physics 185, Springer, 2016.
+        
+        \bibitem{Kelvin1880}
+        W. Thomson (Lord Kelvin),
+        ``Vibrations of a Columnar Vortex,''
+        \textit{Philosophical Magazine} \textbf{10} (1880), 155--168.
+        
+        \bibitem{Madelung1927}
+        E. Madelung,
+        ``Quantentheorie in hydrodynamischer Form,''
+        \textit{Zeitschrift für Physik} \textbf{40} (1927), 322--326.
+        DOI: 10.1007/BF01400372.
+        
+        \bibitem{Bohm1952}
+        D. Bohm,
+        ``A Suggested Interpretation of the Quantum Theory in Terms of `Hidden' Variables. I,''
+        \textit{Physical Review} \textbf{85} (1952), 166--179.
+        DOI: 10.1103/PhysRev.85.166.
+        
+        \bibitem{BarceloLiberatiVisser2011}
+        C. BarcelÃ³, S. Liberati, and M. Visser,
+        ``Analogue Gravity,''
+        \textit{Living Reviews in Relativity} \textbf{14} (2011), 3.
+        DOI: 10.12942/lrr-2011-3.
+        
+        \bibitem{CouderFort2006}
+        Y. Couder and E. Fort,
+        ``Single-Particle Diffraction and Interference at a Macroscopic Scale,''
+        \textit{Physical Review Letters} \textbf{97} (2006), 154101.
+        DOI: 10.1103/PhysRevLett.97.154101.
+        
+        \bibitem{Bush2015}
+        J. W. M. Bush,
+        ``Pilot-Wave Hydrodynamics,''
+        \textit{Annual Review of Fluid Mechanics} \textbf{47} (2015), 269--292.
+        DOI: 10.1146/annurev-fluid-010814-014506.
+        
+        \bibitem{Skyrme1962}
+        T. H. R. Skyrme,
+        ``A Unified Field Theory of Mesons and Baryons,''
+        \textit{Nuclear Physics} \textbf{31} (1962), 556--569.
+        DOI: 10.1016/0029-5582(62)90775-7.
+        
+        \bibitem{FaddeevNiemi1997}
+        L. Faddeev and A. J. Niemi,
+        ``Stable Knot-Like Structures in Classical Field Theory,''
+        \textit{Nature} \textbf{387} (1997), 58--61.
+        DOI: 10.1038/387058a0.
+        
+        \bibitem{BetheSalpeter1957}
+        H. A. Bethe and E. E. Salpeter,
+        \textit{Quantum Mechanics of One- and Two-Electron Atoms},
+        Springer, Berlin, 1957.
+        Permalink: Springer standard monograph edition.
+        
+        \bibitem{LandauLifshitzQM}
+        L. D. Landau and E. M. Lifshitz,
+        \textit{Quantum Mechanics: Non-Relativistic Theory},
+        3rd ed., Pergamon Press, Oxford, 1977.
+        Permalink: standard Course of Theoretical Physics, Vol. 3.
+        
+        \bibitem{NISTDLMF}
+        NIST Digital Library of Mathematical Functions,
+        ``Coulomb Wave Functions,''
+        Chapter 33 in \textit{DLMF},
+        National Institute of Standards and Technology.
+        Permalink: https://dlmf.nist.gov/33
+
+    
+    \end{thebibliography}
+    
+\appendix \section*{Appendix}
+    \section{Topological Hard-Core Repulsion as an Occupancy Analogue}
+    \label{app:PauliBarrier}
+    
+    To extend the SST atomic bridge beyond the hydrogenic baseline, one would ultimately need a derivation of exchange physics from the underlying continuum model. The present appendix does not achieve that. Instead, it formulates only a hard-core occupancy analogue: if electron-like trefoils are treated as extended circulation carriers rather than point particles, then direct co-localization of like-handed cores incurs a large kinetic-energy penalty. This is not equivalent to deriving fermionic antisymmetry, exchange integrals, or spin-statistics, but it may supply a useful geometric obstruction picture.
+    
+    \subsection{Biot-Savart Interaction Energy of Vortex Loops}
+        Consider two thin vortex loops, $C_1$ and $C_2$, embedded in an incompressible, inviscid fluid of effective density $\rho_{\!f}$. The total velocity field of the fluid is the linear superposition of the fields induced by each loop: $\mathbf{u}_{\rm total} = \mathbf{u}_1 + \mathbf{u}_2$. The total kinetic energy of the fluid is
+        \begin{equation}
+            \label{eq:Etotal_fluid}
+            E_{\rm total} = \frac{1}{2}\rho_{\!f} \int \lVert \mathbf{u}_1 + \mathbf{u}_2 \rVert^2 \, d^3r
+            = E_1 + E_2 + E_{\rm int},
+        \end{equation}
+        where $E_1$ and $E_2$ are the invariant self-energies (rest masses) of the isolated knots, and the interaction energy is
+        \begin{equation}
+            \label{eq:Eint_integral}
+            E_{\rm int} = \rho_{\!f} \int \mathbf{u}_1 \cdot \mathbf{u}_2 \, d^3r.
+        \end{equation}
+        By defining the vorticity $\boldsymbol{\omega}_i = \nabla \times \mathbf{u}_i$ and utilizing the vector potential $\mathbf{A}_i$ such that $\mathbf{u}_i = \nabla \times \mathbf{A}_i$, the incompressible constraint $\nabla \cdot \mathbf{u}_i = 0$ allows the vector potential to be written via the Biot-Savart kernel \cite{Batchelor1967}:
+        \begin{equation}
+            \label{eq:VectorPotential}
+            \mathbf{A}_i(\mathbf{r}) = \frac{1}{4\pi} \int \frac{\boldsymbol{\omega}_i(\mathbf{r}')}{\lVert \mathbf{r} - \mathbf{r}' \rVert} \, d^3r'.
+        \end{equation}
+        For thin vortex filaments where the vorticity is strictly confined to a core of radius $r_c$, the volume integral contracts to a line integral along the filament centerline. The vorticity element maps as $\boldsymbol{\omega}_i \, d^3r \to \Gamma_i \, d\mathbf{l}_i$. Substituting this back into Eq.~\eqref{eq:Eint_integral} via integration by parts yields the classical Kelvin interaction energy:
+        \begin{equation}
+            \label{eq:BiotSavartEnergy}
+            E_{\rm int} = \frac{\rho_{\!f} \Gamma_1 \Gamma_2}{4\pi} \oint_{C_1} \oint_{C_2} \frac{d\mathbf{l}_1 \cdot d\mathbf{l}_2}{\lVert \mathbf{r}_1 - \mathbf{r}_2 \rVert}.
+        \end{equation}
+    
+    \subsection{The Topological Repulsion Penalty}
+        While Eq.~\eqref{eq:BiotSavartEnergy} using the background density $\rho_{\!f}$ dictates the weak far-field interaction envelope, the absolute structural barrier occurs upon direct spatial overlap of the topological cores. Inside the vortex core, the local fluid density saturates to the material constant $\rhocore$.
+        
+        Let two identical electron trefoils occupy the exact same spatial volume $V_{\text{core}} = \pi \rc^2 L$, sharing the same internal Swirl-Clock branch ($\sigma_1 = \sigma_2$). Their local velocity fields are completely parallel, adding linearly such that the superimposed core velocity is $\mathbf{v}_{\text{total}} = 2\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}$.
+        
+        The total kinetic energy of the merged core volume is governed by the squared velocity:
+        \begin{equation}
+            E_{\text{merged}} = \int_{V_{\text{core}}} \frac{1}{2} \rhocore \lVert 2\mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \rVert^2 \, d^3r = 4 \left( \frac{1}{2} \rhocore \lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \rVert^2 V_{\text{core}} \right) = 4 E_{\text{rest}}.
+        \end{equation}
+        The sum of the rest energies of two separated electrons is $2 E_{\text{rest}}$. The thermodynamic penalty for forcing identical structural overlap is therefore exactly the generation of two additional rest masses:
+        \begin{equation}
+            \label{eq:VPauli_Max}
+            \Delta E_{\text{Pauli}} = 4 E_{\text{rest}} - 2 E_{\text{rest}} = 2 \left( \frac{1}{2} \rhocore \lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \rVert^2 \right) (\pi \rc^2 L).
+        \end{equation}
+        
+        Conversely, if the two electrons occupy the same spatial orbital but have \emph{opposite} Swirl-Clock branches ($\sigma_1 = -\sigma_2$), their circulation vectors are anti-parallel. This destructive interference locally mitigates the pressure spike, avoiding the catastrophic penalty. Thus, at the level of this overlap model, like-handed co-localization is penalized; the appendix does not claim to derive the Pauli exclusion principle or spin-statistics from first principles.
+    
+    \subsection{Numerical Validation of the Exclusion Energy}
+        To evaluate this macroscopic barrier, we calculate Eq.~\eqref{eq:VPauli_Max} explicitly using the canonical SST core parameters. The core kinetic energy density is:
+        \begin{equation}
+            u_{\rm core} = \rhocore \lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2 \approx (3.893 \times 10^{18})(1.094 \times 10^6)^2 \approx 4.658 \times 10^{30}\ \mathrm{J\,m^{-3}}.
+        \end{equation}
+        For an electron bounded by the geometric circumference of the first Bohr orbital ($L = 2\pi a_0^{\rm SST} \approx 3.324 \times 10^{-10}\ \mathrm{m}$) and core radius $\rc \approx 1.409 \times 10^{-15}\ \mathrm{m}$, the core volume is:
+        \begin{equation}
+            V_{\rm core} = \pi \rc^2 L \approx \pi (1.985 \times 10^{-30})(3.324 \times 10^{-10}) \approx 2.073 \times 10^{-39}\ \mathrm{m^3}.
+        \end{equation}
+        The required exclusion energy is the product of the dynamic pressure spike and the volume:
+        \begin{equation}
+            \label{eq:VPauli_Num}
+            \Delta E_{\text{Pauli}} = u_{\rm core} V_{\rm core} \approx (4.658 \times 10^{30}) (2.073 \times 10^{-39}) \approx 9.65 \times 10^{-9}\ \mathrm{J}.
+        \end{equation}
+        Converting to electron-volts ($1\ \mathrm{eV} \approx 1.602 \times 10^{-19}\ \mathrm{J}$), the topological penalty is:
+        \begin{equation}
+            \Delta E_{\text{Pauli}} \approx 6.02 \times 10^{10}\ \mathrm{eV} \approx 60\ \mathrm{GeV}.
+        \end{equation}
+        This extreme energy scale ($\sim 60\ \mathrm{GeV}$) represents the \emph{topological hard-core collision energy} required to force two identical electron cores into perfectly superimposed spatial configurations. It is vital to distinguish this microscopic structural boundary from the macroscopic orbital exchange energy ($\sim \mathrm{eV}$) observed in chemistry. A complete, quantitative derivation of exchange physics would require calculating the $\sim \mathrm{eV}$ exchange force by evaluating the weak far-field fluid perturbations (the overlapping Biot-Savart tails) of distant knots. As this remains an open calculation, the present appendix supplies only a hard-core occupancy analogue: because the atomic environment cannot provide $60\ \mathrm{GeV}$ of energy, identically handed cores act as impenetrable boundaries in this model, motivating orthogonal occupancy of distinct macroscopic nodes.
+    
+    \subsection{Hard-core obstruction versus atomic exchange}
+        Equation~\eqref{eq:VPauli_Num} yields a very large overlap-energy scale for the idealized complete superposition of two like-handed cores. In the present manuscript, that estimate is used only to motivate a hard-core occupancy obstruction. It should not be identified with the actual eV-scale exchange energies that control atomic spectra and chemistry.
+        
+        A second limitation is dimensional: the local overlap estimate naturally produces a pressure scale, whereas the canonical quantity $F_{\rm swirl}^{\max}$ is a force scale. A quantitative cavitation argument would therefore require an explicit interface area or an independent pressure threshold, neither of which is supplied here. For that reason, the manuscript should not claim a derived cavitation boundary for atomic exchange physics.
+        
+        The appropriate interpretation is narrower. Because the atomic environment cannot access the complete co-localization regime modeled above, the overlap estimate can at most motivate a hard-core analogue that discourages like-handed occupancy of the same coarse spatial node. Whether that picture can be connected to antisymmetry, exchange integrals, and spin-statistics remains an open problem.
+        
+        
+   
+    \section{Primary observable benchmark: Coulomb-continuum helicity asymmetry}
+        
+        To elevate the handed $1s$ result beyond a source-level operator coefficient, we define the incoming circulation driver as a pure helicity eigenpacket
+        \begin{equation}
+            \gamma_h(\mathbf r,t)
+            =
+            A_\gamma\,f(\rho,z)\,e^{i(h\phi+qz-\omega t)},
+            \qquad
+            h=\pm 1,
+        \end{equation}
+        with an axisymmetric envelope $f(\rho,z)$, for example
+        \begin{equation}
+            f(\rho,z)
+            =
+            \exp\!\left(-\frac{\rho^2}{2w_r^2}\right)
+            \exp\!\left(-\frac{z^2}{2w_z^2}\right).
+        \end{equation}
+        This choice is essential: a real cosine packet mixes the two handed sectors and is therefore not the clean observable benchmark.
+        
+        For the hydrogenic ground state, $\hat L_z\psi_{1s}=0$ and $\hat L_z\gamma_h=h\hbar\gamma_h$, so the linear interaction reduces to
+        \begin{equation}
+            \delta H_{\rm int}^{(\sigma)}\psi_{1s}
+            =
+            E_R\eta_0\,\sigma\,C_h\,\gamma_h\,\psi_{1s},
+            \qquad
+            C_h=-2+\frac{h}{2}.
+        \end{equation}
+        Hence
+        \begin{equation}
+            C_{+}=-\frac32,
+            \qquad
+            C_{-}=-\frac52.
+        \end{equation}
+        
+        We take the continuum final states to be the exact Coulomb scattering states
+        \begin{equation}
+            \psi_{E\ell m}^{(-)}(\mathbf r)
+            =
+            R_{E\ell}^{(-)}(r)\,Y_{\ell m}(\theta,\phi),
+        \end{equation}
+        with $R_{E\ell}^{(-)}$ expressed in terms of the regular Coulomb functions for the attractive $Z/r$ potential. The transition amplitude is then
+        \begin{equation}
+            M_{E\ell m}^{(h,\sigma)}
+            =
+            E_R\eta_0\,A_\gamma\,\sigma\,C_h\,\mathcal I_{E\ell m}^{(h)},
+        \end{equation}
+        where
+        \begin{equation}
+            \mathcal I_{E\ell m}^{(h)}
+            =
+            \int d^3r\,
+            \psi_{E\ell m}^{(-)*}(\mathbf r)\,
+            f(\rho,z)e^{i(h\phi+qz)}\,
+            \psi_{1s}(\mathbf r).
+        \end{equation}
+        
+        Because the envelope is axisymmetric, the azimuthal integral gives the exact selection rule
+        \begin{equation}
+            m=h.
+        \end{equation}
+        Moreover, in the central Coulomb problem the sign of $m$ does not affect the continuum radial functions, and the angular overlap magnitudes satisfy
+        \begin{equation}
+            \bigl|\mathcal I_{E\ell}^{(+1)}\bigr|
+            =
+            \bigl|\mathcal I_{E\ell}^{(-1)}\bigr|.
+        \end{equation}
+        Therefore the total ionization rates for equal incident fluxes obey
+        \begin{equation}
+            \Gamma_h(\omega)
+            \propto
+            |C_h|^2
+            \sum_{\ell\ge 1}
+            \bigl|\mathcal I_{E\ell}\bigr|^2
+            \delta(E+I_1-\hbar\omega),
+        \end{equation}
+        and the observable total-rate asymmetry becomes
+        \begin{equation}
+            \boxed{
+                \mathcal A_{\rm tot}(\omega)
+                =
+                \frac{\Gamma_{+1}(\omega)-\Gamma_{-1}(\omega)}
+                {\Gamma_{+1}(\omega)+\Gamma_{-1}(\omega)}
+                =
+                \frac{|C_+|^2-|C_-|^2}{|C_+|^2+|C_-|^2}
+                =
+                -\frac{8}{17}.
+            }
+        \end{equation}
+        
+        Thus, within the axisymmetric Coulomb-continuum benchmark, the handed SST interaction yields an observable helicity asymmetry rather than only an intermediate source-level coefficient. The result is independent of the unknown overall normalization of the external probe and therefore isolates the branch-sensitive atomic content of the model.
+        
+        As internal null controls, removing the anticommutator term gives $C_+=C_-=-2$ and hence $\mathcal A_{\rm tot}=0$, while replacing the helical probe by a non-helical $h=0$ driver also gives $\mathcal A_{\rm tot}=0$.
+        
+
+
+\end{document}

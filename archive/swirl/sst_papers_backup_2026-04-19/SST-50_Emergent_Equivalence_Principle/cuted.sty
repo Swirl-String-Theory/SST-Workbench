@@ -1,0 +1,24 @@
+% Minimal local shim for cuted.sty to support sn-jnl.cls
+% This is a lightweight compatibility layer that avoids layout tricks.
+% It defines a no-op strip environment so that sn-jnl can compile.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cuted}[2025/12/22 Minimal local shim for sn-jnl]
+
+% Guard against redefinition if the real cuted is ever present
+\providecommand{\stripsep}{0pt}
+
+% Basic strip environment: simply typesets contents in a single-column box.
+% This is much simpler than the real cuted implementation but is adequate
+% for manuscripts that do not rely on fancy two-column spanning behavior
+% in the title area.
+\newenvironment{strip}%
+  {\par\begingroup}%
+  {\par\endgroup}
+
+% Some variants of cuted define widetext; provide a trivial fallback
+\newenvironment{widetext}%
+  {\par\begingroup}%
+  {\par\endgroup}
+
+% End of minimal shim

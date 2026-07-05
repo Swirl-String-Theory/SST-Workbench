@@ -1,0 +1,45 @@
+SST chi-phase package v10A.0 summary
+====================================================
+
+Track: A — incompressible Euler / Biot-Savart ring-energy solver
+Status: Research Track / CANON-compatible audit prototype
+
+Core extraction:
+  alpha_eff = log(8R/a) - 2E/(rho Gamma^2 R)
+  alpha_eff(eps) = alpha0 + A eps^2 log(1/eps) + B eps^2
+  beta = alpha - 1 + q
+
+Runtime seconds: 12.556
+nr=8, ntheta=24, nd_scale=90.0, nd_min=900
+eps values: 0.10,0.075,0.055,0.04,0.03
+profiles: rankine_solid, smooth_a0star, smooth_phi, smooth_a0_2, smooth_grad_min
+
+v6 reference constants:
+  a0_star = 1.6553542175871456
+  phi     = 1.6180339887498949
+  c(phi)/v_ref      = 0.99652018272753429
+  c(a0_star)/v_ref  = 1
+
+Fitted alpha intercepts:
+  rankine_solid          alpha0=1.74039741439, rms=9.269e-07, expected=1.75, err=-0.00960259
+  smooth_a0star          alpha0=1.50471814494, rms=5.068e-04
+  smooth_phi             alpha0=1.50814979471, rms=5.147e-04
+  smooth_a0_2            alpha0=1.47071103766, rms=4.337e-04
+  smooth_grad_min        alpha0=1.4957955489, rms=4.867e-04
+
+Beta values from q-lines:
+  rankine_solid          q=0 beta=0.740397414391; q=-1/2 beta=0.240397414391
+  smooth_a0star          q=0 beta=0.504718144945; q=-1/2 beta=0.00471814494475
+  smooth_phi             q=0 beta=0.508149794705; q=-1/2 beta=0.00814979470543
+  smooth_a0_2            q=0 beta=0.470711037663; q=-1/2 beta=-0.0292889623365
+  smooth_grad_min        q=0 beta=0.495795548896; q=-1/2 beta=-0.0042044511044
+
+Interpretation:
+  - rankine_solid is the benchmark and should approach alpha≈7/4 with higher resolution.
+  - smooth_a0star tests whether the v6 chi-closure root also behaves like a ring-energy selector.
+  - v10A.0 does not include NLSE/GP core-field energy, so alpha_NLS=1.61 is not expected to be proven here.
+  - If smooth_a0star does not land near 1.61, that is evidence that chi-closure and NLS ring-energy selection are distinct constraints.
+
+CANON-safe status:
+  Method: canon-compatible Research Track.
+  Numerical alpha0 values: provisional; grid/extrapolation dependent.

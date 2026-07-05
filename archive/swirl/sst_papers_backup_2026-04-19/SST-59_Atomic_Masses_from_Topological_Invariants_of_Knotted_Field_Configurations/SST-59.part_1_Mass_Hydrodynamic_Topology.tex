@@ -1,0 +1,746 @@
+%! Author = Omar Iskandarani
+%! Date = 2/14/2026
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.xxx}
+\newcommand{\papertitle}{Hydrodynamic Topology as an Effective Model for Inertial Mass:\\
+A Self-Contained Derivation of a Topology-Modulated Mass Functional}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsfonts,bm, amsthm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} 
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}  % swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+\newcommand{\phig}{\varphi}
+\newcommand{\alphafs}{\alpha}
+\newcommand{\rhocore}{\rho_{\mathrm{core}}}
+
+% --- shielding gate + double twist notation ---
+\newcommand{\Gate}{\mathsf{G}}                 % exponent in {0,1} controlling (4/alpha) activation
+\newcommand{\Kmn}[2]{K_{#1,#2}}                % double twist knot family
+
+% theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}  \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+
+    \begin{abstract}
+        We present a self-contained, hydrodynamically motivated effective model in which the invariant rest mass of a localized, topologically stable excitation is identified with the integral of a localized kinetic-energy density over its effective support volume. The model assumes an incompressible, inviscid background medium (Euler--Kelvin regime) supporting persistent filamentary defects whose stability is protected by circulation conservation. The resulting rest-mass functional factorizes into: (i) a universal energy-density scale $u=\frac{1}{2}\rhocore \vnorm^{2}$, (ii) a geometric volume proxy $V=\pi \rc^{3} L_{\mathrm{tot}}$, and (iii) a dimensionless kernel $\mathcal{K}(T)$ depending only on a small set of topological indices. We motivate a minimal closed kernel of the form
+        \begin{equation}
+            M(T)=\mathcal{K}(T)\,\frac{u\,V(T)}{c^{2}},
+            \qquad
+            % (4/alpha) is activated only when the shielding-gate exponent \Gate(T)=1
+            \mathcal{K}(T)=\left(\frac{4}{\alphafs}\right)^{\Gate(T)} k(T)^{-3/2}\,\phig^{-g(T)}\,n(T)^{-1/\phig},
+            \label{eq:master}
+        \end{equation}
+        where $k$ is a complexity index (e.g. braid index/crossing proxy), $g$ is Seifert genus, $n$ is the number of components, $\alphafs$ is the fine-structure constant, and $\phig$ is the golden ratio. The paper is written to be ``orthodox-friendly'': all strong statements are framed as model assumptions, the status of each scaling law is clearly labeled, and falsifiable preferred-frame and spectrum-selection consequences are listed. We also separate background density $\rhoF$ (governing wave transport) from a core-localized density $\rhocore$ (governing inertial mass) and explain why this separation is required for dimensional consistency and empirical scale matching.
+    \end{abstract}
+
+\paragraph{Scope \& status.}
+This paper (Part~I) constructs a mathematically controlled \emph{effective} model in which invariant rest mass is represented by a localized energy functional of a persistent filamentary excitation in the Euler--Kelvin regime. No microscopic ontology is assumed beyond the field-theoretic structure stated below.
+
+\paragraph{Assumptions (Euler--Kelvin regime).}
+\begin{itemize}
+    \item \textbf{Incompressible} flow: $\nabla\!\cdot\mathbf{v}=0$.
+    \item \textbf{Inviscid} dynamics: Euler limit (no viscosity, no dissipation).
+    \item \textbf{Barotropic} closure: $p=p(\rho)$ so that Kelvin circulation conservation applies.
+    \item \textbf{No reconnection / topology preserving evolution}: filament topology is conserved over the timescales of interest.
+    \item \textbf{Persistent localized excitation}: the energy density is spatially localized (core + envelope) and admits a time-averaged stationary description.
+\end{itemize}
+
+\paragraph{What is claimed vs.\ not claimed.}
+\begin{itemize}
+    \item \textbf{Claimed:} In this regime one can define a rest-energy functional $E_0$ for a localized filamentary excitation such that $M \equiv E_0/c^2$ behaves operationally as an inertial mass parameter (in the sense of low-velocity response and resonance scaling).
+    \item \textbf{Not claimed:} We do not claim that ``matter is a fluid'' or that any specific microscopic substrate is established; the construction is presented strictly as an effective Hamiltonian functional model with well-defined assumptions.
+\end{itemize}
+
+\paragraph{Observable definition (what is measured).}
+The primary observable is the \emph{invariant rest-energy functional} of a localized excitation,
+\begin{equation}
+E_0 \;\equiv\; \int_V \varepsilon(\mathbf{x})\,dV,
+\qquad
+M \;\equiv\; \frac{E_0}{c^2},
+\label{eq:obs_partI_mass_def}
+\end{equation}
+where $\varepsilon(\mathbf{x})$ is the localized (time-averaged) energy density associated with the persistent filamentary configuration.
+Operationally, $M$ is the parameter that enters low-velocity inertial response and mode scaling; e.g.\ for any probe whose eigenfrequency depends on the effective inertia, one tests the scaling $f \propto M^{-1/2}$ (holding geometry and stiffness fixed), thereby linking the functional prediction $E_0$ to measurable frequency shifts or acceleration response.
+
+    \titlepageClose
+
+
+
+
+
+
+        \section{Introduction and scope}
+
+        % ---------- INSERT (Part I): Assumptions / Claims / Observable ----------
+        \paragraph{Assumptions (Euler--Kelvin regime).}
+        Throughout, we work in the incompressible, inviscid Euler limit and restrict attention to the Kelvin-admissible sector in which circulation is materially conserved. Concretely:
+        \begin{itemize}
+          \item \textbf{Incompressible flow:} $\nabla\!\cdot\mathbf{v}=0$.
+          \item \textbf{Inviscid Euler dynamics:} $\partial_t\mathbf{v}+(\mathbf{v}\!\cdot\nabla)\mathbf{v}=-(1/\rho)\nabla p$ (no viscosity).
+          \item \textbf{Barotropic closure:} $p=p(\rho)$ (needed for Kelvin circulation conservation).
+          \item \textbf{Circulation conservation (Kelvin theorem):} the circulation $\Gamma=\oint_{\mathcal C(t)}\mathbf{v}\cdot d\boldsymbol{\ell}$ is invariant for material loops $\mathcal C(t)$.
+          \item \textbf{No reconnection / fixed topology during evaluation:} filament/link topology is treated as invariant over the time window of interest (i.e.\ the configuration remains in a fixed topological sector).
+        \end{itemize}
+        These assumptions define the controlled regime in which persistent filamentary excitations are well-posed objects for an effective mass functional.
+        (The ``Euler--Kelvin + no reconnection'' set is explicit as a condition in the Rosetta card \cite{SST-01_Rosetta-v0.6}.)
+
+        \paragraph{What is claimed vs.\ what is not claimed.}
+        \begin{itemize}
+          \item \textbf{Claimed:} (i) invariant rest mass can be represented operationally as $M=E_{\rm rest}/c^2$ with $E_{\rm rest}$ given by a localized energy functional for a persistent filamentary excitation; (ii) the proposed construction admits a clean factorization into a scale $\times$ a geometric volume proxy $\times$ a dimensionless topology-dependent kernel, enabling falsifiable downstream mappings.
+          \item \textbf{Not claimed:} (i) no commitment is made to a unique microscopic substrate or ontology; the construction is framed as a mathematically controlled effective model; (ii) specific kernel choices (e.g.\ exponents or discrete suppression factors) are not asserted as theorems unless explicitly proven---they remain testable modeling hypotheses.
+        \end{itemize}
+
+        \paragraph{Observable definition (what is actually measured).}
+        The primary observable is the \emph{rest mass} inferred from rest-energy via
+        \[
+        M \;\equiv\; \frac{1}{c^2}\int_V \rhoE(\mathbf{x})\,dV,
+        \]
+        with $\rhoE$ identified with the organized, localized energy density of the excitation core (kinetic plus any explicitly retained topological/pressure contribution). The operational comparison target is standard: $M$ is the parameter that governs inertial response, e.g.\ $F=Ma$ for center-of-mass motion in the nonrelativistic limit, and $E_{\rm rest}=Mc^2$ when comparing against tabulated rest energies. The theory's output is therefore a concrete map
+        \[
+        \text{(configuration class)}\;\longmapsto\; M
+        \]
+        that can be benchmarked against measured masses and (in later parts) against kinematically induced corrections.
+        % -----------------------------------------------------------------------
+
+            The microscopic origin of inertial mass remains an open question spanning particle physics, condensed matter analogies, and quantum field theory. In the Standard Model (SM), fermion masses arise from Yukawa couplings to the Higgs condensate, with parameters not predicted by the theory \cite{Higgs1964,EnglertBrout1964,Weinberg1967}. This motivates exploration of alternative \emph{effective} mechanisms in which inertia emerges from localized energy storage and topological stability.
+
+            This article develops a hydrodynamic-topology effective model where:
+            (i) persistent localized excitations are protected by circulation conservation (Kelvin theorem),
+            (ii) their rest mass equals a localized kinetic-energy content divided by $c^{2}$,
+            (iii) topology modulates the efficiency of energy localization through a compact kernel $\mathcal{K}(T)$.
+
+            \paragraph{Status note.}
+                Equation \eqref{eq:master} is presented as a \emph{closed effective ansatz} motivated by Euler--Kelvin hydrodynamics, slender-filament energetics, and discrete scale invariance considerations. Certain exponent choices (notably $-3/2$) admit supporting scaling arguments; others (golden-ratio exponents) are principled but not unique. The goal is a journal-ready, checkable formulation with explicit assumptions and falsifiers.
+
+        \section{Hydrodynamic substrate and topological stability}
+
+        \subsection{Euler--Kelvin regime}
+            Assume a background medium described (on relevant scales) as incompressible and inviscid:
+            \begin{equation}
+                \nabla\cdot \mathbf{v}=0,
+                \qquad
+                \partial_t \mathbf{v}+(\mathbf{v}\cdot\nabla)\mathbf{v}=-\frac{1}{\rho}\nabla p,
+                \label{eq:euler}
+            \end{equation}
+            with barotropic closure $p=p(\rho)$ locally. In this regime, Kelvin's circulation theorem implies that the circulation along a material loop is conserved:
+            \begin{equation}
+                \Gamma=\oint_{\mathcal{C}(t)} \mathbf{v}\cdot d\boldsymbol{\ell}=\text{const.}
+                \label{eq:kelvin}
+            \end{equation}
+            Consequently, filamentary circulation structures cannot smoothly terminate; closed loops are dynamically preferred and topologically robust \cite{Kelvin1869,Batchelor1967,Saffman1992}.
+
+        \subsection{Filamentary defects as persistent excitations}
+            We model a localized excitation $T$ as a closed filament (or link of $n$ components) with a microscopic core radius $\rc$ and a characteristic tangential swirl speed $\vnorm=\lVert \vswirl\rVert$. The physical picture is a slender tube of radius $\rc$ carrying a quantized circulation scale $\Gamma_{0}$, which we parameterize as
+            \begin{equation}
+                \Gamma_{0}\equiv 2\pi \rc \vnorm.
+                \label{eq:gamma0}
+            \end{equation}
+            Equation \eqref{eq:gamma0} is a definition of the characteristic scale; quantization of $\Gamma$ is treated as an additional postulate compatible with quantized vortices in superfluids \cite{Onsager1949,Feynman1955}.
+
+        \section{Mass as localized kinetic energy}
+
+        \subsection{Covariant definition (orthodox framing)}
+            In relativistic field theory, invariant rest mass is the rest-frame energy divided by $c^2$. We adopt the operational definition: in the excitation rest frame,
+            \begin{equation}
+                M \equiv \frac{1}{c^2}\int_V \rhoE(\mathbf{x})\,dV,
+                \label{eq:massfunctional}
+            \end{equation}
+            where $\rhoE$ is the localized energy density attributed to the excitation and $V$ encloses its support. This is a standard bookkeeping identity once $\rhoE$ is defined.
+
+        \subsection{Core-localized energy density scale}
+            Assume the excitation has a core region characterized by an effective core density $\rhocore$ (distinct from the background density $\rhoF$ that governs long-wavelength wave transport). The simplest kinetic-energy density scale is then
+            \begin{equation}
+                u \equiv \frac{1}{2}\rhocore \vnorm^2,
+                \label{eq:u}
+            \end{equation}
+            with units $\mathrm{J\,m^{-3}}$. We emphasize: \eqref{eq:u} is the \emph{local} kinetic-energy density of the organized core motion, not the background vacuum energy.
+
+            \paragraph{Why separate $\rhoF$ and $\rhocore$?}
+                If one attempted to build particle-scale masses by integrating background density $\rhoF$ over microscopic volumes, the resulting scale is generically far too small. The effective model requires a localized ``core phase'' with much larger inertial density to achieve observed masses while keeping the background ``light.'' This is analogous in spirit (not identity) to the separation between condensate order-parameter stiffness and quasiparticle effective masses in superfluid/superconducting systems.
+
+        \section{Geometry: volume proxy from ropelength}
+
+        \subsection{Slender-filament volume approximation}
+            For a slender tube of radius $\rc$ and centerline length $\ell$, the volume is approximately
+            \begin{equation}
+                V \simeq \pi \rc^{2}\,\ell.
+            \end{equation}
+            Write $\ell = \rc\,L_{\mathrm{tot}}$, where $L_{\mathrm{tot}}$ is a dimensionless ropelength-like quantity (e.g. length in units of $\rc$). Then
+            \begin{equation}
+                V(T) = \pi \rc^{3}\,L_{\mathrm{tot}}(T).
+                \label{eq:V}
+            \end{equation}
+            The use of a minimal (tight) ropelength as a ground-state proxy is consistent with the idea that line tension drives contraction until self-avoidance/self-interaction prevents further shrinkage \cite{Saffman1992}.
+
+        \section{Topology: a minimal closed kernel}
+
+        \subsection{Factorized master formula}
+            Combining \eqref{eq:massfunctional}, \eqref{eq:u}, and \eqref{eq:V}, we obtain the factorized form
+            \begin{equation}
+                M(T)=\mathcal{K}(T)\,\frac{u\,V(T)}{c^{2}}
+                =\mathcal{K}(T)\,\frac{\left(\frac12\rhocore \vnorm^{2}\right)\left(\pi \rc^{3} L_{\mathrm{tot}}(T)\right)}{c^{2}}.
+                \label{eq:factorized}
+            \end{equation}
+            All nontrivial dependence on topology and ``energy-localization efficiency'' is now placed into $\mathcal{K}(T)$.
+
+        \subsection{Minimal kernel choice and interpretation}
+            We consider the dimensionless kernel
+            \begin{equation}
+                \mathcal{K}(T)=\left(\frac{4}{\alphafs}\right)^{\Gate(T)} k(T)^{-3/2}\,\phig^{-g(T)}\,n(T)^{-1/\phig}.
+                \label{eq:kernel}
+            \end{equation}
+            Here:
+            \begin{itemize}
+                \item $k(T)$ is a complexity index (e.g. braid index, or a crossing-number proxy) representing coarse geometric/topological complexity relevant for self-induction and screening.
+                \item $g(T)$ is Seifert genus, capturing surface complexity of a spanning surface.
+                \item $n(T)$ is number of components (for links).
+                \item $\phig=\frac{1+\sqrt{5}}{2}$ is the golden ratio, used as a discrete-scale modulation factor (see below).
+                \item $\alphafs$ is the electromagnetic fine-structure constant, used here as a universal dimensionless normalization connecting energy localization to a measured coupling strength; we treat this as a model postulate rather than a theorem.
+            \end{itemize}
+
+            \paragraph{Status of each factor.}
+                \begin{enumerate}
+                    \item The factor $(4/\alphafs)^{\Gate(T)}$ is a \emph{gated normalization postulate}. When $\Gate(T)=0$, the excitation is in a ``shielded'' sector and the vacuum-coupling amplification is inactive; when $\Gate(T)=1$, the amplification is active.
+                    \item The exponent $-3/2$ for $k(T)$ admits scaling support from diffusion/heat-kernel analogies and from dimensional considerations in filament energetics; nevertheless, it remains an effective choice.
+                    \item The $\phig^{-g}$ and $n^{-1/\phig}$ factors encode \emph{discrete scale invariance (DSI)}-motivated suppression with increasing topological obstruction and multiplicity. These are principled but not unique; alternative monotone suppressions can be tested.
+                \end{enumerate}
+
+        \subsection{Formal shielding gate via rational sliceness (hard constraint)}
+
+            The narrative ``shielding vs. exposure'' is promoted here to a \emph{checkable gate} \(\Gate(T)\in\{0,1\}\) defined using rational sliceness (rational homology 4-ball bounding). This provides an explicit on/off rule for when the factor \(4/\alpha\) is active.
+
+            \begin{definition}[Rational homology 4-ball]
+                A smooth compact 4-manifold \(W\) is a \emph{rational homology 4-ball} if \(\partial W\cong S^3\) and
+                \[
+                    H_\ast(W;\mathbb{Q}) \cong H_\ast(B^4;\mathbb{Q}).
+                \]
+            \end{definition}
+
+            \begin{definition}[Rational sliceness]
+                A knot \(K\subset S^3\) is \emph{rationally slice} if there exists a rational homology 4-ball \(W\) with \(\partial W\cong S^3\) in which \(K\) bounds a smoothly embedded disk \(D^2\subset W\).
+                Equivalently, \(K\) is slice in some \(W\) that is ``\(B^4\) up to \(\mathbb{Q}\)-homology.'' \cite{Cha2007}
+            \end{definition}
+
+            \begin{definition}[Shielding gate]
+                Define the \emph{shielding-gate exponent} \(\Gate(T)\in\{0,1\}\) by
+                \[
+                    \Gate(T)=
+                    \begin{cases}
+                        0, & \text{if \(T\) is rationally slice (shielded sector)},\\
+                        1, & \text{otherwise (exposed sector)}.
+                    \end{cases}
+                \]
+                In particular, \((4/\alpha)^{\Gate(T)}=1\) in the shielded sector and equals \(4/\alpha\) in the exposed sector.
+            \end{definition}
+
+            \paragraph{Double-twist family as an explicit, computable gate.}
+                For the double twist knots \(\Kmn{m}{n}\) (two twist regions with integer parameters \(m,n\)), rational sliceness is completely characterized. We use this as a \emph{hard constraint} (not merely inspiration) because it yields an exact, finite test for \(\Gate(\Kmn{m}{n})\).
+
+            \begin{theorem}[Rational sliceness of double twist knots \cite{Lee2025DoubleTwist}]
+                A double twist knot \(\Kmn{m}{n}\) is rationally slice if and only if
+                \[
+                    mn=0
+                    \quad\text{or}\quad
+                    n=-m
+                    \quad\text{or}\quad
+                    n=-m\pm 1.
+                \]
+            \end{theorem}
+
+            \begin{remark}[Gate specialization for \(\Kmn{m}{n}\)]
+                The gate becomes the explicit indicator of \emph{not} satisfying the above condition:
+                \[
+                    \Gate(\Kmn{m}{n})=
+                    \begin{cases}
+                        0,& mn=0\ \text{or}\ n=-m\ \text{or}\ n=-m\pm 1,\\
+                        1,& \text{otherwise}.
+                    \end{cases}
+                \]
+                The proof in \cite{Lee2025DoubleTwist} uses definite 4-manifold obstructions (Donaldson-type input) to rule out all other cases. \cite{Donaldson1983}
+            \end{remark}
+
+        \subsection{DSI motivation (orthodox phrasing)}
+        Discrete scale invariance appears in multiple contexts (fracture, turbulence cascades, renormalization-group limit cycles) and can generate preferred ratios in spectra \cite{Sornette1998}. In the present model, we adopt DSI as an organizing principle: increased topological obstruction ($g$) and component count ($n$) reduces the fraction of volume that can maintain coherent core motion, implemented via the golden-ratio suppression in \eqref{eq:kernel}. This is a hypothesis, testable by spectrum-fitting stability and by predictive out-of-sample checks.
+
+        \section{Representative selection vs. mass kernel}
+
+        Equation \eqref{eq:factorized} depends on $L_{\mathrm{tot}}(T)$, which in practice requires selecting a representative configuration within a topological sector. To keep the mass kernel \eqref{eq:kernel} minimal, we separate:
+        \begin{enumerate}
+            \item \textbf{Selection functional:} choose a representative $K^\star$ within a sector by minimizing an effective topological energy
+            \begin{equation}
+                E_{\mathrm{eff}}[K]=\alpha_C\,C(K)+\beta_L\,L(K)+\gamma_H\,H(K),
+                \qquad
+                K^\star=\arg\min E_{\mathrm{eff}}[K].
+                \label{eq:Eeff}
+            \end{equation}
+            Here $C,L,H$ are monotone complexity/stability proxies; $\alpha_C,\beta_L,\gamma_H$ are weights. This stage defines which ``tight'' representative is used to compute $L_{\mathrm{tot}}$ and indices.
+            \item \textbf{Mass evaluation:} compute $(k,g,n,L_{\mathrm{tot}})$ on $K^\star$ and evaluate \eqref{eq:master}.
+        \end{enumerate}
+        This separation prevents double-counting complexity inside $\mathcal{K}$ and keeps the mass map compact.
+
+        \section{Calibration, prediction program, and limitations}
+
+        \subsection{Calibration boundary}
+            Any model with a universal scale must be anchored. A minimal approach is to calibrate one reference mass (e.g. the electron) by choosing $L_{\mathrm{tot}}$ of its representative so that \eqref{eq:master} matches $M_e$. All other masses become predictions conditional on the selected topological assignments and computed indices/ropelengths.
+
+        \subsection{Composite systems and binding energy}
+            For nuclei and atoms, a first-pass assembly model is
+            \begin{equation}
+                M_{\mathrm{atom}}(Z,N)\approx Z\,M_p + N\,M_n + Z\,M_e - \frac{E_{\mathrm{bind}}(Z,N)}{c^2},
+            \end{equation}
+            where each constituent mass (e.g. \(M_p,M_n,M_e\)) is supplied by the same master kernel \(M(T)\) evaluated on the chosen topological representatives, while \(E_{\mathrm{bind}}\) is provided by a \emph{bridge model} until a fully hydrodynamic binding theory is derived.
+
+            \subsubsection{SEMF bridge model (drop-in compatible with the master kernel)}
+
+                As an orthodox-accurate bridge, take the Bethe--Weizs\"acker semi-empirical mass formula (SEMF) binding energy:
+                \begin{equation}
+                    E_{\mathrm{bind}}^{\mathrm{SEMF}}(Z,N)
+                    =
+                    a_V A
+                    - a_S A^{2/3}
+                    - a_C \frac{Z(Z-1)}{A^{1/3}}
+                    - a_A \frac{(A-2Z)^2}{A}
+                    + \delta(A,Z),
+                    \qquad A=Z+N,
+                    \label{eq:SEMF}
+                \end{equation}
+                with the pairing term
+                \begin{equation}
+                    \delta(A,Z)=
+                    \begin{cases}
+                        +a_P A^{-1/2}, & Z,N\ \text{even},\\
+                        0, & A\ \text{odd},\\
+                        -a_P A^{-1/2}, & Z,N\ \text{odd}.
+                    \end{cases}
+                    \label{eq:pairing}
+                \end{equation}
+                This keeps the atomic/nuclear \emph{bookkeeping} orthodox while delegating the \emph{constituent rest masses} to the topology-modulated kernel \eqref{eq:master}.
+                \cite{Weizsaecker1935,BetheBacher1936}
+
+            \subsubsection{Optional SST-compatible modulation (bridge extension)}
+                If one wishes to encode ``topological packing efficiency'' at the nuclear scale without changing the SEMF structure, promote \((a_V,a_S)\) to mild \(A\)-dependent functions through a monotone coherence factor \(\Xi(A)\) (fit/validated on data):
+                \begin{equation}
+                    a_V(A)=a_V^{(0)}\,\Xi(A),
+                    \qquad
+                    a_S(A)=a_S^{(0)}\,\Xi(A)^{-1/2},
+                    \label{eq:XiBridge}
+                \end{equation}
+                leaving \(a_C,a_A,a_P\) as orthodox baselines at first pass. This yields an SST-SEMF bridge that remains algebraically identical to \eqref{eq:SEMF} but allows controlled deviations for large \(A\) in out-of-sample tests.
+
+        \subsection{Preferred-frame (foliation) extension and falsifiers}
+            If the background medium defines a preferred rest frame, motion relative to it can generate small preferred-frame corrections. Parametrize the effective mass for an excitation moving at velocity $v$ relative to the medium by
+            \begin{equation}
+                M_{\mathrm{eff}}(v)=M_0\left[1+\eta_1\frac{\mathbf{v}\cdot\hat{\mathbf{u}}}{c}
+                                           +\eta_2\frac{(\mathbf{v}\cdot\hat{\mathbf{u}})^2}{c^2}+\cdots\right],
+                \label{eq:pf}
+            \end{equation}
+            where $\hat{\mathbf{u}}$ is the medium rest-frame direction field and $\eta_i$ map to preferred-frame phenomenology constrained by precision tests (PPN/SME literature) \cite{Will2014,Kostelecky2004}. The model is falsified if required $\eta_i$ violate existing bounds or if predicted anisotropies are not observed.
+
+        \section{Numerical sanity check (dimension and scale)}
+        Define the universal prefactor
+        \begin{equation}
+            M_0 \equiv \frac{u\,\pi \rc^{3}}{c^{2}}
+            =\frac{\left(\frac12\rhocore \vnorm^2\right)\pi \rc^3}{c^2},
+            \qquad
+            M_1 \equiv \left(\frac{4}{\alphafs}\right) M_0.
+            \label{eq:M0}
+        \end{equation}
+        Then
+        \begin{equation}
+            M(T)= M_0 \left(\frac{4}{\alphafs}\right)^{\Gate(T)} \Big[k(T)^{-3/2}\,\phig^{-g(T)}\,n(T)^{-1/\phig}\Big]\;L_{\mathrm{tot}}(T).
+            \label{eq:compact}
+        \end{equation}
+        Equation \eqref{eq:compact} makes explicit that the model requires only a universal base mass scale \(M_0\), a \emph{gated} amplification \((4/\alpha)^{\Gate(T)}\), and dimensionless topology/geometry factors.
+
+    %=========================================================
+    \section{Resolution Consistency and Gradient Expansion of the Mass Functional}
+    \label{sec:resolution_consistency}
+%=========================================================
+
+    \subsection{Motivation}
+
+        The invariant mass functional derived in Sec.~\ref{sec:mass_derivation}
+        was expressed in terms of the swirl energy density
+        \begin{equation}
+            \rho_{\!E}^{(0)} = \frac12 \rho_{\!f}
+            \lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} \rVert^2.
+        \end{equation}
+
+        However, any quadratic nonlinearity subjected to spatial coarse-graining
+        generates subgrid contributions that cannot be captured solely by
+        the zeroth-order (local) kinetic term.
+        This is a general consequence of filtering theory and the
+        multi-scale gradient expansion of quadratic stresses
+        \cite{Leonard1975,Clark1979,Eyink2006,Sagaut2006}.
+
+        Therefore, to ensure resolution-consistency of the mass functional,
+        we include the leading curvature correction induced by coarse-graining.
+
+%---------------------------------------------------------
+
+    \subsection{Gradient Expansion under Coarse-Graining}
+
+        Let $G_\ell$ denote a symmetric filter of width $\ell$.
+        Define the coarse-grained velocity field
+
+        \begin{equation}
+            \bar{\mathbf{v}} = G_\ell * \mathbf{v}.
+        \end{equation}
+
+        The filtered quadratic mismatch (subgrid stress analogue) is
+
+        \begin{equation}
+            \tau_{ij} = \overline{v_i v_j} - \bar v_i \bar v_j.
+        \end{equation}
+
+        For smooth fields and symmetric filters,
+        $\tau_{ij}$ admits an even-order gradient expansion:
+
+        \begin{equation}
+            \tau_{ij}
+            =
+            \kappa_2 \ell^2
+            \partial_k \bar v_i \partial_k \bar v_j
+            +
+            \kappa_4 \ell^4
+            \partial_{kl} \bar v_i \partial_{kl} \bar v_j
+            +
+            O(\ell^6),
+            \label{eq:SST_gradient_expansion}
+        \end{equation}
+
+        where $\kappa_2,\kappa_4$ are dimensionless constants
+        determined by the filter kernel.
+
+        This hierarchy is mathematically unavoidable
+        for filtered quadratic nonlinearities
+        \cite{Eyink2006}.
+
+%---------------------------------------------------------
+
+    \subsection{Effective Swirl Energy Density}
+
+        The leading resolution-consistent local truncation of the swirl energy density is therefore
+
+        \begin{equation}
+            \rho_{\!E}^{\mathrm{eff}}(\ell)
+            =
+            \frac12 \rho_{\!f}
+            \left(
+                \lVert \bar{\mathbf{v}} \rVert^2
+            +
+                \kappa_2 \ell^2
+                \lVert \nabla \bar{\mathbf{v}} \rVert^2
+            \right),
+            \label{eq:rhoE_effective}
+        \end{equation}
+
+        with
+
+        \begin{equation}
+            \lVert \nabla \bar{\mathbf{v}} \rVert^2
+            =
+            \partial_i \bar v_j \partial_i \bar v_j.
+        \end{equation}
+
+        Dimensional consistency is immediate:
+
+        \[
+            [\rho_{\!f}] = \mathrm{kg\,m^{-3}},
+            \quad
+            [\ell^2 \lVert \nabla \bar{\mathbf{v}}\rVert^2] = \mathrm{m^2\,s^{-2}},
+            \quad
+            [\rho_{\!E}] = \mathrm{J\,m^{-3}}.
+        \]
+
+        Higher-order curvature terms $O(\ell^4)$ may be included,
+        but Eq.~\eqref{eq:rhoE_effective} represents the minimal local truncation.
+
+%---------------------------------------------------------
+
+    \subsection{Resolution-Consistent Mass Functional}
+
+        The coarse-grained invariant mass functional becomes
+
+        \begin{equation}
+            M(\ell)
+            =
+            \frac{1}{c^2}
+            \int
+            \rho_{\!E}^{\mathrm{eff}}(\ell)\, dV.
+            \label{eq:M_ell}
+        \end{equation}
+
+        Explicitly,
+
+        \begin{equation}
+            M(\ell)
+            =
+            \frac{\rho_{\!f}}{2c^2}
+            \int
+            \left(
+                \lVert \bar{\mathbf{v}} \rVert^2
+            +
+                \kappa_2 \ell^2
+                \lVert \nabla \bar{\mathbf{v}} \rVert^2
+            \right)
+            dV.
+            \label{eq:M_resolution}
+        \end{equation}
+
+        Let $L$ denote the characteristic spatial variation scale
+        of the localized swirl structure.
+        Then
+
+        \begin{equation}
+            \frac{\Delta M_2}{M_0}
+            \sim
+            \kappa_2
+            \left(\frac{\ell}{L}\right)^2.
+        \end{equation}
+
+        Hence:
+
+        \begin{itemize}
+            \item If $L \gg \ell$, curvature corrections are negligible.
+            \item If $L \sim \ell$, corrections become $O(1)$.
+        \end{itemize}
+
+        Therefore, resolution-consistent mass evaluation for localized
+        swirl structures requires inclusion of the gradient term.
+
+%---------------------------------------------------------
+
+    \subsection{Falsifiable Diagnostic}
+
+        For a fixed physical configuration,
+        compute $M(\ell)$ over a sequence of filter scales
+        $\ell = n\,\delta x$.
+
+        Resolution consistency requires
+
+        \begin{equation}
+            \mathrm{Var}_\ell \big(M(\ell)\big)
+            <
+            \mathrm{Var}_\ell \big(M_0(\ell)\big).
+        \end{equation}
+
+        Failure of this condition indicates either:
+
+        \begin{itemize}
+            \item insufficient derivative accuracy,
+            \item breakdown of locality,
+            \item or necessity of nonlocal kernel corrections.
+        \end{itemize}
+
+        This diagnostic provides a direct computational test
+        of the resolution-consistent mass hypothesis.
+
+
+        \paragraph{10-year-old analogy (one sentence).}
+            A particle is modeled like a tiny knotted loop of spinning fluid: its mass is how much ``spinning energy'' is packed into the loop, and complicated knots pack that energy less efficiently.
+
+        \section{Conclusions}
+        We have presented a self-contained hydrodynamic-topology effective model for inertial mass in which rest mass equals localized kinetic energy divided by $c^2$, and topology enters through a minimal dimensionless kernel multiplying a filament volume proxy. The framework is explicitly modular: (i) covariant mass functional, (ii) core energy density scale, (iii) slender-filament geometry, (iv) topology-modulated localization efficiency, and (v) optional representative selection by an energy functional. The approach yields clear falsifiers (preferred-frame constraints, out-of-sample mass predictions, stability of selection under kernel variations) and provides a compact, checkable formula suitable for systematic benchmark testing.
+
+        \section*{Acknowledgments}
+        None.
+
+        \begin{thebibliography}{99}
+
+            \bibitem{Leonard1975}
+            A.~Leonard (1975),
+            Energy cascade in large-eddy simulations of turbulent fluid flows,
+            Advances in Geophysics \textbf{18}, 237–248.
+            DOI: 10.1016/S0065-2687(08)60464-1.
+
+            \bibitem{Clark1979}
+            R.~A. Clark, J.~H. Ferziger, and W.~C. Reynolds (1979),
+            Evaluation of subgrid-scale models using an accurately simulated turbulent flow,
+            Journal of Fluid Mechanics \textbf{91}, 1–16.
+            DOI: 10.1017/S002211207900001X.
+
+            \bibitem{Eyink2006}
+            G.~L. Eyink (2006),
+            Multi-scale gradient expansion of the turbulent stress tensor,
+            Journal of Fluid Mechanics \textbf{549}, 159–190.
+            DOI: 10.1017/S002211200500759X.
+
+            \bibitem{Sagaut2006}
+            P.~Sagaut (2006),
+            Large Eddy Simulation for Incompressible Flows: An Introduction,
+            Springer.
+            DOI: 10.1007/978-3-540-26347-2.
+
+
+            \bibitem{Higgs1964}
+            P.~W.~Higgs (1964),
+            \emph{Broken symmetries and the masses of gauge bosons},
+            Phys. Rev. Lett. \textbf{13}, 508--509.
+            doi:10.1103/PhysRevLett.13.508
+
+            \bibitem{EnglertBrout1964}
+            F.~Englert and R.~Brout (1964),
+            \emph{Broken symmetry and the mass of gauge vector mesons},
+            Phys. Rev. Lett. \textbf{13}, 321--323.
+            doi:10.1103/PhysRevLett.13.321
+
+            \bibitem{Weinberg1967}
+            S.~Weinberg (1967),
+            \emph{A model of leptons},
+            Phys. Rev. Lett. \textbf{19}, 1264--1266.
+            doi:10.1103/PhysRevLett.19.1264
+
+            \bibitem{Kelvin1869}
+            W.~Thomson (Lord Kelvin) (1869),
+            \emph{On vortex motion},
+            Trans. R. Soc. Edinburgh \textbf{25}, 217--260.
+            (permalink: historical reprints widely available)
+
+            \bibitem{Batchelor1967}
+            G.~K.~Batchelor (1967),
+            \emph{An Introduction to Fluid Dynamics},
+            Cambridge University Press.
+
+            \bibitem{Saffman1992}
+            P.~G.~Saffman (1992),
+            \emph{Vortex Dynamics},
+            Cambridge University Press.
+
+            \bibitem{Onsager1949}
+            L.~Onsager (1949),
+            \emph{Statistical hydrodynamics},
+            Nuovo Cimento Suppl. \textbf{6}, 279--287.
+            (permalink: archival)
+
+            \bibitem{Feynman1955}
+            R.~P.~Feynman (1955),
+            \emph{Chapter II: Application of quantum mechanics to liquid helium},
+            in \emph{Progress in Low Temperature Physics}, Vol. 1 (ed. C.~J.~Gorter),
+            Elsevier, pp. 17--53.
+
+            \bibitem{Weizsaecker1935}
+            C.~F.~von Weizs\"acker (1935),
+            \emph{Zur Theorie der Kernmassen},
+            Z. Phys. \textbf{96}, 431--458.
+            doi:10.1007/BF01337700
+
+            \bibitem{BetheBacher1936}
+            H.~A.~Bethe and R.~F.~Bacher (1936),
+            \emph{Nuclear Physics A: Stationary States of Nuclei},
+            Rev. Mod. Phys. \textbf{8}, 82--229.
+            doi:10.1103/RevModPhys.8.82
+
+            \bibitem{Sornette1998}
+            D.~Sornette (1998),
+            \emph{Discrete-scale invariance and complex dimensions},
+            Phys. Rep. \textbf{297}, 239--270.
+            doi:10.1016/S0370-1573(97)00076-8
+
+            \bibitem{Cha2007}
+            J.~C.~Cha (2007),
+            \emph{The structure of the rational concordance group of knots},
+            Mem. Amer. Math. Soc. \textbf{189}, no.~885.
+            doi:10.1090/memo/0885
+            (arXiv:math/0609408)
+
+            \bibitem{Lee2025DoubleTwist}
+            W.~Lee (2025),
+            \emph{Rational Concordance of Double Twist Knots},
+            arXiv:2504.07636.
+            doi:10.48550/arXiv.2504.07636
+
+            \bibitem{Donaldson1983}
+            S.~K.~Donaldson (1983),
+            \emph{An application of gauge theory to four-dimensional topology},
+            J. Differential Geom. \textbf{18}(2), 279--315.
+            doi:10.4310/jdg/1214437665
+
+            \bibitem{Cantarella2002Ropelength}
+            J.~Cantarella, R.~B.~Kusner, and J.~M.~Sullivan (2002),
+            \emph{On the minimum ropelength of knots and links},
+            Invent. Math. \textbf{150}, 257--286.
+            doi:10.1007/s00222-002-0234-y
+
+            \bibitem{Will2014}
+            C.~M.~Will (2014),
+            \emph{The Confrontation between General Relativity and Experiment},
+            Living Rev. Relativ. \textbf{17}, 4.
+            doi:10.12942/lrr-2014-4
+
+            \bibitem{Kostelecky2004}
+            V.~A.~Kosteleck\'y (2004),
+            \emph{Gravity, Lorentz violation, and the Standard Model},
+            Phys. Rev. D \textbf{69}, 105009.
+            doi:10.1103/PhysRevD.69.105009
+
+        \end{thebibliography}
+
+
+
+
+\end{document}

@@ -1,0 +1,165 @@
+--- SST_ATOM_MASS_INVARIANT_SEMF.py
++++ SST_ATOM_MASS_INVARIANT_SEMF_canonical_only.py
+@@ -253,7 +253,7 @@
+ @dataclass
+ class Config:
+     # s_u = Vol_H(5_2), s_d = Vol_H(6_1) (canonical up/down)
+-    mode: str = "exact_closure"
++    mode: str = "canonical"
+     kappa_R: float = 2.0
+     fixed_su: float = 2.8281
+     fixed_sd: float = 3.1639
+@@ -501,10 +501,11 @@
+     tau_base      = KnotTopology(name="Tau_base T(2,7)",      k=7.0, b_braid=2, g=3, n=1, sigma=electron_sigma, L_tot=0.0)
+ 
+     l_tot_e  = solve_for_L_tot(M_e_actual,  electron_base, phi_val=phi_val)
+-    l_tot_mu = solve_for_L_tot(M_mu_actual, muon_base,     phi_val=phi_val)
+-    l_tot_tau= solve_for_L_tot(M_tau_actual,tau_base,      phi_val=phi_val)
+-
+-    # Baryon Sector Calibration
++    # Canonical-lepton policy: calibrate ONLY on the electron and predict higher generations
++    # using the same geometric scale L_tot (no mu/tau back-solving).
++    l_tot_mu = l_tot_e
++    l_tot_tau= l_tot_e
++# Baryon Sector Calibration
+     k_bary, g_bary, n_bary = 3.0, 2, 3
+     scaling_factor = 2.0 * (math.pi ** 2) * cfg.kappa_R
+     A_bary = baryon_prefactor(k_bary, g_bary, n_bary, phi_val=phi_val)
+@@ -735,7 +736,7 @@
+     isotope_mass_csv: str = "isotope_masses.csv",
+ ) -> dict:
+     """Align with phi_sweep: pass data_source/isotope_mass_csv explicitly to match sweep semantics."""
+-    cfg = Config(mode=mode)
++    cfg = Config(mode="canonical")
+     ds = data_source if data_source is not None else cfg.data_source
+     iso = None
+     if ds == "isotope_mass":
+@@ -771,7 +772,7 @@
+     if span < 0:
+         raise ValueError("span must be >= 0")
+ 
+-    cfg = Config(mode=mode)
++    cfg = Config(mode="canonical")
+ 
+     iso = None
+     if data_source == "isotope_mass":
+@@ -803,9 +804,9 @@
+ # ──────────────────────────────────────────────────────────────────────────────
+ # Main Function
+ # ──────────────────────────────────────────────────────────────────────────────
+-def main(mode: str = "exact_closure") -> None:
++def main() -> None:
+     print("=== SST Invariant Master Mass (Canon) ===")
+-    cfg = Config(mode=mode)
++    cfg = Config(mode="canonical")
+     topologies = get_particle_topologies(cfg)
+     diag = topologies.pop("_diag")
+ 
+@@ -856,105 +857,5 @@
+ # Main Execution
+ # ──────────────────────────────────────────────────────────────────────────────
+ if __name__ == "__main__":
+-    import sys
+-    # --- Phi sweeps: with and without SEMF proxy ---
+-    # Default: standard weights (averages). SEMF will warn about mixed semantics.
+-    df_sweep_semf = phi_sweep(mode="canonical", npts=101, span=0.05, use_semf=True, data_source="standard_weight")
+-    df_sweep_nosemf = phi_sweep(mode="canonical", npts=101, span=0.05, use_semf=False, data_source="standard_weight")
+-
+-    print("\nTop 10 (canonical, with SEMF):")
+-    print(df_sweep_semf.sort_values("RMS_excl_epn").head(10))
+-    df_semf_sorted = df_sweep_semf.sort_values("RMS_excl_epn").reset_index(drop=True)
+-    best_semf_phi = df_semf_sorted.loc[0, "phi"]
+-    at_edge_semf = (best_semf_phi == df_sweep_semf["phi"].min()) or (best_semf_phi == df_sweep_semf["phi"].max())
+-    print("Best at edge? (with SEMF)", at_edge_semf)
+-
+-    print("\nTop 10 (canonical, no SEMF):")
+-    print(df_sweep_nosemf.sort_values("RMS_excl_epn").head(10))
+-    df_nosemf_sorted = df_sweep_nosemf.sort_values("RMS_excl_epn").reset_index(drop=True)
+-    best_nosemf_phi = df_nosemf_sorted.loc[0, "phi"]
+-    at_edge_nosemf = (best_nosemf_phi == df_sweep_nosemf["phi"].min()) or (best_nosemf_phi == df_sweep_nosemf["phi"].max())
+-    print("Best at edge? (no SEMF)", at_edge_nosemf)
+-
+-    # Optional: isotope-resolved sweep (requires isotope_masses.csv)
+-    # If you provide isotope masses consistent with your (Z,N) table, this is the correct way
+-    # to interpret SEMF-on fits.
+-    try:
+-        df_sweep_iso_semf = phi_sweep(
+-            mode="canonical", npts=101, span=0.05, use_semf=True,
+-            data_source="isotope_mass", isotope_mass_csv="isotope_masses.csv"
+-        )
+-        print("\nTop 10 (canonical, with SEMF, isotope_mass targets):")
+-        print(df_sweep_iso_semf.sort_values("RMS_excl_epn").head(10))
+-    except Exception as e:
+-        print("\n[INFO] Isotope-resolved sweep skipped:", str(e))
+-
+-    # --- Golden-ratio vs best-fit diagnostics ---
+-    best_semf = df_semf_sorted.iloc[0]
+-    phi_best_semf = float(best_semf["phi"])
+-    gold_semf = eval_phi(phi0, mode="canonical", use_semf=True, data_source="standard_weight")
+-    best_eval_semf = eval_phi(phi_best_semf, mode="canonical", use_semf=True, data_source="standard_weight")
+-
+-    print("\n--- Phi diagnostics (canonical, with SEMF) ---")
+-    print("Golden:", gold_semf)
+-    print("Best  :", best_eval_semf)
+-    print(f"RMS ratio excl_epn: {gold_semf['RMS_excl_epn']/best_eval_semf['RMS_excl_epn']:.6f}")
+-    print(f"RMS ratio excl_e  : {gold_semf['RMS_excl_e']/best_eval_semf['RMS_excl_e']:.6f}")
+-
+-    best_nosemf = df_nosemf_sorted.iloc[0]
+-    phi_best_nosemf = float(best_nosemf["phi"])
+-    gold_nosemf = eval_phi(phi0, mode="canonical", use_semf=False, data_source="standard_weight")
+-    best_eval_nosemf = eval_phi(phi_best_nosemf, mode="canonical", use_semf=False, data_source="standard_weight")
+-
+-    print("\n--- Phi diagnostics (canonical, no SEMF) ---")
+-    print("Golden:", gold_nosemf)
+-    print("Best  :", best_eval_nosemf)
+-    print(f"RMS ratio excl_epn: {gold_nosemf['RMS_excl_epn']/best_eval_nosemf['RMS_excl_epn']:.6f}")
+-    print(f"RMS ratio excl_e  : {gold_nosemf['RMS_excl_e']/best_eval_nosemf['RMS_excl_e']:.6f}")
+-
+-    arg_mode = sys.argv[1] if len(sys.argv) > 1 else "exact_closure"
+-    main(arg_mode)
+-
+-    try:
+-        #ans = input("\nCompare with other modes and add predicted columns? [y/N]: ").strip().lower()
+-        ans = "y"
+-    except EOFError:
+-        ans = "n"
+-
+-    if ans in ("y", "yes"):
+-        all_modes = ["exact_closure", "canonical", "sector_norm"]
+-        label_map = {"canonical":"CANON", "sector_norm":"Sector Norm", "exact_closure":"Exact Closure"}
+-
+-        # Get the base dataframe from the mode just run
+-        cfg_base = Config(mode=arg_mode)
+-        tops_base = get_particle_topologies(cfg_base)
+-        # We need to remove the diagnostic dict before passing to compute_tables
+-        tops_base.pop("_diag", None)
+-        df_cmp = compute_tables(tops_base, cfg_base)
+-
+-        # Compute results for other modes and merge
+-        other_modes = [m for m in all_modes if m != arg_mode]
+-        for m in other_modes:
+-            cfg_m = Config(mode=m)
+-            tops_m = get_particle_topologies(cfg_m)
+-            tops_m.pop("_diag", None)
+-            df_m = compute_tables(tops_m, cfg_m)[["Object","Actual Mass (kg)","Predicted Mass (kg)"]].rename(
+-                columns={"Predicted Mass (kg)": f"Predicted Mass (kg) [{label_map[m]}]"}
+-            )
+-            # Error column for that mode
+-            df_m[f"% Error [{label_map[m]}]"] = 100.0 * (df_m[f"Predicted Mass (kg) [{label_map[m]}]"] - df_m["Actual Mass (kg)"]) / df_m["Actual Mass (kg)"]
+-            df_m[f"% Error [{label_map[m]}]"] = df_m[f"% Error [{label_map[m]}]"].apply(emoji_marker)
+-            df_m = df_m.drop(columns=["Actual Mass (kg)"])
+-            df_cmp = df_cmp.merge(df_m, on="Object", how="left")
+-
+-        # Reorder columns for clarity
+-        desired_cols = ["Object","Actual Mass (kg)","Predicted Mass (kg)","% Error",
+-                        "Predicted Mass (kg) [CANON]","% Error [CANON]",
+-                        "Predicted Mass (kg) [Sector Norm]","% Error [Sector Norm]"]
+-        cols = [c for c in desired_cols if c in df_cmp.columns] + [c for c in df_cmp.columns if c not in desired_cols]
+-        df_cmp = df_cmp[cols]
+-
+-        out_csv_all = "SST_Invariant_Mass_Results_all_modes.csv"
+-        df_cmp.to_csv(out_csv_all, index=False)
+-        print(df_cmp.to_string(index=False))
+-        print(f"\nSaved comparison to {out_csv_all}")
++    # Canonical-only execution: no parameter sweeps, no alternate modes.
++    main()

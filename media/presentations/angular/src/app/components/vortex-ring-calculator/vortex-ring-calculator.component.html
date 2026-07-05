@@ -1,0 +1,63 @@
+<div class="flex flex-col items-center p-8 bg-physics-card/80 backdrop-blur-md rounded-xl shadow-2xl border border-slate-800 my-8">
+  <h3 class="font-serif text-xl mb-2 text-white">Vortex Ring Dynamics</h3>
+  <p class="text-sm text-physics-muted mb-8 text-center max-w-md">
+    Adjust the geometry of a thin vortex ring to see how Energy, Impulse, and Translational Velocity scale.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-2xl">
+    <div class="space-y-8">
+      <div>
+        <label class="flex justify-between text-xs font-bold text-physics-cyan uppercase mb-2">
+          <span>Ring Radius (R)</span><span>{{ R() }} cm</span>
+        </label>
+        <input type="range" min="5" max="50" step="1" class="w-full accent-physics-cyan" [ngModel]="R()" (ngModelChange)="R.set(+$event)" />
+      </div>
+      <div>
+        <label class="flex justify-between text-xs font-bold text-physics-purple uppercase mb-2">
+          <span>Core Radius (a)</span><span>{{ aVal() }} cm</span>
+        </label>
+        <input type="range" min="0.1" max="2" step="0.1" class="w-full accent-physics-purple" [ngModel]="aVal()" (ngModelChange)="aVal.set(+$event)" />
+      </div>
+      <div>
+        <label class="flex justify-between text-xs font-bold text-physics-gold uppercase mb-2">
+          <span>Circulation (Γ)</span><span>{{ gamma() }} units</span>
+        </label>
+        <input type="range" min="10" max="200" step="10" class="w-full accent-physics-gold" [ngModel]="gamma()" (ngModelChange)="gamma.set(+$event)" />
+      </div>
+    </div>
+
+    <div class="bg-black/40 rounded-lg border border-slate-700 p-6 flex flex-col justify-center gap-6 relative shadow-inner">
+      <div class="absolute top-3 right-3 text-physics-cyan animate-pulse">
+        <lucide-icon [img]="icons.Activity" [size]="16" />
+      </div>
+      <div class="w-full h-24 flex items-center justify-center border-b border-slate-700 pb-6 mb-2">
+        <div
+          class="rounded-full border-2 border-physics-cyan shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all duration-300 bg-physics-cyan/5"
+          [style.width.px]="R() * 3 > 120 ? 120 : R() * 3"
+          [style.height.px]="R() > 50 ? 50 : R()"
+          [style.borderWidth.px]="aVal() * 3 < 2 ? 2 : aVal() * 3"
+        ></div>
+        <lucide-icon [img]="icons.ArrowRight" class="ml-4 text-physics-muted" [size]="16" />
+        <span class="text-xs text-physics-cyan ml-1 font-mono font-bold">U</span>
+      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <div class="text-[10px] uppercase font-bold text-physics-muted mb-1">Translational Velocity</div>
+          <div class="font-serif text-xl text-white">{{ velocity().toFixed(2) }} <span class="text-xs text-physics-cyan">cm/s</span></div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-physics-muted mb-1">Energy</div>
+          <div class="font-serif text-xl text-white">{{ (energy() / 1000).toFixed(2) }} <span class="text-xs text-physics-purple">k units</span></div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-physics-muted mb-1">Impulse</div>
+          <div class="font-serif text-xl text-white">{{ (impulse() / 1000).toFixed(2) }} <span class="text-xs text-physics-gold">k units</span></div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-physics-muted mb-1">Aspect Ratio (R/a)</div>
+          <div class="font-serif text-xl text-white">{{ aspectRatio().toFixed(1) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

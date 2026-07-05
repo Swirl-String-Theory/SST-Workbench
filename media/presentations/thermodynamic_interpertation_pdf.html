@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Particle Synthesizer</title>
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --panel-bg: #11111a;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --accent-red: #f87171;
+            
+            /* Dynamic Swirl Variables */
+            --swirl-speed: 10s;
+            --swirl-color-1: #38bdf8;
+            --swirl-color-2: #818cf8;
+            --swirl-scale: 1;
+            --lobes: 3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+            background: linear-gradient(to bottom, rgba(17, 17, 26, 1), rgba(5, 5, 10, 1));
+        }
+
+        h1 {
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            padding: 2rem;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-title {
+            color: var(--accent-gold);
+            border-bottom: 1px dashed rgba(251, 191, 36, 0.3);
+            padding-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Controls */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            background: #1e1e2f;
+            color: white;
+            border: 1px solid #333;
+            padding: 0.5rem;
+            border-radius: 4px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            border: none;
+            padding: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        /* Visualizer */
+        .visualizer-container {
+            flex: 2;
+            min-width: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #05050a 70%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .swirl-core {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            transition: all 0.5s ease;
+            transform: scale(var(--swirl-scale));
+        }
+
+        .swirl-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            mix-blend-mode: screen;
+            animation: spin var(--swirl-speed) linear infinite;
+        }
+
+        .layer-1 {
+            background: conic-gradient(from 0deg, transparent, var(--swirl-color-1), transparent 40%, var(--swirl-color-1) 50%, transparent 90%);
+            filter: blur(8px);
+        }
+
+        .layer-2 {
+            background: conic-gradient(from 180deg, transparent, var(--swirl-color-2), transparent 30%, var(--swirl-color-2) 60%, transparent 80%);
+            animation-direction: reverse;
+            animation-duration: calc(var(--swirl-speed) * 0.8);
+            filter: blur(12px);
+            transform: scale(0.8);
+        }
+
+        .layer-3 {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            animation-duration: calc(var(--swirl-speed) * 2);
+        }
+
+        .particle-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px 5px var(--swirl-color-1);
+            z-index: 10;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Data Readout */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-label {
+            color: var(--text-muted);
+        }
+
+        .data-value {
+            font-weight: bold;
+            color: var(--accent-blue);
+            text-align: right;
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+        }
+
+        .equation {
+            background: #000;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            border-left: 3px solid var(--accent-gold);
+            margin-top: 1rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            margin-right: 8px;
+        }
+
+        .status-hot {
+            background-color: var(--accent-red);
+            box-shadow: 0 0 8px var(--accent-red);
+        }
+
+        @media (max-width: 768px) {
+            main { flex-direction: column; }
+            .visualizer-container { min-height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SST Swirl Condensate Simulator</h1>
+        <div class="subtitle">Interactive Thermodynamic Reinterpretation of the Golden Mass Hierarchy</div>
+    </header>
+
+    <main>
+        <!-- Control Panel -->
+        <div class="panel">
+            <h2 class="panel-title">Topological Input</h2>
+            
+            <div class="control-group">
+                <label for="topology">
+                    Knot Topology (K)
+                    <span id="topology-val" style="color: var(--accent-gold)">3₁</span>
+                </label>
+                <select id="topology">
+                    <option value="1_1">Unknot (1₁)</option>
+                    <option value="3_1" selected>Trefoil (3₁)</option>
+                    <option value="5_1">Cinque-foil (5₁)</option>
+                </select>
+                <small style="color: var(--text-muted); margin-top: 4px;">Defines baseline geometric mass.</small>
+            </div>
+
+            <div class="control-group" style="margin-top: 1rem;">
+                <label for="generation">
+                    Thermodynamic Heat Index (G)
+                    <span id="generation-val" style="color: var(--accent-gold)">0</span>
+                </label>
+                <input type="range" id="generation" min="0" max="2" step="1" value="0">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 4px;">
+                    <span>0 (Ground)</span>
+                    <span>1 (Excited)</span>
+                    <span>2 (High-Heat)</span>
+                </div>
+            </div>
+
+            <div class="equation">
+                Λ<sub>Q</sub>(G) ≈ φ<sup>13G</sup>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                φ ≡ (1 + √5)/2 ≈ 1.618
+            </div>
+        </div>
+
+        <!-- Visualizer -->
+        <div class="visualizer-container">
+            <div style="position: absolute; top: 1rem; left: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                <span id="status-dot" class="status-indicator"></span>
+                Vacuum State: <span id="vacuum-state">Stable</span>
+            </div>
+            <div class="swirl-core" id="swirl">
+                <div class="swirl-layer layer-1"></div>
+                <div class="swirl-layer layer-2"></div>
+                <div class="swirl-layer layer-3"></div>
+                <div class="particle-core"></div>
+            </div>
+        </div>
+
+        <!-- Output Data -->
+        <div class="panel">
+            <h2 class="panel-title">Thermodynamic Output</h2>
+            
+            <div class="data-row">
+                <span class="data-label">Identified State:</span>
+                <span class="data-value highlight" id="out-identity">Electron</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Base Mass (M<sub>base</sub>):</span>
+                <span class="data-value" id="out-base-mass">0.4609 MeV</span>
+            </div>
+
+            <div class="data-row">
+                <span class="data-label">Heat Multiplier (Λ<sub>Q</sub>):</span>
+                <span class="data-value" id="out-multiplier">1.00</span>
+            </div>
+
+            <div class="data-row" style="border-bottom: none; margin-top: 1rem;">
+                <span class="data-label" style="font-size: 1.2rem; color: #fff;">Total Mass (m):</span>
+                <span class="data-value highlight" style="font-size: 1.2rem;" id="out-total-mass">0.4609 MeV</span>
+            </div>
+
+            <div style="margin-top: auto; padding: 1rem; background: rgba(56, 189, 248, 0.1); border-left: 3px solid var(--accent-blue); font-size: 0.85rem; line-height: 1.4;">
+                <strong>Observation:</strong> <span id="observation-text">Baseline structural identity governed by topological knot invariant. Thermal coupling is effectively frozen.</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Constants from the paper
+        const PHI = (1 + Math.sqrt(5)) / 2;
+        
+        // Dictionary of topologies and their base masses (approximated/extracted from text)
+        const topologyData = {
+            "1_1": { name: "Unknot (1₁)", baseMass: 1.45, unit: "MeV", lobes: 1 }, // Approximated base to fit G=1 strange quark
+            "3_1": { name: "Trefoil (3₁)", baseMass: 0.4609, unit: "MeV", lobes: 3 }, // Electron scale
+            "5_1": { name: "Cinque-foil (5₁)", baseMass: 0.43, unit: "MeV", lobes: 5 } // Approximated base to fit G=1 pion
+        };
+
+        // Specific particle identities mapped in the paper
+        const particleIdentities = {
+            "3_1_0": { name: "Electron", note: "Extreme stability of fundamental ground state. Thermal coupling frozen." },
+            "3_1_2": { name: "Higgs Boson", note: "Modeled as a high-heat excitation of the baseline trefoil topology." },
+            "5_1_1": { name: "Pion (π⁰)", note: "First-order resonance across the Kelvin gap." },
+            "5_1_2": { name: "Z Boson", note: "High-energy state sharing identical baseline topology with the Pion." },
+            "1_1_1": { name: "Strange Quark", note: "One-component unknot ring with fermionic parity choice χ=2." }
+        };
+
+        // DOM Elements
+        const elTopology = document.getElementById('topology');
+        const elGeneration = document.getElementById('generation');
+        const elTopVal = document.getElementById('topology-val');
+        const elGenVal = document.getElementById('generation-val');
+        
+        const outIdentity = document.getElementById('out-identity');
+        const outBaseMass = document.getElementById('out-base-mass');
+        const outMultiplier = document.getElementById('out-multiplier');
+        const outTotalMass = document.getElementById('out-total-mass');
+        const obsText = document.getElementById('observation-text');
+        
+        const swirlCore = document.getElementById('swirl');
+        const statusDot = document.getElementById('status-dot');
+        const vacuumState = document.getElementById('vacuum-state');
+
+        function formatMass(valueInMeV) {
+            if (valueInMeV < 1000) {
+                return valueInMeV.toFixed(4) + " MeV";
+            } else {
+                return (valueInMeV / 1000).toFixed(3) + " GeV";
+            }
+        }
+
+        function updateSimulation() {
+            const K = elTopology.value;
+            const G = parseInt(elGeneration.value);
+            
+            // Update UI Labels
+            elTopVal.innerText = elTopology.options[elTopology.selectedIndex].text.split(' ')[1];
+            elGenVal.innerText = G;
+
+            // Math
+            const tData = topologyData[K];
+            const baseMass = tData.baseMass;
+            
+            // Λ_Q(G) ≈ φ^(13G)
+            const multiplier = Math.pow(PHI, 13 * G);
+            const totalMass = baseMass * multiplier;
+
+            // Identity lookup
+            const key = `${K}_${G}`;
+            const identity = particleIdentities[key];
+
+            // Update Text Outputs
+            outBaseMass.innerText = `${baseMass.toFixed(4)} MeV`;
+            
+            if (G === 0) {
+                outMultiplier.innerText = "1.00 (Ground)";
+            } else {
+                outMultiplier.innerText = `φ^${13*G} ≈ ${multiplier.toExponential(2)}`;
+            }
+
+            outTotalMass.innerText = formatMass(totalMass);
+
+            if (identity) {
+                outIdentity.innerText = identity.name;
+                obsText.innerText = identity.note;
+            } else {
+                outIdentity.innerText = "Unknown Resonance";
+                obsText.innerText = `Theoretical high-order resonance state. Mass generated by excitation of Kelvin-modes and R/T-phase reconfigurations.`;
+            }
+
+            // Update Visuals (CSS Variables)
+            const root = document.documentElement;
+            
+            // Speed based on Generation (Heat)
+            let speed = "10s";
+            let scale = 1;
+            let c1, c2;
+
+            if (G === 0) {
+                speed = "12s";
+                scale = 1;
+                c1 = "#38bdf8"; // cold blue
+                c2 = "#818cf8";
+                statusDot.className = "status-indicator";
+                vacuumState.innerText = "Stable (Frozen)";
+            } else if (G === 1) {
+                speed = "4s";
+                scale = 1.2;
+                c1 = "#fbbf24"; // warm yellow
+                c2 = "#f59e0b";
+                statusDot.className = "status-indicator";
+                statusDot.style.backgroundColor = "#fbbf24";
+                statusDot.style.boxShadow = "0 0 8px #fbbf24";
+                vacuumState.innerText = "Excited (Kelvin Gap Crossed)";
+            } else if (G === 2) {
+                speed = "1s";
+                scale = 1.5;
+                c1 = "#f87171"; // hot red
+                c2 = "#ec4899"; // magenta
+                statusDot.className = "status-indicator status-hot";
+                vacuumState.innerText = "Highly Unstable (Golden Ladder)";
+            }
+
+            root.style.setProperty('--swirl-speed', speed);
+            root.style.setProperty('--swirl-scale', scale);
+            root.style.setProperty('--swirl-color-1', c1);
+            root.style.setProperty('--swirl-color-2', c2);
+
+            // Add a little pulse effect on change
+            swirlCore.style.opacity = 0.5;
+            setTimeout(() => { swirlCore.style.opacity = 1; }, 150);
+        }
+
+        // Event Listeners
+        elTopology.addEventListener('change', updateSimulation);
+        elGeneration.addEventListener('input', updateSimulation);
+
+        // Initialize
+        updateSimulation();
+
+    </script>
+</body>
+</html>

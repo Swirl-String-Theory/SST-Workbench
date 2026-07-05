@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory Laboratory</title>
+    <style>
+        :root {
+            --bg-color: #050a10;
+            --panel-bg: #0f1620;
+            --text-main: #c9d1d9;
+            --accent-cyan: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-gold: #d29922;
+            --glow: 0 0 10px rgba(88, 166, 255, 0.3);
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            text-shadow: var(--glow);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--accent-cyan);
+            padding-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: var(--accent-gold);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8em;
+            color: #8b949e;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #30363d;
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: var(--glow);
+        }
+
+        .value-display {
+            float: right;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        canvas {
+            background: #000;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .readout {
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-left: 3px solid var(--accent-gold);
+            margin-top: 10px;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: var(--glow);
+        }
+
+        .pulse-indicator {
+            height: 40px;
+            background: #000;
+            border: 1px solid #30363d;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pulse-blip {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-red);
+            opacity: 0;
+            transform: translateX(-50%);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            margin-left: 10px;
+        }
+        .status-stable { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-critical { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        /* Tooltip style for equations */
+        .equation {
+            font-style: italic;
+            color: #8b949e;
+            font-size: 0.8em;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Swirl-String Theory</h1>
+        <div class="subtitle">Multi-Scale Thermodynamics & Hydrodynamic Topology</div>
+        <div style="margin-top: 10px; font-size: 0.8em; color: #8b949e;">
+            Interactive Laboratory based on the work of Omar Iskandarani (Dec 2025)
+        </div>
+    </div>
+
+    <div class="grid-container">
+
+        <!-- PANEL 1: VORTEX CORE SIMULATOR -->
+        <div class="panel">
+            <h2>1. The Vortex Core</h2>
+            <div class="equation">v<sub>&#8634;</sub> = &#915;<sub>0</sub> / 2&#960;r<sub>c</sub></div>
+            
+            <div class="control-group">
+                <label>Core Radius (r<sub>c</sub>) <span id="val-radius" class="value-display">1.41 fm</span></label>
+                <input type="range" id="slider-radius" min="0.5" max="5.0" step="0.01" value="1.41">
+            </div>
+
+            <div class="control-group">
+                <label>Circulation Quantum (&#915;<sub>0</sub>) <span id="val-gamma" class="value-display">6.4 x10³</span></label>
+                <input type="range" id="slider-gamma" min="1.0" max="10.0" step="0.1" value="6.4">
+            </div>
+
+            <canvas id="vortexCanvas" height="200"></canvas>
+
+            <div class="readout">
+                <div>Swirl Velocity: <span id="out-velocity" style="color: var(--accent-cyan)">1.09e6</span> m/s</div>
+                <div>Time Dilation (S<sub>t</sub>): <span id="out-dilation" style="color: var(--accent-gold)">0.9999</span></div>
+                <div>Status: <span id="out-status" class="status-badge status-stable">STABLE</span></div>
+            </div>
+            <p style="font-size: 0.75em; color: #666;">
+                *Shrinking the core radius increases swirl velocity, slowing down local time (The Swirl Clock).
+            </p>
+        </div>
+
+        <!-- PANEL 2: GOLDEN LAYER THERMODYNAMICS -->
+        <div class="panel">
+            <h2>2. Golden Thermodynamics</h2>
+            <div class="equation">C<sub>V</sub>(T) &propto; 1 + A cos(2&#960; ln T / ln &#981;)</div>
+
+            <div class="control-group">
+                <label>Temperature (Log Scale) <span id="val-temp" class="value-display">Low</span></label>
+                <input type="range" id="slider-temp" min="1" max="100" step="0.5" value="10">
+            </div>
+
+            <div class="control-group">
+                <label>Fractal Depth (N) <span id="val-depth" class="value-display">5</span></label>
+                <input type="range" id="slider-depth" min="1" max="20" step="1" value="5">
+            </div>
+
+            <canvas id="graphCanvas" height="200"></canvas>
+
+            <div class="readout">
+                <div>Heat Capacity (C<sub>V</sub>): <span id="out-cv" style="color: var(--accent-green)">--</span></div>
+                <div>Phase: <span id="out-phase">Log-Periodic Oscillation</span></div>
+            </div>
+            <p style="font-size: 0.75em; color: #666;">
+                *Thermodynamic response follows the Golden Ratio (&#981;), creating fractal oscillations in heat capacity.
+            </p>
+        </div>
+
+        <!-- PANEL 3: UNRUH ECHO EXPERIMENT -->
+        <div class="panel">
+            <h2>3. The Unruh Echo</h2>
+            <div class="equation">&#948;Q<sub>sw</sub> (0.1ns) &rarr; &#948;W<sub>EM</sub> (30ns)</div>
+            
+            <p style="font-size: 0.8em; color: #8b949e;">
+                Test the two-stage thermodynamic pulse. First, the Swirl Vacuum excites (vorticity), followed by the Electromagnetic Vacuum response.
+            </p>
+
+            <div class="pulse-indicator" id="echo-chamber">
+                <div id="pulse-swirl" class="pulse-blip" style="left: 10%; background: var(--accent-cyan); box-shadow: 0 0 10px cyan;"></div>
+                <div id="pulse-em" class="pulse-blip" style="left: 80%; background: var(--accent-red); box-shadow: 0 0 10px red;"></div>
+                
+                <!-- Grid lines -->
+                <div style="position: absolute; bottom: 0; left: 10%; height: 10px; border-left: 1px solid #555;"></div>
+                <div style="position: absolute; bottom: 0; left: 80%; height: 10px; border-left: 1px solid #555;"></div>
+                <div style="position: absolute; bottom: 2px; left: 12%; font-size: 0.6em; color: #555;">0.1ns</div>
+                <div style="position: absolute; bottom: 2px; left: 82%; font-size: 0.6em; color: #555;">30ns</div>
+            </div>
+
+            <button class="btn" onclick="triggerEcho()">Initiate Pulse Sequence</button>
+
+            <div class="readout" id="echo-log">
+                <div>System Ready.</div>
+            </div>
+        </div>
+
+        <!-- PANEL 4: HYDROGEN SWELLING -->
+        <div class="panel">
+            <h2>4. Hydrogen Formation</h2>
+            <div class="equation">r<sub>c</sub> &rarr; a<sub>0</sub> (Isothermal Expansion)</div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2em;">&#9883;</div>
+                    <div style="font-size: 0.7em;">Core (r<sub>c</sub>)</div>
+                </div>
+                <div style="flex-grow: 1; height: 2px; background: #333; margin: 0 10px; position: relative;">
+                    <div id="expansion-bar" style="position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--accent-gold); transition: width 0.1s;"></div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2em; color: var(--accent-cyan);">&#9673;</div>
+                    <div style="font-size: 0.7em;">Atom (a<sub>0</sub>)</div>
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-top: 20px;">
+                <label>Expansion Progress</label>
+                <input type="range" id="slider-expansion" min="0" max="100" value="0">
+            </div>
+
+            <div class="readout">
+                <div>Current Radius: <span id="out-hydro-r">1.41 fm</span></div>
+                <div>Regime: <span id="out-hydro-regime">Vacuum Core</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONSTANTS & STATE ---
+        const C_LIGHT = 3e8; // Speed of light approx
+        const PHI = 1.61803398875; // Golden Ratio
+
+        // --- VORTEX SIMULATION ---
+        const vortexCanvas = document.getElementById('vortexCanvas');
+        const vCtx = vortexCanvas.getContext('2d');
+        let vortexTime = 0;
+
+        function drawVortex(velocityNormalized) {
+            // Resize canvas
+            vortexCanvas.width = vortexCanvas.clientWidth;
+            vortexCanvas.height = 200;
+            const w = vortexCanvas.width;
+            const h = vortexCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            vCtx.fillStyle = '#000';
+            vCtx.fillRect(0, 0, w, h);
+
+            // Draw "Swirl Condensate"
+            vCtx.globalCompositeOperation = 'screen';
+            const rings = 15;
+            
+            // The faster the velocity, the tighter and faster the swirl
+            const speedFactor = velocityNormalized * 0.2; 
+            vortexTime += speedFactor;
+
+            for (let i = 1; i <= rings; i++) {
+                vCtx.beginPath();
+                const radius = i * (h/2 / rings) * 0.8;
+                
+                // Distortion effect based on speed (relativistic contraction visual metaphor)
+                const distortion = Math.sin(vortexTime * (rings - i) * 0.1) * 5 * velocityNormalized;
+                
+                vCtx.ellipse(cx, cy, radius + distortion, radius - distortion, vortexTime * 0.05 * i, 0, Math.PI * 2);
+                
+                const alpha = 1 - (i / rings);
+                vCtx.strokeStyle = `rgba(88, 166, 255, ${alpha})`;
+                vCtx.lineWidth = 2;
+                vCtx.stroke();
+            }
+
+            // Draw Core
+            vCtx.beginPath();
+            vCtx.arc(cx, cy, 5 + (1-velocityNormalized)*10, 0, Math.PI * 2);
+            vCtx.fillStyle = '#fff';
+            vCtx.shadowBlur = 20;
+            vCtx.shadowColor = '#58a6ff';
+            vCtx.fill();
+            vCtx.shadowBlur = 0;
+        }
+
+        function updateVortexPanel() {
+            const r_val = parseFloat(document.getElementById('slider-radius').value); // in femtometers (1e-15)
+            const g_val = parseFloat(document.getElementById('slider-gamma').value); // x10^3
+
+            // Real physics calculation based on paper
+            // v = Gamma / (2 * PI * r)
+            // r is in 1e-15, Gamma is in 1e3
+            // v = (g_val * 1e3) / (2 * PI * r_val * 1e-15)
+            // This results in huge numbers, let's scale for the simulation to keep it bounded to c
+            
+            // Let's use the paper's example:
+            // Gamma0 = 6.4e3, rc = 1.41e-15 => v = 1.09e6 m/s
+            // c = 3e8. So v/c is small normally.
+            
+            const real_v = (g_val * 1000) / (2 * Math.PI * r_val * 1e-15);
+            const v_c_ratio = real_v / C_LIGHT;
+            
+            // Time dilation St = sqrt(1 - v^2/c^2)
+            // If v > c, we have a problem (Vacuum Breakdown)
+            let St = 0;
+            let status = "STABLE";
+            let statusClass = "status-stable";
+
+            if (real_v >= C_LIGHT) {
+                St = 0;
+                status = "VACUUM BREAKDOWN";
+                statusClass = "status-critical";
+            } else {
+                St = Math.sqrt(1 - (real_v*real_v)/(C_LIGHT*C_LIGHT));
+            }
+
+            // Update UI
+            document.getElementById('val-radius').innerText = r_val.toFixed(2) + " fm";
+            document.getElementById('val-gamma').innerText = g_val.toFixed(1) + " x10³";
+            document.getElementById('out-velocity').innerText = real_v.toExponential(2);
+            document.getElementById('out-dilation').innerText = St.toFixed(6);
+            
+            const statusEl = document.getElementById('out-status');
+            statusEl.innerText = status;
+            statusEl.className = "status-badge " + statusClass;
+
+            // Normalize velocity for visual (0 to 1 range, exaggerated for effect)
+            // Let's map 1e6 to 0.1 and c to 1.0
+            let visualV = Math.min(1, Math.log10(real_v) / 9); 
+            drawVortex(visualV);
+
+            requestAnimationFrame(() => {
+                // Keep animating
+                if(Math.random() > 0.5) updateVortexPanel(); // Throttle slightly or just rely on loop
+            });
+        }
+        
+        // Animation Loop for Vortex
+        function animateVortex() {
+            const r_val = parseFloat(document.getElementById('slider-radius').value);
+            const g_val = parseFloat(document.getElementById('slider-gamma').value);
+            const real_v = (g_val * 1000) / (2 * Math.PI * r_val * 1e-15);
+            let visualV = Math.min(1, Math.max(0.1, Math.log10(real_v) / 10)); 
+            drawVortex(visualV);
+            requestAnimationFrame(animateVortex);
+        }
+
+        // --- GOLDEN GRAPH SIMULATION ---
+        const graphCanvas = document.getElementById('graphCanvas');
+        const gCtx = graphCanvas.getContext('2d');
+
+        function drawGraph() {
+            graphCanvas.width = graphCanvas.clientWidth;
+            graphCanvas.height = 200;
+            const w = graphCanvas.width;
+            const h = graphCanvas.height;
+
+            const tempInput = parseFloat(document.getElementById('slider-temp').value);
+            const depth = parseInt(document.getElementById('slider-depth').value);
+
+            // Clear
+            gCtx.fillStyle = '#0f1620';
+            gCtx.fillRect(0, 0, w, h);
+
+            // Draw Grid
+            gCtx.strokeStyle = '#30363d';
+            gCtx.lineWidth = 1;
+            gCtx.beginPath();
+            for(let x=0; x<w; x+=40) { gCtx.moveTo(x,0); gCtx.lineTo(x,h); }
+            for(let y=0; y<h; y+=40) { gCtx.moveTo(0,y); gCtx.lineTo(w,y); }
+            gCtx.stroke();
+
+            // Plot Function: Cv ~ 1 + A cos(2*PI/ln(phi) * ln(T))
+            // We will plot a range around the current temperature slider value
+            
+            gCtx.beginPath();
+            gCtx.strokeStyle = '#3fb950';
+            gCtx.lineWidth = 2;
+
+            const A = 0.3; // Amplitude
+            const period = 2 * Math.PI / Math.log(PHI);
+            
+            // X-axis represents ln(T)
+            // Center the view on the slider value
+            const centerT = tempInput;
+            const range = 50; // visual width
+            
+            let currentY = 0;
+
+            for (let x = 0; x < w; x++) {
+                // Map screen x to Temperature T
+                // Linear map for x, but equation uses ln(T)
+                const tVal = (x / w) * 100 + 1; // T from 1 to 100
+                
+                // The paper mentions fractal structure. We sum cosines for depth.
+                let signal = 0;
+                for(let n=0; n<depth; n++) {
+                    // Each depth adds a higher frequency or harmonic based on Phi
+                    // Simplified interpretation: Sum of log-periodic modes
+                    let modeScale = Math.pow(PHI, n);
+                    signal += (A / (n+1)) * Math.cos(period * Math.log(tVal * modeScale));
+                }
+
+                // Normalize roughly to center height
+                const y = (h/2) - (signal * 50);
+                
+                if (x===0) gCtx.moveTo(x, y);
+                else gCtx.lineTo(x, y);
+
+                // Check value at current slider position
+                if (Math.abs(tVal - tempInput) < 0.5) {
+                    currentY = y;
+                }
+            }
+            gCtx.stroke();
+
+            // Draw Indicator Line for current Temp
+            const sliderX = ((tempInput - 1) / 100) * w;
+            gCtx.strokeStyle = '#fff';
+            gCtx.setLineDash([5, 5]);
+            gCtx.beginPath();
+            gCtx.moveTo(sliderX, 0);
+            gCtx.lineTo(sliderX, h);
+            gCtx.stroke();
+            gCtx.setLineDash([]);
+
+            // Draw point
+            gCtx.fillStyle = '#fff';
+            gCtx.beginPath();
+            gCtx.arc(sliderX, (h/2) - (currentY - h/2), 5, 0, Math.PI*2); // Approx y fix
+            gCtx.fill();
+
+            // Update Text
+            document.getElementById('val-temp').innerText = tempInput + " K";
+            document.getElementById('val-depth').innerText = depth;
+            
+            // Calculate specific Cv value for display
+            let cvVal = 0;
+            for(let n=0; n<depth; n++) {
+                 let modeScale = Math.pow(PHI, n);
+                 cvVal += (A / (n+1)) * Math.cos(period * Math.log(tempInput * modeScale));
+            }
+            let baseCv = 1.5; // Base constant
+            document.getElementById('out-cv').innerText = (baseCv + cvVal).toFixed(4) + " kB";
+        }
+
+        // --- ECHO EXPERIMENT ---
+        function triggerEcho() {
+            const log = document.getElementById('echo-log');
+            const swirlPulse = document.getElementById('pulse-swirl');
+            const emPulse = document.getElementById('pulse-em');
+
+            log.innerHTML = "<div>> Sequence Initiated...</div>";
+            
+            // Reset animations
+            swirlPulse.style.transition = 'none';
+            swirlPulse.style.opacity = '0';
+            emPulse.style.transition = 'none';
+            emPulse.style.opacity = '0';
+
+            // Stage 1: Swirl Excitation (Immediate)
+            setTimeout(() => {
+                swirlPulse.style.transition = 'opacity 0.1s';
+                swirlPulse.style.opacity = '1';
+                log.innerHTML += "<div>> T+0.1ns: Swirl Vorticity Excited (Heat)</div>";
+                
+                setTimeout(() => { swirlPulse.style.opacity = '0'; }, 200);
+            }, 100);
+
+            // Stage 2: EM Transduction (Delayed)
+            // In reality 30ns is instant for human eye, so we slow it down for visualization (e.g. 1.5 seconds)
+            setTimeout(() => {
+                emPulse.style.transition = 'opacity 0.1s';
+                emPulse.style.opacity = '1';
+                log.innerHTML += "<div style='color:var(--accent-red)'>> T+30ns: EM Echo Detected (Work)</div>";
+                log.innerHTML += "<div style='color:var(--accent-green)'>> Transduction Complete.</div>";
+                
+                setTimeout(() => { emPulse.style.opacity = '0'; }, 300);
+            }, 1500);
+        }
+
+        // --- HYDROGEN EXPANSION ---
+        function updateHydrogen() {
+            const val = document.getElementById('slider-expansion').value;
+            const bar = document.getElementById('expansion-bar');
+            const rOut = document.getElementById('out-hydro-r');
+            const regOut = document.getElementById('out-hydro-regime');
+
+            bar.style.width = val + "%";
+
+            // Interpolate radius
+            // r_c approx 1.41e-15
+            // a_0 approx 5.29e-11 (approx 37,000 times larger)
+            // Logarithmic interpolation for display
+            const minLog = -15;
+            const maxLog = -11;
+            const currentLog = minLog + (val/100) * (maxLog - minLog);
+            const currentR = Math.pow(10, currentLog);
+
+            rOut.innerText = currentR.toExponential(2) + " m";
+
+            if (val < 10) {
+                regOut.innerText = "Naked Vortex Core";
+                regOut.style.color = "var(--accent-red)";
+            } else if (val > 90) {
+                regOut.innerText = "Atomic Equilibrium (Bohr)";
+                regOut.style.color = "var(--accent-green)";
+            } else {
+                regOut.innerText = "Isothermal Swelling...";
+                regOut.style.color = "var(--accent-gold)";
+            }
+        }
+
+        // --- INITIALIZATION ---
+        document.getElementById('slider-radius').addEventListener('input', updateVortexPanel);
+        document.getElementById('slider-gamma').addEventListener('input', updateVortexPanel);
+        document.getElementById('slider-temp').addEventListener('input', drawGraph);
+        document.getElementById('slider-depth').addEventListener('input', drawGraph);
+        document.getElementById('slider-expansion').addEventListener('input', updateHydrogen);
+
+        // Start loops
+        animateVortex();
+        drawGraph();
+        updateVortexPanel();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Atom Builder</title>
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --panel-bg: rgba(15, 15, 25, 0.85);
+            --text-main: #e0e0ff;
+            --text-muted: #8a8aab;
+            --accent-l: #00ffff; /* Left-handed / Cyan */
+            --accent-r: #ff00ff; /* Right-handed / Magenta */
+            --nucleus: #ffaa00;
+            --orbit-color: rgba(255, 255, 255, 0.1);
+            --danger: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+            /* Swirling fluid background */
+            background: radial-gradient(circle at center, #111122 0%, #000000 100%);
+        }
+
+        /* The continuous, incompressible fluid medium */
+        #fluid-background {
+            position: absolute;
+            top: -50vw; left: -50vw;
+            width: 200vw; height: 200vw;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(20, 30, 60, 0.2) 25%, transparent 50%, rgba(20, 30, 60, 0.2) 75%, transparent 100%);
+            animation: swirl 60s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes swirl {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* UI Sidebar */
+        #sidebar {
+            position: relative;
+            z-index: 10;
+            width: 350px;
+            background: var(--panel-bg);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, var(--accent-l), var(--accent-r));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            border-left: 3px solid #555;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        #btn-spawn-l {
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--accent-l);
+            border: 1px solid var(--accent-l);
+        }
+        #btn-spawn-l:hover { background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 10px var(--accent-l); }
+
+        #btn-spawn-r {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--accent-r);
+            border: 1px solid var(--accent-r);
+        }
+        #btn-spawn-r:hover { background: rgba(255, 0, 255, 0.2); box-shadow: 0 0 10px var(--accent-r); }
+
+        .btn-icon { font-size: 1.5rem; }
+
+        /* Telemetry / Status */
+        .telemetry {
+            margin-top: auto;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+
+        .stat-label { color: var(--text-muted); }
+        .stat-value { font-weight: bold; }
+
+        #energy-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #222;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        #energy-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--danger);
+            transition: width 0.1s, background 0.3s;
+        }
+
+        /* Main Basin */
+        #basin {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        /* Atom Structure */
+        #atom-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #nucleus {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #fff, var(--nucleus));
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--nucleus), 0 0 40px var(--nucleus);
+            z-index: 10;
+        }
+
+        .orbit {
+            position: absolute;
+            border: 1px dashed var(--orbit-color);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .orbit-label {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            background: var(--bg-color);
+            padding: 0 5px;
+        }
+
+        /* Spatial Nodes (Acoustic limits) */
+        .node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+            transform: translate(-50%, -50%);
+            transition: border-color 0.3s, background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .node.highlight {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .node.error {
+            border-color: var(--danger);
+            background: rgba(255, 51, 51, 0.2);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        /* Trefoil Knot (Electron) */
+        .trefoil-wrapper {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            cursor: grab;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+
+        .trefoil-wrapper:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .trefoil-svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .type-l {
+            color: var(--accent-l);
+            stroke: var(--accent-l);
+        }
+        
+        .type-r {
+            color: var(--accent-r);
+            stroke: var(--accent-r);
+        }
+
+        /* Internal Handedness Animation */
+        .spin-l { animation: spinLeft 3s linear infinite; }
+        .spin-r { animation: spinRight 3s linear infinite; }
+
+        @keyframes spinLeft { 100% { transform: rotate(-360deg); } }
+        @keyframes spinRight { 100% { transform: rotate(360deg); } }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-55%, -50%); }
+            50% { transform: translate(-45%, -50%); }
+            75% { transform: translate(-52%, -50%); }
+        }
+
+        /* Overlay for severe repulsion */
+        #repulsion-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            transition: opacity 0.1s;
+        }
+
+        /* Console Messages */
+        #log-container {
+            margin-top: 10px;
+            height: 80px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #aaa;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+        }
+        .log-msg { margin-bottom: 3px; }
+        .log-err { color: var(--danger); }
+        .log-success { color: #00ff00; }
+
+        /* Node capacity indicators */
+        .node-occupants {
+            display: flex;
+            gap: 2px;
+            position: absolute;
+            bottom: -15px;
+        }
+        .occ-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+        }
+        .occ-l { background: var(--accent-l); box-shadow: 0 0 3px var(--accent-l);}
+        .occ-r { background: var(--accent-r); box-shadow: 0 0 3px var(--accent-r);}
+
+    </style>
+</head>
+<body>
+
+    <div id="fluid-background"></div>
+    <div id="repulsion-overlay"></div>
+
+    <div id="sidebar">
+        <h1>Swirl-String Theory</h1>
+        <div class="subtitle">Branch-Resolved Atomic Bridge Model</div>
+        
+        <div class="info-box">
+            <strong>Objective:</strong> Build stable atomic shells using topological vortex filaments (Trefoils).<br><br>
+            <strong>Rule (Appendix A):</strong> Two trefoils can occupy the same spatial node <em>only</em> if they have opposite handedness (σ = ±1). Forcing identical chiralities together causes a massive 60 GeV Topological Hard-Core Repulsion.
+        </div>
+
+        <div class="controls">
+            <button id="btn-spawn-l">
+                <span class="btn-icon">⟲</span>
+                Left Branch (σ = -1)
+            </button>
+            <button id="btn-spawn-r">
+                <span class="btn-icon">⟳</span>
+                Right Branch (σ = +1)
+            </button>
+        </div>
+
+        <div class="telemetry">
+            <div class="stat-row">
+                <span class="stat-label">System State:</span>
+                <span class="stat-value" id="stat-state">Stable</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Electrons (N):</span>
+                <span class="stat-value" id="stat-n">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Helicity Asymmetry (A_tot):</span>
+                <span class="stat-value" id="stat-asym">-0.4706</span>
+            </div>
+            <div class="stat-row" style="margin-top: 15px;">
+                <span class="stat-label">Kinetic Penalty (ΔE_Pauli):</span>
+                <span class="stat-value" id="stat-energy" style="color: var(--danger);">0 eV</span>
+            </div>
+            <div id="energy-bar-container">
+                <div id="energy-bar"></div>
+            </div>
+            <div id="log-container"></div>
+        </div>
+    </div>
+
+    <div id="basin">
+        <div id="atom-container">
+            <div id="nucleus"></div>
+            <!-- Orbits and Nodes generated via JS -->
+        </div>
+    </div>
+
+<script>
+    // --- Physics / Math Utilities ---
+    
+    // Generate SVG path for a Trefoil Knot using parametric equations
+    // x = sin(t) + 2sin(2t), y = cos(t) - 2cos(2t)
+    function generateTrefoilPath() {
+        let path = "";
+        const steps = 100;
+        const scale = 4.5;
+        for (let i = 0; i <= steps; i++) {
+            let t = (i / steps) * Math.PI * 2;
+            let x = (Math.sin(t) + 2 * Math.sin(2 * t)) * scale;
+            let y = (Math.cos(t) - 2 * Math.cos(2 * t)) * scale;
+            if (i === 0) path += `M ${x},${y} `;
+            else path += `L ${x},${y} `;
+        }
+        path += "Z";
+        return path;
+    }
+
+    const trefoilPathData = generateTrefoilPath();
+
+    // --- State Management ---
+    const state = {
+        orbitals: [
+            { n: 1, radius: 80, capacity: 2, nodes: [] }, // n=1 shell: 1 node (holds 2)
+            { n: 2, radius: 180, capacity: 8, nodes: [] }, // n=2 shell: 4 nodes (holds 8)
+            { n: 3, radius: 280, capacity: 18, nodes: [] } // n=3 shell: 9 nodes (holds 18)
+        ],
+        trefoils: [],
+        draggingElement: null,
+        offsetX: 0,
+        offsetY: 0,
+        energySpike: 0
+    };
+
+    const atomContainer = document.getElementById('atom-container');
+    const logContainer = document.getElementById('log-container');
+
+    // --- Initialization ---
+
+    function initAtom() {
+        // Create Orbits and Nodes based on N_n = 2n^2 rule (Eq 50)
+        // Spatial nodes = n^2. Each node holds 2 (opposite branches).
+        
+        state.orbitals.forEach(orbit => {
+            // Draw Orbit Ring
+            const ring = document.createElement('div');
+            ring.className = 'orbit';
+            ring.style.width = `${orbit.radius * 2}px`;
+            ring.style.height = `${orbit.radius * 2}px`;
+            
+            const label = document.createElement('div');
+            label.className = 'orbit-label';
+            label.innerText = `n=${orbit.n}`;
+            ring.appendChild(label);
+            
+            atomContainer.appendChild(ring);
+
+            // Calculate Spatial Nodes (n^2)
+            const numNodes = orbit.n * orbit.n;
+            
+            for (let i = 0; i < numNodes; i++) {
+                const angle = (i / numNodes) * Math.PI * 2;
+                const x = Math.cos(angle) * orbit.radius;
+                const y = Math.sin(angle) * orbit.radius;
+
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'node';
+                // Center is 50%, 50%. Add offset.
+                nodeEl.style.left = `calc(50% + ${x}px)`;
+                nodeEl.style.top = `calc(50% + ${y}px)`;
+                
+                const occupantsIndicator = document.createElement('div');
+                occupantsIndicator.className = 'node-occupants';
+                nodeEl.appendChild(occupantsIndicator);
+
+                atomContainer.appendChild(nodeEl);
+
+                state.orbitals[orbit.n - 1].nodes.push({
+                    el: nodeEl,
+                    x: x,
+                    y: y,
+                    occupants: [], // Will store 'L' or 'R'
+                    indicatorEl: occupantsIndicator
+                });
+            }
+        });
+        
+        log("System initialized. Vacuum state stable.");
+    }
+
+    // --- Interaction Logic ---
+
+    function spawnTrefoil(type) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `trefoil-wrapper type-${type}`;
+        
+        // Initial spawn position (random around edges)
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 350;
+        const startX = window.innerWidth / 2 + Math.cos(angle) * dist;
+        const startY = window.innerHeight / 2 + Math.sin(angle) * dist;
+        
+        wrapper.style.left = `${startX}px`;
+        wrapper.style.top = `${startY}px`;
+
+        // Create SVG
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "-15 -15 30 30");
+        svg.setAttribute("class", `trefoil-svg spin-${type}`);
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", trefoilPathData);
+        svg.appendChild(path);
+        wrapper.appendChild(svg);
+
+        document.body.appendChild(wrapper);
+
+        const trefoilData = {
+            el: wrapper,
+            type: type,
+            currentNode: null
+        };
+        state.trefoils.push(trefoilData);
+
+        // Drag Events
+        wrapper.addEventListener('mousedown', (e) => startDrag(e, trefoilData));
+        
+        log(`Spawned ${type.toUpperCase()}-Trefoil (σ = ${type==='l'?'-1':'+1'}).`);
+        updateStats();
+    }
+
+    function startDrag(e, trefoilData) {
+        state.draggingElement = trefoilData;
+        
+        // Remove from current node if it was in one
+        if (trefoilData.currentNode) {
+            const idx = trefoilData.currentNode.occupants.indexOf(trefoilData);
+            if (idx > -1) trefoilData.currentNode.occupants.splice(idx, 1);
+            updateNodeVisuals(trefoilData.currentNode);
+            trefoilData.currentNode = null;
+        }
+
+        const rect = trefoilData.el.getBoundingClientRect();
+        state.offsetX = e.clientX - rect.left - rect.width / 2;
+        state.offsetY = e.clientY - rect.top - rect.height / 2;
+        
+        trefoilData.el.style.transition = 'none';
+        trefoilData.el.style.zIndex = 100;
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        if (!state.draggingElement) return;
+        
+        const el = state.draggingElement.el;
+        el.style.left = `${e.clientX - state.offsetX}px`;
+        el.style.top = `${e.clientY - state.offsetY}px`;
+
+        // Highlight nearby nodes
+        highlightClosestNode(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('mouseup', (e) => {
+        if (!state.draggingElement) return;
+        
+        const trefoil = state.draggingElement;
+        trefoil.el.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        trefoil.el.style.zIndex = 20;
+
+        // Find closest node to drop
+        const closest = getClosestNode(e.clientX, e.clientY);
+        
+        if (closest && closest.distance < 40) {
+            attemptDock(trefoil, closest.node);
+        } else {
+            // Float in vacuum
+            log("Trefoil floating in background condensate.");
+        }
+
+        // Cleanup highlights
+        state.orbitals.forEach(o => o.nodes.forEach(n => n.el.classList.remove('highlight')));
+        state.draggingElement = null;
+        updateStats();
+    });
+
+    // --- Physics / Collision Logic ---
+
+    function getClosestNode(mouseX, mouseY) {
+        const atomRect = atomContainer.getBoundingClientRect();
+        const atomCenterX = atomRect.left + atomRect.width / 2;
+        const atomCenterY = atomRect.top + atomRect.height / 2;
+
+        let minD = Infinity;
+        let closestNode = null;
+
+        state.orbitals.forEach(orbit => {
+            orbit.nodes.forEach(node => {
+                // Node absolute position
+                const nx = atomCenterX + node.x;
+                const ny = atomCenterY + node.y;
+                const d = Math.hypot(mouseX - nx, mouseY - ny);
+                if (d < minD) {
+                    minD = d;
+                    closestNode = node;
+                }
+            });
+        });
+
+        return { node: closestNode, distance: minD };
+    }
+
+    function highlightClosestNode(x, y) {
+        state.orbitals.forEach(o => o.nodes.forEach(n => n.el.classList.remove('highlight')));
+        const closest = getClosestNode(x, y);
+        if (closest && closest.distance < 40) {
+            closest.node.el.classList.add('highlight');
+        }
+    }
+
+    function attemptDock(trefoil, node) {
+        const occupants = node.occupants;
+        
+        if (occupants.length === 0) {
+            // Empty node, dock successful
+            dock(trefoil, node);
+            log(`Trefoil bound to acoustic node.`);
+        } else if (occupants.length === 1) {
+            if (occupants[0].type !== trefoil.type) {
+                // Opposite chirality, stable pairing
+                dock(trefoil, node);
+                log(`Stable branch-pairing achieved.`, 'success');
+            } else {
+                // SAME CHIRALITY -> TOPOLOGICAL HARD-CORE REPULSION
+                triggerRepulsion(trefoil, node);
+            }
+        } else {
+            // Node full (capacity 2)
+            log(`Node capacity reached.`, 'err');
+            bounceBack(trefoil);
+        }
+    }
+
+    function dock(trefoil, node) {
+        node.occupants.push(trefoil);
+        trefoil.currentNode = node;
+        
+        // Position visually inside the node
+        const atomRect = atomContainer.getBoundingClientRect();
+        const targetX = atomRect.left + atomRect.width/2 + node.x;
+        const targetY = atomRect.top + atomRect.height/2 + node.y;
+        
+        // Slight offset if two are present
+        let ox = 0, oy = 0;
+        if (node.occupants.length === 2) {
+            if (trefoil === node.occupants[0]) { ox = -8; } else { ox = 8; }
+            // adjust the other one too
+            const other = node.occupants[0] === trefoil ? node.occupants[1] : node.occupants[0];
+            if(other) {
+                other.el.style.left = `${targetX - 8}px`;
+            }
+            ox = 8;
+        }
+
+        trefoil.el.style.left = `${targetX + ox}px`;
+        trefoil.el.style.top = `${targetY + oy}px`;
+        
+        updateNodeVisuals(node);
+    }
+
+    function bounceBack(trefoil) {
+        // Just move it slightly away
+        const currentX = parseFloat(trefoil.el.style.left);
+        const currentY = parseFloat(trefoil.el.style.top);
+        trefoil.el.style.left = `${currentX + (Math.random() > 0.5 ? 50 : -50)}px`;
+        trefoil.el.style.top = `${currentY + (Math.random() > 0.5 ? 50 : -50)}px`;
+    }
+
+    function triggerRepulsion(trefoil, node) {
+        log(`CRITICAL: Topological Hard-Core Repulsion! Like-handed overlap penalized.`, 'err');
+        
+        // Visual shake on node
+        node.el.classList.add('error');
+        setTimeout(() => node.el.classList.remove('error'), 300);
+
+        // Screen flash
+        const overlay = document.getElementById('repulsion-overlay');
+        overlay.style.opacity = 1;
+        setTimeout(() => overlay.style.opacity = 0, 150);
+
+        // Energy Spike (60 GeV from Appendix A.3)
+        state.energySpike = 60;
+        updateEnergyMeter();
+
+        // Eject the incoming trefoil violently
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 200;
+        const currentX = parseFloat(trefoil.el.style.left);
+        const currentY = parseFloat(trefoil.el.style.top);
+        
+        trefoil.el.style.transition = 'all 0.5s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        trefoil.el.style.left = `${currentX + Math.cos(angle) * dist}px`;
+        trefoil.el.style.top = `${currentY + Math.sin(angle) * dist}px`;
+    }
+
+    function updateNodeVisuals(node) {
+        node.indicatorEl.innerHTML = '';
+        node.occupants.forEach(occ => {
+            const dot = document.createElement('div');
+            dot.className = `occ-dot occ-${occ.type}`;
+            node.indicatorEl.appendChild(dot);
+        });
+    }
+
+    // --- UI Updates ---
+
+    function updateStats() {
+        const boundElectrons = state.trefoils.filter(t => t.currentNode !== null).length;
+        document.getElementById('stat-n').innerText = boundElectrons;
+        
+        const stateEl = document.getElementById('stat-state');
+        if (state.energySpike > 0) {
+            stateEl.innerText = "CAVITATION / UNSTABLE";
+            stateEl.style.color = varDanger;
+        } else {
+            stateEl.innerText = "Stable Euler Balance";
+            stateEl.style.color = "#00ff00";
+        }
+    }
+
+    const varDanger = getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
+
+    function updateEnergyMeter() {
+        const bar = document.getElementById('energy-bar');
+        const text = document.getElementById('stat-energy');
+        
+        if (state.energySpike > 0) {
+            bar.style.width = '100%';
+            text.innerText = `~${state.energySpike} GeV`;
+            
+            // Decay
+            let decay = setInterval(() => {
+                state.energySpike -= 2;
+                if (state.energySpike <= 0) {
+                    state.energySpike = 0;
+                    bar.style.width = '0%';
+                    text.innerText = `0 eV`;
+                    clearInterval(decay);
+                    updateStats();
+                } else {
+                    bar.style.width = `${(state.energySpike / 60) * 100}%`;
+                    text.innerText = `~${Math.round(state.energySpike)} GeV`;
+                }
+            }, 50);
+        }
+    }
+
+    function log(msg, type='info') {
+        const el = document.createElement('div');
+        el.className = `log-msg ${type === 'err' ? 'log-err' : (type === 'success' ? 'log-success' : '')}`;
+        el.innerText = `> ${msg}`;
+        logContainer.appendChild(el);
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('btn-spawn-l').addEventListener('click', () => spawnTrefoil('l'));
+    document.getElementById('btn-spawn-r').addEventListener('click', () => spawnTrefoil('r'));
+
+    // Handle window resize to keep atom centered
+    window.addEventListener('resize', () => {
+        // Reposition bound trefoils
+        const atomRect = atomContainer.getBoundingClientRect();
+        state.orbitals.forEach(orbit => {
+            orbit.nodes.forEach(node => {
+                const targetX = atomRect.left + atomRect.width/2 + node.x;
+                const targetY = atomRect.top + atomRect.height/2 + node.y;
+                node.occupants.forEach((trefoil, idx) => {
+                    let ox = node.occupants.length === 2 ? (idx === 0 ? -8 : 8) : 0;
+                    trefoil.el.style.left = `${targetX + ox}px`;
+                    trefoil.el.style.top = `${targetY}px`;
+                });
+            });
+        });
+    });
+
+    // Boot
+    initAtom();
+
+</script>
+</body>
+</html>

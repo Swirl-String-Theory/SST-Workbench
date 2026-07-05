@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST-74: Interactive Physics Explorer</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-magenta: #d946ef;
+            --accent-yellow: #eab308;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        header h1 span {
+            color: var(--accent-cyan);
+        }
+
+        .analogy-badge {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: help;
+            position: relative;
+        }
+
+        .analogy-badge:hover::after {
+            content: "Child-level analogy: A tiny bump on a spinning trampoline can reveal which hidden way the whole fabric prefers to twist, and if the twist changes sign across the bump, a small trapped wiggle can live there.";
+            position: absolute;
+            top: 120%;
+            right: 0;
+            width: 300px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        aside {
+            width: 350px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-group label span.val {
+            color: var(--accent-cyan);
+            font-family: monospace;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            margin-top: -6px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-magenta);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .status-panel {
+            margin-top: auto;
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .status-panel h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        #observation-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .highlight-magenta { color: var(--accent-magenta); font-weight: bold; }
+        .highlight-cyan { color: var(--accent-cyan); font-weight: bold; }
+
+        .presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--text-muted);
+        }
+
+        section.visualization {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .overlay-math {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+        
+        .overlay-math span { color: var(--accent-yellow); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SST-74 <span>// Defect-Bound Chirality Simulator</span></h1>
+        <div class="analogy-badge">💡 View Child-Level Analogy</div>
+    </header>
+
+    <main>
+        <aside>
+            <div class="control-group">
+                <label>Background Handedness (χ₀) <span class="val" id="val-chi">0.0</span></label>
+                <input type="range" id="ctrl-chi" min="-1" max="1" step="0.1" value="0">
+                <small style="color: var(--text-muted); font-size: 0.75rem;">Controls the twist direction of the medium.</small>
+            </div>
+
+            <div class="control-group">
+                <label>Chirality Coupling (λ_χ) <span class="val" id="val-lambda">0.5</span></label>
+                <input type="range" id="ctrl-lambda" min="0" max="1" step="0.1" value="0.5">
+                <small style="color: var(--text-muted); font-size: 0.75rem;">Strength of defect's reaction to handedness.</small>
+            </div>
+
+            <div class="control-group">
+                <label>Defect Size (V₀) <span class="val" id="val-defect">0.8</span></label>
+                <input type="range" id="ctrl-defect" min="0" max="2" step="0.1" value="0.8">
+                <small style="color: var(--text-muted); font-size: 0.75rem;">Size of the central bump.</small>
+            </div>
+
+            <div class="toggle-container">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.9rem; font-weight: 500;">Sign Reversal (σ)</label>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Induces a branch field reversal across the defect.</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="ctrl-sigma">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-group">
+                <label>Presets</label>
+                <div class="presets">
+                    <button onclick="setPreset(0, 0.5, 0.8, false)">Symmetric Bump</button>
+                    <button onclick="setPreset(1, 0.8, 1.0, false)">Mirror-Broken (Swirl)</button>
+                    <button onclick="setPreset(0, 0.5, 1.5, true)">Near-Zero Mode</button>
+                </div>
+            </div>
+
+            <div class="status-panel" id="status-panel">
+                <h3>Theoretical Observation</h3>
+                <div id="observation-text">Adjust parameters to observe SST phenomena.</div>
+            </div>
+        </aside>
+
+        <section class="visualization">
+            <canvas id="simCanvas"></canvas>
+            <div class="overlay-math">
+                Eq(8): [-∂²t + c²T∇² - m²₀ - <span>m²₁σ(x)</span> + <span>λ_χ χ(x)</span>n̂·(∇×) + <span>V_def(x)</span>] ψ = 0
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- State Variables ---
+        let params = {
+            chi: 0,        // Handedness (-1 to 1)
+            lambda: 0.5,   // Coupling strength
+            v0: 0.8,       // Defect size
+            sigma: false   // Sign reversal (boolean)
+        };
+
+        // --- UI Elements ---
+        const els = {
+            chi: document.getElementById('ctrl-chi'),
+            lambda: document.getElementById('ctrl-lambda'),
+            defect: document.getElementById('ctrl-defect'),
+            sigma: document.getElementById('ctrl-sigma'),
+            valChi: document.getElementById('val-chi'),
+            valLambda: document.getElementById('val-lambda'),
+            valDefect: document.getElementById('val-defect'),
+            obsText: document.getElementById('observation-text'),
+            statusPanel: document.getElementById('status-panel')
+        };
+
+        // --- Event Listeners ---
+        function updateState() {
+            params.chi = parseFloat(els.chi.value);
+            params.lambda = parseFloat(els.lambda.value);
+            params.v0 = parseFloat(els.defect.value);
+            params.sigma = els.sigma.checked;
+
+            els.valChi.innerText = params.chi.toFixed(1);
+            els.valLambda.innerText = params.lambda.toFixed(1);
+            els.valDefect.innerText = params.v0.toFixed(1);
+
+            updateObservation();
+        }
+
+        els.chi.addEventListener('input', updateState);
+        els.lambda.addEventListener('input', updateState);
+        els.defect.addEventListener('input', updateState);
+        els.sigma.addEventListener('change', updateState);
+
+        window.setPreset = function(chi, lambda, v0, sigma) {
+            els.chi.value = chi;
+            els.lambda.value = lambda;
+            els.defect.value = v0;
+            els.sigma.checked = sigma;
+            updateState();
+        }
+
+        function updateObservation() {
+            let text = "";
+            let borderColor = "var(--border-color)";
+
+            if (params.v0 === 0) {
+                text = "No defect present. The medium is uniform.";
+            } else if (params.sigma) {
+                text = "Sign-changing branch field active! A <span class='highlight-magenta'>localized near-zero mode</span> (trapped wiggle) has formed at the defect.";
+                borderColor = "var(--accent-magenta)";
+            } else if (Math.abs(params.chi) > 0.1 && params.lambda > 0.1) {
+                let dir = params.chi > 0 ? "right-handed" : "left-handed";
+                text = `Background has ${dir} handedness. The defect pattern is <span class='highlight-cyan'>mirror-broken</span> (swirling), acting as a chirality diagnostic.`;
+                borderColor = "var(--accent-cyan)";
+            } else {
+                text = "Background handedness is zero or weakly coupled. The defect pattern remains largely mirror-symmetric.";
+                borderColor = "var(--text-muted)";
+            }
+
+            els.obsText.innerHTML = text;
+            els.statusPanel.style.borderLeftColor = borderColor;
+        }
+
+        // --- Canvas Rendering (The "Trampoline" Physics Simulation) ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let time = 0;
+
+        function resize() {
+            width = canvas.parentElement.clientWidth;
+            height = canvas.parentElement.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Grid parameters
+        const gridSize = 40; // Number of points along one axis
+        const spacing = 15;  // Distance between points
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            const centerX = width / 2;
+            const centerY = height / 2 + 50; // Offset slightly down for isometric view
+
+            // We will draw a 3D surface projected to 2D
+            // Calculate Z values for all points
+            let points = [];
+            for (let i = -gridSize/2; i <= gridSize/2; i++) {
+                let row = [];
+                for (let j = -gridSize/2; j <= gridSize/2; j++) {
+                    // Physical coordinates
+                    let x = i * spacing;
+                    let y = j * spacing;
+                    let r = Math.sqrt(x*x + y*y);
+                    let theta = Math.atan2(y, x);
+
+                    // 1. Base medium wave (spinning fabric)
+                    let z = 0;
+                    
+                    // 2. Defect Potential (Gaussian bump) Eq (18)
+                    let defectZ = params.v0 * 40 * Math.exp(-(r*r) / (80*80));
+                    z += defectZ;
+
+                    // 3. Mirror-broken response (Chirality) Eq (10/12)
+                    // Adds a spiral phase shift based on chi and lambda
+                    if (params.v0 > 0) {
+                        let swirl = Math.sin(r/15 - time * 2 + params.chi * params.lambda * theta * 2);
+                        // Dampen swirl away from defect
+                        let swirlDampening = Math.exp(-(r*r) / (150*150));
+                        z += swirl * 10 * swirlDampening * params.v0;
+                    }
+
+                    // 4. Near-zero mode (Trapped wiggle from branch reversal) Eq (15/22)
+                    let wiggleColorIntensity = 0;
+                    if (params.sigma && params.v0 > 0) {
+                        // High frequency oscillation highly localized at the defect
+                        let wiggleScale = 30;
+                        let wiggle = Math.sin(time * 15) * 25 * Math.exp(-(r*r) / (wiggleScale*wiggleScale));
+                        z += wiggle;
+                        wiggleColorIntensity = Math.max(0, Math.exp(-(r*r) / (40*40)));
+                    }
+
+                    // Isometric Projection
+                    // screenX = (x - y) * cos(30)
+                    // screenY = (x + y) * sin(30) - z
+                    const angle = Math.PI / 6; // 30 degrees
+                    let sx = centerX + (x - y) * Math.cos(angle);
+                    let sy = centerY + (x + y) * Math.sin(angle) - z;
+
+                    row.push({ sx, sy, z, r, wiggleColorIntensity });
+                }
+                points.push(row);
+            }
+
+            // Draw the grid lines (Polygons for depth sorting)
+            // Draw from back to front (roughly)
+            for (let i = 0; i < points.length - 1; i++) {
+                for (let j = 0; j < points[i].length - 1; j++) {
+                    let p1 = points[i][j];
+                    let p2 = points[i+1][j];
+                    let p3 = points[i+1][j+1];
+                    let p4 = points[i][j+1];
+
+                    ctx.beginPath();
+                    ctx.moveTo(p1.sx, p1.sy);
+                    ctx.lineTo(p2.sx, p2.sy);
+                    ctx.lineTo(p3.sx, p3.sy);
+                    ctx.lineTo(p4.sx, p4.sy);
+                    ctx.closePath();
+
+                    // Calculate color based on height (z) and wiggle intensity
+                    let avgZ = (p1.z + p2.z + p3.z + p4.z) / 4;
+                    let avgWiggle = (p1.wiggleColorIntensity + p2.wiggleColorIntensity + p3.wiggleColorIntensity + p4.wiggleColorIntensity) / 4;
+                    
+                    // Base color mapping (Cyan for high, dark blue for low)
+                    let normalizedZ = Math.min(Math.max((avgZ + 20) / 60, 0), 1);
+                    
+                    let r = 15;
+                    let g = 23 + Math.floor(normalizedZ * 150);
+                    let b = 42 + Math.floor(normalizedZ * 170);
+
+                    // If sigma is active, blend in Magenta for the trapped mode
+                    if (params.sigma && avgWiggle > 0.05) {
+                        let wigglePulse = (Math.sin(time * 15) + 1) / 2; // 0 to 1
+                        r = Math.floor(r * (1 - avgWiggle) + (217 * avgWiggle * (0.5 + wigglePulse*0.5))); // #d946ef
+                        g = Math.floor(g * (1 - avgWiggle) + (70 * avgWiggle));
+                        b = Math.floor(b * (1 - avgWiggle) + (239 * avgWiggle));
+                    }
+
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+                    ctx.fill();
+                    
+                    // Wireframe lines
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + normalizedZ * 0.2})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+
+            time += 0.03;
+            requestAnimationFrame(draw);
+        }
+
+        // Initialize
+        updateState();
+        draw();
+
+    </script>
+</body>
+</html>

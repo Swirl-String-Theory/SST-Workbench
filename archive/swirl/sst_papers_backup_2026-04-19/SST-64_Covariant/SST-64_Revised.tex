@@ -1,0 +1,702 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{doi}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{authblk}
+\usepackage{natbib}
+
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black,
+            citecolor=blue!60!black, urlcolor=blue!60!black}
+
+% ── Patch-note environment ────────────────────────────────────────────────────
+\definecolor{patchbg}{RGB}{232,240,251}
+\definecolor{patchborder}{RGB}{46,117,182}
+\definecolor{patchtext}{RGB}{31,78,121}
+
+\newmdenv[
+  backgroundcolor=patchbg,
+  linecolor=patchborder,
+  linewidth=1.2pt,
+  innerleftmargin=10pt, innerrightmargin=10pt,
+  innertopmargin=6pt,   innerbottommargin=6pt,
+  skipabove=8pt, skipbelow=8pt,
+  roundcorner=3pt
+]{patchbox}
+
+\newcommand{\patchnote}[1]{%
+  \begin{patchbox}
+    {\small\color{patchtext}\textbf{PATCH NOTE\,---\,}#1}
+  \end{patchbox}}
+
+% ── Abbreviation for AEther ──────────────────────────────────────────────────
+\newcommand{\Aether}{\AE ther}
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}[proposition]
+\newtheorem{remark}{Remark}
+
+% ── Handy macros ─────────────────────────────────────────────────────────────
+\newcommand{\EH}{S_{\mathrm{g}}}
+\newcommand{\Su}{S_{u}}
+\newcommand{\Sm}{S_{\mathrm{m}}}
+\newcommand{\Tmm}{T^{(\mathrm{m})}_{\mu\nu}}
+\newcommand{\Tuu}{T^{(u)}_{\mu\nu}}
+\newcommand{\cT}{c_{\mathrm{T}}}
+
+% ── Title ─────────────────────────────────────────────────────────────────────
+\title{Covariant Emergence of Special-Relativistic Kinematics\\
+       and Einsteinian Gravitational Dynamics\\
+       from a Minimal Vector--Tensor Action}
+
+\author[1]{Omar Iskandarani}
+\affil[1]{Independent Researcher, Groningen, The Netherlands\quad
+  \texttt{info@omariskandarani.com}\quad ORCID: 0009-0006-1686-3961}
+\date{January 27, 2026 (revised)}
+
+% =============================================================================
+\begin{document}
+\maketitle
+
+\patchnote{\textbf{Title revised.}
+The original title claimed ``unification'' of SR, GR, and the WEP as logically
+independent principles ``from a single action.'' Because the Einstein--Hilbert
+term is an explicit ingredient of the action and the Lorentzian metric
+signature already encodes local Minkowski structure, the original framing was
+circular. The revised title accurately describes the result: given a minimal
+covariant vector--tensor framework, standard relativistic kinematics and
+Einsteinian dynamics \emph{emerge structurally}, with the WEP following from
+minimal coupling. The word ``unification'' is reserved for the Discussion
+where its precise meaning is qualified.}
+
+% =============================================================================
+\begin{abstract}
+\patchnote{\textbf{Abstract revised.}
+The original abstract claimed that SR, GR, and the WEP ``are not logically
+independent.'' The revised abstract accurately describes what is
+\emph{assumed} (Lorentzian metric, EH action, unit timelike field, minimal
+coupling) and what is \emph{derived} (local SR kinematics as consequences of
+metric structure; EH field equations by variation; WEP from the Bianchi
+identity and minimal coupling). The relationship to
+Einstein--\Aether\ theory is now acknowledged upfront.}
+
+We study a minimal covariant vector--tensor framework consisting of the
+Einstein--Hilbert action, a generally covariant action for a unit timelike
+vector field $u^{\mu}$ subject to $u^{\mu}u_{\mu}=-1$, and minimally coupled
+matter. Within this framework we establish three structural results. First,
+local special-relativistic kinematics---including the standard Lorentz factor
+and energy--momentum relations---follow from the Lorentzian metric structure
+in every local inertial frame; no independent postulate of Lorentz invariance
+is required beyond the assumption of a Lorentzian signature. Second, variation
+of the total action with respect to the metric yields gravitational field
+equations of the Einstein form with a covariantly conserved total
+stress--energy tensor. Third, the universality of free fall for minimally
+coupled, structureless test bodies follows from the Bianchi identity and
+minimal coupling, without additional postulates.
+
+These results clarify the minimal structural conditions from which standard
+relativistic physics emerges in the infrared. The framework is mathematically
+equivalent to Einstein--\Aether\ and khronometric theories; the present
+emphasis is on identifying which features of relativistic physics are
+structurally enforced by diffeomorphism invariance and minimal coupling,
+rather than on Lorentz-violation phenomenology. General relativity is
+recovered exactly when the stress contribution of the timelike sector
+vanishes; controlled, observationally bounded deviations arise from nontrivial
+dynamics of the vector field. We analyse these deviations in the parameterised
+post-Newtonian (PPN) framework and show that the Eddington--Robertson--Schiff
+parameters satisfy $\gamma=\beta=1$ under a standard asymptotic-alignment
+assumption, while preferred-frame parameters and gravitational-wave speed
+provide the operative experimental constraints.
+\end{abstract}
+
+% =============================================================================
+\section{Introduction and Scope}
+\label{sec:intro}
+
+\subsection{Motivation}
+
+Modern relativistic physics rests on three principles: (i) special relativity,
+expressing local Lorentz-invariant kinematics; (ii) general relativity,
+describing gravitation as the dynamics of spacetime geometry; and (iii) the
+weak equivalence principle (WEP), asserting the universality of free fall.
+Historically these were introduced in different contexts and are often treated
+as logically independent axioms~\citep{will2014,einstein1905,einstein1915}.
+
+A natural foundational question is whether all three can be seen as
+consequences of a single underlying covariant structure, or whether each
+requires independent postulation. The purpose of this work is to exhibit a
+minimal covariant variational framework in which all three emerge as structural
+consequences, and to identify the precise assumptions on which each emergence
+depends.
+
+\subsection{Strategy and Key Assumptions}
+\label{sec:assumptions}
+
+\patchnote{\textbf{Assumption list revised.}
+The original text listed the Lorentzian metric signature as a mere technical
+condition without acknowledging that this signature already encodes local
+Minkowski structure and hence local Lorentz invariance in every tangent space.
+This is now stated explicitly in \cref{sec:kinematics}. The Einstein--Hilbert
+action is listed as an explicit ingredient, removing the misleading impression
+that Einstein's equations are derived from something more primitive.}
+
+We adopt a minimal strategy. The theory is defined by:
+\begin{itemize}[noitemsep]
+  \item a four-dimensional manifold with Lorentzian metric $g_{\mu\nu}$
+        of signature $(-,+,+,+)$;
+  \item diffeomorphism invariance of the total action;
+  \item the Einstein--Hilbert action $\EH$ for the metric;
+  \item a generally covariant action $\Su$ for a unit timelike vector field
+        $u^{\mu}$ satisfying $u^{\mu}u_{\mu}=-1$;
+  \item minimal coupling of matter to the metric only.
+\end{itemize}
+No assumption of Lorentz invariance, geodesic motion, or the equivalence
+principle is made beyond diffeomorphism invariance and minimal coupling.
+
+\subsection{Relation to Einstein--\texorpdfstring{\Aether}{AEther} Theory}
+\label{sec:aether}
+
+\patchnote{\textbf{Section~1.3 substantially revised.}
+The original text dismissed the relationship to Einstein--\Aether\ theory as
+merely ``mathematical'' while claiming ``conceptual'' distinction. A referee
+correctly noted this distinction was philosophical rather than technical. The
+revised section states the relationship precisely.}
+
+The framework studied here is a special case of the Einstein--\Aether\ (E\AE)
+class of theories introduced by Jacobson and Mattingly~\citep{jacobson2001}
+and reviewed in~\citep{jacobson2008}. In E\AE\ theories a dynamical unit
+timelike vector field is coupled to the metric via a two-derivative covariant
+Lagrangian; the action below is the most general such Lagrangian at this
+order~\citep{jacobson2001}.
+
+The present work differs from the phenomenological E\AE\ programme in
+emphasis rather than in mathematical content. The E\AE\ programme focuses on
+Lorentz-violation phenomenology and observational constraints on the coupling
+coefficients $c_i$. The present work instead asks: given this action, which
+features of relativistic physics are \emph{structurally enforced} by
+diffeomorphism invariance and minimal coupling, independent of the specific
+values of $c_i$? The answer---local SR kinematics, the Einstein form of the
+field equations, and the WEP---constitutes the main result.
+
+This distinction is meaningful but does not constitute a claim of novelty over
+the E\AE\ literature on the individual derivations. The contribution is the
+systematic identification and joint presentation of these structural
+enforcements within a single framework, together with the PPN analysis of
+\cref{sec:obs}.
+
+\subsection{Scope and Limitations}
+
+This paper works within effective field theory and is agnostic regarding any
+ultraviolet completion. It does not quantise gravity, propose a specific
+microscopic model, or introduce additional particle content. The results are
+compatible with, but logically independent of, string theory, loop quantum
+gravity, and other UV approaches.
+
+\subsection{Outline}
+
+\Cref{sec:proposition} states the main structural proposition.
+\Cref{sec:kinematics} derives SR kinematics.
+\Cref{sec:action} presents the covariant action and field equations.
+\Cref{sec:obs} analyses observational constraints in the PPN framework.
+\Cref{sec:logic} describes the logical structure of the derivations.
+\Cref{sec:summary} summarises.
+
+% =============================================================================
+\section{Main Structural Proposition}
+\label{sec:proposition}
+
+\patchnote{\textbf{Section~2 revised throughout.}
+The ``Theorem'' label has been replaced with ``Proposition'' because the
+original statement did not meet the standard of a mathematical theorem: the
+hypotheses were incompletely stated, the universality-of-free-fall claim was
+not proved for bodies with self-energy (Nordtvedt effect), and the recovery of
+GR was merely a special-case assumption rather than a derived result. The
+revised statement is precise about what is assumed and what is proved.}
+
+\subsection{Assumptions}
+
+Let $(M,g_{\mu\nu})$ be a four-dimensional differentiable manifold with a
+Lorentzian metric of signature $(-,+,+,+)$. Assume an action functional
+\begin{equation}
+  S = \EH[g_{\mu\nu}]+\Su[g_{\mu\nu},u^{\mu}]+\Sm[g_{\mu\nu},\psi],
+  \label{eq:total_action}
+\end{equation}
+where $\EH$ is the Einstein--Hilbert action, $\Su$ is a generally covariant
+action for a unit timelike vector field $u^{\mu}$ satisfying
+$u^{\mu}u_{\mu}=-1$, and $\Sm$ is the matter action depending on matter
+fields $\psi$ and the metric only (minimal coupling).
+
+\subsection{Statement}
+
+\begin{proposition}[Structural emergence of relativistic physics]
+\label{prop:main}
+Under the assumptions of \cref{sec:assumptions}, the following hold.
+
+\smallskip\noindent
+\textbf{1.\ Local special-relativistic kinematics.}
+At every point $p\in M$ there exist Riemann normal coordinates in which
+$g_{\mu\nu}(p)=\eta_{\mu\nu}$. Proper time along any timelike worldline
+satisfies
+\begin{equation}
+  d\tau^{2}=dt^{2}\!\left(1-\frac{v^{2}}{c^{2}}\right),
+\end{equation}
+yielding the standard Lorentz factor $\gamma=(1-v^{2}/c^{2})^{-1/2}$. This
+is a consequence of the Lorentzian metric structure; it does not require
+Lorentz invariance to be postulated separately.
+
+\smallskip\noindent
+\textbf{2.\ Einstein form of the gravitational field equations.}
+Variation of $S$ with respect to $g_{\mu\nu}$ yields
+\begin{equation}
+  G_{\mu\nu}=8\pi G\!\left(\Tmm+\Tuu\right),
+  \label{eq:field_eqs}
+\end{equation}
+where both stress--energy tensors are independently covariantly conserved.
+
+\smallskip\noindent
+\textbf{3.\ Universality of free fall (structureless test bodies).}
+For minimally coupled pressure-free dust with
+$\Tmm=\rho U_{\mu}U_{\nu}$ and $U^{\mu}U_{\mu}=-c^{2}$,
+the conservation law $\nabla_{\!\mu}T^{(\mathrm{m})\,\mu\nu}=0$ implies
+geodesic motion
+\begin{equation}
+  U^{\mu}\nabla_{\!\mu}U^{\nu}=0,
+\end{equation}
+independently of $\rho$. \emph{Caveat:} this derivation holds for
+structureless test bodies without gravitational self-energy. Bodies with
+non-negligible self-energy may experience Nordtvedt-type corrections,
+parameterised within the PPN framework of \cref{sec:obs}.
+\end{proposition}
+
+\subsection{Corollary: Recovery of General Relativity}
+
+\patchnote{\textbf{Corollary clarified.}
+The original text implied that GR is ``recovered'' as if it were a prediction.
+It is a special case obtained by setting $\Tuu=0$, which is an additional
+assumption. This is now stated explicitly.}
+
+\begin{corollary}
+If the dynamics of $u^{\mu}$ are such that $\Tuu=0$---a self-consistent
+condition satisfied when all $c_{i}=0$---the field equations reduce to
+Einstein's equations $G_{\mu\nu}=8\pi G\,\Tmm$. This is a consistent
+special case of the theory, not a derivation of GR from something more
+primitive.
+\end{corollary}
+
+\subsection{Remark on Logical Status}
+
+\begin{remark}
+\Cref{prop:main} shows that Lorentz-invariant kinematics, the Einstein form
+of the field equations, and the WEP for structureless test bodies are
+simultaneously enforced by the variational structure. One could write down
+variational theories with the same field content that violate one or more of
+these properties. The proposition identifies the minimal conditions that
+jointly enforce all three.
+\end{remark}
+
+% =============================================================================
+\section{Local Special-Relativistic Kinematics}
+\label{sec:kinematics}
+
+\subsection{Kinematic Setup and the Role of Lorentzian Signature}
+
+\patchnote{\textbf{Section~3.1 expanded.}
+A new remark explicitly states that the Lorentzian metric signature is the
+operative assumption from which local SR kinematics follow. Section~3 is
+therefore a derivation of the kinematic \emph{formulae} from the metric
+structure, not a derivation of Lorentz invariance from something
+non-Lorentzian.}
+
+Let $(M,g_{\mu\nu})$ be a Lorentzian manifold with signature $(-,+,+,+)$.
+Introduce a unit timelike vector field $u^{\mu}$ satisfying
+$u^{\mu}u_{\mu}=-1$ and define the spatial projector
+\begin{equation}
+  h_{\mu\nu}\equiv g_{\mu\nu}+u_{\mu}u_{\nu},\qquad
+  h_{\mu\nu}u^{\nu}=0,\qquad
+  h_{\mu}{}^{\alpha}h_{\alpha\nu}=h_{\mu\nu}.
+\end{equation}
+
+\begin{remark}[Role of the Lorentzian signature]
+The signature $(-,+,+,+)$ implies that at each $p\in M$ the tangent space
+$T_{p}M$ is isomorphic to Minkowski space. The existence of Riemann normal
+coordinates in which $g_{\mu\nu}(p)=\eta_{\mu\nu}$ is a standard result of
+differential geometry~\citep{misner1973,carroll2004}, not an additional
+assumption. The SR kinematics derived below are therefore \emph{consequences
+of the metric structure}. The vector field $u^{\mu}$ plays no role; it enters
+only in the dynamics (\cref{sec:action}).
+\end{remark}
+
+\subsection{Local Inertial Reduction}
+
+At any $p\in M$ choose Riemann normal coordinates so that
+$g_{\mu\nu}(p)=\eta_{\mu\nu}=\mathrm{diag}(-1,1,1,1)$ and
+$\partial_{\alpha}g_{\mu\nu}(p)=0$. In the frame aligned with $u^{\mu}$:
+$u^{\mu}(p)=(1,0,0,0)$ and $h_{\mu\nu}(p)=\mathrm{diag}(0,1,1,1)$.
+
+\subsection{Proper Time and Lorentz Factor}
+
+For a timelike worldline $x^{\mu}(\lambda)$, proper time is defined by
+\begin{equation}
+  d\tau^{2}=-\frac{1}{c^{2}}\,g_{\mu\nu}\,dx^{\mu}dx^{\nu}.
+\end{equation}
+In the local inertial frame, with $x^{0}=ct$:
+\begin{equation}
+  d\tau^{2}=dt^{2}-\frac{|d\mathbf{x}|^{2}}{c^{2}}
+           =dt^{2}\!\left(1-\frac{v^{2}}{c^{2}}\right),
+  \qquad v^{2}\equiv\left|\frac{d\mathbf{x}}{dt}\right|^{2}.
+\end{equation}
+Hence $\gamma\equiv dt/d\tau=(1-v^{2}/c^{2})^{-1/2}$, reproducing the
+standard special-relativistic time dilation~\citep{will2014,carroll2004}.
+
+\subsection{Four-Velocity, Four-Momentum, and Mass Shell}
+
+Define $U^{\mu}\equiv dx^{\mu}/d\tau$ and $p^{\mu}\equiv mU^{\mu}$.
+Normalisation gives $g_{\mu\nu}U^{\mu}U^{\nu}=-c^{2}$ and the invariant
+mass-shell condition
+\begin{equation}
+  E^{2}=(pc)^{2}+(mc^{2})^{2},\qquad E\equiv p^{0}c,\quad p\equiv\|\mathbf{p}\|.
+  \label{eq:massshell}
+\end{equation}
+
+% =============================================================================
+\section{Covariant Action and Gravitational Dynamics}
+\label{sec:action}
+
+\subsection{The Action}
+
+We consider~\citep{jacobson2001,jacobson2008}
+\begin{equation}
+  S=\int d^{4}x\sqrt{-g}\!\left[\frac{R}{16\pi G}
+    +\mathcal{L}_{u}(g_{\mu\nu},u^{\mu},\nabla u)\right]+\Sm[g_{\mu\nu},\psi],
+  \label{eq:S}
+\end{equation}
+where the most general diffeomorphism-invariant two-derivative Lagrangian for
+$u^{\mu}$ is~\citep{jacobson2001}
+\begin{align}
+  \mathcal{L}_{u} &= -c_{1}(\nabla_{\!\mu}u_{\nu})(\nabla^{\mu}u^{\nu})
+                    -c_{2}(\nabla_{\!\mu}u^{\mu})^{2}
+                    -c_{3}(\nabla_{\!\mu}u_{\nu})(\nabla^{\nu}u^{\mu})\nonumber\\
+                  &\quad -c_{4}\,u^{\mu}u^{\nu}(\nabla_{\!\mu}u^{\alpha})
+                             (\nabla_{\!\nu}u_{\alpha})
+                    +\lambda(u^{\mu}u_{\mu}+1),
+  \label{eq:Lu}
+\end{align}
+with dimensionless couplings $c_{i}$ and Lagrange multiplier $\lambda$.
+
+\subsection{Field Equations}
+
+Variation of $S$ with respect to $g_{\mu\nu}$ yields \cref{eq:field_eqs},
+with the two stress--energy tensors defined by functional derivatives.
+Variation with respect to $u^{\mu}$ and $\lambda$ yields the equations of
+motion for the vector field and re-enforces $u^{\mu}u_{\mu}=-1$.
+
+\subsection{Covariant Conservation and the WEP}
+
+Diffeomorphism invariance implies the contracted Bianchi identity
+$\nabla_{\!\mu}G^{\mu\nu}\equiv 0$, which together with \cref{eq:field_eqs}
+gives
+\begin{equation}
+  \nabla_{\!\mu}\!\left(T^{(\mathrm{m})\,\mu\nu}+T^{(u)\,\mu\nu}\right)=0.
+\end{equation}
+Under minimal coupling, $\nabla_{\!\mu}T^{(\mathrm{m})\,\mu\nu}=0$
+independently, hence also $\nabla_{\!\mu}T^{(u)\,\mu\nu}=0$. For
+pressure-free dust the matter conservation law reduces to the geodesic
+equation \eqref{eq:massshell}:
+\begin{equation}
+  U^{\mu}\nabla_{\!\mu}U^{\nu}=0.
+  \label{eq:geodesic}
+\end{equation}
+
+\patchnote{\textbf{Reference corrected.}
+The original manuscript cited Ryder's \emph{Quantum Field Theory} for the
+derivation of geodesic motion from stress--energy conservation. The correct
+references are Misner, Thorne \& Wheeler~\citep{misner1973} and
+Carroll~\citep{carroll2004}. The Ryder citation has been removed from this
+context.}
+
+\subsection{Recovery of GR and the Newtonian Limit}
+
+Setting $c_{i}=0$ gives $\Tuu=0$ and the field equations reduce to
+$G_{\mu\nu}=8\pi G\,\Tmm$. In the weak-field, non-relativistic limit
+\begin{equation}
+  g_{00}=-\!\left(1+\frac{2\Phi}{c^{2}}\right),\quad
+  g_{ij}=\delta_{ij}\!\left(1-\frac{2\Phi}{c^{2}}\right),\quad
+  \left|\frac{\Phi}{c^{2}}\right|\ll 1,
+\end{equation}
+with $T^{(\mathrm{m})}_{00}\simeq\rho c^{2}$, the $(00)$ component reduces to
+Poisson's equation $\nabla^{2}\Phi=4\pi G\rho$.
+
+% =============================================================================
+\section{Observational Constraints}
+\label{sec:obs}
+
+\subsection{The \texorpdfstring{$\gamma$}{gamma} and
+            \texorpdfstring{$\beta$}{beta} Parameters}
+
+\patchnote{\textbf{Broken citation repaired.}
+The original manuscript contained a broken citation ``[?]'' for the PPN
+framework in this section. It has been replaced by
+Will~(1993)~\citep{will1993} and Will~(2014)~\citep{will2014}.}
+
+We work in the PPN expansion~\citep{will1993,will2014}:
+\begin{equation}
+  g_{00}=-1+2U-2\beta U^{2}+\mathcal{O}(\varepsilon^{3}),\qquad
+  g_{ij}=\delta_{ij}(1+2\gamma U)+\mathcal{O}(\varepsilon^{2}),
+\end{equation}
+where $U$ is the Newtonian potential and $\varepsilon\sim v/c$.
+
+For the action~\eqref{eq:Lu}, linearised perturbation theory about Minkowski
+space with $u^{\mu}$ asymptotically aligned with the rest frame of the
+gravitating source shows that $u^{\mu}$ does not source the trace of the
+metric perturbation in the static limit. Under this assumption the metric
+potentials coincide with the Schwarzschild solution at first post-Newtonian
+order, giving~\citep{foster2006}
+\begin{equation}
+  \gamma=1,\qquad\beta=1.
+  \label{eq:gammabeta}
+\end{equation}
+These equalities guarantee agreement with all classical solar-system tests:
+light deflection, Shapiro time delay, gravitational redshift, and Mercury
+perihelion precession.
+
+\subsection{Preferred-Frame Parameters}
+
+\patchnote{\textbf{Section~5.2 substantially revised.}
+The original text stated only that preferred-frame parameters ``take the
+schematic form $\alpha_{1}=\alpha_{1}(c_{1},c_{2},c_{3},c_{4})$'' without
+providing explicit expressions. A referee correctly noted this was
+insufficient. The explicit PPN expressions from Foster \&
+Jacobson~\citep{foster2006} are now given, and that reference is added to the
+bibliography.}
+
+The dynamical vector field $u^{\mu}$ allows preferred-frame effects
+parameterised by $\alpha_{1}$ and $\alpha_{2}$. Following~\citet{foster2006}:
+\begin{align}
+  \alpha_{1} &= -\frac{8c_{13}(2-c_{13})}{(1-c_{13})(2+c_{13}+3c_{2})},
+  \label{eq:alpha1}\\[4pt]
+  \alpha_{2} &= \frac{\alpha_{1}}{2}
+               -\frac{c_{13}^{2}}{2(1-c_{13})},
+  \label{eq:alpha2}
+\end{align}
+where $c_{13}\equiv c_{1}+c_{3}$. Current experimental bounds require
+$|\alpha_{1}|\lesssim 10^{-4}$ and $|\alpha_{2}|\lesssim
+10^{-7}$~\citep{will2014}, constraining the $(c_{1},c_{2},c_{3},c_{4})$
+parameter space to a narrow region near the GR limit.
+
+\subsection{Gravitational-Wave Speed}
+
+Linearised analysis gives the tensor-mode dispersion relation
+$\omega^{2}=\cT^{2}k^{2}$ with
+\begin{equation}
+  \cT^{2}=\frac{1}{1-c_{13}}.
+  \label{eq:cT}
+\end{equation}
+The coincident GW and electromagnetic detection of the binary neutron-star
+merger GW170817~\citep{abbott2017gw,abbott2017mm} constrains
+$|\cT-1|\lesssim 10^{-15}$, requiring
+\begin{equation}
+  c_{13}\equiv c_{1}+c_{3}\approx 0.
+  \label{eq:c13constraint}
+\end{equation}
+Substituting \cref{eq:c13constraint} into \cref{eq:alpha1,eq:alpha2} gives
+\begin{equation}
+  \alpha_{1}^{\mathrm{SST}}=-4c_{14},\qquad
+  \alpha_{2}^{\mathrm{SST}}=\alpha_{2}(c_{14},c_{2}),
+\end{equation}
+where $c_{14}\equiv c_{1}+c_{4}$ and $c_{2}$ governs the scalar
+sector~\citep{foster2006}. The viable parameter space reduces to $(c_{14},
+c_{2})$ subject to the preferred-frame bounds above.
+
+\subsection{Summary of Constraints}
+
+The theory is phenomenologically consistent provided $c_{13}\approx 0$ and
+$|c_{14}|$, $|c_{2}|$ satisfy the preferred-frame bounds. The trivial solution
+$c_{i}=0$ recovers GR exactly. Nontrivial solutions within the allowed region
+are kinematically and weak-field equivalent to GR but may differ in strong-field
+or cosmological regimes.
+
+% =============================================================================
+\section{Logical Structure of the Derivations}
+\label{sec:logic}
+
+\patchnote{\textbf{Figure~1 replaced.}
+The original Figure~1 showed an arrow from ``Bianchi identity'' to ``Einstein
+equations,'' which inverts the logical flow: the contracted Bianchi identity
+$\nabla_{\!\mu}G^{\mu\nu}\equiv 0$ is a \emph{consequence} of the metric
+structure, not an input to the field equations. The figure has been removed
+and replaced by the corrected logical summary below.}
+
+The three results of \cref{prop:main} depend on distinct ingredients and are
+logically independent:
+
+\begin{description}[leftmargin=2em, labelsep=1em]
+  \item[SR kinematics $\Leftarrow$ Lorentzian signature.]
+    Local inertial frames exist by differential geometry; proper-time and
+    four-momentum relations follow from the metric signature alone. The vector
+    field $u^{\mu}$ and the action play no role.
+
+  \item[Einstein field equations $\Leftarrow$ EH action $+$ variational principle.]
+    Variation of $\EH$ with respect to $g_{\mu\nu}$ produces $G_{\mu\nu}$ on
+    the left of \cref{eq:field_eqs}. The contracted Bianchi identity
+    $\nabla_{\!\mu}G^{\mu\nu}\equiv 0$ then follows automatically from the
+    metric structure and constrains---but does not generate---the right-hand
+    side. The identity is a \emph{consequence}, not an input.
+
+  \item[WEP for test bodies $\Leftarrow$ minimal coupling $+$ Bianchi identity.]
+    Under minimal coupling, $\nabla_{\!\mu}T^{(\mathrm{m})\,\mu\nu}=0$
+    independently. For pressureless dust this implies geodesic motion via the
+    standard divergence argument. The derivation is independent of $u^{\mu}$
+    and holds for structureless test bodies without self-energy.
+\end{description}
+
+In summary: (1) Lorentzian signature $\Rightarrow$ local SR kinematics;
+(2) EH action $+$ variational principle $\Rightarrow$ Einstein field equations;
+(3) minimal coupling $+$ Bianchi identity $\Rightarrow$ WEP for test bodies.
+Each implication is distinct; none reduces to either of the others.
+
+% =============================================================================
+\section{Summary and Outlook}
+\label{sec:summary}
+
+We have shown that local special-relativistic kinematics, the Einstein form of
+the gravitational field equations, and the universality of free fall for
+structureless test bodies are simultaneously structural consequences of a
+minimal covariant vector--tensor action with diffeomorphism invariance and
+minimal coupling. The framework is mathematically equivalent to
+Einstein--\Aether\ theory at two-derivative order; the contribution is a
+systematic analysis of which relativistic principles are enforced by the
+variational structure independently of the specific coupling coefficients
+$c_{i}$.
+
+The Eddington--Robertson--Schiff parameters satisfy $\gamma=\beta=1$ under
+standard asymptotic alignment~\citep{foster2006}. The operative experimental
+handles are the preferred-frame parameters $\alpha_{1}$, $\alpha_{2}$---now
+given explicitly in terms of $c_{i}$ in \cref{eq:alpha1,eq:alpha2}---and the
+gravitational-wave speed constraint $c_{13}\approx 0$.
+
+Directions for future work include: a complete PPN analysis without the
+asymptotic-alignment assumption; strong-field and cosmological solutions with
+nontrivial $c_{i}$; and establishing whether the framework admits a unique
+massless spin-2 infrared
+excitation~\citep{weinberg1972,weinberg1965}.
+
+% =============================================================================
+\section*{Acknowledgements}
+The author thanks the anonymous referees whose comments substantially improved
+the precision and scope of this manuscript.
+
+% =============================================================================
+\patchnote{\textbf{Reference list revised.}
+(i)~Ryder's \emph{Quantum Field Theory} removed from the geodesic-derivation
+context and replaced by the correct references MTW and Carroll.
+(ii)~Will~(1993) added as \texttt{will1993} to repair the broken PPN citation.
+(iii)~Foster \& Jacobson~(2006) added as \texttt{foster2006} to support the
+explicit PPN expressions in \cref{sec:obs}.
+(iv)~Numbering updated throughout.}
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[Will(2014)]{will2014}
+C.~M. Will (2014).
+\newblock The Confrontation between General Relativity and Experiment.
+\newblock \emph{Living Reviews in Relativity} \textbf{17}, 4.
+\newblock \doi{10.12942/lrr-2014-4}
+
+\bibitem[Einstein(1905)]{einstein1905}
+A.~Einstein (1905).
+\newblock Zur Elektrodynamik bewegter K\"{o}rper.
+\newblock \emph{Annalen der Physik} \textbf{17}, 891--921.
+\newblock \doi{10.1002/andp.19053221004}
+
+\bibitem[Einstein(1915)]{einstein1915}
+A.~Einstein (1915).
+\newblock Die Feldgleichungen der Gravitation.
+\newblock \emph{Sitzungsberichte der Preu\ss{}ischen Akademie der
+  Wissenschaften}, 844--847.
+
+\bibitem[Misner et al.(1973)]{misner1973}
+C.~W. Misner, K.~S. Thorne, and J.~A. Wheeler (1973).
+\newblock \emph{Gravitation}.
+\newblock W.~H. Freeman.
+
+\bibitem[Carroll(2004)]{carroll2004}
+S.~M. Carroll (2004).
+\newblock \emph{Spacetime and Geometry}.
+\newblock Addison--Wesley.
+
+\bibitem[Will(1993)]{will1993}
+C.~M. Will (1993).
+\newblock \emph{Theory and Experiment in Gravitational Physics}.
+\newblock Cambridge University Press.
+\newblock [\emph{Added to repair broken citation ``[?]'' in original
+  Section~5.}]
+
+\bibitem[Weinberg(1972)]{weinberg1972}
+S.~Weinberg (1972).
+\newblock \emph{Gravitation and Cosmology}.
+\newblock Wiley.
+
+\bibitem[Weinberg(1965)]{weinberg1965}
+S.~Weinberg (1965).
+\newblock Photons and Gravitons in $S$-Matrix Theory.
+\newblock \emph{Physical Review} \textbf{135}, B1049.
+\newblock \doi{10.1103/PhysRev.135.B1049}
+
+\bibitem[Jacobson \& Mattingly(2001)]{jacobson2001}
+T.~Jacobson and D.~Mattingly (2001).
+\newblock Gravity with a dynamical preferred frame.
+\newblock \emph{Physical Review D} \textbf{64}, 024028.
+\newblock \doi{10.1103/PhysRevD.64.024028}
+
+\bibitem[Deser(1970)]{deser1970}
+S.~Deser (1970).
+\newblock Self-interaction and gauge invariance.
+\newblock \emph{General Relativity and Gravitation} \textbf{1}, 9--18.
+\newblock \doi{10.1007/BF00759198}
+
+\bibitem[Jacobson(2008)]{jacobson2008}
+T.~Jacobson (2008).
+\newblock Einstein--\Aether\ gravity: a status report.
+\newblock \emph{PoS(QG-PH)}, 020.
+\newblock \doi{10.22323/1.043.0020}
+
+\bibitem[Foster \& Jacobson(2006)]{foster2006}
+B.~Z. Foster and T.~Jacobson (2006).
+\newblock Post-Newtonian parameters and constraints on Einstein--\Aether\
+  theory.
+\newblock \emph{Physical Review D} \textbf{73}, 064015.
+\newblock \doi{10.1103/PhysRevD.73.064015}
+\newblock [\emph{New --- added to support explicit PPN expressions
+  \eqref{eq:alpha1}--\eqref{eq:alpha2}.}]
+
+\bibitem[Abbott et al.(2017a)]{abbott2017gw}
+B.~P. Abbott et al.\ (LIGO/Virgo) (2017).
+\newblock GW170817: Observation of Gravitational Waves from a Binary Neutron
+  Star Inspiral.
+\newblock \emph{Physical Review Letters} \textbf{119}, 161101.
+\newblock \doi{10.1103/PhysRevLett.119.161101}
+
+\bibitem[Abbott et al.(2017b)]{abbott2017mm}
+B.~P. Abbott et al.\ (LIGO/Virgo) (2017).
+\newblock Multi-messenger Observations of a Binary Neutron Star Merger.
+\newblock \emph{Astrophysical Journal Letters} \textbf{848}, L12.
+\newblock \doi{10.3847/2041-8213/aa91c9}
+
+\end{thebibliography}
+
+
+
+\end{document}

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory (SST) Lepton Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05050a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px #38bdf8;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(5,5,10,1) 70%);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .preset-btn {
+            transition: all 0.2s ease;
+        }
+        .preset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        .preset-btn.active {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <header class="w-full max-w-6xl mb-8 text-center">
+        <h1 class="text-3xl md:text-5xl font-bold mb-2 glow-text text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+            Swirl-String Theory Explorer
+        </h1>
+        <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+            Interactive visualization of emergent topological leptons based on the Golden-parameterized Nonlinear Schrödinger vortex core. 
+            Adjust the knot topology to generate particle masses.
+        </p>
+    </header>
+
+    <main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Controls Panel -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-400 border-b border-slate-700 pb-2">Topology Parameters</h2>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm text-slate-300">Meridional Crossings (<span class="italic text-cyan-300">p</span>)</label>
+                        <span id="p-val" class="mono text-cyan-400 font-bold">3</span>
+                    </div>
+                    <input type="range" id="p-slider" min="1" max="15" step="2" value="3">
+                    <p class="text-xs text-slate-500 mt-1">Defines the base torus knot T<sub>p,2</sub></p>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm text-slate-300">Screening Layer Index (<span class="italic text-cyan-300">k</span>)</label>
+                        <span id="k-val" class="mono text-cyan-400 font-bold">0</span>
+                    </div>
+                    <input type="range" id="k-slider" min="0" max="10" step="1" value="0">
+                    <p class="text-xs text-slate-500 mt-1">Discrete scale invariance multiplier</p>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">Known Leptons</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="preset-btn active glass-panel rounded-lg py-2 text-sm border border-slate-600" data-p="3" data-k="0" data-name="Electron">Electron</button>
+                        <button class="preset-btn glass-panel rounded-lg py-2 text-sm border border-slate-600" data-p="5" data-k="5" data-name="Muon">Muon</button>
+                        <button class="preset-btn glass-panel rounded-lg py-2 text-sm border border-slate-600" data-p="11" data-k="7" data-name="Tau">Tau</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-400 border-b border-slate-700 pb-2">Governing Equation</h2>
+                <div class="bg-slate-900/50 rounded-lg p-4 flex justify-center items-center border border-slate-800">
+                    <span class="text-xl md:text-2xl font-serif italic">
+                        m(p,k) = m<sub>e</sub> <span class="text-2xl">(</span><span class="inline-block align-middle text-center text-lg"><div class="border-b border-slate-300 px-1">p</div><div>3</div></span><span class="text-2xl">)</span> &phi;<sup>2k</sup>
+                    </span>
+                </div>
+                <ul class="text-xs text-slate-400 mt-4 space-y-1">
+                    <li><span class="text-cyan-300">m<sub>e</sub></span> = 0.511 MeV/c² (Electron mass)</li>
+                    <li><span class="text-cyan-300">&phi;</span> &approx; 1.618034 (Golden Ratio)</li>
+                    <li class="italic opacity-70 mt-2">*Note: Equation adapted to +2k to match paper's numerical results table for heavier leptons.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 flex-grow flex flex-col items-center justify-center relative">
+                <div class="absolute top-4 left-6 z-10">
+                    <span class="text-xs font-bold tracking-widest uppercase text-slate-500">Hydrodynamic State</span>
+                    <div id="particle-name" class="text-2xl font-bold text-white mt-1">Electron (T<sub>3,2</sub>)</div>
+                </div>
+
+                <div id="canvas-container" class="mt-8 mb-4 w-[80%] max-w-[400px]">
+                    <canvas id="vortex-canvas"></canvas>
+                </div>
+                <p class="text-xs text-slate-500 text-center max-w-md">
+                    Visualizing 2D projection of a T<sub>p,2</sub> torus knot. Multiple paths represent acoustic screening layers (k).
+                </p>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="glass-panel rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Base Mass Factor</div>
+                    <div class="text-xl mono text-white"><span id="res-base">1.000</span> m<sub>e</sub></div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Scale Multiplier (&phi;<sup>2k</sup>)</div>
+                    <div class="text-xl mono text-white" id="res-scale">1.000</div>
+                </div>
+                <div class="bg-gradient-to-br from-cyan-900/50 to-blue-900/50 rounded-xl p-4 border border-cyan-700/50 shadow-[0_0_15px_rgba(8,145,178,0.2)]">
+                    <div class="text-xs text-cyan-300 uppercase tracking-wider mb-1 font-bold">Predicted Mass</div>
+                    <div class="text-2xl mono font-bold text-white glow-text"><span id="res-mass">0.511</span> <span class="text-sm text-cyan-200 font-sans">MeV/c²</span></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Constants from the paper
+        const ME = 0.511; // Electron mass in MeV
+        const PHI = (1 + Math.sqrt(5)) / 2; // Golden ratio
+
+        // DOM Elements
+        const pSlider = document.getElementById('p-slider');
+        const kSlider = document.getElementById('k-slider');
+        const pVal = document.getElementById('p-val');
+        const kVal = document.getElementById('k-val');
+        const particleName = document.getElementById('particle-name');
+        
+        const resBase = document.getElementById('res-base');
+        const resScale = document.getElementById('res-scale');
+        const resMass = document.getElementById('res-mass');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+
+        // Canvas Setup
+        const canvas = document.getElementById('vortex-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            width = container.clientWidth;
+            height = container.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // State
+        let currentP = parseInt(pSlider.value);
+        let currentK = parseInt(kSlider.value);
+        let time = 0;
+
+        // Update Logic
+        function updateCalculations() {
+            currentP = parseInt(pSlider.value);
+            currentK = parseInt(kSlider.value);
+
+            pVal.textContent = currentP;
+            kVal.textContent = currentK;
+
+            // Math
+            const baseFactor = currentP / 3;
+            const scaleMultiplier = Math.pow(PHI, 2 * currentK);
+            const totalMass = ME * baseFactor * scaleMultiplier;
+
+            // Update UI
+            resBase.textContent = baseFactor.toFixed(3);
+            resScale.textContent = scaleMultiplier.toFixed(3);
+            
+            // Format mass nicely
+            if (totalMass > 1000) {
+                resMass.textContent = totalMass.toFixed(1);
+            } else if (totalMass > 10) {
+                resMass.textContent = totalMass.toFixed(2);
+            } else {
+                resMass.textContent = totalMass.toFixed(3);
+            }
+
+            // Determine Name
+            let name = "Unknown Resonance";
+            presetBtns.forEach(btn => btn.classList.remove('active'));
+            
+            if (currentP === 3 && currentK === 0) {
+                name = "Electron";
+                document.querySelector('[data-name="Electron"]').classList.add('active');
+            } else if (currentP === 5 && currentK === 5) {
+                name = "Muon";
+                document.querySelector('[data-name="Muon"]').classList.add('active');
+            } else if (currentP === 11 && currentK === 7) {
+                name = "Tau";
+                document.querySelector('[data-name="Tau"]').classList.add('active');
+            } else if (currentK === 0) {
+                 name = `Base Knot (T<sub>${currentP},2</sub>)`;
+            } else {
+                 name = `Excited State (T<sub>${currentP},2</sub>, k=${currentK})`;
+            }
+            
+            particleName.innerHTML = name !== "Unknown Resonance" && !name.includes("T<sub>") 
+                ? `${name} (T<sub>${currentP},2</sub>)` 
+                : name;
+        }
+
+        // Event Listeners
+        pSlider.addEventListener('input', updateCalculations);
+        kSlider.addEventListener('input', updateCalculations);
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                pSlider.value = e.target.dataset.p;
+                kSlider.value = e.target.dataset.k;
+                updateCalculations();
+            });
+        });
+
+        // Animation Loop
+        function drawVortex() {
+            // Fade effect for trails
+            ctx.fillStyle = 'rgba(5, 5, 10, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+            ctx.translate(width / 2, height / 2);
+
+            // Base size relative to canvas
+            const baseRadius = Math.min(width, height) * 0.25;
+            const minorRadius = baseRadius * 0.4;
+
+            // Draw layers based on k
+            // We draw at least 1 layer (k=0). Max layers drawn is capped for performance/visual clarity
+            const layersToDraw = Math.min(currentK + 1, 8); 
+
+            for (let layer = 0; layer < layersToDraw; layer++) {
+                ctx.beginPath();
+                
+                // Scale expands slightly with each layer
+                const scale = 1 + (layer * 0.12);
+                const R = baseRadius * scale;
+                const r = minorRadius * scale;
+
+                // Color mapping based on layer and time
+                const hue = (time * 20 + layer * 40 + (currentP * 10)) % 360;
+                const alpha = Math.max(0.1, 1 - (layer * 0.15));
+                
+                ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
+                ctx.lineWidth = layer === 0 ? 3 : 1.5;
+                
+                // Add glow to the core layer
+                if (layer === 0) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = `hsla(${hue}, 100%, 50%, 0.8)`;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+
+                // Parametric equation for T_{p,2} torus knot projection
+                const resolution = 0.05;
+                for (let t = 0; t <= Math.PI * 2 + resolution; t += resolution) {
+                    // q = 2 for T_{p,2} knots
+                    const q = 2;
+                    
+                    // The paper describes swirling. We add time to rotate the knot.
+                    const angle = t + (time * 0.5) * (layer % 2 === 0 ? 1 : -1); // Alternate rotation direction for layers
+                    
+                    const x = (R + r * Math.cos(q * t)) * Math.cos(currentP * t + angle);
+                    const y = (R + r * Math.cos(q * t)) * Math.sin(currentP * t + angle);
+                    
+                    if (t === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+            time += 0.03;
+            requestAnimationFrame(drawVortex);
+        }
+
+        // Initialize
+        updateCalculations();
+        drawVortex();
+
+    </script>
+</body>
+</html>

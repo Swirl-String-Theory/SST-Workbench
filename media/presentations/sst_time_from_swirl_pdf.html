@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory Laboratory</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: #151b2b;
+            --accent-cyan: #00f3ff;
+            --accent-purple: #bd00ff;
+            --text-main: #e0e6ed;
+            --text-dim: #94a3b8;
+            --danger: #ff0055;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+        }
+
+        /* Sidebar Controls */
+        .sidebar {
+            width: 300px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-right: 1px solid #2d3748;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #2d3748;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            background: var(--accent-cyan);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            margin-top: -6px;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .value-display {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        /* Visualization Area */
+        .viewport {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1a202c 0%, #000 100%);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Overlay UI in Viewport */
+        .probe-readout {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(11, 15, 25, 0.85);
+            border: 1px solid var(--accent-cyan);
+            padding: 15px;
+            border-radius: 4px;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .readout-item {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .readout-label {
+            color: var(--text-dim);
+            margin-right: 10px;
+        }
+
+        /* Right Panel: Time Dilation */
+        .metrics-panel {
+            width: 280px;
+            background: var(--panel-bg);
+            border-left: 1px solid #2d3748;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid #2d3748;
+        }
+
+        .clock-face {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--text-dim);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: var(--text-main);
+            width: 2px;
+            height: 35px;
+            border-radius: 2px;
+        }
+
+        .hand.second {
+            background: var(--danger);
+            height: 38px;
+            width: 1px;
+        }
+
+        .clock-label {
+            font-size: 0.8rem;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .swirl-clock .clock-face {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .swirl-clock .hand {
+            background: var(--accent-cyan);
+        }
+
+        .formula-box {
+            font-size: 0.75rem;
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            color: #a0aec0;
+            line-height: 1.4;
+            border-left: 2px solid var(--accent-purple);
+        }
+
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            padding: 5px 20px;
+            font-size: 0.7rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .warning {
+            color: var(--danger);
+            animation: pulse 1s infinite;
+            font-weight: bold;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST: Swirl-String Laboratory</h1>
+        <div class="subtitle">Hydrodynamic Origin of Proper Time (Based on O. Iskandarani)</div>
+    </div>
+    <div style="font-size: 1.5rem;">🌀</div>
+</header>
+
+<div class="container">
+    <!-- Left Controls -->
+    <aside class="sidebar">
+        <div style="color: var(--accent-purple); font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            Condensate Parameters
+        </div>
+
+        <div class="control-group">
+            <label>
+                Characteristic Speed (||v<sub>↺</sub>||)
+                <span id="val-speed" class="value-display">1.09c</span>
+            </label>
+            <input type="range" id="input-speed" min="0.5" max="3.0" step="0.01" value="1.09">
+        </div>
+
+        <div class="control-group">
+            <label>
+                Core Radius (r<sub>c</sub>)
+                <span id="val-radius" class="value-display">1.40 fm</span>
+            </label>
+            <input type="range" id="input-radius" min="0.5" max="5.0" step="0.1" value="1.4">
+        </div>
+
+        <div style="color: var(--accent-cyan); font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            Probe Position
+        </div>
+
+        <div class="control-group">
+            <label>
+                Distance from Core (r)
+                <span id="val-dist" class="value-display">2.0 r<sub>c</sub></span>
+            </label>
+            <input type="range" id="input-dist" min="0" max="10" step="0.1" value="2.0">
+        </div>
+
+        <div class="formula-box">
+            <strong>Velocity Profile:</strong><br>
+            v<sub>θ</sub>(r) = ||v<sub>↺</sub>|| · (r/r<sub>c</sub>) · e<sup>-r/r<sub>c</sub></sup>
+        </div>
+        
+        <div class="formula-box">
+            <strong>Time Dilation:</strong><br>
+            S<sub>(t)</sub> = √(1 - |v<sub>⊥</sub>|² / ||v<sub>↺</sub>||²)
+        </div>
+    </aside>
+
+    <!-- Center Visualization -->
+    <main class="viewport" id="viewport">
+        <canvas id="swirlCanvas"></canvas>
+        
+        <div class="probe-readout">
+            <div style="color: var(--accent-cyan); margin-bottom: 10px; font-weight: bold;">PROBE TELEMETRY</div>
+            <div class="readout-item">
+                <span class="readout-label">Local Velocity v<sub>θ</sub>:</span>
+                <span id="readout-v">0.00 m/s</span>
+            </div>
+            <div class="readout-item">
+                <span class="readout-label">Vorticity ω:</span>
+                <span id="readout-w">0.00 s⁻¹</span>
+            </div>
+            <div class="readout-item">
+                <span class="readout-label">Energy Density H:</span>
+                <span id="readout-h">0.00 J/m³</span>
+            </div>
+            <div class="readout-item">
+                <span class="readout-label">Time Factor S<sub>(t)</sub>:</span>
+                <span id="readout-s" style="font-size: 1.2rem; color: #fff;">0.99</span>
+            </div>
+            <div id="warning-msg" class="warning">⚠ CORE INSTABILITY DETECTED</div>
+        </div>
+    </main>
+
+    <!-- Right Metrics -->
+    <aside class="metrics-panel">
+        <div style="text-align: center; color: var(--text-dim); font-size: 0.9rem;">
+            TEMPORAL COMPARISON
+        </div>
+
+        <!-- Lab Clock -->
+        <div class="clock-container">
+            <div class="clock-face">
+                <div class="hand second" id="hand-lab"></div>
+            </div>
+            <div class="clock-label">
+                Laboratory Time (t<sub>∞</sub>)<br>
+                <span style="color: #666">Asymptotic Flat Space</span>
+            </div>
+        </div>
+
+        <!-- Swirl Clock -->
+        <div class="clock-container swirl-clock">
+            <div class="clock-face">
+                <div class="hand second" id="hand-swirl"></div>
+            </div>
+            <div class="clock-label">
+                Swirl Time (t<sub>loc</sub>)<br>
+                <span style="color: var(--accent-cyan)">Redshifted by Vortex</span>
+            </div>
+        </div>
+
+        <div style="margin-top: auto; font-size: 0.8rem; color: #666;">
+            <p>Note: As the probe approaches the core radius (r ≈ r<sub>c</sub>), the local clock slows down relative to the lab clock due to high swirl velocity.</p>
+        </div>
+    </aside>
+</div>
+
+<div class="status-bar">
+    <span>Rosetta 0.6.0 Framework Loaded</span>
+    <span>Swirl-String Theory Simulation Active</span>
+</div>
+
+<script>
+    // --- Physics Constants & State ---
+    const state = {
+        v_char: 1.09, // Characteristic speed (normalized)
+        rc: 1.4,      // Core radius
+        r: 2.0,       // Probe position
+        
+        // Calculated
+        v_theta: 0,
+        s_factor: 1,
+        vorticity: 0,
+        energy: 0,
+        
+        // Clock Accumulators
+        labTime: 0,
+        swirlTime: 0
+    };
+
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('swirlCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, centerX, centerY;
+    let particles = [];
+    const NUM_PARTICLES = 400;
+
+    function resize() {
+        width = canvas.width = document.getElementById('viewport').clientWidth;
+        height = canvas.height = document.getElementById('viewport').clientHeight;
+        centerX = width / 2;
+        centerY = height / 2;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            // Spawn randomly around center
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * (Math.min(width, height) / 2);
+            this.x = centerX + Math.cos(angle) * dist;
+            this.y = centerY + Math.sin(angle) * dist;
+            this.life = Math.random();
+            this.size = Math.random() * 2 + 1;
+        }
+
+        update() {
+            const dx = this.x - centerX;
+            const dy = this.y - centerY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            // Normalize distance to simulation units (scale factor)
+            const scale = 50; // pixels per unit r
+            const r_sim = dist / scale;
+
+            // Calculate velocity based on paper formula: v = v_char * (r/rc) * exp(-r/rc)
+            // We add a minimum swirl to keep visual interest even far out
+            let v_mag = state.v_char * (r_sim / state.rc) * Math.exp(-r_sim / state.rc);
+            
+            // Visual multiplier for canvas animation speed
+            const visualSpeed = 5 * v_mag; 
+
+            // Tangential velocity vector
+            const angle = Math.atan2(dy, dx);
+            const vAngle = angle + Math.PI / 2; // Perpendicular
+
+            this.x += Math.cos(vAngle) * visualSpeed;
+            this.y += Math.sin(vAngle) * visualSpeed;
+
+            // Slight inward pull for visual effect (sink)
+            // this.x -= Math.cos(angle) * 0.1;
+            // this.y -= Math.sin(angle) * 0.1;
+
+            this.life -= 0.002;
+            if (this.life <= 0 || dist > Math.min(width, height)/1.5) {
+                this.reset();
+            }
+        }
+
+        draw() {
+            const dx = this.x - centerX;
+            const dy = this.y - centerY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const r_sim = dist / 50;
+            
+            // Color based on proximity to rc
+            const intensity = Math.exp(-Math.abs(r_sim - state.rc));
+            
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            // Cyan at core, purple outside
+            const r = 0 + (intensity * 0);
+            const g = 243 * intensity;
+            const b = 255;
+            
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.life * intensity + 0.2})`;
+            ctx.fill();
+        }
+    }
+
+    // Initialize particles
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+        particles.push(new Particle());
+    }
+
+    // --- Physics Engine ---
+    function updatePhysics() {
+        // Inputs
+        state.v_char = parseFloat(document.getElementById('input-speed').value);
+        state.rc = parseFloat(document.getElementById('input-radius').value);
+        state.r = parseFloat(document.getElementById('input-dist').value);
+
+        // Update Labels
+        document.getElementById('val-speed').innerText = state.v_char.toFixed(2) + "c";
+        document.getElementById('val-radius').innerText = state.rc.toFixed(2) + " fm";
+        document.getElementById('val-dist').innerText = state.r.toFixed(2) + " rc";
+
+        // Formula: v_theta(r) = ||v_swirl|| * (r/rc) * e^(-r/rc)
+        // Note: The input r is already in units of rc for the slider, but let's treat r as absolute for calculation
+        // Actually, slider value is a multiplier of rc. So r_actual = slider_val * rc.
+        // Let's stick to the slider representing r/rc ratio directly for simplicity in UI, 
+        // but the math needs r and rc.
+        
+        // Let's interpret the slider "Distance" as r_actual.
+        // If slider says "2.0 rc", that means r = 2.0 * rc.
+        const r_actual = state.r * state.rc;
+
+        // v_theta calculation
+        // v_theta = v_char * (r_actual / rc) * exp(-r_actual / rc)
+        // (r_actual / rc) simplifies to just state.r (the slider value)
+        state.v_theta = state.v_char * state.r * Math.exp(-state.r);
+
+        // Time Dilation S(t) = sqrt(1 - (v_perp / v_char)^2)
+        // The paper defines S based on v_perp normalized by v_swirl.
+        // v_perp is v_theta here.
+        const ratio = state.v_theta / state.v_char;
+        const term = 1 - (ratio * ratio);
+        
+        if (term < 0) {
+            state.s_factor = 0;
+            document.getElementById('warning-msg').style.display = 'block';
+        } else {
+            state.s_factor = Math.sqrt(term);
+            document.getElementById('warning-msg').style.display = 'none';
+        }
+
+        // Energy Density (Approximate visualization)
+        // H ~ v^2 + l^2 * w^2
+        // Vorticity w ~ v/r roughly (simplified)
+        state.energy = (state.v_theta * state.v_theta) * 10; // Arbitrary scaling for UI
+
+        // Update Readouts
+        document.getElementById('readout-v').innerText = (state.v_theta * 10e5).toExponential(2) + " m/s";
+        document.getElementById('readout-s').innerText = state.s_factor.toFixed(4);
+        document.getElementById('readout-h').innerText = state.energy.toFixed(2) + " units";
+        
+        // Color code the S factor
+        const sReadout = document.getElementById('readout-s');
+        if(state.s_factor < 0.5) sReadout.style.color = "#ff0055";
+        else if(state.s_factor < 0.9) sReadout.style.color = "#bd00ff";
+        else sReadout.style.color = "#fff";
+    }
+
+    // --- Animation Loop ---
+    function animate() {
+        ctx.fillStyle = 'rgba(11, 15, 25, 0.3)'; // Trail effect
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw Core boundary
+        const scale = 50;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.1)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.arc(centerX, centerY, state.rc * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw Particles
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+
+        // Draw Probe
+        const probeDist = state.r * state.rc * scale;
+        // Place probe at a fixed angle for visibility, or rotating? Fixed is better for UI.
+        const probeX = centerX + probeDist;
+        const probeY = centerY;
+        
+        ctx.beginPath();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.arc(centerX, centerY, probeDist, 0, Math.PI*2); // Orbit path
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = '#ff0055';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff0055';
+        ctx.arc(probeX, probeY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Draw connector to center
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(probeX, probeY);
+        ctx.stroke();
+
+        updatePhysics();
+        updateClocks();
+
+        requestAnimationFrame(animate);
+    }
+
+    // --- Clock Logic ---
+    function updateClocks() {
+        // Lab time ticks constantly
+        state.labTime += 1; // 1 degree per frame roughly
+        
+        // Swirl time ticks based on S factor
+        state.swirlTime += 1 * state.s_factor;
+
+        const labHand = document.getElementById('hand-lab');
+        const swirlHand = document.getElementById('hand-swirl');
+
+        // Rotate hands (6 degrees per "second" tick, but we run smooth)
+        labHand.style.transform = `rotate(${state.labTime}deg)`;
+        swirlHand.style.transform = `rotate(${state.swirlTime}deg)`;
+    }
+
+    // Start
+    animate();
+
+</script>
+</body>
+</html>

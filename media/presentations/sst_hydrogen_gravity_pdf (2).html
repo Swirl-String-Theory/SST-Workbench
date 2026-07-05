@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST: Swirl-String Theory Workbench</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --panel: #151b2b;
+            --accent: #00f2ff;
+            --accent-dim: #00f2ff44;
+            --secondary: #ff0055;
+            --text: #cdd6f4;
+            --grid: #1e293b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Controls */
+        #sidebar {
+            width: 320px;
+            background: var(--panel);
+            border-right: 1px solid var(--grid);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--accent-dim);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #fff;
+            opacity: 0.8;
+        }
+
+        .control-group {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--grid);
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: var(--bg);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        button.danger {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        button.danger:hover {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 0 10px var(--secondary);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-val {
+            color: var(--accent);
+        }
+
+        /* Main Canvas Area */
+        #stage {
+            flex-grow: 1;
+            position: relative;
+            background-image: 
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Overlay UI */
+        #oscilloscope {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 150px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        #oscilloscope-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        #galaxy-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--grid);
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .slider-container {
+            margin-top: 10px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .tooltip {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Notifications */
+        #toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h1>SST Workbench</h1>
+        <div style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">
+            Based on "Long-Distance Swirl Gravity" by O. Iskandarani (2025)
+        </div>
+
+        <div class="control-group">
+            <h2>Knot Injector</h2>
+            <button onclick="app.addKnot(3)">Inject Trefoil (3₁)</button>
+            <button onclick="app.addKnot(5)">Inject Cinquefoil (5₁)</button>
+            <button onclick="app.addKnot(6)">Inject Stevedore (6₁)</button>
+            <div class="tooltip">Drag knots together to form Baryons.</div>
+        </div>
+
+        <div class="control-group">
+            <h2>Swirl-EM Lab</h2>
+            <div class="stat-row">
+                <span>Flux Quantum (Φ⋆):</span>
+                <span class="stat-val">2.07e-15 Wb</span>
+            </div>
+            <button class="danger" onclick="app.triggerTransition()">Trigger Topology Change</button>
+            <div class="tooltip">Nucleates a vortex, generating an EMF impulse. Watch the oscilloscope.</div>
+        </div>
+
+        <div class="control-group">
+            <h2>Galactic Scale</h2>
+            <div class="stat-row">
+                <span>Tail Saturation:</span>
+                <span class="stat-val" id="tail-val">50%</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" min="0" max="100" value="50" oninput="app.updateGalaxy(this.value)">
+            </div>
+            <div class="tooltip">Adjusts the swirl tail (Dark Matter analogue) to flatten rotation curves.</div>
+        </div>
+
+        <div class="control-group">
+            <h2>Data Stream</h2>
+            <div class="stat-row">
+                <span>Active Knots:</span>
+                <span class="stat-val" id="count-knots">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Baryons Formed:</span>
+                <span class="stat-val" id="count-baryons">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Total Circulation (Γ):</span>
+                <span class="stat-val" id="total-circ">0 κ</span>
+            </div>
+        </div>
+        
+        <button onclick="app.reset()" style="margin-top:auto; border-color: #555; color: #888;">Reset Simulation</button>
+    </div>
+
+    <div id="stage">
+        <canvas id="mainCanvas"></canvas>
+        <div id="toast">Topological Transition Detected!</div>
+        
+        <div id="oscilloscope">
+            <div id="oscilloscope-label">EMF IMPULSE DETECTOR (mV)</div>
+            <canvas id="scopeCanvas" width="300" height="150"></canvas>
+        </div>
+
+        <div id="galaxy-panel">
+            <h2>Rotation Curve v(r)</h2>
+            <canvas id="galaxyCanvas" width="270" height="100"></canvas>
+            <div class="tooltip" style="color:var(--accent)">Cyan: SST Prediction (Flat)</div>
+            <div class="tooltip" style="color:#666">Grey: Newtonian (Keplerian)</div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * SWIRL-STRING THEORY SIMULATOR
+         * Implements the physics described in the paper:
+         * 1. Knots as particles with circulation.
+         * 2. Merging knots into Baryons (3 quarks).
+         * 3. Swirl-EM correspondence (Voltage spikes on topology change).
+         * 4. Galactic rotation curves via swirl tails.
+         */
+
+        class Vector {
+            constructor(x, y) { this.x = x; this.y = y; }
+            add(v) { return new Vector(this.x + v.x, this.y + v.y); }
+            sub(v) { return new Vector(this.x - v.x, this.y - v.y); }
+            mult(n) { return new Vector(this.x * n, this.y * n); }
+            mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+            normalize() { 
+                let m = this.mag(); 
+                return m === 0 ? new Vector(0,0) : new Vector(this.x/m, this.y/m); 
+            }
+            dist(v) { return Math.sqrt(Math.pow(this.x - v.x, 2) + Math.pow(this.y - v.y, 2)); }
+        }
+
+        class Knot {
+            constructor(x, y, type) {
+                this.pos = new Vector(x, y);
+                this.vel = new Vector(Math.random() - 0.5, Math.random() - 0.5);
+                this.type = type; // 3 (Trefoil), 5 (Cinquefoil), 6 (Stevedore)
+                this.radius = 20;
+                this.angle = 0;
+                this.spinSpeed = 0.05 * (Math.random() > 0.5 ? 1 : -1); // Chirality
+                this.circulation = 1; // 1 kappa
+                this.isBaryon = false;
+                this.color = type === 3 ? '#00f2ff' : (type === 5 ? '#ff00ff' : '#ffe600');
+                this.components = []; // If baryon, holds the sub-knots
+                this.dragging = false;
+            }
+
+            update(width, height) {
+                if (this.dragging) return;
+
+                this.pos = this.pos.add(this.vel);
+                this.angle += this.spinSpeed;
+
+                // Bounce
+                if (this.pos.x < this.radius || this.pos.x > width - this.radius) this.vel.x *= -1;
+                if (this.pos.y < this.radius || this.pos.y > height - this.radius) this.vel.y *= -1;
+
+                // Friction
+                this.vel = this.vel.mult(0.99);
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.pos.x, this.pos.y);
+                ctx.rotate(this.angle);
+
+                // Draw Swirl Field Aura
+                let grad = ctx.createRadialGradient(0, 0, this.radius * 0.5, 0, 0, this.radius * 2.5);
+                grad.addColorStop(0, this.color + "44");
+                grad.addColorStop(1, "transparent");
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw Knot Geometry
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                // Parametric approximation of knot projection
+                let loops = this.type;
+                if (this.isBaryon) loops = 1; // Baryon draws differently
+
+                if (!this.isBaryon) {
+                    for (let t = 0; t <= Math.PI * 2.1; t += 0.1) {
+                        let r = this.radius * (0.8 + 0.3 * Math.cos(loops * t));
+                        let x = r * Math.cos(t);
+                        let y = r * Math.sin(t);
+                        if (t === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                } else {
+                    // Baryon Core (Composite Tube)
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Draw internal quarks
+                    this.components.forEach((k, i) => {
+                        let offsetAngle = (Math.PI * 2 / 3) * i - this.angle * 2; // Counter rotate
+                        let ox = Math.cos(offsetAngle) * this.radius * 0.5;
+                        let oy = Math.sin(offsetAngle) * this.radius * 0.5;
+                        
+                        ctx.fillStyle = k.color;
+                        ctx.beginPath();
+                        ctx.arc(ox, oy, 5, 0, Math.PI*2);
+                        ctx.fill();
+                    });
+                }
+                
+                ctx.stroke();
+                ctx.closePath();
+
+                // Central Hole Indicator (The "Swirl Clock")
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(0, 0, 2, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        class App {
+            constructor() {
+                this.canvas = document.getElementById('mainCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.knots = [];
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.draggedKnot = null;
+                
+                // Oscilloscope Data
+                this.scopeCanvas = document.getElementById('scopeCanvas');
+                this.scopeCtx = this.scopeCanvas.getContext('2d');
+                this.voltageData = new Array(100).fill(0);
+                
+                // Galaxy Data
+                this.galaxyCanvas = document.getElementById('galaxyCanvas');
+                this.galaxyCtx = this.galaxyCanvas.getContext('2d');
+                this.tailFactor = 0.5;
+
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                // Input handling
+                this.canvas.addEventListener('mousedown', e => this.onMouseDown(e));
+                this.canvas.addEventListener('mousemove', e => this.onMouseMove(e));
+                this.canvas.addEventListener('mouseup', e => this.onMouseUp(e));
+
+                this.animate();
+                this.updateStats();
+                this.drawGalaxyCurve();
+            }
+
+            resize() {
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+            }
+
+            addKnot(type) {
+                let x = this.canvas.width / 2 + (Math.random() - 0.5) * 100;
+                let y = this.canvas.height / 2 + (Math.random() - 0.5) * 100;
+                this.knots.push(new Knot(x, y, type));
+                this.updateStats();
+            }
+
+            onMouseDown(e) {
+                let rect = this.canvas.getBoundingClientRect();
+                let mx = e.clientX - rect.left;
+                let my = e.clientY - rect.top;
+                
+                // Find clicked knot
+                for (let k of this.knots) {
+                    if (k.pos.dist(new Vector(mx, my)) < k.radius * 1.5) {
+                        this.draggedKnot = k;
+                        k.dragging = true;
+                        break;
+                    }
+                }
+            }
+
+            onMouseMove(e) {
+                let rect = this.canvas.getBoundingClientRect();
+                this.mouseX = e.clientX - rect.left;
+                this.mouseY = e.clientY - rect.top;
+
+                if (this.draggedKnot) {
+                    this.draggedKnot.pos.x = this.mouseX;
+                    this.draggedKnot.pos.y = this.mouseY;
+                    this.draggedKnot.vel = new Vector(0,0);
+                }
+            }
+
+            onMouseUp() {
+                if (this.draggedKnot) {
+                    this.draggedKnot.dragging = false;
+                    this.draggedKnot = null;
+                }
+            }
+
+            checkMergers() {
+                // Naive O(N^2) check for proximity to form Baryons
+                // Need 3 non-baryon knots close to each other
+                let candidates = this.knots.filter(k => !k.isBaryon && !k.dragging);
+                
+                for (let i = 0; i < candidates.length; i++) {
+                    let closeNeighbors = [];
+                    for (let j = 0; j < candidates.length; j++) {
+                        if (i === j) continue;
+                        if (candidates[i].pos.dist(candidates[j].pos) < 60) {
+                            closeNeighbors.push(candidates[j]);
+                        }
+                    }
+
+                    if (closeNeighbors.length >= 2) {
+                        // Merge first 2 neighbors + current into a baryon
+                        let k1 = candidates[i];
+                        let k2 = closeNeighbors[0];
+                        let k3 = closeNeighbors[1];
+
+                        // Remove old knots
+                        this.knots = this.knots.filter(k => k !== k1 && k !== k2 && k !== k3);
+
+                        // Create Baryon
+                        let bx = (k1.pos.x + k2.pos.x + k3.pos.x) / 3;
+                        let by = (k1.pos.y + k2.pos.y + k3.pos.y) / 3;
+                        let baryon = new Knot(bx, by, 1); // Type 1 is generic composite
+                        baryon.isBaryon = true;
+                        baryon.radius = 35;
+                        baryon.circulation = 3; // Additive circulation
+                        baryon.color = "#ffffff";
+                        baryon.components = [k1, k2, k3];
+                        
+                        this.knots.push(baryon);
+                        
+                        // Visual Flare
+                        this.triggerTransition(true);
+                        break; // One merge per frame
+                    }
+                }
+            }
+
+            triggerTransition(isMerge = false) {
+                // Simulates the Swirl-EM correspondence
+                // Add a Gaussian pulse to the voltage data
+                let magnitude = isMerge ? 50 : (Math.random() > 0.5 ? 30 : -30); // +/- Phi_star
+                
+                // Inject pulse
+                for(let i=0; i<20; i++) {
+                    let val = magnitude * Math.exp(-Math.pow(i - 10, 2) / 10);
+                    if (this.voltageData.length > 90) this.voltageData.shift();
+                    this.voltageData.push(val);
+                }
+
+                // Show Toast
+                let t = document.getElementById('toast');
+                t.innerText = isMerge ? "Baryon Formed! Circulation Tripled." : "Topological Transition: ΔΦ = ±Φ⋆";
+                t.style.opacity = 1;
+                setTimeout(() => t.style.opacity = 0, 2000);
+            }
+
+            updateOscilloscope() {
+                // Shift data
+                this.voltageData.shift();
+                // Add noise
+                this.voltageData.push((Math.random() - 0.5) * 2);
+
+                let ctx = this.scopeCtx;
+                let w = this.scopeCanvas.width;
+                let h = this.scopeCanvas.height;
+
+                ctx.fillStyle = "#000";
+                ctx.fillRect(0, 0, w, h);
+
+                // Grid
+                ctx.strokeStyle = "#003300";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for(let x=0; x<w; x+=20) { ctx.moveTo(x,0); ctx.lineTo(x,h); }
+                for(let y=0; y<h; y+=20) { ctx.moveTo(0,y); ctx.lineTo(w,y); }
+                ctx.stroke();
+
+                // Signal
+                ctx.strokeStyle = "#00ff00";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, h/2);
+                
+                for(let i=0; i<this.voltageData.length; i++) {
+                    let x = (i / this.voltageData.length) * w;
+                    let y = h/2 - this.voltageData[i];
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            updateGalaxy(val) {
+                this.tailFactor = val / 100;
+                document.getElementById('tail-val').innerText = val + "%";
+                this.drawGalaxyCurve();
+            }
+
+            drawGalaxyCurve() {
+                let ctx = this.galaxyCtx;
+                let w = this.galaxyCanvas.width;
+                let h = this.galaxyCanvas.height;
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Axes
+                ctx.strokeStyle = "#666";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(10, 10); ctx.lineTo(10, h-10); ctx.lineTo(w-10, h-10);
+                ctx.stroke();
+
+                // Newtonian (Keplerian) Falloff: v ~ 1/sqrt(r)
+                ctx.strokeStyle = "#555";
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(10, h-10);
+                for(let x=1; x<w-20; x++) {
+                    let r = x / 20;
+                    let v = 0;
+                    if(r > 0) v = 30 / Math.sqrt(r);
+                    if (v > h-20) v = h-20;
+                    ctx.lineTo(10+x, (h-10) - v);
+                }
+                ctx.stroke();
+
+                // SST Prediction: v = v_core + C_tail(1 - e^-r/rc)
+                ctx.strokeStyle = "#00f2ff";
+                ctx.setLineDash([]);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(10, h-10);
+                
+                for(let x=0; x<w-20; x++) {
+                    let r = x / 20; // radius scale
+                    // Core contribution (rises then falls slightly)
+                    let v_core = 50 * (r / (1 + r*r)); 
+                    // Tail contribution (Saturates)
+                    let v_tail = (this.tailFactor * 60) * (1 - Math.exp(-r/2));
+                    
+                    let v_total = v_core + v_tail;
+                    ctx.lineTo(10+x, (h-10) - v_total);
+                }
+                ctx.stroke();
+            }
+
+            updateStats() {
+                let baryons = this.knots.filter(k => k.isBaryon).length;
+                let singles = this.knots.length - baryons;
+                let circ = singles + (baryons * 3);
+
+                document.getElementById('count-knots').innerText = singles;
+                document.getElementById('count-baryons').innerText = baryons;
+                document.getElementById('total-circ').innerText = circ + " κ";
+            }
+
+            reset() {
+                this.knots = [];
+                this.updateStats();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw connecting lines for "Long-Distance Swirl Gravity"
+                this.ctx.strokeStyle = "#1e293b";
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                for(let i=0; i<this.knots.length; i++) {
+                    for(let j=i+1; j<this.knots.length; j++) {
+                        let d = this.knots[i].pos.dist(this.knots[j].pos);
+                        if (d < 200) {
+                            this.ctx.globalAlpha = 1 - (d/200);
+                            this.ctx.moveTo(this.knots[i].pos.x, this.knots[i].pos.y);
+                            this.ctx.lineTo(this.knots[j].pos.x, this.knots[j].pos.y);
+                        }
+                    }
+                }
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
+
+                // Physics & Draw
+                this.checkMergers();
+                
+                this.knots.forEach(k => {
+                    k.update(this.canvas.width, this.canvas.height);
+                    k.draw(this.ctx);
+                });
+
+                this.updateOscilloscope();
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        const app = new App();
+
+        // Initial seed
+        app.addKnot(3);
+        app.addKnot(5);
+        app.addKnot(5);
+
+    </script>
+</body>
+</html>

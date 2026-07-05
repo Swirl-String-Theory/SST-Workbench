@@ -1,0 +1,556 @@
+%! Author = Omar Iskandarani
+%! Title = Swirl String Theory (SST) Canon v0.5.5
+%! Date = Sept 9, 2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17052966 % Placeholder DOI, update upon finalization
+
+\newcommand{\canonversion}{\textbf{v0.5.5}} % Semantic versioning: vMAJOR.MINOR.PATCH
+\newcommand{\papertitle}{Swirl String Theory (SST) Canon \canonversion}
+\newcommand{\paperdoi}{10.5281/zenodo.17052966}
+
+
+
+%========================================================================================
+% PACKAGES AND DOCUMENT CONFIGURATION
+%========================================================================================
+\documentclass[11pt]{article}
+\usepackage{subfiles}
+\input{../template/SSTstyle.sty}
+\input{../template/SST_appendix_setup.sty}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{tcolorbox}
+\usetikzlibrary{knots,intersections,decorations.pathreplacing,3d,calc,arrows.meta,positioning,decorations.pathmorphing}
+\usepackage{pgfmath}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{ulem}
+
+
+% ==== Packages ====
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\geometry{margin=1in}
+\usepackage{ bm, mathtools}
+\usepackage{siunitx}
+\sisetup{per-mode=symbol,round-mode=figures,round-precision=6}
+\usepackage{physics}
+\usepackage{upgreek}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+
+
+% ===== Gauge sector macros =====
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\ii}{\mathrm{i}}
+% Gauge fields (adjoints; indices a=1..8, i=1..3)
+\newcommand{\GsA}{G^a_{\mu\nu}}
+\newcommand{\WsI}{W^i_{\mu\nu}}
+\newcommand{\Bmn}{B_{\mu\nu}}
+
+
+
+% ===============================
+% Macros (canonicalized)
+% ===============================
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{%
+	\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+	{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+	{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+	{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+}
+\newcommand{\swirlarrowcw}{%
+	\mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+	{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+	{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+	{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+}
+
+
+% Canonical symbols
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}               % swirl speed magnitude
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density /c^2? (we define clearly below)
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+\newcommand{\FmaxEM}{F_{\mathrm{EM}}^{\max}}             % EM-like maximal force scale
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+% Policy: the golden constant is only allowed via hyperbolic functions.
+% Never write (1+\sqrt{5})/2; always use \xig=\asinh(1/2), \varphi=e^{\xig}.
+% hyperbolic "golden" constants policy
+\newcommand{\xig}{\operatorname{asinh}\!\left(\tfrac{1}{2}\right)}
+\newcommand{\phig}{\exp(\xig)}
+\newcommand{\phialg}{\bigl(1+\sqrt{5}\bigr)/2}
+\newcommand{\xigold}{\tfrac{3}{2}\,\xig}
+\newcommand{\GoldenDeclare}{%
+	\textbf{Golden (hyperbolic)}:\ \(\ln\phi=\xig\), hence \(\phi=\phig\).
+	\ \emph{(Equivalently, \(\phi=\phialg\); the algebraic form is derivative.)}%
+}
+% --- Canonical identity (hyperbolic-only proof, algebraic as corollary) ---
+\newtheorem{identity}{Identity}
+
+% Additional theorem-like environments
+\newtheorem{axiom}{Axiom}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{postulate}{Postulate}
+
+%========================================================================================
+% DOCUMENT START
+%========================================================================================
+\begin{document}
+
+%========================================================================================
+% TITLE PAGE
+%========================================================================================
+
+	\titlepageOpen
+	\begin{abstract}\small
+		This Canon is the single source of truth for \emph{Swirl String Theory (SST)}: all definitions, axioms, theorems, and empirical calibrations are presented with rigorous, axiomatic clarity. It unifies the core hydrodynamic, electromagnetic, and topological principles of the theory. This version (\canonversion) updates the formal system by integrating pedagogical derivations from earlier versions while preserving the rigor of v0.4.x. In particular, it canonizes the following principles:
+
+		I. \textbf{Foundational swirl invariants and quantization:} The Chronos--Kelvin circulation invariant and Swirl Quantization Principle unify classical vortex laws with quantum topology. The \emph{swirl Coulomb constant} $\Lambda$ is defined for the hydrogenic swirl potential, yielding the correct Bohr spectrum \cite{Batchelor1967,Saffman1992,Iskandarani2025Canon034,Iskandarani2025Hydrogen}.
+
+		II. \textbf{Swirl--Electromagnetic unification:} Electromagnetism emerges as collective swirl dynamics. A changing swirl-string density produces an electromotive force (Faraday-law term), and \emph{photons} are identified as delocalized, unknotted swirl oscillations whose wave dynamics exactly reproduce Maxwell’s equations \cite{Jackson1999,Iskandarani2025MagneticVector,Iskandarani2025DoubleSlit}.
+
+		III. \textbf{Standard Model from topology:} The $SU(3)\times SU(2)\times U(1)$ gauge structure and particle spectrum emerge from swirl-string director fields and knot topology. The \emph{weak mixing angle} $\theta_W$ and electroweak scale are derived from first principles (director stiffness ratios and bulk swirl energy) \cite{Weinberg1967,PeskinSchroeder1995,Iskandarani2025Canon034}, with a parameter-free prediction of the Higgs scale ($\sim \SI{259}{GeV}$) \cite{Iskandarani2025Canon034}.
+
+		IV. \textbf{Swirl gravitation mechanism:} Long-range gravitational attraction arises as a topological pressure effect in a flat medium. Chiral knotted strings (e.g.\ two hydrogen molecules modeled as trefoil knots) connected by a common swirl axis experience a persistent swirl clock gradient and mutual attraction, explaining molecular gravity without spacetime curvature (\emph{Hydrogen-Gravity theorem}) \cite{Iskandarani2025Hydrogen}.
+
+		V. \textbf{Quantum measurement as dynamics:} Wave--particle duality is handled via two phases of swirl strings (extended R-phase vs.\ knotted T-phase). The R$\to$T (wave collapse) transition is governed by a \emph{dynamical rate law} proportional to ambient energy density, replacing an ad hoc wavefunction collapse postulate with a canonical kinetic rule \cite{Zurek2003,Iskandarani2025DoubleSlit}.
+
+		\medskip
+		\noindent\textbf{Core Axioms (SST).}
+		\begin{enumerate}
+			\item \textbf{Swirl Medium:} Physics is formulated on $\mathbb{R}^3$ with an absolute time. All dynamics occur in a frictionless, incompressible \emph{swirl condensate} (universal substrate).
+			\item \textbf{Swirl Strings (Circulation \& Topology):} Particles and field quanta correspond to closed vortex filaments (``swirl strings'') in the condensate. The circulation around any closed loop is quantized:
+			\[
+				\Gamma = \oint_C \mathbf{v}_{\!\!\;\circ} \cdot d\boldsymbol{\ell} = n\,\kappa,\quad n\in\mathbb{Z},\quad \kappa=\frac{h}{m_{\textrm eff}}\,,
+			\]
+			and discrete quantum numbers (mass, charge, spin) correspond to topological invariants of the swirl string (linking, twist, writhe) \cite{Onsager1949,Feynman1955,Iskandarani2025Canon034}.
+			\item \textbf{String-Induced Gravitation:} Macroscopic attraction (gravity) emerges from coherent swirl flows and pressure gradients in the condensate. In the Newtonian limit, the effective gravitational coupling $G_{\textrm swirl}$ is fixed by canonical constants such that $G_{\textrm swirl}\approx G_{\textrm N}$ \cite{Iskandarani2025Canon034}.
+			\item \textbf{Swirl Clocks (Local Time):} A local proper-time rate depends on tangential swirl speed. A clock comoving with swirl velocity $v$ ticks slower by the factor $S_t = \sqrt{\,1 - v^2/c^2\,}$ relative to an observer at rest in the medium.
+			\item \textbf{Dual Phases (Wave--Particle):} Each swirl string has two limiting phases: an extended \emph{R-phase} (unknotted, delocalized circulation, wave-like) and a localized \emph{T-phase} (knotted, particle-like). Quantum measurement corresponds to a dynamic transition between these phases (R$\to$T collapse or T$\to$R de-localization) accompanied by swirl radiation.
+			\item \textbf{Taxonomy (Particle--Knot Mapping):} Unknotted excitations correspond to bosonic fields; chiral hyperbolic knots correspond to quarks; torus knots correspond to leptons. Linked composite knots represent bound states (e.g.\ nuclei). This particle--knot dictionary is one-to-one and \emph{canonical} (fixed by topology) \cite{Iskandarani2025Canon034}.
+		\end{enumerate}
+	\end{abstract}
+
+	\titlepageClose
+
+	\section{Canon Governance and Formal System}
+	\textbf{Canonical Formal System.} SST is formulated as a formal system $S = (P, D, R)$ comprising axioms $P$, definitions $D$, and inference rules $R$. A statement is \emph{canonical} if it is derivable within $S$ and consistent with all prior canonical statements. The hierarchy of statements is defined as:
+	\begin{itemize}
+		\item \textbf{Axiom (Canonical):} A primitive assumption of SST (e.g.\ the existence of the swirl medium).
+		\item \textbf{Definition (Canonical):} Introduction of a symbol or concept (e.g.\ the swirl Coulomb constant $\Lambda$).
+		\item \textbf{Theorem/Corollary (Canonical):} A proposition proved within $S$ from axioms and prior theorems.
+		\item \textbf{Calibration (Empirical):} A numerical value for a canonical constant, taken from experiment to anchor the theory (but not used as a premise in proofs).
+		\item \textbf{Research Track (Non-canonical):} A conjecture or extension not yet proven within $S$ (included for context but not formally part of the canon).
+	\end{itemize}
+	All canonical developments below adhere strictly to these rules. The main text presents only axioms, definitions, theorems, corollaries, and calibrated constants. All derivations, dimensional analyses, and pedagogical explanations are deferred to appendices for clarity (cf.\ v0.3.4) \cite{Iskandarani2025Canon034}. Each new formula or constant introduced is verified for dimensional consistency and limiting-case agreement with established physics (see Appendix~\ref{app:deriv} and \S\ref{app:glossary}).
+
+	\section{Classical Invariants and Swirl Quantization}
+	Under Axiom~1 (inviscid incompressible medium), the Euler equations yield standard vortex invariants. In particular:
+	\begin{itemize}
+		\item \textbf{Kelvin’s circulation theorem:} $\frac{d\Gamma}{dt}=0$ for any material loop co-moving with the fluid \cite{Batchelor1967,Saffman1992}.
+		\item \textbf{Vorticity transport (Helmholtz law):} $\partial_t \boldsymbol{\omega}_{\!\!\;\circ} = \nabla \times (\mathbf{v}_{\!\!\;\circ}\times \boldsymbol{\omega}_{\!\!\;\circ})$, implying vortex lines move with the fluid \cite{Helmholtz1858,Kelvin1869}.
+		\item \textbf{Helicity conservation:} $H=\int \mathbf{v}_{\!\!\;\circ}\cdot\boldsymbol{\omega}_{\!\!\;\circ}\,dV$ is materially invariant (changes only through reconnections) \cite{Moffatt1969}.
+	\end{itemize}
+
+	\begin{axiom}[Chronos--Kelvin Invariant]\label{ax:chronos-kelvin}
+	For any thin, closed swirl loop (core radius $R(t)$) carried with the flow (no reconnections or sources), the following quantity is invariant in time:
+	\[
+		\frac{D}{Dt}\Big(R^2\,\omega\Big)=0 \quad\Longleftrightarrow\quad \frac{D}{Dt}\Big(\frac{c}{r_c}\,R^2\sqrt{\,1 - S_t^2\,}\Big)=0, \quad (S_t = \sqrt{\,1 - (\omega\,r_c/c)^2\,})\,,
+	\]
+	where $\omega=\|\boldsymbol{\omega}_{\!\!\;\circ}\|$ is the swirl vorticity magnitude on the loop, $r_c$ is the canonical core radius, and $S_t$ is the local swirl clock factor. This encapsulates Kelvin’s theorem with relativistic time dilation due to swirl motion (the ``swirl clock'' effect) \cite{Batchelor1967,Saffman1992,Iskandarani2025Canon034}.
+	\end{axiom}
+
+	\subsection{Swirl Quantization Principle}
+	\textbf{Swirl Quantization Principle.} The joint discreteness of circulation and topology is the origin of quantum behavior in SST. Concretely, a swirl string’s circulation $\Gamma$ is quantized in units of $\kappa$, and its allowed configurations are restricted to distinct knot classes \cite{Onsager1949,Feynman1955,Iskandarani2025Canon034}. This replaces canonical commutation relations of quantum mechanics with topological and integrality conditions. In summary, discreteness arises from (a) $\Gamma = n\kappa$ and (b) the knot spectrum $H_{\textrm swirl}$ (trefoil, figure-eight, Hopf link, \emph{etc.}) \cite{Iskandarani2025Canon034}. A particle in SST is identified with a quantized swirl state (a closed vortex filament) rather than an eigenstate of an operator.
+
+	\section{Canonical Constants and Effective Densities}
+	Several new physical constants arise in SST, corresponding to properties of the universal swirl medium and its excitations. \textbf{Primary SST constants (with recommended calibrations)} \cite{Iskandarani2025Canon034,Iskandarani2025Hydrogen}:
+	\begin{itemize}
+		\item \textbf{Swirl speed quantum (core):} $v_{\!\!\;\circ} = 1.09385\times10^6~\si{m/s}$.
+		\item \textbf{String core radius:} $r_c = 1.40897\times10^{-15}~\si{m}$.
+		\item \textbf{Effective fluid density:} $\rho_f = 7.00000\times10^{-7}~\si{kg/m^3}$.
+		\item \textbf{Mass-equivalent density:} $\rho_m = 3.89344\times10^{18}~\si{kg/m^3}$.
+		\item \textbf{Maximal force (EM sector):} $F_\textrm{EM}^{\max} = 2.9053507\times 10^{1}~\si{N}$. 
+		\item \textbf{Maximal force (Gravitational):} $F_{\textrm G}^{\max} = 3.02563\times10^{43}~\si{N}$.
+		\item \textbf{Swirl--EM transduction constant:} $G_{\!\!\;\circ}$ (dimensionless).
+	\end{itemize}
+
+	\textbf{Effective density derivation.} The swirl energy density is $\rho_E = \tfrac{1}{2}\rho_f\,\|\mathbf{v}_{\!\!\;\circ}\|^2$, and the mass-equivalent density $\rho_m = \rho_E/c^2$. The physical origin of the fluid density $\rho_f$ can be understood by coarse-graining an ensemble of swirl strings \cite{Iskandarani2025Canon034}. Consider many thin vortex filaments in a small volume. Each filament of core radius $r_c$ carries a line mass $\mu_* = \rho_m \pi r_c^2$ and a circulation quantum $\Gamma_* \approx 2\pi r_c\,v_{\!\!\;\circ}$. If $N_{\textrm str}$ such strings pervade area $A$ (so number density $\nu=N_{\textrm str}/A$), one finds $\rho_f = \mu_*\,\nu = \rho_m\,\pi r_c^2\,\nu$, and $\langle\omega_{\!\!\;\circ}\rangle \approx \Gamma_*\,\nu$ for average vorticity. Eliminating $\nu$ yields:
+	\[
+		\rho_f = \rho_m\,\frac{r_c^2\,v_{\!\!\;\circ}}{\langle \omega_{\!\!\;\circ}\rangle}\,,
+	\]
+	which shows that a small $r_c$ or large $\langle\omega\rangle$ leads to a very low effective density $\rho_f$ (consistent with $\rho_f \sim 7\times10^{-7}~\si{kg/m^3}$ for reasonable vortex parameters) \cite{Iskandarani2025Canon034}.
+
+	\section{The Swirl--Electromagnetic Bridge}
+	One of SST’s core achievements is to show that classical electromagnetism is an emergent phenomenon of swirl dynamics. Local changes in swirl string density and configuration act as sources for effective electric and magnetic fields in the bulk.
+
+	\begin{definition}[Swirl Areal Density]
+		Let $\varrho_{\!\!\;\circ}(x,t)$ be the coarse-grained areal density of swirl strings piercing a surface (number of vortex cores per unit area, oriented along a local direction). $\varrho_{\!\!\;\circ}$ measures how many swirl filaments thread through a given area, serving as an analog to charge/current density in Maxwell’s equations \cite{Jackson1999,Iskandarani2025MagneticVector}.
+	\end{definition}
+
+	\begin{theorem}[Swirl-Induced Electromotive Force]
+		A time-varying swirl areal density acts as an effective source term in Faraday’s law \cite{Jackson1999,Iskandarani2025MagneticVector}:
+		\[
+			\nabla \times \mathbf{E} = -\,\partial_t \mathbf{B} \;-\; \mathbf{b}_{\!\!\;\circ}, \qquad \mathbf{b}_{\!\!\;\circ} = G_{\!\!\;\circ}\,\partial_t \varrho_{\!\!\;\circ}\,.
+		\]
+		Thus, whenever swirl strings reconnect or $\varrho_{\!\!\;\circ}$ shifts, an electromotive force is generated. Kinetic energy from the fluid converts into electromagnetic field energy, in exact analogy to Faraday induction.
+	\end{theorem}
+
+	\begin{corollary}[Photon as Swirl Wave]
+		Unknotted swirl excitations correspond to free electromagnetic radiation. Introduce a divergence-free swirl potential $\mathbf{a}(x,t)$ with
+		\[
+			\mathbf{v}_{\!\!\;\circ} = \partial_t \mathbf{a}, \qquad \mathbf{b}_{\!\!\;\circ} = \nabla \times \mathbf{a}, \qquad \nabla\cdot \mathbf{a}=0.
+		\]
+		The Lagrangian $L_{\textrm wave} = \frac{\rho_f}{2}\,|\mathbf{v}_{\!\!\;\circ}|^2 - \frac{\rho_f c^2}{2}\,|\mathbf{b}_{\!\!\;\circ}|^2$ yields
+		\[
+			\partial_t^2 \mathbf{a} - c^2\,\nabla\times(\nabla\times \mathbf{a}) = 0,\qquad \nabla\cdot \mathbf{a}=0,
+		\]
+		identical to free-space Maxwell (Coulomb gauge). Identifying
+		$\mathbf{E} \propto \partial_t \mathbf{a}$, $\mathbf{B}\propto \nabla\times \mathbf{a}$ recovers all vacuum EM relations; unknotted R-phase excitations are photons \cite{Jackson1999,Iskandarani2025DoubleSlit}.
+	\end{corollary}
+
+	\section{Master Equations (Boxed Canonical Relations)}
+	\textbf{Swirl Coulomb Potential:}
+	\[
+		V_{\textrm SST}(r) = -\,\Lambda\,\sqrt{\,r^2 + r_c^2\,}\,, \qquad \Lambda = 4\pi\,\rho_m\,v_{\!\!\;\circ}^2\,r_c^4\,,
+	\]
+	recovering $-\Lambda/r$ for $r\gg r_c$ and the hydrogen spectrum \cite{Iskandarani2025Canon034,Iskandarani2025Hydrogen}.
+
+	\textbf{Swirl Pressure Law (Euler radial balance):}
+	\[
+		\frac{1}{\rho_f}\frac{dp_{\textrm swirl}}{dr} = \frac{v_\theta(r)^2}{\,r\,}\,,
+	\]
+	with $p_{\textrm swirl}(r) = p_0 + \rho_f v_0^2 \ln(r/r_0)$ for flat rotation curves, providing centripetal force density for galaxies \cite{Batchelor1967,Saffman1992,Iskandarani2025Canon034}.
+
+	\textbf{Swirl Clock (Local Time Dilation):}
+	\[
+		\frac{dt_{\textrm local}}{dt_{\infty}} \;=\; \sqrt{\,1 - \frac{\|\mathbf{v}_{\!\!\;\circ}\|^2}{c^2}\,}\,.
+	\]
+
+	\textbf{Swirl Hamiltonian Density:}
+	\[
+		\mathcal{H}_{\textrm SST} \;=\; \tfrac{1}{2}\rho_f\,\|\mathbf{v}_{\!\!\;\circ}\|^2 \;+\; \tfrac{1}{2}\rho_f\,r_c^2\,\|\boldsymbol{\omega}_{\!\!\;\circ}\|^2 \;+\; \lambda\,(\nabla\cdot\mathbf{v}_{\!\!\;\circ})\,,
+	\]
+	Kelvin-compatible energy density (extended form in Appendix~\ref{app:deriv}) \cite{Batchelor1967,Saffman1992}.
+
+	\textbf{Swirl--Gravity Coupling:}
+	\[
+		G_{\textrm swirl} = \frac{v_{\!\!\;\circ}\,c^5\,t_P^2}{2\,F_{\textrm EM}^{\max}\,r_c^2} \;\approx\; G_{\textrm N}\,.
+	\]
+
+	\textbf{Topology--Driven Mass Law:}
+	\[
+		M(K)\;=\;\Big(\tfrac{4}{\alpha}\Big)^{\!b-3/2}\,\phi^{-g}\,n^{-1/\phi}\;\Big(\tfrac{1}{2}\rho_f v_{\!\!\;\circ}^2\Big)\,\frac{\pi\,r_c^3\,L_{\textrm tot}(K)}{c^2}\,,
+	\]
+	relating mass to string length and topological invariants (research-grade; included for intuition) \cite{Iskandarani2025Canon034}.
+
+	\section{The Standard Gauge Sector}
+	A remarkable feature of SST is the natural emergence of Yang--Mills gauge fields from the collective orientation of swirl strings. In a condensed matter analogy, each swirl string has an internal director (orientation in an order parameter space), and smooth distortions of these directors lead to field theories.
+
+	\begin{theorem}[Emergent Yang--Mills from Swirl Directors]
+		The elasticity of the swirl condensate’s director fields gives rise to gauge field dynamics. Small fluctuations in the director fields are described by an effective Lagrangian:
+		\[
+			\mathcal{L}_{\textrm dir} \;\Longrightarrow\; \mathcal{L}_{\textrm YM}^{\textrm (eff)} \;=\; -\frac{1}{4}\sum_{i=1}^{3} g_i^{-2}\, F_{\mu\nu}^{(i)}\,F^{(i)\mu\nu}\,,
+		\]
+		with $g_i^{-2} \propto \kappa_i$ (director stiffness moduli). Upon quantization of modes one obtains an $SU(3)\times SU(2)\times U(1)$ Yang--Mills sector \cite{ChoFaddeevNiemi1999,Iskandarani2025Canon034}.
+	\end{theorem}
+
+	\subsection{Knot-to-Representation Map and Particle Taxonomy}
+	Quantum numbers are mapped to topological invariants. The canonical mapping from knot properties $(s_3, d_2, \tau)$ to hypercharge $Y$ is:
+	\[
+		Y(K)=\tfrac{1}{2}+\tfrac{2}{3}s_3(K)-d_2(K)-\tfrac{1}{2}\tau(K)\,,
+	\]
+	reproducing Standard Model hypercharges; with $Q = T_3 + \tfrac{1}{2}Y$ this yields observed electric charges. Anomaly cancellation holds generation-wise (topological consistency) \cite{Weinberg1967,PeskinSchroeder1995,Iskandarani2025Canon034}.
+
+	\subsection{Coupling Constants, EWSB, and the Weak Mixing Angle}
+	\textbf{Canonical scale and couplings.} SST defines a natural renormalization scale $\mu \equiv \hbar v_{\!\!\;\circ}/r_c \approx \SI{0.511}{MeV}$ \cite{Iskandarani2025Canon034}. At this scale,
+	\[
+		g_i^{-2}(\mu) \;=\; \kappa_i\,\Sigma_{\textrm core}\,W_i\,,\qquad \Sigma_{\textrm core}=\frac{1}{\pi}\,,
+	\]
+	where $W_i$ are topological weights accounting for how each director spans the condensate.
+
+	\begin{theorem}[Emergence of the Weak Mixing Angle]
+		The electroweak mixing angle $\theta_W$ arises from the ratio of swirl director stiffnesses:
+		\[
+			\tan^2\theta_W \;=\; \frac{g'^2}{g^2} \;=\; \frac{\kappa_2}{\kappa_1}\,,
+		\]
+		so $\theta_W$ is computable from first principles \cite{Weinberg1967,PeskinSchroeder1995,Iskandarani2025Canon034}.
+	\end{theorem}
+
+	\textbf{EWSB scale.} From the bulk swirl energy density $u_{\textrm swirl} = \tfrac{1}{2}\rho_f v_{\!\!\;\circ}^2$ and $(W_1W_2W_3)^{1/4}$,
+	\[
+		v_\Phi \;=\; u_{\textrm swirl}^{1/4}\,(W_1 W_2 W_3)^{1/4} \;\approx\; 2.595\times10^2~\si{GeV}\,,
+	\]
+	a parameter-free prediction near the observed $\SI{246}{GeV}$ \cite{Iskandarani2025Canon034}.
+
+	\section{Swirl Gravitation and the Hydrogen-Gravity Mechanism}
+	While gravity is included implicitly via swirl pressure (Axiom~3), SST provides a concrete mechanism for attractive forces between neutral bodies.
+
+	\begin{theorem}[Swirl Gravity Mechanism in Flat Space]
+		Chiral knotted swirl strings generate quantized long-range circulation that leads to mutual attraction. Consider a chiral knot $K$ (e.g.\ a trefoil, $3_1$) which encloses a straight central axis. Let $\mathcal{C}$ be a large loop encircling this axis. Cauchy’s integral theorem applied to the analytic swirl potential $W(z)=\Phi+i\Psi$ implies
+		\[
+			\oint_{\mathcal{C}} \mathbf{v}_{\!\!\;\circ}\cdot d\boldsymbol{\ell} \;=\; 2\pi i\,\mathrm{Res}(\partial_z W,0) \;=\; n\,\kappa\,,
+		\]
+		with $n$ the winding (linking) number. The locked circulation yields a pressure deficit along the axis, $\Delta p = -\tfrac{1}{2}\rho_f\,\|\mathbf{v}_{\!\!\;\circ}\|^2$, producing attraction between knots sharing the axis (e.g.\ two $H_2$ trefoils), entirely in flat space \cite{Iskandarani2025Hydrogen}.
+	\end{theorem}
+
+	\section{Wave--Particle Duality and Quantum Measurement}
+	SST provides a natural framework for wave--particle duality through the dual phases of swirl strings. The de Broglie relations arise by considering a moving T-phase particle as a transported R-phase oscillation: a closed R-loop of length $L$ resonates with wavelength $\lambda = L/n$ for mode number $n$; setting $p = h/\lambda$ yields $p = h n/L$.
+
+	\begin{theorem}[R$\to$T Transition Dynamics]
+		Quantum measurement (collapse) corresponds to a rapid R$\to$T phase transition induced by interactions:
+		\[
+			\Gamma_{R\to T} = C_{\textrm int}\,\rho_{E,\textrm int}\,f(\Delta K)\,,
+		\]
+		with $C_{\textrm int}$ characteristic of the interaction, $\rho_{E,\textrm int}$ the interacting field’s energy density, and $f(\Delta K)$ a function decreasing with knot complexity change. This replaces an ad hoc postulate with predictive kinetics (environment-dependent) \cite{Zurek2003,Iskandarani2025DoubleSlit}.
+	\end{theorem}
+
+	\begin{theorem}[Topological Spin--Statistics Connection]
+		Unknotted swirl strings are bosons (integer spin), while knotted strings can carry half-integer spin, per the Finkelstein--Rubinstein constraint on single-valuedness under $2\pi$ rotations in configuration space \cite{FinkelsteinRubinstein1968}. Hence unknotted~=~boson, knotted~=~fermion.
+	\end{theorem}
+
+	% ================================
+% Canonical Patch: Experimental Status & Restrictions
+% ================================
+	\section{Canonical Experimental Status and Restrictions}
+	\label{sec:exp_status_patch}
+
+	\begin{theorem}[Local-Kernel Collapse Law (Canonical)]
+		\label{thm:local_kernel}
+		The R$\to$T transition rate is given by a spatial–spectral convolution of a local susceptibility kernel $\chi(\mathbf r,\omega)$ with the incident energy-density $u(\mathbf r,\omega)$, modulated by a topological factor $\mathcal F(\Delta\mathcal K,\omega)$:
+		\begin{equation}
+			\boxed{\;
+			\Gamma_{R\to T}
+				=
+				\int_{\mathbb{R}^3}\!\! d^3\mathbf r\,
+				\int_0^\infty\!\! d\omega\;
+				\chi(\mathbf r,\omega)\,
+				u(\mathbf r,\omega)\,
+				\mathcal F(\Delta\mathcal K,\omega)
+				\;}
+			\label{eq:Gamma_local_kernel}
+		\end{equation}
+		This form reduces, in the weak-coupling linear regime, to standard environment-induced decoherence where rates are governed by the bath spectral density at system transitions \cite{Zurek2003,Hornberger2012RMP}.
+	\end{theorem}
+
+	\begin{corollary}[Near-field Single-Mode Approximation]
+		\label{cor:P_over_A}
+		If the field is dominated by one near-field mode with frequency $\omega_0$, effective area $A_{\textrm eff}$, and power $P$, and if $\chi(\mathbf r,\omega)$ varies slowly over the string cross-section, then
+		\begin{equation}
+			\Gamma_{R\to T}\;\approx\;
+			\alpha\,\frac{P}{A_{\textrm eff}}\,
+			L(\omega;\omega_0,\gamma)\,\Delta\mathcal K,
+			\qquad
+			L(\omega;\omega_0,\gamma)=\frac{\gamma^2}{(\omega-\omega_0)^2+\gamma^2}\,,
+			\label{eq:P_over_A}
+		\end{equation}
+		i.e.\ the geometry-law \(P/A_{\textrm eff}\) is an \emph{asymptotic} approximation, not universal. In generic lab conditions where many modes and device couplings contribute, Eq.~\eqref{eq:Gamma_local_kernel} must be used \cite{Hornberger2012RMP,Krantz2019APR}.
+	\end{corollary}
+
+	\begin{definition}[Environment-Dressed Knot Resonance]
+		\label{def:dressed_resonance}
+		The bare R$\leftrightarrow$T resonance at \(\omega_0^{(0)}\) acquires a shift and width from environmental dressing:
+		\(
+		\omega_0=\omega_0^{(0)}+\Re\Sigma(\omega_0),\
+		\gamma=-\Im\Sigma(\omega_0),
+		\)
+		with $\Sigma$ the retarded self-energy generated by \(\chi\!\ast u\). Hence, in realistic devices, the resonance can broaden/shift and masquerade as device-specific features unless the bath is engineered ultra-clean \cite{Zurek2003,Krantz2019APR}.
+	\end{definition}
+
+	\begin{lemma}[Consistency with Existing Null Results]
+		\label{lem:null_results}
+		Interferometry of large molecules and clusters, optomechanical noise thermometry, and superconducting-resonator tests report decoherence consistent with standard spectral-density couplings and set upper bounds on any \emph{universal}, geometry-invariant excess collapse \cite{Hornberger2012RMP,Nimmrichter2014PRL,Schrinski2023PRL}. This constrains the \emph{magnitude and domain} where Eq.~\eqref{eq:P_over_A} applies but does not conflict with the canonical kernel law Eq.~\eqref{eq:Gamma_local_kernel}.
+	\end{lemma}
+
+	\begin{calibration}[Empirical Upper Bounds on \(\chi\)]
+		\label{cal:chi_bounds}
+		Given measured visibility \(V\) over interaction time \(\tau\) and a mapped field \(u(\mathbf r,\omega)\),
+		\begin{equation}
+			-\ln V \;=\; \int d^3\mathbf r \int d\omega\;\chi(\mathbf r,\omega)\,u(\mathbf r,\omega)\,\mathcal F(\Delta\mathcal K,\omega)\,\tau
+			\;\;\Rightarrow\;\;
+			\chi_{\textrm eff}^{\max}(\omega)\;\lesssim\;
+			\frac{-\ln V}{\tau \int d^3\mathbf r\, u(\mathbf r,\omega)\,\mathcal F(\Delta\mathcal K,\omega)}\,.
+			\label{eq:chi_bound}
+		\end{equation}
+		Canonical tables may list \(\chi_{\textrm eff}^{\max}\) extracted from interferometry, optomechanics, and qubit spectroscopy as priors (Appendix \S\ref{app:deriv}).
+	\end{calibration}
+
+	\paragraph{Status of Canonical Predictions.}
+	\begin{itemize}
+		\item \textbf{Unaffected (sound):} The SST$\to$QM correspondence (Rabi physics, standard decoherence in the linear regime), photon as unknotted swirl wave, swirl pressure law, gauge emergence—all remain consistent.
+		\item \textbf{Constrained:} Geometry-invariant collapse (\(P/A_{\textrm eff}\) law) and a device-agnostic skinny line are \emph{only} expected in the near-field single-mode limit (Cor.~\ref{cor:P_over_A}) and otherwise reduce to the kernel law (Thm.~\ref{thm:local_kernel}).
+		\item \textbf{Open falsification windows (retain as Canon 4R):}
+		\begin{enumerate}
+			\item \emph{Equal-energy, different-spectrum challenge:} Few near-resonant photons vs.\ many off-resonant with identical integrated energy. Prediction: strong nonlinearity (resonant wins).
+			\item \emph{Chiral attosecond flip map:} A specific helicity/enantiomer flip with a quantitative angular dependence tied to swirl clocks; compare against PECD/RABBITT fits \cite{Beaulieu2017Science}.
+		\end{enumerate}
+	\end{itemize}
+
+	\paragraph{Hydrogen-Gravity Canon.}
+	The swirl-pressure mechanism and hydrogen-gravity construction (Sec.~\ref{sec:swirl_em_bridge} and Theorem “Swirl Gravity Mechanism in Flat Space”) are orthogonal to decoherence tests and remain canonical; no modification is required here.
+	\medskip
+
+	\section{Unified SST Lagrangian (Definitive Form)}
+	We collect the fundamental pieces of SST dynamics into a single Lagrangian density:
+	\[
+		\boxed{\;
+			\begin{aligned}
+				\mathcal{L}_{\textrm SST+Gauge} \;=\; &\underbrace{\frac{1}{2}\rho_f\,\|\mathbf{v}_{\!\!\;\circ}\|^2 \;-\; \rho_f\,\Phi_{\textrm swirl} \;+\; \lambda\,(\nabla\cdot\mathbf{v}_{\!\!\;\circ}) \;+\; \chi_h\,\rho_f\,(\mathbf{v}_{\!\!\;\circ}\cdot\boldsymbol{\omega}_{\!\!\;\circ})}_{\text{SST Hydrodynamics}} \\[0.5ex]
+				&+\; \underbrace{\mathcal{L}_{\textrm YM}}_{\text{Gauge Fields}} \;+\; \underbrace{\mathcal{L}_{\textrm Matter}}_{\text{Gauge-Charged Matter}}\,,
+			\end{aligned}
+			\;}
+	\]
+	where $\mathcal{L}_{\textrm YM} = -\tfrac{1}{4}\sum_i g_i^{-2}F_{\mu\nu}^{(i)}F^{(i)\mu\nu}$. All terms carry units of energy density (J/m$^3$); $\lambda$ enforces incompressibility, $\chi_h$ is an optional helicity coupling \cite{Batchelor1967,Saffman1992,ChoFaddeevNiemi1999,Iskandarani2025Canon034}.
+
+	\bigskip
+	\noindent\textbf{Conclusion.} Swirl String Theory (\canonversion) provides a coherent, testable framework where particles are knotted fluid vortices and forces emerge from hydrodynamic interactions. This document has presented the formal axioms and theorems of SST. Appendices include detailed derivations and consistency checks for key results, as well as a glossary of terms and notation.
+
+	\appendix
+
+	\section{Derivations and Dimensional Checks}\label{app:deriv}
+	\subsection{Swirl Hamiltonian Density Derivation}
+	Starting from the Euler fluid Lagrangian with an incompressibility constraint, a Kelvin-compatible Hamiltonian density for vortex motion is
+	\[
+		\mathcal{H}_{\textrm SST}[\mathbf{v}] \;=\; \frac{1}{2}\rho_f\,\|\mathbf{v}_{\!\!\;\circ}\|^2 \;+\; \frac{1}{2}\rho_f\,r_c^2\,\|\boldsymbol{\omega}_{\!\!\;\circ}\|^2 \;+\; \frac{1}{2}\rho_f\,r_c^4\,\|\nabla\boldsymbol{\omega}_{\!\!\;\circ}\|^2 \;+\; \lambda(\nabla\cdot\mathbf{v}_{\!\!\;\circ})\,,
+	\]
+	where the $r_c^2\|\omega\|^2$ term captures core rotational energy and $r_c^4\|\nabla\omega\|^2$ penalizes curvature (string tension). All terms have units J/m$^3$ \cite{Batchelor1967,Saffman1992}. The reduced two-term form appears in the main text.
+
+	\subsection{Derivation of the Swirl Pressure Law}
+	For steady, purely azimuthal flow $\mathbf{v}=v_\theta(r)\,\hat{\boldsymbol{\theta}}$, Euler’s radial equation $\rho_f (v_\theta^2/r)=-dp/dr$ yields
+	\[
+		\frac{1}{\rho_f}\frac{d p_{\textrm swirl}}{dr} = \frac{v_\theta^2(r)}{r}\,,
+	\]
+	and integrating with $v_\theta\to v_0$ gives $p_{\textrm swirl}(r)=p_0+\rho_f v_0^2\ln(r/r_0)$. Dimensions and interpretation are standard \cite{Batchelor1967,Saffman1992,Iskandarani2025Canon034}.
+
+	\subsection{Additional Consistency Verifications}
+	\textbf{Hydrogen numerics.} With $\Lambda=4\pi\rho_m v_{\!\!\;\circ}^2 r_c^4$ and calibrated constants, one finds $a_0=\hbar^2/(\mu\Lambda)\approx 5.29\times10^{-11}~\si{m}$ and $E_1=-\mu\Lambda^2/(2\hbar^2)\approx -13.6~\si{eV}$, matching hydrogen \cite{Iskandarani2025Canon034,Iskandarani2025Hydrogen}.
+
+	\textbf{Dimensional check of $\Lambda$.} $[\rho_m v^2 r_c^4] = \text{kg/m}^3\times \text{m}^2/\text{s}^2\times \text{m}^4 = \text{kg\,m}^3/\text{s}^2 = \text{J\,m}$.
+
+	\textbf{Swirl pseudo-metric.} In cylindrical coordinates, a steady swirl $v_\theta(r)$ gives an analogue line element $ds^2 = -(c^2 - v_\theta^2)dt^2 + 2 v_\theta r\,d\theta\,dt + dr^2 + r^2 d\theta^2 + dz^2$, indicating clock slowing by $\sqrt{1-v_\theta^2/c^2}$ (co-rotating frame) \cite{Iskandarani2025Canon034}.
+
+	\section{SST Glossary and Notation Index}\label{app:glossary}
+	\textbf{Absolute time (A-time):} Universal reference time $t$ for the swirl condensate.\\
+	\textbf{Chronos time (C-time):} Time at infinity (no dilation).\\
+	\textbf{Swirl Clock:} Local clock comoving with a swirl string, $dt_{\textrm local}=S_t\,dt_\infty$.\\
+	\textbf{R-phase vs.\ T-phase:} Unknotted delocalized circulation vs.\ knotted localized state.\\
+	\textbf{String taxonomy:} Bosons = unknotted; leptons = torus knots; quarks = chiral hyperbolic; composites = links.\\
+	\textbf{Chirality:} Handedness of swirl circulation (CCW $\to$ matter; CW $\to$ antimatter).\\
+	\textbf{Circulation quantum $\kappa$:} $h/m_{\textrm eff}$; $\Gamma=n\kappa$.\\
+	\textbf{Swirl Coulomb constant $\Lambda$:} Defines $V_{\textrm SST}$; reproduces hydrogen.\\
+	\textbf{Swirl areal density $\varrho_{\!\!\;\circ}$:} Vortex cores per unit area; $\partial_t\varrho$ sources induction.\\
+	\textbf{$G_{\!\!\;\circ}$:} Swirl--EM inductive coupling constant.\\
+	\textbf{$v_{\!\!\;\circ}, \mathbf{v}_{\!\!\;\circ}, \boldsymbol{\omega}_{\!\!\;\circ}$:} Core speed scale; swirl velocity and vorticity fields.\\
+	\textbf{$\rho_f, \rho_m$:} Effective fluid density; mass-equivalent density.\\
+	\textbf{$G_{\textrm swirl}$:} Swirl gravitational constant.\\
+	\textbf{$\chi_h$:} Optional helicity coupling in $\mathcal{L}$.\\
+	\textbf{$U_3, U_2, \vartheta$:} Director fields for $SU(3)$, $SU(2)$, and $U(1)$ sectors.\\
+	\textbf{Knot invariants ($s_3,d_2,\tau,L_{\textrm tot},b,g,\phi$):} Topological descriptors used in taxonomy and mass law.\\
+	\textbf{Planck/core scales:} $t_P$, $\mu=\hbar v_{\!\!\;\circ}/r_c$.
+
+	\begin{thebibliography}{99}
+
+		\bibitem{Hornberger2012RMP}
+		K.~Hornberger, S.~Gerlich, P.~Haslinger, S.~Nimmrichter, and M.~Arndt,
+		``Colloquium: Quantum interference of clusters and molecules,''
+		\emph{Rev.\ Mod.\ Phys.} \textbf{84}, 157 (2012).
+
+		\bibitem{Nimmrichter2014PRL}
+		S.~Nimmrichter, K.~Hornberger, and K.~Hammerer,
+		``Optomechanical Sensing of Spontaneous Wave-Function Collapse,''
+		\emph{Phys.\ Rev.\ Lett.} \textbf{113}, 020405 (2014).
+
+		\bibitem{Schrinski2023PRL}
+		B.~Schrinski \emph{et al.},
+		``Macroscopic quantum test with bulk acoustic wave resonators,''
+		\emph{Phys.\ Rev.\ Lett.} \textbf{130}, 200801 (2023).
+
+		\bibitem{Krantz2019APR}
+		P.~Krantz \emph{et al.},
+		``A quantum engineer’s guide to superconducting qubits,''
+		\emph{Appl.\ Phys.\ Rev.} \textbf{6}, 021318 (2019).
+
+		\bibitem{Zurek2003}
+		W.~H. Zurek,
+		``Decoherence, einselection, and the quantum origins of the classical,''
+		\emph{Rev.\ Mod.\ Phys.} \textbf{75}, 715 (2003).
+
+		\bibitem{Beaulieu2017Science}
+		S.~Beaulieu \emph{et al.},
+		``Attosecond-resolved photoionization of chiral molecules,''
+		\emph{Science} \textbf{358}, 1288 (2017).
+
+		\bibitem{Batchelor1967}
+		G.~K. Batchelor, \emph{An Introduction to Fluid Dynamics}, Cambridge Univ.\ Press (1967).
+
+		\bibitem{Saffman1992}
+		P.~G. Saffman, \emph{Vortex Dynamics}, Cambridge Univ.\ Press (1992).
+
+		\bibitem{Helmholtz1858}
+		H. von Helmholtz, ``\"Uber Integrale der hydrodynamischen Gleichungen\dots'', \emph{J.\ Reine Angew.\ Math.} \textbf{55} (1858).
+
+		\bibitem{Kelvin1869}
+		W. Thomson (Lord Kelvin), ``On vortex motion'', \emph{Trans.\ R. Soc.\ Edinburgh} (1869).
+
+		\bibitem{Moffatt1969}
+		H.~K. Moffatt, ``The degree of knottedness of tangled vortex lines'', \emph{J.\ Fluid Mech.} \textbf{35}, 117 (1969).
+
+		\bibitem{Onsager1949}
+		L. Onsager, ``Statistical Hydrodynamics'', \emph{Nuovo Cimento} \textbf{6}, 279 (1949).
+
+		\bibitem{Feynman1955}
+		R.~P. Feynman, in \emph{Progress in Low Temperature Physics}, Vol.~1 (1955).
+
+		\bibitem{Jackson1999}
+		J.~D. Jackson, \emph{Classical Electrodynamics}, 3rd ed., Wiley (1999).
+
+		\bibitem{Weinberg1967}
+		S. Weinberg, ``A Model of Leptons'', \emph{Phys.\ Rev.\ Lett.} \textbf{19}, 1264 (1967).
+
+		\bibitem{PeskinSchroeder1995}
+		M.~E. Peskin and D.~V. Schroeder, \emph{An Introduction to Quantum Field Theory}, Addison--Wesley (1995).
+
+		\bibitem{FinkelsteinRubinstein1968}
+		D. Finkelstein and J. Rubinstein, ``Connection between spin and statistics'', \emph{J.\ Math.\ Phys.} \textbf{9}, 1762 (1968).
+
+		\bibitem{ChoFaddeevNiemi1999}
+		Y.~M. Cho, H. Khim, and P. Zhang (1998--1999); L.~D. Faddeev and A.~J. Niemi (1998--1999), on decompositions of non-Abelian gauge fields.
+
+		\bibitem{Iskandarani2025Canon034}
+		O. Iskandarani, \emph{Swirl String Theory (SST) Canon v0.3.4}, Zenodo (2025). DOI: 10.5281/zenodo.17014358.
+
+		\bibitem{Iskandarani2025Hydrogen}
+		O. Iskandarani, ``Long-Distance Swirl Gravity from Chiral Swirling Knots with Central Holes'' (2025).
+
+		\bibitem{Iskandarani2025DoubleSlit}
+		O. Iskandarani, ``Wave--Particle Duality in SST: Toroidal Circulation, Knot Collapse, and Photon-Induced Transitions'' (2025).
+
+		\bibitem{Iskandarani2025MagneticVector}
+		O. Iskandarani, ``Magnetic helicity in periodic domains: gauge conditions, existence of vector potentials, and periodic winding --- Rosetta to SST'' (2025).
+
+	\end{thebibliography}
+
+\end{document}

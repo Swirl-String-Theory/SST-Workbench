@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helicity-Constrained Stability Explorer</title>
+    <style>
+        :root {
+            --paper-bg: #fdfbf7;
+            --ink-color: #1a1a1a;
+            --accent-blue: #0056b3;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --font-serif: "Georgia", "Times New Roman", Times, serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            color: var(--ink-color);
+            font-family: var(--font-serif);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 1rem 2rem;
+            max-width: 800px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+        }
+
+        .meta {
+            font-family: var(--font-sans);
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 900px;
+            padding: 0 1rem 4rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            padding: 2rem;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        h2 {
+            font-family: var(--font-sans);
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--ink-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .interactive-container {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background: var(--ink-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        button.active {
+            background: var(--accent-blue);
+        }
+
+        button.mode-toggle {
+            background: var(--accent-green);
+        }
+        
+        button.mode-toggle.off {
+            background: var(--accent-red);
+        }
+
+        canvas {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            cursor: crosshair;
+        }
+
+        .label {
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+
+        .formula {
+            font-family: "Courier New", monospace;
+            background: #eee;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .visualization-caption {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Tooltip/Status */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-sans);
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .status-ideal { background: #d4edda; color: #155724; }
+        .status-real { background: #f8d7da; color: #721c24; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Helicity-Constrained Stability<br>Beyond Energy Minimization</h1>
+    <div class="meta">Based on the research by Omar Iskandarani • Interactive Abstract</div>
+    <p style="font-style: italic; max-width: 600px; margin: 0 auto;">
+        "Stability in classical continuum systems is commonly associated with energetic optimality... 
+        Here we show that helicity conservation imposes topological constraints that stabilize knotted structures independently."
+    </p>
+</header>
+
+<main>
+
+    <!-- SECTION 1: KNOT VISUALIZER -->
+    <section>
+        <h2>1. Topological Structure: The Knot</h2>
+        <p>
+            Vortex filaments in ideal fluids can form knotted configurations. These structures possess <strong>Helicity</strong> ($H$), a conserved quantity measuring the linkage, twist, and writhe of the flow lines. Unlike simple energy, which wants to dissipate, Helicity acts as a barrier preventing the knot from untying.
+        </p>
+        <p>
+            Use the simulator below to visualize a <strong>Trefoil Knot</strong> vortex filament. Observe how it maintains its topological structure (it doesn't break) even as it rotates or deforms.
+        </p>
+
+        <div class="interactive-container">
+            <canvas id="knotCanvas" width="500" height="350"></canvas>
+            <div class="visualization-caption">Figure 1: Interactive Vortex Filament. Drag to rotate view.</div>
+            
+            <div class="controls">
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <label class="label">Writhe (Coiling)</label>
+                    <input type="range" id="writheSlider" min="0" max="100" value="50">
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <label class="label">Twist (Internal Spin)</label>
+                    <input type="range" id="twistSlider" min="0" max="100" value="20">
+                </div>
+            </div>
+            <div style="margin-top: 1rem; font-family: var(--font-sans);">
+                Helicity Estimate: <span id="helicityValue" class="formula">H ≈ 50</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: STABILITY GAME -->
+    <section>
+        <h2>2. Stability: Energy vs. Topology</h2>
+        <p>
+            The core insight of the paper is the distinction between <strong>Energetic Stability</strong> (rolling into a valley) and <strong>Topological Stability</strong> (being trapped behind a wall).
+        </p>
+        <p>
+            <strong>Interactive Experiment:</strong> 
+            Below are three "Topological Sectors" (A, B, C). In an Ideal Fluid, you cannot cross the barriers because Helicity is conserved. In a Real Fluid (with viscosity/reconnection), the barriers weaken, allowing the structure to decay.
+        </p>
+
+        <div class="interactive-container">
+            <div id="gameStatus" class="status-badge status-ideal">Mode: Ideal Fluid (Conservation ON)</div>
+            <canvas id="stabilityCanvas" width="600" height="300"></canvas>
+            <div class="visualization-caption">Figure 2: Drag the particle (Vortex State). Try to move between sectors.</div>
+
+            <div class="controls">
+                <button id="toggleFluidBtn" class="mode-toggle">Switch to Real Fluid (Allow Decay)</button>
+                <button id="resetGameBtn">Reset Particle</button>
+            </div>
+            <p id="gameFeedback" style="text-align: center; font-weight: bold; color: var(--accent-blue); height: 1.5rem; margin-top: 0.5rem;">
+                System Stable.
+            </p>
+        </div>
+
+        <p>
+            <strong>Observation:</strong> In "Ideal Fluid" mode, the particle is trapped in its local sector (representing a specific knot type). Even if a lower energy state exists in another sector, it cannot reach it. This explains the longevity of knotted vortices!
+        </p>
+    </section>
+
+    <!-- SECTION 3: DECOMPOSITION -->
+    <section>
+        <h2>3. The Math: Helicity Decomposition</h2>
+        <p>
+            The paper decomposes Helicity into distinct geometric components:
+        </p>
+        <div style="text-align: center; margin: 2rem 0;">
+            <span class="formula" style="font-size: 1.2rem;">
+                $H = \sum \Gamma_i \Gamma_j \text{Lk}_{ij} + \sum \Gamma_i^2 (\text{Tw}_i + \text{Wr}_i)$
+            </span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; text-align: center;">
+            <div style="padding: 1rem; background: #f4f4f4; border-radius: 8px;">
+                <strong>Linking (Lk)</strong><br>
+                <span style="font-size: 2rem;">🔗</span><br>
+                <small>Entanglement between different loops.</small>
+            </div>
+            <div style="padding: 1rem; background: #f4f4f4; border-radius: 8px;">
+                <strong>Twist (Tw)</strong><br>
+                <span style="font-size: 2rem;">🌀</span><br>
+                <small>Internal rotation of the ribbon.</small>
+            </div>
+            <div style="padding: 1rem; background: #f4f4f4; border-radius: 8px;">
+                <strong>Writhe (Wr)</strong><br>
+                <span style="font-size: 2rem;">➰</span><br>
+                <small>Coiling of the filament axis itself.</small>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    /**
+     * KNOT VISUALIZATION (CANVAS 1)
+     * Renders a rotating 3D Trefoil knot using simple projection.
+     */
+    const knotCanvas = document.getElementById('knotCanvas');
+    const knotCtx = knotCanvas.getContext('2d');
+    const writheSlider = document.getElementById('writheSlider');
+    const twistSlider = document.getElementById('twistSlider');
+    const helicityDisplay = document.getElementById('helicityValue');
+
+    let angle = 0;
+    let dragStart = { x: 0, y: 0 };
+    let isDraggingKnot = false;
+    let rotation = { x: 0, y: 0 };
+
+    // Knot parameters
+    const points = [];
+    const numPoints = 200;
+
+    function initKnot() {
+        for (let i = 0; i < numPoints; i++) {
+            points.push({ x: 0, y: 0, z: 0 });
+        }
+        animateKnot();
+    }
+
+    function generateTrefoil(t, writheFactor) {
+        // Parametric equations for a Trefoil knot
+        // Modified by writhe factor to expand/contract loops
+        const scale = 60;
+        const w = 1 + (writheFactor - 50) / 100; 
+        
+        const x = scale * (Math.sin(t) + 2 * Math.sin(2 * t));
+        const y = scale * (Math.cos(t) - 2 * Math.cos(2 * t));
+        const z = scale * (-Math.sin(3 * t)) * w * 1.5;
+        
+        return { x, y, z };
+    }
+
+    function project(p, width, height) {
+        // Simple perspective projection
+        const fov = 300;
+        const scale = fov / (fov + p.z + 200);
+        return {
+            x: p.x * scale + width / 2,
+            y: p.y * scale + height / 2,
+            scale: scale
+        };
+    }
+
+    function rotate3D(p, rx, ry) {
+        // Rotate around Y
+        let x = p.x * Math.cos(ry) - p.z * Math.sin(ry);
+        let z = p.x * Math.sin(ry) + p.z * Math.cos(ry);
+        let y = p.y;
+
+        // Rotate around X
+        let y_new = y * Math.cos(rx) - z * Math.sin(rx);
+        let z_new = y * Math.sin(rx) + z * Math.cos(rx);
+        
+        return { x: x, y: y_new, z: z_new };
+    }
+
+    function animateKnot() {
+        knotCtx.clearRect(0, 0, knotCanvas.width, knotCanvas.height);
+        
+        const writheVal = parseInt(writheSlider.value);
+        const twistVal = parseInt(twistSlider.value);
+        
+        // Update Helicity Display (Fake calculation for demo)
+        const hVal = Math.round(writheVal * 0.8 + twistVal * 0.5);
+        helicityDisplay.textContent = `H ≈ ${hVal}`;
+
+        // Auto rotate slowly
+        if (!isDraggingKnot) {
+            rotation.y += 0.01;
+        }
+
+        // Generate and draw path
+        knotCtx.beginPath();
+        knotCtx.lineWidth = 4;
+        knotCtx.lineCap = 'round';
+        knotCtx.lineJoin = 'round';
+
+        // Create gradient for the tube
+        const gradient = knotCtx.createLinearGradient(0, 0, knotCanvas.width, knotCanvas.height);
+        gradient.addColorStop(0, '#0056b3');
+        gradient.addColorStop(1, '#28a745');
+        knotCtx.strokeStyle = gradient;
+
+        // Draw the main filament
+        let firstPoint = null;
+        for (let i = 0; i <= numPoints; i++) {
+            const t = (i / numPoints) * Math.PI * 2;
+            let p = generateTrefoil(t, writheVal);
+            p = rotate3D(p, rotation.x, rotation.y);
+            const proj = project(p, knotCanvas.width, knotCanvas.height);
+
+            if (i === 0) {
+                knotCtx.moveTo(proj.x, proj.y);
+                firstPoint = proj;
+            } else {
+                knotCtx.lineTo(proj.x, proj.y);
+            }
+        }
+        knotCtx.stroke();
+
+        // Draw Twist indicators (small cross lines)
+        const twistCount = Math.floor(twistVal / 5);
+        if (twistCount > 0) {
+            knotCtx.beginPath();
+            knotCtx.strokeStyle = "rgba(0,0,0,0.3)";
+            knotCtx.lineWidth = 1;
+
+            for (let i = 0; i < numPoints; i += Math.floor(numPoints/twistCount)) {
+                const t = (i / numPoints) * Math.PI * 2;
+                let p = generateTrefoil(t, writheVal);
+                p = rotate3D(p, rotation.x, rotation.y);
+                const proj = project(p, knotCanvas.width, knotCanvas.height);
+                
+                // Draw a small perpendicular line to represent twist
+                knotCtx.moveTo(proj.x - 5 * proj.scale, proj.y - 5 * proj.scale);
+                knotCtx.lineTo(proj.x + 5 * proj.scale, proj.y + 5 * proj.scale);
+            }
+            knotCtx.stroke();
+        }
+
+        requestAnimationFrame(animateKnot);
+    }
+
+    // Mouse Interaction for Knot
+    knotCanvas.addEventListener('mousedown', e => {
+        isDraggingKnot = true;
+        dragStart = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('mousemove', e => {
+        if (isDraggingKnot) {
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            rotation.y += dx * 0.01;
+            rotation.x += dy * 0.01;
+            dragStart = { x: e.clientX, y: e.clientY };
+        }
+    });
+    window.addEventListener('mouseup', () => isDraggingKnot = false);
+
+
+    /**
+     * STABILITY GAME (CANVAS 2)
+     * Simulates a particle in a potential landscape with topological barriers.
+     */
+    const stabCanvas = document.getElementById('stabilityCanvas');
+    const stabCtx = stabCanvas.getContext('2d');
+    const toggleBtn = document.getElementById('toggleFluidBtn');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const feedback = document.getElementById('gameFeedback');
+    const statusBadge = document.getElementById('gameStatus');
+
+    let isIdeal = true; // True = Infinite barriers, False = Permeable barriers
+    let particle = { x: 100, y: 200, vx: 0, vy: 0, dragging: false };
+    
+    // Define Sectors (Wells)
+    // Sector A: x 50-150
+    // Sector B: x 250-350
+    // Sector C: x 450-550
+    const sectors = [
+        { x: 100, label: "Unknotted (A)", color: "#e3f2fd" },
+        { x: 300, label: "Trefoil (B)", color: "#e8f5e9" },
+        { x: 500, label: "Figure-8 (C)", color: "#fff3e0" }
+    ];
+
+    function drawLandscape() {
+        stabCtx.clearRect(0, 0, stabCanvas.width, stabCanvas.height);
+
+        const groundY = 250;
+        
+        // Draw Sectors
+        sectors.forEach((sec, i) => {
+            // Draw well background
+            stabCtx.fillStyle = sec.color;
+            stabCtx.beginPath();
+            stabCtx.ellipse(sec.x, groundY - 20, 60, 20, 0, 0, Math.PI * 2);
+            stabCtx.fill();
+            
+            // Label
+            stabCtx.fillStyle = "#666";
+            stabCtx.font = "12px sans-serif";
+            stabCtx.textAlign = "center";
+            stabCtx.fillText(sec.label, sec.x, groundY + 40);
+        });
+
+        // Draw Potential Curve / Barriers
+        stabCtx.beginPath();
+        stabCtx.strokeStyle = "#333";
+        stabCtx.lineWidth = 2;
+        
+        for (let x = 0; x < stabCanvas.width; x++) {
+            let y = groundY;
+            
+            // Create wells at 100, 300, 500
+            // Create barriers at 200, 400
+            
+            // Base parabola for each well
+            const distA = Math.abs(x - 100);
+            const distB = Math.abs(x - 300);
+            const distC = Math.abs(x - 500);
+            
+            let height = 0;
+            
+            if (x < 200) height = Math.pow(distA/20, 2);
+            else if (x < 400) height = Math.pow(distB/20, 2);
+            else height = Math.pow(distC/20, 2);
+
+            // Add Barriers
+            // Barrier at 200 and 400
+            const barrierWidth = 40;
+            const b1 = Math.max(0, 1 - Math.abs(x - 200)/barrierWidth);
+            const b2 = Math.max(0, 1 - Math.abs(x - 400)/barrierWidth);
+            
+            // Barrier Height depends on Mode
+            const barrierH = isIdeal ? 200 : 40; // High vs Low barrier
+            
+            height += (b1 + b2) * barrierH;
+            
+            // Cap height
+            height = Math.min(height, 150);
+
+            stabCtx.lineTo(x, y - height);
+        }
+        stabCtx.stroke();
+
+        // Draw Particle
+        stabCtx.beginPath();
+        stabCtx.fillStyle = particle.dragging ? "#ff9800" : "#0056b3";
+        stabCtx.arc(particle.x, particle.y, 10, 0, Math.PI * 2);
+        stabCtx.fill();
+        stabCtx.strokeStyle = "white";
+        stabCtx.lineWidth = 2;
+        stabCtx.stroke();
+    }
+
+    function updatePhysics() {
+        if (particle.dragging) return;
+
+        const groundY = 250;
+        
+        // Simple gravity/potential logic
+        // Determine which well we are in or near
+        let targetX = 100;
+        if (particle.x > 200 && particle.x < 400) targetX = 300;
+        if (particle.x > 400) targetX = 500;
+
+        // Check Barriers
+        let barrierHeight = isIdeal ? 200 : 40;
+        
+        // Physics: Move towards well center
+        // But if hitting barrier (x near 200 or 400) and y is low, bounce back
+        
+        let force = (targetX - particle.x) * 0.05;
+        
+        // Barrier Logic
+        if (Math.abs(particle.x - 200) < 20 && particle.y > (groundY - barrierHeight)) {
+            // Hitting barrier 1
+            if (isIdeal) {
+                // Hard bounce
+                if (particle.x < 200) particle.x = 180;
+                else particle.x = 220;
+                particle.vx *= -0.5;
+                force = 0;
+                feedback.textContent = "Blocked by Topological Constraint!";
+            } else {
+                feedback.textContent = "Reconnection Event: Topology Changing...";
+            }
+        } else if (Math.abs(particle.x - 400) < 20 && particle.y > (groundY - barrierHeight)) {
+            // Hitting barrier 2
+            if (isIdeal) {
+                if (particle.x < 400) particle.x = 380;
+                else particle.x = 420;
+                particle.vx *= -0.5;
+                force = 0;
+                feedback.textContent = "Blocked by Topological Constraint!";
+            } else {
+                feedback.textContent = "Reconnection Event: Topology Changing...";
+            }
+        } else {
+            if (!isIdeal && Math.abs(particle.vx) < 0.1) {
+                 feedback.textContent = "System Relaxing...";
+            } else if (Math.abs(particle.vx) < 0.1) {
+                 feedback.textContent = "Stable State.";
+            }
+        }
+
+        particle.vx += force;
+        particle.vx *= 0.9; // Damping
+        particle.x += particle.vx;
+
+        // Y position follows the curve roughly
+        let yOffset = 0;
+        // Calculate curve height at x
+        const distA = Math.abs(particle.x - 100);
+        const distB = Math.abs(particle.x - 300);
+        const distC = Math.abs(particle.x - 500);
+        let h = 0;
+        if (particle.x < 200) h = Math.pow(distA/20, 2);
+        else if (particle.x < 400) h = Math.pow(distB/20, 2);
+        else h = Math.pow(distC/20, 2);
+        
+        // Add barrier visual height
+        const barrierWidth = 40;
+        const b1 = Math.max(0, 1 - Math.abs(particle.x - 200)/barrierWidth);
+        const b2 = Math.max(0, 1 - Math.abs(particle.x - 400)/barrierWidth);
+        h += (b1 + b2) * barrierHeight;
+        h = Math.min(h, 150);
+
+        particle.y = groundY - h - 10;
+    }
+
+    function gameLoop() {
+        updatePhysics();
+        drawLandscape();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Interaction for Game
+    stabCanvas.addEventListener('mousedown', e => {
+        const rect = stabCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        
+        // Check if clicking particle
+        const dist = Math.sqrt((mx - particle.x)**2 + (my - particle.y)**2);
+        if (dist < 30) {
+            particle.dragging = true;
+            feedback.textContent = "Dragging Vortex...";
+        }
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (particle.dragging) {
+            const rect = stabCanvas.getBoundingClientRect();
+            let mx = e.clientX - rect.left;
+            let my = e.clientY - rect.top;
+            
+            // Constrain to canvas
+            mx = Math.max(10, Math.min(stabCanvas.width - 10, mx));
+            my = Math.max(10, Math.min(stabCanvas.height - 10, my));
+
+            particle.x = mx;
+            particle.y = my;
+            particle.vx = 0;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (particle.dragging) {
+            particle.dragging = false;
+            feedback.textContent = "Released.";
+        }
+    });
+
+    toggleBtn.addEventListener('click', () => {
+        isIdeal = !isIdeal;
+        if (isIdeal) {
+            toggleBtn.textContent = "Switch to Real Fluid (Allow Decay)";
+            toggleBtn.classList.remove('off');
+            statusBadge.textContent = "Mode: Ideal Fluid (Conservation ON)";
+            statusBadge.className = "status-badge status-ideal";
+            feedback.textContent = "Helicity Conservation Restored.";
+        } else {
+            toggleBtn.textContent = "Switch to Ideal Fluid (Conserve Helicity)";
+            toggleBtn.classList.add('off');
+            statusBadge.textContent = "Mode: Real Fluid (Viscosity/Reconnection)";
+            statusBadge.className = "status-badge status-real";
+            feedback.textContent = "Barriers Lowered due to Viscosity.";
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        particle.x = 100;
+        particle.vx = 0;
+        feedback.textContent = "Reset to Unknotted State.";
+    });
+
+    // Initialize
+    initKnot();
+    gameLoop();
+
+</script>
+
+</body>
+</html>

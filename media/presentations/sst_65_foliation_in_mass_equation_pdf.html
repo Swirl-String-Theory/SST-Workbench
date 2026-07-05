@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Research Terminal: Experiment A</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --text-main: #c9d1d9;
+            --accent-cyan: #58a6ff;
+            --accent-green: #238636;
+            --accent-red: #da3633;
+            --border: #30363d;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 1fr 1fr;
+            gap: 1px;
+            background-color: var(--border); /* Creates grid lines */
+        }
+
+        .panel {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .panel-header {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            margin-top: -6px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .value-display {
+            float: right;
+            color: var(--accent-cyan);
+        }
+
+        /* Canvas Areas */
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Mass Viz Specifics */
+        .mass-readout {
+            font-size: 2rem;
+            font-family: var(--font-mono);
+            color: var(--accent-green);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .formula {
+            font-style: italic;
+            color: #8b949e;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Button */
+        button {
+            background: var(--panel-bg);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        button:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                overflow-y: auto;
+            }
+            .panel {
+                min-height: 300px;
+            }
+        }
+        
+        .status-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #333;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-light.active {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 5px var(--accent-green);
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST Research Terminal</h1>
+        <span class="subtitle">Based on "Velocity-Dependent Mass Functional" by O. Iskandarani</span>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.8rem;">
+        SYSTEM STATUS: <span style="color: var(--accent-green)">ONLINE</span>
+    </div>
+</header>
+
+<main>
+    <!-- Left Column: Controls -->
+    <div class="panel" style="grid-row: span 2;">
+        <div class="panel-header">
+            <span>Experiment A: Parameters</span>
+            <span>v0.7.7</span>
+        </div>
+
+        <div class="control-group">
+            <label>Turntable Rotation (ω<sub>rot</sub>) <span id="val-omega" class="value-display">0.5 Hz</span></label>
+            <input type="range" id="input-omega" min="0" max="5" step="0.1" value="0.5">
+        </div>
+
+        <div class="control-group">
+            <label>Preferred Frame Coupling (α) <span id="val-alpha" class="value-display">1.0</span></label>
+            <input type="range" id="input-alpha" min="0" max="10" step="0.1" value="1.0">
+        </div>
+        
+        <div class="control-group">
+            <label>Intrinsic Clock Noise (σ<sub>τ</sub>) <span id="val-noise" class="value-display">0.0</span></label>
+            <input type="range" id="input-noise" min="0" max="1" step="0.01" value="0.1">
+        </div>
+
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div class="panel-header">Mass Functional</div>
+            <div class="control-group">
+                <label>Velocity (v/c) <span id="val-velocity" class="value-display">0.00</span></label>
+                <input type="range" id="input-velocity" min="0" max="0.99" step="0.01" value="0.0">
+            </div>
+            <div class="control-group">
+                <label>Direction Cosine (v · û) <span id="val-angle" class="value-display">1.0</span></label>
+                <input type="range" id="input-angle" min="-1" max="1" step="0.1" value="1.0">
+            </div>
+        </div>
+
+        <div style="margin-top: auto;">
+            <button id="btn-reset">Reset Calibration</button>
+        </div>
+    </div>
+
+    <!-- Center Top: Turntable Viz -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>Apparatus: Cryogenic Sapphire Resonator</span>
+            <div class="status-light active"></div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="turntableCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Top: Signal Output -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>Heterodyne Readout (Δf/f)</span>
+            <span style="color: var(--accent-red)">LIVE</span>
+        </div>
+        <div class="canvas-container">
+            <canvas id="signalCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Center Bottom: Mass Viz -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>Velocity-Dependent Mass Simulation</span>
+        </div>
+        <div class="canvas-container">
+            <canvas id="massCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Bottom: Data Readout -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>SST Metrics</span>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 0.8rem; color: #8b949e;">EFFECTIVE MASS M<sub>eff</sub></div>
+                <div class="mass-readout" id="readout-mass">1.000 M₀</div>
+                <div class="formula">M<sub>eff</sub> = M₀ [1 + α₁(v·û)/c + ...]</div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div style="font-size: 0.8rem; color: #8b949e;">SIGNAL AMPLITUDE</div>
+                <div class="mass-readout" id="readout-signal" style="color: var(--accent-cyan)">0.00 Hz</div>
+                <div class="formula">Δf ≈ S₂ cos(2ω<sub>rot</sub>t)</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- State Management ---
+    const state = {
+        omega: 0.5,      // Rotation speed
+        alpha: 1.0,      // Coupling constant
+        noise: 0.1,      // Stochastic noise
+        velocity: 0.0,   // v/c
+        angle: 1.0,      // Direction cosine
+        time: 0,
+        signalHistory: new Array(200).fill(0),
+        turntableAngle: 0
+    };
+
+    // --- DOM Elements ---
+    const els = {
+        omega: document.getElementById('input-omega'),
+        alpha: document.getElementById('input-alpha'),
+        noise: document.getElementById('input-noise'),
+        velocity: document.getElementById('input-velocity'),
+        angle: document.getElementById('input-angle'),
+        
+        valOmega: document.getElementById('val-omega'),
+        valAlpha: document.getElementById('val-alpha'),
+        valNoise: document.getElementById('val-noise'),
+        valVelocity: document.getElementById('val-velocity'),
+        valAngle: document.getElementById('val-angle'),
+        
+        readoutMass: document.getElementById('readout-mass'),
+        readoutSignal: document.getElementById('readout-signal'),
+        
+        btnReset: document.getElementById('btn-reset'),
+        
+        cTurntable: document.getElementById('turntableCanvas'),
+        cSignal: document.getElementById('signalCanvas'),
+        cMass: document.getElementById('massCanvas')
+    };
+
+    // --- Event Listeners ---
+    els.omega.addEventListener('input', (e) => {
+        state.omega = parseFloat(e.target.value);
+        els.valOmega.textContent = state.omega.toFixed(1) + " Hz";
+    });
+    els.alpha.addEventListener('input', (e) => {
+        state.alpha = parseFloat(e.target.value);
+        els.valAlpha.textContent = state.alpha.toFixed(1);
+    });
+    els.noise.addEventListener('input', (e) => {
+        state.noise = parseFloat(e.target.value);
+        els.valNoise.textContent = state.noise.toFixed(2);
+    });
+    els.velocity.addEventListener('input', (e) => {
+        state.velocity = parseFloat(e.target.value);
+        els.valVelocity.textContent = state.velocity.toFixed(2) + " c";
+    });
+    els.angle.addEventListener('input', (e) => {
+        state.angle = parseFloat(e.target.value);
+        els.valAngle.textContent = state.angle.toFixed(1);
+    });
+    els.btnReset.addEventListener('click', () => {
+        state.omega = 0.5;
+        state.alpha = 1.0;
+        state.noise = 0.1;
+        state.velocity = 0.0;
+        state.angle = 1.0;
+        
+        els.omega.value = 0.5;
+        els.alpha.value = 1.0;
+        els.noise.value = 0.1;
+        els.velocity.value = 0.0;
+        els.angle.value = 1.0;
+        
+        // Update text displays
+        els.valOmega.textContent = "0.5 Hz";
+        els.valAlpha.textContent = "1.0";
+        els.valNoise.textContent = "0.10";
+        els.valVelocity.textContent = "0.00 c";
+        els.valAngle.textContent = "1.0";
+    });
+
+    // --- Canvas Setup ---
+    function resizeCanvas(canvas) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
+
+    window.addEventListener('resize', () => {
+        resizeCanvas(els.cTurntable);
+        resizeCanvas(els.cSignal);
+        resizeCanvas(els.cMass);
+    });
+    
+    // Initial resize
+    resizeCanvas(els.cTurntable);
+    resizeCanvas(els.cSignal);
+    resizeCanvas(els.cMass);
+
+    // --- Physics Engine ---
+    function updatePhysics() {
+        // Update time
+        state.time += 0.016; // Approx 60fps
+
+        // Turntable rotation
+        state.turntableAngle += state.omega * 0.05;
+
+        // Calculate Signal (Experiment A)
+        // Delta f / f = S2 * cos(2 * omega * t)
+        // We simulate S2 proportional to Alpha
+        const signalBase = state.alpha * Math.cos(2 * state.turntableAngle);
+        
+        // Add Intrinsic Temporal Stochasticity (Noise)
+        const noiseVal = (Math.random() - 0.5) * state.noise * 5;
+        
+        const currentSignal = signalBase + noiseVal;
+        
+        // Update History
+        state.signalHistory.push(currentSignal);
+        if (state.signalHistory.length > els.cSignal.width / 2) {
+            state.signalHistory.shift();
+        }
+
+        // Calculate Mass (Velocity Dependent)
+        // Meff = M0 * (1 + alpha * v/c * angle + ...)
+        // Simplified for visualization
+        const vTerm = state.alpha * state.velocity * state.angle;
+        const v2Term = state.alpha * (state.velocity * state.velocity); // Second order approx
+        const massFactor = 1 + vTerm + v2Term;
+        
+        // Update Readouts
+        els.readoutMass.textContent = massFactor.toFixed(4) + " M₀";
+        els.readoutSignal.textContent = currentSignal.toFixed(3) + " Hz"; // Arbitrary units
+        
+        return { massFactor };
+    }
+
+    // --- Rendering ---
+    
+    function drawTurntable(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        
+        const cx = width / 2;
+        const cy = height / 2;
+        const radius = Math.min(width, height) * 0.35;
+
+        // Draw Base
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#21262d';
+        ctx.fill();
+        ctx.strokeStyle = '#30363d';
+        ctx.stroke();
+
+        // Draw Rotating Table
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(state.turntableAngle);
+
+        // Table surface
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#161b22';
+        ctx.fill();
+        ctx.strokeStyle = '#58a6ff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Crosshairs / Grid on table
+        ctx.strokeStyle = '#30363d';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-radius, 0); ctx.lineTo(radius, 0);
+        ctx.moveTo(0, -radius); ctx.lineTo(0, radius);
+        ctx.stroke();
+
+        // Resonators (Orthogonal Bars)
+        // Bar 1 (X)
+        ctx.fillStyle = 'rgba(88, 166, 255, 0.5)'; // Cyan transparent
+        ctx.fillRect(-radius * 0.6, -10, radius * 1.2, 20);
+        ctx.strokeStyle = '#58a6ff';
+        ctx.strokeRect(-radius * 0.6, -10, radius * 1.2, 20);
+
+        // Bar 2 (Y)
+        ctx.fillStyle = 'rgba(218, 54, 51, 0.5)'; // Red transparent
+        ctx.fillRect(-10, -radius * 0.6, 20, radius * 1.2);
+        ctx.strokeStyle = '#da3633';
+        ctx.strokeRect(-10, -radius * 0.6, 20, radius * 1.2);
+
+        // Center hub
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#c9d1d9';
+        ctx.fill();
+
+        ctx.restore();
+
+        // Static Indicators
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#8b949e';
+        ctx.fillText("N", cx - 3, cy - radius - 15);
+        ctx.fillText("E", cx + radius + 10, cy + 3);
+    }
+
+    function drawSignal(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Grid lines
+        ctx.strokeStyle = '#21262d';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < width; i += 40) {
+            ctx.moveTo(i, 0); ctx.lineTo(i, height);
+        }
+        for (let i = 0; i < height; i += 40) {
+            ctx.moveTo(0, i); ctx.lineTo(width, i);
+        }
+        ctx.stroke();
+
+        // Center Line
+        ctx.strokeStyle = '#30363d';
+        ctx.beginPath();
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.stroke();
+
+        // Signal Trace
+        ctx.beginPath();
+        ctx.strokeStyle = '#58a6ff';
+        ctx.lineWidth = 2;
+        
+        const scaleY = height / 20; // Sensitivity
+        const midY = height / 2;
+        
+        for (let i = 0; i < state.signalHistory.length; i++) {
+            const x = i * 2; // 2px per sample
+            const y = midY - (state.signalHistory[i] * scaleY);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Scanline effect
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(0.5, "rgba(88, 166, 255, 0.1)");
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+        
+        // Moving scanline
+        const scanY = (Date.now() / 10) % height;
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, scanY - 10, width, 20);
+    }
+
+    function drawMassViz(ctx, width, height, massFactor) {
+        ctx.clearRect(0, 0, width, height);
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Draw "Track"
+        ctx.strokeStyle = '#30363d';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(width, cy);
+        ctx.stroke();
+
+        // Particle Animation
+        // Position oscillates based on velocity, but visualizes "relativistic" effects
+        const speed = state.velocity * 20; // Visual speed
+        const pos = (Date.now() / 10 * speed) % width;
+        
+        // Draw Particle
+        // Radius increases with mass
+        const baseRadius = 10;
+        const radius = baseRadius * Math.sqrt(massFactor); // Area proportional to mass
+        
+        // Color shift: Blue (rest) -> Red (high velocity/mass)
+        // Simple interpolation
+        const r = Math.min(255, 88 + (state.velocity * 150));
+        const g = Math.min(255, 166 - (state.velocity * 100));
+        const b = Math.min(255, 255 - (state.velocity * 200));
+        const color = `rgb(${r}, ${g}, ${b})`;
+
+        // Glow
+        const grad = ctx.createRadialGradient(pos, cy, radius * 0.2, pos, cy, radius * 2);
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(pos, cy, radius * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Core
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(pos, cy, radius * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Vector Arrow (Direction of motion relative to preferred frame)
+        // We use state.angle to rotate an arrow around the particle
+        if (state.velocity > 0) {
+            ctx.save();
+            ctx.translate(pos, cy);
+            // The angle input is a cosine, so we convert back to radians roughly
+            const angleRad = Math.acos(Math.max(-1, Math.min(1, state.angle)));
+            
+            ctx.rotate(-angleRad); // Rotate arrow
+            
+            ctx.strokeStyle = '#238636'; // Green for preferred frame vector
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(radius + 20, 0);
+            ctx.stroke();
+            
+            // Arrowhead
+            ctx.beginPath();
+            ctx.moveTo(radius + 20, 0);
+            ctx.lineTo(radius + 15, -5);
+            ctx.lineTo(radius + 15, 5);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // Label
+            ctx.fillStyle = '#238636';
+            ctx.font = '10px monospace';
+            ctx.fillText("û (Preferred Frame)", pos - 40, cy - radius - 10);
+        }
+    }
+
+    // --- Main Loop ---
+    function loop() {
+        const physics = updatePhysics();
+
+        drawTurntable(els.cTurntable.getContext('2d'), els.cTurntable.width, els.cTurntable.height);
+        drawSignal(els.cSignal.getContext('2d'), els.cSignal.width, els.cSignal.height);
+        drawMassViz(els.cMass.getContext('2d'), els.cMass.width, els.cMass.height, physics.massFactor);
+
+        requestAnimationFrame(loop);
+    }
+
+    // Start
+    loop();
+
+</script>
+</body>
+</html>

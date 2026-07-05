@@ -1,0 +1,88 @@
+--- /mnt/data/SST-31_Swirl-String-Theory_Canon-v0.7.8.tex	2026-03-05 13:58:56.296798026 +0000
++++ /mnt/data/SST-31_Swirl-String-Theory_Canon-v0.7.8_patched_helicity_appendix.tex	2026-03-05 13:58:56.393411911 +0000
+@@ -1888,6 +1888,8 @@
+ The Canon-level claim is that \emph{once} $(\mathcal{L},\Xi)$ are computed, the masses
+ are fixed by $(\rhocore,\Gamma,c)$ without additional fitting.
+ 
++For multi-component filament configurations (links, composites, or interacting tube ensembles), the helicity-type contribution in the canonical knot-energy/stability functional may be evaluated using the thin-core diagnostic decomposition and reporting protocol in Appendix~\ref{app:helicity_diagnostics_multicomponent}, unless a direct field-based evaluation of $\mathcal{H}=\int \mathbf{v}\cdot\boldsymbol{\omega}\,d^3x$ is performed.
++
+ \subsection{Fixing coupling placeholders by normalization}
+ \label{sec:coupling_normalization}
+ 
+@@ -2190,6 +2192,76 @@
+ 
+         Algebraic operations on Conway tangles altering local crossing numbers directly map to integer steps in $\mathcal{H}$ through discrete topological transitions in $Lk$.
+ 
++
++    \subsection{Canonical Helicity Diagnostics for Multi-Component Swirl Strings}
++    \label{app:helicity_diagnostics_multicomponent}
++
++    The preceding derivation establishes the single-tube relation between kinematic helicity and topological winding data in the thin-core ideal limit. For practical SST computations involving links or multi-component filament assemblies, we record here a canonical \emph{diagnostic} decomposition and reporting procedure. This subsection is included as a topology-support module for numerical work and for evaluation of helicity-type terms in the knot-energy/stability sector; it does not replace the canonical mass functional and does not by itself fix coupling coefficients.
++
++    \paragraph{Assumptions (diagnostic regime).}
++    The formulas below are used in the incompressible, inviscid, thin-core filament regime, with disjoint components and no net helicity flux through the chosen control volume. Exact conservation can fail under non-ideal reconnection dynamics; in such cases, direct field evaluation or corrected coarse-grained diagnostics should be preferred.
++
++    \paragraph{Field definition.}
++    The kinematic helicity is
++    \begin{equation}
++        \mathcal{H} \;=\; \int_V \mathbf{v}\cdot\boldsymbol{\omega}\,d^3x,
++        \qquad
++        \boldsymbol{\omega}=\nabla\times\mathbf{v}.
++    \end{equation}
++
++    \paragraph{Multi-component thin-core decomposition.}
++    Consider \(N\) oriented, disjoint filament components indexed by \(i=1,\dots,N\), each carrying circulation \(\Gamma_i\). Let \(SL_i\) denote the self-linking number assigned to component \(i\) (with a stated framing convention), and let \(Lk_{ij}\) denote the Gauss linking number between components \(i\) and \(j\). In the thin-core regime, a practical helicity estimator is
++    \begin{equation}
++        \mathcal{H}_{\mathrm{est}}
++        \;\approx\;
++        \sum_{i=1}^{N}\Gamma_i^{\,2}SL_i
++        \;+\;
++        \sum_{1\le i<j\le N}2\,Lk_{ij}\,\Gamma_i\Gamma_j.
++        \label{eq:helicity_multicomponent_decomp}
++    \end{equation}
++    For framed closed curves, one may decompose
++    \begin{equation}
++        SL_i = Tw_i + Wr_i,
++        \label{eq:helicity_selflinking_split}
++    \end{equation}
++    where \(Tw_i\) is twist and \(Wr_i\) is writhe (with convention-dependent assignment that should be reported explicitly).
++
++    If all components share a common circulation \(\Gamma_i=\Gamma\), then
++    \begin{equation}
++        \mathcal{H}_{\mathrm{est}}
++        \;\approx\;
++        \Gamma^2\!\left(
++        \sum_{i=1}^{N}SL_i
++        +2\sum_{1\le i<j\le N}Lk_{ij}
++        \right).
++        \label{eq:helicity_multicomponent_decomp_hom}
++    \end{equation}
++
++    \paragraph{Canonical role in the knot-energy/stability sector.}
++    This subsection provides a computational realization for helicity-type contributions in the canonical knot-energy/stability functional,
++    \begin{equation}
++        E_{\mathrm{eff}}[K] = \alpha\,C(K)+\beta\,L(K)+\gamma\,\mathcal{H}(K),
++    \end{equation}
++    in the multi-component thin-core regime. It is a diagnostic/evaluation rule and reporting convention, not an independent replacement of the canonical mass kernel or a standalone derivation of particle stability.
++
++    \paragraph{Normative reporting procedure (for reproducibility).}
++    For any reported \(\mathcal{H}_{\mathrm{est}}\), list at minimum:
++    \begin{enumerate}
++        \item component orientations and indexing convention;
++        \item circulations \(\Gamma_i\) (including estimation method/uncertainty);
++        \item pairwise linking numbers \(Lk_{ij}\);
++        \item framing convention used for \(SL_i\), or separate \(Tw_i,Wr_i\) values;
++        \item discretization/embedding method and numerical resolution;
++        \item uncertainty band for \(\mathcal{H}_{\mathrm{est}}\).
++    \end{enumerate}
++
++    \paragraph{Research-track variational note (not canonical spine).}
++    A constrained variational ansatz of the form
++    \begin{equation}
++        \delta\!\left(E-\lambda\mathcal{H}\right)=0
++    \end{equation}
++    may be used as a bridge heuristic for helicity-constrained relaxation studies. In Canon v0.7.8 this is retained as research-track guidance only; it is not adopted here as a canonical derivation of relativistic stability, mass hierarchy, or persistence without additional SST-specific closure, calibration, and falsifier links.
++
+     \subsection{Physical Analogy}
+         Consider Conway notation as the structural chemical formula for a molecule, where ``tangles'' are functional groups snapping together. Alexander-Briggs is merely the common name (like ``water''), and Dowker-Thistlethwaite is a database registry number. Reidemeister moves represent bending or twisting the molecule without breaking any chemical bonds.
+ 

@@ -1,0 +1,370 @@
+%! Author = Omar Iskandarani
+%! Date = Nov 15, 2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17619189
+
+\newcommand{\paperdoi}{10.5281/zenodo.17619189}
+\newcommand{\papertitle}{Energy, Impulse, and Stability of Thin Vortex Loops\\
+in Incompressible, Inviscid Fluids}
+
+
+%========================================================================================
+% PACKAGES AND DOCUMENT CONFIGURATION
+%========================================================================================
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+    \ifdefined\standalonechapter
+    {\Large\bfseries \appendixtitle \par}
+    \else
+        {\Large\bfseries \papertitle \par}
+    \fi
+    \vspace{1cm}
+    {\Large\itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par}
+    \vspace{0.5cm}
+    {\today \par}
+    \vspace{0.5cm}
+}
+
+% here comes abstract
+\newcommand{\titlepageClose}{
+    \vfill
+    \raggedright % <-- fixes left alignment
+    \null
+    \begin{picture}(0,0)
+    % Adjust position: (x,y) = (left, bottom)
+    \put(0,-45){  % Shift 200pt left, 40pt down
+        \begin{minipage}[b]{0.7\textwidth}
+        \footnotesize % One step bigger than \tiny \scriptsize
+        \renewcommand{\arraystretch}{1.0}
+        \noindent\rule{\textwidth}{0.4pt} \\[0.5em]  % ← horizontal line
+        \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+        Email: \texttt{info@omariskandarani.com} \\
+        ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+        \end{minipage}
+    }
+    \end{picture}
+    \end{titlepage}
+}
+
+\begin{document}
+    \titlepageOpen
+
+    \begin{abstract}
+        Vortex rings and vortex loops in incompressible, inviscid fluids are localized structures that carry finite energy, impulse, and helicity and can propagate over long distances with weak distortion.
+        In this paper we review and organize classical results for thin-core circular vortex rings and extend the discussion to general closed vortex loops, including knotted filaments.
+        For a circular ring of radius $R$, core radius $a \ll R$, circulation $\Gamma$, and ambient density $\rho$, we summarize the standard expressions for kinetic energy, hydrodynamic impulse, and self-induced translational velocity,
+        \[
+            E = \frac{1}{2}\rho \Gamma^2 R\left(\ln\frac{8R}{a} - \alpha\right),\quad
+            \bm{I} = \rho \pi \Gamma R^2 \,\hat{\bm{z}},\quad
+            U = \frac{\Gamma}{4\pi R}\left(\ln\frac{8R}{a} - \beta\right),
+        \]
+        with model-dependent constants $\alpha,\beta$.
+        We discuss how these quantities confer ``particle-like'' properties on the ring through an effective mass $M_{\mathrm{eff}} = \|\bm{I}\|/U$ and show how curvature and pressure gradients yield a consistent force balance in the inviscid Euler equations.
+        Finally, we outline the extension to general closed filaments, highlighting how the Biot--Savart representation and the helicity invariant underlie the robustness of knotted vortex loops as finite-energy, bound configurations in classical fluid mechanics.
+        The analysis uses only incompressible Euler flow and established results from vortex dynamics.
+    \end{abstract}
+    \titlepageClose
+
+
+
+
+    \section{Introduction}
+        Localized vortical structures are a hallmark of fluid flows across a wide range of Reynolds numbers and physical systems, from smoke rings and underwater bubble rings to quantized vortices in superfluids~\cite{Saffman1992,Donnelly1991,Meleshko2010}.
+        Among these, axisymmetric vortex rings in incompressible, inviscid fluids have long served as a canonical example of a finite-energy, self-propagating configuration, already studied by Helmholtz, Kelvin, and Lamb~\cite{Helmholtz1858,Lamb1932}.
+
+        For a thin-core vortex ring of large radius $R$ relative to its core size $a$, classical vortex theory yields explicit expressions for its kinetic energy, hydrodynamic impulse, and self-induced translational speed in terms of the circulation $\Gamma$ and fluid density $\rho$~\cite{Saffman1992,Sullivan2008}.
+        These results have been refined in numerous experimental and numerical studies~\cite{Sullivan2008,Stanaway1988,BolsterRings}, and analogous structures appear in superfluid helium~\cite{Donnelly1991} and Bose--Einstein condensates~\cite{Bulgac2013}.
+
+        In parallel, topological aspects of vorticity, such as linking, knottedness, and helicity, have been studied since Moffatt's work on tangled vortex lines~\cite{Moffatt1969}, with rigorous constructions of knotted vortex lines in steady Euler flows appearing more recently~\cite{EncisoPeralta2012,Ricca1993}.
+        Experiments have realized knotted vortex structures in water~\cite{KlecknerIrvine2013}, demonstrating that closed and knotted vortex loops can propagate as coherent, long-lived objects.
+
+        The aim of the present paper is threefold:
+        \begin{enumerate}
+            \item to present, in a compact form, the standard expressions for the energy, impulse, and self-induced velocity of a thin circular vortex ring in an incompressible, inviscid fluid;
+            \item to interpret these quantities in terms of an effective ``particle-like'' description characterized by a finite energy, momentum, and size;
+            \item to outline how these ideas extend to general closed and knotted vortex loops via the Biot--Savart formalism and helicity, without invoking any nonstandard physics.
+        \end{enumerate}
+        We work entirely within the framework of classical incompressible Euler flow and established vortex-dynamics theory.
+
+    \section{Thin circular vortex ring in an unbounded fluid}
+        \subsection{Geometric and dynamical set-up}
+            We consider an incompressible, inviscid fluid of constant density $\rho$, unbounded in all directions.
+            A thin circular vortex ring is modeled as a toroidal vortex of major radius $R$ and minor (core) radius $a$, with $a \ll R$.
+            The vorticity is concentrated in a toroidal core around a circular centerline $C$ lying in the plane $z=0$ and centered on the $z$-axis.
+
+            Let the circulation around any closed curve linking the core be
+            \begin{equation}
+                \Gamma = \oint \bm{v}\cdot\mathrm{d}\bm{\ell},
+            \end{equation}
+            where $\bm{v}$ is the velocity field induced by the vortex and any background motion is absent.
+            We assume an axisymmetric vorticity distribution across the core cross-section, with characteristic radius $a$.
+            In the thin-core limit $a/R \ll 1$, the details of the core structure enter only through logarithmic corrections~\cite{Saffman1992,Sullivan2008}.
+
+        \subsection{Biot--Savart representation and thin-core approximation}
+            In an incompressible, inviscid fluid, the velocity induced by a vortex filament of circulation $\Gamma$ along a curve $C$ can be expressed via the Biot--Savart law~\cite{Saffman1992,Newman2011}:
+            \begin{equation}
+                \bm{v}(\bm{x}) = \frac{\Gamma}{4\pi} \int_C
+                \frac{(\mathrm{d}\bm{\ell} \times (\bm{x}-\bm{x}'))}{\|\bm{x}-\bm{x}'\|^3},
+                \label{eq:BiotSavart}
+            \end{equation}
+            where $\bm{x}'$ is a point on $C$ and $\mathrm{d}\bm{\ell}$ is the tangent element.
+            For a circular ring of radius $R$ lying in the $x$--$y$ plane, Eq.~\eqref{eq:BiotSavart} can be evaluated in terms of elliptic integrals; in the thin-core limit, these integrals admit asymptotic simplifications when computing bulk quantities such as energy and translational speed.
+
+        \subsection{Kinetic energy, impulse, and self-induced velocity}
+            The kinetic energy associated with the vortex ring is
+            \begin{equation}
+                E = \frac{1}{2}\rho \int_{\mathbb{R}^3} \|\bm{v}\|^2 \,\mathrm{d}V,
+                \label{eq:E-def}
+            \end{equation}
+            and the hydrodynamic impulse is given by~\cite{Saffman1992,Hunt2007}
+            \begin{equation}
+                \bm{I} = \frac{\rho}{2} \int_{\mathbb{R}^3} \bm{x} \times \bm{\omega}\,\mathrm{d}V,
+                \label{eq:impulse-def}
+            \end{equation}
+            where $\bm{\omega} = \nabla\times\bm{v}$ is the vorticity.
+            For an axisymmetric thin-core vortex ring, classical analysis yields (see, e.g.,~\cite{Saffman1992,Sullivan2008,Hunt2007}):
+            \begin{align}
+                \Gamma &= \pi \omega_0 a^2, \label{eq:Gamma-core}\\
+                \bm{I} &= \rho \pi \Gamma R^2 \,\hat{\bm{z}}, \label{eq:impulse-ring}\\
+                E &= \frac{1}{2}\rho \Gamma^2 R
+                \left(\ln\frac{8R}{a} - \alpha\right),
+                \qquad a \ll R,
+                \label{eq:energy-ring}
+            \end{align}
+            where $\omega_0$ is the approximately uniform vorticity in the core and $\alpha$ is a constant of order unity depending on the core model (e.g.\ uniformly rotating solid core, hollow core, presence of surface tension)~\cite{Sullivan2008,Hunt2007}.
+
+            The ring moves along its axis of symmetry (the $z$-axis) with a self-induced translational speed
+            \begin{equation}
+                U = \frac{\Gamma}{4\pi R}
+                \left(\ln\frac{8R}{a} - \beta\right),
+                \qquad a \ll R,
+                \label{eq:velocity-ring}
+            \end{equation}
+            where $\beta$ is another model-dependent constant, related to $\alpha$ through Hamiltonian considerations~\cite{Sullivan2008}.
+            For a classical solid-core model, typical values are $\alpha = 7/4$ and $\beta = 1/4$~\cite{Sullivan2008,Hunt2007}.
+
+            Equations~\eqref{eq:energy-ring}--\eqref{eq:velocity-ring} show that both $E$ and $U$ depend logarithmically on the aspect ratio $R/a$, a hallmark of concentrated vortex structures.
+
+        \subsection{Effective mass and particle-like attributes}
+            The impulse $\bm{I}$ plays a role analogous to linear momentum for localized vortical structures~\cite{Saffman1992,Hunt2007}.
+            For a steadily translating ring, one can define an effective mass
+            \begin{equation}
+                M_{\mathrm{eff}} := \frac{\|\bm{I}\|}{U}
+                = \frac{\rho \pi \Gamma R^2}{U}.
+                \label{eq:Meff-def}
+            \end{equation}
+            Substituting Eq.~\eqref{eq:velocity-ring}, one finds
+            \begin{equation}
+                M_{\mathrm{eff}}
+                = 4\pi^2 \rho R^3
+                \left[\ln\frac{8R}{a} - \beta\right]^{-1}.
+                \label{eq:Meff-ring}
+            \end{equation}
+            In this sense, the vortex ring behaves as a localized object with finite energy $E$, effective mass $M_{\mathrm{eff}}$, and size $R$, moving with speed $U$ along its axis.
+            This particle-like interpretation is widely used in the analysis of vortex ring interactions and in analogies with quantized rings in superfluids~\cite{Donnelly1991,Sullivan2008}.
+
+    \section{Curvature, pressure gradients, and stability}
+        \subsection{Pressure field and normal force balance}
+            The motion of the vortex ring must satisfy the incompressible Euler equations
+            \begin{equation}
+                \frac{\partial \bm{v}}{\partial t} + (\bm{v}\cdot\nabla)\bm{v}
+                = -\frac{1}{\rho}\nabla p,
+                \qquad \nabla\cdot\bm{v} = 0,
+                \label{eq:Euler}
+            \end{equation}
+            where $p$ is the pressure.
+            In a frame co-moving with the ring, the core vorticity experiences a balance between curvature-induced centrifugal tendencies and pressure gradients.
+            For a vortex filament with curvature $\kappa = 1/R$ and circulation $\Gamma$, the local induction approximation suggests a self-induced velocity proportional to $\Gamma \kappa \ln(1/(\kappa a))$~\cite{Saffman1992,Alekseenko2007}.
+            The normal component of the Euler equation then yields a force balance between inertial and pressure-gradient terms.
+
+            This local picture is consistent with the global energy and impulse expressions: curvature determines the ring radius $R$, while the pressure distribution establishes the finite core radius $a$ and regularizes the otherwise singular velocity field on the filament.
+
+        \subsection{Axisymmetric perturbations and Kelvin waves}
+            The stability of vortex rings to small perturbations has been extensively studied in both inviscid and viscous regimes~\cite{Widnall1975,Sullivan2008}.
+            Axisymmetric perturbations of the core shape can be described in terms of Kelvin waves propagating along the ring, with dispersion relations derived from the linearized Euler equations and the Biot--Savart integral.
+            For thin rings of moderate circulation, these perturbations typically remain bounded over many core turnover times, and the ring preserves its identity as a coherent structure.
+
+            Non-axisymmetric instabilities, such as azimuthal waviness leading to breakdown, emerge at higher Reynolds numbers or larger perturbation amplitudes, but experimentally generated rings in water and other fluids often travel many diameters before significant distortion~\cite{Sullivan2008,Hunt2007}.
+            The combination of finite energy, impulse, and relative robustness under perturbations justifies treating thin vortex rings as dynamically stable ``bound'' structures within classical fluid mechanics.
+
+    \section{Extension to general and knotted vortex loops}
+        \subsection{Biot--Savart energy for a closed filament}
+            For a general closed vortex filament $C$ with circulation $\Gamma$ in an otherwise irrotational incompressible fluid, the velocity field can be written in Biot--Savart form as in Eq.~\eqref{eq:BiotSavart}.
+            Neglecting core structure and assuming a small but finite core radius $a$, the kinetic energy can be expressed as~\cite{Saffman1992,Alekseenko2007}
+            \begin{equation}
+                E \simeq \frac{\rho \Gamma^2}{8\pi}
+                \int_C\!\!\int_C
+                \frac{\bm{t}(s)\cdot\bm{t}(s')}{\|\bm{x}(s)-\bm{x}(s')\|}\,
+                \mathrm{d}s\,\mathrm{d}s'
+                + E_{\mathrm{core}},
+                \label{eq:E-double}
+            \end{equation}
+            where $\bm{x}(s)$ is an arclength parametrization, $\bm{t}(s)$ the unit tangent vector, and $E_{\mathrm{core}}$ collects model-dependent core contributions.
+            For a circular ring, Eq.~\eqref{eq:E-double} reduces, in the thin-core limit, to the form~\eqref{eq:energy-ring}.
+
+            Equation~\eqref{eq:E-double} applies equally to non-planar and knotted centerlines, revealing that a wide class of closed vortex loops can carry finite kinetic energy proportional to $\rho \Gamma^2$ and a geometric functional of their shape.
+
+        \subsection{Helicity and knottedness}
+            The helicity of a velocity field is defined as~\cite{Moffatt1969}
+            \begin{equation}
+                H = \int_{\mathbb{R}^3} \bm{v}\cdot\bm{\omega}\,\mathrm{d}V.
+            \end{equation}
+            For a collection of thin vortex filaments with circulations $\Gamma_i$, helicity can be expressed in terms of linking numbers and self-linking numbers~\cite{Moffatt1969,Ricca1993}:
+            \begin{equation}
+                H = \sum_{i\neq j} \Gamma_i \Gamma_j \,Lk_{ij}
+                + \sum_i \Gamma_i^2 SL_i,
+            \end{equation}
+            where $Lk_{ij}$ is the Gauss linking number between filaments $i$ and $j$, and $SL_i$ is the self-linking number (twist plus writhe) of filament $i$.
+            Helicity is an invariant of ideal (inviscid, barotropic) flow under suitable boundary conditions~\cite{Moffatt1969,Meleshko2010}.
+
+            For a single knotted vortex loop with circulation $\Gamma$, the self-linking term gives a non-zero contribution $H \propto \Gamma^2 SL$, which is topological in nature.
+            This invariance constrains the possible deformations and reconnection events in the flow, contributing to the robustness of knotted structures.
+
+        \subsection{Existence and realization of knotted vortex loops}
+            Mathematical results show that, under appropriate conditions, steady solutions of the incompressible Euler equations can exhibit vortex lines of arbitrary knot and link type~\cite{EncisoPeralta2012}.
+            Experimentally, knotted vortices have been created and visualized in water, with centerlines following torus knots and links that propagate stably over multiple diameters before deforming~\cite{KlecknerIrvine2013}.
+
+            These findings, together with Eq.~\eqref{eq:E-double} and helicity invariance, support the view that knotted vortex loops can be treated as finite-energy, bound configurations characterized by:
+            \begin{itemize}
+                \item a circulation $\Gamma$;
+                \item geometric invariants such as total length, curvature, and torsion;
+                \item topological invariants such as linking and self-linking numbers;
+                \item associated energy $E$, impulse $\bm{I}$, and induced motion.
+            \end{itemize}
+            Within the domain of classical incompressible fluid mechanics, such loops thus provide a natural class of ``particle-like'' objects, with identity tied to both geometry and topology.
+
+    \section{Intuitive picture}
+        A useful analogy is to imagine the fluid as a still pond and a vortex loop as a flexible hula-hoop made of spinning water.
+        The spinning motion keeps the hula-hoop ``tight'' and pulls the surrounding water along, giving it a definite size, a preferred direction of motion, and a certain amount of stored energy.
+        If you gently bump the hoop, it wobbles and ripples but stays recognizable as a single moving ring, much like a smoke ring traveling across a room.
+
+    \section{Discussion and outlook}
+        We have summarized the standard thin-core theory of circular vortex rings and extended the discussion to general and knotted vortex loops in incompressible, inviscid fluids.
+        The key points are:
+        \begin{enumerate}
+            \item A thin circular vortex ring has well-defined kinetic energy, impulse, and self-induced velocity given by Eqs.~\eqref{eq:energy-ring}--\eqref{eq:velocity-ring}, with logarithmic dependence on the aspect ratio $R/a$.
+            \item The ratio $\|\bm{I}\|/U$ defines an effective mass $M_{\mathrm{eff}}$ that encodes the particle-like behavior of the ring as a localized, propagating object.
+            \item Curvature and pressure gradients provide a consistent force balance in the Euler equations, while small perturbations give rise to Kelvin waves and, at higher amplitudes, to possible instabilities.
+            \item For general closed and knotted filaments, the Biot--Savart representation leads to a finite kinetic energy functional, and helicity invariance ties the dynamics to topological invariants such as linking and self-linking numbers.
+        \end{enumerate}
+
+        All results lie squarely within classical incompressible Euler theory and established vortex dynamics.
+        They suggest that closed vortex loops---including knotted ones---can be usefully regarded as bound, finite-energy structures with persistent identity, characterized by a small set of geometric, topological, and dynamical invariants.
+
+        Potential mainstream extensions include:
+        \begin{itemize}
+            \item detailed stability analyses of specific knotted vortex configurations using linear and weakly nonlinear theory;
+            \item quantitative comparisons between classical vortex loops and quantized vortex rings in superfluids, where circulation is fixed by Planck's constant~\cite{Donnelly1991};
+            \item numerical studies of vortex reconnection and helicity transfer in complex vortex networks, building on recent experimental realizations of knotted vortices~\cite{KlecknerIrvine2013}.
+        \end{itemize}
+        Any further interpretive steps beyond these frameworks would require additional assumptions that go beyond the scope of the present work.
+
+    \section*{Acknowledgments}
+        The author thanks the authors of classical and modern references on vortex dynamics and helicity for providing the theoretical framework on which this synthesis is based.
+
+        \bibliographystyle{unsrt}
+        \begin{thebibliography}{99}
+
+            \bibitem{Saffman1992}
+            P.~G. Saffman,
+            \newblock \emph{Vortex Dynamics},
+            \newblock Cambridge University Press, Cambridge (1992).
+
+            \bibitem{Donnelly1991}
+            R.~J. Donnelly,
+            \newblock \emph{Quantized Vortices in Helium II},
+            \newblock Cambridge University Press, Cambridge (1991).
+
+            \bibitem{Meleshko2010}
+            V.~V. Meleshko and A.~A. Gourjii,
+            \newblock \emph{Vortex rings: history and state of the art},
+            \newblock Fluid Dyn. Res.\ \textbf{42}, 021001 (2010).
+
+            \bibitem{Helmholtz1858}
+            H.~Helmholtz,
+            \newblock \emph{\"Uber Integrale der hydrodynamischen Gleichungen, welche den Wirbelbewegungen entsprechen},
+            \newblock J.\ Reine Angew.\ Math.\ \textbf{55}, 25--55 (1858).
+
+            \bibitem{Lamb1932}
+            H.~Lamb,
+            \newblock \emph{Hydrodynamics}, 6th ed.,
+            \newblock Cambridge University Press, Cambridge (1932).
+
+            \bibitem{Sullivan2008}
+            I.~S. Sullivan, J.~J. Niemela, R.~E. Hershberger, D.~Bolster, and R.~J. Donnelly,
+            \newblock \emph{Dynamics of thin vortex rings},
+            \newblock J.\ Fluid Mech.\ \textbf{609}, 319--347 (2008).
+
+            \bibitem{Stanaway1988}
+            S.~K. Stanaway,
+            \newblock \emph{A Numerical Study of Viscous Vortex Rings Using a Spectral Method},
+            \newblock NASA Technical Report 19890014449 (1988).
+
+            \bibitem{BolsterRings}
+            D.~Bolster,
+            \newblock \emph{Vortex rings: from smoke rings to superfluid helium},
+            \newblock (Lecture notes, University of Notre Dame).
+
+            \bibitem{Hunt2007}
+            J.~C.~R. Hunt, A.~Jacobs, and U.~Fernando,
+            \newblock \emph{Vortices, Complex Flows and Inertial Particles},
+            \newblock in \emph{IUTAM Symposium on Computational Physics and New Perspectives in Turbulence}, Springer (2008).
+
+            \bibitem{Bulgac2013}
+            A.~Bulgac, M.~M. Forbes, and R.~Sharma,
+            \newblock \emph{Vortex ring in a trapped unitary Fermi gas},
+            \newblock Phys.\ Rev.\ Lett.\ \textbf{110}, 025301 (2013).
+
+            \bibitem{Moffatt1969}
+            H.~K. Moffatt,
+            \newblock \emph{The degree of knottedness of tangled vortex lines},
+            \newblock J.\ Fluid Mech.\ \textbf{35}, 117--129 (1969).
+
+            \bibitem{Ricca1993}
+            R.~L. Ricca,
+            \newblock \emph{Toroidal and knotted vortex filaments in Euler flows},
+            \newblock Proc.\ R.\ Soc.\ Lond.\ A \textbf{439}, 305--321 (1993).
+
+            \bibitem{EncisoPeralta2012}
+            A.~Enciso and D.~Peralta-Salas,
+            \newblock \emph{Existence of knotted vortex tubes in steady Euler flows},
+            \newblock Acta Math.\ \textbf{214}, 61--134 (2015).
+
+            \bibitem{KlecknerIrvine2013}
+            D.~Kleckner and W.~T.~M. Irvine,
+            \newblock \emph{Creation and dynamics of knotted vortices},
+            \newblock Nat.\ Phys.\ \textbf{9}, 253--258 (2013).
+
+            \bibitem{Newman2011}
+            S.~J. Newman,
+            \newblock \emph{The induced velocity of a vortex ring filament},
+            \newblock AFM Technical Report 11-03, University of Southampton (2011).
+
+            \bibitem{Alekseenko2007}
+            S.~V. Alekseenko, P.~A. Kuibin, and V.~L. Okulov,
+            \newblock \emph{Theory of Concentrated Vortices},
+            \newblock Springer, Berlin (2007).
+
+            \bibitem{Widnall1975}
+            S.~E. Widnall and C.-Y. Tsai,
+            \newblock \emph{The instability of the thin vortex ring of constant vorticity},
+            \newblock Philos.\ Trans.\ R.\ Soc.\ Lond.\ A \textbf{287}, 273--305 (1977).
+
+        \end{thebibliography}
+
+\end{document}

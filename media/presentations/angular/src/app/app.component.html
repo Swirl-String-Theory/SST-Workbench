@@ -1,0 +1,282 @@
+<div
+  class="min-h-screen bg-physics-bg text-physics-text selection:bg-physics-cyan selection:text-physics-bg overflow-x-hidden"
+>
+  <app-admin-dashboard />
+
+  <nav
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+    [class]="scrolled() ? 'bg-physics-bg/80 backdrop-blur-md border-b border-slate-800 py-4' : 'bg-transparent py-6'"
+  >
+    <div class="container mx-auto px-6 flex justify-between items-center">
+      <div class="flex items-center gap-4 cursor-pointer group" (click)="scrollToTop()">
+        <div
+          class="w-10 h-10 bg-physics-cyan/10 border border-physics-cyan rounded-full flex items-center justify-center text-physics-cyan font-serif font-bold text-xl shadow-[0_0_15px_rgba(34,211,238,0.2)] group-hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300"
+        >
+          Ω
+        </div>
+        <span class="font-serif font-bold text-lg tracking-wide text-white">
+          {{ cms.authorLastName() }}
+          <span class="font-normal text-physics-cyan"> 2025</span>
+        </span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide text-physics-muted">
+        <a href="#introduction" (click)="scrollToSection('introduction', $event)" class="hover:text-white transition-all cursor-pointer uppercase text-xs tracking-widest">Introduction</a>
+        <a href="#unification" (click)="scrollToSection('unification', $event)" class="hover:text-physics-cyan transition-all cursor-pointer uppercase text-xs tracking-widest">Electron Scale</a>
+        <a href="#taxonomy" (click)="scrollToSection('taxonomy', $event)" class="hover:text-physics-gold transition-all cursor-pointer uppercase text-xs tracking-widest">Taxonomy</a>
+        <a href="#simulator" (click)="scrollToSection('simulator', $event)" class="hover:text-physics-cyan transition-all cursor-pointer uppercase text-xs tracking-widest">Simulator</a>
+        <a href="#fluids" (click)="scrollToSection('fluids', $event)" class="hover:text-physics-purple transition-all cursor-pointer uppercase text-xs tracking-widest">Fluid Analogues</a>
+        <a href="#papers" (click)="scrollToSection('papers', $event)" class="hover:text-physics-gold transition-all cursor-pointer uppercase text-xs tracking-widest">Papers</a>
+        <div class="w-px h-4 bg-slate-700"></div>
+        <span class="text-slate-600 text-[10px] font-mono">GRONINGEN, NL</span>
+      </div>
+
+      <button type="button" class="md:hidden text-white p-2" (click)="toggleMenu()">
+        @if (menuOpen()) {
+          <lucide-icon [img]="icons.X" />
+        } @else {
+          <lucide-icon [img]="icons.Menu" />
+        }
+      </button>
+    </div>
+  </nav>
+
+  @if (menuOpen()) {
+    <div class="fixed inset-0 z-40 bg-physics-bg flex flex-col items-center justify-center gap-8 text-xl font-serif animate-fade-in text-white">
+      <a href="#introduction" (click)="scrollToSection('introduction', $event)" class="hover:text-physics-cyan uppercase">Introduction</a>
+      <a href="#unification" (click)="scrollToSection('unification', $event)" class="hover:text-physics-cyan uppercase">Electron Scale</a>
+      <a href="#taxonomy" (click)="scrollToSection('taxonomy', $event)" class="hover:text-physics-gold uppercase">Taxonomy</a>
+      <a href="#simulator" (click)="scrollToSection('simulator', $event)" class="hover:text-physics-cyan uppercase">Simulator</a>
+      <a href="#fluids" (click)="scrollToSection('fluids', $event)" class="hover:text-physics-cyan uppercase">Fluid Analogues</a>
+      <a href="#papers" (click)="scrollToSection('papers', $event)" class="hover:text-physics-cyan uppercase">Papers</a>
+    </div>
+  }
+
+  <header class="relative h-screen flex items-center justify-center overflow-hidden">
+    <app-hero-scene />
+    <div class="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,#020617_90%)]"></div>
+
+    <div class="relative z-10 container mx-auto px-6 text-center">
+      <div class="inline-block mb-6 px-4 py-1.5 border border-physics-cyan/30 text-physics-cyan text-[10px] tracking-[0.3em] uppercase font-bold rounded-full backdrop-blur-md bg-physics-cyan/5 shadow-[0_0_15px_rgba(34,211,238,0.15)] animate-glow">
+        {{ cms.content().hero.badge }}
+      </div>
+      <h1 class="font-serif text-5xl md:text-7xl lg:text-9xl font-medium leading-tight md:leading-[0.9] mb-8 text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+        {{ cms.content().hero.title }}
+        <br />
+        <span class="italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-physics-cyan via-white to-physics-purple text-3xl md:text-5xl block mt-4 pb-2">
+          &amp; {{ cms.content().hero.subtitle }}
+        </span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-lg md:text-xl text-physics-muted font-light leading-relaxed mb-12">
+        {{ cms.content().hero.description }}
+      </p>
+      <div class="flex justify-center">
+        <a
+          href="#introduction"
+          (click)="scrollToSection('introduction', $event)"
+          class="group flex flex-col items-center gap-3 text-xs font-bold tracking-widest text-physics-muted hover:text-white transition-colors cursor-pointer uppercase"
+        >
+          <span>Explore Research</span>
+          <span class="p-3 border border-slate-700 rounded-full group-hover:border-physics-cyan group-hover:bg-physics-cyan/10 transition-all">
+            <lucide-icon [img]="icons.ArrowDown" [size]="16" />
+          </span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="introduction" class="py-32 bg-physics-bg relative">
+      <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+      <div class="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+        <div class="md:col-span-4 sticky top-32">
+          <div class="inline-block mb-3 text-[10px] font-bold tracking-[0.2em] text-physics-cyan uppercase">Introduction</div>
+          <h2 class="font-serif text-4xl md:text-5xl mb-6 leading-tight text-white">{{ cms.content().intro.title }}</h2>
+          <div class="w-20 h-1 bg-gradient-to-r from-physics-cyan to-transparent mb-6"></div>
+        </div>
+        <div class="md:col-span-8 text-lg text-physics-muted leading-relaxed space-y-8 font-light">
+          @if (cms.content().intro.body.length) {
+            <p>
+              <span class="text-6xl float-left mr-4 mt-[-10px] font-serif text-physics-cyan opacity-80">
+                {{ cms.content().intro.body[0].charAt(0) }}
+              </span>
+              {{ cms.content().intro.body[0].slice(1) }}
+            </p>
+          }
+          @for (text of cms.content().intro.body.slice(1); track text) {
+            <p>{{ text }}</p>
+          }
+          <div class="p-6 bg-physics-card border border-slate-800 rounded-xl mt-8">
+            <h4 class="font-serif text-white mb-2">Abstract</h4>
+            <p class="text-sm italic">
+              This note develops a definitive symmetry and topological taxonomy of knots as candidate swirl-string configurations in Swirl-String Theory (SST).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="unification" class="py-32 relative bg-[#050b1d]">
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-physics-purple/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div class="container mx-auto px-6 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div>
+            @if (cms.content().papers[0]; as paper0) {
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-physics-purple/10 text-physics-purple text-[10px] font-bold tracking-widest uppercase rounded-full mb-6 border border-physics-purple/20">
+                {{ paper0.tag }}
+              </div>
+              <h2 class="font-serif text-4xl md:text-5xl mb-8 text-white">{{ paper0.title }}</h2>
+            }
+            <p class="text-lg text-physics-muted mb-6 leading-relaxed">
+              We construct a classical harmonic oscillator using the electron mass, a Compton-rescaled frequency, and the classical electron radius as amplitude.
+            </p>
+            <p class="text-lg text-physics-muted mb-6 leading-relaxed">
+              Remarkably, the resulting maximal force depends only on fundamental constants, and the energy at a specific Compton-scale radius matches exactly half the electron rest energy.
+            </p>
+          </div>
+          <div>
+            <app-electron-scale-derivation />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <app-mass-invariant-section />
+
+    <section id="taxonomy" class="py-32 bg-physics-bg border-t border-slate-800">
+      <div class="container mx-auto px-6">
+        <div class="mb-12 text-center">
+          <div class="inline-block mb-3 text-[10px] font-bold tracking-[0.2em] text-physics-gold uppercase">Taxonomy</div>
+          <h2 class="font-serif text-4xl md:text-5xl mb-6 text-white">Knot Symmetry Classification</h2>
+          <p class="text-physics-muted max-w-2xl mx-auto">
+            A definitive symmetry and topological taxonomy of knots as candidate swirl-string configurations.
+          </p>
+        </div>
+        <app-torus-knots-table />
+        <app-hyperbolic-knots-table />
+        <app-knot-glossary />
+      </div>
+    </section>
+
+    <section id="simulator" class="py-32 bg-[#050505] border-t border-slate-800">
+      <div class="container mx-auto px-6">
+        <div class="mb-12 text-center">
+          <div class="inline-block mb-3 text-[10px] font-bold tracking-[0.2em] text-physics-cyan uppercase">Simulation</div>
+          <h2 class="font-serif text-4xl md:text-5xl mb-6 text-white">SST Starship Coil</h2>
+          <p class="text-physics-muted max-w-2xl mx-auto">
+            Interactive simulation of Topological Vorticity Confinement. Adjust frequency to find resonance.
+          </p>
+        </div>
+        <app-starship-coil-simulator />
+      </div>
+    </section>
+
+    <section class="py-16 bg-physics-bg">
+      <div class="container mx-auto px-6">
+        <app-unified-energy-chart />
+      </div>
+    </section>
+
+    <section class="py-32 bg-[#020617] text-white overflow-hidden relative border-t border-slate-900">
+      <div class="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none">
+        <div class="w-[800px] h-[800px] rounded-full bg-physics-cyan/5 blur-[150px] absolute top-[-200px] left-[-200px]"></div>
+      </div>
+      <div class="container mx-auto px-6 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div class="order-2 lg:order-1">
+            <app-vortex-ring-calculator />
+          </div>
+          <div class="order-1 lg:order-2">
+            @if (cms.content().papers[3]; as paper4) {
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-physics-cyan/10 text-physics-cyan text-[10px] font-bold tracking-widest uppercase rounded-full mb-6 border border-physics-cyan/20">
+                {{ paper4.tag }}
+              </div>
+              <h2 class="font-serif text-4xl md:text-5xl mb-8 text-white">{{ paper4.title }}</h2>
+            }
+            <p class="text-lg text-physics-muted mb-6 leading-relaxed">
+              Vortex rings in incompressible fluids behave like localized particles. They carry finite energy, impulse, and helicity.
+            </p>
+            <p class="text-lg text-physics-muted leading-relaxed">
+              This research organizes classical results for thin-core circular vortex rings and extends the discussion to knotted filaments.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fluids" class="py-32 bg-gradient-to-b from-[#050b1d] to-[#020617] border-t border-slate-800/50">
+      <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-16">
+        <div class="md:col-span-5 relative">
+          <div class="aspect-square bg-physics-card rounded-2xl overflow-hidden relative border border-slate-800 shadow-2xl min-h-[320px]">
+            <app-rotating-fluid-scene />
+            <div class="absolute bottom-6 left-0 right-0 text-center text-xs text-physics-muted/60 font-serif italic tracking-wider">
+              Simulation of a Rotating Fluid Experiment
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-7 flex flex-col justify-center">
+          <div class="inline-block mb-4 text-[10px] font-bold tracking-widest text-physics-gold uppercase">PAPERS V &amp; VI</div>
+          <h2 class="font-serif text-4xl md:text-5xl mb-8 text-white">Fluid Analogues for Gravity</h2>
+          <p class="text-lg text-physics-muted mb-6 leading-relaxed">
+            In swirling flows, pressure gradients balance centripetal acceleration. We show that for a specific azimuthal velocity profile (v ~ 1/√r), the pressure field mimics a Newtonian gravitational potential (-GM/r).
+          </p>
+          <p class="text-lg text-physics-muted mb-8 leading-relaxed">
+            Additionally, we derive an effective mass density from rotational kinetic energy and show how circulation in a rigid rotation provides a fluid-mechanical representation of kinematic time dilation.
+          </p>
+          <div class="p-8 bg-physics-card/30 border border-slate-800 rounded-lg border-l-2 border-l-physics-gold backdrop-blur-sm">
+            <p class="font-serif italic text-xl text-physics-text mb-4">
+              "The analysis remains strictly within the framework of classical incompressible Euler flow... providing a pedagogical link between relativistic kinematics and classical rotational flows."
+            </p>
+            <span class="text-[10px] font-bold text-physics-muted tracking-wider uppercase">— {{ cms.content().author.name }}, 2025</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="papers" class="py-32 bg-physics-bg relative">
+      <div class="absolute top-0 left-0 w-full h-px bg-slate-800"></div>
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-20">
+          <div class="inline-block mb-3 text-[10px] font-bold tracking-widest text-physics-muted uppercase">PUBLICATIONS</div>
+          <h2 class="font-serif text-4xl md:text-6xl mb-4 text-white">The 2025 Series</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (paper of cms.content().papers; track paper.id) {
+            <div class="bg-physics-card p-8 rounded-xl border border-slate-800 hover:border-physics-cyan/30 transition-all cursor-pointer group hover:bg-slate-900 shadow-lg hover:shadow-physics-cyan/5 hover:-translate-y-1">
+              <div class="flex items-start justify-between mb-6">
+                <span class="text-[10px] font-bold uppercase tracking-widest border border-slate-700 px-2 py-1 rounded bg-black/20" [class]="paper.color">{{ paper.tag }}</span>
+                <lucide-icon [img]="icons.FileText" [size]="16" class="text-slate-600 group-hover:text-white transition-colors" />
+              </div>
+              <h3 class="font-serif text-lg text-slate-200 leading-snug group-hover:text-white transition-colors">{{ paper.title }}</h3>
+            </div>
+          }
+        </div>
+        <div class="mt-24 flex justify-center">
+          <app-author-card
+            [name]="cms.content().author.name"
+            [role]="cms.content().author.role"
+            delay="0s"
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-[#010409] text-physics-muted py-20 border-t border-slate-900">
+    <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+      <div class="text-center md:text-left">
+        <div class="text-white font-serif font-bold text-2xl mb-2">{{ cms.content().author.name }}</div>
+        <p class="text-sm text-slate-400">{{ cms.content().author.location }}</p>
+        <p class="text-xs mt-3 text-slate-600 font-mono">{{ cms.content().author.email }}</p>
+      </div>
+      <div class="flex gap-8 text-[10px] font-bold tracking-widest uppercase">
+        <a href="#unification" (click)="scrollToSection('unification', $event)" class="hover:text-physics-cyan transition-colors">Electron Scale</a>
+        <a href="#fluids" (click)="scrollToSection('fluids', $event)" class="hover:text-physics-purple transition-colors">Fluid Analogues</a>
+        <a href="#papers" (click)="scrollToSection('papers', $event)" class="hover:text-physics-gold transition-colors">Publications</a>
+      </div>
+    </div>
+    <div class="text-center mt-16 text-[10px] text-slate-700 font-mono uppercase tracking-wider">
+      © 2025 {{ cms.content().author.name }}. CMS Powered.
+    </div>
+  </footer>
+</div>

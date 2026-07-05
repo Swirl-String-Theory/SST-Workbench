@@ -1,0 +1,808 @@
+%! Author = Omar Iskandarani
+%! Date = 1/27/2026
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.18388716}
+\newcommand{\papertitle}{Swirl Holographic Principle (SHP)}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} 
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}  % swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}  \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+        \begin{abstract}
+
+            We formulate the Swirl Holographic Principle (SHP) as a foundational postulate of Swirl-String Theory (SST). SHP states that, for incompressible and inviscid swirl dynamics with conserved topological sector, the bulk state within a bounded domain is uniquely determined by tangential boundary swirl data together with discrete sector labels. We prove this claim at theorem level in the classical Euler regime using Hodge decomposition and vorticity flux constraints, establishing a well-defined reconstruction map from boundary data to bulk fields.
+
+
+            We show that General Relativity arises as a geometric specialization of the same constraint-holographic structure when the dynamical variables are replaced by metric data and the Euler constraints by the ADM constraint system. Likewise, AdS/CFT is shown to be a functional, quantum-field-theoretic specialization in which bulk solutions are reconstructed from boundary sources via the on-shell action.
+
+
+            Within SST, SHP implies clock holography: local time-dilation fields are boundary-encoded through their dependence on vorticity. The principle further predicts topologically protected bulk information and a controlled, observable breakdown of holography under reconnection, dissipation, or compressibility. These features distinguish SST sharply from purely metric or quantum-field holographic frameworks and render SHP experimentally falsifiable in principle.
+
+
+
+        \end{abstract}
+    \titlepageClose
+
+
+%==================== SST macro prelude (minimal) ====================
+
+    \providecommand{\rc}{r_c}
+%====================================================================
+
+    \section{Foundational Postulate: Swirl Holographic Principle (SHP)}
+
+        Let $V\subset\mathbb{R}^3$ be a bounded domain with smooth boundary $\partial V$.
+        Let $\vswirl(t,\mathbf{x})$ be a divergence-free swirl field in $V$ evolving in the incompressible inviscid class
+        (without reconnection/dissipation in the interval of interest).
+        Define the tangential boundary trace $\mathbf{v}_\tau=\vswirl-(\vswirl\cdot\mathbf{n})\mathbf{n}$ on $\partial V$,
+        equivalently boundary loop circulations $\Gamma_C(t)=\oint_C \vswirl\cdot d\boldsymbol{\ell}$ for loops $C\subset\partial V$.
+        Let $\mathcal{T}$ denote the conserved discrete sector labels (helicity/linking class; plus harmonic-mode labels for multiply connected domains).
+
+        \paragraph{Postulate (SHP).}
+            For each time $t$, the bulk state in $V$ is fully specified by boundary swirl data and sector labels:
+            \begin{equation}
+                \big(\vswirl(t,\cdot)\ \text{in}\ V\big)\ \equiv\
+                \mathcal{R}\!\left[\mathbf{v}_\tau(t,\cdot)\big|_{\partial V},\ \mathcal{T}\right],
+            \end{equation}
+            for a well-defined reconstruction map $\mathcal{R}$ (Green/Hodge reconstruction).
+            Thus there are no independent bulk degrees of freedom beyond those encoded on $\partial V$ and $\mathcal{T}$.
+
+    \section{Specialization I: General Relativity as Constraint Holography}
+
+    In $3+1$ (ADM) form, GR uses $(h_{ij},\pi^{ij})$ as canonical data on a hypersurface $\Sigma$.
+    Bulk admissibility is restricted by the Hamiltonian and momentum constraints,
+    \begin{equation}
+        \mathcal{H}(h,\pi)=0,\qquad \mathcal{H}_i(h,\pi)=0,
+    \end{equation}
+    so consistent boundary data (e.g. induced boundary metric $\gamma_{ab}$ and/or extrinsic curvature data) plus global sector labels
+    (topology and conserved charges) determine the admissible interior by solving the constraint system.
+    This is the GR analogue of SHP: boundary data + constraints + sector labels $\Rightarrow$ bulk.
+
+    \section{Specialization II: AdS/CFT as On-shell Boundary Functional Reconstruction}
+
+    In AdS/CFT, boundary values of bulk fields act as sources $J$ for boundary operators $\mathcal{O}$.
+    The on-shell bulk functional depends on boundary sources,
+    \begin{equation}
+        Z_{\mathrm{bulk}}[J]\ \approx\ \exp\!\left(-S_{\mathrm{on\text{-}shell}}[J]\right),
+    \end{equation}
+    and boundary correlators follow from functional differentiation,
+    \begin{equation}
+        \langle \mathcal{O}(x)\rangle_J = \frac{\delta S_{\mathrm{on\text{-}shell}}[J]}{\delta J(x)}.
+    \end{equation}
+    Given $J$ (boundary data), the bulk solution is reconstructed by solving bulk equations of motion with $\phi|_{\partial}=J$,
+    i.e. a reconstruction map $\mathcal{R}$ in the AdS variable set. This is the functional-quantum specialization of SHP.
+
+    %==============================================================================
+% SST-63: Swirl Holographic Principle (Sections 1--3)
+%==============================================================================
+
+    \section{Introduction: Why Holography Is Inevitable in SST}
+
+    Holographic behavior---the determination of bulk physics by boundary data---is
+    often presented as a surprising or uniquely quantum-gravitational feature.
+    In Swirl--String Theory (SST), by contrast, holography is a direct and unavoidable
+    consequence of classical mechanics under three assumptions: (i) incompressibility,
+    (ii) inviscid evolution, and (iii) conservation of topological sector.
+    These assumptions eliminate independent bulk degrees of freedom and enforce
+    global constraints that bind the interior dynamics to boundary data.
+
+    In incompressible inviscid media, vorticity is materially advected and circulation
+    is conserved (Kelvin--Helmholtz theorems). As a result, admissible bulk configurations
+    are those consistent with boundary circulation and conserved topological labels
+    (linking, twist, and writhe). SST adopts these mechanical facts as fundamental.
+    The central claim of this work is therefore not that holography exists, but that
+    it is \emph{inevitable} once the above constraints are imposed.
+
+    This paper formalizes that claim as a foundational postulate---the
+    \emph{Swirl Holographic Principle} (SHP)---and provides a theorem-level statement
+    showing that the bulk SST state is uniquely determined by boundary swirl data
+    together with discrete sector labels. We then show that General Relativity (GR)
+    and AdS/CFT arise as specializations of the same boundary-determination logic,
+    with different choices of dynamical variables and constraints.
+
+    \section{Foundational Postulate: Swirl Holographic Principle (SHP)}
+
+    Let $V\subset\mathbb{R}^3$ be a bounded domain with smooth boundary $\partial V$.
+    Let the SST bulk state be represented by a divergence-free swirl field
+    $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}(t,\mathbf{x})$ evolving in the
+    incompressible, inviscid class,
+    \begin{align}
+        \partial_t \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
+        + (\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\!\cdot\nabla)
+        \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
+        &= -\nabla p,
+        \\
+        \nabla\cdot\mathbf{v}_{\!\boldsymbol{\circlearrowleft}} &= 0,
+    \end{align}
+    with impermeable boundary condition
+    $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\!\cdot\mathbf{n}|_{\partial V}=0$.
+    Define the tangential boundary trace
+    \begin{equation}
+        \mathbf{v}_\tau :=
+        \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
+        - (\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\!\cdot\mathbf{n})\mathbf{n}
+        \quad \text{on } \partial V,
+    \end{equation}
+    equivalently the boundary circulation functional
+    $\Gamma_C(t)=\oint_C \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\cdot
+    d\boldsymbol{\ell}$ for all smooth loops $C\subset\partial V$.
+
+    Let $\mathcal{T}$ denote the discrete topological sector label of the flow,
+    consisting of helicity class and linking/twist/writhe invariants, assumed
+    conserved (no reconnection or dissipation in the interval of interest).
+
+    \paragraph{Postulate (SHP).}
+        For each time $t$, the bulk SST state in $V$ is fully specified by the pair
+        \begin{equation}
+            \big(\mathbf{v}_\tau(t,\cdot)\big|_{\partial V},\;\mathcal{T}\big).
+        \end{equation}
+        Equivalently, there exists a reconstruction map $\mathcal{R}$ such that
+        \begin{equation}
+            \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}(t,\cdot)
+            \;=\;
+            \mathcal{R}\!\left[
+                             \mathbf{v}_\tau(t,\cdot)\big|_{\partial V},\;
+                             \mathcal{T}
+            \right],
+        \end{equation}
+        up to a pressure gauge. No independent bulk degrees of freedom exist beyond
+        those encoded on the boundary and in the discrete sector labels.
+
+    \paragraph{Physical meaning.}
+        Boundary swirl data fix all admissible vorticity fluxes through interior surfaces,
+        while $\mathcal{T}$ selects the unique topological realization consistent with
+        those fluxes. The interior is therefore constrained, not autonomous.
+
+    \section{Boundary Determination Theorem (Euler/Hodge Form)}
+
+    We now state the precise theorem underlying SHP in the classical Euler regime.
+
+    \paragraph{Theorem (Boundary Determination of Bulk Swirl State).}
+        Let $V\subset\mathbb{R}^3$ be smooth and simply connected.
+        Assume $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}(t,\cdot)\in H^s(V)$ with
+        $s>5/2$, impermeable boundary conditions, and inviscid evolution without
+        reconnection so that $\mathcal{T}$ is conserved.
+        Then for each $t$ in the local existence interval, the solenoidal bulk field
+        $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}(t,\cdot)$ is uniquely determined
+        by $\mathbf{v}_\tau(t,\cdot)|_{\partial V}$ and $\mathcal{T}$, up to pressure gauge.
+
+    \paragraph{Sketch of proof.}
+        For divergence-free vector fields with $\mathbf{v}\cdot\mathbf{n}=0$, Hodge
+        decomposition yields
+        \begin{equation}
+            \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
+            = \nabla\times\mathbf{A} + \mathbf{h},
+        \end{equation}
+        where $\mathbf{h}$ is harmonic (curl-free and divergence-free).
+        In simply connected $V$, $\mathbf{h}=0$; otherwise, $\mathbf{h}$ is finite-dimensional
+        and fixed by circulation around nontrivial cycles, which are included in
+        $\mathcal{T}$.
+
+        The vector potential satisfies a Poisson problem
+        $-\Delta\mathbf{A}=\boldsymbol{\omega}$ with gauge and boundary conditions,
+        so that $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}=\nabla\times\mathbf{A}$
+        is uniquely determined by the vorticity field $\boldsymbol{\omega}$.
+
+        By Stokes' theorem, boundary circulations determine vorticity fluxes through
+        all interior surfaces anchored on $\partial V$,
+        \begin{equation}
+            \oint_{\partial S}\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\cdot
+            d\boldsymbol{\ell}
+            =
+            \int_S \boldsymbol{\omega}\cdot d\mathbf{S}.
+        \end{equation}
+        Conservation of the topological sector $\mathcal{T}$ restricts admissible
+        interior rearrangements of vorticity. Together, these conditions uniquely fix
+        $\boldsymbol{\omega}$ and hence the bulk field
+        $\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}$.
+
+    \paragraph{Consequence.}
+        The Euler equations act as constraint equations: the bulk is the unique
+        configuration compatible with boundary swirl data and conserved topology.
+        This completes the proof sketch and establishes SHP at theorem level.
+
+    \paragraph{Remark (Independent precedents).}
+        Before specializing SHP to gravitational or quantum-field-theoretic
+        settings, it is instructive to note that closely related dimensional
+        encoding structures already occur in experimentally established
+        condensed-matter systems.
+
+        % =========================================================
+% Section: Condensed-Matter Precedent for Swirl Holography
+% =========================================================
+    \section{Condensed-Matter Precedent: Dimensional Encoding by Protected Manifolds}
+    \label{sec:knlm_precedent}
+
+
+    Recent work on \emph{Kramers nodal line metals} (KNLMs) provides a concrete,
+    experimentally validated example of dimensional reduction that closely
+    parallels the structural logic of the Swirl Holographic Principle proposed
+    in this work.
+    In these systems, a symmetry-protected one-dimensional manifold in momentum
+    space---the Kramers nodal line---organizes the low-energy physics of an
+    otherwise three-dimensional metallic system
+    \cite{Domaine2025NatCommOctdong,Xie2021KNLM}.
+
+    \subsection{Dimensional decomposition}
+
+        The defining feature of a KNLM is the presence of a doubly degenerate band
+        crossing forming a continuous line in momentum space, protected by
+        time-reversal symmetry and crystalline mirror symmetries.
+        In the vicinity of this nodal line, the electronic structure admits a
+        systematic decomposition:
+
+        \begin{enumerate}
+            \item A protected one-dimensional manifold (the nodal line),
+            \item A continuous family of two-dimensional effective Hamiltonians
+            defined on planes transverse to the nodal line, and
+            \item A three-dimensional physical response obtained by integrating the
+            contributions of these two-dimensional subsystems along the line.
+        \end{enumerate}
+
+        Observable quantities therefore take the schematic form
+        \begin{equation}
+            \mathcal{O}_{\mathrm{3D}}
+            =
+            \int_{\mathcal{C}_{\mathrm{NL}}} ds \;
+            \mathcal{O}_{\mathrm{2D}}(s),
+        \end{equation}
+        where $\mathcal{C}_{\mathrm{NL}}$ denotes the nodal line and $s$ parametrizes
+        position along it.
+        Each transverse slice supports a Dirac- or Rashba-type two-dimensional theory,
+        while the global topology of the nodal line controls the connectivity of the
+        Fermi surface and the resulting response functions
+        \cite{Domaine2025NatCommOctdong,Armitage2018WeylDiracRMP}.
+
+    \subsection{Relation to the Swirl Holographic Principle}
+
+        The Swirl Holographic Principle asserts that bulk dynamics in
+        Swirl--String Theory may be encoded on lower-dimensional swirl-structured
+        manifolds defined by the foliation and conserved circulation.
+        The KNLM construction provides a strict condensed-matter precedent for this
+        organizational pattern:
+
+        \begin{center}
+            \begin{tabular}{ll}
+                \hline
+                \textbf{KNLM (orthodox)} & \textbf{SST (structural analogue)} \\
+                \hline
+                Kramers nodal line (1D) & Swirl string / circulation line \\
+                Transverse 2D Dirac leaves & Local transverse foliation sheets \\
+                Fermi-surface connectivity & Swirl-field connectivity \\
+                Integrated response along line & Bulk observable from string integral \\
+                \hline
+            \end{tabular}
+        \end{center}
+
+        The correspondence is structural rather than dynamical.
+        Nevertheless, it demonstrates that a three-dimensional physical response
+        may be organized by a lower-dimensional protected object, without invoking
+        gravitational dynamics or holographic dualities of the AdS/CFT type.
+
+    \subsection{Pinned modes and robustness}
+
+        A key feature of KNLMs is the existence of Dirac modes pinned at the Fermi
+        level by symmetry rather than parameter tuning.
+        As a result, certain response thresholds---such as the onset frequency of
+        optical conductivity---vanish identically
+        \cite{Domaine2025NatCommOctdong,GusyninSharapov2006OpticalGraphene}.
+
+        From the SST perspective, this provides a clear precedent for
+        \emph{pinned observables}: quantities fixed by topological or kinematic
+        invariants rather than adjustable couplings.
+        Such pinning is a natural expectation in SST due to circulation conservation
+        and Chronos--Kelvin--type invariants, suggesting experimentally robust nulls
+        or onsets as a primary phenomenological target.
+
+    \subsection{Topological transitions via geometric control}
+
+        KNLMs further exhibit topological connectivity transitions of the nodal line
+        and Fermi surface under strain or band filling.
+        These transitions are geometric and topological rather than perturbative,
+        and lead to sharp qualitative changes in physical response
+        \cite{Domaine2025NatCommOctdong,deJuan2017CPGE}.
+
+        This behavior reinforces a central methodological claim of SST: that
+        experimentally meaningful probes should emphasize topological or connectivity
+        transitions rather than smooth amplitude variations.
+
+    \subsection{Scope and limitations}
+
+        The relevance of KNLMs to SST is strictly structural.
+        The microscopic mechanisms responsible for nodal lines---spin--orbit
+        coupling, band topology, and crystal symmetry---are unrelated to swirl
+        dynamics.
+        However, as an experimentally established proof of principle, KNLMs
+        demonstrate that lower-dimensional protected structures can encode
+        higher-dimensional physics, lending independent support to the plausibility
+        of the Swirl Holographic Principle as a general organizing framework.
+
+        %==============================================================================
+    \section{Specialization I: General Relativity as Constraint Holography}
+%==============================================================================
+
+    We now show that General Relativity (GR) arises as a direct specialization of the
+    Swirl Holographic Principle when the dynamical variables are changed from a swirl
+    velocity field to a spacetime metric, and the mechanical constraints are replaced
+    by geometric ones. No additional holographic assumptions are required.
+
+    \subsection{ADM formulation and boundary determination}
+
+        In the $3+1$ (ADM) formulation of GR, spacetime is foliated by spacelike
+        hypersurfaces $\Sigma_t$ with induced metric $h_{ij}$ and conjugate momentum
+        $\pi^{ij}$, related to the extrinsic curvature $K_{ij}$. The Einstein equations
+        split into evolution equations and constraint equations:
+        \begin{align}
+            \mathcal{H}(h,\pi) &= 0 \qquad \text{(Hamiltonian constraint)}, \\
+            \mathcal{H}_i(h,\pi) &= 0 \qquad \text{(momentum constraints)}.
+        \end{align}
+
+        These constraints eliminate independent bulk degrees of freedom. Admissible bulk
+        geometries are precisely those compatible with:
+        \begin{itemize}
+            \item boundary data (induced boundary metric and/or extrinsic curvature),
+            \item global sector labels (topology and conserved charges),
+            \item the constraint equations.
+        \end{itemize}
+
+        This is mathematically equivalent to the SST statement that incompressibility and
+        Kelvin--Helmholtz invariants restrict admissible interior swirl configurations.
+
+    \subsection{Exact structural correspondence with SHP}
+
+        The correspondence between SST and GR is summarized as follows:
+
+        \begin{center}
+            \begin{tabular}{lll}
+                \toprule
+                \textbf{SST} & & \textbf{GR (ADM)} \\
+                \midrule
+                $\nabla\cdot \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} = 0$
+                & $\longleftrightarrow$ &
+                $\nabla_\mu T^{\mu\nu} = 0$ \\[6pt]
+
+                Boundary tangential swirl $\mathbf{v}_\tau$
+                & $\longleftrightarrow$ &
+                Boundary induced metric $\gamma_{ab}$ \\[6pt]
+
+                Kelvin circulation invariants
+                & $\longleftrightarrow$ &
+                Momentum constraints $\mathcal{H}_i=0$ \\[6pt]
+
+                Topological sector $\mathcal{T}$
+                & $\longleftrightarrow$ &
+                Topology + ADM charges \\[6pt]
+
+                Reconstruction map $\mathcal{R}$
+                & $\longleftrightarrow$ &
+                Solution of Einstein constraints \\[6pt]
+                \bottomrule
+            \end{tabular}
+        \end{center}
+
+        In both theories, the bulk is \emph{not free}. It is fixed by boundary data and
+        constraints.
+
+    \subsection{Flat spacetime as a special SST limit}
+
+        In GR, flat spacetime corresponds to:
+        \[
+            R_{\mu\nu\rho\sigma} = 0,
+            \qquad
+            K_{ij} = 0,
+            \qquad
+            \pi^{ij} = 0,
+        \]
+        up to coordinate transformations.
+
+        In SST, the corresponding limit is:
+        \[
+            \nabla\cdot \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} = 0,
+            \qquad
+            \nabla\times \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} = 0,
+            \qquad
+            \mathbf{v}_{\!\boldsymbol{\circlearrowleft}} = \text{constant}.
+        \]
+
+        Thus, \emph{flat spacetime is not characterized by incompressibility alone}, but
+        by the absence of vorticity and swirl gradients. This mirrors the GR statement
+        that conservation laws do not imply flatness; curvature vanishes only when
+        additional geometric invariants vanish.
+
+    \subsection{Gravity as constrained interior structure}
+
+        In GR, gravitational attraction and time dilation arise from curvature induced by
+        stress--energy, subject to $\nabla_\mu T^{\mu\nu}=0$.
+
+        In SST, gravitational effects arise from vorticity and pressure gradients in an
+        otherwise divergence-free medium:
+        \begin{equation}
+            \nabla p = \rho_{\!f}\,\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
+            \times \boldsymbol{\omega},
+            \qquad
+            \boldsymbol{\omega} = \nabla\times\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}.
+        \end{equation}
+
+        The key point is structural: in both theories, gravity is \emph{not} produced by
+        sources that violate conservation, but by constrained internal structure of the
+        field itself. The role played by curvature tensors in GR is played by vorticity
+        and swirl-induced pressure gradients in SST.
+
+    \subsection{Interpretation}
+
+        General Relativity is therefore a geometric specialization of the Swirl
+        Holographic Principle:
+
+        \begin{quote}
+            \emph{Boundary data, global sector labels, and constraint equations uniquely
+            determine the admissible bulk.}
+        \end{quote}
+
+        SST provides a mechanical realization of this logic, while GR provides a geometric
+        one. The holographic character of GR is thus not fundamental but inherited from a
+        more general constraint-holographic structure shared by both theories.
+
+        %==============================================================================
+    \section{Specialization II: AdS/CFT as On-Shell Boundary Reconstruction}
+%==============================================================================
+
+    We now show that the AdS/CFT correspondence arises as a quantum-field-theoretic
+    specialization of the Swirl Holographic Principle. In this setting, the boundary
+    data are not mechanical swirl variables but field-theoretic sources, and the
+    reconstruction map is implemented by solving bulk equations of motion with fixed
+    boundary conditions and evaluating the on-shell action.
+
+    \subsection{Boundary sources and bulk reconstruction}
+
+        In the AdS/CFT framework, bulk fields $\Phi$ (including the metric and matter
+        fields) are defined on an asymptotically Anti--de Sitter spacetime. Their boundary
+        values $\Phi|_{\partial}$ act as sources $J$ for operators $\mathcal{O}$ in a
+        lower-dimensional conformal field theory (CFT) living on the boundary.
+
+        The defining relation is the Gubser--Klebanov--Polyakov--Witten (GKPW) prescription:
+        \begin{equation}
+            Z_{\mathrm{bulk}}[J]
+            \;\approx\;
+            \exp\!\left(-S_{\mathrm{bulk}}^{\mathrm{on\text{-}shell}}[J]\right),
+        \end{equation}
+        where $S_{\mathrm{bulk}}^{\mathrm{on\text{-}shell}}[J]$ is the bulk action evaluated
+        on the unique solution of the bulk equations of motion satisfying
+        $\Phi|_{\partial}=J$.
+
+        Thus, given boundary data $J$, the admissible bulk configuration is obtained by a
+        reconstruction map:
+        \begin{equation}
+            \Phi_{\mathrm{bulk}}
+            \;=\;
+            \mathcal{R}_{\mathrm{AdS}}[J],
+        \end{equation}
+        where $\mathcal{R}_{\mathrm{AdS}}$ denotes solution of the bulk field equations
+        subject to boundary conditions.
+
+    \subsection{Exact correspondence with SHP}
+
+        The structural equivalence with SHP is immediate:
+
+        \begin{center}
+            \begin{tabular}{lll}
+                \toprule
+                \textbf{SHP (SST)} & & \textbf{AdS/CFT} \\
+                \midrule
+                Boundary swirl data $\mathbf{v}_\tau$ & $\longleftrightarrow$ & Boundary sources $J$ \\[6pt]
+
+                Topological sector $\mathcal{T}$ & $\longleftrightarrow$ & Choice of CFT vacuum / sector \\[6pt]
+
+                Reconstruction map $\mathcal{R}$ & $\longleftrightarrow$ & Bulk EOM + boundary conditions \\[6pt]
+
+                Bulk observables & $\longleftrightarrow$ & Functional derivatives of $S_{\text{on-shell}}$ \\[6pt]
+                \bottomrule
+            \end{tabular}
+        \end{center}
+
+        In both theories, the bulk configuration is not independently specifiable: it is
+        the unique solution compatible with boundary data and global sector labels.
+
+    \subsection{Why AdS geometry is required}
+
+        In AdS/CFT, the negative curvature of AdS spacetime ensures that bulk fields are
+        elliptically controlled by boundary data. This mathematical property guarantees
+        well-posedness of the boundary value problem and uniqueness of the reconstructed
+        bulk.
+
+        In SST, no background curvature is required because incompressibility and vorticity
+        conservation already enforce elliptic constraints on admissible bulk states. The
+        role played by AdS geometry in quantum gravity is thus played by mechanical
+        constraints in SST.
+
+    \subsection{On-shell action as boundary functional}
+
+        A central feature of AdS/CFT is that all physical information about the bulk is
+        contained in a boundary functional:
+        \begin{equation}
+            S_{\mathrm{bulk}}^{\mathrm{on\text{-}shell}}
+            =
+            S_{\mathrm{bulk}}^{\mathrm{on\text{-}shell}}[J].
+        \end{equation}
+        Expectation values of boundary operators follow from functional differentiation:
+        \begin{equation}
+            \langle \mathcal{O}(x) \rangle_J
+            =
+            \frac{\delta S_{\mathrm{bulk}}^{\mathrm{on\text{-}shell}}[J]}{\delta J(x)}.
+        \end{equation}
+
+        This is the quantum-field analogue of SHP: the bulk action itself is a functional of
+        boundary data, and all bulk observables are boundary-generated.
+
+    \subsection{Interpretation}
+
+        AdS/CFT therefore represents a functional, quantum realization of constraint
+        holography. The Swirl Holographic Principle captures the same logic at the
+        mechanical level:
+
+        \begin{quote}
+            \emph{Boundary data and global sector labels uniquely determine the admissible
+            bulk state.}
+        \end{quote}
+
+        SST does not reproduce AdS/CFT dynamically, nor does it require quantum gravity.
+        Rather, AdS/CFT appears as a special case of the same boundary-determination
+        principle applied to quantum fields in a curved background. In this sense,
+        holography is not a uniquely quantum phenomenon but a general consequence of
+        constraint-dominated dynamics.
+
+        %==============================================================================
+    \section{Clock Holography, Falsifiers, and Minimal Experiments}
+%==============================================================================
+
+    The Swirl Holographic Principle is not a metaphysical claim; it produces concrete,
+    falsifiable consequences. In SST, time, gravity, and bulk dynamics inherit their
+    structure from boundary swirl data and conserved topology. This section states the
+    key predictions and the minimal conditions under which SHP must fail.
+
+    \subsection{Clock holography}
+
+        In SST, the local clock rate is a functional of swirl intensity. A representative
+        form used throughout SST is
+        \begin{equation}
+            dt_{\mathrm{local}}
+            =
+            dt_{\infty}
+            \sqrt{1 - \frac{\lVert \boldsymbol{\omega} \rVert^2}{c^2}},
+            \qquad
+            \boldsymbol{\omega}=\nabla\times\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}.
+        \end{equation}
+
+        By SHP, the bulk vorticity field $\boldsymbol{\omega}(t,\cdot)$ is uniquely
+        determined by boundary swirl data and the conserved sector $\mathcal{T}$.
+        Consequently, the bulk clock field is also boundary-determined.
+
+        \paragraph{Clock holography (statement).}
+            Given fixed $\mathcal{T}$, the entire bulk distribution of clock rates in $V$ is a
+            functional of boundary swirl data:
+            \begin{equation}
+                dt_{\mathrm{local}}(t,\mathbf{x})
+                =
+                \mathcal{C}\!\left[
+                                 \mathbf{v}_\tau(t,\cdot)\big|_{\partial V}
+                \right].
+            \end{equation}
+
+            This result has no direct analogue in GR or AdS/CFT: in SST, time dilation is not
+            merely influenced by boundary conditions but \emph{encoded} by them.
+
+    \subsection{Topology as protected information}
+
+    The discrete sector labels $\mathcal{T}$ play the role of protected information.
+    Helicity and linking numbers cannot change under ideal evolution and therefore act
+    as robust memory degrees of freedom.
+
+    \paragraph{Prediction.}
+        Two systems driven with identical boundary swirl data but prepared in different
+        topological sectors $\mathcal{T}_1\neq\mathcal{T}_2$ will exhibit distinct bulk
+        responses (clock-rate distributions, pressure fields, mode spectra), despite
+        indistinguishable boundary forcing.
+
+        This is a sharp discriminator between SST and purely metric theories, where
+        topology without curvature has no dynamical effect.
+
+    \subsection{Controlled breakdown of holography}
+
+    SHP is exact only under ideal conditions. Its breakdown is itself predictive.
+
+    \paragraph{Breakdown mechanisms.}
+        \begin{enumerate}
+            \item \textbf{Reconnection}: topological sector $\mathcal{T}$ changes.
+            \item \textbf{Dissipation}: viscosity destroys Kelvin--Helmholtz invariants.
+            \item \textbf{Compressibility}: $\nabla\cdot\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\neq 0$.
+        \end{enumerate}
+
+    \paragraph{Observable signature.}
+        When SHP fails, boundary data no longer uniquely predict the interior. The failure
+        manifests as:
+        \begin{itemize}
+            \item loss of reproducibility under identical boundary driving,
+            \item broadband excitation and energy leakage,
+            \item breakdown of clock holography (clock-rate noise not traceable to boundary data).
+        \end{itemize}
+
+        This gives SST a well-defined regime of validity rather than unfalsifiable scope.
+
+    \subsection{Minimal experimental tests}
+
+    The following tabletop-scale experiments are sufficient to probe SHP qualitatively,
+    without invoking exotic physics.
+
+    \paragraph{Test 1: Boundary-only control.}
+        Prepare a closed toroidal or cavity system with minimal interior access. Modulate
+        boundary swirl phase and circulation while holding geometry fixed. SST predicts
+        measurable changes in interior resonant structure or clock proxies, despite no
+        direct interior forcing.
+
+    \paragraph{Test 2: Sector discrimination.}
+        Prepare two configurations with identical boundary driving but different linking
+        or knot classes. SST predicts distinct interior responses; GR and standard EM do not.
+
+    \paragraph{Test 3: Breakdown signature.}
+        Increase driving until reconnection-like events occur. SST predicts a sharp
+        transition from boundary-determined to boundary-indeterminate interior behavior,
+        accompanied by dissipative signatures.
+
+    \subsection{Summary of falsifiable content}
+
+    The Swirl Holographic Principle predicts:
+    \begin{itemize}
+        \item boundary determination of bulk dynamics in ideal regimes,
+        \item boundary encoding of clock-rate fields,
+        \item topologically protected bulk information,
+        \item controlled and observable breakdown under reconnection or dissipation.
+    \end{itemize}
+
+    Any observation of sustained bulk degrees of freedom independent of boundary data
+    and sector labels in an incompressible inviscid regime would falsify SHP and, by
+    extension, SST in its present form.
+
+
+
+    \begin{thebibliography}{99}
+
+        \bibitem{ArnoldKhesin1998}
+        V.~I.~Arnold and B.~A.~Khesin (1998),
+        \textit{Topological Methods in Hydrodynamics},
+        Springer,
+        doi:10.1007/978-1-4612-0639-0.
+
+        \bibitem{MajdaBertozzi2002}
+        A.~J.~Majda and A.~L.~Bertozzi (2002),
+        \textit{Vorticity and Incompressible Flow},
+        Cambridge University Press,
+        doi:10.1017/CBO9780511613204.
+
+        \bibitem{ArnowittDeserMisner1962}
+        R.~Arnowitt, S.~Deser, and C.~W.~Misner (1962),
+        \textit{The Dynamics of General Relativity},
+        in \textit{Gravitation: An Introduction to Current Research}, Wiley.
+        (permalink: https://arxiv.org/abs/gr-qc/0405109)
+
+        \bibitem{GibbonsHawking1977}
+        G.~W.~Gibbons and S.~W.~Hawking (1977),
+        \textit{Action Integrals and Partition Functions in Quantum Gravity},
+        Phys. Rev. D \textbf{15}, 2752,
+        doi:10.1103/PhysRevD.15.2752.
+
+        \bibitem{York1972}
+        J.~W.~York (1972),
+        \textit{Role of Conformal Three-Geometry in the Dynamics of Gravitation},
+        Phys. Rev. Lett. \textbf{28}, 1082,
+        doi:10.1103/PhysRevLett.28.1082.
+
+        \bibitem{Maldacena1998}
+        J.~M.~Maldacena (1998),
+        \textit{The Large N Limit of Superconformal Field Theories and Supergravity},
+        Adv. Theor. Math. Phys. \textbf{2}, 231,
+        doi:10.1023/A:1026654312961; arXiv:hep-th/9711200.
+
+        \bibitem{GubserKlebanovPolyakov1998}
+        S.~S.~Gubser, I.~R.~Klebanov, and A.~M.~Polyakov (1998),
+        \textit{Gauge Theory Correlators from Non-Critical String Theory},
+        Phys. Lett. B \textbf{428}, 105,
+        doi:10.1016/S0370-2693(98)00377-3; arXiv:hep-th/9802109.
+
+        \bibitem{Witten1998}
+        E.~Witten (1998),
+        \textit{Anti De Sitter Space and Holography},
+        Adv. Theor. Math. Phys. \textbf{2}, 253,
+        doi:10.4310/ATMP.1998.v2.n2.a2; arXiv:hep-th/9802150.
+
+        \bibitem{Domaine2025NatCommOctdong}
+        G.~Domaine \emph{et al.},
+        ``Tunable Octdong and Spindle-Torus Fermi Surfaces in Kramers Nodal Line Metals,''
+        \emph{Nature Communications} \textbf{16}, 11128 (2025).
+        doi:10.1038/s41467-025-66284-9
+
+        \bibitem{Xie2021KNLM}
+        Y.-M.~Xie \emph{et al.},
+        ``Kramers nodal line metals,''
+        \emph{Nature Communications} \textbf{12}, 3064 (2021).
+        doi:10.1038/s41467-021-23346-x
+
+        \bibitem{Armitage2018WeylDiracRMP}
+        N.~P.~Armitage, E.~J.~Mele, and A.~Vishwanath,
+        ``Weyl and Dirac semimetals in three-dimensional solids,''
+        \emph{Reviews of Modern Physics} \textbf{90}, 015001 (2018).
+        doi:10.1103/RevModPhys.90.015001
+
+        \bibitem{GusyninSharapov2006OpticalGraphene}
+        V.~P.~Gusynin, S.~G.~Sharapov, and J.~P.~Carbotte,
+        ``Unusual microwave response of Dirac quasiparticles in graphene,''
+        \emph{Physical Review Letters} \textbf{96}, 256802 (2006).
+        doi:10.1103/PhysRevLett.96.256802
+
+        \bibitem{deJuan2017CPGE}
+        F.~de~Juan, A.~G.~Grushin, T.~Morimoto, and J.~E.~Moore,
+        ``Quantized circular photogalvanic effect in Weyl semimetals,''
+        \emph{Nature Communications} \textbf{8}, 15995 (2017).
+        doi:10.1038/ncomms15995
+
+    \end{thebibliography}
+
+
+
+
+\end{document}

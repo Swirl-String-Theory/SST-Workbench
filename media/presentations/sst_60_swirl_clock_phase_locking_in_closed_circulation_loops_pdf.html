@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-Clock Phase Locking Lab</title>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --panel: #1a1d24;
+            --text: #e0e6ed;
+            --accent: #00f2ff;
+            --accent-dim: #00f2ff44;
+            --secondary: #ff0055;
+            --success: #00ff9d;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow: hidden; /* App-like feel */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background: var(--panel);
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        main {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1px;
+            background: #333; /* Grid line color */
+            overflow: hidden;
+        }
+
+        /* Left Panel: Visualization */
+        #viz-container {
+            background: var(--bg);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 50%;
+        }
+
+        /* Right Panel: Controls & Analysis */
+        #controls-container {
+            background: var(--panel);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+        }
+
+        .control-group {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #aaa;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            color: #ccc;
+        }
+
+        .metric-value {
+            color: var(--accent);
+        }
+
+        /* Analysis Graph */
+        #graph-container {
+            height: 150px;
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 4px;
+            position: relative;
+            margin-top: 1rem;
+        }
+        
+        #graph-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Status Indicators */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #333;
+            color: #888;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .status-badge.locked {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+        }
+
+        .status-badge.searching {
+            background: rgba(255, 0, 85, 0.1);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        /* Overlay for Mobile/Resize */
+        @media (max-width: 800px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+            #controls-container {
+                border-left: none;
+                border-top: 1px solid #333;
+            }
+        }
+
+        /* Button */
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+        button:hover {
+            background: #fff;
+            box-shadow: 0 0 15px var(--accent);
+        }
+        
+        .mode-indicator {
+            font-size: 2rem;
+            text-align: center;
+            font-family: var(--font-mono);
+            color: var(--text);
+            margin: 10px 0;
+        }
+        .mode-label {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Tooltip/Help */
+        .tooltip {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.4;
+            margin-top: 1rem;
+            border-top: 1px solid #333;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Swirl-Clock Phase Lab</h1>
+        <div class="subtitle">Based on "Phase Locking in Closed Circulation Loops" by O. Iskandarani</div>
+    </div>
+    <button id="toggle-audio">Enable Audio 🔇</button>
+</header>
+
+<main>
+    <!-- Visualization Area -->
+    <div id="viz-container">
+        <canvas id="main-canvas"></canvas>
+    </div>
+
+    <!-- Controls Area -->
+    <div id="controls-container">
+        
+        <div id="status-display" class="status-badge searching">System Unstable</div>
+
+        <div class="control-group">
+            <div class="mode-label">Current Winding Number</div>
+            <div class="mode-indicator" id="winding-number">n = -</div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-header">
+                <span>Natural Frequency (Ω₀)</span>
+                <span id="val-omega">1.0</span>
+            </div>
+            <input type="range" id="input-omega" min="0.5" max="5.0" step="0.1" value="2.0">
+            
+            <div class="control-header">
+                <span>Feedback Strength (K)</span>
+                <span id="val-k">0.5</span>
+            </div>
+            <input type="range" id="input-k" min="0" max="5.0" step="0.1" value="1.5">
+
+            <div class="control-header">
+                <span>Delay Time (τ)</span>
+                <span id="val-tau">1.0s</span>
+            </div>
+            <input type="range" id="input-tau" min="0.1" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+            <div class="control-header">
+                <span>Phase Space Analysis</span>
+            </div>
+            <div id="graph-container">
+                <canvas id="graph-canvas"></canvas>
+            </div>
+            <div class="metric">
+                <span>Current Ω:</span>
+                <span id="metric-omega" class="metric-value">0.00</span>
+            </div>
+            <div class="metric">
+                <span>Target Ω (Stable):</span>
+                <span id="metric-target" class="metric-value">--</span>
+            </div>
+        </div>
+
+        <div class="tooltip">
+            <strong>How it works:</strong>
+            The particle travels on a loop. Its speed (Ω) is affected by its own position from τ seconds ago. 
+            <br><br>
+            Adjust <strong>K</strong> (Feedback) and <strong>τ</strong> (Delay) to force the system into discrete "Phase Locked" modes (integer winding numbers).
+            <br><br>
+            <em>Green Light</em> = Stable Mode Found.
+        </div>
+    </div>
+</main>
+
+<script>
+/**
+ * SIMULATION ENGINE
+ * Implements the minimal delayed phase model:
+ * dφ/dt = Ω₀ + K * sin(φ(t-τ) - φ(t))
+ */
+
+const CONFIG = {
+    historyResolution: 60, // samples per second stored in history
+    maxHistorySeconds: 5,
+};
+
+class DelayOscillator {
+    constructor() {
+        this.omega0 = 2.0;
+        this.K = 1.5;
+        this.tau = 1.0;
+        
+        this.phi = 0; // Current phase
+        this.t = 0;
+        
+        // History buffer for delay
+        // We store {t, phi} to interpolate accurately
+        this.history = []; 
+        
+        this.currentOmega = 0;
+        this.isLocked = false;
+        this.windingNumber = 0;
+    }
+
+    reset() {
+        this.phi = 0;
+        this.t = 0;
+        this.history = [];
+    }
+
+    getDelayedPhi(delay) {
+        const targetTime = this.t - delay;
+        if (targetTime <= 0 || this.history.length === 0) return this.phi - (this.omega0 * delay); // Approximation for start
+
+        // Find index
+        // Optimization: History is sorted by time. Search from end.
+        for (let i = this.history.length - 1; i >= 0; i--) {
+            if (this.history[i].t <= targetTime) {
+                // Interpolate between i and i+1 (if i+1 exists)
+                const p1 = this.history[i];
+                const p2 = this.history[i+1];
+                
+                if (!p2) return p1.phi; // Should not happen if logic is correct
+
+                const ratio = (targetTime - p1.t) / (p2.t - p1.t);
+                return p1.phi + (p2.phi - p1.phi) * ratio;
+            }
+        }
+        return this.history[0].phi; // Fallback
+    }
+
+    update(dt) {
+        this.t += dt;
+
+        // 1. Get delayed phase
+        const phiDelayed = this.getDelayedPhi(this.tau);
+
+        // 2. Calculate derivative
+        // Equation: dφ/dt = Ω₀ + K * sin(φ(t-τ) - φ(t))
+        // Note: φ(t-τ) - φ(t) is roughly -Ωτ
+        const phaseDiff = phiDelayed - this.phi;
+        const dPhi = this.omega0 + this.K * Math.sin(phaseDiff);
+
+        // 3. Update phase (Euler integration)
+        this.phi += dPhi * dt;
+        this.currentOmega = dPhi;
+
+        // 4. Update history
+        this.history.push({ t: this.t, phi: this.phi });
+
+        // Prune history
+        const cutoffTime = this.t - CONFIG.maxHistorySeconds;
+        while(this.history.length > 0 && this.history[0].t < cutoffTime) {
+            this.history.shift();
+        }
+
+        // 5. Analyze Stability
+        // Winding number n ≈ (Ω * τ) / 2π
+        // We check if Ω is steady.
+        // Theoretical steady state: Ω = Ω₀ - K sin(Ωτ)
+        const theoreticalError = Math.abs(this.currentOmega - (this.omega0 + this.K * Math.sin(-this.currentOmega * this.tau)));
+        
+        if (theoreticalError < 0.1) {
+            this.isLocked = true;
+            this.windingNumber = Math.round((this.currentOmega * this.tau) / (2 * Math.PI));
+        } else {
+            this.isLocked = false;
+        }
+    }
+}
+
+/**
+ * VISUALIZATION & UI
+ */
+const sim = new DelayOscillator();
+const canvas = document.getElementById('main-canvas');
+const ctx = canvas.getContext('2d');
+const graphCanvas = document.getElementById('graph-canvas');
+const graphCtx = graphCanvas.getContext('2d');
+
+// Audio Context
+let audioCtx;
+let oscillator;
+let gainNode;
+let audioEnabled = false;
+
+function initAudio() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+    oscillator = audioCtx.createOscillator();
+    gainNode = audioCtx.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 200;
+    gainNode.gain.value = 0.1;
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.start();
+}
+
+function updateAudio() {
+    if (!audioEnabled || !oscillator) return;
+    
+    // Map Omega to Pitch
+    // Base 100Hz, scale by Omega
+    const targetFreq = 100 + (sim.currentOmega * 40);
+    oscillator.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
+    
+    // Volume based on stability (louder when locked)
+    const targetVol = sim.isLocked ? 0.15 : 0.05;
+    gainNode.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.1);
+}
+
+document.getElementById('toggle-audio').addEventListener('click', (e) => {
+    if (!audioEnabled) {
+        initAudio();
+        audioEnabled = true;
+        e.target.innerText = "Disable Audio 🔊";
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } else {
+        gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        setTimeout(() => {
+            oscillator.stop();
+            audioCtx.close();
+            audioEnabled = false;
+            e.target.innerText = "Enable Audio 🔇";
+        }, 200);
+    }
+});
+
+// Resize handling
+function resize() {
+    const container = document.getElementById('viz-container');
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    
+    const graphContainer = document.getElementById('graph-container');
+    graphCanvas.width = graphContainer.clientWidth;
+    graphCanvas.height = graphContainer.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Input Listeners
+const inputs = {
+    omega: document.getElementById('input-omega'),
+    k: document.getElementById('input-k'),
+    tau: document.getElementById('input-tau')
+};
+
+const displays = {
+    omega: document.getElementById('val-omega'),
+    k: document.getElementById('val-k'),
+    tau: document.getElementById('val-tau'),
+    metricOmega: document.getElementById('metric-omega'),
+    metricTarget: document.getElementById('metric-target'),
+    status: document.getElementById('status-display'),
+    winding: document.getElementById('winding-number')
+};
+
+function updateParams() {
+    sim.omega0 = parseFloat(inputs.omega.value);
+    sim.K = parseFloat(inputs.k.value);
+    sim.tau = parseFloat(inputs.tau.value);
+
+    displays.omega.innerText = sim.omega0.toFixed(1);
+    displays.k.innerText = sim.K.toFixed(1);
+    displays.tau.innerText = sim.tau.toFixed(1) + 's';
+}
+
+Object.values(inputs).forEach(input => {
+    input.addEventListener('input', updateParams);
+});
+
+// Drawing Logic
+function drawLoop() {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = Math.min(cx, cy) * 0.7;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Draw Track
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 20;
+    ctx.stroke();
+
+    // 2. Draw Delayed "Ghost" Particle
+    // Position based on phi(t - tau)
+    const phiDelayed = sim.getDelayedPhi(sim.tau);
+    const ghostX = cx + Math.cos(phiDelayed) * radius;
+    const ghostY = cy + Math.sin(phiDelayed) * radius;
+
+    ctx.beginPath();
+    ctx.arc(ghostX, ghostY, 10, 0, Math.PI * 2);
+    ctx.fillStyle = '#ff0055'; // Secondary color
+    ctx.fill();
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff0055';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // 3. Draw Current Particle
+    const currentX = cx + Math.cos(sim.phi) * radius;
+    const currentY = cy + Math.sin(sim.phi) * radius;
+
+    // Connection Line (Feedback Visual)
+    ctx.beginPath();
+    ctx.moveTo(currentX, currentY);
+    ctx.lineTo(ghostX, ghostY);
+    ctx.strokeStyle = `rgba(0, 242, 255, ${Math.min(sim.K * 0.3, 1)})`; // Opacity based on K
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Particle
+    ctx.beginPath();
+    ctx.arc(currentX, currentY, 15, 0, Math.PI * 2);
+    ctx.fillStyle = sim.isLocked ? '#00ff9d' : '#00f2ff';
+    ctx.fill();
+    
+    // Glow
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = sim.isLocked ? '#00ff9d' : '#00f2ff';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Center Text
+    ctx.fillStyle = '#fff';
+    ctx.font = '16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Ω: ${sim.currentOmega.toFixed(2)}`, cx, cy + 5);
+}
+
+function drawGraph() {
+    const w = graphCanvas.width;
+    const h = graphCanvas.height;
+    const gCtx = graphCtx;
+
+    gCtx.clearRect(0, 0, w, h);
+
+    // Plot range for Omega: 0 to 10
+    const maxOmega = 10;
+    const scaleX = w / maxOmega;
+    const scaleY = h / maxOmega; // Keep aspect ratio roughly 1:1 in value space
+
+    // Draw Axes
+    gCtx.strokeStyle = '#444';
+    gCtx.lineWidth = 1;
+    gCtx.beginPath();
+    gCtx.moveTo(0, h);
+    gCtx.lineTo(w, 0); // y = x line (Ω = Ω)
+    gCtx.stroke();
+
+    // Draw Feedback Function: y = Ω₀ - K sin(Ωτ)
+    gCtx.beginPath();
+    gCtx.strokeStyle = '#00f2ff';
+    gCtx.lineWidth = 2;
+    
+    for (let x = 0; x < w; x++) {
+        const omega = x / scaleX;
+        // The self-consistency equation is Ω = Ω₀ + K sin(-Ωτ) => Ω = Ω₀ - K sin(Ωτ)
+        const yVal = sim.omega0 - sim.K * Math.sin(omega * sim.tau);
+        
+        const plotY = h - (yVal * scaleY);
+        if (x === 0) gCtx.moveTo(x, plotY);
+        else gCtx.lineTo(x, plotY);
+    }
+    gCtx.stroke();
+
+    // Draw Current State Dot
+    const curX = sim.currentOmega * scaleX;
+    const curY = h - (sim.currentOmega * scaleY);
+    
+    gCtx.beginPath();
+    gCtx.arc(curX, curY, 4, 0, Math.PI*2);
+    gCtx.fillStyle = '#ff0055';
+    gCtx.fill();
+}
+
+function updateUI() {
+    displays.metricOmega.innerText = sim.currentOmega.toFixed(3);
+    
+    if (sim.isLocked) {
+        displays.status.className = 'status-badge locked';
+        displays.status.innerText = 'Phase Locked';
+        displays.winding.innerText = `n = ${sim.windingNumber}`;
+        displays.metricTarget.innerText = sim.currentOmega.toFixed(3);
+    } else {
+        displays.status.className = 'status-badge searching';
+        displays.status.innerText = 'Searching...';
+        displays.winding.innerText = 'n = -';
+        displays.metricTarget.innerText = '--';
+    }
+}
+
+// Main Loop
+let lastTime = 0;
+function loop(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+
+    // Run simulation steps (sub-stepping for stability)
+    const subSteps = 5;
+    for (let i = 0; i < subSteps; i++) {
+        sim.update(dt / subSteps);
+    }
+
+    drawLoop();
+    drawGraph();
+    updateUI();
+    updateAudio();
+
+    requestAnimationFrame(loop);
+}
+
+// Init
+updateParams();
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

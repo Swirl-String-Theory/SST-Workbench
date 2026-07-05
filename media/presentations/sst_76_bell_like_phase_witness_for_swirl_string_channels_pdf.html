@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Interferometer Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, 0.5);
+            --path-a: #ec4899; /* Pink */
+            --path-b: #10b981; /* Green */
+            --detector-base: #eab308;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background-color: rgba(0,0,0,0.2);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 600px;
+            text-align: right;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Panel: Controls & Chart */
+        .sidebar {
+            width: 350px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid #334155;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .val-display {
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #475569;
+            border-radius: 2px;
+        }
+
+        .math-box {
+            background: #000;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            border: 1px solid #334155;
+            text-align: center;
+        }
+
+        .math-box span {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .chart-container {
+            flex: 1;
+            min-height: 200px;
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            padding: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Right Panel: Visualization */
+        .main-view {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            overflow: hidden;
+        }
+
+        #svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .node-icon {
+            width: 40px;
+            height: 40px;
+            background: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .node-label {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        #source .node-icon { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+        #detector .node-icon { border-color: var(--detector-base); border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; }
+        
+        #phase-shifter .node-icon { 
+            border-color: var(--accent); 
+            background: rgba(14, 165, 233, 0.1);
+            width: 60px;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .particle.path-a { background: var(--path-a); box-shadow: 0 0 8px var(--path-a); }
+        .particle.path-b { background: var(--path-b); box-shadow: 0 0 8px var(--path-b); }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--detector-base);
+            transform: translate(-50%, -50%);
+            animation: ripple-anim 1s linear forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes ripple-anim {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 150px; height: 150px; opacity: 0; }
+        }
+
+        /* Info Overlay */
+        .info-overlay {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            max-width: 300px;
+        }
+        .info-overlay h3 { font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--accent); }
+        .info-overlay p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SST Phase Witness Simulator</h1>
+        <p>Analogy: "Imagine making two matching ripples in water and sending them through two different maze paths. If the paths keep the ripples coordinated, when they meet again they make a repeating strong-weak pattern."</p>
+    </header>
+
+    <div class="container">
+        <!-- Controls -->
+        <div class="sidebar">
+            <div class="control-group">
+                <label>
+                    Phase Delay (Φ)
+                    <span class="val-display" id="val-phi">0.00 rad</span>
+                </label>
+                <input type="range" id="slider-phi" min="0" max="12.56" step="0.01" value="0">
+                <p style="font-size: 0.7rem; color: #64748b;">Simulates delay/swirl-clock perturbation in Arm B.</p>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    Visibility (A_SST)
+                    <span class="val-display" id="val-vis">1.00</span>
+                </label>
+                <input type="range" id="slider-vis" min="0" max="1" step="0.01" value="1">
+                <p style="font-size: 0.7rem; color: #64748b;">Coherence preservation (0 = lost, 1 = perfect).</p>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    Offset Phase (δ_SST)
+                    <span class="val-display" id="val-delta">0.00 rad</span>
+                </label>
+                <input type="range" id="slider-delta" min="0" max="6.28" step="0.01" value="0">
+            </div>
+
+            <div class="math-box">
+                E<sub>SST</sub>(Φ) = -A<sub>SST</sub> cos(Φ + δ<sub>SST</sub>)<br><br>
+                Current E = <span id="val-e">-1.000</span>
+            </div>
+
+            <div class="control-group" style="flex: 1; display: flex; flex-direction: column;">
+                <label>Phase Witness Correlation Plot</label>
+                <div class="chart-container">
+                    <canvas id="plotCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization -->
+        <div class="main-view" id="sim-area">
+            <svg id="svg-layer">
+                <!-- Paths will be drawn here by JS -->
+                <path id="svg-path-a" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="5,5" />
+                <path id="svg-path-b" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="5,5" />
+            </svg>
+
+            <!-- Nodes -->
+            <div class="node" id="source" style="left: 10%; top: 50%;">
+                <div class="node-icon">✨</div>
+                <div class="node-label">Pair Source</div>
+            </div>
+
+            <div class="node" id="bs1" style="left: 25%; top: 50%;">
+                <div class="node-icon" style="transform: rotate(45deg); width: 20px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+                <div class="node-label">Splitter</div>
+            </div>
+
+            <div class="node" id="mirror-top" style="left: 25%; top: 20%;">
+                <div class="node-icon" style="transform: rotate(-45deg); width: 10px; height: 30px; background: #94a3b8;"></div>
+            </div>
+
+            <div class="node" id="mirror-bot" style="left: 25%; top: 80%;">
+                <div class="node-icon" style="transform: rotate(45deg); width: 10px; height: 30px; background: #94a3b8;"></div>
+            </div>
+
+            <div class="node" id="mirror-top-2" style="left: 75%; top: 20%;">
+                <div class="node-icon" style="transform: rotate(45deg); width: 10px; height: 30px; background: #94a3b8;"></div>
+            </div>
+
+            <div class="node" id="mirror-bot-2" style="left: 75%; top: 80%;">
+                <div class="node-icon" style="transform: rotate(-45deg); width: 10px; height: 30px; background: #94a3b8;"></div>
+            </div>
+
+            <div class="node" id="phase-shifter" style="left: 50%; top: 80%;">
+                <div class="node-icon" id="shifter-icon">Φ</div>
+                <div class="node-label">Swirl Delay</div>
+            </div>
+
+            <div class="node" id="bs2" style="left: 75%; top: 50%;">
+                <div class="node-icon" style="transform: rotate(-45deg); width: 20px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+                <div class="node-label">Combiner</div>
+            </div>
+
+            <div class="node" id="detector" style="left: 90%; top: 50%;">
+                <div class="node-icon" id="detector-icon">👁️</div>
+                <div class="node-label">Coincidence<br>Detector</div>
+            </div>
+
+            <div class="info-overlay">
+                <h3>Observables</h3>
+                <p>The detector measures the correlation of paired excitations arriving from the two paths. Adjust the Phase Delay (Φ) to see the sinusoidal Bell-like correlation emerge.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let phi = 0;
+        let A = 1;
+        let delta = 0;
+        let currentE = -1;
+
+        // DOM Elements
+        const sliderPhi = document.getElementById('slider-phi');
+        const sliderVis = document.getElementById('slider-vis');
+        const sliderDelta = document.getElementById('slider-delta');
+        
+        const valPhi = document.getElementById('val-phi');
+        const valVis = document.getElementById('val-vis');
+        const valDelta = document.getElementById('val-delta');
+        const valE = document.getElementById('val-e');
+        
+        const canvas = document.getElementById('plotCanvas');
+        const ctx = canvas.getContext('2d');
+        const simArea = document.getElementById('sim-area');
+        
+        const detectorIcon = document.getElementById('detector-icon');
+        const shifterIcon = document.getElementById('shifter-icon');
+
+        const svgPathA = document.getElementById('svg-path-a');
+        const svgPathB = document.getElementById('svg-path-b');
+
+        // Coordinates for paths (percentages)
+        const coords = {
+            source: {x: 10, y: 50},
+            bs1: {x: 25, y: 50},
+            mTop1: {x: 25, y: 20},
+            mTop2: {x: 75, y: 20},
+            mBot1: {x: 25, y: 80},
+            mBot2: {x: 75, y: 80},
+            bs2: {x: 75, y: 50},
+            detector: {x: 90, y: 50}
+        };
+
+        // Update layout based on window size
+        let rect;
+        function updateLayout() {
+            rect = simArea.getBoundingClientRect();
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            
+            // Draw SVG lines
+            const getPx = (percentX, percentY) => `${percentX}% ${percentY}%`;
+            
+            svgPathA.setAttribute('d', `M ${getPx(coords.source.x, coords.source.y)} L ${getPx(coords.bs1.x, coords.bs1.y)} L ${getPx(coords.mTop1.x, coords.mTop1.y)} L ${getPx(coords.mTop2.x, coords.mTop2.y)} L ${getPx(coords.bs2.x, coords.bs2.y)} L ${getPx(coords.detector.x, coords.detector.y)}`);
+            
+            svgPathB.setAttribute('d', `M ${getPx(coords.source.x, coords.source.y)} L ${getPx(coords.bs1.x, coords.bs1.y)} L ${getPx(coords.mBot1.x, coords.mBot1.y)} L ${getPx(coords.mBot2.x, coords.mBot2.y)} L ${getPx(coords.bs2.x, coords.bs2.y)} L ${getPx(coords.detector.x, coords.detector.y)}`);
+
+            drawChart();
+        }
+
+        window.addEventListener('resize', updateLayout);
+
+        // Math Logic
+        function updateMath() {
+            phi = parseFloat(sliderPhi.value);
+            A = parseFloat(sliderVis.value);
+            delta = parseFloat(sliderDelta.value);
+
+            currentE = -A * Math.cos(phi + delta);
+
+            valPhi.innerText = phi.toFixed(2) + ' rad';
+            valVis.innerText = A.toFixed(2);
+            valDelta.innerText = delta.toFixed(2) + ' rad';
+            valE.innerText = currentE.toFixed(3);
+
+            // Visual updates based on math
+            shifterIcon.style.transform = `rotate(${phi * 20}deg)`;
+            shifterIcon.style.backgroundColor = `rgba(14, 165, 233, ${0.1 + (phi/(4*Math.PI))*0.5})`;
+
+            // Detector glow based on correlation E (-1 to 1)
+            // Map E to a color: 1 = bright green (correlated), -1 = bright red (anti-correlated), 0 = dim
+            let r = currentE < 0 ? 255 : 0;
+            let g = currentE > 0 ? 255 : 0;
+            let intensity = Math.abs(currentE);
+            detectorIcon.style.boxShadow = `0 0 ${10 + intensity*30}px rgba(${r}, ${g}, 0, ${0.2 + intensity*0.8})`;
+            detectorIcon.style.borderColor = `rgba(${r}, ${g}, 0, 1)`;
+
+            drawChart();
+        }
+
+        // Event Listeners
+        sliderPhi.addEventListener('input', updateMath);
+        sliderVis.addEventListener('input', updateMath);
+        sliderDelta.addEventListener('input', updateMath);
+
+        // Chart Drawing
+        function drawChart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const w = canvas.width;
+            const h = canvas.height;
+            const centerY = h / 2;
+            const amp = (h / 2) * 0.8;
+
+            // Grid/Axes
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(w, centerY);
+            ctx.stroke();
+
+            // Draw Sine Wave
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < w; x++) {
+                let p = (x / w) * (4 * Math.PI); // X axis goes from 0 to 4pi
+                let y = centerY - (-A * Math.cos(p + delta)) * amp;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Draw Current Point
+            let currentX = (phi / (4 * Math.PI)) * w;
+            let currentY = centerY - currentE * amp;
+
+            ctx.fillStyle = '#0ea5e9';
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#0ea5e9';
+            ctx.stroke();
+            ctx.shadowBlur = 0; // reset
+        }
+
+        // Particle Animation System
+        let particles = [];
+        
+        // Helper to get exact pixel coordinates from percentages
+        function getPos(percentX, percentY) {
+            return {
+                x: (percentX / 100) * rect.width,
+                y: (percentY / 100) * rect.height
+            };
+        }
+
+        // Define path segments for animation
+        // Total distance is roughly proportional to these segments
+        // Source->BS1 (15%), BS1->M1 (30%), M1->M2 (50%), M2->BS2 (30%), BS2->Det (15%)
+        // We'll normalize t from 0 to 1 across the whole journey.
+        function getPathPosition(pathType, t) {
+            let p1, p2, localT;
+            
+            if (t < 0.1) { // Source to BS1
+                p1 = coords.source; p2 = coords.bs1; localT = t / 0.1;
+            } else if (t < 0.8) { // BS1 to BS2 via Mirrors
+                let m1 = pathType === 'A' ? coords.mTop1 : coords.mBot1;
+                let m2 = pathType === 'A' ? coords.mTop2 : coords.mBot2;
+                
+                let subT = (t - 0.1) / 0.7; // 0 to 1 for the loop
+                if (subT < 0.2) { // BS1 to M1
+                    p1 = coords.bs1; p2 = m1; localT = subT / 0.2;
+                } else if (subT < 0.8) { // M1 to M2
+                    p1 = m1; p2 = m2; localT = (subT - 0.2) / 0.6;
+                } else { // M2 to BS2
+                    p1 = m2; p2 = coords.bs2; localT = (subT - 0.8) / 0.2;
+                }
+            } else { // BS2 to Detector
+                p1 = coords.bs2; p2 = coords.detector; localT = (t - 0.8) / 0.2;
+            }
+
+            let pos1 = getPos(p1.x, p1.y);
+            let pos2 = getPos(p2.x, p2.y);
+
+            return {
+                x: pos1.x + (pos2.x - pos1.x) * localT,
+                y: pos1.y + (pos2.y - pos1.y) * localT
+            };
+        }
+
+        function spawnPair() {
+            // Create DOM elements
+            let elA = document.createElement('div');
+            elA.className = 'particle path-a';
+            simArea.appendChild(elA);
+
+            let elB = document.createElement('div');
+            elB.className = 'particle path-b';
+            simArea.appendChild(elB);
+
+            particles.push({ t: 0, path: 'A', el: elA });
+            particles.push({ t: 0, path: 'B', el: elB });
+        }
+
+        function createRipple() {
+            let ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            let detPos = getPos(coords.detector.x, coords.detector.y);
+            ripple.style.left = detPos.x + 'px';
+            ripple.style.top = detPos.y + 'px';
+            
+            // Color ripple based on correlation
+            let r = currentE < 0 ? 255 : 0;
+            let g = currentE > 0 ? 255 : 0;
+            ripple.style.borderColor = `rgba(${r}, ${g}, 0, ${Math.abs(currentE)})`;
+
+            simArea.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1000);
+        }
+
+        let lastTime = 0;
+        let spawnTimer = 0;
+        
+        // The probability of a successful "coincidence" detection is related to E.
+        // If E = 1, high probability. If E = -1, low probability.
+        // We'll visually represent this by making the ripple effect stronger/more frequent when E is high.
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (!rect) updateLayout();
+
+            // Spawn pairs periodically
+            spawnTimer += dt;
+            if (spawnTimer > 400) { // spawn every 400ms
+                spawnPair();
+                spawnTimer = 0;
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.t += 0.005; // speed
+
+                if (p.t >= 1) {
+                    // Reached detector
+                    p.el.remove();
+                    particles.splice(i, 1);
+                    
+                    // Trigger ripple only once per pair (when path A finishes)
+                    if (p.path === 'A') {
+                        // The paper says $E = -A \cos(\Phi + \delta)$. 
+                        // Let's make a visual hit effect.
+                        createRipple();
+                    }
+                } else {
+                    // Move
+                    let pos = getPathPosition(p.path, p.t);
+                    p.el.style.left = pos.x + 'px';
+                    p.el.style.top = pos.y + 'px';
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Init
+        setTimeout(() => {
+            updateLayout();
+            updateMath();
+            requestAnimationFrame(animate);
+        }, 100);
+
+    </script>
+</body>
+</html>

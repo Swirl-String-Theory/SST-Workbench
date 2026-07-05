@@ -1,0 +1,656 @@
+%! Author = Omar Iskandarani
+%! Date = 11/26/2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17728292
+
+\newcommand{\paperdoi}{10.5281/zenodo.17728292}
+\newcommand{\papertitle}{Symmetry Classification of Knot-based Swirl String Structures in Swirl--String Theory (SST)}
+
+%=========================================
+% PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\newcommand{\normalarticle}
+
+\ifdefined\normalarticle
+\documentclass[11pt]{article}
+\else
+\documentclass[11pt,onecolumn,aps,prd,floatfix,nofootinbib]{revtex4-2}
+\fi
+%=========================================
+
+
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs} % for \toprule, \midrule, \bottomrule
+\usepackage{float}   % for [H]
+\usepackage[font=footnotesize,skip=4pt]{caption} % smaller caption, less vertical space
+\usepackage{subfig}    % older
+\usepackage{longtable}
+\usepackage{xcolor}
+
+\usepackage{textcomp}
+
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+% swirl arrows Counter Clockwise
+\newcommand{\swirlarrowcw}{ \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\Fmaxswirlcw}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+\newcommand{\Fmax}{\Fmaxswirl} % default maximal force (left swirl)
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}               % swirl speed magnitude
+\newcommand{\Ce}{\vswirl}                                % canonical swirl-speed constant
+
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoF}{\rhof}
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rhoM}{\rhom}
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+
+% Optional: golden ratio macro for readability
+\newcommand{\golden}{\varphi}
+\newcommand{\xig}{\operatorname{asinh}\!\left(\tfrac{1}{2}\right)}
+\newcommand{\phig}{\exp(\xig)}
+\newcommand{\phialg}{\bigl(1+\sqrt{5}\bigr)/2}
+\newcommand{\xigold}{\tfrac{3}{2}\,\xig}
+
+
+
+
+\newcommand{\VolH}[1]{\operatorname{Vol}_{\!\mathbb{H}}(#1)}
+\newcommand{\rhocore}{\rho_{\!\text{core}}}
+%=========================================
+\ifdefined\normalarticle
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+    \Large \bfseries \papertitle \par \vspace{1cm}
+    {\Large \itshape \textbf{Omar Iskandarani} \par}
+    \noindent \\[0.5em]
+    {\small \textit{Independent Researcher, Groningen, The Netherlands}\textsuperscript{\textbf{*}} \par}\\
+    \vspace{0.5cm}
+    {\today \par}
+    \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+    \vfill \raggedright \null
+    \begin{picture}(0,0)
+    \put(0,-45){  % Shift 200pt left, 40pt down
+        \begin{minipage}[b]{0.7\textwidth} \footnotesize
+        \renewcommand{\arraystretch}{1.0}
+        %\noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+        \textsuperscript{\textbf{*}}Email: \texttt{info@omariskandarani.com} \\
+        ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}}
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+        \end{minipage}
+    }
+    \end{picture}
+    \end{titlepage}
+}
+
+\begin{document}
+    \titlepageOpen
+
+    \else
+    \begin{document}
+        \title{\papertitle}
+        \author{Omar Iskandarani}
+        \affiliation{Independent Researcher, Groningen, The Netherlands}
+        \thanks{info@omariskandarani.com \\
+        ORCID: \href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961} \\
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+        }
+        \date{\today}
+        \fi
+
+        \begin{abstract}
+            This note develops a definitive symmetry and topological taxonomy of knots
+            as candidate swirl--string configurations in Swirl--String Theory (SST).
+            Building on standard knot tables, we organise prime knots (with emphasis on
+            torus and hyperbolic knots up to eight crossings, plus selected higher-crossing
+            exceptions) by their discrete symmetry groups, including $D_2(r)$, higher
+            dihedral $D_{2k}$, cyclic $Z_{2k}$, and inversion symmetries $I_m$.  For each
+            knot type $K$ we record reversibility, (positive/negative) amphichirality,
+            allowed rotational periods, and the full symmetry group, and we supplement
+            these with SST-relevant topological invariants: crossing number, braid index,
+            Seifert genus, number of components, and (where applicable) hyperbolic volume
+            $\VolH{K}$.  Amphichiral knots are identified as the natural candidates for the
+            SST dark sector, with positive amphichirality associated to cyclic
+            ($Z_{2k}$--type) symmetry and negative amphichirality to inversion
+            ($I_2$--type) symmetry.  Within this taxonomy we single out a minimal set of
+            torus knots to represent the charged lepton ladder and a family of chiral
+            hyperbolic knots to represent quark states, while the unknot and links (e.g.\
+            Hopf-type) provide bosonic and neutrino templates.
+
+            A central outcome is the introduction of a dimensionless \emph{mass invariant}
+            $\mathcal{I}_{M}(K)$ that depends only on braid index, genus, and component
+            count, and which enters the SST invariant mass kernel
+            $M(T)=\Lambda_{0}\,\mathcal{I}_{M}(K(T))\,L_{\mathrm{tot}}(T)$ for a given
+            geometric realisation $T$ of type $K(T)$.  In this way the tables presented
+            here serve simultaneously as a symmetry catalogue and as a practical lookup
+            layer between the combinatorial data of knot theory and the quantitative mass
+            predictions of SST for leptons, baryons, nuclei, molecules, and potential
+            dark-sector excitations.  The taxonomy is designed to be extensible: additional
+            prime knots, links, and composite knot graphs can be incorporated without
+            altering the underlying classification scheme.
+        \end{abstract}
+
+
+
+        \ifdefined\normalarticle
+        \titlepageClose
+        \else
+        \maketitle
+        \fi
+
+
+        \begin{table}[H]
+    \caption{
+        \textbf{Known Symmetries of Prime Knots as SST Swirl Strings.}
+        This table catalogs the discrete symmetries of low-crossing-number prime knots, interpreted as possible stable knotted swirl string configurations in Swirl--String Theory (SST). Columns show the principal symmetry groups ($D_2(r)$, $D_{2k}$, $Z_{2k}$, $I$), reversibility, amphichirality, allowed periods, and the full symmetry group (FSG).
+    }
+    \centering
+
+    % SST-21 Knot Taxonomy — Master Table (alle data uit AppendixG, SST_72, VAM, Definitive, Torus)
+% Include: \input{SST_Master_Full_Table} of \include{SST_Master_Full_Table}
+% Requires: longtable, booktabs, amssymb, pdflscape (of lscape) voor landscape
+
+    \newcommand{\VolH}{\operatorname{Vol}_{\!\mathbb{H}}}
+    \subsection*{SST Master Tabel — 72 varianten met helicity, VolH, band, SST/VAM-candidaten en symmetrie}
+        \begin{landscape}
+            \scriptsize
+            \setlength{\tabcolsep}{3pt}
+            \begin{longtable}{@{}llrrrrrllp{3.2cm}lp{2.8cm}@{}}
+                \caption{Gecombineerde mastertabel: helicity fingerprints $a_\mu(32^3,48^3,64^3)$, $\Delta$, $\VolH$, geometrie, band (Appendix~G), SST-candidaten, VAM-6 symmetrie, SM-mapping (VAM), en taxonomie-invarianten (Definitive). Alle bronnen verwerkt.}\\
+                \toprule
+                Knot & Base & $a_{32}$ & $a_{48}$ & $a_{64}$ & $\Delta$ & $\VolH$ & Geom & Band & SST cand. & Reden & VAM-6 & SM & Cat \\
+                \midrule
+                \endfirsthead
+
+                \toprule
+                Knot & Base & $a_{32}$ & $a_{48}$ & $a_{64}$ & $\Delta$ & $\VolH$ & Geom & Band & SST cand. & Reden & VAM-6 & SM & Cat \\
+                \midrule
+                \endhead
+
+                \bottomrule
+                \endfoot
+
+                1\_1 & 1\_1 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & 0 & torus & Achiral & Boson (photon-like) & Unknot; achiral; gauge envelope & & Bosonic & Bosonic \\
+                3\_1 & 3\_1 & $-0.501$ & $-0.497$ & $-0.498$ & $-0.001$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family; small chiral offset & D4,D6; rev; 2,3; Z2 & e$\pm$ & SM \\
+                3\_1p & 3\_1 & $-0.464$ & $-0.451$ & $-0.483$ & $-0.032$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family; small chiral offset & D4,D6; rev; 2,3; Z2 & e$\pm$ & SM \\
+                3\_1u & 3\_1 & $-0.490$ & $-0.498$ & $-0.498$ & $-0.001$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family; small chiral offset & D4,D6; rev; 2,3; Z2 & e$\pm$ & SM \\
+                4\_1 & 4\_1 & $-0.494$ & $-0.496$ & $-0.496$ & $-0.0003$ & 2.030 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic but near-achiral & D4;Z4;I8;amphi;D8 & $\nu$ & SM \\
+                4\_1d & 4\_1 & $-0.516$ & $-0.513$ & $-0.500$ & $+0.012$ & 2.030 & hyp & Achiral & Bosonic envelope & Achiral across refinements & D4;Z4;I8;amphi;D8 & $\nu$ & SM \\
+                4\_1p & 4\_1 & $-0.503$ & $-0.499$ & $-0.502$ & $-0.003$ & 2.030 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic but near-achiral & D4;Z4;I8;amphi;D8 & $\nu$ & SM \\
+                4\_1z & 4\_1 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & 2.030 & hyp & Achiral & Bosonic envelope & Achiral across refinements & D4;Z4;I8;amphi;D8 & $\nu$ & SM \\
+                5\_1 & 5\_1 & $-0.497$ & $-0.495$ & $-0.496$ & $-0.001$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family & D4,D10; rev; 2,5; Z2 & $\mu\pm$ & SM \\
+                5\_1p & 5\_1 & $-0.474$ & $-0.432$ & $-0.461$ & $-0.029$ & 0 & torus & Quarklike & Quark (hyp) & Strong chirality & D4,D10; rev; 2,5; Z2 & $\mu\pm$ & SM \\
+                5\_1u & 5\_1 & $-0.472$ & $-0.498$ & $-0.498$ & $+0.0002$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family & D4,D10; rev; 2,5; Z2 & $\mu\pm$ & SM \\
+                5\_2 & 5\_2 & $-0.460$ & $-0.462$ & $-0.474$ & $-0.012$ & 2.828 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic near-achiral & D4; rev; D4 & u/ū & SM \\
+                5\_2d & 5\_2 & $-0.590$ & $-0.504$ & $-0.531$ & $-0.028$ & 2.828 & hyp & Quarklike & Quark (down) & Strong chirality; VolH heavier & D4; rev; D4 & u/ū & SM \\
+                5\_2r & 5\_2 & $-0.484$ & $-0.476$ & $-0.478$ & $-0.002$ & 2.828 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic near-achiral & D4; rev; D4 & u/ū & SM \\
+                6\_1 & 6\_1 & $-0.481$ & $-0.491$ & $-0.499$ & $-0.008$ & 3.164 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic near-achiral & D4; rev; D4 & d/d̄ & SM \\
+                6\_2 & 6\_2 & $-0.487$ & $-0.485$ & $-0.490$ & $-0.005$ & 4.401 & hyp & Lepton-band & Lepton-like & Near-achiral chiral offset & D4; rev; D4 & s/s̄ & SM \\
+                6\_2d & 6\_2 & $-0.441$ & $-0.426$ & $-0.493$ & $-0.068$ & 4.401 & hyp & Lepton-band & Lepton-like & Near-achiral chiral offset & D4; rev; D4 & s/s̄ & SM \\
+                6\_2p & 6\_2 & $-0.459$ & $-0.467$ & $-0.482$ & $-0.016$ & 4.401 & hyp & Lepton-band & Lepton-like & Near-achiral chiral offset & D4; rev; D4 & s/s̄ & SM \\
+                6\_3d & 6\_3 & $-0.468$ & $-0.449$ & $-0.513$ & $-0.064$ & 5.693 & hyp & Lepton-band & Lepton-like & Near-achiral chiral offset & D4;Z4;amphi;D8 & & Dark \\
+                6\_3z & 6\_3 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & 5.693 & hyp & Achiral & Bosonic envelope & Achiral across refinements & D4;Z4;amphi;D8 & & Dark \\
+                7\_1 & 7\_1 & $-0.494$ & $-0.494$ & $-0.496$ & $-0.002$ & 0 & torus & Lepton-band & Lepton (e/$\mu$/$\tau$) & Torus family & D4,D14; rev; 2,7; Z2 & $\tau\pm$ & SM \\
+                7\_1p & 7\_1 & $-0.426$ & $-0.407$ & $-0.434$ & $-0.027$ & 0 & torus & Quarklike & Quark (hyp) & Strong chirality & D4,D14; rev; 2,7; Z2 & $\tau\pm$ & SM \\
+                7\_2 & 7\_2 & $-0.399$ & $-0.473$ & $-0.472$ & $+0.001$ & 3.332 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                7\_2d & 7\_2 & $-0.373$ & $-0.460$ & $-0.461$ & $-0.001$ & 3.332 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                7\_2r & 7\_2 & $-0.504$ & $-0.436$ & $-0.476$ & $-0.041$ & 3.332 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                7\_3 & 7\_3 & $-0.554$ & $-0.512$ & $-0.511$ & $+0.001$ & 4.592 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic near-achiral & D4; rev; D4 & c/c̄ & SM \\
+                7\_3d & 7\_3 & $-0.168$ & $-0.213$ & $-0.423$ & $-0.209$ & 4.592 & hyp & Quarklike & Quark (down) & Strong chirality; VolH heavier & D4; rev; D4 & c/c̄ & SM \\
+                7\_4 & 7\_4 & $-0.580$ & $-0.536$ & $-0.522$ & $+0.014$ & 5.138 & hyp & Lepton-band & Neutr. lepton-like & Hyperbolic near-achiral & D4; rev; D8 & & Exotic \\
+                7\_5 & 7\_5 & $-0.429$ & $-0.480$ & $-0.479$ & $+0.001$ & 6.444 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                7\_5d & 7\_5 & $-0.673$ & $-0.585$ & $-0.597$ & $-0.012$ & 6.444 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                7\_6d & 7\_6 & $-0.464$ & $-0.461$ & $-0.433$ & $+0.027$ & 6.870 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                7\_6s & 7\_6 & $-0.456$ & $-0.405$ & $-0.508$ & $-0.103$ & 6.870 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                7\_7d & 7\_7 & $-0.541$ & $-0.533$ & $-0.528$ & $+0.005$ & 7.170 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D8 & & Uncl. \\
+                8\_1 & 8\_1 & $-0.424$ & $-0.491$ & $-0.478$ & $+0.013$ & 4.059 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_1d & 8\_1 & $-0.506$ & $-0.586$ & $-0.551$ & $+0.035$ & 4.059 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_2 & 8\_2 & $-0.394$ & $-0.456$ & $-0.475$ & $-0.020$ & 3.164 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_2d & 8\_2 & $-0.381$ & $-0.409$ & $-0.441$ & $-0.032$ & 3.164 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_3d & 8\_3 & $-0.554$ & $-0.518$ & $-0.472$ & $+0.046$ & 5.333 & hyp & Lepton-band & Lepton-like & Near-achiral & D4;Z4;I8;amphi;D8 & & Dark \\
+                8\_3z & 8\_3 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & 5.333 & hyp & Achiral & Bosonic envelope & Achiral & D4;Z4;I8;amphi;D8 & & Dark \\
+                8\_4d & 8\_4 & $-0.624$ & $-0.488$ & $-0.517$ & $-0.029$ & 5.138 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_5 & 8\_5 & $-1.994$ & $-2.252$ & $-2.501$ & $-0.249$ & 6.997 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_6 & 8\_6 & $-0.470$ & $-0.486$ & $-0.498$ & $-0.013$ & 7.475 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_6p & 8\_6 & $-0.456$ & $-0.467$ & $-0.493$ & $-0.026$ & 7.475 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_7d & 8\_7 & $-0.548$ & $-0.735$ & $-0.616$ & $+0.119$ & 7.022 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_7s & 8\_7 & $-0.527$ & $-0.532$ & $-0.506$ & $+0.027$ & 7.022 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_8d & 8\_8 & $-0.591$ & $-0.620$ & $-0.520$ & $+0.100$ & 7.801 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & b/b̄ & SM \\
+                8\_9d & 8\_9 & $-0.513$ & $-0.714$ & $-0.441$ & $+0.274$ & 7.588 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4;I4;amphi;D8 & & Dark \\
+                8\_10s & 8\_10 & $-0.552$ & $-0.518$ & $-0.509$ & $+0.009$ & 6.444 & hyp & Lepton-band & Lepton-like & Near-achiral & D2(r); D2 & & Uncl. \\
+                8\_11 & 8\_11 & $-0.419$ & $-0.461$ & $-0.475$ & $-0.013$ & 8.286 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_11d & 8\_11 & $-0.428$ & $-0.397$ & $-0.461$ & $-0.064$ & 8.286 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_12d & 8\_12 & $-0.328$ & $-0.532$ & $-0.528$ & $+0.004$ & 8.936 & hyp & Lepton-band & Lepton-like & Near-achiral & D4;Z4;amphi;D8 & & Dark \\
+                8\_12z & 8\_12 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & 8.936 & hyp & Achiral & Bosonic envelope & Achiral & D4;Z4;amphi;D8 & & Dark \\
+                8\_13d & 8\_13 & $-0.423$ & $-0.504$ & $-0.484$ & $+0.020$ & 8.531 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_13p & 8\_13 & $-0.535$ & $-0.518$ & $-0.519$ & $-0.002$ & 8.531 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_14d & 8\_14 & $-0.412$ & $-0.417$ & $-0.568$ & $-0.151$ & 9.218 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_14r & 8\_14 & $-0.434$ & $-0.485$ & $-0.500$ & $-0.015$ & 9.218 & hyp & Achiral & Bosonic envelope & Achiral & D4; rev; D4 & & Uncl. \\
+                8\_15 & 8\_15 & $-0.378$ & $-0.468$ & $-0.491$ & $-0.023$ & 9.931 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_15d & 8\_15 & $-0.278$ & $-0.413$ & $-0.423$ & $-0.010$ & 9.931 & hyp & Quarklike & Quark (hyp) & Strong chirality & D4; rev; D4 & & Uncl. \\
+                8\_15p & 8\_15 & $-0.444$ & $-0.435$ & $-0.485$ & $-0.049$ & 9.931 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_16 & 8\_16 & $-0.525$ & $-0.469$ & $-0.490$ & $-0.020$ & 10.58 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_17 & 8\_17 & $-0.502$ & $-0.502$ & $-0.500$ & $+0.002$ & 10.99 & hyp & Achiral & Bosonic envelope & Achiral & D4; rev; D4 & & Uncl. \\
+                8\_18 & 8\_18 & $-0.408$ & $-0.474$ & $-0.513$ & $-0.038$ & 12.35 & hyp & Lepton-band & Lepton-like & Near-achiral & D4,D8;Z8;amphi;D16 & t/t̄ & SM \\
+                8\_18z & 8\_18 & $-0.539$ & $-0.543$ & $-0.511$ & $+0.032$ & 12.35 & hyp & Lepton-band & Lepton-like & Near-achiral & D4,D8;Z8;amphi;D16 & t/t̄ & SM \\
+                8\_19t & 8\_19 & $-0.486$ & $-0.494$ & $-0.498$ & $-0.003$ & 0 & torus & Lepton-band & Lepton-like & Torus T(3,4) & D4,D6,D8; 2,3,4; Z2 & Bosonic & Bosonic \\
+                8\_19u & 8\_19 & $-0.495$ & $-0.500$ & $-0.499$ & $+0.001$ & 0 & torus & Lepton-band & Lepton-like & Torus T(3,4) & D4,D6,D8; 2,3,4; Z2 & Bosonic & Bosonic \\
+                8\_20r & 8\_20 & $-0.462$ & $-0.528$ & $-0.513$ & $+0.015$ & 11.40 & hyp & Lepton-band & Lepton-like & Near-achiral & D2(r); D2 & & Uncl. \\
+                8\_21d & 8\_21 & $-0.403$ & $-0.412$ & $-0.482$ & $-0.070$ & 11.47 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_21p & 8\_21 & $-0.403$ & $-0.457$ & $-0.499$ & $-0.042$ & 11.47 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                8\_21r & 8\_21 & $-0.487$ & $-0.462$ & $-0.490$ & $-0.029$ & 11.47 & hyp & Lepton-band & Lepton-like & Near-achiral & D4; rev; D4 & & Uncl. \\
+                12a\_1202 & 12a\_1202 & $-0.691$ & $-0.484$ & $-0.440$ & $+0.044$ & & unknown & Quarklike & Quark (hyp) & Strong chirality & Z2,Z6;amphi;D12 & & Dark \\
+                12a\_1202z6 & 12a\_1202z6 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & & unknown & Achiral & Bosonic envelope & Achiral & & & Dark \\
+                15331 & 15331 & $-0.500$ & $-0.500$ & $-0.500$ & 0.000 & & unknown & Achiral & Bosonic envelope & Achiral & Z2; amphichiral & & Dark \\
+            \end{longtable}
+
+            \subsubsection*{Links (VAM master)}
+                \begin{tabular}{@{}llllrl@{}}
+                    \toprule
+                    Base (link) & Candidate & Class & $\VolH$ & Geom & VAM-6 \\
+                    \midrule
+                    L2a1 (Hopf) & Meson-like flux pair (envelope) & Bosonic envelope & 0 & torus link & torus link; oriented-chiral \\
+                    3-chain (min twist) & Baryon scaffold (3-body) & Exotic scaffold & 5.333 & hyperbolic link & 3 components; chain \\
+                    L6a4 (Borromean) & Dark scaffold (no pairwise linking) & Dark (amphi) & 7.328 & hyperbolic link & Brunnian; amphichiral \\
+                    L4a1 (Solomon) & Heavy meson envelope (lk=2) & Bosonic envelope & 0 & torus link & torus link T(2,4) \\
+                    L5a1 (Whitehead) & Diquark/gluonic mediator & Exotic/unstable & 3.664 & hyperbolic link & hyperbolic 2-comp \\
+                    \bottomrule
+                \end{tabular}
+
+        \end{landscape}
+        \noindent\textit{Bronnen:} Appendix~G (helicity, band, SST-candidaten), SST\_72 (VolH, GeomType, VAM-6), VAM\_master (SM-mapping, Category), SST\_Definitive\_Taxonomy (symmetrie), Torus\_* (T(p,q), c, b, g).
+
+
+        \renewcommand{\arraystretch}{1.15}
+    \setlength{\tabcolsep}{0.45em}
+
+    \begin{longtable}{lcccccccc}
+    \hline
+    \textbf{ } & $\mathrm{D}_2(r)$ & $\mathrm{D}_{2k}$ & $\mathrm{Z}_{2k}$ & $I$ & reversible & amphichiral & periods & FSG \\
+    \hline
+    \hyperlink{3_1}{$3_1$}                & \checkmark & $D_4, D_6$      & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2, 3$   & $Z_2$ \\
+    \hyperlink{4_1}{$4_1$}                & \checkmark & $D_4$           & $Z_4$               & $I_8$               & \checkmark & \checkmark          & $2$      & $D_8$ \\
+    \hyperlink{5_1}{$5_1$}                & \checkmark & $D_4, D_{10}$   & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2, 5$   & $Z_2$ \\
+    \hyperlink{5_2,6_1,6_2}{$5_2, 6_1, 6_2$} & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{6_3}{$6_3$}                & \checkmark & $D_4$           & $Z_4$               &                     & \checkmark & \checkmark          & $2$      & $D_8$ \\
+    \hyperlink{7_1}{$7_1$}                & \checkmark & $D_4, D_{14}$   & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2, 7$   & $Z_2$ \\
+    \hyperlink{7_2,7_3}{$7_2, 7_3$}       & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{7_4}{$7_4$}                & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_8$ \\
+    \hyperlink{7_5,7_6}{$7_5, 7_6$}       & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{7_7}{$7_7$}                & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_8$ \\
+    \hyperlink{8_1,8_2}{$8_1, 8_2$}       & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{8_3}{$8_3$}                & \checkmark & $D_4$           & $Z_4$               & $I_8$               & \checkmark & \checkmark          & $2$      & $D_8$ \\
+    \hyperlink{8_4,8_5,8_6,8_7,8_8}{$8_4, 8_5, 8_6, 8_7, 8_8$}
+    & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{8_9}{$8_9$}                & \checkmark & $D_4$           &                     & $I_4$               & \checkmark & \checkmark          & $2$      & $D_8$ \\
+    \hyperlink{8_{10}}{$8_{10}$}          & \checkmark & $\text{\texttimes}$ & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & none     & $D_2$ \\
+    \hyperlink{8_{11}}{$8_{11}$}          & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{8_{12}}{$8_{12}$}          & \checkmark & $D_4$           & $Z_4$               &                     & \checkmark & \checkmark          & $2$      & $D_8$ \\
+    \hyperlink{8_{13},8_{14},8_{15}}{$8_{13}, 8_{14}, 8_{15}$}
+    & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{8_{16}}{$8_{16}$}          & \checkmark & $\text{\texttimes}$ & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & none     & $D_2$ \\
+    \hyperlink{8_{17}}{$8_{17}$}          & $\text{\texttimes}$ & $\text{\texttimes}$ & $\text{\texttimes}$ &               & $\text{\texttimes}$ & \checkmark & none & $D_2$ \\
+    \hyperlink{8_{18}}{$8_{18}$}          & \checkmark & $D_4, D_8$      & $Z_8$               &                     & \checkmark & \checkmark          & $2, 4$   & $D_{16}$ \\
+    \hyperlink{8_{19}}{$8_{19}$}          & \checkmark & $D_4, D_6, D_8$ & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2, 3, 4$& $Z_2$ \\
+    \hyperlink{8_{20}}{$8_{20}$}          & \checkmark & $\text{\texttimes}$ & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & none     & $D_2$ \\
+    \hyperlink{8_{21}}{$8_{21}$}          & \checkmark & $D_4$           & $\text{\texttimes}$ & $\text{\texttimes}$ & \checkmark & $\text{\texttimes}$ & $2$      & $D_4$ \\
+    \hyperlink{12a_{1202}}{$12a_{1202}$}  & \checkmark &                 & $Z_2, Z_6$          &                     & \checkmark & \checkmark          &          & $D_{12}$ \\
+    \hyperlink{15331}{$15331$}            &           &                 & $Z_2$               &                     &           & \checkmark          &          &         \\
+    \hline
+    \end{longtable}\label{tab:knot-symmetries}
+    \end{table}
+
+    \\
+    \textit{In SST, these symmetries classify the invariance properties of knotted swirl strings, constraining their physical stability, energy quantization, and possible transformation pathways.}
+
+    \noindent
+    \textit{Remarks.}\\
+    Any $D_{2k}$ symmetry ($k\geq2$) implies $D_2(r)$ symmetry; if $k$ is even, period 2 is also present. $D_{2k}$ symmetry further implies $D_{2j}$ for divisors $j$ of $k$. $Z_{2k}$ symmetry entails positive amphichirality; $D_2(r)$ guarantees reversibility. $I_2$ symmetry implies negative amphichirality. These properties map directly to constraints on swirl string energy spectra, fusion/interconversion rules, and topological charge conservation in SST. The ``full symmetry group'' (FSG) is tabulated for comparison, though it may not capture all SST-relevant invariances.
+
+    \vspace{1em}
+
+    \textit{Note.}\\
+    Knots such as $8_{10}$, $8_{16}$, $8_{17}$, and $8_{20}$, for which period 2 is absent, also uniquely have FSG $D_2$ among prime knots with 8 or fewer crossings, reflecting special restrictions on allowable swirl string periodicities and energy levels in the foliation. Exceptional knots $12a_{1202}$ and $15331$ are included for their rare $Z_2$ symmetry, potentially corresponding to novel or unanticipated swirl-field states.
+
+\section{Glossary of Symmetry Table Symbols}
+\label{sec:glossary-of-symmetry-table-symbols}
+
+    \begin{description}
+    \item[\( D_2(r) \)] \textbf{Order-2 Dihedral (Reflectional) Symmetry.}
+    The knot (or swirl string) admits a dihedral symmetry of order 2, meaning it is invariant under a 180° rotation and a reflection; this often guarantees \emph{reversibility}.
+
+    \item[\( D_{2k} \)] \textbf{Higher-Order Dihedral Symmetry.}
+    The knot is invariant under the full dihedral group of order \( 2k \), i.e., all rotations by \( 2\pi/k \) and reflections. In SST, this corresponds to invariance under both cyclic flows and chirality-reversing operations.
+
+    \item[\( Z_{2k} \)] \textbf{Cyclic Symmetry of Order \( 2k \).}
+    The knot admits rotational symmetry by \( 2\pi/(2k) \) (and its multiples), but not necessarily reflection symmetry. In SST, such symmetry is associated with periodic phase cycling and often positive amphichirality.
+
+    \item[\( I \)] \textbf{Icosahedral Symmetry or Inversion.}
+    \( I \) often indicates additional point group symmetries (such as icosahedral, dodecahedral, or inversion symmetries), depending on the context. In tables, it may specify inversion axes or particular symmetry orders, e.g., \( I_8 \), \( I_4 \).
+
+    \item[reversible] \textbf{Reversible Knot (Swirl String).}
+    The knot is topologically equivalent to itself with the orientation reversed; in SST, this reflects invariance under reversal of circulation or swirl clock direction.
+
+    \item[amphichiral] \textbf{Amphichiral (Mirror-Image) Symmetry.}
+    The knot is equivalent to its mirror image:
+    \begin{itemize}\item \emph{Positive amphichirality} usually corresponds to cyclic (\( Z_{2k} \)) symmetry.
+    \item \emph{Negative amphichirality} is sometimes indicated by special inversion (\( I_2 \)).
+    \end{itemize}
+
+    \item[periods] \textbf{Periods of Symmetry.}
+    Lists the possible orders of cyclic symmetry—i.e., the integer \( n \) for which the knot is invariant under a \( 2\pi/n \) rotation. In SST, this relates to allowed quantized mode numbers.
+
+    \item[FSG] \textbf{Full Symmetry Group (FSG).}
+    The maximal discrete symmetry group of the knot, encoding all rotational, reflectional, and inversion symmetries. In SST, the FSG constrains the topological conservation laws and fusion/annihilation selection rules for knotted swirl strings.
+    \end{description}
+
+% ===========================
+% Torus invariants by formula (SST)
+% ===========================
+% For a torus knot T(p,q) with coprime p,q:
+%   braid index:  b = \min(p,q)
+%   genus:        g = \frac{(p-1)(q-1)}{2}
+%   crossing #:   c = (p-1)q  (if p<q)
+
+    \subsection*{Torus Knots (Lepton Sector)}
+
+        \begin{table}[H]
+            \centering
+            \scriptsize                      % smaller font so it fits
+            \setlength{\tabcolsep}{3pt}      % tighter columns
+            \renewcommand{\arraystretch}{0.9}% tighter rows
+
+            \caption{Torus knots (lepton sector) with SST symmetry data.}
+            \label{tab:torus-lepton}
+
+            \begin{tabular}{lccccccccc}
+                \toprule
+                Knot & $D_2(r)$ & $D_{2k}$ & $Z_{2k}$ & $I$
+                & reversible & amphichiral & Dark & periods & FSG \\
+                \midrule
+                \multicolumn{10}{l}{\textbf{SM mapping (SST default, torus ladder):}
+                    $e^- \leftrightarrow T(2,3)\ (=3_1)$,
+                    $\mu^- \leftrightarrow T(2,5)\ (=5_1)$,
+                    $\tau^- \leftrightarrow T(2,7)\ (=7_1)$.} \\
+                \midrule
+                $3_1$ ($T(2,3)$), $b\!=\!2$, $g\!=\!1$
+                & \checkmark & $D_4,D_6$   & $\times$ & $\times$
+                & \checkmark & $\times$    & no       & $2,3$   & $Z_2$ \\
+                $5_1$ ($T(2,5)$), $b\!=\!2$, $g\!=\!2$
+                & \checkmark & $D_4,D_{10}$& $\times$ & $\times$
+                & \checkmark & $\times$    & no       & $2,5$   & $Z_2$ \\
+                $7_1$ ($T(2,7)$), $b\!=\!2$, $g\!=\!3$
+                & \checkmark & $D_4,D_{14}$& $\times$ & $\times$
+                & \checkmark & $\times$    & no       & $2,7$   & $Z_2$ \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        \paragraph{Torus invariants (formula).}
+            For coprime integers $p,q\ge 2$, the torus knot $T(p,q)$ has braid index
+            $b=\min(p,q)$ and genus
+            \(
+            g=\frac{(p-1)(q-1)}{2}.
+            \)
+
+\subsection*{Hyperbolic Knots (Quark Sector)}
+
+    \begin{table}[H]
+        \centering
+        \footnotesize
+        \setlength{\tabcolsep}{3pt}
+        \renewcommand{\arraystretch}{0.9}
+
+        \caption{Hyperbolic knots (quark sector) with SST symmetry data.}
+        \label{tab:hyperbolic-quark}
+
+        \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lccccccccc}
+            \toprule
+            Knot & $D_2(r)$ & $D_{2k}$ & $Z_{2k}$ & $I$
+            & reversible & amphichiral & Dark & periods & FSG \\
+            \midrule
+            \multicolumn{10}{l}{\textbf{SM mapping (SST default, hyperbolic chiral):}
+            up/down/strange $\leftrightarrow$ chiral hyperbolics
+                (reps among $6_x,7_x,8_x,\dots$);\ bosons $=$ unknot;
+                neutrinos $=$ links (e.g.\ Hopf).} \\
+            \midrule
+    $4_1$         & \checkmark & $D_4$             & $Z_4$            & $I_8$ & \checkmark & \checkmark & yes+  & $2$       & $D_8$ \\
+    $5_2, 6_1, 6_2$ & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $6_3$         & \checkmark & $D_4$             & $Z_4$            &        & \checkmark & \checkmark & yes+  & $2$       & $D_8$ \\
+    $7_2, 7_3$    & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $7_4$         & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_8$ \\
+    $7_5, 7_6$    & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $7_7$         & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_8$ \\
+    $8_1, 8_2$    & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $8_3$         & \checkmark & $D_4$             & $Z_4$            & $I_8$ & \checkmark & \checkmark & yes+  & $2$       & $D_8$ \\
+    $8_4, 8_5, 8_6, 8_7, 8_8$ & \checkmark & $D_4$ & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $8_9$         & \checkmark & $D_4$             &                  & $I_4$ & \checkmark & \checkmark & yes+  & $2$       & $D_8$ \\
+    $8_{10}$      & \checkmark & $\times$          & $\times$         & $\times$ & \checkmark & $\times$   & no    & none      & $D_2$ \\
+    $8_{11}$      & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $8_{12}$      & \checkmark & $D_4$             & $Z_4$            &        & \checkmark & \checkmark & yes+  & $2$       & $D_8$ \\
+    $8_{13}, 8_{14}, 8_{15}$ & \checkmark & $D_4$ & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $8_{16}$      & \checkmark & $\times$          & $\times$         & $\times$ & \checkmark & $\times$   & no    & none      & $D_2$ \\
+    $8_{17}$      & $\times$   & $\times$          & $\times$         &        & $\times$   & \checkmark & yes-- & none      & $D_2$ \\
+    $8_{18}$      & \checkmark & $D_4, D_8$        & $Z_8$            &        & \checkmark & \checkmark & yes+  & $2,4$     & $D_{16}$ \\
+    $8_{19}$      & \checkmark & $D_4, D_6, D_8$   & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2,3,4$   & $Z_2$ \\
+    $8_{20}$      & \checkmark & $\times$          & $\times$         & $\times$ & \checkmark & $\times$   & no    & none      & $D_2$ \\
+    $8_{21}$      & \checkmark & $D_4$             & $\times$         & $\times$ & \checkmark & $\times$   & no    & $2$       & $D_4$ \\
+    $12a_{1202}$  & \checkmark &                   & $Z_2, Z_6$       &        & \checkmark & \checkmark & yes+  &           & $D_{12}$ \\
+    $15331$       &            &                   & $Z_2$            &        &            & \checkmark & yes-- &           &          \\
+            \bottomrule
+        \end{tabular}%
+        }
+    \end{table}
+% -------------------------
+% Remarks (kept, but tightened)
+% -------------------------
+    \paragraph{Remarks.}
+        Any $D_{2k}$ symmetry $(k\ge 2)$ implies $D_2(r)$ and, if $k$ is even, period $2$; it also implies $D_{2j}$ for each divisor $j$ of $k$. Any $Z_{2k}$ symmetry typically entails \emph{positive} amphichirality (dark sector $=$ yes+); $D_2(r)$ implies reversibility. $I_2$ symmetry indicates \emph{negative} amphichirality (dark sector $=$ yes--). Among prime knots with $\le 8$ crossings, the ones lacking period $2$ ($8_{10}, 8_{16}, 8_{17}, 8_{20}$) have FSG $D_2$. Multiple 3D realizations can witness different symmetry subgroups; FSG (KnotInfo) does not encode periodicity.
+
+
+\section{Definitive Symmetry and Topological Taxonomy of Knots in Swirl--String Theory (SST)}
+
+    This taxonomy fuses three strands of data:
+    \begin{enumerate}
+    \item Discrete symmetries of prime knots (from KnotInfo and Fremlin \cite{fremlinKnots}).
+    \item Invariants from the SST Canon and Appendix G (crossing number, braid index, genus, hyperbolic volume).
+    \item Dark-sector assignment via amphichirality (positive/negative amphichiral knots).
+    \end{enumerate}
+
+\subsection{Unified Table (with SST Mass Invariant)}
+    \label{subsec:unified-table-mass}
+
+    \begin{table}[H]
+        \centering
+        \footnotesize
+        \setlength{\tabcolsep}{3pt}
+        \renewcommand{\arraystretch}{0.9}
+
+        \caption{Unified symmetry and mass-invariant data for selected knots.}
+        \label{tab:unified-mass}
+
+        \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lccccccccccc}
+            \toprule
+            Knot & $D_2(r)$ & $D_{2k}$ & $Z_{2k}$ & $I$ & reversible & amphichiral & Dark Sector & periods & FSG & Invariants & Mass kernel $\mathcal{I}_{M}(K)$ \\
+            \midrule
+            $3_1$ & \checkmark & $D_4,D_6$ & $\times$ & $\times$ & \checkmark & $\times$ & no & $2,3$ & $Z_2$ & $b=2,\ g=1,\ n=1$ & $2^{-3/2}\golden^{-1} \approx 2.19\times10^{-1}$ \\
+            $4_1$ & \checkmark & $D_4$ & $Z_4$ & $I_8$ & \checkmark & \checkmark & yes+ & $2$ & $D_8$ & $b=2,\ g=1,\ n=1,\ \VolH{4_1}\approx 2.0299$ & $2^{-3/2}\golden^{-1} \approx 2.19\times10^{-1}$ \\
+            $6_3$ & \checkmark & $D_4$ & $Z_4$ & & \checkmark & \checkmark & yes+ & $2$ & $D_8$ & $b=3,\ g=1,\ n=1,\ \VolH{6_3}\approx 5.6930$ & $3^{-3/2}\golden^{-1} \approx 1.19\times10^{-1}$ \\
+            $8_3$ & \checkmark & $D_4$ & $Z_4$ & $I_8$ & \checkmark & \checkmark & yes+ & $2$ & $D_8$ & $b=3,\ g=2,\ n=1,\ \VolH{8_3}\approx 7.3277$ & $3^{-3/2}\golden^{-2} \approx 7.35\times10^{-2}$ \\
+            $8_9$ & \checkmark & $D_4$ & & $I_4$ & \checkmark & \checkmark & yes+ & $2$ & $D_8$ & $b=3,\ g=2,\ n=1,\ \VolH{8_9}\approx 7.3650$ & $3^{-3/2}\golden^{-2} \approx 7.35\times10^{-2}$ \\
+            $8_{12}$ & \checkmark & $D_4$ & $Z_4$ & & \checkmark & \checkmark & yes+ & $2$ & $D_8$ & $b=3,\ g=2,\ n=1,\ \VolH{8_{12}}\approx 7.5177$ & $3^{-3/2}\golden^{-2} \approx 7.35\times10^{-2}$ \\
+            $8_{18}$ & \checkmark & $D_4,D_8$ & $Z_8$ & & \checkmark & \checkmark & yes+ & $2,4$ & $D_{16}$ & $b=3,\ g=2,\ n=1,\ \VolH{8_{18}}\approx 7.6534$ & $3^{-3/2}\golden^{-2} \approx 7.35\times10^{-2}$ \\
+            $8_{17}$ & $\times$ & $\times$ & $\times$ & & $\times$ & \checkmark & yes-- & none & $D_2$ & $b=3,\ g=2,\ n=1,\ \VolH{8_{17}}\approx 7.2381$ & $3^{-3/2}\golden^{-2} \approx 7.35\times10^{-2}$ \\
+            $12a_{1202}$ & \checkmark & & $Z_2,Z_6$ & & \checkmark & \checkmark & yes+ & & $D_{12}$ & amphichiral exceptional (hyperbolic; see Appendix~G) & $\mathcal{I}_{M}(12a_{1202})$ (to be fixed from $(b,g,n)$) \\
+            $15331$ & & & $Z_2$ & & & \checkmark & yes-- & & & prime, negative amphichiral & $\mathcal{I}_{M}(15331)$ (to be fixed from $(b,g,n)$) \\
+            \bottomrule
+        \end{tabular}%
+        }
+    \end{table}
+
+
+    \subsection{Remarks}
+        \begin{itemize}
+        \item All knots with $D_2(r)$ symmetry are strongly invertible.
+        \item Amphichiral knots define the \emph{dark sector}: positive amphichirality ($Z_{2k}$-type) vs negative amphichirality ($I_2$-type).
+        \item Fully amphichiral: $4_1$, $6_3$, $8_3$, $8_9$, $8_{12}$, $8_{18}$, $12a_{1202}$.
+        \item Negatively amphichiral: $8_{17}$, $15331$ (prime).
+        \item Of the knots with 8 or fewer crossings, those lacking period 2 ($8_{10}$, $8_{16}$, $8_{17}$, $8_{20}$) uniquely have FSG $D_2$.
+        \end{itemize}
+
+    \subsection{Glossary Updates}
+        The glossary from the Canon remains unchanged, except:
+        \begin{itemize}
+        \item \textbf{Dark sector} $\equiv$ the amphichiral subsector of SST swirl strings.
+        \item Positive amphichirality = cyclic symmetry ($Z_{2k}$).
+        \item Negative amphichirality = inversion symmetry ($I_2$).
+        \end{itemize}
+
+
+    %======================================================================
+% SST Invariant Master Mass Kernel
+%======================================================================
+\section{SST Invariant Master Mass Kernel from Knot Taxonomy}
+\label{sec:sit-mass-kernel}
+
+In Swirl--String Theory (SST), the rest mass of a particle-like excitation
+realised as a knotted swirl string of type $K$ is obtained from a single
+\emph{invariant kernel} that depends only on the knot-theoretic data
+tabulated in this document, together with a geometry-dependent ropelength
+$L_{\mathrm{tot}}(T)$ for the physical realisation $T$.
+
+\subsection{Universal scale and mass invariant}
+
+    Let the swirl energy density be
+    \begin{equation}
+        u \;=\; \frac{1}{2}\,\rhocore\,\bigl\lVert\vswirl\bigr\rVert^{2},
+        \label{eq:swirl-energy-density}
+    \end{equation}
+    and define the universal SST mass scale
+    \begin{equation}
+        \Lambda_{0}
+        \;=\;
+        \frac{4}{\alpha}\;
+        u\;
+        \frac{\pi r_{c}^{3}}{c^{2}}
+        \;=\;
+        \frac{4}{\alpha}\,
+        \frac{1}{2}\,\rhocore\,\bigl\lVert\vswirl\bigr\rVert^{2}\,
+        \frac{\pi r_{c}^{3}}{c^{2}}.
+        \label{eq:Lambda0-def}
+    \end{equation}
+    Using the canonical constants ($\alpha$ the fine-structure constant,
+    $\rhocore = 3.8934358266918687\times10^{18}\,\mathrm{kg\,m^{-3}}$,
+    $\lVert\vswirl\rVert = 1.09384563\times10^{6}\,\mathrm{m\,s^{-1}}$,
+    $r_{c}=1.40897017\times10^{-15}\,\mathrm{m}$,
+    $c=2.99792458\times10^{8}\,\mathrm{m\,s^{-1}}$),
+    one finds numerically
+    \begin{equation}
+        \Lambda_{0}
+        \;\approx\;
+        1.2483\times10^{-28}\,\mathrm{kg}.
+        \label{eq:Lambda0-numeric}
+    \end{equation}
+
+    For a knot type $K$ with braid index $b(K)$, genus $g(K)$, and number of
+    components $n(K)$, the dimensionless \emph{mass invariant} is
+    \begin{equation}
+        \mathcal{I}_{M}(K)
+        \;:=\;
+        b(K)^{-3/2}\,
+        \golden^{-g(K)}\,
+        n(K)^{-1/\golden},
+        \label{eq:mass-invariant-def}
+    \end{equation}
+
+    where we use the \textbf{Golden (hyperbolic)}:\ \(\ln\varphi=\xig\), hence \(\varphi=\phig\).   \emph{(Algebraic form \( \varphi=\phialg\)  is equivalent.)}
+    This is precisely the topological factor used in the invariant kernel of the Python implementation.\footnote{See the script \texttt{SST\_Particle\_INVARIANT\_MASS3-1.py} for the code-level realisation of Eq.~\eqref{eq:mass-invariant-def}.}
+
+\subsection{Master mass relation}
+
+    Given a physical realisation $T$ of knot type $K(T)$ with total
+    dimensionless ropelength $L_{\mathrm{tot}}(T)$, the SST master mass
+    relation is
+    \begin{equation}
+        M(T)
+        \;=\;
+        \Lambda_{0}\;
+        \mathcal{I}_{M}\bigl(K(T)\bigr)\;
+        L_{\mathrm{tot}}(T).
+        \label{eq:master-mass-kernel}
+    \end{equation}
+    Equivalently, expanding $\Lambda_{0}$ and $\mathcal{I}_{M}$,
+    \begin{equation}
+        M(T)
+        \;=\;
+        \frac{4}{\alpha}\,
+        b(T)^{-3/2}\,
+        \golden^{-g(T)}\,
+        n(T)^{-1/\golden}\,
+        \frac{1}{2}\,\rhocore\,\bigl\lVert\vswirl\bigr\rVert^{2}\,
+        \frac{\pi r_{c}^{3} L_{\mathrm{tot}}(T)}{c^{2}},
+        \label{eq:master-mass-expanded}
+    \end{equation}
+    which matches the code kernel (up to the choice of mode for
+    $L_{\mathrm{tot}}$). Here:
+    \begin{itemize}
+        \item $b(T), g(T), n(T)$ are read directly from the \textbf{knot taxonomy} tables
+        (braid index, Seifert genus, number of components),
+        \item $\rhocore, \vswirl, r_{c}$ and $\alpha$ are fixed SST Canon scales,
+        \item $L_{\mathrm{tot}}(T)$ encodes the geometry of the specific
+        ropelength realisation (e.g.\ electron, proton, nucleus, or molecule).
+    \end{itemize}
+
+    Thus, the knot taxonomy provides the \emph{entire topological content} of
+    the mass mapping via $(b,g,n)$ and, where used, the hyperbolic volume
+    $\VolH{K}$ in the refinement of $L_{\mathrm{tot}}(T)$ for baryons and
+    multi-knot composites.
+
+
+    \bibliographystyle{plain}
+    \begin{thebibliography}{99}
+    \bibitem{fremlinKnots}
+    D. Fremlin. \emph{Symmetry classification of prime knots}, online table.
+    URL: \url{https://david.fremlin.de/knots/table.htm}. Accessed Sept 2025.
+
+    \bibitem{fremlin2018symmetry}
+    D. Fremlin and J. Mala. Symmetry and measurability.
+    \emph{Acta Mathematica Hungarica}, 155(2):449--459, 2018.
+    Springer. DOI: \href{https://doi.org/10.1007/s10474-017-0778-3}{10.1007/s10474-017-0778-3}.
+    \end{thebibliography}
+
+\end{document}

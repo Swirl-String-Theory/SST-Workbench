@@ -1,0 +1,187 @@
+--- SST_ATOM_MASS_INVARIANT_SEMF.py
++++ SST_ATOM_MASS_INVARIANT_SEMF_canonical_strict.py
+@@ -13,17 +13,11 @@
+ calculation modes (see below) that change only topological-to-geometry inputs;
+ the invariant kernel is identical in all modes.
+ 
+-Modes (Computation Paths)
+--------------------------
+-- exact_closure (default): fits the dimensionless quark geometry factors (s_u, s_d)
+-  analytically so that the **proton and neutron** masses are matched exactly, while
+-  preserving the electron-only geometric calibration. No extra scaling beyond
+-  the Canon kernel is introduced.
+-- canonical: strict Canon evaluation with a **single** electron calibration (fixes L_tot(e)).
+-  Uses fixed (s_u, s_d) from hyperbolic-volume assignments; **no** baryon-sector
+-  rescaling. Nucleon residuals reflect the direct Canon mapping.
+-- sector_norm: keeps fixed (s_u, s_d) as in canonical, but introduces a **single**
+-  baryon-sector normalization λ_b to make the **proton** exact; the neutron is predicted.
++Modes
++-----
++- canonical_only: strict Canon evaluation with a single electron calibration (fixes L_tot(e)).
++  Uses fixed (s_u, s_d) from hyperbolic-volume assignments; no baryon-sector fitting or rescaling.
++- Optional diagnostics: phi sweeps (and twist-knot k proxies) may be run to explore topology sensitivity.
+ 
+ What changes across modes?
+ --------------------------
+@@ -253,7 +247,6 @@
+ @dataclass
+ class Config:
+     # s_u = Vol_H(5_2), s_d = Vol_H(6_1) (canonical up/down)
+-    mode: str = "exact_closure"
+     kappa_R: float = 2.0
+     fixed_su: float = 2.8281
+     fixed_sd: float = 3.1639
+@@ -480,30 +473,21 @@
+     return (4.0/alpha_fs) * (k ** -1.5) * (phi_val ** -g) * (n ** (-1.0/phi_val)) * (u * math.pi * (r_c**3)) / (c*c)
+ 
+ 
+-def fit_quark_geom_factors_for_baryons(k: float, g: int, n: int, scaling_factor: float, phi_val: float = phi0) -> tuple[float, float]:
+-    A = baryon_prefactor(k, g, n, phi_val=phi_val)
+-    K = A * scaling_factor
+-    s_u = (2.0 * M_p_actual - M_n_actual) / (3.0 * K)
+-    s_d = (M_p_actual / K) - 2.0 * s_u
+-    return float(s_u), float(s_d)
+-
+-
+ # ──────────────────────────────────────────────────────────────────────────────
+ # Assembly helpers
+ # ──────────────────────────────────────────────────────────────────────────────
+ def get_particle_topologies(cfg: Config, phi_val: float = phi0) -> Dict:
+-    # Lepton Generation Calibration
++    # Lepton Generation Calibration (canonical-only)
++    # Calibrate ONLY on the electron. Muon/tau are predicted by topology inputs,
++    # not by back-solving L_tot from their measured masses.
+     electron_sigma = 1
+     if cfg.use_shielding_exponent:
+         electron_sigma = cfg.sigma_leptons
+-    electron_base = KnotTopology(name="Electron_base T(2,3)", k=3.0, b_braid=2, g=1, n=1, sigma=electron_sigma, L_tot=0.0)
+-    muon_base     = KnotTopology(name="Muon_base T(2,5)",     k=5.0, b_braid=2, g=2, n=1, sigma=electron_sigma, L_tot=0.0)
+-    tau_base      = KnotTopology(name="Tau_base T(2,7)",      k=7.0, b_braid=2, g=3, n=1, sigma=electron_sigma, L_tot=0.0)
+-
+-    l_tot_e  = solve_for_L_tot(M_e_actual,  electron_base, phi_val=phi_val)
+-    l_tot_mu = solve_for_L_tot(M_mu_actual, muon_base,     phi_val=phi_val)
+-    l_tot_tau= solve_for_L_tot(M_tau_actual,tau_base,      phi_val=phi_val)
+-
++    electron_base = KnotTopology(name="Electron_base T(2,3)", k=3.0, b_braid=2, g=1, n=1, sigma=electron_sigma)
++    l_tot_e = solve_for_L_tot(M_e_actual,  electron_base, phi_val=phi_val)
++    l_tot_mu = l_tot_e
++    l_tot_tau = l_tot_e
++    
+     # Baryon Sector Calibration
+     k_bary, g_bary, n_bary = 3.0, 2, 3
+     scaling_factor = 2.0 * (math.pi ** 2) * cfg.kappa_R
+@@ -518,14 +502,8 @@
+     if cfg.use_twist_alexander_k:
+         k_up_tw = k_from_knot_label("5_2", phi_val=phi_val)
+         k_down_tw = k_from_knot_label("6_1", phi_val=phi_val)
+-
+-    if cfg.mode == "canonical":
+-        s_u, s_d = cfg.fixed_su, cfg.fixed_sd
+-    elif cfg.mode == "sector_norm":
+-        s_u, s_d = cfg.fixed_su, cfg.fixed_sd
+-        lam_b = M_p_actual / (K * (2.0 * s_u + s_d))
+-    else: # exact_closure
+-        s_u, s_d = fit_quark_geom_factors_for_baryons(k_bary, g_bary, n_bary, scaling_factor, phi_val=phi_val)
++    # Canonical-only: fixed (s_u, s_d) from topology assignments; no fitting or sector rescaling.
++    s_u, s_d = cfg.fixed_su, cfg.fixed_sd
+ 
+     l_tot_p = lam_b * (2.0 * s_u + 1.0 * s_d) * scaling_factor
+     l_tot_n = lam_b * (1.0 * s_u + 2.0 * s_d) * scaling_factor
+@@ -735,7 +713,7 @@
+     isotope_mass_csv: str = "isotope_masses.csv",
+ ) -> dict:
+     """Align with phi_sweep: pass data_source/isotope_mass_csv explicitly to match sweep semantics."""
+-    cfg = Config(mode=mode)
++    cfg = Config()
+     ds = data_source if data_source is not None else cfg.data_source
+     iso = None
+     if ds == "isotope_mass":
+@@ -771,7 +749,7 @@
+     if span < 0:
+         raise ValueError("span must be >= 0")
+ 
+-    cfg = Config(mode=mode)
++    cfg = Config()
+ 
+     iso = None
+     if data_source == "isotope_mass":
+@@ -803,14 +781,14 @@
+ # ──────────────────────────────────────────────────────────────────────────────
+ # Main Function
+ # ──────────────────────────────────────────────────────────────────────────────
+-def main(mode: str = "exact_closure") -> None:
++def main() -> None:
+     print("=== SST Invariant Master Mass (Canon) ===")
+-    cfg = Config(mode=mode)
++    cfg = Config()
+     topologies = get_particle_topologies(cfg)
+     diag = topologies.pop("_diag")
+ 
+     print("\n--- Mode & Model Parameters ---")
+-    print(f"mode = {diag['mode']}  |  kappa_R = {diag['kappa_R']:.6g}")
++    print(f"kappa_R = {diag['kappa_R']:.6g}")
+     print(f"s_u = {diag['s_u']:.6f}, s_d = {diag['s_d']:.6f}, lambda_b = {diag['lambda_b']:.6f}")
+     print(f"A_bary = {diag['A_bary']:.6e},  K = {diag['K']:.6e}")
+     print(f"scaling_factor = {diag['scaling_factor']:.6f}")
+@@ -848,7 +826,7 @@
+     print(f"Ratio (L_mu / L_e):   {ltot_mu / ltot_e:.4f}")
+     print(f"Ratio (L_tau / L_mu): {ltot_tau / ltot_mu:.4f}")
+ 
+-    out_csv = f"SST_Invariant_Mass_Results_{mode}.csv"
++    out_csv = "SST_Invariant_Mass_Results_canonical.csv"
+     df.to_csv(out_csv, index=False)
+     print(f"\nSaved results to {out_csv}")
+ 
+@@ -911,50 +889,5 @@
+     print("Best  :", best_eval_nosemf)
+     print(f"RMS ratio excl_epn: {gold_nosemf['RMS_excl_epn']/best_eval_nosemf['RMS_excl_epn']:.6f}")
+     print(f"RMS ratio excl_e  : {gold_nosemf['RMS_excl_e']/best_eval_nosemf['RMS_excl_e']:.6f}")
+-
+-    arg_mode = sys.argv[1] if len(sys.argv) > 1 else "exact_closure"
+-    main(arg_mode)
+-
+-    try:
+-        #ans = input("\nCompare with other modes and add predicted columns? [y/N]: ").strip().lower()
+-        ans = "y"
+-    except EOFError:
+-        ans = "n"
+-
+-    if ans in ("y", "yes"):
+-        all_modes = ["exact_closure", "canonical", "sector_norm"]
+-        label_map = {"canonical":"CANON", "sector_norm":"Sector Norm", "exact_closure":"Exact Closure"}
+-
+-        # Get the base dataframe from the mode just run
+-        cfg_base = Config(mode=arg_mode)
+-        tops_base = get_particle_topologies(cfg_base)
+-        # We need to remove the diagnostic dict before passing to compute_tables
+-        tops_base.pop("_diag", None)
+-        df_cmp = compute_tables(tops_base, cfg_base)
+-
+-        # Compute results for other modes and merge
+-        other_modes = [m for m in all_modes if m != arg_mode]
+-        for m in other_modes:
+-            cfg_m = Config(mode=m)
+-            tops_m = get_particle_topologies(cfg_m)
+-            tops_m.pop("_diag", None)
+-            df_m = compute_tables(tops_m, cfg_m)[["Object","Actual Mass (kg)","Predicted Mass (kg)"]].rename(
+-                columns={"Predicted Mass (kg)": f"Predicted Mass (kg) [{label_map[m]}]"}
+-            )
+-            # Error column for that mode
+-            df_m[f"% Error [{label_map[m]}]"] = 100.0 * (df_m[f"Predicted Mass (kg) [{label_map[m]}]"] - df_m["Actual Mass (kg)"]) / df_m["Actual Mass (kg)"]
+-            df_m[f"% Error [{label_map[m]}]"] = df_m[f"% Error [{label_map[m]}]"].apply(emoji_marker)
+-            df_m = df_m.drop(columns=["Actual Mass (kg)"])
+-            df_cmp = df_cmp.merge(df_m, on="Object", how="left")
+-
+-        # Reorder columns for clarity
+-        desired_cols = ["Object","Actual Mass (kg)","Predicted Mass (kg)","% Error",
+-                        "Predicted Mass (kg) [CANON]","% Error [CANON]",
+-                        "Predicted Mass (kg) [Sector Norm]","% Error [Sector Norm]"]
+-        cols = [c for c in desired_cols if c in df_cmp.columns] + [c for c in df_cmp.columns if c not in desired_cols]
+-        df_cmp = df_cmp[cols]
+-
+-        out_csv_all = "SST_Invariant_Mass_Results_all_modes.csv"
+-        df_cmp.to_csv(out_csv_all, index=False)
+-        print(df_cmp.to_string(index=False))
+-        print(f"\nSaved comparison to {out_csv_all}")
++    # Canonical-only run
++    main()

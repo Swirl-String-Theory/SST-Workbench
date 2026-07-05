@@ -1,0 +1,738 @@
+%! Author = Omar Iskandarani
+%! Date = 12/9/2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17877012
+
+\newcommand{\paperdoi}{10.5281/zenodo.18391520}
+\newcommand{\papertitle}{Time from Swirl: A Hydrodynamic Origin of Proper Time}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+% swirl arrows Counter Clockwise
+\newcommand{\swirlarrowcw}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirlcw}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+\newcommand{\Fmax}{\Fmaxswirl} % default maximal force (left swirl)
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}               % swirl speed magnitude
+\newcommand{\Ce}{\vswirl}                                % canonical swirl-speed constant
+
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rhoM}{\rho_{\!m}}   % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}
+        \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par}
+        \vspace{0.5cm}
+        {\today \par}
+        \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0}
+                    \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+    \begin{abstract}
+        Swirl--String Theory (SST) models matter as knotted swirl strings embedded in an incompressible, inviscid swirl condensate of effective density \(\rhof\). In this paper we develop a swirl--clock Hamiltonian and Lagrangian formulation in which internal time evolution is controlled by the local tangential swirl speed rather than by spacetime curvature. At the coarse--grained level, the condensate dynamics are described by a velocity--vorticity pair \((\vec{v},\boldsymbol{\omega}=\nabla\times\vec{v})\) and a local swirl energy density
+        \[
+            \mathcal{H}_{\text{swirl}}
+            =
+            \frac{1}{2}\rhoM\Big(|\vec{v}|^{2}
+            +\ell_\omega^{2}|\boldsymbol{\omega}|^{2}\Big),
+            \qquad
+            \ell_\omega\sim\rc,
+        \]
+        which encodes bulk kinetic energy and a short--range swirl tension. The associated swirl clock is introduced as
+        \[
+            \SwirlClock(\vec{x})
+            =
+            \sqrt{1-\frac{|v_\perp(\vec{x})|^{2}}{\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^{2}}},
+            \qquad
+            dt(\vec{x})=dt_\infty\,\SwirlClock(\vec{x}),
+        \]
+        leading to a ``redshifted'' Schr\"odinger evolution
+        \(
+        i\hbar\,\partial_{t_\infty}\Psi
+        =
+        \SwirlClock(\vec{x})\,H[\vec{v}]\,\Psi
+        \)
+        for swirl--bound modes. Starting from a local, time--symmetric Lagrangian density
+        \(
+        \mathcal{L}_{\text{swirl}}
+        =
+        \tfrac{1}{2}\rhoM|\vec{v}|^{2}
+        -\tfrac{1}{2}\rhoM\ell_\omega^{2}|\nabla\times\vec{v}|^{2},
+        \)
+        we derive a vector Helmholtz equation
+        \(
+        \nabla^{2}\vec{v}+\ell_\omega^{-2}\vec{v}=0
+        \)
+        whose bound solutions define discrete swirl shells and an effective core radius \(\sim\ell_\omega\). A symmetric swirl stress tensor is constructed, providing an energy--momentum bookkeeping scheme in which swirl tension plays the role of a hydrodynamic analogue of magnetic stress. Finally, we introduce an effective metric ansatz
+        \[
+            ds^{2}
+            =
+            -\Big(1-\tfrac{v_\perp^{2}}{\lVert\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^{2}}\Big)\,dt^{2}
+            +
+            \big(\delta_{ij}+\gamma_{ij}(\boldsymbol{\omega})\big)\,dx^{i}dx^{j},
+        \]
+        with \(\gamma_{ij}\propto\omega_i\omega_j-\tfrac{1}{2}\delta_{ij}|\boldsymbol{\omega}|^{2}\), to summarize the impact of swirl on internal clocks and rulers while preserving a flat background condensate. Using the canonical SST constants and an axisymmetric reference profile, we obtain finite, strongly peaked swirl energy densities and a core swirl clock \(\SwirlClock(\rc)\approx 0.93\), providing a quantitatively controlled link between swirl structure, time dilation, and emergent geometry within the Rosetta~0.6.0 framework.
+    \end{abstract}
+
+    \titlepageClose
+%=========================================
+% Title Page End
+%=========================================
+
+
+
+
+
+%=========================================
+% Body (insert into document)
+%=========================================
+
+    \section{Swirl–Clock Hamiltonian and Time Dilation in Swirl–String Theory}
+        \label{sec:sst_swirl_clock}
+
+        In Swirl–String Theory (SST), matter is modeled as knotted swirl strings embedded in a mechanically incompressible, inviscid swirl condensate of effective density \(\rhof\). The internal time evolution of a bound excitation is governed not by spacetime curvature, but by the rotational kinetic energy stored in structured swirl. Building on classical vortex kinematics~\cite{Helmholtz1858,LambHydro,Batchelor1967,Saffman1992,ChorinMarsden1993} and using a Schr\"odinger-type evolution for internal modes~\cite{Schrodinger1926}, we construct a swirl–clock Hamiltonian in which the local clock rate is set by the tangential swirl speed.
+
+        \subsection{Velocity–Vorticity Kinematics and Swirl Energy Density}
+            \label{subsec:sst_kin_energy}
+
+            Let \(\vec{v}(\vec{x},t)\) be the local condensate velocity and
+            \begin{equation}
+                \boldsymbol{\omega}(\vec{x},t)
+                := \nabla\times\vec{v}(\vec{x},t)
+            \end{equation}
+            the associated vorticity. At the coarse–grained level used in Rosetta~0.6.0, the leading local energy density retained in the effective Hamiltonian is
+            \begin{equation}
+                \mathcal{H}_{\text{swirl}}(\vec{x})
+                =
+                \frac{1}{2}\,\rhoM\,\Big(
+                |\vec{v}(\vec{x})|^{2}
+                + \ell_\omega^{2}\,|\boldsymbol{\omega}(\vec{x})|^{2}
+                \Big),
+                \qquad \ell_\omega\sim \rc,
+                \label{eq:sst_H_swirl_local}
+            \end{equation}
+            where \(\rhoM\) is the mass–equivalent density associated with the core of the swirl string. The \(|\vec{v}|^{2}\) term is the bulk kinetic energy density; the \(\ell_\omega^{2}|\boldsymbol{\omega}|^{2}\) term is the leading local surrogate for the nonlocal Biot–Savart interaction energy and encodes a short–distance swirl tension~\cite{Saffman1992,ChorinMarsden1993,Salmon1988,Morrison1998}.
+
+            Dimensions:
+            \[
+                [\rhoM][v]^2 \sim \mathrm{J/m^3},
+                \qquad
+                [\rhoM]\ell_\omega^{2}[\omega]^{2}
+                \sim \mathrm{J/m^3},
+            \]
+            so \(\mathcal{H}_{\text{swirl}}\) is an energy density.
+
+            \paragraph{Axisymmetric profile (Rosetta reference ansatz).}
+
+                For explicit estimates we use the axisymmetric angular–velocity profile
+                \begin{equation}
+                    \Omega_{\text{swirl}}(r)
+                    =
+                    \frac{\vnorm}{\rc}\,e^{-r/\rc},
+                    \qquad
+                    v_\theta(r)
+                    =
+                    r\,\Omega_{\text{swirl}}(r)
+                    =
+                    \vnorm\Big(\frac{r}{\rc}\Big)e^{-r/\rc},
+                    \label{eq:sst_omegaswirl_profile}
+                \end{equation}
+                where \(\vnorm\) is the characteristic swirl speed (\(\vnorm \approx 1.09384563\times10^{6}\,\mathrm{m/s}\) in the SST Canon). The tangential speed peaks at \(r=\rc\) with
+                \begin{equation}
+                    v_\theta(\rc)=\frac{\vnorm}{e}.
+                \end{equation}
+                The corresponding axial vorticity is
+                \begin{equation}
+                    \omega_z(r)
+                    =
+                    \frac{1}{r}\frac{\dd}{\dd r}\big(r\,v_\theta(r)\big)
+                    =
+                    \frac{\vnorm}{\rc}e^{-r/\rc}\Big(2-\frac{r}{\rc}\Big).
+                    \label{eq:sst_omega_z_exact}
+                \end{equation}
+
+    \subsection{Swirl–Clock and Proper Time from Tangential Swirl}
+        \label{subsec:sst_proper_time}
+
+        Rosetta~0.6.0 defines the local swirl clock \(\SwirlClock(\vec{x})\) as a dimensionless factor that slows internal evolution relative to an asymptotic laboratory time \(t_\infty\). At leading order, the swirl clock is taken to depend on the local tangential swirl speed \(v_\perp(\vec{x})\) through
+        \begin{equation}
+            dt(\vec{x})
+            =
+            dt_\infty\,\SwirlClock(\vec{x}),
+            \qquad
+            \SwirlClock(\vec{x})
+            :=
+            \sqrt{1-\frac{|v_\perp(\vec{x})|^{2}}{\vnorm^{2}}}
+            \in [0,1],
+            \label{eq:sst_time_dilation_velocity}
+        \end{equation}
+        in direct analogy with special–relativistic time dilation, but with \(\vnorm\) replacing \(c\) as the relevant swirl scale. For an axisymmetric swirl string, \(v_\perp = v_\theta\,\hat{\bm{\theta}}\). Inserting~\eqref{eq:sst_omegaswirl_profile} gives
+        \begin{equation}
+            \SwirlClock(r)
+            =
+            \sqrt{
+                1-\Big(\frac{r}{\rc}\Big)^{2}e^{-2r/\rc}
+            },
+            \qquad
+            \SwirlClock(\rc)
+            =
+            \sqrt{1-e^{-2}}
+            \approx 0.929873.
+        \end{equation}
+        Thus the core clock runs at roughly \(93\%\) of the far–field rate for the canonical profile.
+
+    \subsection{Hamiltonian Time Evolution of a Swirl–Bound Mode}
+        \label{subsec:sst_ham_evolution}
+
+        Let \(\Psi\) denote a swirl–bound internal mode supported on a given knot–type swirl string. In local proper time \(t_{\rm loc}\) one has the usual Schr\"odinger form
+        \begin{equation}
+            i\hbar\,\frac{\partial \Psi}{\partial t_{\rm loc}}
+            =
+            H[\vec{v}]\,\Psi,
+        \end{equation}
+        where \(H[\vec{v}]\) is constructed from the energy functional associated with \(\mathcal{H}_{\text{swirl}}\) in~\eqref{eq:sst_H_swirl_local}. Since \(dt_{\rm loc}=\SwirlClock(\vec{x})\,dt_\infty\), the evolution in the laboratory time \(t_\infty\) is
+        \begin{equation}
+            i\hbar\,\frac{\partial}{\partial t_\infty}\Psi(\vec{x},t_\infty)
+            =
+            \SwirlClock(\vec{x})\,H[\vec{v}]\,\Psi(\vec{x},t_\infty).
+            \label{eq:sst_lab_schrodinger}
+        \end{equation}
+        For a single–mode reduction localized in the knot core, we approximate
+        \begin{equation}
+            \langle \SwirlClock \rangle
+            :=
+            \frac{1}{V}\int_V \SwirlClock(\vec{x})\,\dd^3x,
+            \qquad
+            i\hbar\,\frac{\dd}{\dd t_\infty}\Psi
+            =
+            \langle\SwirlClock\rangle\,H[\vec{v}]\,\Psi.
+        \end{equation}
+
+        \paragraph{Dimensional check.}
+
+            In~\eqref{eq:sst_time_dilation_velocity}, the argument of the square root is dimensionless. In~\eqref{eq:sst_H_swirl_local}, each term carries units \(\mathrm{J/m^3}\). Equation~\eqref{eq:sst_lab_schrodinger} matches the usual “redshifted Hamiltonian” form where the local clock factor multiplies \(H\).
+
+    \subsection{Numerical validation with SST Canon constants}
+    \label{subsec:sst_numerics}
+
+    Using the SST Canon values \(\vnorm = 1.09384563\times10^{6}\,\mathrm{m/s}\), \(\rc = 1.40897017\times10^{-15}\,\mathrm{m}\), and \(\rhoM = 3.8934358266918687\times10^{18}\,\mathrm{kg/m^3}\), and the profile~\eqref{eq:sst_omegaswirl_profile}–\eqref{eq:sst_omega_z_exact}, one finds
+    \[
+        \begin{aligned}
+            v_\theta(\rc)
+            &= \frac{\vnorm}{e}
+            = 4.02403\times10^{5}\,\mathrm{m/s},\\
+            \SwirlClock(\rc)
+            &= \sqrt{1-e^{-2}}
+            = 0.9298734950,\\
+            \omega_z(\rc)
+            &= \frac{\vnorm}{\rc}e^{-1}\big(2-1\big)
+            = 2.8560102099\times10^{20}\,\mathrm{s^{-1}},\\
+            \mathcal{H}_{\text{swirl}}(\rc)
+            &= \frac{1}{2}\rhoM
+            \big[v_\theta(\rc)^2+\rc^2\omega_z(\rc)^2\big]
+            = 6.3045795546\times10^{29}\,\mathrm{J/m^3}.
+        \end{aligned}
+    \]
+    Representative values for several radii \(r/\rc\in\{0,0.25,0.5,1,2,3\}\) are summarized in Table~\ref{tab:sst_swirl_profile}, using the same Canon constants.
+
+    \begin{table}[h!]
+        \centering
+        \caption{Representative profile values for the canonical swirl string (\(\vnorm, \rc, \rhoM\) from SST Canon).}
+        \label{tab:sst_swirl_profile}
+        \small
+        \begin{tabular}{@{}cccccc@{}}
+            \toprule
+            \(r/\rc\) & \(r\) (m) & \(v_\theta\) (m/s) & \(\SwirlClock\) & \(\omega_z\) (s\(^{-1}\)) & \(\mathcal{H}_{\text{swirl}}\) (J/m\(^3\)) \\
+            \midrule
+            0.00 & \(0\) & \(0\) & \(1.0000000000\) & \(1.5526881311\times10^{21}\) & \(9.3169784018\times10^{30}\) \\
+            0.25 & \(3.5224\times10^{-16}\) & \(2.12972\times10^{5}\) & \(0.9808628007\) & \(1.0580803908\times10^{21}\) & \(4.4148695754\times10^{30}\) \\
+            0.50 & \(7.0449\times10^{-16}\) & \(3.31725\times10^{5}\) & \(0.9529061547\) & \(7.0631471735\times10^{20}\) & \(2.1422030049\times10^{30}\) \\
+            1.00 & \(1.4090\times10^{-15}\) & \(4.02403\times10^{5}\) & \(0.9298734950\) & \(2.8560102099\times10^{20}\) & \(6.3045795546\times10^{29}\) \\
+            2.00 & \(2.8179\times10^{-15}\) & \(2.96072\times10^{5}\) & \(0.9626720337\) & \(0\) & \(1.7064641194\times10^{29}\) \\
+            3.00 & \(4.2269\times10^{-15}\) & \(1.63378\times10^{5}\) & \(0.9887827013\) & \(-3.8651895068\times10^{19}\) & \(5.7736201234\times10^{28}\) \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    %=========================================
+    \section{Cauchy Integral Theorem and Swirl--Clock Plateaus}
+    \label{sec:sst_cauchy_swirl_clock}
+%=========================================
+
+    The swirl--clock Hamiltonian in Sect.~\ref{sec:sst_swirl_clock} can be sharpened by using the complex--analytic structure of incompressible planar flows. In the transverse plane to a straight segment of a swirl string, the swirl condensate velocity is divergence-free and (outside the core) irrotational, so it admits a complex potential in the sense of classical hydrodynamics~\cite{ahlforsComplexAnalysis1979,LambHydro,Batchelor1967,Saffman1992}.
+
+    \subsection{Complex swirl potential and circulation}
+        \label{subsec:sst_complex_potential}
+
+        Consider a straight swirl string aligned with the \(z\)--axis, and introduce the complex coordinate
+        \begin{equation}
+            z = x + i y,
+        \end{equation}
+        in a transverse cross--section. In a simply connected region that does not contain the core line, there exists a complex potential
+        \begin{equation}
+            W(z) = \Phi(x,y) + i \Psi(x,y),
+        \end{equation}
+        such that the complex velocity
+        \begin{equation}
+            U(z)
+            :=
+            v_x - i v_y
+            =
+            \frac{dW}{dz}
+            \label{eq:sst_complex_velocity}
+        \end{equation}
+        is analytic~\cite{ahlforsComplexAnalysis1979}. The (scalar) circulation around a closed loop \(C\) in the \(x\)–\(y\) plane is
+        \begin{equation}
+            \Gamma_C
+            :=
+            \oint_C \vec{v}\cdot d\vec{\ell}
+            =
+            \oint_C (v_x\,dx + v_y\,dy)
+            =
+            -\,\Im \oint_C U(z)\,dz.
+            \label{eq:sst_circulation_def}
+        \end{equation}
+
+        If \(U(z)\) is analytic in the region bounded by \(C\), Cauchy’s integral theorem implies
+        \begin{equation}
+            \oint_C U(z)\,dz = 0
+            \quad\Rightarrow\quad
+            \Gamma_C = 0,
+        \end{equation}
+        so any loop that does not link the core measures negligible circulation.
+
+        When the swirl string axis is treated as an isolated singular line (removed from the fluid domain), the complex velocity \(U(z)\) is analytic on the punctured plane and admits a Laurent expansion with a simple pole at \(z=0\). By Cauchy’s integral and residue theorems~\cite{cauchy1825,ahlforsComplexAnalysis1979},
+        \begin{equation}
+            \oint_C U(z)\,dz
+            =
+            2\pi i\,n\,\mathrm{Res}\!\left(U,z=0\right),
+        \end{equation}
+        where \(n\in\mathbb{Z}\) is the winding number of \(C\) about the axis. Writing
+        \begin{equation}
+            \mathrm{Res}(U,z=0)
+            =
+            \frac{\kappa}{2\pi i},
+        \end{equation}
+        we obtain the circulation plateau
+        \begin{equation}
+            \Gamma_C
+            =
+            -\,\Im \oint_C U(z)\,dz
+            =
+            n\,\kappa,
+            \qquad
+            n\in\mathbb{Z},
+            \label{eq:sst_circulation_quantized}
+        \end{equation}
+        in agreement with Kelvin’s circulation theorem for material loops~\cite{Helmholtz1858,Saffman1992,ChorinMarsden1993}. Loops whose spanning disk intersects the core annulus form a family with constant \(\Gamma_C\); loops that do not link the axis yield \(\Gamma_C\approx 0\).
+
+    \subsection{Canonical identification of the circulation quantum \texorpdfstring{\(\kappa\)}{kappa}}
+        \label{subsec:sst_kappa_canonical}
+
+        Within the SST Canon and Rosetta~0.6.0, the circulation quantum is tied to core kinematics by
+        \begin{equation}
+            \boxed{
+                \kappa
+                \equiv
+                \frac{h}{m_{\text{eff}}}
+                =
+                2\pi\,\rc\,\vnorm
+            }
+            \label{eq:sst_kappa_definition}
+        \end{equation}
+        where \(\rc\) is the swirl--string core radius and \(\vnorm=\lVert\vswirl\rVert\) is the characteristic swirl speed. This gives an effective mass
+        \begin{equation}
+            m_{\text{eff}}
+            =
+            \frac{h}{\kappa}
+            =
+            \frac{h}{2\pi\,\rc\,\vnorm}.
+        \end{equation}
+        Using the Canon values
+        \[
+            \rc = 1.40897017\times10^{-15}\,\mathrm{m},
+            \qquad
+            \vnorm = 1.09384563\times10^{6}\,\mathrm{m/s},
+        \]
+        we obtain
+        \begin{equation}
+            \kappa
+            =
+            2\pi \rc \vnorm
+            \approx
+            9.6836\times10^{-9}\,\mathrm{m^{2}/s},
+            \qquad
+            m_{\text{eff}}
+            =
+            \frac{h}{\kappa}
+            \approx
+            6.84\times10^{-26}\,\mathrm{kg},
+        \end{equation}
+        which corresponds to an energy scale of \(\mathcal{O}(10^{1}\,\mathrm{GeV})\) when expressed in \(c^{-2}\) units. Dimensions are consistent: \([\kappa]=\mathrm{m^{2}s^{-1}}\).
+
+    \subsection{Quantized swirl--clock loops}
+        \label{subsec:sst_quantized_clock_loops}
+
+        For a circular loop of radius \(r\) about the axis, the azimuthal swirl speed is
+        \begin{equation}
+            v_\theta^{(n)}(r)
+            =
+            \frac{\Gamma_C}{2\pi r}
+            =
+            \frac{n\,\kappa}{2\pi r},
+            \qquad
+            n\in\mathbb{Z},
+            \label{eq:sst_vtheta_from_kappa}
+        \end{equation}
+        so that the swirl clock~\eqref{eq:sst_time_dilation_velocity} becomes
+        \begin{equation}
+            \SwirlClock_n(r)
+            :=
+            \sqrt{
+                1-\frac{\bigl(v_\theta^{(n)}(r)\bigr)^{2}}{\vnorm^{2}}
+            }
+            =
+            \sqrt{
+                1-\frac{n^{2}\,\kappa^{2}}{4\pi^{2} r^{2}\vnorm^{2}}
+            }.
+            \label{eq:sst_clock_quantized}
+        \end{equation}
+        In other words, for any fixed radius \(r\) in the envelope of the swirl string, the swirl clock takes values on a discrete set indexed by the linking number \(n\). Topology changes that alter \(n\) (e.g.~reconnections, nucleations, or annihilations of swirl lines) therefore produce \(\mathcal{O}(1)\) jumps in the local clock factor, even if the underlying geometry varies smoothly.
+
+        In the thin--core limit \(r\approx\rc\), Eq.~\eqref{eq:sst_clock_quantized} ties the minimal clock rate directly to the Canon parameters:
+        \begin{equation}
+            \SwirlClock_{n=1}(\rc)
+            =
+            \sqrt{
+                1-\frac{\kappa^{2}}{4\pi^{2}\rc^{2}\vnorm^{2}}
+            }
+            =
+            \sqrt{1-\frac{1}{4\pi^{2}}}
+            \approx
+            0.9603,
+        \end{equation}
+        while higher \(n\) are suppressed by the requirement that the local swirl speed remains in the physically allowed regime. In practice, the axisymmetric profile~\eqref{eq:sst_omegaswirl_profile} provides a smoothed version of the thin--core idealization, with the same integer plateau structure inherited from~\eqref{eq:sst_circulation_quantized}.
+
+    \subsection{Impact on the swirl--clock Hamiltonian}
+        \label{subsec:sst_cauchy_impact}
+
+        The quantized circulation plateaus~\eqref{eq:sst_circulation_quantized} and discrete swirl clocks~\eqref{eq:sst_clock_quantized} refine the Hamiltonian evolution
+        \begin{equation}
+            i\hbar\,\partial_{t_\infty}\Psi
+            =
+            \SwirlClock(\vec{x})\,H[\vec{v}]\,\Psi
+            \label{eq:sst_lab_schrodinger_recall}
+        \end{equation}
+        by promoting \(\SwirlClock(\vec{x})\) to a topological observable: for a given family of loops that link a swirl string segment, the effective clock factor entering the single--mode reduction is locked to the integer \(n\). In particular, for a mode localized near \(r\approx\rc\),
+        \begin{equation}
+            \langle\SwirlClock\rangle
+            \;\longrightarrow\;
+            \langle\SwirlClock_{n=1}\rangle
+            \quad\text{under smooth deformations that preserve the linking number,}
+        \end{equation}
+        while topology–changing events produce discrete shifts in \(\langle\SwirlClock\rangle\). This is the swirl–clock analogue of the integer plateau of circulation used in the long–distance swirl gravity construction, now embedded directly in the time--dilation sector of SST.
+
+        \medskip
+        \noindent\emph{Analogy.} In complex analysis language, the swirl string core plays the role of a simple pole: as long as a loop winds around it, Cauchy’s theorem fixes the integral, and the clock slows by a fixed amount; only when the loop slips off the pole (a topology change) can the integral, and the clock rate, jump.
+
+%-----------------------------------------
+    \section{Swirl Lagrangian and Stationary Field Equation}
+    \label{sec:sst_lagrangian_swirl}
+
+    To complement the Hamiltonian formulation, we adopt a local, time–symmetric Lagrangian density for the swirl velocity field,
+    \begin{equation}
+        \mathcal{L}_{\text{swirl}}
+        =
+        \frac{1}{2}\rhoM\,|\vec{v}|^{2}
+        -\frac{1}{2}\rhoM\,\ell_\omega^{2}\,|\nabla\times\vec{v}|^{2},
+        \qquad
+        \ell_\omega\sim\rc,
+        \label{eq:sst_L_swirl}
+    \end{equation}
+    interpreted as the lowest–order local truncation of the nonlocal swirl interaction energy~\cite{Saffman1992,ChorinMarsden1993}. Varying with respect to \(\vec{v}\) yields
+    \begin{equation}
+        \rhoM\,\vec{v}
+        -\rhoM\,\ell_\omega^{2}\,\nabla\times(\nabla\times\vec{v})
+        =0.
+    \end{equation}
+    For incompressible flow (\(\nabla\!\cdot\!\vec{v}=0\Rightarrow \nabla\times(\nabla\times\vec{v})=-\nabla^2\vec{v}\)) this reduces to the vector Helmholtz equation
+    \begin{equation}
+        \boxed{
+            \nabla^{2}\vec{v}
+            +\frac{1}{\ell_\omega^{2}}\,\vec{v}
+            =0
+        }
+        \label{eq:sst_Helmholtz_v}
+    \end{equation}
+    whose bound solutions define discrete swirl shells and an effective core radius \(\sim \ell_\omega\). Combined with the swirl–clock relation~\eqref{eq:sst_time_dilation_velocity}, any stationary swirl solution \(\vec{v}(\vec{x})\) has a well–defined time–dilation profile.
+
+    \paragraph{Dimensional check.}
+
+        \(\mathcal{L}_{\text{swirl}}\) carries units \(\mathrm{J/m^3}\). In~\eqref{eq:sst_Helmholtz_v}, \(1/\ell_\omega^{2}\) has dimensions of wavenumber squared.
+
+%-----------------------------------------
+    \section{Swirl Stress Tensor and Energy–Momentum Bookkeeping}
+    \label{sec:sst_swirl_stress_tensor}
+
+    For the Lagrangian~\eqref{eq:sst_L_swirl}, a symmetric Cauchy stress consistent with spatial translation invariance is~\cite{LandauFM,Morrison1998}
+    \begin{equation}
+        \sigma_{ij}
+        =
+        \rhoM\,v_i v_j
+        +\rhoM\,\ell_\omega^{2}
+        \Big(
+        \omega_i\omega_j
+        -\frac{1}{2}\delta_{ij}|\boldsymbol{\omega}|^{2}
+        \Big)
+        -\delta_{ij}\,\frac{1}{2}\rhoM|\vec{v}|^{2},
+        \label{eq:sst_swirl_stress}
+    \end{equation}
+    where \(\omega_i\) are the components of \(\boldsymbol{\omega}\). The first term is inertial flux, the second encodes swirl tension (closely analogous to magnetic tension in Maxwell theory~\cite{LambHydro,Saffman1992}), and the last term is the kinetic pressure contribution (bulk pressure may be absorbed into \(-\delta_{ij}p\)).
+
+    The corresponding energy density and energy flux are
+    \begin{equation}
+        \mathcal{H}_{\text{swirl}}
+        =
+        \frac{1}{2}\rhoM\,|\vec{v}|^{2}
+        +\frac{1}{2}\rhoM\,\ell_\omega^{2}|\boldsymbol{\omega}|^{2},
+        \qquad
+        \bm{\mathcal{S}}_{\text{energy}}
+        \sim
+        (\mathcal{H}_{\text{swirl}}+p)\,\vec{v},
+    \end{equation}
+    in direct analogy with ideal–fluid and magnetohydrodynamic energy fluxes~\cite{LandauFM,Batchelor1967,Salmon1988}.
+
+    For bookkeeping in an effective \(3+1\) description, one may define a swirl energy–momentum tensor
+    \begin{equation}
+        T^{00}_{(\text{swirl})}
+        :=
+        \mathcal{H}_{\text{swirl}},
+        \quad
+        T^{0i}_{(\text{swirl})}
+        :=
+        \rhoM v^i,
+        \quad
+        T^{ij}_{(\text{swirl})}
+        :=
+        \sigma_{ij},
+    \end{equation}
+    so that time dilation, inertial response, and effective “gravitational” behaviour are all traced back to the distribution of \(\mathcal{H}_{\text{swirl}}\) and \(\sigma_{ij}\) within and around a swirl string.
+
+%-----------------------------------------
+    \section{Emergent Metric Bookkeeping from Swirl Foliations}
+    \label{sec:sst_spacetime_emergence}
+
+    SST maintains an underlying Euclidean spatial background and a global laboratory time \(t_\infty\). Nevertheless, it is often convenient to represent the combined effect of the swirl clock and swirl tension as an \emph{effective} metric that tracks how internal processes perceive time and spatial distances.
+
+    \subsection{Temporal Direction from the Swirl–Null Line}
+        \label{subsec:sst_null_filament_time}
+
+        Consider a knotted swirl string (e.g.~an electron–like or proton–like excitation) supported by a localized region of high vorticity \(\boldsymbol{\omega}\). Define the \emph{swirl–null line} \(\mathcal{N}\subset\mathbb{R}^3\) as the one–dimensional locus
+        \begin{equation}
+            \boldsymbol{\omega}(\vec{x})=0,
+            \qquad
+            \nabla\!\cdot\!\boldsymbol{\omega}(\vec{x})=0,
+            \qquad
+            \vec{x}\in\mathcal{N}.
+        \end{equation}
+        Along \(\mathcal{N}\) the swirl string neither stores swirl energy nor exhibits swirl–induced time dilation. The unit 4–vector tangent to \(\mathcal{N}\),
+        \begin{equation}
+            \tau^\mu
+            =
+            \frac{\dd x^\mu}{\dd s}\Big|_{\boldsymbol{\omega}=0},
+        \end{equation}
+        may therefore be used as an internal temporal axis for the excitation: it is the direction of maximal proper–time flow within the knot.
+
+    \subsection{Spatial Layers from Swirl Shells}
+        \label{subsec:sst_swirl_shells_space}
+
+        The region surrounding \(\mathcal{N}\) is foliated by nested isovorticity shells
+        \begin{equation}
+            \Sigma_\lambda
+            :=
+            \big\{
+            \vec{x}\in\mathbb{R}^3
+            \,\big|\,
+            |\boldsymbol{\omega}(\vec{x})|=\lambda
+            \big\},
+        \end{equation}
+        each of which carries a swirl clock
+        \begin{equation}
+            dt(\lambda)
+            =
+            dt_\infty\sqrt{
+                1-\frac{v_\perp(\lambda)^2}{\vnorm^{2}}
+            }
+        \end{equation}
+        set by the local geometry of \(\vec{v}\) or \(\boldsymbol{\omega}\). In this picture, spatial distance from the swirl–null line is encoded in the radial variation of swirl intensity and the associated layering of clock rates.
+
+        A dimensionless spatial correction consistent with isotropy is
+        \begin{equation}
+            g_{ij}(\vec{x})
+            =
+            \delta_{ij}
+            +
+            \frac{\ell_g^{2}}{\vnorm^{2}}
+            \Big(
+            \omega_i\omega_j
+            -\frac{1}{2}\delta_{ij}|\boldsymbol{\omega}|^{2}
+            \Big),
+            \qquad
+            \ell_g\sim\rc,
+            \label{eq:sst_induced_metric}
+        \end{equation}
+        so that the effective line element reads
+        \begin{equation}
+            ds^{2}
+            =
+            -\Big(1-\frac{v_\perp^{2}}{\vnorm^{2}}\Big)\,dt^{2}
+            +
+            \big(\delta_{ij}+\gamma_{ij}(\boldsymbol{\omega})\big)\,dx^{i}dx^{j},
+            \quad
+            \gamma_{ij}(\boldsymbol{\omega})
+            :=
+            \frac{\ell_g^{2}}{\vnorm^{2}}
+            \Big(
+            \omega_i\omega_j
+            -\frac{1}{2}\delta_{ij}|\boldsymbol{\omega}|^{2}
+            \Big).
+        \end{equation}
+        This metric is an internal bookkeeping device: it summarizes how internal clocks and rulers are distorted by the swirl configuration, while the fundamental kinematics of SST remain those of a flat background condensate.
+
+    \subsection*{One–line analogy}
+
+        A swirl string is like a spinning rubber band in water: the faster its surface water flows, the slower the clock at its centre ticks.
+
+%=========================================
+% References
+%=========================================
+
+        \bibliographystyle{unsrt}
+
+
+        \begin{thebibliography}{99}
+
+            \bibitem{Helmholtz1858}
+            H.~Helmholtz,
+            ``On Integrals of the Hydrodynamical Equations Which Express Vortex Motion,''
+            \emph{Journal f\"ur die reine und angewandte Mathematik} \textbf{55}, 25--55 (1858).
+            doi:10.1515/crll.1858.55.25
+
+            \bibitem{Schrodinger1926}
+            E.~Schr\"odinger,
+            ``An Undulatory Theory of the Mechanics of Atoms and Molecules,''
+            \emph{Physical Review} \textbf{28}, 1049--1070 (1926).
+            doi:10.1103/PhysRev.28.1049
+
+            \bibitem{LambHydro}
+            H.~Lamb,
+            \emph{Hydrodynamics}, 6th ed.
+            (Cambridge University Press, 1932).
+
+            \bibitem{Batchelor1967}
+            G.~K.~Batchelor,
+            \emph{An Introduction to Fluid Dynamics}
+            (Cambridge University Press, 1967).
+
+            \bibitem{Saffman1992}
+            P.~G.~Saffman,
+            \emph{Vortex Dynamics}
+            (Cambridge University Press, 1992).
+            doi:10.1017/CBO9780511624063
+
+            \bibitem{ChorinMarsden1993}
+            A.~J.~Chorin and J.~E.~Marsden,
+            \emph{A Mathematical Introduction to Fluid Mechanics}, 3rd ed.
+            (Springer, 1993).
+            doi:10.1007/978-1-4757-2219-8
+
+            \bibitem{Salmon1988}
+            R.~Salmon,
+            ``Hamiltonian Fluid Mechanics,''
+            \emph{Annual Review of Fluid Mechanics} \textbf{20}, 225--256 (1988).
+            doi:10.1146/annurev.fl.20.010188.001301
+
+            \bibitem{Morrison1998}
+            P.~J.~Morrison,
+            ``Hamiltonian Description of the Ideal Fluid,''
+            \emph{Reviews of Modern Physics} \textbf{70}, 467--521 (1998).
+            doi:10.1103/RevModPhys.70.467
+
+            \bibitem{LandauFM}
+            L.~D.~Landau and E.~M.~Lifshitz,
+            \emph{Fluid Mechanics}, 2nd ed.,
+            Course of Theoretical Physics, Vol.~6
+            (Pergamon, 1987).
+
+            \bibitem{ahlforsComplexAnalysis1979}
+            L.~V.~Ahlfors,
+            \emph{Complex Analysis}, 3rd ed.
+            (McGraw--Hill, 1979).
+
+            \bibitem{cauchy1825}
+            A.-L.~Cauchy,
+            ``M\'emoire sur les int\'egrales d\'efinies et sur leurs applications \`a la th\'eorie des fonctions,''
+            \emph{M\'emoires pr\'esent\'es par divers savants \`a l'Acad\'emie Royale des Sciences de l'Institut de France} \textbf{1}, 1--60 (1825).
+
+        \end{thebibliography}
+
+
+
+
+
+
+\end{document}

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faraday Rotation Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc; /* slate-50 */
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Glassmorphism elements */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        /* Laser Beam Animation */
+        .beam {
+            transition: all 0.1s ease;
+        }
+        
+        /* Coil Animation */
+        .coil-path {
+            stroke-dasharray: 10;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        .polarization-vector {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-8">
+
+    <header class="mb-8 text-center md:text-left">
+        <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+            Faraday Rotation Simulator
+        </h1>
+        <p class="text-slate-400 mt-2 max-w-3xl">
+            Based on the <i>Cutoff-Sensitive Dispersive Model for Transparent Media</i>. 
+            Adjust the wavelength, magnetic field, and medium length to observe the magneto-optic rotation of polarized light through silica glass.
+        </p>
+    </header>
+
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Controls Panel -->
+        <section class="glass-panel p-6 lg:col-span-4 flex flex-col gap-6">
+            <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 flex items-center justify-between">
+                <span>Experiment Parameters</span>
+                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            </h2>
+
+            <!-- Wavelength -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-300">Wavelength (λ)</label>
+                    <span id="wl-val" class="mono text-cyan-400">633 nm</span>
+                </div>
+                <input type="range" id="wl-slider" min="200" max="1500" value="633" step="1">
+                <div class="flex justify-between text-xs text-slate-500 mt-1">
+                    <span>UV (200nm)</span>
+                    <span>Visible</span>
+                    <span>IR (1500nm)</span>
+                </div>
+            </div>
+
+            <!-- Magnetic Field -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-300">Magnetic Field (B)</label>
+                    <span id="b-val" class="mono text-cyan-400">1.00 T</span>
+                </div>
+                <input type="range" id="b-slider" min="-5" max="5" value="1" step="0.01">
+                <div class="flex justify-between text-xs text-slate-500 mt-1">
+                    <span>-5 T (Reverse)</span>
+                    <span>0</span>
+                    <span>+5 T (Forward)</span>
+                </div>
+            </div>
+
+            <!-- Medium Length -->
+            <div>
+                <div class="flex justify-between mb-1">
+                    <label class="text-sm font-medium text-slate-300">Medium Length (L)</label>
+                    <span id="l-val" class="mono text-cyan-400">1.0 m</span>
+                </div>
+                <input type="range" id="l-slider" min="0.1" max="10" value="1" step="0.1">
+                <div class="flex justify-between text-xs text-slate-500 mt-1">
+                    <span>0.1 m</span>
+                    <span>10.0 m</span>
+                </div>
+            </div>
+
+            <!-- Metrics Output -->
+            <div class="mt-auto pt-4 border-t border-slate-700 space-y-4">
+                <div class="bg-slate-800/50 p-3 rounded-lg flex justify-between items-center">
+                    <span class="text-sm text-slate-400" title="Verdet Constant based on dispersive model">Verdet Constant (𝓥)</span>
+                    <span id="v-val" class="mono font-bold text-emerald-400">0.00 rad/T·m</span>
+                </div>
+                <div class="bg-slate-800/50 p-3 rounded-lg flex justify-between items-center">
+                    <span class="text-sm text-slate-400">Total Rotation (θ)</span>
+                    <span id="theta-val" class="mono font-bold text-yellow-400 text-lg">0.0°</span>
+                </div>
+                
+                <!-- Gamification / Goal -->
+                <div class="bg-blue-900/30 border border-blue-700/50 p-4 rounded-lg">
+                    <p class="text-xs text-blue-200 mb-2"><strong>Challenge:</strong> The analyzer at the end is set to 90° (crossed). Adjust parameters to rotate the beam exactly 90° to achieve maximum transmission!</p>
+                    <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div id="transmission-bar" class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <div class="text-right text-xs mono mt-1 text-blue-300" id="transmission-val">0% Transmission</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Panel -->
+        <section class="lg:col-span-8 flex flex-col gap-6">
+            
+            <!-- 3D-ish Setup View -->
+            <div class="glass-panel p-6 flex-1 flex flex-col justify-center relative overflow-hidden min-h-[300px]">
+                <h3 class="absolute top-4 left-4 text-sm font-medium text-slate-400">Apparatus Top View</h3>
+                
+                <div class="flex items-center justify-between w-full max-w-4xl mx-auto relative mt-8">
+                    
+                    <!-- Laser Source -->
+                    <div class="flex flex-col items-center z-10">
+                        <div class="w-12 h-16 bg-slate-700 rounded-l-md border-r-4 border-slate-900 flex items-center justify-center relative">
+                            <div class="w-2 h-2 rounded-full bg-red-500 absolute right-1"></div>
+                        </div>
+                        <span class="text-xs mt-2 text-slate-500">Laser</span>
+                    </div>
+
+                    <!-- Initial Polarizer (Vertical) -->
+                    <div class="z-10 flex flex-col items-center mx-2">
+                        <div class="w-2 h-24 bg-slate-600 border border-slate-500 flex flex-col justify-evenly items-center">
+                            <div class="w-full h-px bg-slate-400"></div>
+                            <div class="w-full h-px bg-slate-400"></div>
+                            <div class="w-full h-px bg-slate-400"></div>
+                        </div>
+                        <span class="text-xs mt-2 text-slate-500">Polarizer (0°)</span>
+                    </div>
+
+                    <!-- Medium & Coil -->
+                    <div class="flex-1 relative h-32 flex items-center justify-center mx-4">
+                        <!-- Glass Rod -->
+                        <div class="absolute w-full h-16 bg-gradient-to-b from-white/20 to-white/5 border border-white/20 rounded-sm backdrop-blur-sm z-10"></div>
+                        
+                        <!-- Laser Beam -->
+                        <div id="laser-beam" class="absolute w-full h-2 beam z-20" style="background: red; box-shadow: 0 0 10px red;"></div>
+                        
+                        <!-- Magnetic Coil (SVG) -->
+                        <svg class="absolute w-full h-32 z-30" preserveAspectRatio="none" viewBox="0 0 100 100">
+                            <path id="coil" class="coil-path" fill="none" stroke="#f59e0b" stroke-width="1" d="M 0,20 Q 5,90 10,20 T 20,20 T 30,20 T 40,20 T 50,20 T 60,20 T 70,20 T 80,20 T 90,20 T 100,20" opacity="0.5"/>
+                            <path id="coil2" class="coil-path" fill="none" stroke="#f59e0b" stroke-width="1" d="M 0,80 Q 5,10 10,80 T 20,80 T 30,80 T 40,80 T 50,80 T 60,80 T 70,80 T 80,80 T 90,80 T 100,80" opacity="0.5"/>
+                        </svg>
+
+                        <!-- B-Field Indicator -->
+                        <div id="b-dir-indicator" class="absolute top-0 text-yellow-500 text-xl font-bold z-40 transition-transform">
+                            → B →
+                        </div>
+                        <div class="absolute -bottom-6 text-xs text-slate-400">Silica Medium (L)</div>
+                    </div>
+
+                    <!-- Analyzer (Horizontal) -->
+                    <div class="z-10 flex flex-col items-center mx-2">
+                        <div class="w-2 h-24 bg-slate-600 border border-slate-500 flex justify-evenly items-center">
+                            <div class="h-full w-px bg-slate-400"></div>
+                            <div class="h-full w-px bg-slate-400"></div>
+                        </div>
+                        <span class="text-xs mt-2 text-slate-500">Analyzer (90°)</span>
+                    </div>
+
+                    <!-- Detector / Screen -->
+                    <div class="flex flex-col items-center z-10">
+                        <div class="w-4 h-20 bg-slate-800 border-l-2 border-slate-600 relative overflow-hidden">
+                            <div id="detector-glow" class="absolute inset-0 transition-opacity duration-200"></div>
+                        </div>
+                        <span class="text-xs mt-2 text-slate-500">Detector</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Head-on Polarization View -->
+            <div class="glass-panel p-6 flex-1 flex items-center justify-center relative">
+                <h3 class="absolute top-4 left-4 text-sm font-medium text-slate-400">Polarization Plane (Head-on)</h3>
+                
+                <div class="relative w-48 h-48">
+                    <!-- Grid -->
+                    <svg class="w-full h-full absolute inset-0" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="none" stroke="#334155" stroke-width="1"/>
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2"/>
+                        <line x1="50" y1="2" x2="50" y2="98" stroke="#334155" stroke-width="1"/>
+                        <line x1="2" y1="50" x2="98" y2="50" stroke="#334155" stroke-width="1"/>
+                        
+                        <!-- Analyzer Reference (Horizontal) -->
+                        <line x1="10" y1="50" x2="90" y2="50" stroke="#ef4444" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"/>
+                        <text x="85" y="45" fill="#ef4444" font-size="6" opacity="0.7">Analyzer</text>
+                    </svg>
+
+                    <!-- Rotating Vector -->
+                    <svg id="pol-vector" class="w-full h-full absolute inset-0 polarization-vector" viewBox="0 0 100 100">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="3" refY="2" orient="auto">
+                                <polygon points="0 0, 6 2, 0 4" fill="#38bdf8" />
+                            </marker>
+                            <marker id="arrowhead-rev" markerWidth="6" markerHeight="4" refX="3" refY="2" orient="auto">
+                                <polygon points="6 0, 0 2, 6 4" fill="#38bdf8" />
+                            </marker>
+                        </defs>
+                        <!-- Vertical line initially -->
+                        <line x1="50" y1="15" x2="50" y2="85" stroke="#38bdf8" stroke-width="3" marker-start="url(#arrowhead-rev)" marker-end="url(#arrowhead)"/>
+                    </svg>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // DOM Elements
+        const wlSlider = document.getElementById('wl-slider');
+        const bSlider = document.getElementById('b-slider');
+        const lSlider = document.getElementById('l-slider');
+        
+        const wlVal = document.getElementById('wl-val');
+        const bVal = document.getElementById('b-val');
+        const lVal = document.getElementById('l-val');
+        
+        const vVal = document.getElementById('v-val');
+        const thetaVal = document.getElementById('theta-val');
+        
+        const laserBeam = document.getElementById('laser-beam');
+        const polVector = document.getElementById('pol-vector');
+        const bDirIndicator = document.getElementById('b-dir-indicator');
+        const coils = document.querySelectorAll('.coil-path');
+        
+        const transmissionBar = document.getElementById('transmission-bar');
+        const transmissionVal = document.getElementById('transmission-val');
+        const detectorGlow = document.getElementById('detector-glow');
+
+        // Physics Constants & Model Parameters
+        // Based on the paper: V(omega) ~ omega / (omega_*^2 - omega^2)
+        // Empirical fit for Silica to match Sec 8 data (approx):
+        // V(lambda) = C / (lambda^2 - lambda_0^2)
+        const LAMBDA_0 = 180; // Resonance wavelength in nm
+        const C_SILICA = 1.3e6; // Fitting constant to yield rad/(T*m)
+
+        function calculateVerdet(lambda) {
+            // Prevent division by zero or negative values near resonance
+            if (lambda <= LAMBDA_0 + 5) return 1000; 
+            return C_SILICA / (Math.pow(lambda, 2) - Math.pow(LAMBDA_0, 2));
+        }
+
+        // Convert Wavelength to RGB color
+        function wavelengthToRGB(Wavelength) {
+            let R, G, B, alpha;
+            if (Wavelength >= 380 && Wavelength < 440) {
+                R = -(Wavelength - 440) / (440 - 380); G = 0.0; B = 1.0;
+            } else if (Wavelength >= 440 && Wavelength < 490) {
+                R = 0.0; G = (Wavelength - 440) / (490 - 440); B = 1.0;
+            } else if (Wavelength >= 490 && Wavelength < 510) {
+                R = 0.0; G = 1.0; B = -(Wavelength - 510) / (510 - 490);
+            } else if (Wavelength >= 510 && Wavelength < 580) {
+                R = (Wavelength - 510) / (580 - 510); G = 1.0; B = 0.0;
+            } else if (Wavelength >= 580 && Wavelength < 645) {
+                R = 1.0; G = -(Wavelength - 645) / (645 - 580); B = 0.0;
+            } else if (Wavelength >= 645 && Wavelength <= 780) {
+                R = 1.0; G = 0.0; B = 0.0;
+            } else {
+                R = 0.0; G = 0.0; B = 0.0;
+            }
+
+            // Intensity falloff
+            if (Wavelength >= 380 && Wavelength < 420) alpha = 0.3 + 0.7 * (Wavelength - 380) / (420 - 380);
+            else if (Wavelength >= 420 && Wavelength < 701) alpha = 1.0;
+            else if (Wavelength >= 701 && Wavelength <= 780) alpha = 0.3 + 0.7 * (780 - Wavelength) / (780 - 700);
+            else alpha = 0.0;
+
+            // Handle non-visible spectrum for simulation visualization purposes
+            if (Wavelength < 380) return `rgb(138, 43, 226)`; // Purple for UV
+            if (Wavelength > 780) return `rgb(139, 0, 0)`;    // Dark red for IR
+
+            R = Math.round(R * alpha * 255);
+            G = Math.round(G * alpha * 255);
+            B = Math.round(B * alpha * 255);
+            return `rgb(${R},${G},${B})`;
+        }
+
+        function updateSimulation() {
+            // Get values
+            const lambda = parseFloat(wlSlider.value);
+            const B = parseFloat(bSlider.value);
+            const L = parseFloat(lSlider.value);
+
+            // Update UI text
+            wlVal.textContent = `${lambda} nm`;
+            bVal.textContent = `${B.toFixed(2)} T`;
+            lVal.textContent = `${L.toFixed(1)} m`;
+
+            // Calculate Physics
+            const verdet = calculateVerdet(lambda);
+            const thetaRad = verdet * B * L;
+            const thetaDeg = thetaRad * (180 / Math.PI);
+
+            // Output Metrics
+            vVal.textContent = `${verdet.toFixed(2)} rad/T·m`;
+            thetaVal.textContent = `${thetaDeg.toFixed(1)}°`;
+
+            // Update Colors
+            const beamColor = wavelengthToRGB(lambda);
+            laserBeam.style.backgroundColor = beamColor;
+            laserBeam.style.boxShadow = `0 0 15px ${beamColor}`;
+            
+            // Update Vector Rotation
+            // Initial is vertical (0 deg in our setup). 
+            polVector.style.transform = `rotate(${thetaDeg}deg)`;
+
+            // Update B-Field Visuals
+            const bAbs = Math.abs(B);
+            const opacity = 0.1 + (bAbs / 5) * 0.9;
+            coils.forEach(c => c.style.opacity = opacity);
+            
+            if (B > 0) {
+                bDirIndicator.textContent = "→ B →";
+                coils.forEach(c => c.style.animationDirection = "normal");
+            } else if (B < 0) {
+                bDirIndicator.textContent = "← B ←";
+                coils.forEach(c => c.style.animationDirection = "reverse");
+            } else {
+                bDirIndicator.textContent = "B = 0";
+                coils.forEach(c => c.style.animationPlayState = "paused");
+            }
+            if(B !== 0) coils.forEach(c => c.style.animationPlayState = "running");
+
+            // Calculate Transmission (Malus's Law)
+            // Initial polarization is vertical (0°). Analyzer is horizontal (90°).
+            // Angle relative to analyzer = 90 - thetaDeg.
+            // Transmission I = I_0 * cos^2(angle_relative) = cos^2(90 - theta) = sin^2(theta)
+            const transmission = Math.pow(Math.sin(thetaRad), 2);
+            const transPercent = (transmission * 100).toFixed(1);
+            
+            transmissionBar.style.width = `${transPercent}%`;
+            transmissionVal.textContent = `${transPercent}% Transmission`;
+            
+            // Color transmission bar green if close to 100%
+            if (transmission > 0.95) {
+                transmissionBar.classList.remove('bg-blue-500');
+                transmissionBar.classList.add('bg-emerald-500');
+                transmissionBar.style.boxShadow = '0 0 10px #10b981';
+            } else {
+                transmissionBar.classList.add('bg-blue-500');
+                transmissionBar.classList.remove('bg-emerald-500');
+                transmissionBar.style.boxShadow = 'none';
+            }
+
+            // Update detector glow
+            detectorGlow.style.backgroundColor = beamColor;
+            detectorGlow.style.opacity = transmission;
+            detectorGlow.style.boxShadow = `0 0 ${transmission * 20}px ${beamColor}`;
+        }
+
+        // Event Listeners
+        wlSlider.addEventListener('input', updateSimulation);
+        bSlider.addEventListener('input', updateSimulation);
+        lSlider.addEventListener('input', updateSimulation);
+
+        // Initial call
+        updateSimulation();
+
+    </script>
+</body>
+</html>

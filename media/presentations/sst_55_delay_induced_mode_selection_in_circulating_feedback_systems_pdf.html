@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delay-Induced Mode Selection Explorer</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --grid-line: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--grid-line);
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 800px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--grid-line);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value-display {
+            color: var(--accent-cyan);
+            font-family: monospace;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--grid-line);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .visualization-container {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        canvas {
+            background-color: #0f172a;
+            border-radius: 8px;
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--grid-line);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .canvas-title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .mode-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+
+        .mode-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--grid-line);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mode-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .mode-item.active {
+            background: rgba(6, 182, 212, 0.15);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .stable { color: var(--accent-green); }
+        .unstable { color: var(--accent-red); }
+
+        .info-box {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-pink);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--grid-line);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Delay-Induced Mode Selection</h1>
+    <div class="subtitle">Interactive simulation of spectral discreteness in circulating feedback loops based on Iskandarani (2026).</div>
+</header>
+
+<main>
+    <!-- Controls Panel -->
+    <div class="panel">
+        <div class="info-box">
+            <strong>Physics Insight:</strong><br>
+            A finite delay ($\tau$) in a feedback loop acts as a filter. Even without spatial boundaries, the delay enforces a discrete "ladder" of stable frequencies ($\Omega$).
+            <br><br>
+            Equation: $\Omega = \omega_0 - \kappa \sin(\Omega\tau)$
+        </div>
+
+        <div class="control-group">
+            <label>
+                Intrinsic Frequency ($\omega_0$)
+                <span id="val-omega" class="value-display">10.0</span>
+            </label>
+            <input type="range" id="input-omega" min="1" max="20" step="0.1" value="5.0">
+        </div>
+
+        <div class="control-group">
+            <label>
+                Coupling Strength ($\kappa$)
+                <span id="val-kappa" class="value-display">5.0</span>
+            </label>
+            <input type="range" id="input-kappa" min="0" max="15" step="0.1" value="8.0">
+        </div>
+
+        <div class="control-group">
+            <label>
+                Delay Time ($\tau$)
+                <span id="val-tau" class="value-display">1.0</span>
+            </label>
+            <input type="range" id="input-tau" min="0.1" max="5.0" step="0.1" value="2.0">
+        </div>
+
+        <div>
+            <label style="margin-bottom: 0.5rem;">Detected Modes</label>
+            <div id="mode-list" class="mode-list">
+                <!-- Modes populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization Panel -->
+    <div class="visualization-container">
+        
+        <!-- Plot 1: Transcendental Intersection -->
+        <div class="canvas-wrapper">
+            <div class="canvas-title">Fig 3: Spectral Selection ($\Omega$ vs Error)</div>
+            <canvas id="graphCanvas"></canvas>
+        </div>
+
+        <!-- Plot 2: The Physical Loop -->
+        <div class="canvas-wrapper">
+            <div class="canvas-title">Fig 1: Circulating Field Visualization</div>
+            <canvas id="loopCanvas"></canvas>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    // --- State Management ---
+    const state = {
+        omega0: 5.0,
+        kappa: 8.0,
+        tau: 2.0,
+        modes: [], // Array of { omega: number, stable: boolean }
+        selectedModeIndex: -1,
+        time: 0
+    };
+
+    // --- DOM Elements ---
+    const els = {
+        omega: document.getElementById('input-omega'),
+        kappa: document.getElementById('input-kappa'),
+        tau: document.getElementById('input-tau'),
+        valOmega: document.getElementById('val-omega'),
+        valKappa: document.getElementById('val-kappa'),
+        valTau: document.getElementById('val-tau'),
+        modeList: document.getElementById('mode-list'),
+        graphCanvas: document.getElementById('graphCanvas'),
+        loopCanvas: document.getElementById('loopCanvas')
+    };
+
+    const ctxGraph = els.graphCanvas.getContext('2d');
+    const ctxLoop = els.loopCanvas.getContext('2d');
+
+    // --- Math Logic ---
+
+    // The transcendental equation: Omega = w0 - k * sin(Omega * tau)
+    // Rewrite as Error function: f(Omega) = Omega - w0 + k * sin(Omega * tau) = 0
+    function errorFunc(Omega) {
+        return Omega - state.omega0 + state.kappa * Math.sin(Omega * state.tau);
+    }
+
+    // Stability condition: 1 + k * tau * cos(Omega * tau) > 0
+    function checkStability(Omega) {
+        return (1 + state.kappa * state.tau * Math.cos(Omega * state.tau)) > 0;
+    }
+
+    function findModes() {
+        state.modes = [];
+        
+        // Search range. The modes cluster around w0, spread by kappa.
+        // With large kappa*tau, there can be many. We limit the search for visual clarity.
+        const range = Math.max(20, state.kappa * 2); 
+        const start = state.omega0 - range;
+        const end = state.omega0 + range;
+        const step = 0.05; // Coarse step
+
+        let prevVal = errorFunc(start);
+
+        for (let x = start; x <= end; x += step) {
+            let currVal = errorFunc(x);
+
+            // Check for zero crossing
+            if (Math.sign(prevVal) !== Math.sign(currVal)) {
+                // Refine root using binary search
+                let low = x - step;
+                let high = x;
+                let root = low;
+                for(let i=0; i<10; i++) {
+                    root = (low + high) / 2;
+                    let val = errorFunc(root);
+                    if (Math.sign(val) === Math.sign(prevVal)) {
+                        low = root;
+                    } else {
+                        high = root;
+                    }
+                }
+                
+                const isStable = checkStability(root);
+                state.modes.push({ omega: root, stable: isStable });
+            }
+            prevVal = currVal;
+        }
+
+        // Auto-select the first stable mode closest to omega0 if none selected or invalid
+        if (state.selectedModeIndex === -1 || state.selectedModeIndex >= state.modes.length) {
+            // Find closest stable mode to intrinsic freq
+            let bestIdx = -1;
+            let minDiff = Infinity;
+            state.modes.forEach((m, i) => {
+                if (m.stable) {
+                    const diff = Math.abs(m.omega - state.omega0);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestIdx = i;
+                    }
+                }
+            });
+            // If no stable modes, just pick closest mode
+            if (bestIdx === -1 && state.modes.length > 0) {
+                 let minDiff = Infinity;
+                 state.modes.forEach((m, i) => {
+                    const diff = Math.abs(m.omega - state.omega0);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestIdx = i;
+                    }
+                });
+            }
+            state.selectedModeIndex = bestIdx;
+        }
+    }
+
+    // --- UI Updates ---
+
+    function updateUI() {
+        els.valOmega.textContent = state.omega0.toFixed(1);
+        els.valKappa.textContent = state.kappa.toFixed(1);
+        els.valTau.textContent = state.tau.toFixed(1);
+
+        // Update Mode List
+        els.modeList.innerHTML = '';
+        if (state.modes.length === 0) {
+            els.modeList.innerHTML = '<div style="padding:0.5rem; color:#64748b;">No solutions found in range.</div>';
+        } else {
+            state.modes.forEach((mode, idx) => {
+                const div = document.createElement('div');
+                div.className = `mode-item ${idx === state.selectedModeIndex ? 'active' : ''}`;
+                const label = mode.stable ? 'Stable' : 'Unstable';
+                const cls = mode.stable ? 'stable' : 'unstable';
+                
+                div.innerHTML = `
+                    <span>Ω = ${mode.omega.toFixed(3)}</span>
+                    <span class="${cls}">${label}</span>
+                `;
+                div.onclick = () => {
+                    state.selectedModeIndex = idx;
+                    updateUI(); // Re-render to show active state
+                };
+                els.modeList.appendChild(div);
+            });
+        }
+    }
+
+    // --- Drawing ---
+
+    function resizeCanvas(canvas) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
+
+    function drawGraph() {
+        const w = els.graphCanvas.width;
+        const h = els.graphCanvas.height;
+        const ctx = ctxGraph;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Setup coordinate system
+        // Center view around omega0
+        const viewRangeX = Math.max(20, state.kappa * 2.5);
+        const minX = state.omega0 - viewRangeX/2;
+        const maxX = state.omega0 + viewRangeX/2;
+        
+        // Y range roughly same scale
+        const minY = minX;
+        const maxY = maxX;
+
+        function mapX(val) { return ((val - minX) / (maxX - minX)) * w; }
+        function mapY(val) { return h - ((val - minY) / (maxY - minY)) * h; }
+
+        // Draw Grid
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // X axis
+        const y0 = mapY(0);
+        if (y0 >= 0 && y0 <= h) {
+            ctx.moveTo(0, y0);
+            ctx.lineTo(w, y0);
+        }
+        // Y axis
+        const x0 = mapX(0);
+        if (x0 >= 0 && x0 <= w) {
+            ctx.moveTo(x0, 0);
+            ctx.lineTo(x0, h);
+        }
+        ctx.stroke();
+
+        // Draw Line y = Omega (Identity)
+        ctx.strokeStyle = '#06b6d4'; // Cyan
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(minX));
+        ctx.lineTo(mapX(maxX), mapY(maxX));
+        ctx.stroke();
+
+        // Draw Curve y = w0 - k*sin(Omega*tau)
+        ctx.strokeStyle = '#ec4899'; // Pink
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let px = 0; px <= w; px+=2) {
+            // inverse map pixel to value
+            const omegaVal = minX + (px/w) * (maxX - minX);
+            const yVal = state.omega0 - state.kappa * Math.sin(omegaVal * state.tau);
+            const py = mapY(yVal);
+            if (px === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Draw Intersection Points (Modes)
+        state.modes.forEach((mode, idx) => {
+            const mx = mapX(mode.omega);
+            const my = mapY(mode.omega); // Since y=x at intersection
+
+            ctx.beginPath();
+            ctx.arc(mx, my, idx === state.selectedModeIndex ? 8 : 4, 0, Math.PI * 2);
+            ctx.fillStyle = mode.stable ? '#22c55e' : '#ef4444';
+            ctx.fill();
+            if (idx === state.selectedModeIndex) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        });
+    }
+
+    function drawLoop() {
+        const w = els.loopCanvas.width;
+        const h = els.loopCanvas.height;
+        const ctx = ctxLoop;
+        
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(w, h) * 0.35;
+
+        // Draw base loop
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // If a mode is selected, visualize it
+        if (state.selectedModeIndex !== -1 && state.modes[state.selectedModeIndex]) {
+            const mode = state.modes[state.selectedModeIndex];
+            
+            // Visualizing the wave:
+            // The paper describes phase phi(t) = Omega*t + phi0.
+            // Spatially, in a delay line, the phase at position x (0 to L) is roughly phi(t - x/v).
+            // Since tau = L/v, the phase around the ring is phi(t - theta/2pi * tau).
+            // phi(t, theta) = Omega * (t - theta/2pi * tau)
+            // Wave amplitude visualization: A = cos(phi)
+            
+            ctx.beginPath();
+            const ringWidth = 20;
+            
+            for (let i = 0; i <= 360; i++) {
+                const theta = (i * Math.PI) / 180;
+                
+                // Calculate phase at this angle
+                // theta goes 0 -> 2PI. Delay 'age' goes 0 -> tau.
+                const delayAtTheta = (theta / (2 * Math.PI)) * state.tau;
+                const phase = mode.omega * (state.time - delayAtTheta);
+                
+                // Amplitude modulation for visual effect
+                const amp = Math.cos(phase); 
+                
+                // Map to radius
+                const r = radius + amp * ringWidth;
+                
+                const px = cx + r * Math.cos(theta);
+                const py = cy + r * Math.sin(theta);
+                
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            
+            // Color based on stability
+            ctx.strokeStyle = mode.stable ? '#22c55e' : '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Fill slightly
+            ctx.fillStyle = mode.stable ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+            ctx.fill();
+
+            // Draw a "particle" representing the signal head
+            // The head is at delay = 0 (theta = 0)
+            const headPhase = mode.omega * state.time;
+            const headX = cx + radius * Math.cos(0);
+            const headY = cy + radius * Math.sin(0);
+            
+            // Actually, let's rotate the whole system so the wave travels visually
+            // If Omega is positive, phase increases.
+            // Visual rotation speed = Omega? No, that's phase velocity.
+            // Group velocity is v = L/tau.
+            // Let's just animate the wave traveling.
+        }
+        
+        // Draw text info
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'center';
+        if (state.selectedModeIndex !== -1) {
+            const m = state.modes[state.selectedModeIndex];
+            ctx.fillText(`Selected Mode: Ω=${m.omega.toFixed(2)}`, cx, cy - 10);
+            ctx.fillStyle = m.stable ? '#22c55e' : '#ef4444';
+            ctx.fillText(m.stable ? 'STABLE' : 'UNSTABLE', cx, cy + 10);
+        } else {
+            ctx.fillText("No Mode Selected", cx, cy);
+        }
+    }
+
+    // --- Main Loop ---
+
+    function animate(timestamp) {
+        // Convert timestamp to seconds
+        const t = timestamp / 1000;
+        state.time = t;
+
+        drawGraph();
+        drawLoop();
+        requestAnimationFrame(animate);
+    }
+
+    // --- Event Listeners ---
+
+    function handleInput() {
+        state.omega0 = parseFloat(els.omega.value);
+        state.kappa = parseFloat(els.kappa.value);
+        state.tau = parseFloat(els.tau.value);
+        
+        findModes();
+        updateUI();
+    }
+
+    els.omega.addEventListener('input', handleInput);
+    els.kappa.addEventListener('input', handleInput);
+    els.tau.addEventListener('input', handleInput);
+
+    window.addEventListener('resize', () => {
+        resizeCanvas(els.graphCanvas);
+        resizeCanvas(els.loopCanvas);
+    });
+
+    // --- Initialization ---
+
+    resizeCanvas(els.graphCanvas);
+    resizeCanvas(els.loopCanvas);
+    handleInput(); // Initial calculation
+    requestAnimationFrame(animate);
+
+</script>
+</body>
+</html>

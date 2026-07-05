@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delay-Induced Mode Selection Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8fafc;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .slider-track {
+            accent-color: #3b82f6;
+        }
+        .math-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Delay-Induced Mode Selection</h1>
+                <p class="text-sm text-slate-500 mt-1">Interactive exploration of circulating feedback systems with temporal nonlocality.</p>
+            </div>
+            <div class="hidden md:block text-right text-xs text-slate-400 max-w-xs">
+                Based on the classical delayed-feedback analysis: <br>
+                <span class="math-text">Ω = ω₀ - κ sin(Ωτ)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Controls Sidebar -->
+        <aside class="lg:col-span-3 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h2 class="text-lg font-semibold mb-4 border-b pb-2">System Parameters</h2>
+                
+                <!-- Omega 0 -->
+                <div class="mb-5">
+                    <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                        <span>Intrinsic Freq (<span class="math-text">ω₀</span>)</span>
+                        <span id="val-w0" class="text-blue-600 font-mono">0.00</span>
+                    </label>
+                    <input type="range" id="slider-w0" min="-10" max="10" step="0.1" value="0" class="w-full slider-track">
+                    <p class="text-xs text-slate-400 mt-1">Base frequency without feedback.</p>
+                </div>
+
+                <!-- Kappa -->
+                <div class="mb-5">
+                    <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                        <span>Coupling Strength (<span class="math-text">κ</span>)</span>
+                        <span id="val-kappa" class="text-blue-600 font-mono">6.00</span>
+                    </label>
+                    <input type="range" id="slider-kappa" min="0" max="20" step="0.1" value="6" class="w-full slider-track">
+                    <p class="text-xs text-slate-400 mt-1">Feedback loop gain/strength.</p>
+                </div>
+
+                <!-- Tau -->
+                <div class="mb-5">
+                    <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                        <span>Circulation Delay (<span class="math-text">τ</span>)</span>
+                        <span id="val-tau" class="text-blue-600 font-mono">1.00</span>
+                    </label>
+                    <input type="range" id="slider-tau" min="0.1" max="5" step="0.1" value="1.0" class="w-full slider-track">
+                    <p class="text-xs text-slate-400 mt-1">Time taken for one loop transit.</p>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">Delay-Strength Product (<span class="math-text">K=κτ</span>):</span>
+                        <span id="val-K" class="font-bold text-slate-900 font-mono">6.00</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">When <span class="math-text">K ≳ 1</span>, multiple discrete modes emerge.</p>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl border border-blue-100 p-5 text-sm text-blue-800">
+                <h3 class="font-semibold mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    How it works
+                </h3>
+                <p class="mb-2">Adjust the sliders to see how temporal delay (<span class="math-text">τ</span>) and feedback (<span class="math-text">κ</span>) create discrete, stable operating frequencies (<span class="math-text">Ω</span>).</p>
+                <ul class="list-disc pl-4 space-y-1 text-blue-700/80">
+                    <li><strong>Green dots:</strong> Stable modes</li>
+                    <li><strong>Red circles:</strong> Unstable modes</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Visualizations -->
+        <section class="lg:col-span-9 flex flex-col gap-6">
+            
+            <!-- Transcendental Equation Plot -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-80 flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-md font-semibold text-slate-800">Emergent Spectral Discreteness</h2>
+                    <div class="text-xs text-slate-500 flex gap-4">
+                        <span class="flex items-center gap-1"><div class="w-3 h-0.5 bg-blue-500"></div> <span class="math-text">y = Ω</span></span>
+                        <span class="flex items-center gap-1"><div class="w-3 h-0.5 bg-orange-400"></div> <span class="math-text">y = ω₀ - κ sin(Ωτ)</span></span>
+                    </div>
+                </div>
+                <div class="relative flex-grow w-full h-full">
+                    <canvas id="canvas-roots"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-80">
+                <!-- Time Domain Simulation -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-md font-semibold text-slate-800">Time-Domain Convergence</h2>
+                        <span class="text-xs text-slate-500">Integration of delayed phase eq.</span>
+                    </div>
+                    <div class="relative flex-grow w-full h-full">
+                        <canvas id="canvas-time"></canvas>
+                    </div>
+                    <div class="text-center mt-2 text-xs text-slate-500">
+                        Instantaneous frequency <span class="math-text">dφ/dt</span> settling into a stable mode.
+                    </div>
+                </div>
+
+                <!-- Physical Loop Animation -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center relative overflow-hidden">
+                    <h2 class="text-md font-semibold text-slate-800 absolute top-5 left-5">Circulating Platform</h2>
+                    <div class="absolute top-5 right-5 text-right">
+                        <div class="text-xs text-slate-500">Current Freq (<span class="math-text">Ω</span>)</div>
+                        <div id="live-freq" class="font-mono font-bold text-lg text-blue-600">0.00</div>
+                    </div>
+                    
+                    <div class="relative w-48 h-48 mt-4">
+                        <!-- SVG Ring -->
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4 4" />
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#cbd5e1" stroke-width="1" />
+                            
+                            <!-- Delay indicator arc -->
+                            <path id="delay-arc" d="" fill="none" stroke="#bfdbfe" stroke-width="8" opacity="0.5" />
+                        </svg>
+                        
+                        <!-- Moving Particle -->
+                        <div id="particle" class="absolute w-4 h-4 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)] -ml-2 -mt-2 top-1/2 left-1/2" style="transform: translate(45px, 0px);"></div>
+                        
+                        <!-- Center Icon -->
+                        <div class="absolute inset-0 flex items-center justify-center text-3xl opacity-20">
+                            🔄
+                        </div>
+                    </div>
+                    <div class="mt-6 text-xs text-slate-500 max-w-xs text-center">
+                        Particle speed represents instantaneous phase evolution. The "ghost arc" visualizes the temporal memory <span class="math-text">τ</span>.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            w0: 0.0,
+            kappa: 6.0,
+            tau: 1.0,
+            roots: [],
+            simData: { times: [], dphi: [] },
+            currentOmega: 0,
+            animationAngle: 0
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            w0: document.getElementById('slider-w0'),
+            kappa: document.getElementById('slider-kappa'),
+            tau: document.getElementById('slider-tau'),
+            valW0: document.getElementById('val-w0'),
+            valKappa: document.getElementById('val-kappa'),
+            valTau: document.getElementById('val-tau'),
+            valK: document.getElementById('val-K'),
+            liveFreq: document.getElementById('live-freq'),
+            canvasRoots: document.getElementById('canvas-roots'),
+            canvasTime: document.getElementById('canvas-time'),
+            particle: document.getElementById('particle'),
+            delayArc: document.getElementById('delay-arc')
+        };
+
+        // --- Math & Physics Engine ---
+
+        // Find roots of Omega = w0 - kappa * sin(Omega * tau)
+        function calculateRoots() {
+            const { w0, kappa, tau } = state;
+            const K = kappa * tau;
+            state.roots = [];
+
+            if (tau === 0) {
+                state.roots.push({ omega: w0, stable: true });
+                return;
+            }
+
+            // Search in terms of theta = Omega * tau
+            // theta = w0*tau - K*sin(theta)
+            const theta0 = w0 * tau;
+            const minTheta = theta0 - K - 1;
+            const maxTheta = theta0 + K + 1;
+            const steps = 2000;
+            const dTheta = (maxTheta - minTheta) / steps;
+
+            let prevV = minTheta - theta0 + K * Math.sin(minTheta);
+
+            for (let i = 1; i <= steps; i++) {
+                const t = minTheta + i * dTheta;
+                const v = t - theta0 + K * Math.sin(t);
+
+                // Zero crossing detected
+                if (prevV * v <= 0) {
+                    // Bisection refinement
+                    let a = t - dTheta;
+                    let b = t;
+                    for (let j = 0; j < 20; j++) {
+                        const mid = (a + b) / 2;
+                        const vMid = mid - theta0 + K * Math.sin(mid);
+                        const vA = a - theta0 + K * Math.sin(a);
+                        if (vA * vMid <= 0) b = mid;
+                        else a = mid;
+                    }
+                    const rootTheta = (a + b) / 2;
+                    const rootOmega = rootTheta / tau;
+                    
+                    // Stability condition: 1 + K*cos(Omega*tau) > 0
+                    const isStable = (1 + K * Math.cos(rootTheta)) > 0;
+                    
+                    // Deduplicate
+                    if (state.roots.length === 0 || Math.abs(state.roots[state.roots.length-1].omega - rootOmega) > 1e-3) {
+                        state.roots.push({ omega: rootOmega, stable: isStable });
+                    }
+                }
+                prevV = v;
+            }
+        }
+
+        // Simulate DDE: dphi/dt = w0 + kappa * sin(phi(t-tau) - phi(t))
+        function simulateDDE() {
+            const { w0, kappa, tau } = state;
+            const T = 15.0;
+            const dt = 0.05;
+            const n_hist = Math.max(1, Math.floor(tau / dt));
+            const totalSteps = Math.floor(T / dt);
+            
+            const history = new Float64Array(n_hist + totalSteps + 1);
+            const times = new Float64Array(totalSteps);
+            const dphi = new Float64Array(totalSteps);
+
+            // Initial history (constant frequency Omega_init)
+            const Omega_init = 6.0; 
+            for (let i = 0; i <= n_hist; i++) {
+                const t = (i - n_hist) * dt;
+                history[i] = Omega_init * t;
+            }
+
+            let idx = n_hist;
+            for (let step = 0; step < totalSteps; step++) {
+                const t = step * dt;
+                const phi_t = history[idx];
+                
+                // Delay index
+                let delay_idx = idx - n_hist;
+                if (delay_idx < 0) delay_idx = 0;
+                const phi_delay = history[delay_idx];
+
+                const current_dphi = w0 + kappa * Math.sin(phi_delay - phi_t);
+                
+                times[step] = t;
+                dphi[step] = current_dphi;
+
+                history[idx + 1] = phi_t + current_dphi * dt;
+                idx++;
+            }
+
+            state.simData = { times, dphi };
+            
+            // Set current target omega for animation based on last stable value
+            if (dphi.length > 0) {
+                // Average last 10% to smooth out any remaining oscillations
+                let sum = 0;
+                let count = Math.floor(totalSteps * 0.1);
+                for(let i = totalSteps - count; i < totalSteps; i++) sum += dphi[i];
+                state.currentOmega = sum / count;
+            } else {
+                state.currentOmega = w0;
+            }
+        }
+
+        // --- Canvas Rendering ---
+
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            return { ctx, width: rect.width, height: rect.height };
+        }
+
+        function drawRootsPlot() {
+            const { ctx, width, height } = setupCanvas(els.canvasRoots);
+            const { w0, kappa, tau, roots } = state;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Determine bounds
+            let minX = -15, maxX = 15;
+            if (roots.length > 0) {
+                minX = Math.min(-5, roots[0].omega - 5);
+                maxX = Math.max(5, roots[roots.length-1].omega + 5);
+            }
+            const minY = minX;
+            const maxY = maxX;
+
+            const mapX = (x) => ((x - minX) / (maxX - minX)) * width;
+            const mapY = (y) => height - ((y - minY) / (maxY - minY)) * height;
+
+            // Draw Grid
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i = Math.floor(minX); i <= Math.ceil(maxX); i+=5) {
+                ctx.moveTo(mapX(i), 0); ctx.lineTo(mapX(i), height);
+                ctx.moveTo(0, mapY(i)); ctx.lineTo(width, mapY(i));
+            }
+            ctx.stroke();
+
+            // Draw Axes
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, mapY(0)); ctx.lineTo(width, mapY(0)); // X axis
+            ctx.moveTo(mapX(0), 0); ctx.lineTo(mapX(0), height); // Y axis
+            ctx.stroke();
+
+            // Plot y = Omega (straight line)
+            ctx.strokeStyle = '#3b82f6'; // Blue
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(mapX(minX), mapY(minX));
+            ctx.lineTo(mapX(maxX), mapY(maxX));
+            ctx.stroke();
+
+            // Plot y = w0 - kappa * sin(Omega * tau)
+            ctx.strokeStyle = '#fb923c'; // Orange
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let px = 0; px <= width; px += 2) {
+                const omega = minX + (px / width) * (maxX - minX);
+                const y = w0 - kappa * Math.sin(omega * tau);
+                if (px === 0) ctx.moveTo(px, mapY(y));
+                else ctx.lineTo(px, mapY(y));
+            }
+            ctx.stroke();
+
+            // Draw Roots
+            roots.forEach(r => {
+                const px = mapX(r.omega);
+                const py = mapY(r.omega); // Intersects line y=x
+                
+                ctx.beginPath();
+                ctx.arc(px, py, 5, 0, Math.PI * 2);
+                if (r.stable) {
+                    ctx.fillStyle = '#22c55e'; // Green
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ef4444'; // Red
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function drawTimePlot() {
+            const { ctx, width, height } = setupCanvas(els.canvasTime);
+            const { times, dphi } = state.simData;
+            
+            ctx.clearRect(0, 0, width, height);
+            if (times.length === 0) return;
+
+            const minT = 0;
+            const maxT = times[times.length - 1];
+            
+            // Find min/max for Y axis, with some padding
+            let minDphi = Math.min(...dphi);
+            let maxDphi = Math.max(...dphi);
+            const padding = Math.max(1, (maxDphi - minDphi) * 0.2);
+            minDphi -= padding;
+            maxDphi += padding;
+
+            const mapX = (t) => ((t - minT) / (maxT - minT)) * width;
+            const mapY = (y) => height - ((y - minDphi) / (maxDphi - minDphi)) * height;
+
+            // Grid
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i = 0; i <= maxT; i+=2) {
+                ctx.moveTo(mapX(i), 0); ctx.lineTo(mapX(i), height);
+            }
+            // Y grid lines
+            const yRange = maxDphi - minDphi;
+            const yStep = yRange > 10 ? 5 : (yRange > 5 ? 2 : 1);
+            for(let i = Math.floor(minDphi); i <= Math.ceil(maxDphi); i+=yStep) {
+                ctx.moveTo(0, mapY(i)); ctx.lineTo(width, mapY(i));
+            }
+            ctx.stroke();
+
+            // Predicted stable root (if any positive one exists)
+            const stableRoots = state.roots.filter(r => r.stable && r.omega > 0);
+            if (stableRoots.length > 0) {
+                const targetOmega = stableRoots[0].omega;
+                ctx.strokeStyle = '#94a3b8';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(0, mapY(targetOmega));
+                ctx.lineTo(width, mapY(targetOmega));
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Plot Time Series
+            ctx.strokeStyle = '#0ea5e9'; // Light blue
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < times.length; i++) {
+                const px = mapX(times[i]);
+                const py = mapY(dphi[i]);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // --- Animation Loop ---
+        let lastTime = performance.now();
+        
+        function animate(time) {
+            const dt = (time - lastTime) / 1000; // seconds
+            lastTime = time;
+
+            // Update angle based on current frequency (scaled down for visual comfort)
+            const visualSpeedScale = 0.5; 
+            state.animationAngle += state.currentOmega * dt * visualSpeedScale;
+            
+            // Keep angle manageable
+            state.animationAngle = state.animationAngle % (Math.PI * 2);
+
+            // Update Particle Position
+            const radius = 45; // SVG radius
+            const x = Math.cos(state.animationAngle) * radius;
+            const y = Math.sin(state.animationAngle) * radius;
+            
+            els.particle.style.transform = `translate(${x}px, ${y}px)`;
+
+            // Update Delay Arc (representing tau)
+            // The arc length is proportional to tau * currentOmega
+            const arcAngle = Math.min(Math.PI * 1.8, Math.abs(state.tau * state.currentOmega * visualSpeedScale));
+            
+            if (arcAngle > 0.1) {
+                const startAngle = state.animationAngle - arcAngle;
+                const endAngle = state.animationAngle;
+                
+                const startX = 50 + Math.cos(startAngle) * radius;
+                const startY = 50 + Math.sin(startAngle) * radius;
+                const endX = 50 + Math.cos(endAngle) * radius;
+                const endY = 50 + Math.sin(endAngle) * radius;
+                
+                const largeArcFlag = arcAngle > Math.PI ? 1 : 0;
+                // Sweep flag depends on direction of rotation
+                const sweepFlag = state.currentOmega >= 0 ? 1 : 0;
+
+                const d = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+                els.delayArc.setAttribute('d', d);
+            } else {
+                els.delayArc.setAttribute('d', '');
+            }
+
+            // Update Live Text
+            els.liveFreq.innerText = state.currentOmega.toFixed(2);
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners & Initialization ---
+
+        function update() {
+            state.w0 = parseFloat(els.w0.value);
+            state.kappa = parseFloat(els.kappa.value);
+            state.tau = parseFloat(els.tau.value);
+
+            // Update UI text
+            els.valW0.innerText = state.w0.toFixed(2);
+            els.valKappa.innerText = state.kappa.toFixed(2);
+            els.valTau.innerText = state.tau.toFixed(2);
+            els.valK.innerText = (state.kappa * state.tau).toFixed(2);
+
+            // Recalculate math
+            calculateRoots();
+            simulateDDE();
+
+            // Redraw
+            drawRootsPlot();
+            drawTimePlot();
+        }
+
+        [els.w0, els.kappa, els.tau].forEach(el => {
+            el.addEventListener('input', update);
+        });
+
+        // Handle window resize for canvas
+        window.addEventListener('resize', () => {
+            drawRootsPlot();
+            drawTimePlot();
+        });
+
+        // Init
+        update();
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

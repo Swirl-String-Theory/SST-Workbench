@@ -1,0 +1,1482 @@
+%! Author = Omar Iskandarani
+%! Date = 1/29/2026
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.xxx}
+\newcommand{\papertitle}{Velocity-Dependent Mass Functional, Preferred-Frame Effects, and Intrinsic Temporal Stochasticity}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} 
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}  % swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}  \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+    \begin{abstract}
+        We analyze the weak-field experimental consequences of Swirl-String Theory (SST)
+        in its covariant vector--tensor formulation.
+        Building on the master mass functional derived in \textbf{Atomic Masses from Topological Invariants of Knotted Field Configurations} and the clock--foliation
+        structure fixed in Canon v0.7.7, we show that preferred-frame effects arise as
+        velocity-dependent corrections to the inertial and gravitational mass functional,
+        rather than from additional forces or modified gravitational propagation.
+        Imposing the observational constraint from GW170817 that gravitational waves
+        propagate at the speed of light reduces the accessible parameter space to a narrow
+        sector governed by the combinations $c_{14}$ and $c_2$.
+        We propose a tabletop null experiment based on a rotating cryogenic sapphire
+        resonator system to provide an independent laboratory constraint on the
+        Parameterized Post-Newtonian preferred-frame parameters $\alpha_1$ and $\alpha_2$.
+    \end{abstract}
+
+\paragraph{Scope \& status.}
+This paper (Part~IV) analyzes operational weak-field consequences of introducing a covariant clock--foliation structure into the mass-functional program, and maps the resulting preferred-frame signatures onto established test frameworks (e.g.\ PPN-style parameters) without modifying electromagnetic dynamics.
+
+\paragraph{Assumptions (weak-field + foliation).}
+\begin{itemize}
+    \item \textbf{Weak-field / slow-motion regime}: expansions are performed to leading nontrivial order in $v/c$ and in weak gravitational potentials.
+    \item \textbf{Covariant foliation field}: a unit timelike vector field $u^\mu$ defines the operational clock slicing used to evaluate the mass functional.
+    \item \textbf{No reconnection / topology preservation}: underlying filamentary sectors remain fixed as in Parts~I--II.
+    \item \textbf{Empirical constraint sectoring}: parameter combinations are restricted to those consistent with gravitational-wave speed constraints (treated as an external observational input).
+\end{itemize}
+
+\paragraph{What is claimed vs.\ not claimed.}
+\begin{itemize}
+    \item \textbf{Claimed:} Motion relative to the foliation can be represented as \emph{velocity-dependent corrections to the effective inertial/gravitational mass functional}, producing preferred-frame signatures that can be parameter-mapped onto standard null-test observables.
+    \item \textbf{Not claimed:} We do not claim new long-range forces, nor do we require modifications of Maxwell electrodynamics; any electromagnetic influence is excluded as a primary source and would have to proceed only via persistent, non-radiative contributions to the mass/clock functional (if present at all).
+\end{itemize}
+
+\paragraph{Observable definition (what is measured).}
+The observable is a \emph{preferred-frame anisotropy signal} in a system whose eigenfrequencies depend on effective inertia. In a rotating resonator null test, one measures the fractional differential frequency shift
+\begin{equation}
+\frac{\Delta f(t)}{f}
+\;=\;
+S_2 \cos\!\big(2\omega_{\rm rot} t\big)
+\;+\;
+\sum_{n=\pm1,\pm2} S_{2,n}\cos\!\big(2\omega_{\rm rot} t + n\omega_\oplus t\big),
+\label{eq:obs_partIV_sidereal}
+\end{equation}
+where the \emph{sidereal sidebands} ($\omega_\oplus$) isolate preferred-frame effects from purely instrumental rotation harmonics. These fitted coefficients provide the operational bridge to the standard preferred-frame parameterization used for comparison with existing bounds.
+
+    \titlepageClose
+
+    General Relativity describes gravitation as spacetime geometry while treating
+    inertial mass and physical time as primitive inputs.
+    Swirl--String Theory (SST) departs from this paradigm by deriving both mass and
+    time from a single covariant action involving a Lorentzian metric and a unit
+    timelike vector field.
+
+    SST-59 established a master mass functional based on the integrated swirl energy
+    density.
+    Canon v0.7.7 unified this construction with a clock--foliation field $u^\mu$,
+    equivalent in the infrared to the Einstein--\AE ther or khronometric framework.
+    The remaining open question is how motion relative to this foliation manifests
+    operationally and experimentally.
+
+    The present work should therefore be read as an operational and experimental
+    follow-up to the master mass functional derived in SST-59, with no modification
+    of its foundational assumptions.
+    Specifically, this paper provides two results:
+    (i) a canonical identification of preferred-frame effects with
+    velocity-dependent corrections to the mass functional, and
+    (ii) an operational framework for probing intrinsic temporal stochasticity.
+    These two results are logically independent but conceptually linked.
+    Velocity-dependent mass corrections probe anisotropy of the gravitational sector,
+    while intrinsic temporal stochasticity probes the operational meaning of time itself.
+    The latter is developed formally in Sect.~\ref{sec:intrinsic_time} and supported by
+    classical and quantum analogues discussed throughout the appendices.
+
+    \section{Mass Functional and Clock Foliation}
+
+        In SST, inertial and gravitational mass are defined by
+        \begin{equation}
+            M = \mathcal{C} \int_V \rho_{\!E}(\mathbf{x})\, dV ,
+        \end{equation}
+        where $\rho_{\!E}$ is the local swirl energy density and $\mathcal{C}$ is a fixed
+        normalization constant \cite{SST59}.
+
+        The evaluation of $\rho_{\!E}$ is referenced to a local clock--foliation structure
+        represented covariantly by a unit timelike vector field
+        \begin{equation}
+            u^\mu u_\mu = -1 .
+        \end{equation}
+
+    \section{Velocity-Dependent Mass Functional}
+
+        A system moving with spatial velocity $\mathbf{v}$ relative to the foliation samples
+        a boosted slicing of the clock field.
+        The effective mass therefore becomes velocity dependent:
+        \begin{equation}
+            M_{\mathrm{eff}}(\mathbf{v})
+            =
+            M_0
+            \left[
+                1
+                + \alpha_1 \frac{\mathbf{v}\cdot\hat{u}}{c}
+                + \alpha_2 \frac{(\mathbf{v}\cdot\hat{u})^2}{c^2}
+                + \mathcal{O}\!\left(\frac{v^3}{c^3}\right)
+            \right],
+        \end{equation}
+        where $\hat{u}$ denotes the spatial direction selected by the clock field.
+        The coefficients $\alpha_1$ and $\alpha_2$ quantify anisotropic corrections to the
+        mass functional rather than new interactions.
+
+
+        \begin{theorem}[Electromagnetic Non-Generation of Gravity]
+            \label{thm:EM_no_gravity}
+
+            In Swirl--String Theory (SST), electromagnetic fields \emph{cannot} directly modify
+            gravitational mass, inertial response, or spacetime curvature.
+            Any apparent electromagnetic influence on gravity must proceed
+            \emph{indirectly} through the generation of a persistent foliation
+            pressure in the underlying medium.
+
+            More precisely, let $\chi$ denote the foliation (clock) field and
+            $\rho_{\!E}$ the swirl energy density.
+            A necessary and sufficient condition for an electromagnetic configuration
+            to induce a gravitational effect is the existence of a non-radiative,
+            long-lived contribution
+            \begin{equation}
+                \Delta m c^2
+                \;=\;
+                \int_V \Delta p_{\mathrm{eff}} \, dV
+                \;=\;
+                \int_V \Delta \rho_{\!E} \, dV ,
+            \end{equation}
+            such that
+            \begin{equation}
+                \Delta(\nabla_\mu \chi) \neq 0
+                \quad\text{after all electromagnetic fields are removed.}
+            \end{equation}
+
+            Electromagnetic energy that is oscillatory, radiative, gauge-removable,
+            or time-averaged to zero cannot satisfy this condition and therefore
+            cannot generate or modify gravity in SST.
+
+        \end{theorem}
+
+        This theorem fixes the admissible sources of the SST mass functional
+        and excludes electromagnetic configurations as primary generators
+        of gravitational structure, independent of gauge choice or time averaging.
+
+
+
+    \section{Mapping to Einstein--\AE ther and PPN Formalism}
+
+        The covariant SST action shares its infrared structure with Einstein--\AE ther theory.
+        Imposing the observational constraint from GW170817 that the speed of gravitational
+        waves equals the speed of light requires
+        \begin{equation}
+            c_{13} = c_1 + c_3 = 0 .
+        \end{equation}
+
+        Under this constraint, the preferred-frame PPN parameters reduce to
+        \begin{equation}
+            \alpha_1^{\mathrm{SST}} = -4 c_{14},
+            \qquad
+            \alpha_2^{\mathrm{SST}} = \alpha_2(c_{14},c_2),
+        \end{equation}
+        where $c_{14}=c_1+c_4$ and $c_2$ governs the scalar sector \cite{FosterJacobson}.
+
+        \subsection{Relation to Wave-Optical Gravitational Lensing}
+            Recent work on gravitational-wave lensing in the wave-optics regime has clarified that
+            interference phenomena near caustics are governed primarily by phase geometry rather than
+            by amplitude magnification alone. In particular, Bulashenko and Ubach have shown that the
+            transition between diffraction, amplification, and geometrical-optics oscillations is
+            controlled by a two-parameter criterion involving both the Fresnel number and the angular
+            source displacement relative to the Einstein angle, rather than by the wavelength-to-Schwarzschild-radius
+            ratio alone \cite{BulashenkoUbach2022}. Close to a caustic, geometrical optics breaks down
+            at any finite frequency, and the resulting beating patterns exhibit universal nodal and
+            antinodal structures corresponding to constant phase differences between multiple
+            propagation paths. A fixed $\pi/2$ phase offset associated with saddle points of the
+            time-delay function appears as a topological (Morse) contribution, independent of the
+            detailed lens model. These results provide a concrete demonstration that caustics represent
+            degeneracies in the effective time-of-flight structure, where multiple histories contribute
+            coherently to the observed signal. From the perspective of Swirl-String Theory, such behavior
+            admits a natural interpretation in terms of foliation degeneracies of the swirl-clock
+            structure, in which distinct flow-guided trajectories share a common projected time
+            coordinate. While the present analysis does not alter the predictions of general relativity,
+            it establishes a robust observational regime in which phase-topological effects dominate,
+            thereby defining a clean baseline against which SST-specific deviations may be formulated
+            and tested.
+
+    \section{Experiment A: Gravity-Sector Preferred-Frame Null Test}
+
+        \subsection{Physical Principle}
+
+            Because SST preferred-frame effects modify the inertial mass functional, any resonant
+            system whose eigenfrequencies depend on effective mass becomes a probe of gravity-
+            sector anisotropy, independent of electromagnetic Lorentz violation.
+
+        \subsection{Apparatus}
+
+            The proposed apparatus consists of two orthogonal cryogenic sapphire resonators
+            mounted in a single vacuum cryostat at $4.2\,\mathrm{K}$ and rotated on a precision
+            air-bearing turntable with angular frequency $\omega_{\mathrm{rot}}$.
+            The differential resonance frequency
+            \begin{equation}
+                \Delta f(t) = f_x(t) - f_y(t)
+            \end{equation}
+            is monitored using heterodyne readout with fractional stability
+            $\Delta f/f \sim 10^{-17}$.
+
+        \subsection{Signal Model}
+
+            The expected signal admits the harmonic expansion
+            \begin{equation}
+                \frac{\Delta f}{f}
+                =
+                S_2 \cos(2\omega_{\mathrm{rot}} t)
+                + \sum_{n=\pm1,\pm2}
+                S_{2,n}\cos(2\omega_{\mathrm{rot}} t + n\omega_\oplus t),
+            \end{equation}
+            where $\omega_\oplus$ is the sidereal frequency.
+            Sidereal sidebands uniquely identify preferred-frame effects.
+
+            \paragraph{Phase--topological origin of intrinsic temporal fluctuations.}
+                Experimental and theoretical studies of vortexed photon states demonstrate that
+                geometric and topological phase structures can induce fixed phase offsets and
+                interference patterns that are insensitive to local field amplitudes and device
+                details. In particular, Pancharatnam--Berry--Gouy phase effects introduce discrete
+                phase discontinuities across focusing and mode--conversion processes, reflecting
+                degeneracies in the effective time--of--flight structure where multiple propagation
+                histories contribute coherently. Such degeneracies naturally lead to observable
+                phase jitter and mode--dependent timing fluctuations even in otherwise
+                deterministic classical systems. While unrelated to gravitation, these results
+                provide an explicit laboratory realization of how intrinsic temporal broadening
+                may arise from phase--topological structure alone. In this sense, the intrinsic
+                temporal stochasticity introduced in Sect.~\ref{sec:intrinsic_time} can be interpreted as a generic
+                consequence of foliation--dependent phase organization, rather than as a
+                phenomenological noise source.
+
+    \section{Intrinsic Temporal Stochasticity}
+    \label{sec:intrinsic_time}
+
+        In SST-31, time is defined as a relational observable associated with a conserved
+        event current.
+        This implies the possibility of intrinsic fluctuations in clock readouts.
+
+        The observed time-of-arrival distribution is modeled as
+        \begin{equation}
+            P_{\mathrm{obs}}(\Theta)
+            =
+            \int dt\;
+            P_{\mathrm{cl}}(t)
+            \frac{1}{\sqrt{2\pi\sigma_\tau^2}}
+            \exp\!\left[-\frac{(\Theta-t)^2}{2\sigma_\tau^2}\right],
+        \end{equation}
+        where $\sigma_\tau^2$ characterizes intrinsic clock noise.
+        The Canon implies that $\sigma_\tau^2$ may depend on the gradient of the clock
+        potential,
+        \begin{equation}
+            \sigma_\tau^2 = \sigma_\tau^2(\nabla \chi),
+        \end{equation}
+        with its detailed spectrum left phenomenological.
+
+        Experimental studies of single--bubble sonoluminescence demonstrate that
+        energy emission exhibits large, reproducible timing variations uncorrelated
+        with peak compression or temperature, indicating that emission is governed
+        by internal phase organization rather than local energetic extrema
+        \cite{LiYuan2005}.
+
+
+        \paragraph{Foliation-dependent dynamics in extreme hydrodynamic collapse.}
+            Independent support for foliation- and phase-dependent dynamics,
+            conceptually analogous to the intrinsic temporal stochasticity defined
+            in Sect.~\ref{sec:intrinsic_time}, is provided by refined hydrodynamic
+            studies of single--bubble sonoluminescence.
+            Detailed numerical simulations demonstrate that light emission
+            during bubble collapse is not determined by peak temperature or energy density alone,
+            but depends sensitively on the internal spatiotemporal structure of the flow, including
+            vapor content, chemical reactions, and the emergence (or suppression) of coherent
+            compressive cores. In particular, identical external driving conditions may lead either
+            to shock--like behavior or to smooth compression waves depending on the internal
+            configuration, indicating that regime transitions are controlled by structural rather
+            than purely energetic criteria. These results show that extreme emission phenomena can
+            arise from transient degeneracies in the effective time and phase organization of the
+            system, even in a purely classical fluid setting. While unrelated to gravitation, such
+            behavior supports the broader SST perspective that physically observable effects may be
+            governed by foliation--dependent dynamics rather than by local field amplitudes alone.
+
+    \paragraph{Chirality, orientation, and matter--antimatter asymmetry.}
+        Classical studies of tight composite knots demonstrate that chirality constitutes
+        an intrinsically energy--bearing geometric property, rather than a purely
+        topological label. In particular, chiral and achiral composites constructed from
+        the same prime knots exhibit systematic differences in elastic energy in their
+        tight configuration, with the dominant contribution arising from internal torsion.
+        Since torsion is sensitive to orientation, these results establish that opposite
+        geometric handedness corresponds to physically inequivalent energetic states,
+        even in the absence of microscopic interactions or external fields. While derived
+        within classical rope elasticity and unrelated to particle physics, this finding
+        provides a structurally relevant precedent for theories in which matter and
+        antimatter are distinguished by orientation or internal rotational structure
+        rather than by independent dynamical degrees of freedom. In the SST framework,
+        this supports the interpretation that matter--antimatter distinction may be
+        encoded at the level of geometric orientation of otherwise equivalent underlying
+        configurations.\cite{Faglioni2025TightKnots}
+        Further structural support for intrinsic temporal stochasticity is provided by:
+        Appendix~\ref{sec:SST65_schrodinger} (relational phase evolution),
+        Appendix~\ref{app:energy_saturation} (compact time and bounded evolution),
+        and Appendix~\ref{app:exchange_statistics} (holonomy of the swirl--clock phase).
+
+    \section{Experiment B: Exploratory Clock-Noise Search}
+
+        Experiment~B operationalizes the intrinsic temporal stochasticity
+        introduced in Sect.~\ref{sec:intrinsic_time}.
+        It employs a pair of co-located optical lattice clocks operated in
+        differential mode to suppress common-mode noise.
+        The observable is an anomalous decoherence rate
+        \begin{equation}
+            \Gamma_{\mathrm{obs}} = \Gamma_{\mathrm{env}} + \Gamma_{\mathrm{SST}},
+            \qquad
+            \Gamma_{\mathrm{SST}} \propto \sigma_\tau^2(\nabla \chi),
+        \end{equation}
+        correlated with controlled modulation of the local clock-field gradient.
+        This experiment defines a search channel rather than a guaranteed detection.
+
+    \section{Discussion and Conclusion}
+
+        The analysis presented here demonstrates that Swirl--String Theory
+        predicts two distinct but experimentally accessible consequences:
+        anisotropic corrections to the mass functional associated with preferred
+        foliation, and intrinsic temporal stochasticity arising from relational time.
+        Neither effect requires modifications of gravitational wave propagation,
+        electromagnetic dynamics, or Lorentz invariance in the infrared.
+
+        Together, the proposed experiments define a minimal and falsifiable low-energy test
+        program for SST consistent with existing gravitational constraints.
+
+        Recent potential-based analyses show that quark mixing angles and the weak
+        CP-violating phase arise as extrema of flavor-invariant mass functionals,
+        rather than as independent input parameters \cite{Altshuler2023Potential}.
+        Within Swirl--String Theory, this behavior is naturally interpreted as the
+        variational alignment of closed configurations that minimize a geometric
+        energy functional built from invariant combinations of masses.
+        CP violation then emerges as a nontrivial phase at the minimum of this
+        functional, consistent with its interpretation as a holonomy of relational
+        time.
+
+%=================================================
+% Appendices
+%
+% NOTE:
+% Intrinsic Temporal Stochasticity is developed
+% in the main text (Sect.~\ref{sec:intrinsic_time})
+% and is NOT an appendix in this paper.
+%
+% Appendix letters therefore start at A and skip
+% any conceptual Appendix B used in earlier drafts.
+%=================================================
+\appendix
+
+%==============================
+% Appendix A
+% Supporting derivation for relational time
+% (Referenced from Sect.~\ref{sec:intrinsic_time})
+%==============================
+    \section{Emergence of the Schr\"odinger Equation from Relational Time}
+        \label{sec:SST65_schrodinger}
+
+        This appendix provides a formal derivation supporting the operational
+        notion of relational time used in Sect.~\ref{sec:intrinsic_time}.
+        It does not introduce new physical assumptions beyond those already
+        employed in the main text.
+
+        \subsection{Relational Time and Phase Dynamics}
+
+            In Swirl--String Theory (SST), physical time is not introduced as a fundamental external parameter, but arises operationally from a preferred foliation defined by a unit timelike vector field $u^\mu$. Observables evolve along the integral curves of $u^\mu$, and the physically meaningful time derivative is the directional derivative
+            \begin{equation}
+                \frac{D}{Dt} \;\equiv\; u^\mu \nabla_\mu .
+            \end{equation}
+            This construction parallels the ``khronon'' formulation of hypersurface--orthogonal Einstein--\AE ther theory and provides a covariant notion of simultaneity.
+
+            Consider a complex scalar field $\Psi(x)$ representing a localized excitation of the SST medium. The field is assumed to admit a rapidly oscillating internal phase associated with a characteristic rest energy $E_0 = m c^2$, where the effective mass $m$ is determined by the SST mass functional (see SST--59). We therefore write
+            \begin{equation}
+                \Psi(\mathbf{x},t)
+                =
+                \psi(\mathbf{x},t)\,
+                \exp\!\left(-\frac{i}{\hbar} m c^2 t\right),
+                \label{eq:phase_factorization}
+            \end{equation}
+            where $\psi$ is a slowly varying envelope with respect to the clock time defined by the foliation.
+
+        \subsection{Underlying Relativistic Dynamics}
+
+            At wavelengths large compared to the SST core scale $r_c$, the excitation dynamics are governed by a second--order hyperbolic equation consistent with covariance and locality. To leading order, this takes the Klein--Gordon form
+            \begin{equation}
+                \left(
+                    \frac{1}{c^2} \frac{D^2}{Dt^2}
+                    -
+                    \nabla_\perp^2
+                +
+                    \frac{m^2 c^2}{\hbar^2}
+                \right)\Psi
+                =
+                0,
+                \label{eq:kg_foliation}
+            \end{equation}
+            where $\nabla_\perp^2$ is the Laplacian on spatial hypersurfaces orthogonal to $u^\mu$. Equation \eqref{eq:kg_foliation} does not introduce new degrees of freedom beyond those already present in the SST covariant action; it represents the infrared wave dynamics of a massive excitation propagating along the foliation.
+
+        \subsection{Nonrelativistic Limit}
+
+            Substituting the factorization \eqref{eq:phase_factorization} into \eqref{eq:kg_foliation} and assuming the nonrelativistic regime
+            \begin{equation}
+                \left| \frac{D\psi}{Dt} \right| \ll \frac{m c^2}{\hbar} |\psi|,
+                \qquad
+                \left| \nabla_\perp \psi \right| \ll \frac{m c}{\hbar} |\psi|,
+            \end{equation}
+            one finds that second--order time derivatives of $\psi$ are parametrically suppressed. Retaining terms to leading order in $v/c$, the envelope equation reduces to
+            \begin{equation}
+                i \hbar \frac{D\psi}{Dt}
+                =
+                -\frac{\hbar^2}{2m}\,\nabla_\perp^2 \psi .
+                \label{eq:schrodinger_free}
+            \end{equation}
+
+            Equation \eqref{eq:schrodinger_free} is precisely the free Schr\"odinger equation, with the time derivative replaced by evolution along the SST clock foliation.
+
+        \subsection{External Potentials and Clock Gradients}
+
+            Weak interactions with background fields or inhomogeneities of the SST medium enter as perturbations to the local clock rate. A scalar clock potential $\Phi_\chi$ modifies the rest energy as
+            \begin{equation}
+                m c^2 \;\rightarrow\; m c^2 + V,
+                \qquad
+                V \equiv m \Phi_\chi ,
+            \end{equation}
+            leading to the full nonrelativistic equation
+            \begin{equation}
+                i \hbar \frac{D\psi}{Dt}
+                =
+                \left(
+                    -\frac{\hbar^2}{2m}\,\nabla_\perp^2
+                +
+                V
+                \right)\psi .
+                \label{eq:schrodinger_full}
+            \end{equation}
+            In SST, the potential $V$ is interpreted as a pressure or clock--rate perturbation associated with gradients of the foliation field, rather than as a fundamental force.
+
+        \subsection{Interpretation}
+
+            Equation \eqref{eq:schrodinger_full} demonstrates that the Schr\"odinger equation arises in SST as a controlled infrared limit of relativistic phase evolution along a preferred foliation. The mass parameter $m$ is not fundamental, but encodes stored energy of the underlying medium through the SST mass functional. The complex wavefunction $\psi$ represents the slowly varying envelope of a high--frequency internal clock.
+
+            In this sense, nonrelativistic quantum mechanics is not postulated but emerges as the effective phase--transport equation governing relational time evolution in the SST framework.
+
+        \subsection{Domain of Validity}
+
+            The derivation holds under the following conditions:
+            \begin{itemize}
+                \item velocities small compared to $c$,
+                \item wavelengths large compared to the SST core scale $r_c$,
+                \item weak clock--rate gradients $\nabla \Phi_\chi$.
+            \end{itemize}
+            Corrections to Schr\"odinger dynamics are expected at higher order in $v/c$ and from stochastic clock fluctuations, discussed separately in the context of intrinsic time broadening.
+
+            \subsubsection{Normalizability and Finite Clock Evolution}
+                \label{sec:SST65_schrodinger_normalizability}
+
+                The derivation of the Schr\"odinger equation in
+                Section~\ref{sec:SST65_schrodinger} implicitly assumes that the clock parameter
+                governing phase evolution defines a normalizable quantum state.
+                If the clock parameter were unbounded, wave packets evolving along the
+                foliation would generically fail to remain square--integrable.
+
+                Independent analyses of quantum mechanics in accelerated and gravitational
+                frames demonstrate that unbounded time evolution leads to pathological
+                Hilbert spaces unless the associated boost or clock parameter is restricted to
+                a finite domain \cite{DiBiagio2021EmergentTime,Makela2024QuantumGravity}.
+
+                In SST, this restriction is implemented geometrically by the compactness of the
+                swirl--clock variable,
+            \begin{equation}
+                \SwirlClock \in \mathbb{S}^1,
+                \end{equation}
+                which ensures that Schr\"odinger evolution remains well defined and that
+                quantum states are normalizable at all times.
+                The emergence of nonrelativistic quantum mechanics is therefore inseparable
+                from the bounded structure of relational time.
+
+%==============================
+% Appendix C
+% Topological origin of fermionic mass hierarchies
+% (Independent of Sect.~\ref{sec:intrinsic_time})
+%==============================
+    \section{Discrete Topological Origin of Fermionic Mass Hierarchies}
+        \label{app:topological_mass_hierarchy}
+
+        \subsection{Motivation}
+
+            In the Standard Model, fermion masses and mixing angles are encoded in arbitrary Yukawa
+            matrices. In Swirl--String Theory (SST), by contrast, mass emerges from geometric and
+            topological properties of closed swirl--string configurations embedded in a preferred
+            foliation.
+
+            It has been shown that hierarchical fermion mass spectra may arise from purely discrete
+            order counting without invoking continuous flavor symmetries
+            \cite{FroggattNielsen1979,Abbas2019Z2Z5}.
+            Here we demonstrate that SST provides a deeper physical origin for such order structures
+            by identifying them with intrinsic topological suppression factors of swirl--string
+            configurations.
+
+        \subsection{Discrete Geometric Suppression Parameter}
+
+            Consider a closed swirl--string configuration $K$ characterized by:
+            \begin{itemize}
+                \item core radius $r_c$,
+                \item effective string length $L_K$,
+                \item topological complexity index $n_K \in \mathbb{Z}_{\ge 0}$,
+            \end{itemize}
+            where $n_K$ encodes knotting, linking, and internal winding complexity.
+
+            We define the dimensionless geometric suppression parameter
+            \begin{equation}
+                \epsilon_K \;\equiv\; \frac{r_c}{L_K}, \qquad \epsilon_K \ll 1 .
+            \end{equation}
+            This parameter is fixed by geometry and is not a free coupling.
+
+        \subsection{Mass Functional as a Topological Power Series}
+
+            The SST mass functional associated with configuration $K$ may be written as
+            \begin{equation}
+                M_K
+                \;=\;
+                \mathcal{A}\,
+                \rho_{\!E}\,
+                V_K\,
+                \epsilon_K^{\,n_K},
+                \label{eq:SST_mass_power}
+            \end{equation}
+            where:
+            \begin{itemize}
+                \item $\rho_{\!E}$ is the swirl energy density,
+                \item $V_K$ is the effective core volume,
+                \item $n_K$ is the topological order index,
+                \item $\mathcal{A}$ is a universal normalization fixed by the SST mass scale.
+            \end{itemize}
+
+            Equation~\eqref{eq:SST_mass_power} shows that fermion mass hierarchies arise as integer
+            powers of a single geometric ratio, rather than from arbitrary Yukawa coefficients.
+
+        \subsection{Generation Structure from Topological Order}
+
+            Configurations of lowest complexity ($n_K = 0$) acquire unsuppressed masses, while higher
+            values of $n_K$ produce progressively lighter fermions. This yields the qualitative
+            hierarchy
+            \begin{equation}
+                M^{(3)} \gg M^{(2)} \gg M^{(1)}, \qquad
+                \frac{M^{(i)}}{M^{(j)}} \sim \epsilon_K^{\,n_i-n_j}.
+            \end{equation}
+
+            The heaviest fermion corresponds to a minimal, topologically protected swirl--string
+            configuration, while lighter fermions correspond to configurations with additional
+            internal winding that dilute swirl energy over larger effective lengths.
+
+        \subsection{Discrete Phase, Mixing, and CP Violation}
+
+            Closed swirl--strings admit discrete circulation phases compatible with foliation
+            closure. We associate a phase label
+            \begin{equation}
+                \theta_K = \frac{2\pi k}{N}, \qquad k \in \mathbb{Z}_N ,
+            \end{equation}
+            with each configuration.
+
+            Observable mixing arises from geometric misalignment between swirl--string embeddings in
+            different sectors, while CP violation corresponds to a nontrivial relative swirl phase
+            between otherwise real mass functionals. No fundamental complex Yukawa couplings are
+            required.
+
+        \subsection{Neutrino Sector as Nested Swirl Excitations}
+
+            Light neutrino masses arise naturally as second--order excitations of nested swirl--string
+            structures. Small loops couple indirectly to larger, stiffer configurations, producing
+            effective masses of the form
+            \begin{equation}
+                M_\nu \;\sim\; \epsilon_K^{\,2}\, M_{\mathrm{swirl}},
+            \end{equation}
+            analogous in structure to seesaw suppression but originating purely from geometry
+            \cite{Minkowski1977,GellMann1979}.
+
+        \subsection{Experimental Implications}
+
+            Flavor--changing effects correspond to partial geometric overlap of distinct
+            swirl--string configurations. Neutral meson mixing bounds therefore constrain allowable
+            inter--configuration coupling strengths, while preferred--frame and mass--functional
+            anisotropy tests probe the same underlying structure.
+
+        \subsection{Summary}
+
+            Fermion mass hierarchies in SST emerge from integer--ordered topological suppression,
+            require no continuous flavor symmetry, and unify mass generation, mixing, and CP violation
+            as consequences of swirl geometry and foliation structure.
+
+
+%==============================
+% Appendix D — Mass-Ratio Origin of Quark Mixing
+%==============================
+
+    \section{Mass--Ratio Origin of Quark Mixing}
+        \label{app:mass_ratio_ckm}
+
+        An explicit construction exists in which the Cabibbo--Kobayashi--Maskawa (CKM)
+        matrix can be derived directly from quark mass ratios, without introducing
+        Yukawa textures or flavor symmetries \cite{NovelloAntunes2018CKM}.
+
+        In this approach, an effective geometric radius $R_i$ is associated with each
+        quark $q_i$ through a cubic scaling of its mass,
+        \begin{equation}
+            R_i \;\propto\; M_i^{1/3}.
+        \end{equation}
+        The interaction strength between two quark flavors is then assumed to depend
+        on the ratio of these effective radii,
+        \begin{equation}
+            Q_{ij} \;=\; \frac{R_i}{R_j}
+            \;=\;
+            \left(\frac{M_i}{M_j}\right)^{1/3}.
+            \label{eq:mass_ratio_Qij}
+        \end{equation}
+
+        A unitary quark mixing matrix is subsequently constructed from $Q_{ij}$ via a
+        matrix exponential,
+        \begin{equation}
+            V_Q \;=\;
+            \exp\!\left[-i\,\Delta\,(S+S^T)\right],
+        \end{equation}
+        where $S$ is a matrix formed from $Q_{ij}$ and $\Delta = \det Q$.
+        Remarkably, this procedure reproduces the observed hierarchical structure of
+        the CKM matrix using only quark masses as input.
+
+        \subsection{Interpretation within Swirl--String Theory}
+
+            Within SST, fermion masses arise from the energy content of closed
+            swirl--string configurations,
+            \begin{equation}
+                M_K \;\propto\; \rho_{\!E}\, V_K,
+            \end{equation}
+            where $V_K$ is the effective core volume of configuration $K$.
+            Identifying $V_K \sim L_K^3$, where $L_K$ is the characteristic
+            swirl--string length, equation~\eqref{eq:mass_ratio_Qij} acquires a direct
+            geometric meaning,
+            \begin{equation}
+                \left(\frac{M_i}{M_j}\right)^{1/3}
+                \;\longleftrightarrow\;
+                \frac{L_i}{L_j}.
+            \end{equation}
+
+            Quark mixing in SST is therefore interpreted as arising from the geometric
+            overlap and relative embedding of swirl--string configurations with different
+            characteristic lengths. The observed suppression of off--diagonal CKM elements
+            follows naturally from large disparities in swirl--string scales.
+
+        \subsection{Conceptual Consequences}
+
+            This construction supports the SST claim that:
+            \begin{itemize}
+                \item mixing angles are not fundamental parameters,
+                \item flavor mixing is a derived geometric effect,
+                \item mass hierarchies and mixing hierarchies share a common origin.
+            \end{itemize}
+
+            In SST, the matrix exponential form reflects continuous deformations of
+            swirl--string embeddings rather than ad hoc unitary rotations in flavor space.
+
+%==============================
+% Appendix E
+% Energy saturation from compact relational time
+% (Conceptually linked to Sect.~\ref{sec:intrinsic_time})
+%==============================
+    \section{Energy Saturation from Quantum Gravitational Foliation}
+        \label{app:energy_saturation}
+
+        \subsection{Motivation}
+
+            Recent work by M\"akel\"a has shown that quantum gravitational consistency alone,
+            without Lorentz violation or modified dispersion relations, enforces a finite
+            upper bound on the attainable energy of a massive particle
+            \cite{Makela2024QuantumGravity}.
+            The bound arises from the requirement that quantum states perceived by uniformly
+            accelerated observers remain normalizable within a finite boost domain.
+
+            This result is directly relevant to Swirl--String Theory (SST), where mass and
+            time are defined relative to a compact clock--foliation structure and where the
+            mass functional is finite by construction.
+
+        \subsection{Quantum--Mechanical Consistency and Time Compactness}
+
+            Beyond numerical considerations, the existence of a maximum attainable energy
+            has a deeper conceptual origin. Recent analyses of quantum mechanics in
+            gravitational and accelerated frames show that the standard formulation of
+            quantum theory becomes inconsistent if the time parameter is assumed to be
+            globally unbounded \cite{DiBiagio2021EmergentTime}.
+
+            In particular, when quantum states are defined relative to observers with
+            constant proper acceleration, the requirement of Hilbert--space
+            normalizability enforces a finite domain for the associated time or boost
+            parameter. Extending time evolution beyond this domain leads to non--physical,
+            non--normalizable states.
+
+            This result implies that compact or effectively bounded time is not an
+            additional assumption, but a necessary condition for the existence of a
+            well--defined quantum theory in the presence of gravitation.
+            In Swirl--String Theory (SST), this requirement is naturally satisfied by the
+            compact swirl--clock variable $\SwirlClock$, whose bounded domain guarantees
+            quantum consistency and directly yields the observed energy saturation.
+
+        \subsection{Quantum Gravitational Energy Bound}
+
+            For a particle of rest mass $m$, M\"akel\"a derives the universal bound
+            \begin{equation}
+                E_{\max}
+                =
+                m c^2 \cosh\!\left(\frac{2\pi^2}{\ln 2}\right),
+                \label{eq:Makela_Emax}
+            \end{equation}
+            independent of the particle species or interaction details.
+
+            Numerically,
+            \begin{align}
+                \cosh\!\left(\frac{2\pi^2}{\ln 2}\right)
+                &\simeq 1.17\times 10^{12},\\
+                E_{\max}^{(p)} &\simeq 1.1\times10^{21}\,\mathrm{eV},\\
+                E_{\max}^{(e)} &\simeq 6\times10^{17}\,\mathrm{eV},
+            \end{align}
+            placing the effect far below the Planck scale yet within reach of
+            ultra--high--energy cosmic ray observations.
+
+            \subsubsection{Numerical evaluation}
+                \label{app:energy_saturation:numerics}
+
+                M\"akel\"a's bound may be written in terms of a maximum rapidity
+            \begin{equation}
+                \phi_{\max}=\frac{2\pi^2}{\ln 2},
+                \qquad
+                \gamma_{\max}=\cosh(\phi_{\max}),
+                \qquad
+                \beta_{\max}=\tanh(\phi_{\max}),
+                \end{equation}
+                so that $E_{\max}=\gamma_{\max}\,m c^2$ \cite{Makela2024QuantumGravity}.
+
+                Evaluating the universal factors gives
+            \begin{align}
+                \phi_{\max} &\simeq 28.47765865,\\
+                \gamma_{\max} &\simeq 1.165896540231\times 10^{12},\\
+                1-\beta_{\max} &\simeq \frac{1}{2\gamma_{\max}^2}
+                \simeq 3.67832397\times 10^{-25}.
+                \end{align}
+                Hence $\beta_{\max}$ is extremely close to unity, and the ceiling is dominated by
+                $\gamma_{\max}$.
+
+                Using standard rest energies as inputs,
+                $m_p c^2 \simeq \SI{0.9382720813}{\giga\electronvolt}$ and
+                $m_e c^2 \simeq \SI{0.51099895}{\mega\electronvolt}$, one obtains
+            \begin{align}
+                E_{\max}^{(p)} &= \gamma_{\max} m_p c^2
+                \simeq \SI{1.0939e21}{\electronvolt}
+                \simeq \SI{1.7527e2}{\joule},\\
+                E_{\max}^{(e)} &= \gamma_{\max} m_e c^2
+                \simeq \SI{5.9577e17}{\electronvolt}
+                \simeq \SI{9.545e-2}{\joule},
+                \end{align}
+                where we used $1~\mathrm{eV}=\SI{1.602176634e-19}{\joule}$ \cite{CODATA2018}.
+
+                In SST notation, the same numerical ceiling applies multiplicatively to the
+                rest energy functional
+            \begin{equation}
+                E_0(K)=\mathcal{C}\,c^2\int_{V_K}\rho_{\!E}(\mathbf{x})\,dV,
+                \end{equation}
+                so that
+            \begin{equation}
+                E_{\max}(K)=\gamma_{\max}\,E_0(K),
+                \qquad
+                \gamma_{\max}=\cosh\!\left(\frac{2\pi^2}{\ln 2}\right).
+                \end{equation}
+                All model dependence remains confined to $E_0(K)$; the factor $\gamma_{\max}$ is
+                universal and fixed by the quantum--gravitational normalizability condition
+                \cite{Makela2024QuantumGravity}.
+
+        \subsection{Reduction to the SST Mass Functional}
+
+            In SST, inertial and gravitational mass are not fundamental parameters but are
+            defined by the master mass functional
+            \begin{equation}
+                M
+                =
+                \mathcal{C}
+                \int_V
+                \rho_{\!E}(\mathbf{x})\, dV ,
+                \label{eq:SST_mass_functional}
+            \end{equation}
+            where $\rho_{\!E}$ is the local swirl energy density evaluated relative to the
+            clock--foliation field.
+
+            The corresponding rest energy of an excitation $K$ is therefore
+            \begin{equation}
+                E_0(K)
+                =
+                M c^2
+                =
+                \mathcal{C}\, c^2
+                \int_{V_K}
+                \rho_{\!E}(\mathbf{x})\, dV .
+                \label{eq:SST_rest_energy}
+            \end{equation}
+
+            Substituting equation~\eqref{eq:SST_rest_energy} into the quantum gravitational
+            bound \eqref{eq:Makela_Emax}, we obtain the SST form of the energy ceiling:
+            \begin{equation}
+                \boxed{
+                    E_{\max}(K)
+                    =
+                    \mathcal{C}\, c^2
+                    \cosh\!\left(\frac{2\pi^2}{\ln 2}\right)
+                    \int_{V_K}
+                    \rho_{\!E}(\mathbf{x})\, dV
+                }.
+                \label{eq:SST_Emax}
+            \end{equation}
+
+            The factor $\cosh(2\pi^2/\ln 2)$ is universal and kinematic; all model dependence
+            enters solely through the SST mass functional.
+
+        \subsection{Interpretation in Terms of Clock Foliation}
+
+            The hyperbolic cosine in equation~\eqref{eq:SST_Emax} reflects a finite range of
+            admissible boost angles for normalizable quantum states. In SST language, this
+            corresponds to the compactness of the swirl--clock phase,
+            \begin{equation}
+                \SwirlClock \in \mathbb{S}^1 .
+            \end{equation}
+
+            Allowing unbounded evolution along the clock direction would render the quantum
+            state non--normalizable, precisely as in the gravitational derivation of
+            \cite{Makela2024QuantumGravity}. Energy saturation is therefore a kinematic
+            consequence of compact foliation time, not a dynamical cutoff.
+
+            \begin{theorem}[Quantum--Gravitational Time Boundedness]
+                \label{thm:time_boundedness}
+
+                Any quantum theory admitting a gravitationally consistent observer description
+                requires that the physical time parameter governing state evolution be compact
+                or effectively bounded.
+
+            \end{theorem}
+
+            \begin{proof}[Sketch]
+                For observers undergoing constant proper acceleration, quantum states are
+                naturally described in terms of boost--adapted time coordinates.
+                If the associated time or rapidity parameter is unbounded, the resulting
+                quantum states fail to be normalizable in Hilbert space.
+                This pathology arises independently of Lorentz violation or ultraviolet
+                modifications and is a direct consequence of combining quantum mechanics with
+                general relativity \cite{DiBiagio2021EmergentTime,Makela2024QuantumGravity}.
+
+                Therefore, a finite domain of physical time is required for quantum
+                consistency. In Swirl--String Theory, this condition is satisfied by the compact
+                swirl--clock phase $\SwirlClock$, which enforces both quantum normalizability
+                and the existence of a maximum attainable energy.
+            \end{proof}
+
+        \subsection{Physical Consequences}
+
+            Equation~\eqref{eq:SST_Emax} implies that:
+            \begin{itemize}
+                \item the maximum attainable energy of a massive excitation is finite,
+                \item the bound scales linearly with the SST mass functional,
+                \item no Planck--scale physics is required,
+                \item ultra--high--energy cosmic rays probe foliation geometry rather than
+                acceleration mechanisms.
+            \end{itemize}
+
+            Thus, SST does not introduce an ad hoc energy cutoff; it explains why such a
+            cutoff is required by quantum gravitational consistency.
+
+        \subsection{Summary}
+
+            The quantum gravitational energy bound derived by M\"akel\"a reduces in SST to a
+            universal multiplicative factor acting on the master mass functional.
+            Energy saturation is therefore an unavoidable consequence of relational time
+            and compact clock foliation, fully consistent with the SST framework.
+
+
+%==============================
+% Appendix F — Modular Symmetry as Emergent Swirl-Clock Geometry
+%==============================
+
+    \section{Modular Symmetry as Emergent Swirl--Clock Geometry}
+        \label{app:modular_symmetry}
+
+        \subsection{Motivation}
+
+            Recent developments in flavor physics have demonstrated that lepton masses and
+            mixing angles can be reproduced using modular invariance, where all flavor
+            structure is encoded in modular forms of a single complex parameter $\tau$
+            \cite{Feruglio2018Modular,Novichkov2019Modular}.
+            In such constructions, $\tau$ acts as a spurionic modulus whose vacuum value
+            determines mass hierarchies, mixing angles, and CP--violating phases.
+
+            While phenomenologically successful, these models leave unanswered the
+            fundamental physical origin of $\tau$ and the reason modular functions should
+            govern fermion properties.
+            In this appendix we show that, within Swirl--String Theory (SST), the modular
+            parameter $\tau$ admits a natural geometric interpretation as an emergent
+            clock--phase variable associated with compact relational time.
+
+        \subsection{The Modular Parameter as a Relational Time Phase}
+
+            In SST, physical time is defined operationally by a preferred foliation
+            represented by a unit timelike vector field $u^\mu$.
+            Closed swirl--string configurations admit an internal phase associated with
+            evolution along this foliation, encoded by the compact swirl--clock variable
+            \begin{equation}
+                \SwirlClock \in \mathbb{S}^1 .
+            \end{equation}
+
+            We identify the modular parameter $\tau$ used in flavor models with the complex
+            representation of this internal phase structure,
+            \begin{equation}
+                \boxed{
+                    \tau
+                    \;\longleftrightarrow\;
+                    \theta_{\mathrm{geom}}
+                    +
+                    i\,\theta_{\mathrm{stab}}
+                }
+            \end{equation}
+            where:
+            \begin{itemize}
+                \item $\theta_{\mathrm{geom}}$ corresponds to a geometric winding or relative
+                embedding phase of the swirl--string,
+                \item $\theta_{\mathrm{stab}}$ encodes stability and normalizability constraints
+                imposed by finite swirl energy density.
+            \end{itemize}
+
+            In this interpretation, $\tau$ is not an arbitrary spurion but a derived,
+            dynamical quantity determined by the geometry and energy content of the
+            configuration.
+
+        \subsection{Origin of Modular Functions}
+
+            Closed, periodic configurations evolving along a compact clock parameter
+            naturally admit functions that are invariant under discrete reparametrizations
+            of the phase.
+            The appropriate functional space is therefore that of modular forms.
+
+            Thus, modular invariance arises in SST as a kinematic consequence of:
+            \begin{itemize}
+                \item compact relational time,
+                \item closed topological support of excitations,
+                \item phase--relabeling invariance of the internal clock.
+            \end{itemize}
+
+            Modular forms do not represent additional symmetries imposed on the theory, but
+            rather the natural basis functions on the configuration space of compact
+            swirl--clock phases.
+
+        \subsection{Mass Hierarchies and Modular Weights}
+
+            In modular flavor models, fermion masses scale with modular forms of specific
+            weights $k$.
+            Within SST, the mass of a configuration $K$ is determined by the integrated
+            swirl energy density,
+            \begin{equation}
+                M_K = \mathcal{C}\int_{V_K}\rho_{\!E}(\mathbf{x})\,dV .
+            \end{equation}
+
+            Discrete modular weights correspond to topological suppression factors arising
+            from the distribution of swirl energy over increasing effective volumes.
+            Thus,
+            \begin{equation}
+                k
+                \;\longleftrightarrow\;
+                n_K ,
+            \end{equation}
+            where $n_K$ is the topological complexity index of the configuration.
+            Mass hierarchies emerge as a consequence of energy dilution over larger or more
+            intricate geometric support, rather than from arbitrary coupling matrices.
+
+        \subsection{Mixing and CP Violation}
+
+            In modular symmetry models, CP violation arises from the complex phase of $\tau$.
+            In SST, this phase has a direct geometric interpretation as the relative
+            orientation of swirl--clock phases between different configurations.
+
+            Mixing matrices therefore arise from geometric misalignment of closed
+            swirl--strings embedded in the same foliation, while CP--violating phases encode
+            chirality and orientation information of the underlying topology.
+            No fundamental complex Yukawa couplings are required.
+
+        \subsection{Conceptual Consequences}
+
+            This reinterpretation yields several conceptual clarifications:
+            \begin{itemize}
+                \item modular symmetry is emergent rather than fundamental,
+                \item the parameter $\tau$ acquires a physical, geometric meaning,
+                \item flavor structure, CP violation, and mass hierarchies share a common origin
+                in relational time geometry,
+                \item modular flavor models are recovered as effective infrared descriptions of
+                SST.
+            \end{itemize}
+
+        \subsection{Connection to Topological Mass Hierarchies}
+            \label{app:modular_to_topological_bridge}
+
+            The interpretation of modular symmetry presented here connects directly to the
+            topological mass hierarchy discussed in Appendix~\ref{app:topological_mass_hierarchy}.
+            In that appendix, fermion masses arise from the integrated swirl energy density
+            distributed over closed configurations with increasing topological complexity.
+
+            Within modular flavor models, mass suppression is encoded through modular forms
+            of increasing weight $k$. In the SST framework, these modular weights correspond
+            precisely to the topological complexity index $n_K$ that controls the geometric
+            suppression factor
+            \begin{equation}
+                \epsilon_K = \frac{r_c}{L_K},
+            \end{equation}
+            introduced in Appendix~\ref{app:topological_mass_hierarchy}.
+
+            The mapping
+            \begin{equation}
+                k \;\longleftrightarrow\; n_K
+            \end{equation}
+            identifies modular weight as the infrared shadow of topological energy dilution
+            in closed swirl--string configurations.
+            What appears in modular symmetry constructions as an abstract algebraic grading
+            is, in SST, a direct measure of how swirl energy is distributed over an
+            increasingly extended or intricate geometric support.
+
+            Consequently, modular flavor models recover the same hierarchical mass patterns
+            as Appendix~\ref{app:topological_mass_hierarchy}, but without access to the
+            underlying geometric mechanism.
+            Swirl--String Theory therefore unifies discrete modular hierarchies and
+            topological mass suppression as two descriptions of the same physical origin.
+
+        \subsection{Summary}
+
+            Modular symmetry in flavor physics can be understood within SST as the infrared
+            shadow of compact relational time and closed swirl--string topology.
+            What appear as abstract modular parameters in phenomenological models correspond
+            in SST to concrete geometric and energetic features of physical configurations.
+
+
+%==============================
+% Appendix G — Parameter-Independent Mass Relations from SST Sector Ansatz
+%==============================
+
+    \section{Parameter--Independent Mass Relations from SST Sector Ansatz}
+    \label{app:parameter_independent_mass_relations}
+
+    \subsection{Motivation}
+
+        In conventional flavor models, fermion masses are determined by Yukawa matrices
+        containing many free parameters.
+        Nevertheless, it has been shown that if a fermion mass matrix depends on a small
+        number of underlying parameters, then algebraic relations between the physical
+        masses necessarily follow \cite{KoideNishiura2018U3}.
+
+        Swirl--String Theory (SST) is particularly well suited for such relations, since
+        fermion masses arise from geometric and energetic properties of closed
+        configurations rather than from arbitrary couplings.
+        In this appendix we show that SST generically predicts \emph{parameter--independent
+    mass relations} whenever a fermion sector is governed by a restricted set of
+        topological or geometric degrees of freedom.
+
+    \subsection{Invariant Structure of Mass Matrices}
+
+        Consider a fermion sector $f$ described effectively by a Hermitian matrix
+        $H_f$, whose eigenvalues are proportional to the squared physical masses
+        $m_{f1}^2,m_{f2}^2,m_{f3}^2$.
+        Independently of the microscopic origin of $H_f$, its spectrum is fully
+        characterized by the three invariants
+        \begin{align}
+            I_1 &= \mathrm{Tr}(H_f)
+            = m_{f1}^2 + m_{f2}^2 + m_{f3}^2,\\
+            I_2 &= \tfrac12\!\left[\mathrm{Tr}(H_f)^2 - \mathrm{Tr}(H_f^2)\right]
+            = m_{f1}^2 m_{f2}^2 + m_{f2}^2 m_{f3}^2 + m_{f3}^2 m_{f1}^2,\\
+            I_3 &= \det(H_f)
+            = m_{f1}^2 m_{f2}^2 m_{f3}^2 .
+        \end{align}
+
+        These invariants are independent of basis choice and represent observable
+        combinations of the fermion masses.
+
+    \subsection{Elimination of Sector Parameters}
+
+        Suppose that the effective SST description of sector $f$ yields a mass matrix
+        $H_f(\lambda_1,\ldots,\lambda_N)$ depending on $N$ continuous parameters
+        $\lambda_i$, where $N<3$.
+        Then the three invariants $I_1,I_2,I_3$ are functions of the same $N$ parameters,
+        \begin{equation}
+            I_k = I_k(\lambda_1,\ldots,\lambda_N), \qquad k=1,2,3 .
+        \end{equation}
+
+        Because the number of invariants exceeds the number of parameters, it is
+        possible to eliminate the $\lambda_i$ and obtain at least $(3-N)$ independent
+        algebraic relations among the physical masses,
+        \begin{equation}
+            F_j(m_{f1}^2,m_{f2}^2,m_{f3}^2)=0,
+            \qquad j=1,\ldots,3-N .
+        \end{equation}
+
+        These relations are \emph{parameter independent} and therefore constitute
+        genuine predictions of the theory.
+
+    \subsection{Interpretation within Swirl--String Theory}
+
+        In SST, the mass of a fermionic excitation is determined by the integrated swirl
+        energy density over a closed configuration,
+        \begin{equation}
+            M_K = \mathcal{C}\int_{V_K}\rho_{\!E}(\mathbf{x})\,dV ,
+        \end{equation}
+        possibly modified by discrete topological suppression factors discussed in
+        Appendix~\ref{app:topological_mass_hierarchy}.
+
+        If all configurations in a given fermion sector share the same underlying
+        topological class, differing only by a small number of geometric or phase
+        parameters, then the effective description of that sector necessarily involves
+        few continuous degrees of freedom.
+        Parameter--independent mass relations are therefore not accidental but an
+        expected consequence of the SST ontology.
+
+    \subsection{Relation to Quark Mass Relations}
+
+        An explicit example of this mechanism is provided by the
+        $U(3)\times U(3)'$ model of Koide and Nishiura, where quark mass matrices depend
+        on a single complex parameter and yield a cubic mass relation independent of
+        that parameter \cite{KoideNishiura2018U3}.
+
+        Within SST, such constructions are reinterpreted as effective infrared
+        descriptions of a deeper geometric restriction: the quark sector is assumed to
+        occupy a narrow class of admissible swirl--string configurations.
+        The resulting mass relations reflect this geometric constraint rather than a
+        specific flavor symmetry.
+
+    \subsection{Predictive Power and Falsifiability}
+
+        Parameter--independent mass relations provide a sharp experimental test of SST.
+        Improved determinations of light quark masses or leptonic mass ratios can
+        directly confirm or falsify the existence of the corresponding invariant
+        constraints.
+
+        Moreover, different topological sectors are expected to yield different
+        functional forms of $F_j$, allowing SST to be progressively constrained or
+        ruled out by precision mass measurements.
+
+    \subsection{Summary}
+
+        Whenever a fermion sector in Swirl--String Theory is governed by fewer continuous
+        degrees of freedom than observable mass parameters, algebraic relations among
+        the masses necessarily emerge.
+        Such parameter--independent mass relations are a robust and testable signature
+        of the SST framework and unify previously phenomenological constructions within
+        a single geometric interpretation.
+
+
+%==============================
+% Appendix H
+% Exchange statistics from swirl-clock holonomy
+% (Relational time phase structure)
+%==============================
+    \section{Exchange Statistics as Swirl--Clock Holonomy}
+        \label{app:exchange_statistics}
+
+        \subsection{Motivation}
+
+            In standard quantum field theory, particle exchange statistics are postulated as
+            either bosonic or fermionic, with the spin--statistics theorem providing a
+            consistency condition under locality and relativistic causality.
+            Recent work has demonstrated, however, that exchange statistics are more
+            generally determined by the topology of configuration space and the internal
+            structure of excitations, rather than by point-particle assumptions alone
+            \cite{BeyondFermions2023}.
+
+            Swirl--String Theory (SST) naturally accommodates this broader perspective.
+            Its fundamental excitations are extended, closed configurations evolving along
+            a preferred foliation, endowed with a compact internal clock phase.
+            This appendix shows that, within SST, exchange statistics arise as a geometric
+            holonomy of the swirl--clock phase under nontrivial exchange paths in
+            configuration space.
+
+        \subsection{Exchange as a Configuration-Space Loop}
+
+            Consider two identical SST excitations described by closed configurations
+            $K_1$ and $K_2$.
+            An exchange process is not merely a permutation of labels but a continuous
+            deformation of the joint configuration through configuration space.
+            Such a process defines a closed loop $\gamma$ in the reduced configuration
+            space modulo gauge and foliation redundancies.
+
+            The physically relevant effect of this loop is the accumulated phase of the
+            internal clock variable along $\gamma$,
+            \begin{equation}
+                \Delta \theta
+                =
+                \oint_{\gamma} d\SwirlClock .
+            \end{equation}
+
+            This phase is invariant under smooth deformations of the exchange path that do
+            not cross singular configurations and therefore represents a topological
+            holonomy.
+
+        \subsection{Classification of Statistics}
+
+            The exchange operator $\mathcal{E}$ acting on the joint state of two identical
+            excitations acquires the form
+            \begin{equation}
+                \mathcal{E}
+                =
+                \exp\!\left(i\,\Delta \theta\right),
+            \end{equation}
+            where $\Delta\theta$ is determined by the topology of the exchange path and the
+            internal geometry of the configurations.
+
+            Special cases recover familiar statistics:
+            \begin{itemize}
+                \item $\Delta\theta = 0 \pmod{2\pi}$ corresponds to bosonic exchange,
+                \item $\Delta\theta = \pi \pmod{2\pi}$ corresponds to fermionic exchange,
+                \item intermediate or matrix-valued holonomies correspond to generalized or
+                composite statistics.
+            \end{itemize}
+
+            Thus, exchange statistics in SST are not postulated but emerge from the geometry
+            of configuration space and the compactness of relational time.
+
+        \subsection{Relation to Spin--Statistics}
+
+            The standard spin--statistics connection is recovered in SST as a consistency
+            condition imposed by relativistic causality and foliation-compatible locality
+            in the infrared.
+            Elementary excitations with minimal topological structure admit only trivial or
+            $\pi$ holonomy, reproducing bosons and fermions.
+
+            More intricate closed configurations may admit richer holonomy classes without
+            violating unitarity or causality, provided the exchange paths remain compatible
+            with the foliation structure.
+            In this sense, SST generalizes rather than contradicts the conventional
+            spin--statistics connection.
+
+        \subsection{Time, Memory, and Nonlocality}
+
+            A key implication of the holonomy interpretation is that exchange statistics
+            depend on the history of the configuration rather than solely on instantaneous
+            positions.
+            This reflects the presence of internal memory encoded in the swirl--clock phase.
+
+            Such behavior is compatible with quantum mechanics because the memory is
+            topological rather than dynamical: it depends only on the homotopy class of the
+            exchange path.
+            No violation of microcausality or signal locality is implied.
+
+        \subsection{Conceptual Consequences}
+
+            The holonomy interpretation of exchange statistics yields several conceptual
+            clarifications:
+            \begin{itemize}
+                \item statistics are emergent properties of extended configurations,
+                \item bosonic and fermionic behavior are limiting cases of a broader geometric
+                classification,
+                \item quantum phase, time evolution, and exchange are unified through the
+                swirl--clock variable,
+                \item no modification of quantum mechanics or Lorentz symmetry is required in
+                the infrared.
+            \end{itemize}
+
+        \subsection{Summary}
+
+            In Swirl--String Theory, particle exchange statistics arise from the holonomy of
+            the compact swirl--clock phase associated with nontrivial loops in configuration
+            space.
+            This framework reproduces conventional bosonic and fermionic statistics while
+            allowing a principled extension to more general topological classes for
+            composite or highly structured excitations.
+            Exchange statistics are thus understood as a manifestation of relational time
+            geometry rather than as an independent axiom.
+
+%==============================
+% References
+%==============================
+
+\begin{thebibliography}{99}
+
+        \bibitem{BeyondFermions2023}
+        A.~Kitaev, J.~Preskill, et al.,
+        \emph{Particle exchange statistics beyond fermions},
+        arXiv:2308.05203 [quant-ph].
+
+        \bibitem{Faglioni2025TightKnots}
+        S.~Faglioni,
+        \emph{Tight composite knots and chirality},
+        arXiv:2508.03305 [math-ph] (2025).
+
+
+        \bibitem{KoideNishiura2018U3}
+        Y.~Koide and H.~Nishiura,
+        \emph{Parameter-Independent Quark Mass Relation in the $U(3)\times U(3)'$ Model},
+        arXiv:1805.07334 (2018).
+
+        \bibitem{Cabibbo1963}
+        N.~Cabibbo,
+        \emph{Unitary Symmetry and Leptonic Decays},
+        Phys.\ Rev.\ Lett.\ \textbf{10} (1963) 531.
+        doi:10.1103/PhysRevLett.10.531
+
+        \bibitem{KobayashiMaskawa1973}
+        M.~Kobayashi and T.~Maskawa,
+        \emph{CP-Violation in the Renormalizable Theory of Weak Interaction},
+        Prog.\ Theor.\ Phys.\ \textbf{49} (1973) 652.
+        doi:10.1143/PTP.49.652
+
+
+        \bibitem{Makela2024QuantumGravity}
+        J.~M\"akel\"a,
+        \emph{A Possible Quantum Effect of Gravitation},
+        arXiv:2405.18502 [gr-qc].
+
+        \bibitem{BulashenkoUbach2022}
+        O.~Bulashenko and H.~Ubach,
+        \emph{Lensing of gravitational waves: universal signatures in the beating pattern},
+        JCAP \textbf{07} (2022) 034,
+        \href{https://arxiv.org/abs/2112.10773}{arXiv:2112.10773 [gr-qc]}.
+
+
+        \bibitem{NovelloAntunes2018CKM}
+        M.~Novello and V.~Antunes,
+        \emph{Connecting the Cabibbo--Kobayashi--Maskawa matrix to quark masses},
+        arXiv:1804.00572 [physics.gen-ph].
+
+        \bibitem{CODATA2018}
+        E.~Tiesinga, P.~J.~Mohr, D.~B.~Newell, and B.~N.~Taylor,
+        \emph{The 2018 CODATA Recommended Values of the Fundamental Physical Constants},
+        Rev.\ Mod.\ Phys.\ \textbf{93} (2021) 025010.
+        doi:10.1103/RevModPhys.93.025010
+
+        \bibitem{DiBiagio2021EmergentTime}
+        A.~Di~Biagio and R.~Smerlak,
+        \emph{Emergence of Time from Quantum Gravitational Considerations},
+        Front.\ Phys.\ \textbf{9} (2021) 646228.
+        doi:10.3389/fphy.2021.646228
+
+
+        \bibitem{FroggattNielsen1979}
+        C.~D.~Froggatt and H.~B.~Nielsen,
+        \emph{Hierarchy of Quark Masses, Cabibbo Angles and CP Violation},
+        Nucl.\ Phys.\ B \textbf{147} (1979) 277.
+        doi:10.1016/0550-3213(79)90316-X
+
+        \bibitem{Abbas2019Z2Z5}
+        G.~Abbas,
+        \emph{A new solution of the fermionic mass hierarchy of the Standard Model},
+        Int.\ J.\ Mod.\ Phys.\ A \textbf{34} (2019) 1950104,
+        arXiv:1807.05683 [hep-ph].
+
+        \bibitem{Minkowski1977}
+        P.~Minkowski,
+        \emph{$\mu \rightarrow e\gamma$ at a Rate of One Out of $10^{9}$ Muon Decays?},
+        Phys.\ Lett.\ B \textbf{67} (1977) 421.
+        doi:10.1016/0370-2693(77)90435-X
+
+        \bibitem{GellMann1979}
+        M.~Gell-Mann, P.~Ramond, and R.~Slansky,
+        \emph{Complex Spinors and Unified Theories},
+        in \emph{Supergravity}, North Holland, Amsterdam (1979).
+
+        \bibitem{Feruglio2018Modular}
+        F.~Feruglio,
+        \emph{Are neutrino masses modular forms?},
+        in \emph{From My Vast Repertoire}, World Scientific (2019),
+        arXiv:1706.08749 [hep-ph].
+
+        \bibitem{Novichkov2019Modular}
+        P.~P.~Novichkov, S.~T.~Petcov, and M.~Tanimoto,
+        \emph{Trimaximal Neutrino Mixing from Modular $A_4$ Invariance},
+        Phys.\ Lett.\ B \textbf{793} (2019) 247,
+        arXiv:1812.11289 [hep-ph].
+
+        \bibitem{Feruglio2021Review}
+        F.~Feruglio,
+        \emph{Flavor symmetries and modular invariance},
+        Eur.\ Phys.\ J.\ C \textbf{80} (2020) 640,
+        doi:10.1140/epjc/s10052-020-8259-0.
+
+        \bibitem{LiYuan2005}
+        Y.~Li and L.~Yuan,
+        \emph{Numerical investigation of single--bubble sonoluminescence},
+        Phys.\ Rev.\ E \textbf{72} (2005) 036303.
+        doi:10.1103/PhysRevE.72.036303
+
+        \bibitem{Saito2021}
+        S.~Saito,
+        \emph{Poincar\'e Rotator for Vortexed Photons},
+        Frontiers in Physics \textbf{9} (2021) 646228.
+        doi:10.3389/fphy.2021.646228
+
+        \bibitem{SST59}
+        O.~Iskandarani,
+        \emph{Atomic Masses from Topological Invariants of Knotted Field Configurations},
+        SST-59 (2025).
+
+        \bibitem{FosterJacobson}
+        B.~Z.~Foster and T.~Jacobson,
+        \emph{Post-Newtonian parameters and constraints on Einstein-\AE ther theory},
+        Phys.\ Rev.\ D \textbf{73}, 064015 (2006),
+        \href{https://arxiv.org/abs/gr-qc/0509083}{arXiv:gr-qc/0509083}.
+
+        \bibitem{Altshuler2023Potential}
+        B.~Altshuler,
+        \emph{Quark mixing angles and weak CP-violating phase vs quark masses:
+        potential approach},
+        arXiv:2303.16568 [hep-ph] (2023).
+
+    \end{thebibliography}
+
+\end{document}

@@ -1,0 +1,387 @@
+%! Author = Omar Iskandarani
+%! Date = Nov 15, 2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17619187
+
+\newcommand{\paperdoi}{10.5281/zenodo.17619187}
+\newcommand{\papertitle}{Circulation, Rigid Rotation, and Proper Time Dilation:\\
+A Fluid-Mechanical Representation of Kinematic Redshift}
+
+
+%========================================================================================
+% PACKAGES AND DOCUMENT CONFIGURATION
+%========================================================================================
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+    \ifdefined\standalonechapter
+    {\Large\bfseries \appendixtitle \par}
+    \else
+        {\Large\bfseries \papertitle \par}
+    \fi
+    \vspace{1cm}
+    {\Large\itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par}
+    \vspace{0.5cm}
+    {\today \par}
+    \vspace{0.5cm}
+}
+
+% here comes abstract
+\newcommand{\titlepageClose}{
+    \vfill
+    \raggedright % <-- fixes left alignment
+    \null
+    \begin{picture}(0,0)
+    % Adjust position: (x,y) = (left, bottom)
+    \put(0,-45){  % Shift 200pt left, 40pt down
+        \begin{minipage}[b]{0.7\textwidth}
+        \footnotesize % One step bigger than \tiny \scriptsize
+        \renewcommand{\arraystretch}{1.0}
+        \noindent\rule{\textwidth}{0.4pt} \\[0.5em]  % ← horizontal line
+        \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+        Email: \texttt{info@omariskandarani.com} \\
+        ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+        \end{minipage}
+    }
+    \end{picture}
+    \end{titlepage}
+}
+
+\begin{document}
+    \titlepageOpen
+
+    \begin{abstract}
+        Proper time dilation for moving clocks is a central prediction of special relativity and underlies precision technologies such as the Global Positioning System (GPS).
+        In this paper we express kinematic time dilation in a rigidly rotating frame in terms of fluid-mechanical quantities: tangential ``swirl'' speed, vorticity, and circulation.
+        For a clock co-moving with an incompressible, inviscid fluid undergoing rigid-body rotation, we derive the standard special-relativistic result
+        \[
+            \frac{\mathrm{d}\tau}{\mathrm{d}t}
+            = \sqrt{1 - \frac{v^2}{c^2}},
+            \qquad v = \Omega r,
+        \]
+        and recast it in terms of the circulation $\Gamma = \oint \boldsymbol{v}\cdot\mathrm{d}\boldsymbol{\ell}$ as
+        \[
+            \frac{\mathrm{d}\tau}{\mathrm{d}t}
+            = \sqrt{1 - \frac{\Gamma^2}{4\pi^2 r^2 c^2}}.
+        \]
+        Because circulation is a conserved quantity in inviscid, barotropic flows (Kelvin's theorem), this provides a topological representation of time dilation in terms of a fluid invariant.
+        We compare the resulting scaling with the weak-field Schwarzschild time-dilation factor and illustrate the magnitudes involved for terrestrial rotation and GPS-like orbits.
+        The analysis uses only standard special relativity, elementary general relativity, and classical fluid mechanics.
+    \end{abstract}
+    \titlepageClose
+
+    \section{Introduction}
+        Time dilation for moving and gravitationally bound clocks is one of the most striking and well-tested predictions of relativity~\cite{Einstein1905,Einstein1916,MTW,Will2014}.
+        In special relativity, a clock moving at speed $v$ relative to an inertial frame ticks more slowly by a factor
+        \begin{equation}
+            \frac{\mathrm{d}\tau}{\mathrm{d}t} = \sqrt{1 - \frac{v^2}{c^2}},
+            \label{eq:SR-dilation}
+        \end{equation}
+        while in general relativity, clocks in a gravitational potential well experience additional redshift.
+        These effects are routinely accounted for in satellite navigation systems such as GPS~\cite{Ashby2003}.
+
+        At the same time, classical fluid mechanics provides a natural language for describing rotational motion in terms of vorticity and circulation~\cite{Batchelor1967,LandauLifshitzFM,Moffatt1969}.
+        In inviscid, barotropic flows with conservative body forces, the circulation along a closed material loop is conserved (Kelvin's theorem), rendering it a topological invariant of the flow.
+
+        The purpose of this paper is to connect these two perspectives in a purely classical and relativistic framework.
+        We consider a simple, analytically solvable configuration: an incompressible, inviscid fluid in rigid-body rotation.
+        By placing co-moving clocks in such a flow, we:
+        \begin{enumerate}
+            \item derive the standard special-relativistic proper-time factor for circular motion directly from the Minkowski metric;
+            \item express this factor in terms of circulation, making explicit its dependence on a fluid-mechanical invariant;
+            \item compare the resulting kinematic scaling to the weak-field Schwarzschild time-dilation factor for circular orbits.
+        \end{enumerate}
+        The analysis remains strictly within established theory and is intended to provide a pedagogical link between relativistic kinematics and classical rotational flows.
+
+    \section{Kinematics of rigid rotation and proper time}
+        \subsection{Rigid rotation in cylindrical coordinates}
+            Consider a rigidly rotating frame in flat spacetime.
+            In an inertial Cartesian frame $(ct, x, y, z)$, introduce cylindrical coordinates $(r,\phi,z)$ with $x = r\cos\phi$, $y = r\sin\phi$.
+            The Minkowski line element in these coordinates is
+            \begin{equation}
+                \mathrm{d}s^2
+                = -c^2 \mathrm{d}t^2 + \mathrm{d}r^2 + r^2 \mathrm{d}\phi^2 + \mathrm{d}z^2.
+                \label{eq:Minkowski-cyl}
+            \end{equation}
+            A point moving on a circle of constant radius $r$ and height $z$ with angular velocity $\Omega$ about the $z$-axis has
+            \begin{equation}
+                \phi(t) = \phi_0 + \Omega t,
+                \qquad r = \text{const.},\quad z = \text{const.}
+            \end{equation}
+            The tangential velocity is
+            \begin{equation}
+                v = \Omega r.
+                \label{eq:v-Omega-r}
+            \end{equation}
+
+        \subsection{Proper time for circular motion in flat spacetime}
+            For the circular worldline described above, we have
+            \begin{equation}
+                \mathrm{d}r = 0, \qquad \mathrm{d}z = 0,
+                \qquad \mathrm{d}\phi = \Omega\,\mathrm{d}t.
+            \end{equation}
+            Substituting into Eq.~\eqref{eq:Minkowski-cyl},
+            \begin{equation}
+                \begin{aligned}
+                    \mathrm{d}s^2
+                    &= -c^2 \mathrm{d}t^2 + r^2 (\mathrm{d}\phi)^2 \\
+                    &= -c^2 \mathrm{d}t^2 + r^2 \Omega^2 \mathrm{d}t^2 \\
+                    &= -(c^2 - \Omega^2 r^2)\,\mathrm{d}t^2.
+                \end{aligned}
+            \end{equation}
+            Proper time $\tau$ along the worldline is related to the line element by $\mathrm{d}s^2 = -c^2 \mathrm{d}\tau^2$, so
+            \begin{equation}
+                -c^2 \mathrm{d}\tau^2
+                = -(c^2 - \Omega^2 r^2)\,\mathrm{d}t^2.
+            \end{equation}
+            Assuming $v = \Omega r < c$, we obtain
+            \begin{equation}
+                \mathrm{d}\tau
+                = \mathrm{d}t \sqrt{1 - \frac{\Omega^2 r^2}{c^2}}
+                = \mathrm{d}t \sqrt{1 - \frac{v^2}{c^2}},
+                \label{eq:tau-v}
+            \end{equation}
+            which is the standard special-relativistic time dilation for uniform circular motion~\cite{MTW,LL_FieldTheory}.
+
+            Equation~\eqref{eq:tau-v} is purely kinematic: it makes no reference to forces or stresses.
+            In particular, it applies equally to a small co-moving clock in a rotating fluid and to a point mass on a rigid rotating platform, provided the local velocity is $v = \Omega r$ and spacetime is flat.
+
+    \section{Circulation and vorticity in rigid-body rotation}
+        \subsection{Velocity field and vorticity}
+            We now recall standard fluid-mechanical quantities associated with rigid-body rotation.
+            Consider an incompressible, inviscid Newtonian fluid rotating as a solid body with angular velocity $\Omega$ about the $z$-axis~\cite{Batchelor1967,LandauLifshitzFM}.
+            The velocity field in cylindrical coordinates is
+            \begin{equation}
+                \boldsymbol{v}(r) = \Omega r\,\hat{\boldsymbol{\phi}},
+                \label{eq:fluid-v}
+            \end{equation}
+            which is divergence-free and corresponds to rigid-body rotation.
+
+            The vorticity is defined by
+            \begin{equation}
+                \boldsymbol{\omega} = \nabla \times \boldsymbol{v}.
+            \end{equation}
+            For the field~\eqref{eq:fluid-v}, one finds
+            \begin{equation}
+                \boldsymbol{\omega} = 2\Omega\,\hat{\boldsymbol{z}}.
+            \end{equation}
+            Thus rigid-body rotation corresponds to uniform vorticity aligned with the rotation axis.
+
+        \subsection{Circulation as a topological invariant}
+            The circulation of $\boldsymbol{v}$ around a closed curve $C$ is
+            \begin{equation}
+                \Gamma = \oint_C \boldsymbol{v}\cdot\mathrm{d}\boldsymbol{\ell}.
+            \end{equation}
+            For a circle of radius $r$ in the plane $z = \text{const.}$,
+            \begin{equation}
+                \begin{aligned}
+                    \Gamma(r)
+                    &= \int_0^{2\pi} \boldsymbol{v}(r)\cdot (r\,\hat{\boldsymbol{\phi}}\,\mathrm{d}\phi) \\
+                    &= \int_0^{2\pi} \Omega r\, (r\,\mathrm{d}\phi) \\
+                    &= 2\pi \Omega r^2.
+                \end{aligned}
+                \label{eq:Gamma-r}
+            \end{equation}
+            In an inviscid, barotropic fluid with conservative body forces, Kelvin's circulation theorem states that the circulation around a closed material loop moving with the fluid is conserved in time~\cite{Batchelor1967,LandauLifshitzFM,Moffatt1969}.
+            In such flows, $\Gamma$ is therefore a topological invariant associated with the vorticity distribution.
+
+            Equation~\eqref{eq:Gamma-r} can be inverted to express the tangential speed in terms of circulation:
+            \begin{equation}
+                v(r) = \Omega r
+                = \frac{\Gamma(r)}{2\pi r}.
+                \label{eq:v-Gamma}
+            \end{equation}
+            This relation will allow us to rewrite the time-dilation factor in terms of $\Gamma$.
+
+    \section{Proper time in terms of circulation}
+        \subsection{Circulation-based expression for time dilation}
+            Substituting Eq.~\eqref{eq:v-Gamma} into Eq.~\eqref{eq:tau-v}, we obtain
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                = \sqrt{1 - \frac{v^2}{c^2}}
+                = \sqrt{1 - \frac{\Gamma^2}{4\pi^2 r^2 c^2}}.
+                \label{eq:tau-Gamma}
+            \end{equation}
+            For a given radius $r$, the circulation $\Gamma(r)$ completely determines the kinematic time-dilation factor for a co-moving clock, provided spacetime is flat and $v < c$.
+
+            In the context of inviscid, barotropic flows, where $\Gamma$ is conserved for material loops, Eq.~\eqref{eq:tau-Gamma} can be interpreted as showing that the kinematic time scaling of co-moving clocks is tied to a topological invariant of the flow.
+            No new physics is implied; this is simply a reparameterization of the standard special-relativistic result using fluid-mechanical variables.
+
+        \subsection{Small-velocity expansion}
+            For $v \ll c$, or equivalently $|\Gamma|/(2\pi r c) \ll 1$, Eq.~\eqref{eq:tau-Gamma} can be expanded as
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq 1 - \frac{1}{2}\frac{v^2}{c^2}
+                = 1 - \frac{1}{2}\frac{\Gamma^2}{4\pi^2 r^2 c^2}
+                + \mathcal{O}\!\left(\frac{v^4}{c^4}\right).
+                \label{eq:tau-small-v}
+            \end{equation}
+            Thus, to leading order, the fractional rate difference between a co-moving clock and an inertial clock at rest is
+            \begin{equation}
+                1 - \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq \frac{1}{2}\frac{v^2}{c^2}.
+            \end{equation}
+            This expression is widely used in practical applications such as timekeeping for rotating spacecraft and satellites~\cite{Ashby2003}.
+
+    \section{Comparison with Schwarzschild time dilation}
+        \subsection{Static gravitational redshift}
+            In the Schwarzschild spacetime outside a non-rotating, spherically symmetric mass $M$, the line element in Schwarzschild coordinates is~\cite{MTW,LL_FieldTheory}
+            \begin{equation}
+                \mathrm{d}s^2
+                = -\left(1 - \frac{2GM}{r c^2}\right) c^2 \mathrm{d}t^2
+                + \left(1 - \frac{2GM}{r c^2}\right)^{-1} \mathrm{d}r^2
+                + r^2 \mathrm{d}\Omega^2,
+            \end{equation}
+            where $\mathrm{d}\Omega^2$ is the line element on the unit sphere.
+            For a static observer at fixed $(r,\theta,\phi)$, the proper time satisfies
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                = \sqrt{1 - \frac{2GM}{r c^2}}.
+                \label{eq:Schwarzschild-static}
+            \end{equation}
+            In the weak-field limit $GM/(r c^2) \ll 1$,
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq 1 - \frac{GM}{r c^2}
+                + \mathcal{O}\!\left(\frac{G^2M^2}{r^2 c^4}\right).
+                \label{eq:Schwarzschild-weak}
+            \end{equation}
+
+        \subsection{Circular orbit: kinematic plus gravitational contribution}
+            For a test particle in a circular geodesic orbit in the equatorial plane of the Schwarzschild spacetime, the combined effect of gravitational redshift and kinematic time dilation leads to~\cite{MTW,Will2014}
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq 1 - \frac{3}{2}\frac{GM}{r c^2},
+                \qquad \frac{GM}{r c^2} \ll 1.
+                \label{eq:Schwarzschild-circular}
+            \end{equation}
+            Using the Newtonian orbital speed $v^2 \simeq GM/r$ in the weak-field limit, this can be written as
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq 1 - \frac{1}{2}\frac{v^2}{c^2} - \frac{GM}{r c^2},
+            \end{equation}
+            where the first term corresponds to the transverse Doppler (special-relativistic) effect and the second term to the gravitational redshift.
+
+            Comparing Eq.~\eqref{eq:tau-small-v} with Eq.~\eqref{eq:Schwarzschild-weak} and Eq.~\eqref{eq:Schwarzschild-circular} highlights that:
+            \begin{itemize}
+                \item in flat spacetime, time dilation in circular motion is purely kinematic and scales as $v^2/c^2$;
+                \item in the presence of gravity, a gravitational potential term $GM/(r c^2)$ appears in addition, with similar magnitude for circular orbits where $v^2 \sim GM/r$.
+            \end{itemize}
+            The fluid-mechanical representation derived in Eq.~\eqref{eq:tau-Gamma} thus captures the kinematic part of the time-dilation budget that also appears in orbital situations, while the gravitational contribution is absent in strictly flat spacetime.
+
+    \section{Illustrative magnitudes}
+        \subsection{Terrestrial rotation}
+            For a clock at Earth's equator, the tangential speed due to Earth's rotation is approximately $v \approx \SI{465}{m.s^{-1}}$~\cite{Ashby2003}.
+            The purely kinematic time-dilation factor from Eq.~\eqref{eq:SR-dilation} is
+            \begin{equation}
+                \frac{\mathrm{d}\tau}{\mathrm{d}t}
+                \simeq 1 - \frac{1}{2}\frac{v^2}{c^2}
+                \approx 1 - 1.2\times 10^{-12},
+            \end{equation}
+            so that the equatorial clock lags an ideal inertial clock by about $\sim \SI{0.1}{ns}$ per second purely from rotational motion.
+            When expressed in terms of circulation, the same effect is obtained from Eq.~\eqref{eq:tau-Gamma} once the effective $\Gamma$ at the equator is specified.
+
+        \subsection{GPS-like orbits}
+            In GPS, satellites move at speeds of order $v \sim \SI{4}{km.s^{-1}}$ and orbit at altitudes of order $\SI{2e7}{m}$~\cite{Ashby2003}.
+            The kinematic contribution to time dilation is then of order
+            \begin{equation}
+                \frac{1}{2}\frac{v^2}{c^2} \sim 10^{-10},
+            \end{equation}
+            while the gravitational redshift term $GM/(r c^2)$ is of similar magnitude but opposite sign at GPS altitude.
+            Both contributions must be accounted for to maintain nanosecond-level timing accuracy.
+
+            Although realistic satellite motion is orbital rather than fluid-like, the circular-motion formulas derived here in terms of $v$ and $\Gamma$ provide a useful conceptual bridge between fluid rotation and the kinematic aspects of satellite timekeeping.
+
+    \section{Discussion and outlook}
+        We have shown that:
+        \begin{enumerate}
+            \item proper time dilation for a clock in uniform circular motion in flat spacetime can be derived directly from the Minkowski metric in cylindrical coordinates, yielding Eq.~\eqref{eq:tau-v};
+            \item in the case of an incompressible, inviscid fluid undergoing rigid-body rotation, the tangential speed is related to circulation by $v = \Gamma/(2\pi r)$, leading to a circulation-based expression for time dilation, Eq.~\eqref{eq:tau-Gamma};
+            \item circulation, being conserved in inviscid, barotropic flows with conservative body forces (Kelvin's theorem), provides a topological parameter controlling the kinematic time scaling of co-moving clocks;
+            \item comparison with weak-field Schwarzschild results clarifies how the kinematic piece captured here relates to the full gravitational plus kinematic time dilation in orbital systems.
+        \end{enumerate}
+
+        The analysis remains strictly within the framework of special relativity, elementary general relativity, and classical fluid mechanics.
+        It suggests that rotational time dilation can be usefully discussed in terms of invariants of the underlying flow, such as circulation and vorticity, without invoking any nonstandard physics.
+
+        Possible extensions within mainstream theory include:
+        \begin{itemize}
+            \item treating non-rigid rotational profiles (e.g.\ potential vortices or Rankine vortices) and deriving the corresponding circulation-based time-dilation factors;
+            \item analyzing relativistic rotating fluids in full general relativity, where both the metric and the fluid flow contribute to time dilation, using the tools of relativistic hydrodynamics~\cite{RezzollaZanotti2013};
+            \item exploring pedagogical applications in advanced courses on special relativity and fluid dynamics, where the connection between circulation and time dilation can serve as a unifying theme.
+        \end{itemize}
+        Any further interpretation beyond these established frameworks would require additional assumptions and lies outside the scope of the present work.
+
+    \section*{Acknowledgments}
+        The author thanks the developers of standard references on relativity and fluid mechanics for providing the theoretical framework within which these connections can be clearly expressed.
+
+        \bibliographystyle{unsrt}
+        \begin{thebibliography}{99}
+
+            \bibitem{Einstein1905}
+            A.~Einstein,
+            \newblock \emph{\"Uber die von dem relativit\"atsprinzip geforderte Tr\"agheit der Energie},
+            \newblock Ann.\ Phys.\ \textbf{18}, 639--641 (1905).
+
+            \bibitem{Einstein1916}
+            A.~Einstein,
+            \newblock \emph{Die Grundlage der allgemeinen Relativit\"atstheorie},
+            \newblock Ann.\ Phys.\ \textbf{49}, 769--822 (1916).
+
+            \bibitem{MTW}
+            C.~W. Misner, K.~S. Thorne, and J.~A. Wheeler,
+            \newblock \emph{Gravitation},
+            \newblock W.~H. Freeman, San Francisco (1973).
+
+            \bibitem{LL_FieldTheory}
+            L.~D. Landau and E.~M. Lifshitz,
+            \newblock \emph{The Classical Theory of Fields},
+            \newblock 4th ed., Butterworth--Heinemann, Oxford (1975).
+
+            \bibitem{Will2014}
+            C.~M. Will,
+            \newblock \emph{The Confrontation between General Relativity and Experiment},
+            \newblock Living Rev.\ Relativ.\ \textbf{17}, 4 (2014).
+
+            \bibitem{Ashby2003}
+            N.~Ashby,
+            \newblock \emph{Relativity in the Global Positioning System},
+            \newblock Living Rev.\ Relativ.\ \textbf{6}, 1 (2003).
+
+            \bibitem{Batchelor1967}
+            G.~K. Batchelor,
+            \newblock \emph{An Introduction to Fluid Dynamics},
+            \newblock Cambridge University Press, Cambridge (1967).
+
+            \bibitem{LandauLifshitzFM}
+            L.~D. Landau and E.~M. Lifshitz,
+            \newblock \emph{Fluid Mechanics},
+            \newblock 2nd ed., Pergamon Press, Oxford (1987).
+
+            \bibitem{Moffatt1969}
+            H.~K. Moffatt,
+            \newblock \emph{The degree of knottedness of tangled vortex lines},
+            \newblock J.\ Fluid Mech.\ \textbf{35}, 117--129 (1969).
+
+            \bibitem{RezzollaZanotti2013}
+            L.~Rezzolla and O.~Zanotti,
+            \newblock \emph{Relativistic Hydrodynamics},
+            \newblock Oxford University Press, Oxford (2013).
+
+        \end{thebibliography}
+
+\end{document}

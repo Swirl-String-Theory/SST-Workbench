@@ -1,0 +1,554 @@
+%! Author = Omar Iskandarani
+%! Date = 12/9/2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.17877182
+
+\newcommand{\paperdoi}{10.5281/zenodo.17877182}
+\newcommand{\papertitle}{Resonant Topological Vorticity Confinement:\\
+Scalar Vacuum Stress Amplification in Swirl--String Toroidal Knot Coils}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb, amsfonts,bm,graphicx}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{cite}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{ \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+% swirl arrows Counter Clockwise
+\newcommand{\swirlarrowcw}{ \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\Fmaxswirlcw}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowright}}}
+
+\newcommand{\Fmax}{\Fmaxswirl} % default maximal force (left swirl)
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert {\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} \rVert}               % swirl speed magnitude
+\newcommand{\Ce}{\vswirl}                                % canonical swirl-speed constant
+
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\Fswirlmax}{F_{\text{swirl}}^{\max}}
+
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ii}{\mathrm{i}}
+
+% Canonical SST numerical values (for reference)
+\newcommand{\rhofval}{7.0\times 10^{-7}\,\mathrm{kg\,m^{-3}}}
+\newcommand{\vswirlval}{1.09384563\times 10^{6}\,\mathrm{m\,s^{-1}}}
+\newcommand{\rccoreval}{1.40897017\times 10^{-15}\,\mathrm{m}}
+\newcommand{\Fswirlmaxval}{29.053507\,\mathrm{N}}
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}
+        \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par}
+        \vspace{0.5cm}
+        {\today \par}
+        \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0}
+                    \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+    \begin{abstract}
+        In Swirl String Theory (SST), the vacuum is modeled as an inviscid, incompressible fluid with effective density $\rhof$. Standard electromagnetic propulsion uses vector field interactions; SST instead attributes gravitational effects to scalar pressure gradients $\nabla P$ within the vacuum fluid. We propose a hydrodynamic mechanism to amplify local pressure drops via resonant excitation of helical vortex filaments arranged in $(p,q)$ torus knot geometries.
+
+        The central design principle is a mirrored bifilar configuration of counter--rotating filaments that realizes a ``Zero--Vector / Max--Scalar'' condition: macroscopic vorticity and vector flow cancel, while local kinetic energy density $\tfrac{1}{2}\rhof\lvert\mathbf{u}\rvert^2$ adds constructively. First, we develop a general helical coil model using slender--filament vortex dynamics, deriving the pressure drop enhancement from Kelvin--wave self--resonance and geometric contraction (pinch effect). We then specialize to a $(5,12)$ torus knot with golden--ratio aspect ratio $r/R=1/\phi$ and evaluate the wire length, Kelvin resonance frequency, and achievable pressure amplification.
+
+        Using canonical SST constants $\rhof\approx\rhofval$ and $\vnorm\approx\vswirlval$, a mirrored $(5,12)$ ``Starship'' coil with major radius $R=0.15\,\mathrm{m}$ and wire length $L\simeq 8.4\,\mathrm{m}$, driven near $f_{\text{res}}\sim 130\,\mathrm{kHz}$, produces a localized vacuum pressure deficit of order $\Delta P\sim 1.7\times 10^{6}\,\mathrm{Pa}$, corresponding to $\sim 16$ atmospheres of effective vacuum tension confined to the toroidal void. We compare this to the SST core stress scale $P_{\text{max,core}}\sim 10^{30}\,\mathrm{Pa}$ derived from $\Fswirlmax$ and $\rc$, establishing a wide linearity window. Finally, we outline classical and quantum fluid analogs and state falsifiable predictions for scalar stress amplification and vector--field suppression.
+    \end{abstract}
+
+    \titlepageClose
+
+%=========================================
+        \section{Introduction}
+%=========================================
+            General relativity describes gravitation as spacetime curvature sourced by mass--energy, making local gravity modification appear to require extreme stress--energy densities. Swirl String Theory (SST) offers an alternative: the vacuum is a superfluid medium, and gravitational phenomena are reinterpreted as pressure effects in an inviscid, incompressible fluid of density $\rhof$.\cite{SSTCanon} In this hydrodynamic picture, filamentary vorticity structures---``swirl strings''---become the primary carriers of momentum and energy, and the local gravitational potential is associated with pressure deficits generated by their motion.
+
+            The engineering problem is then reformulated:
+            \begin{enumerate}
+                \item How can we accelerate the vacuum fluid to near--canonical swirl speeds $\vnorm$ in a controlled volume without inducing destructive turbulence or reconnection?
+                \item Can we design configurations where net vector observables (vorticity, magnetic--like fields, bulk rotation) are suppressed, while scalar quantities (pressure deficits, energy density) are enhanced?
+            \end{enumerate}
+
+            We address these questions with a specific class of devices: resonant, mirrored toroidal knot coils that confine vorticity topologically and amplify scalar vacuum stress hydrodynamically. The mechanism combines three ingredients:
+            \begin{itemize}
+                \item Kelvin--wave self--resonance on slender vortex filaments.\cite{Kelvin1880,Saffman1992,Fetter2009}
+                \item Geometric contraction (pinch effect) of helical coils under resonance, increasing local speeds.
+                \item Bifilar (counter--rotating) winding to cancel net vorticity while adding kinetic energy scalar--wise, reminiscent of Tesla's non--inductive bifilar coils.\cite{Tesla1894}
+            \end{itemize}
+            We first develop a general helical coil model, then implement it in a $(5,12)$ torus knot with golden--ratio aspect, and finally quantify the resulting scalar stress amplification using SST Canon constants.
+
+%=========================================
+        \section{Hydrodynamic Vacuum Pressure in SST}
+%=========================================
+            \subsection{Bernoulli pressure deficit and base SST scale}
+                The SST vacuum flow $\mathbf{u}(\mathbf{x},t)$ obeys the incompressible Euler equations,
+                \begin{align}
+                    \nabla\cdot\mathbf{u} &= 0,\\
+                    \frac{\partial \mathbf{u}}{\partial t}
+                    + (\mathbf{u}\cdot\nabla)\mathbf{u}
+                    &= -\frac{1}{\rhof}\nabla P,
+                \end{align}
+                with $P(\mathbf{x},t)$ the pressure field. Along a steady streamline, Bernoulli's principle states\cite{Batchelor1967,Bernoulli1738}
+                \begin{equation}
+                    P_{\text{local}} + \frac{1}{2}\,\rhof \lvert\mathbf{u}\rvert^2
+                    = P_{\infty},
+                    \label{eq:Bernoulli}
+                \end{equation}
+                where $P_{\infty}$ is a far--field reference pressure. We define the local pressure deficit
+                \begin{equation}
+                    \Delta P \equiv P_{\infty} - P_{\text{local}}
+                    = \frac{1}{2}\,\rhof \lvert\mathbf{u}\rvert^2.
+                    \label{eq:DeltaP_def}
+                \end{equation}
+                In SST, $\Delta P$ is the hydrodynamic representation of gravitational potential: regions where $\lvert\mathbf{u}\rvert^2$ is large correspond to ``vacuum wells'' that attract matter.
+
+                The Canon specifies a characteristic swirl speed $\vnorm$ at a core radius $\rc$,
+                \begin{align}
+                    \vnorm &\approx \vswirlval,\\
+                    \rhof &\approx \rhofval,\\
+                    \rc &\approx \rccoreval,
+                \end{align}
+                for the fundamental swirl string. For a single, non--resonant swirl loop with $\lvert\mathbf{u}\rvert\simeq\vnorm$,
+                \begin{equation}
+                    \Delta P_{\text{base}}
+                    = \frac{1}{2}\,\rhof \vnorm^2.
+                    \label{eq:DeltaP_base_symbolic}
+                \end{equation}
+                Numerically,
+                \begin{align}
+                    \Delta P_{\text{base}}
+                    &=
+                    \frac{1}{2}
+                    \left(7.0\times 10^{-7}\,\mathrm{kg\,m^{-3}}\right)
+                    \left(1.09384563\times 10^{6}\,\mathrm{m\,s^{-1}}\right)^2
+                    \nonumber\\
+                    &\approx 4.19\times 10^{5}\,\mathrm{Pa},
+                    \label{eq:DeltaP_base_numeric}
+                \end{align}
+                i.e.\ about $4.1$ atmospheres of effective vacuum tension for a fundamental swirl loop.
+
+            \subsection{Intrinsic and induced velocities near a filament}
+                Near a slender filament, the flow can be decomposed as
+                \begin{equation}
+                    \mathbf{u} = \vswirl + \mathbf{v}_{\text{ind}},
+                    \label{eq:u_decompose}
+                \end{equation}
+                with $\vswirl$ the intrinsic swirl about the core and $\mathbf{v}_{\text{ind}}$ an induced component from the filament geometry via Biot--Savart--type contributions.\cite{Saffman1992} For a circular loop of radius $R$, the tangential component scales as
+                \begin{equation}
+                    v_\theta(R) \simeq \frac{\Gamma}{2\pi R},
+                    \label{eq:vtheta_scaling}
+                \end{equation}
+                where $\Gamma$ is the circulation. In more complex geometries (helices, knots), $\mathbf{v}_{\text{ind}}$ develops axial and poloidal components whose magnitude can be tuned by geometry and resonance.
+
+                Equation \eqref{eq:DeltaP_def} shows that maximizing $\Delta P$ reduces to maximizing $\lvert\vswirl + \mathbf{v}_{\text{ind}}\rvert^2$ subject to constraints from circulation conservation and stability.
+
+%=========================================
+        \section{Helical Swirl--String Coils and Kelvin Self--Resonance}
+%=========================================
+            \subsection{General helical coil geometry}
+                We first consider a helical swirl--string coil before imposing knot topology. Let the filament centerline be parameterized by arclength $s\in[0,L]$:
+                \begin{align}
+                    \mathbf{X}(s)
+                    &= \bigl(R\cos\theta(s),\,R\sin\theta(s),\,z(s)\bigr),\\
+                    \theta(s) &= \frac{2\pi N}{L}s,\\
+                    z(s) &= \frac{\lambda N}{L}s,
+                \end{align}
+                where $R$ is the coil radius, $\lambda$ the pitch per turn, and $N$ the number of turns. The total length is
+                \begin{equation}
+                    L = N\sqrt{(2\pi R)^2 + \lambda^2}.
+                \end{equation}
+
+                Locally, the velocity near the filament can be decomposed in cylindrical coordinates as
+                \begin{equation}
+                    \mathbf{u} \simeq v_\theta\,\hat{\bm{\theta}} + v_z\,\hat{\mathbf{z}},
+                \end{equation}
+                with $v_\theta$ dominated by the swirl and $v_z$ an induced axial flow. In a solenoidal approximation, the axial velocity at the coil center scales as
+                \begin{equation}
+                    v_z \simeq C_{\text{helix}}\,n_t \Gamma,
+                    \qquad
+                    n_t = \frac{N}{L},
+                    \label{eq:vz_scaling}
+                \end{equation}
+                where $C_{\text{helix}}$ is a geometric factor of order unity depending on $\lambda/R$.\cite{HelicalVortexReview}
+
+            \subsection{Kelvin waves on slender filaments}
+                Thin vortex filaments in inviscid fluids support transverse Kelvin waves.\cite{Kelvin1880,Saffman1992,Fetter2009} For a filament with circulation $\Gamma$ and core radius $\sim\rc$, the dispersion relation in the long--wavelength limit $\lvert k\rc\rvert\ll 1$ is
+                \begin{equation}
+                    \omega(k) \simeq
+                    \frac{\Gamma k^2}{4\pi}
+                    \left[
+                        \ln\left(\frac{1}{\lvert k\rvert\rc}\right) + A
+                    \right],
+                    \qquad A\sim 0.1,
+                    \label{eq:Kelvin_dispersion}
+                \end{equation}
+                where $k$ is the wavenumber along the filament and $A$ depends weakly on the core profile.\cite{Saffman1992}
+
+                For a closed loop of length $L$, periodicity quantizes $k$:
+                \begin{equation}
+                    k_n = \frac{2\pi n}{L},
+                    \qquad n\in\mathbb{Z},
+                \end{equation}
+                with modes at frequencies $\omega_n=\omega(k_n)$. The SST Canon defines a core swirl frequency
+                \begin{equation}
+                    \omega_c = \frac{\vnorm}{\rc},
+                \end{equation}
+                so a natural resonance condition is
+                \begin{equation}
+                    \omega_n \approx m\,\omega_c,
+                    \qquad m\in\mathbb{Z},
+                    \label{eq:resonance_condition}
+                \end{equation}
+                signalling locking between Kelvin modes and core swirl.
+
+            \subsection{Wire--length resonance and standing waves}
+                From the drive perspective (e.g.\ an electromagnetic coil approximating the filament path), a simpler resonance condition relates the drive frequency $f_{\text{drive}}$ to $\vnorm$ and $L$:
+                \begin{equation}
+                    L_{\text{wire}} = \frac{\vnorm}{f_{\text{drive}}}.
+                    \label{eq:L_resonance}
+                \end{equation}
+                When $L_{\text{wire}}$ matches an integer multiple of the Kelvin wavelength associated with $\vnorm$, the drive couples efficiently into the filament's transverse modes, forming a standing wave of geometric deformation (breathing/sausage modes). At resonance, curvature and separation between turns oscillate coherently, leading to effective contraction of the core region sampled by the fluid.
+
+                Conservation of circulation $\Gamma \approx 2\pi \rc \vnorm$ implies that if the effective radius experienced by the flow contracts by a factor $(1-\epsilon)$, $0<\epsilon\ll 1$, then the local swirl speed scales approximately as
+                \begin{equation}
+                    \lvert\vswirl\rvert \propto \frac{1}{\rc(1-\epsilon)}.
+                \end{equation}
+                Thus resonance enhances $\lvert\mathbf{u}\rvert^2$ and $\Delta P$ even before we consider mirrored configurations.
+
+%=========================================
+        \section{Zero--Vector / Max--Scalar: Mirrored Bifilar Design}
+%=========================================
+            \subsection{Vector cancellation and scalar addition}
+                A single resonant helical coil generates a nonzero net flow vector $\mathbf{u}_{\text{net}}$ and associated far--field vorticity and magnetic--like fields. To construct a pure scalar stressor, we employ a mirrored bifilar configuration: two geometrically identical filaments $A$ and $B$ occupying the same toroidal volume but with opposite chirality.
+
+                At a representative core point we approximate
+                \begin{align}
+                    \mathbf{u}_A &= \vswirl + \mathbf{v}_{\text{ind}},\\
+                    \mathbf{u}_B &= -\vswirl + \mathbf{v}_{\text{ind}},
+                \end{align}
+                where $\vswirl$ flips under chirality reversal while $\mathbf{v}_{\text{ind}}$ (e.g.\ axial flow) is approximately invariant. The net velocity is
+                \begin{equation}
+                    \mathbf{u}_{\text{total}} = \mathbf{u}_A + \mathbf{u}_B
+                    = 2\,\mathbf{v}_{\text{ind}}.
+                \end{equation}
+                By design, $\mathbf{v}_{\text{ind}}$ can be arranged to be small at external observation points (or to form a closed pattern with zero net circulation), so that
+                \begin{equation}
+                    \mathbf{u}_{\text{total}} \approx 0,
+                    \qquad
+                    \boldsymbol{\omega}_{\text{net}}\approx 0,
+                \end{equation}
+                and far--field vector observables are suppressed.
+
+                However, the scalar pressure deficit depends on the sum of squared speeds:
+                \begin{align}
+                    \Delta P_{\text{total}}
+                    &=
+                    \frac{1}{2}\,\rhof
+                    \left(\lvert\mathbf{u}_A\rvert^2+\lvert\mathbf{u}_B\rvert^2\right).
+                \end{align}
+                Expanding,
+                \begin{align}
+                    \lvert\mathbf{u}_A\rvert^2
+                    &= \vnorm^2 + \lvert\mathbf{v}_{\text{ind}}\rvert^2
+                    + 2\,\vswirl\cdot\mathbf{v}_{\text{ind}},\\
+                    \lvert\mathbf{u}_B\rvert^2
+                    &= \vnorm^2 + \lvert\mathbf{v}_{\text{ind}}\rvert^2
+                    - 2\,\vswirl\cdot\mathbf{v}_{\text{ind}},
+                \end{align}
+                so the cross terms cancel:
+                \begin{equation}
+                    \lvert\mathbf{u}_A\rvert^2+\lvert\mathbf{u}_B\rvert^2
+                    = 2\bigl(\vnorm^2 + \lvert\mathbf{v}_{\text{ind}}\rvert^2\bigr).
+                \end{equation}
+                Thus
+                \begin{equation} \label{eq:mirrored_general}
+                    \Delta P_{\text{total}}
+                    = \rhof\bigl(\vnorm^2 + \lvert\mathbf{v}_{\text{ind}}\rvert^2\bigr).
+                \end{equation}
+
+            \subsection{Resonant matching and amplification factors}
+                Near Kelvin resonance, it is natural to target
+                \begin{equation}
+                    \lvert\mathbf{v}_{\text{ind}}\rvert \approx \vnorm,
+                    \label{eq:matching_condition}
+                \end{equation}
+                i.e.\ induced velocities comparable to the intrinsic swirl. In that case,
+                \begin{equation}
+                    \Delta P_{\text{total}}
+                    \approx \rhof(\vnorm^2 + \vnorm^2)
+                    = 2\,\rhof\vnorm^2
+                    = 4\,\Delta P_{\text{base}}.
+                    \label{eq:DeltaP_mirrored_res}
+                \end{equation}
+                We can interpret the amplification hierarchy as
+                \begin{align}
+                    \Delta P_{\text{base}} &\sim \text{single, non--resonant swirl loop},\\
+                    \Delta P_{\text{coil,res}} &\sim 2\,\Delta P_{\text{base}}
+                    \quad\text{(single resonant helical coil)},\\
+                    \Delta P_{\text{mirrored,res}} &\sim 4\,\Delta P_{\text{base}}
+                    \quad\text{(mirrored resonant coil)}.
+                \end{align}
+                Numerically, using \eqref{eq:DeltaP_base_numeric},
+                \begin{align}
+                    \Delta P_{\text{mirrored,res}}
+                    &\approx 4\times 4.19\times 10^{5}\,\mathrm{Pa}
+                    \nonumber\\
+                    &\approx 1.68\times 10^{6}\,\mathrm{Pa},
+                    \label{eq:DeltaP_numeric_final}
+                \end{align}
+                corresponding to $\sim 16.8$ atmospheres of effective vacuum tension localized in the coil interior.
+
+%=========================================
+        \section{Toroidal $(p,q)$ Knot Implementation}
+%=========================================
+            \subsection{The $(5,12)$ torus knot and golden aspect}
+                We now embed the mirrored filaments in a toroidal knot geometry. A $(p,q)$ torus knot is a closed curve on a torus of major radius $R$ and minor radius $r$ that winds $p$ times poloidally and $q$ times toroidally before closing.\cite{Saffman1992} A convenient parameterization is
+                \begin{align}
+                    x(t) &= \bigl[R + r\cos(qt)\bigr]\cos(pt),\\
+                    y(t) &= \bigl[R + r\cos(qt)\bigr]\sin(pt),\\
+                    z(t) &= r\sin(qt),
+                \end{align}
+                with $t\in[0,2\pi]$. The arclength is
+                \begin{equation}
+                    L = \int_{0}^{2\pi}\bigl\lvert\dot{\mathbf{X}}(t)\bigr\rvert\,\dd t,
+                \end{equation}
+                evaluated numerically for given $(p,q,R,r)$.
+
+                We choose $(p,q)=(5,12)$ and impose a golden--ratio aspect
+                \begin{equation}
+                    \frac{r}{R} = \frac{1}{\phi},
+                    \qquad
+                    \phi = \frac{1+\sqrt{5}}{2}\approx 1.618,
+                \end{equation}
+                which prior SST work suggests minimizes self--inductance and curvature extremes. For a representative major radius
+                \begin{equation}
+                    R = 0.15\,\mathrm{m},
+                    \qquad
+                    r = \frac{R}{\phi} \approx 0.093\,\mathrm{m},
+                \end{equation}
+                numerical quadrature yields
+                \begin{equation}
+                    L \approx 8.4\,\mathrm{m},
+                    \label{eq:L_numeric}
+                \end{equation}
+                to within a few percent depending on parametrization and resolution. This defines the wire length of each filament in the Starship coil.
+
+            \subsection{Resonant frequency}
+                Using the wire--length resonance condition \eqref{eq:L_resonance} with $\vnorm\approx\vswirlval$ and $L\approx 8.43\,\mathrm{m}$,
+                \begin{align}
+                    f_{\text{res}}
+                    &\approx \frac{\vnorm}{L}
+                    \approx \frac{1.09384563\times 10^{6}\,\mathrm{m\,s^{-1}}}{8.43\,\mathrm{m}}
+                    \nonumber\\
+                    &\approx 1.30\times 10^{5}\,\mathrm{s^{-1}}
+                    \approx 1.30\times 10^{5}\,\mathrm{Hz},
+                \end{align}
+                so the fundamental Kelvin--coupled resonance occurs near $f_{\text{res}}\sim 130\,\mathrm{kHz}$ for this geometry. Higher harmonics at integer multiples of $f_{\text{res}}$ are expected, but the lowest mode is the most relevant for energy injection and geometric contraction.
+
+            \subsection{Diamond lattice and node structure}
+                When two mirrored $(5,12)$ filaments are wound bifilarly on the same torus, their projections on the surface form a ``diamond lattice'' of crossing points: at each crossing, tangential velocities cancel while pressure deficits from each filament add according to equation~\ref{eq:mirrored_general}. The pattern contains:
+                \begin{itemize}
+                    \item nodes of near--zero local flow (vector--quiet points),
+                    \item surrounding plaquettes of enhanced scalar stress, and
+                    \item an overall focusing of $\Delta P$ into the toroidal void (the ``Starship'' core).
+                \end{itemize}
+                From the outside, the coil behaves not as a propeller but as a hydrodynamic sink: it evacuates pressure from the center, establishing an external gradient that pulls nearby matter inward. In SST terms, the device carves a localized gravitational well out of the vacuum fluid.
+
+                Wire diameter $d_{\text{wire}}$ and spacing $\delta$ must be chosen to avoid choking the fluid, which would introduce effective viscosity and turbulence. A practical design constraint is
+                \begin{equation}
+                    \delta \gtrsim 0.618\,d_{\text{wire}},
+                \end{equation}
+                ensuring sufficient cross--section for smooth flow between adjacent turns. Litz wire or hollow conductors are natural candidates, as they maximize surface coupling while supporting high--frequency drive.
+
+%=========================================
+        \section{Core Stress Scale and Linearity Window}
+%=========================================
+            The SST Canon introduces a maximum swirl force $\Fswirlmax$ associated with a fundamental core cross--section:
+            \begin{equation}
+                \Fswirlmax \approx \Fswirlmaxval.
+            \end{equation}
+            If this force acts across the core area
+            \begin{equation}
+                A_{\text{core}} = \pi\rc^2,
+            \end{equation}
+            with $\rc\approx\rccoreval$, the corresponding maximum pressure scale is
+            \begin{equation}
+                P_{\text{max,core}} \equiv \frac{\Fswirlmax}{A_{\text{core}}}
+                = \frac{\Fswirlmax}{\pi\rc^2}.
+            \end{equation}
+            Numerically,
+            \begin{align}
+                A_{\text{core}}
+                &=
+                \pi(1.40897017\times 10^{-15}\,\mathrm{m})^2
+                \nonumber\\
+                &\approx 6.24\times 10^{-30}\,\mathrm{m^2},\\[4pt]
+                P_{\text{max,core}}
+                &\approx
+                \frac{29.053507\,\mathrm{N}}{6.24\times 10^{-30}\,\mathrm{m^2}}
+                \nonumber\\
+                &\approx 4.66\times 10^{30}\,\mathrm{Pa}.
+            \end{align}
+            Comparing \eqref{eq:DeltaP_numeric_final} with $P_{\text{max,core}}$,
+            \begin{equation}
+                \beta \equiv \frac{\Delta P_{\text{mirrored,res}}}{P_{\text{max,core}}}
+                \sim 3.6\times 10^{-25},
+            \end{equation}
+            so the Starship coil operates $\sim 25$ orders of magnitude below the canonical core stress scale. This justifies treating laboratory--scale resonant coils as linear perturbations of the SST vacuum and supports using standard vortex dynamics as a reliable approximation.
+
+            Dimensional consistency is immediate:
+            \begin{equation}
+            [\Delta P] = [\rhof][\mathbf{u}]^2
+            = \mathrm{kg\,m^{-3}}\cdot\mathrm{m^2\,s^{-2}}
+            = \mathrm{kg\,m^{-1}\,s^{-2}} = \mathrm{Pa}.
+            \end{equation}
+
+%=========================================
+        \section{Experimental Analogues and Falsifiable Predictions}
+%=========================================
+            \subsection{Classical fluid analogues}
+                Although direct manipulation of the SST vacuum is not currently feasible, the underlying vortex dynamics can be tested in classical fluids:
+                \begin{itemize}
+                    \item \textbf{Helical vortex coils}: Carefully generated helical vortices in water or air can be driven at Kelvin--like resonances, and the resulting axial pressure deficits can be measured via pressure probes or free--surface deformation.\cite{Saffman1992,HelicalVortexReview}
+                    \item \textbf{Mirrored vortex pairs}: Counter--rotating vortex rings or paired helical vortices arranged in a toroidal interaction region should exhibit suppressed far--field circulation but enhanced central pressure deficits relative to single--vortex configurations.
+                \end{itemize}
+                These experiments test the hydrodynamic core of the Zero--Vector / Max--Scalar mechanism without committing to SST's gravity mapping.
+
+            \subsection{Quantum fluid analogues}
+                Quantized vortices in Bose--Einstein condensates and superfluid helium provide higher--precision analogs. Kelvin waves and vortex reconnections have been observed in such systems, with dispersion relations matching the classical thin--filament form in the appropriate limit.\cite{Fetter2009} Engineering toroidal vortex knots and mirrored excitations would allow:
+                \begin{itemize}
+                    \item direct observation of density depletion (pressure deficit) in knot cores,
+                    \item mapping of resonance frequencies vs.\ geometry,
+                    \item tests of scalar stress amplification vs.\ vector field cancellation.
+                \end{itemize}
+                Agreement with the predicted scaling $\Delta P\propto\rhof\vnorm^2$ and the fourfold amplification for mirrored, resonant configurations would support the internal logic of the SST device model.
+
+            \subsection{Falsifiable SST predictions}
+                Within SST, the following statements are falsifiable in principle:
+                \begin{enumerate}
+                    \item A mirrored, resonant $(5,12)$ torus knot coil produces a central pressure deficit $\Delta P_{\text{mirrored,res}}\approx 4\,\Delta P_{\text{base}}$ under comparable circulation and core size.
+                    \item The dominant amplification peak occurs near $f_{\text{res}}\approx \vnorm/L$ with secondary peaks at integer multiples, consistent with Kelvin--wave structure.
+                    \item Far--field vorticity and magnetic analogs (e.g.\ external magnetic dipole moment in a wire implementation) are strongly suppressed compared to a single helical coil at the same drive current.
+                \end{enumerate}
+                Failure of these predictions in controlled analog systems would constrain SST's mapping between vorticity, pressure, and effective gravity.
+
+%=========================================
+        \section{Analogy for a 10-Year-Old}
+%=========================================
+            Imagine a very calm swimming pool. The water is flat and quiet, like a smooth blanket.
+
+            First, you spin a long rope in the water like a lasso. The spinning rope makes a whirl that pulls the water in a bit, like a bathtub drain. That one whirl is a small ``hole'' in the water pressure.
+
+            Next, you bend the rope into a doughnut shape and wind it around in a fancy knot that wraps around the doughnut many times in different directions. You spin this knotted rope and shake it at just the right rhythm so it wiggles in a standing pattern. Parts of the rope move closer together and farther apart over and over, making the water near the knot move faster and faster. The ``hole'' in the water gets deeper.
+
+            Finally, you take two ropes, make the same fancy doughnut knot with both, but spin one clockwise and the other counterclockwise. From far away, the splashes almost cancel and the pool still looks calm. But between the two ropes, the water is squeezed and stretched much more than before. Right in the middle of the doughnut, there is a spot where the water really wants to rush in. In SST, that special spot is like a small artificial gravity well: anything nearby feels pulled toward it, not because of magic, but because the ``water of space'' is stretched tight there.
+
+%=========================================
+        \section{Conclusion}
+%=========================================
+            We have fused general resonant coil analysis with topological knot geometry to propose a concrete SST device class: mirrored, Kelvin--tuned toroidal knot coils that realize topological vorticity confinement and scalar vacuum stress amplification. Starting from Bernoulli's principle and canonical SST constants, we quantified the base pressure deficit associated with a fundamental swirl loop and showed how Kelvin--wave self--resonance and geometric contraction can double this for a single helical coil. Mirroring two such coils in a bifilar configuration cancels far--field vector fields while driving scalar pressure deficits to approximately four times the base value.
+
+            Specializing to a $(5,12)$ torus knot with golden--ratio aspect ratio and $R=0.15\,\mathrm{m}$, we obtained a wire length $L\sim 8.4\,\mathrm{m}$, a natural resonance frequency $f_{\text{res}}\sim 130\,\mathrm{kHz}$, and a mirrored resonant pressure deficit $\Delta P\sim 1.7\times 10^{6}\,\mathrm{Pa}$, equivalent to $\sim 16$ atmospheres of vacuum tension in the toroidal void. Comparing this to the SST core stress bound set by $\Fswirlmax$ and $\rc$ demonstrates a wide linearity window in which standard vortex dynamics applies.
+
+            These results provide a structured pathway from SST's abstract fluid vacuum to experimentally tractable devices and analogs. Future work will include high--resolution numerical simulations of mirrored torus knots with realistic drive and dissipation, systematic exploration of different $(p,q)$ topologies, and explicit coupling models between swirl strings and electromagnetic coils to guide laboratory implementations.
+
+%=========================================
+            \begin{thebibliography}{99}
+
+                \bibitem{SSTCanon}
+                O.~Iskandarani,
+                \newblock ``Swirl String Theory (SST) Canon: Definitions and Constants,''
+                \newblock Internal manuscript and Zenodo preprint (2025).
+                \newblock doi:10.5281/zenodo.xxx.
+
+                \bibitem{Saffman1992}
+                P.~G. Saffman,
+                \newblock \emph{Vortex Dynamics},
+                \newblock Cambridge University Press, Cambridge (1992).
+                \newblock ISBN 978-0-521-47739-0.
+
+                \bibitem{Batchelor1967}
+                G.~K. Batchelor,
+                \newblock \emph{An Introduction to Fluid Dynamics},
+                \newblock Cambridge University Press, Cambridge (1967).
+                \newblock ISBN 0-521-04118-X.
+
+                \bibitem{Kelvin1880}
+                W.~Thomson (Lord Kelvin),
+                \newblock ``Vibrations of a columnar vortex,''
+                \newblock {\em Philos. Mag.} \textbf{10}, 155--168 (1880).
+                \newblock doi:10.1080/14786448008626912.
+
+                \bibitem{Tesla1894}
+                N.~Tesla,
+                \newblock ``Coil for Electro-Magnets,''
+                \newblock U.S. Patent 512{,}340 (1894).
+                \newblock Available at \url{https://patents.google.com/patent/US512340A}.
+
+                \bibitem{Bernoulli1738}
+                D.~Bernoulli,
+                \newblock \emph{Hydrodynamica},
+                \newblock Johann Reinhold Dulssekel, Strasbourg (1738).
+                \newblock (Modern English translation: Dover Publications, New York).
+
+                \bibitem{Fetter2009}
+                A.~L. Fetter,
+                \newblock ``Rotating trapped Bose-Einstein condensates,''
+                \newblock {\em Rev. Mod. Phys.} \textbf{81}, 647--691 (2009).
+                \newblock doi:10.1103/RevModPhys.81.647.
+
+                \bibitem{HelicalVortexReview}
+                Y.~Mitsudera, T.~Okuno, and T.~Okada,
+                \newblock ``Review of analytical approaches for simulating motions of helical vortex,''
+                \newblock {\em Front. Energy Res.} \textbf{10}, 817941 (2022).
+                \newblock doi:10.3389/fenrg.2022.817941.
+
+            \end{thebibliography}
+
+\end{document}

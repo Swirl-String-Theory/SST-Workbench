@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helicity-Constrained Stability: Interactive Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #1a202c;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Lora', serif;
+        }
+
+        .math-font {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+
+        .canvas-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .sector-badge {
+            transition: all 0.3s ease;
+        }
+        
+        .active-sector {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+
+        .dashed-circle {
+            stroke-dasharray: 10, 5;
+            animation: spin 10s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header / Abstract Section -->
+    <header class="bg-white border-b border-gray-200 py-8 px-4 md:px-12">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Helicity-Constrained Stability</h1>
+            <h2 class="text-xl text-gray-600 mb-4 serif italic">Beyond Energy Minimization</h2>
+            <p class="text-sm text-gray-500 mb-6">Based on the work of Omar Iskandarani (2026)</p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 text-left rounded shadow-sm">
+                <p class="text-gray-700 text-sm leading-relaxed">
+                    <span class="font-bold">Interactive Abstract:</span> Classical systems usually stabilize by minimizing energy. However, knotted vortex filaments in fluids persist far from energy minimums. Why? 
+                    <span class="font-semibold text-blue-700">Topological Obstruction.</span> 
+                    Conserved quantities like <span class="math-font">Helicity</span> prevent the knot from untying, trapping it in a stable state despite high energy.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl mx-auto w-full p-4 md:p-8 space-y-12">
+
+        <!-- MODULE 1: Helicity Composer -->
+        <section id="helicity-lab" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div>
+                <h3 class="text-2xl font-bold mb-4 border-b pb-2">1. The Helicity Formula</h3>
+                <p class="text-gray-600 mb-6 text-sm">
+                    Helicity (<span class="math-font">H</span>) measures the structural complexity of the flow. It is composed of Linking (<span class="math-font">Lk</span>), Twist (<span class="math-font">Tw</span>), and Writhe (<span class="math-font">Wr</span>).
+                    <br><br>
+                    <code class="bg-gray-100 p-1 rounded text-xs">H = &Gamma;² (Lk + Tw + Wr)</code>
+                </p>
+
+                <div class="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <!-- Twist Control -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-semibold text-green-600">Twist (Tw)</label>
+                            <span id="val-tw" class="text-sm font-mono">0.0</span>
+                        </div>
+                        <input type="range" id="input-tw" min="-5" max="5" step="0.1" value="0">
+                        <p class="text-xs text-gray-400 mt-1">Internal rotation of the filament ribbons.</p>
+                    </div>
+
+                    <!-- Writhe Control -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-semibold text-orange-500">Writhe (Wr)</label>
+                            <span id="val-wr" class="text-sm font-mono">0.0</span>
+                        </div>
+                        <input type="range" id="input-wr" min="0" max="5" step="0.1" value="0">
+                        <p class="text-xs text-gray-400 mt-1">Coiling of the filament axis (geometry).</p>
+                    </div>
+
+                    <!-- Link Control -->
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-semibold text-blue-600">Linking Number (Lk)</label>
+                            <span id="val-lk" class="text-sm font-mono">0</span>
+                        </div>
+                        <input type="range" id="input-lk" min="0" max="3" step="1" value="0">
+                        <p class="text-xs text-gray-400 mt-1">Number of times filaments wind around each other.</p>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-800">Total Helicity (H)</span>
+                            <span id="total-helicity" class="text-2xl font-mono font-bold text-indigo-600">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Panel -->
+            <div class="flex flex-col items-center justify-center bg-gray-50 rounded-xl p-8 border border-gray-200 h-full min-h-[400px] relative overflow-hidden">
+                <div id="visual-container" class="relative w-64 h-64">
+                    <!-- SVG Visualization injected by JS -->
+                    <svg id="filament-svg" viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+                        <!-- Dynamic Content -->
+                    </svg>
+                </div>
+                <div class="mt-4 text-center">
+                    <p id="visual-caption" class="text-sm font-medium text-gray-500">Unknotted Ring</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: Stability Landscape Game -->
+        <section id="stability-game" class="space-y-6">
+            <div class="text-center max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold mb-2">2. The Stability Trap</h3>
+                <p class="text-gray-600 text-sm">
+                    In ideal flows, topology creates "walls" in the energy landscape. Even if a lower energy state exists (the unknot), the system cannot reach it without breaking the rules (reconnection).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Controls -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+                        <h4 class="font-bold text-gray-800 mb-4">Simulation Controls</h4>
+                        
+                        <div class="space-y-4">
+                            <button id="btn-perturb" class="w-full py-2 px-4 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-semibold rounded transition flex items-center justify-center gap-2">
+                                <span>⚡ Perturb System</span>
+                            </button>
+                            <p class="text-xs text-gray-500">Adds kinetic energy (random noise) to the state.</p>
+
+                            <button id="btn-relax" class="w-full py-2 px-4 bg-green-100 hover:bg-green-200 text-green-800 font-semibold rounded transition flex items-center justify-center gap-2">
+                                <span>🌊 Viscous Relaxation</span>
+                            </button>
+                            <p class="text-xs text-gray-500">Damps energy, trying to find a minimum.</p>
+
+                            <hr class="border-gray-100">
+
+                            <button id="btn-reconnect" class="w-full py-2 px-4 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded transition flex items-center justify-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                <span>✂️ Force Reconnection</span>
+                            </button>
+                            <p class="text-xs text-gray-500">The only way to escape a topological trap.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h5 class="text-xs font-bold text-blue-800 uppercase tracking-wide mb-2">Current State</h5>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-blue-700">Energy:</span>
+                            <div class="w-24 h-2 bg-blue-200 rounded-full overflow-hidden">
+                                <div id="energy-bar" class="h-full bg-blue-600" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-blue-700">Topology:</span>
+                            <span id="topology-status" class="text-sm font-bold text-blue-900">Unknotted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Canvas -->
+                <div class="lg:col-span-2 relative">
+                    <canvas id="stability-canvas" width="600" height="350" class="w-full h-auto bg-white rounded-lg border border-gray-200 shadow-inner cursor-crosshair"></canvas>
+                    
+                    <!-- Overlay Labels -->
+                    <div class="absolute top-4 left-4 text-xs text-gray-400 font-mono">Potential Energy V(x)</div>
+                    <div class="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">Configuration Space</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 3: Comparison -->
+        <section class="bg-gray-900 text-white rounded-2xl p-8 md:p-12 text-center">
+            <h3 class="text-2xl font-bold mb-6 serif">Why This Matters</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h4 class="text-green-400 font-bold mb-2">Energetic Stability</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        The "standard" view. Systems evolve until forces balance. Like a pendulum stopping at the bottom. This requires energy dissipation.
+                    </p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-6xl">∞</div>
+                    <h4 class="text-purple-400 font-bold mb-2">Topological Stability</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        The "fluid" view. The system is stuck in a high-energy state because the path to the bottom is blocked by conservation laws (Helicity). It's stable not because it's at the bottom, but because it's <span class="italic">trapped</span>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12 py-8">
+        <div class="max-w-4xl mx-auto text-center text-gray-500 text-sm">
+            <p>&copy; 2026 Interactive Artifact generated for "Helicity-Constrained Stability Beyond Energy Minimization"</p>
+            <p class="mt-2 text-xs">No external APIs were used. Runs entirely in browser.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- MODULE 1: HELICITY VISUALIZER ---
+        const inputs = {
+            tw: document.getElementById('input-tw'),
+            wr: document.getElementById('input-wr'),
+            lk: document.getElementById('input-lk')
+        };
+        const displays = {
+            tw: document.getElementById('val-tw'),
+            wr: document.getElementById('val-wr'),
+            lk: document.getElementById('val-lk'),
+            total: document.getElementById('total-helicity'),
+            svg: document.getElementById('filament-svg'),
+            caption: document.getElementById('visual-caption')
+        };
+
+        function updateHelicity() {
+            const tw = parseFloat(inputs.tw.value);
+            const wr = parseFloat(inputs.wr.value);
+            const lk = parseInt(inputs.lk.value);
+            
+            // Update value displays
+            displays.tw.innerText = tw.toFixed(1);
+            displays.wr.innerText = wr.toFixed(1);
+            displays.lk.innerText = lk;
+
+            // Simple formula assumption: Gamma = 1
+            const H = (lk + tw + wr).toFixed(2);
+            displays.total.innerText = H;
+
+            renderFilament(tw, wr, lk);
+        }
+
+        function renderFilament(tw, wr, lk) {
+            const svg = displays.svg;
+            svg.innerHTML = ''; // Clear
+
+            const cx = 100, cy = 100;
+            const r = 60;
+
+            // 1. Handle Writhe (Deformation of the loop)
+            // We simulate writhe by creating a Lissajous-like path or figure-8
+            let pathD = "";
+            let points = [];
+            const segments = 100;
+            
+            // Writhe factor affects the "folding" of the circle
+            const fold = wr * 0.5; 
+
+            for(let i=0; i<=segments; i++) {
+                const theta = (i / segments) * Math.PI * 2;
+                // Parametric equation for a deformed circle
+                const x = cx + r * Math.cos(theta);
+                const y = cy + r * Math.sin(theta) + (fold * 20 * Math.sin(2 * theta)); // Figure 8 distortion
+                points.push({x, y});
+            }
+
+            // Construct Path String
+            pathD = `M ${points[0].x} ${points[0].y}`;
+            for(let i=1; i<points.length; i++) {
+                pathD += ` L ${points[i].x} ${points[i].y}`;
+            }
+            pathD += " Z";
+
+            // 2. Handle Twist (Stroke Dash Array animation speed/density)
+            // We visualize twist as a dashed pattern on the tube
+            const dashArray = tw !== 0 ? "10, 5" : "none";
+            const strokeColor = tw > 0 ? "#16a34a" : (tw < 0 ? "#dc2626" : "#4f46e5");
+            
+            // Create main loop
+            const loop = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            loop.setAttribute("d", pathD);
+            loop.setAttribute("fill", "none");
+            loop.setAttribute("stroke", strokeColor);
+            loop.setAttribute("stroke-width", "8");
+            loop.setAttribute("stroke-linecap", "round");
+            if(tw !== 0) {
+                loop.setAttribute("stroke-dasharray", "10, 5");
+                // Add animation for twist
+                const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                animate.setAttribute("attributeName", "stroke-dashoffset");
+                animate.setAttribute("from", "0");
+                animate.setAttribute("to", "100");
+                animate.setAttribute("dur", `${Math.max(0.5, 5 - Math.abs(tw))}s`); // Faster twist = faster animation
+                animate.setAttribute("repeatCount", "indefinite");
+                loop.appendChild(animate);
+            }
+            svg.appendChild(loop);
+
+            // 3. Handle Link (Second Loop)
+            if (lk > 0) {
+                // Draw secondary rings based on linking number
+                for(let i=0; i<lk; i++) {
+                    const offset = (i+1) * 15;
+                    const linkCircle = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+                    linkCircle.setAttribute("cx", cx + r); 
+                    linkCircle.setAttribute("cy", cy);
+                    linkCircle.setAttribute("rx", 20);
+                    linkCircle.setAttribute("ry", 40);
+                    linkCircle.setAttribute("fill", "none");
+                    linkCircle.setAttribute("stroke", "#ea580c"); // Orange for linked
+                    linkCircle.setAttribute("stroke-width", "4");
+                    // Simple depth hack: draw part of it transparent to simulate going "behind"
+                    // For this demo, we just draw it on top
+                    svg.appendChild(linkCircle);
+                }
+                displays.caption.innerText = `Knotted/Linked Structure (Link: ${lk})`;
+            } else if (Math.abs(wr) > 1) {
+                displays.caption.innerText = "Coiled Filament (High Writhe)";
+            } else if (Math.abs(tw) > 1) {
+                displays.caption.innerText = "Twisted Flux Tube";
+            } else {
+                displays.caption.innerText = "Unknotted Vortex Ring";
+            }
+        }
+
+        // Initialize Module 1
+        Object.values(inputs).forEach(input => input.addEventListener('input', updateHelicity));
+        updateHelicity();
+
+
+        // --- MODULE 2: STABILITY GAME (CANVAS PHYSICS) ---
+        const canvas = document.getElementById('stability-canvas');
+        const ctx = canvas.getContext('2d');
+        const btnPerturb = document.getElementById('btn-perturb');
+        const btnRelax = document.getElementById('btn-relax');
+        const btnReconnect = document.getElementById('btn-reconnect');
+        const energyBar = document.getElementById('energy-bar');
+        const statusText = document.getElementById('topology-status');
+
+        let particle = { x: 100, y: 100, vx: 0, vy: 0 };
+        let targetX = 100; // The local minimum
+        let topologyState = 0; // 0 = Unknot (Global Min), 1 = Trefoil (Local Min), 2 = Figure8 (Higher Local Min)
+        let isTrapped = false;
+        let barrierHeight = 0;
+        
+        // Physics Constants
+        const GRAVITY = 0.5;
+        const FRICTION = 0.95;
+        const DAMPING = 0.98;
+
+        // Landscape Definition
+        // We define the landscape as a function Y = f(X)
+        // Global Min is at X = 100.
+        // Local Min (Knot) is at X = 400.
+        // Barrier is at X = 250.
+        
+        function getPotentialY(x) {
+            // Base parabola for global well
+            let y = 0.003 * Math.pow(x - 100, 2) + 250;
+
+            // If we have topological complexity, we add a "barrier" and a second well
+            // We simulate the barrier using a Gaussian bump and the second well as another parabola
+            
+            // Barrier at 250
+            const barrier = 150 * Math.exp(-Math.pow(x - 250, 2) / 2000);
+            
+            // Second Well at 450 (The Knot Sector)
+            const secondWell = -80 * Math.exp(-Math.pow(x - 450, 2) / 5000);
+
+            return y - barrier + secondWell;
+        }
+
+        // We need a simpler physics model for the game feel:
+        // The particle is constrained to the curve.
+        // x is the only degree of freedom really, y is calculated.
+        
+        let pX = 450; // Start in the knotted state (right side)
+        let pV = 0;   // Velocity
+        let pEnergy = 0; // Kinetic Energy
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Landscape
+            ctx.beginPath();
+            ctx.moveTo(0, getPotentialY(0));
+            for(let x=0; x<=canvas.width; x+=5) {
+                ctx.lineTo(x, getPotentialY(x));
+            }
+            ctx.strokeStyle = "#3b82f6";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Fill under curve
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+            ctx.fill();
+
+            // Draw Sectors
+            ctx.fillStyle = "rgba(0,0,0,0.05)";
+            ctx.fillRect(250, 0, 2, canvas.height); // Barrier line
+            ctx.font = "12px Inter";
+            ctx.fillStyle = "#64748b";
+            ctx.fillText("Sector A (Unknot)", 80, 50);
+            ctx.fillText("Sector B (Knot)", 400, 50);
+            ctx.fillText("Topological Barrier", 215, 30);
+
+            // 2. Physics Update
+            // Calculate slope (force)
+            const delta = 1;
+            const y1 = getPotentialY(pX);
+            const y2 = getPotentialY(pX + delta);
+            const slope = (y2 - y1) / delta;
+            
+            // Force = -Slope
+            const force = -slope * 0.5;
+            
+            pV += force;
+            pV *= FRICTION; // Air resistance
+            pX += pV;
+
+            // Boundary checks
+            if(pX < 0) { pX = 0; pV *= -0.5; }
+            if(pX > canvas.width) { pX = canvas.width; pV *= -0.5; }
+
+            // TOPOLOGICAL CONSTRAINT LOGIC
+            // If barrier exists (topologyState == 1), prevent crossing X=250
+            if (isTrapped) {
+                // If trying to cross from Right to Left
+                if (pX < 250 && pX + pV < 250 && pX > 200) {
+                     // Bounce back hard
+                     pX = 251;
+                     pV = Math.abs(pV) * 0.8; 
+                }
+            }
+
+            // 3. Draw Particle
+            const ballY = getPotentialY(pX);
+            ctx.beginPath();
+            ctx.arc(pX, ballY - 10, 10, 0, Math.PI * 2);
+            
+            // Color based on state
+            if (pX > 250) {
+                ctx.fillStyle = "#ea580c"; // Orange (Knotted)
+                statusText.innerText = "Knotted (Sector B)";
+                statusText.className = "text-sm font-bold text-orange-600";
+                btnReconnect.disabled = false;
+                btnReconnect.classList.remove('opacity-50', 'cursor-not-allowed');
+                isTrapped = true;
+            } else {
+                ctx.fillStyle = "#16a34a"; // Green (Unknot)
+                statusText.innerText = "Unknotted (Sector A)";
+                statusText.className = "text-sm font-bold text-green-600";
+                btnReconnect.disabled = true;
+                btnReconnect.classList.add('opacity-50', 'cursor-not-allowed');
+                isTrapped = false;
+            }
+            
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Update UI
+            const speed = Math.abs(pV);
+            const energyPercent = Math.min(speed * 5, 100);
+            energyBar.style.width = `${energyPercent}%`;
+            if(speed > 10) energyBar.style.backgroundColor = "#ef4444";
+            else energyBar.style.backgroundColor = "#2563eb";
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Controls
+        btnPerturb.addEventListener('click', () => {
+            // Add random velocity
+            pV += (Math.random() - 0.5) * 15;
+            // Also lift it slightly to simulate thermal jump
+            // But in this 1D model velocity is enough
+        });
+
+        btnRelax.addEventListener('click', () => {
+            // Heavy friction
+            const relaxInterval = setInterval(() => {
+                pV *= 0.8;
+                if(Math.abs(pV) < 0.1) clearInterval(relaxInterval);
+            }, 50);
+        });
+
+        btnReconnect.addEventListener('click', () => {
+            // "Tunnel" through the barrier
+            if(pX > 250) {
+                // Teleport effect
+                ctx.fillStyle = "white";
+                ctx.fillRect(0,0,canvas.width, canvas.height);
+                
+                pX = 200; // Move to left side
+                pV = -5; // Push into the well
+                isTrapped = false; // Temporarily disable trap logic logic handled by X coord mostly
+            }
+        });
+
+        // Start Game
+        gameLoop();
+
+    </script>
+</body>
+</html>

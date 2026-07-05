@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faraday Rotation: Dispersive Model Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Merriweather', serif;
+        }
+
+        .math-font {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            margin-top: -6px;
+        }
+
+        .slider-track::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .canvas-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .equation-box {
+            background: #f1f5f9;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.1rem;
+        }
+        
+        .panel {
+            transition: all 0.3s ease;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Faraday Rotation Virtual Lab</h1>
+                <p class="text-sm text-slate-500">Based on "A Cutoff-Sensitive Dispersive Model" by O. Iskandarani</p>
+            </div>
+            <div class="hidden md:block">
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">Interactive Physics</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Controls & Theory -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Abstract / Intro -->
+            <div class="bg-white p-5 rounded-lg shadow-sm border border-slate-200">
+                <h2 class="text-lg font-semibold mb-2">Model Parameters</h2>
+                <p class="text-sm text-slate-600 mb-4">
+                    Adjust the physical properties of the medium and the magnetic field to observe the effect on the Verdet constant $\mathcal{V}(\omega)$ and polarization rotation.
+                </p>
+
+                <!-- Presets -->
+                <div class="flex gap-2 mb-4">
+                    <button onclick="app.loadPreset('silica')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-medium rounded border border-slate-300 transition">Preset: Silica Glass</button>
+                    <button onclick="app.loadPreset('high_verdet')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-medium rounded border border-slate-300 transition">Preset: High $\mathcal{V}$ Material</button>
+                </div>
+
+                <!-- Controls -->
+                <div class="space-y-4">
+                    
+                    <div class="control-group">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Current Wavelength ($\lambda$)</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl font-mono text-blue-600" id="val-lambda">633</span>
+                            <span class="text-sm text-slate-400">nm</span>
+                        </div>
+                        <input type="range" id="input-lambda" min="200" max="1600" step="1" value="633" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                        <div class="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>UV (200nm)</span>
+                            <span>IR (1600nm)</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Magnetic Field ($B$)</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xl font-mono text-slate-700" id="val-b">1.0</span>
+                            <span class="text-sm text-slate-400">Tesla</span>
+                        </div>
+                        <input type="range" id="input-b" min="0" max="10" step="0.1" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Medium Length ($L$)</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xl font-mono text-slate-700" id="val-l">0.10</span>
+                            <span class="text-sm text-slate-400">meters</span>
+                        </div>
+                        <input type="range" id="input-l" min="0.01" max="1.0" step="0.01" value="0.10" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                    </div>
+
+                    <div class="border-t border-slate-200 my-4 pt-4">
+                        <h3 class="text-sm font-semibold text-slate-800 mb-3">Microscopic Parameters</h3>
+                        
+                        <div class="mb-3">
+                            <label class="flex justify-between text-xs text-slate-600 mb-1">
+                                <span>Resonance ($\omega_*$)</span>
+                                <span class="font-mono" id="val-omega">1.57e16</span>
+                            </label>
+                            <input type="range" id="input-omega" min="0.5" max="5.0" step="0.01" value="1.57" class="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1">Scale: $\times 10^{16}$ rad/s</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="flex justify-between text-xs text-slate-600 mb-1">
+                                <span>Strength ($\eta S$)</span>
+                                <span class="font-mono" id="val-s">2.30e32</span>
+                            </label>
+                            <input type="range" id="input-s" min="0.1" max="10.0" step="0.1" value="2.30" class="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1">Scale: $\times 10^{32}$ s⁻²</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Math Box -->
+            <div class="equation-box rounded-lg text-sm">
+                <p class="mb-2 font-bold text-slate-700">Verdet Constant Model:</p>
+                <div class="text-center mb-3">
+                    $\mathcal{V}(\omega) \approx \frac{\eta e \omega S \omega_*}{2 m_e c n_0} \text{Re}\left[\frac{1}{D(\omega)^2}\right]$
+                </div>
+                <p class="text-xs text-slate-500">
+                    Where $D(\omega) = \omega_*^2 - \omega^2 - i\gamma\omega$. This model captures the high-frequency cutoff $\omega_*$ effect on rotation.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Visualization -->
+        <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Visualizer Canvas -->
+            <div class="canvas-container p-4 relative overflow-hidden bg-slate-900">
+                <div class="absolute top-4 left-4 z-10">
+                    <span class="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded backdrop-blur-sm">REAL-TIME SIMULATION</span>
+                </div>
+                <div class="absolute top-4 right-4 z-10 text-right">
+                    <div class="text-white text-2xl font-mono font-bold" id="readout-theta">0.00°</div>
+                    <div class="text-slate-400 text-xs">Rotation Angle ($\theta$)</div>
+                </div>
+                <canvas id="simCanvas" class="w-full h-64 md:h-80 block"></canvas>
+                
+                <!-- Legend -->
+                <div class="flex justify-center gap-6 mt-2 text-xs text-slate-400">
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-blue-500"></div> E-Field Vector</div>
+                    <div class="flex items-center gap-1"><div class="w-8 h-1 bg-slate-700 border border-slate-500"></div> Medium</div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-1 bg-green-500"></div> B-Field</div>
+                </div>
+            </div>
+
+            <!-- Graph Canvas -->
+            <div class="canvas-container p-6">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Spectral Response</h3>
+                    <div class="text-right">
+                        <div class="text-xl font-mono font-bold text-blue-600" id="readout-verdet">0.00</div>
+                        <div class="text-xs text-slate-500">Verdet Constant (rad T⁻¹ m⁻¹)</div>
+                    </div>
+                </div>
+                <canvas id="graphCanvas" class="w-full h-64 block"></canvas>
+                <p class="text-center text-xs text-slate-400 mt-2">Wavelength $\lambda$ (nm)</p>
+            </div>
+
+            <!-- Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Transparent Limit Check</h4>
+                    <p class="text-xs text-slate-600 mb-2">
+                        According to Eq (31), in the transparent limit, $\mathcal{V}(\omega) \propto \omega / (\omega_*^2 - \omega^2)$.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <div class="h-2 flex-grow bg-slate-100 rounded-full overflow-hidden">
+                            <div id="limit-bar" class="h-full bg-green-500 w-0 transition-all duration-300"></div>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500" id="limit-text">0%</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Proximity to resonance (100% = Absorption)</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <h4 class="font-semibold text-sm text-slate-700 mb-2">Silica Consistency</h4>
+                    <p class="text-xs text-slate-600">
+                        The model predicts $\mathcal{V}(193\text{nm}) / \mathcal{V}(1523\text{nm}) \approx 130$.
+                        <br>
+                        Current Ratio: <span class="font-mono font-bold text-blue-600" id="ratio-readout">--</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- Physics Constants (SI) ---
+        const C = 299792458; // Speed of light
+        const E_CHARGE = 1.60217663e-19;
+        const M_ELECTRON = 9.10938356e-31;
+        const N0 = 1.45; // Base refractive index (approx for silica)
+
+        // --- State Management ---
+        const state = {
+            lambda: 633, // nm
+            B: 1.0, // Tesla
+            L: 0.1, // meters
+            omegaStarBase: 1.57, // x 10^16
+            etaSBase: 2.30, // x 10^32
+            gamma: 5.0e13,
+            
+            get omegaStar() { return this.omegaStarBase * 1e16; },
+            get etaS() { return this.etaSBase * 1e32; },
+            
+            // Derived
+            omega: 0,
+            verdet: 0,
+            theta: 0
+        };
+
+        // --- Physics Engine ---
+        function calculatePhysics() {
+            // Convert lambda to angular frequency omega
+            // w = 2*pi*c / lambda
+            const lambdaMeters = state.lambda * 1e-9;
+            state.omega = (2 * Math.PI * C) / lambdaMeters;
+
+            const w = state.omega;
+            const w_star = state.omegaStar;
+            const D_real = (w_star * w_star) - (w * w);
+            const D_imag = -state.gamma * w;
+            
+            // Complex denominator D^2 = (Dr + iDi)^2 = (Dr^2 - Di^2) + i(2DrDi)
+            // We need Re[1/D^2] = Re[ (Dr^2 - Di^2 - i2DrDi) / |D^2|^2 ] ... actually easier:
+            // 1/D = D* / |D|^2.
+            // Let Z = D^2. We need Re[1/Z] = Re[Z*]/|Z|^2 = Re[Z]/|Z|^2.
+            // Z = (Dr + iDi)^2 = (Dr^2 - Di^2) + i(2*Dr*Di).
+            // Re[Z] = Dr^2 - Di^2.
+            // |Z|^2 = (Dr^2 + Di^2)^2.
+            
+            const Dr2 = D_real * D_real;
+            const Di2 = D_imag * D_imag;
+            const magD2 = Dr2 + Di2; // |D|^2
+            const magZ2 = magD2 * magD2; // |D^2|^2 = |D|^4
+            
+            const re_inv_D2 = (Dr2 - Di2) / magZ2;
+
+            // Eq (15): V(w) = (eta * e * w * S * w_star) / (2 * me * c * n0) * Re[1/D^2]
+            // Group (eta * S)
+            const prefactor = (E_CHARGE * w * state.etaS * w_star) / (2 * M_ELECTRON * C * N0);
+            
+            state.verdet = prefactor * re_inv_D2;
+            state.theta = state.verdet * state.B * state.L; // Radians
+        }
+
+        // --- Visualizer (Canvas) ---
+        const simCanvas = document.getElementById('simCanvas');
+        const simCtx = simCanvas.getContext('2d');
+        let animationFrameId;
+        let time = 0;
+
+        function resizeCanvas(canvas) {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height; // Use CSS height
+        }
+
+        function drawSimulation() {
+            const w = simCanvas.width;
+            const h = simCanvas.height;
+            const cy = h / 2;
+            
+            simCtx.clearRect(0, 0, w, h);
+
+            // Draw Medium Block
+            const blockStart = w * 0.25;
+            const blockEnd = w * 0.75;
+            const blockWidth = blockEnd - blockStart;
+            
+            // Magnetic Field Lines (Background)
+            simCtx.strokeStyle = 'rgba(34, 197, 94, 0.2)'; // Green, faint
+            simCtx.lineWidth = 2;
+            const bFieldDensity = Math.max(2, Math.floor(state.B * 5));
+            for(let i=0; i<bFieldDensity; i++) {
+                const y = (h/(bFieldDensity+1)) * (i+1);
+                simCtx.beginPath();
+                simCtx.moveTo(blockStart - 20, y);
+                simCtx.lineTo(blockEnd + 20, y);
+                simCtx.stroke();
+                // Arrowhead
+                simCtx.beginPath();
+                simCtx.moveTo(blockEnd + 15, y - 3);
+                simCtx.lineTo(blockEnd + 20, y);
+                simCtx.lineTo(blockEnd + 15, y + 3);
+                simCtx.stroke();
+            }
+
+            // Draw Glass Block
+            const grad = simCtx.createLinearGradient(blockStart, 0, blockEnd, 0);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+            grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+            grad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+            simCtx.fillStyle = grad;
+            simCtx.fillRect(blockStart, 0, blockWidth, h);
+            simCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            simCtx.lineWidth = 1;
+            simCtx.strokeRect(blockStart, 0, blockWidth, h);
+            
+            // Draw Optical Axis
+            simCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            simCtx.setLineDash([5, 5]);
+            simCtx.beginPath();
+            simCtx.moveTo(0, cy);
+            simCtx.lineTo(w, cy);
+            simCtx.stroke();
+            simCtx.setLineDash([]);
+
+            // --- Wave Simulation ---
+            // We draw a "ribbon" representing the polarization plane.
+            // Input: Vertical polarization.
+            // Inside: Twists.
+            // Output: Rotated.
+            
+            const points = 200;
+            const lambdaPx = w / 4; // Visual wavelength
+            const amplitude = h * 0.3;
+            
+            simCtx.lineWidth = 2;
+            
+            // Color based on wavelength
+            let waveColor = `hsl(${280 - (state.lambda - 200) * 0.2}, 100%, 70%)`;
+            if (state.lambda > 700) waveColor = '#ef4444'; // IR red
+            if (state.lambda < 400) waveColor = '#a855f7'; // UV purple
+            
+            simCtx.strokeStyle = waveColor;
+            simCtx.beginPath();
+
+            let currentAngle = 0;
+            const totalRotation = state.theta; // Total rotation in radians
+
+            for (let i = 0; i <= points; i++) {
+                const x = (i / points) * w;
+                
+                // Calculate local rotation angle
+                let localAngle = 0;
+                if (x > blockStart && x < blockEnd) {
+                    const progress = (x - blockStart) / blockWidth;
+                    localAngle = progress * totalRotation;
+                } else if (x >= blockEnd) {
+                    localAngle = totalRotation;
+                }
+
+                // Wave oscillation
+                const phase = (x / lambdaPx) * 2 * Math.PI - time;
+                const osc = Math.sin(phase) * amplitude;
+
+                // Project 3D rotation onto 2D plane
+                // Vertical polarization starts at angle 0 (up/down on screen is Y)
+                // Actually, let's say Vertical is Y. 
+                // Rotated vector: y' = y*cos(theta), z' = y*sin(theta) (z is depth)
+                // We visualize depth by perspective or just y'.
+                // To make it clear, let's draw the "envelope" or the vector tip.
+                
+                // Simple visualization: The wave oscillates in a plane. That plane rotates.
+                // We draw the projection of the oscillation on the screen Y axis.
+                // Screen Y = osc * cos(localAngle)
+                
+                const y = cy + osc * Math.cos(localAngle);
+                
+                if (i === 0) simCtx.moveTo(x, y);
+                else simCtx.lineTo(x, y);
+            }
+            simCtx.stroke();
+
+            // Draw Polarization Vectors (Arrows) at key points
+            drawPolarizationArrow(w * 0.15, cy, 0, amplitude, waveColor, "Input");
+            drawPolarizationArrow(w * 0.5, cy, totalRotation * 0.5, amplitude, waveColor, null);
+            drawPolarizationArrow(w * 0.85, cy, totalRotation, amplitude, waveColor, "Output");
+
+            time += 0.15; // Animation speed
+            animationFrameId = requestAnimationFrame(drawSimulation);
+        }
+
+        function drawPolarizationArrow(x, cy, angle, amp, color, label) {
+            // Draw a circle representing the cross-section
+            simCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+            simCtx.lineWidth = 1;
+            simCtx.beginPath();
+            simCtx.arc(x, cy, amp * 1.2, 0, Math.PI * 2);
+            simCtx.stroke();
+
+            // Draw the axis of polarization
+            const dx = Math.sin(angle) * amp; // Visual X offset for "3D" effect
+            const dy = Math.cos(angle) * amp; // Visual Y offset
+            
+            simCtx.strokeStyle = color;
+            simCtx.lineWidth = 3;
+            simCtx.beginPath();
+            simCtx.moveTo(x - dx * 0.3, cy - dy); // Flatten x slightly for perspective
+            simCtx.lineTo(x + dx * 0.3, cy + dy);
+            simCtx.stroke();
+
+            if (label) {
+                simCtx.fillStyle = 'white';
+                simCtx.font = '10px Inter';
+                simCtx.textAlign = 'center';
+                simCtx.fillText(label, x, cy + amp * 1.5);
+                
+                if (label === "Output") {
+                    const deg = (angle * 180 / Math.PI).toFixed(1);
+                    simCtx.fillStyle = '#fbbf24';
+                    simCtx.fillText(`${deg}°`, x, cy - amp * 1.5);
+                }
+            }
+        }
+
+        // --- Graphing (Canvas) ---
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas.getContext('2d');
+
+        function drawGraph() {
+            const w = graphCanvas.width;
+            const h = graphCanvas.height;
+            const padding = 40;
+            
+            graphCtx.clearRect(0, 0, w, h);
+            
+            // Axes
+            graphCtx.strokeStyle = '#94a3b8';
+            graphCtx.lineWidth = 1;
+            graphCtx.beginPath();
+            graphCtx.moveTo(padding, h - padding);
+            graphCtx.lineTo(w - padding, h - padding); // X axis
+            graphCtx.moveTo(padding, h - padding);
+            graphCtx.lineTo(padding, padding); // Y axis
+            graphCtx.stroke();
+
+            // Labels
+            graphCtx.fillStyle = '#64748b';
+            graphCtx.font = '10px Inter';
+            graphCtx.textAlign = 'center';
+            graphCtx.fillText('200', padding, h - padding + 15);
+            graphCtx.fillText('1600', w - padding, h - padding + 15);
+            graphCtx.textAlign = 'right';
+            graphCtx.fillText('0', padding - 5, h - padding);
+            
+            // Calculate Curve Points
+            const points = [];
+            let maxV = 0;
+            
+            // We scan from 200nm to 1600nm
+            for (let lambda = 200; lambda <= 1600; lambda += 5) {
+                // Local calc
+                const omega = (2 * Math.PI * C) / (lambda * 1e-9);
+                const w_star = state.omegaStar;
+                const D_real = (w_star * w_star) - (omega * omega);
+                const D_imag = -state.gamma * omega;
+                const magD2 = D_real*D_real + D_imag*D_imag;
+                const magZ2 = magD2 * magD2;
+                const re_inv_D2 = (D_real*D_real - D_imag*D_imag) / magZ2;
+                const prefactor = (E_CHARGE * omega * state.etaS * w_star) / (2 * M_ELECTRON * C * N0);
+                const V = prefactor * re_inv_D2;
+                
+                points.push({lambda, V});
+                if (Math.abs(V) > maxV) maxV = Math.abs(V);
+            }
+
+            // Scale factor
+            // Prevent division by zero or tiny scales
+            if (maxV === 0) maxV = 1;
+            const scaleY = (h - 2 * padding) / (maxV * 1.1);
+            const scaleX = (w - 2 * padding) / (1600 - 200);
+
+            graphCtx.textAlign = 'right';
+            graphCtx.fillText(maxV.toExponential(1), padding - 5, padding);
+
+            // Draw Curve
+            graphCtx.beginPath();
+            graphCtx.strokeStyle = '#3b82f6';
+            graphCtx.lineWidth = 2;
+            
+            points.forEach((p, i) => {
+                const x = padding + (p.lambda - 200) * scaleX;
+                const y = (h - padding) - (p.V * scaleY); // Assumes positive V mostly
+                if (i === 0) graphCtx.moveTo(x, y);
+                else graphCtx.lineTo(x, y);
+            });
+            graphCtx.stroke();
+
+            // Draw Current Position Indicator
+            const currentX = padding + (state.lambda - 200) * scaleX;
+            const currentY = (h - padding) - (state.verdet * scaleY);
+            
+            graphCtx.fillStyle = '#ef4444';
+            graphCtx.beginPath();
+            graphCtx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+            graphCtx.fill();
+            
+            // Dashed line to axis
+            graphCtx.strokeStyle = '#ef4444';
+            graphCtx.setLineDash([4, 4]);
+            graphCtx.beginPath();
+            graphCtx.moveTo(currentX, currentY);
+            graphCtx.lineTo(currentX, h - padding);
+            graphCtx.stroke();
+            graphCtx.setLineDash([]);
+        }
+
+        // --- UI Updates ---
+        function updateUI() {
+            // Update Text Values
+            document.getElementById('val-lambda').innerText = state.lambda;
+            document.getElementById('val-b').innerText = state.B.toFixed(1);
+            document.getElementById('val-l').innerText = state.L.toFixed(2);
+            document.getElementById('val-omega').innerText = state.omegaStarBase.toFixed(2) + "e16";
+            document.getElementById('val-s').innerText = state.etaSBase.toFixed(2) + "e32";
+            
+            // Update Readouts
+            document.getElementById('readout-theta').innerText = (state.theta * (180/Math.PI)).toFixed(2) + "°";
+            document.getElementById('readout-verdet').innerText = state.verdet.toFixed(2);
+
+            // Update Analysis Bars
+            // Resonance proximity: ratio of omega to omegaStar
+            const ratio = state.omega / state.omegaStar;
+            const pct = Math.min(100, Math.round(ratio * 100));
+            document.getElementById('limit-bar').style.width = `${pct}%`;
+            document.getElementById('limit-text').innerText = `${pct}%`;
+            if (pct > 90) document.getElementById('limit-bar').classList.replace('bg-green-500', 'bg-red-500');
+            else document.getElementById('limit-bar').classList.replace('bg-red-500', 'bg-green-500');
+
+            // Silica Ratio Check
+            // Calculate V at 193 and 1523 for current params
+            const calcV = (lam) => {
+                const w = (2 * Math.PI * C) / (lam * 1e-9);
+                const w_star = state.omegaStar;
+                const D_real = (w_star * w_star) - (w * w);
+                const D_imag = -state.gamma * w;
+                const magZ2 = Math.pow(D_real*D_real + D_imag*D_imag, 2);
+                const re_inv_D2 = (D_real*D_real - D_imag*D_imag) / magZ2;
+                return ((E_CHARGE * w * state.etaS * w_star) / (2 * M_ELECTRON * C * N0)) * re_inv_D2;
+            };
+            const v193 = calcV(193);
+            const v1523 = calcV(1523);
+            const ratioVal = v193 / v1523;
+            document.getElementById('ratio-readout').innerText = ratioVal.toFixed(1);
+
+            // Redraw
+            drawGraph();
+        }
+
+        // --- Event Listeners ---
+        const inputs = {
+            lambda: document.getElementById('input-lambda'),
+            b: document.getElementById('input-b'),
+            l: document.getElementById('input-l'),
+            omega: document.getElementById('input-omega'),
+            s: document.getElementById('input-s')
+        };
+
+        inputs.lambda.addEventListener('input', (e) => { state.lambda = parseInt(e.target.value); calculatePhysics(); updateUI(); });
+        inputs.b.addEventListener('input', (e) => { state.B = parseFloat(e.target.value); calculatePhysics(); updateUI(); });
+        inputs.l.addEventListener('input', (e) => { state.L = parseFloat(e.target.value); calculatePhysics(); updateUI(); });
+        inputs.omega.addEventListener('input', (e) => { state.omegaStarBase = parseFloat(e.target.value); calculatePhysics(); updateUI(); });
+        inputs.s.addEventListener('input', (e) => { state.etaSBase = parseFloat(e.target.value); calculatePhysics(); updateUI(); });
+
+        // --- App Controller ---
+        const app = {
+            init: () => {
+                resizeCanvas(simCanvas);
+                resizeCanvas(graphCanvas);
+                window.addEventListener('resize', () => {
+                    resizeCanvas(simCanvas);
+                    resizeCanvas(graphCanvas);
+                    drawGraph();
+                });
+                
+                calculatePhysics();
+                updateUI();
+                drawSimulation();
+            },
+            loadPreset: (type) => {
+                if (type === 'silica') {
+                    state.omegaStarBase = 1.57;
+                    state.etaSBase = 2.30;
+                    inputs.omega.value = 1.57;
+                    inputs.s.value = 2.30;
+                } else if (type === 'high_verdet') {
+                    state.omegaStarBase = 1.2; // Lower resonance -> higher dispersion
+                    state.etaSBase = 8.0;
+                    inputs.omega.value = 1.2;
+                    inputs.s.value = 8.0;
+                }
+                calculatePhysics();
+                updateUI();
+            }
+        };
+
+        // Start
+        app.init();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotating Fluid Column Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --fluid-color: rgba(56, 189, 248, 0.2);
+            --pulse-pos: #38bdf8;
+            --pulse-neg: #fb7185;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 1.2rem; font-weight: 600; }
+        header p { font-size: 0.8rem; color: var(--text-muted); }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--panel-bg);
+            margin: 15px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls-panel { width: 300px; padding: 20px; overflow-y: auto; }
+        .sim-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .charts-panel { width: 350px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+
+        h2 { font-size: 1rem; margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Controls */
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; }
+        .control-group input[type="range"] {
+            width: 100%; cursor: pointer; accent-color: var(--accent);
+        }
+        
+        .toggle-container {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;
+        }
+        
+        button {
+            width: 100%; padding: 10px; border: none; border-radius: 6px;
+            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
+            transition: background 0.2s; margin-bottom: 10px;
+        }
+        button:hover { background: var(--accent-hover); }
+        button.danger { background: var(--danger); }
+        button.danger:hover { background: #dc2626; }
+
+        /* Switch */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Simulation Area */
+        .platform {
+            position: relative;
+            width: 200px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .detector {
+            width: 220px; height: 20px;
+            border: 2px dashed var(--success);
+            border-radius: 50%;
+            position: absolute; top: -10px;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--success); font-size: 0.8rem; font-weight: bold;
+            background: rgba(16, 185, 129, 0.1);
+            z-index: 10;
+        }
+
+        .cylinder {
+            width: 100%; height: 100%;
+            border-left: 2px solid #475569;
+            border-right: 2px solid #475569;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%), var(--fluid-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rotor-container {
+            width: 200px; height: 40px;
+            position: absolute; bottom: -20px;
+            border: 2px solid #475569;
+            border-radius: 50%;
+            background: #1e293b;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10;
+        }
+
+        .rotor {
+            width: 160px; height: 10px;
+            background: repeating-linear-gradient(90deg, #334155, #334155 10px, #64748b 10px, #64748b 20px);
+            border-radius: 5px;
+            transition: transform 0.1s linear;
+        }
+
+        .pulse {
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            opacity: 0.8;
+            left: 0;
+        }
+
+        /* Status & Charts */
+        .status-box {
+            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;
+        }
+        .status-box div { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        
+        .regime-indicator {
+            display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;
+        }
+        .regime-1 { background: #475569; color: white; }
+        .regime-2 { background: var(--success); color: white; }
+        .regime-3 { background: var(--warning); color: black; }
+        .regime-4 { background: var(--danger); color: white; }
+
+        canvas {
+            width: 100%; height: 120px; background: #0f172a; border-radius: 6px; border: 1px solid #334155;
+        }
+        .chart-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; text-align: center; }
+
+        /* Annotations */
+        .annotation { position: absolute; color: var(--text-muted); font-size: 0.8rem; }
+        .anno-h { right: -60px; top: 50%; transform: translateY(-50%); }
+        .anno-h::before { content: '↕'; margin-right: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Delayed Nonlinear Loop Simulator</h1>
+            <p>Based on "Delayed Mode Selection... in a Rapidly Rotating Fluid Column"</p>
+        </div>
+        <div>
+            <span id="k-value-display">K = 0.00</span>
+            <span id="regime-badge" class="regime-indicator regime-1">I. One-Pass</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Controls Panel -->
+        <div class="panel controls-panel">
+            <h2>⚙️ Parameters</h2>
+            
+            <div class="control-group">
+                <label>Background Rotation (Ω) <span id="val-omega">50</span></label>
+                <input type="range" id="slider-omega" min="0" max="100" value="50">
+            </div>
+
+            <div class="control-group">
+                <label>Hydrodynamic Delay (τ_h) <span id="val-tauh">2.0s</span></label>
+                <input type="range" id="slider-tauh" min="0.5" max="5.0" step="0.1" value="2.0">
+                <small style="color:var(--text-muted); font-size:0.7rem;">Affects axial transport speed</small>
+            </div>
+
+            <div class="control-group">
+                <label>Digital Latency (τ_d) <span id="val-taud">1.0s</span></label>
+                <input type="range" id="slider-taud" min="0.1" max="3.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>Feedback Gain (κ_eff) <span id="val-gain">1.0</span></label>
+                <input type="range" id="slider-gain" min="0" max="5" step="0.1" value="1.0">
+                <small style="color:var(--text-muted); font-size:0.7rem;">Drives mode selection/chaos</small>
+            </div>
+
+            <hr style="border-color: #334155; margin: 20px 0;">
+
+            <h2>🔄 Protocol</h2>
+
+            <div class="toggle-container">
+                <span>Event-Triggered Reinjection</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-reinjection">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-container">
+                <span>Parity (Negative Pulse)</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-parity">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <button id="btn-fire">🔥 Manual Fire Pulse</button>
+            <button id="btn-clear" class="danger">🗑️ Clear System</button>
+        </div>
+
+        <!-- Simulation Panel -->
+        <div class="panel sim-panel">
+            <div class="platform">
+                <div class="detector" id="detector">Surface Detector</div>
+                <div class="cylinder" id="cylinder">
+                    <!-- Pulses injected here via JS -->
+                </div>
+                <div class="rotor-container">
+                    <div class="rotor" id="rotor"></div>
+                </div>
+                <div class="annotation anno-h">Height H</div>
+            </div>
+        </div>
+
+        <!-- Charts Panel -->
+        <div class="panel charts-panel">
+            <h2>📊 Observables</h2>
+            
+            <div class="status-box">
+                <div><span>Last Arrival Time:</span> <span id="stat-arrival">--</span></div>
+                <div><span>Effective Delay (τ_eff):</span> <span id="stat-taueff">--</span></div>
+                <div><span>Gain-Delay Prod (K):</span> <span id="stat-k">--</span></div>
+            </div>
+
+            <div>
+                <div class="chart-title">Event Interval Sequence (Δt_n)</div>
+                <canvas id="chart-intervals"></canvas>
+                <small style="color:var(--text-muted); font-size:0.7rem; display:block; text-align:center; margin-top:5px;">
+                    Flat = Locked (II) | Split = Multi (III) | Noisy = Irregular (IV)
+                </small>
+            </div>
+
+            <div>
+                <div class="chart-title">Odd Sector Observable A(u_z)</div>
+                <canvas id="chart-odd"></canvas>
+            </div>
+
+            <div>
+                <div class="chart-title">Even Sector Observable Q(u_z) ∝ u²</div>
+                <canvas id="chart-even"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const dom = {
+            omega: document.getElementById('slider-omega'),
+            tauh: document.getElementById('slider-tauh'),
+            taud: document.getElementById('slider-taud'),
+            gain: document.getElementById('slider-gain'),
+            valOmega: document.getElementById('val-omega'),
+            valTauh: document.getElementById('val-tauh'),
+            valTaud: document.getElementById('val-taud'),
+            valGain: document.getElementById('val-gain'),
+            toggleReinjection: document.getElementById('toggle-reinjection'),
+            toggleParity: document.getElementById('toggle-parity'),
+            btnFire: document.getElementById('btn-fire'),
+            btnClear: document.getElementById('btn-clear'),
+            cylinder: document.getElementById('cylinder'),
+            rotor: document.getElementById('rotor'),
+            detector: document.getElementById('detector'),
+            badge: document.getElementById('regime-badge'),
+            kDisplay: document.getElementById('k-value-display'),
+            statArrival: document.getElementById('stat-arrival'),
+            statTaueff: document.getElementById('stat-taueff'),
+            statK: document.getElementById('stat-k'),
+            chartIntervals: document.getElementById('chart-intervals'),
+            chartOdd: document.getElementById('chart-odd'),
+            chartEven: document.getElementById('chart-even')
+        };
+
+        // --- State Variables ---
+        let pulses = [];
+        let lastDetectionTime = null;
+        let pendingReinjection = null;
+        let rotorAngle = 0;
+        let timeElapsed = 0;
+        
+        // Chart Data
+        const maxDataPoints = 50;
+        let dataIntervals = [];
+        let dataOdd = [];
+        let dataEven = [];
+
+        // --- Contexts ---
+        const ctxIntervals = dom.chartIntervals.getContext('2d');
+        const ctxOdd = dom.chartOdd.getContext('2d');
+        const ctxEven = dom.chartEven.getContext('2d');
+
+        // Resize canvases to match display size
+        function resizeCanvas(canvas) {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+        [dom.chartIntervals, dom.chartOdd, dom.chartEven].forEach(resizeCanvas);
+
+        // --- Physics/Math Logic ---
+        function getParams() {
+            const tau_h = parseFloat(dom.tauh.value);
+            const tau_d = parseFloat(dom.taud.value);
+            const kappa = parseFloat(dom.gain.value);
+            const tau_eff = tau_h + tau_d;
+            const K = kappa * tau_eff;
+            return { tau_h, tau_d, kappa, tau_eff, K };
+        }
+
+        function updateUIParams() {
+            dom.valOmega.innerText = dom.omega.value;
+            dom.valTauh.innerText = dom.tauh.value + 's';
+            dom.valTaud.innerText = dom.taud.value + 's';
+            dom.valGain.innerText = dom.gain.value;
+
+            const p = getParams();
+            dom.statTaueff.innerText = p.tau_eff.toFixed(2) + 's';
+            dom.statK.innerText = p.K.toFixed(2);
+            dom.kDisplay.innerText = `K = ${p.K.toFixed(2)}`;
+
+            // Determine Regime
+            let regime = 1, text = "I. One-Pass", cls = "regime-1";
+            if (dom.toggleReinjection.checked) {
+                if (p.K < 2.5) { regime = 2; text = "II. Locked"; cls = "regime-2"; }
+                else if (p.K < 4.5) { regime = 3; text = "III. Multistable"; cls = "regime-3"; }
+                else { regime = 4; text = "IV. Irregular"; cls = "regime-4"; }
+            }
+            
+            dom.badge.className = `regime-indicator ${cls}`;
+            dom.badge.innerText = text;
+        }
+
+        // Event Listeners for UI
+        ['input', 'change'].forEach(evt => {
+            dom.omega.addEventListener(evt, updateUIParams);
+            dom.tauh.addEventListener(evt, updateUIParams);
+            dom.taud.addEventListener(evt, updateUIParams);
+            dom.gain.addEventListener(evt, updateUIParams);
+            dom.toggleReinjection.addEventListener(evt, updateUIParams);
+        });
+
+        // --- Core Functions ---
+        function firePulse(isAuto = false) {
+            const isNegative = dom.toggleParity.checked;
+            const pulseEl = document.createElement('div');
+            pulseEl.className = 'pulse';
+            pulseEl.style.bottom = '0px';
+            pulseEl.style.color = isNegative ? 'var(--pulse-neg)' : 'var(--pulse-pos)';
+            pulseEl.style.backgroundColor = isNegative ? 'var(--pulse-neg)' : 'var(--pulse-pos)';
+            
+            dom.cylinder.appendChild(pulseEl);
+            
+            pulses.push({
+                el: pulseEl,
+                y: 0, // position from bottom
+                sign: isNegative ? -1 : 1,
+                firedAt: performance.now()
+            });
+
+            // Visual feedback on rotor
+            dom.rotor.style.transform = `scale(1.1) rotate(${rotorAngle}deg)`;
+            setTimeout(() => dom.rotor.style.transform = `scale(1) rotate(${rotorAngle}deg)`, 100);
+        }
+
+        function handleDetection(pulse) {
+            const now = performance.now();
+            
+            // Visual flash
+            dom.detector.style.background = 'rgba(16, 185, 129, 0.5)';
+            setTimeout(() => dom.detector.style.background = 'rgba(16, 185, 129, 0.1)', 150);
+
+            // Record Observables
+            if (lastDetectionTime) {
+                const dt = (now - lastDetectionTime) / 1000; // in seconds
+                addDataPoint(dataIntervals, dt);
+            }
+            lastDetectionTime = now;
+            dom.statArrival.innerText = (now/1000).toFixed(1) + 's';
+
+            // Parity Observables
+            const amplitude = 1.0; // Base amplitude
+            addDataPoint(dataOdd, pulse.sign * amplitude);
+            addDataPoint(dataEven, Math.pow(pulse.sign * amplitude, 2)); // Q prop to u^2
+
+            // Reinjection Logic
+            if (dom.toggleReinjection.checked) {
+                const p = getParams();
+                
+                // Simulate the nonlinear delay equation dynamics based on K
+                // phi_dot = w0 + K * sin(phi(t-tau) - phi(t))
+                // We approximate this by modifying the digital latency
+                
+                let actualDelay = p.tau_d;
+                
+                if (p.K >= 2.5 && p.K < 4.5) {
+                    // Multistable: flip between two delay branches
+                    actualDelay += (Math.random() > 0.5 ? 0.3 : -0.3); 
+                } else if (p.K >= 4.5) {
+                    // Irregular/Chaos: Add noise proportional to K
+                    actualDelay += (Math.random() - 0.5) * (p.K - 4.5) * 0.5;
+                }
+
+                // Ensure delay doesn't go negative
+                actualDelay = Math.max(0.1, actualDelay);
+
+                if (pendingReinjection) clearTimeout(pendingReinjection);
+                pendingReinjection = setTimeout(() => {
+                    firePulse(true);
+                }, actualDelay * 1000);
+            }
+        }
+
+        function clearSystem() {
+            pulses.forEach(p => p.el.remove());
+            pulses = [];
+            if (pendingReinjection) clearTimeout(pendingReinjection);
+            lastDetectionTime = null;
+            dataIntervals = [];
+            dataOdd = [];
+            dataEven = [];
+            dom.statArrival.innerText = '--';
+        }
+
+        dom.btnFire.addEventListener('click', () => firePulse(false));
+        dom.btnClear.addEventListener('click', clearSystem);
+
+        // --- Charting ---
+        function addDataPoint(arr, val) {
+            arr.push(val);
+            if (arr.length > maxDataPoints) arr.shift();
+        }
+
+        function drawChart(ctx, data, color, yMin, yMax, drawZeroLine = false) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            if (data.length === 0) return;
+
+            // Draw zero line
+            if (drawZeroLine) {
+                const zeroY = height - ((0 - yMin) / (yMax - yMin)) * height;
+                ctx.beginPath();
+                ctx.strokeStyle = '#334155';
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(0, zeroY);
+                ctx.lineTo(width, zeroY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+
+            const step = width / (maxDataPoints - 1);
+            
+            for (let i = 0; i < data.length; i++) {
+                const x = i * step;
+                // Normalize y
+                let val = Math.max(yMin, Math.min(yMax, data[i]));
+                const y = height - ((val - yMin) / (yMax - yMin)) * height;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // Draw points
+            ctx.fillStyle = color;
+            for (let i = 0; i < data.length; i++) {
+                const x = i * step;
+                let val = Math.max(yMin, Math.min(yMax, data[i]));
+                const y = height - ((val - yMin) / (yMax - yMin)) * height;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // --- Main Simulation Loop ---
+        let lastFrameTime = performance.now();
+
+        function loop(timestamp) {
+            const dt = (timestamp - lastFrameTime) / 1000;
+            lastFrameTime = timestamp;
+            
+            const p = getParams();
+
+            // 1. Rotate base (Background Rotation Omega)
+            const omega = parseFloat(dom.omega.value);
+            rotorAngle += omega * dt * 5;
+            dom.rotor.style.transform = `rotate(${rotorAngle}deg)`;
+
+            // 2. Move Pulses
+            // Speed is inversely proportional to tau_h. 
+            // Cylinder height is 400px. Speed = 400 / tau_h (px per second)
+            const speed = 400 / p.tau_h;
+
+            for (let i = pulses.length - 1; i >= 0; i--) {
+                let pulse = pulses[i];
+                pulse.y += speed * dt;
+                pulse.el.style.bottom = pulse.y + 'px';
+
+                // Check detection (reached top)
+                if (pulse.y >= 400) {
+                    handleDetection(pulse);
+                    pulse.el.remove();
+                    pulses.splice(i, 1);
+                }
+            }
+
+            // 3. Draw Charts
+            // Intervals: expected around tau_eff
+            const expectedInterval = p.tau_eff;
+            drawChart(ctxIntervals, dataIntervals, '#f59e0b', Math.max(0, expectedInterval - 2), expectedInterval + 2);
+            
+            // Odd Sector (Signed)
+            drawChart(ctxOdd, dataOdd, '#38bdf8', -1.5, 1.5, true);
+            
+            // Even Sector (Quadratic)
+            drawChart(ctxEven, dataEven, '#10b981', 0, 1.5);
+
+            requestAnimationFrame(loop);
+        }
+
+        // Init
+        updateUIParams();
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>

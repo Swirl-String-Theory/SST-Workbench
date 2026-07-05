@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl Holographic Principle (SHP) Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-color: #161b22;
+            --text-color: #c9d1d9;
+            --accent-cyan: #58a6ff;
+            --accent-green: #238636;
+            --accent-red: #da3633;
+            --holo-glow: 0 0 10px rgba(88, 166, 255, 0.5);
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel-color);
+            padding: 1rem;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            text-shadow: var(--holo-glow);
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Controls */
+        aside {
+            width: 300px;
+            background-color: var(--panel-color);
+            border-right: 1px solid #30363d;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .control-group {
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            background: #0d1117;
+        }
+
+        .control-group h3 {
+            margin-top: 0;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .value-display {
+            float: right;
+            color: var(--accent-cyan);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Visualization Area */
+        #vis-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a202c 0%, #0d1117 100%);
+        }
+
+        canvas {
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 50%;
+            cursor: crosshair;
+        }
+
+        /* Overlay Info */
+        #readout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(13, 17, 23, 0.9);
+            border: 1px solid var(--accent-cyan);
+            padding: 15px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            pointer-events: none;
+            width: 250px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .metric span:last-child {
+            color: var(--accent-cyan);
+        }
+
+        /* Theory Box */
+        .theory-box {
+            font-size: 0.75rem;
+            color: #8b949e;
+            line-height: 1.4;
+        }
+        
+        .theory-highlight {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        /* Button */
+        button.action-btn {
+            background-color: #238636;
+            color: white;
+            border: 1px solid rgba(240,246,252,0.1);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        button.action-btn:hover {
+            background-color: #2ea043;
+        }
+        button.reset-btn {
+            background-color: #da3633;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SHP: Swirl Holographic Principle</h1>
+        <div class="subtitle">Interactive Bulk Reconstruction Laboratory</div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-cyan);">
+        STATUS: ONLINE (OFFLINE MODE)
+    </div>
+</header>
+
+<main>
+    <aside>
+        <div class="control-group">
+            <h3>1. Boundary Data (∂V)</h3>
+            <p class="theory-box">Control the tangential swirl $\mathbf{v}_\tau$ on the boundary. The bulk state is reconstructed from this data.</p>
+            
+            <label>
+                Boundary Swirl Velocity
+                <span id="val-swirl" class="value-display">0.0</span>
+            </label>
+            <input type="range" id="input-swirl" min="-10" max="10" step="0.1" value="2">
+            
+            <label style="margin-top: 15px;">
+                Boundary Perturbation (Waves)
+                <span id="val-wave" class="value-display">0</span>
+            </label>
+            <input type="range" id="input-wave" min="0" max="5" step="1" value="0">
+        </div>
+
+        <div class="control-group">
+            <h3>2. Topological Sector ($\mathcal{T}$)</h3>
+            <p class="theory-box">Select the discrete topological label (helicity/linking) to constrain the interior reconstruction.</p>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="sector" value="0" checked>
+                    Sector 0: Laminar / Trivial
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="sector" value="1">
+                    Sector 1: Central Vortex
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="sector" value="2">
+                    Sector 2: Dipole Pair
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>3. Observables</h3>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="checkbox" id="check-vectors" checked>
+                    Show Velocity Field ($\mathbf{v}$)
+                </label>
+                <label class="radio-option">
+                    <input type="checkbox" id="check-particles" checked>
+                    Show Tracer Particles
+                </label>
+                <label class="radio-option">
+                    <input type="checkbox" id="check-clock">
+                    Clock Holography (Time Dilation)
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>Experiment Controls</h3>
+            <button class="action-btn" id="btn-pulse">Inject Boundary Pulse</button>
+            <button class="action-btn reset-btn" id="btn-reset">Reset System</button>
+        </div>
+    </aside>
+
+    <div id="vis-container">
+        <canvas id="simCanvas" width="600" height="600"></canvas>
+        
+        <div id="readout">
+            <div style="border-bottom: 1px solid #30363d; margin-bottom: 10px; padding-bottom: 5px; color: var(--accent-cyan);">
+                HOLOGRAPHIC READOUT
+            </div>
+            <div class="metric">
+                <span>Boundary Circulation ($\Gamma_{\partial V}$):</span>
+                <span id="metric-circ">0.00</span>
+            </div>
+            <div class="metric">
+                <span>Bulk Energy ($E_{bulk}$):</span>
+                <span id="metric-energy">0.00</span>
+            </div>
+            <div class="metric">
+                <span>Max Vorticity ($\omega_{max}$):</span>
+                <span id="metric-vort">0.00</span>
+            </div>
+            <div class="metric">
+                <span>Clock Rate ($dt_{local}$):</span>
+                <span id="metric-clock">1.00</span>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.7rem; color: #8b949e;">
+                <i>"The bulk is not free. It is fixed by boundary data and constraints."</i>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+/**
+ * SWIRL HOLOGRAPHIC PRINCIPLE SIMULATOR
+ * 
+ * Implements the core logic of the paper:
+ * Bulk State = Reconstruction_Map(Boundary Data, Topological Sector)
+ * 
+ * We simulate an incompressible inviscid fluid in a circular domain.
+ * The flow is reconstructed analytically based on user inputs to mimic
+ * the "Reconstruction Map R" described in the paper.
+ */
+
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+// State
+let width, height, centerX, centerY, radius;
+let particles = [];
+const numParticles = 800;
+
+// Physics Parameters
+let boundarySwirl = 2.0;
+let boundaryWaveMode = 0;
+let topologicalSector = 0; // 0: Trivial, 1: Vortex, 2: Dipole
+let showVectors = true;
+let showParticles = true;
+let showClock = false;
+let time = 0;
+
+// UI Elements
+const uiSwirl = document.getElementById('input-swirl');
+const uiWave = document.getElementById('input-wave');
+const uiSector = document.getElementsByName('sector');
+const uiVectors = document.getElementById('check-vectors');
+const uiParticles = document.getElementById('check-particles');
+const uiClock = document.getElementById('check-clock');
+const btnPulse = document.getElementById('btn-pulse');
+const btnReset = document.getElementById('btn-reset');
+
+// Metrics
+const mCirc = document.getElementById('metric-circ');
+const mEnergy = document.getElementById('metric-energy');
+const mVort = document.getElementById('metric-vort');
+const mClock = document.getElementById('metric-clock');
+const vSwirl = document.getElementById('val-swirl');
+const vWave = document.getElementById('val-wave');
+
+// Initialization
+function init() {
+    width = canvas.width;
+    height = canvas.height;
+    centerX = width / 2;
+    centerY = height / 2;
+    radius = width / 2 - 20;
+
+    // Initialize Particles
+    for(let i=0; i<numParticles; i++) {
+        particles.push(spawnParticle());
+    }
+
+    // Event Listeners
+    uiSwirl.addEventListener('input', (e) => {
+        boundarySwirl = parseFloat(e.target.value);
+        vSwirl.textContent = boundarySwirl.toFixed(1);
+    });
+
+    uiWave.addEventListener('input', (e) => {
+        boundaryWaveMode = parseInt(e.target.value);
+        vWave.textContent = boundaryWaveMode;
+    });
+
+    uiSector.forEach(rb => {
+        rb.addEventListener('change', (e) => {
+            topologicalSector = parseInt(e.target.value);
+            // Reset particles on topology change for visual clarity
+            particles.forEach(p => {
+                let pos = spawnParticle();
+                p.x = pos.x;
+                p.y = pos.y;
+            });
+        });
+    });
+
+    uiVectors.addEventListener('change', (e) => showVectors = e.target.checked);
+    uiParticles.addEventListener('change', (e) => showParticles = e.target.checked);
+    uiClock.addEventListener('change', (e) => showClock = e.target.checked);
+
+    btnPulse.addEventListener('click', () => {
+        boundarySwirl += 5;
+        uiSwirl.value = boundarySwirl;
+        vSwirl.textContent = boundarySwirl.toFixed(1);
+        setTimeout(() => {
+            boundarySwirl -= 5;
+            uiSwirl.value = boundarySwirl;
+            vSwirl.textContent = boundarySwirl.toFixed(1);
+        }, 500);
+    });
+
+    btnReset.addEventListener('click', () => {
+        boundarySwirl = 0;
+        uiSwirl.value = 0;
+        vSwirl.textContent = "0.0";
+        boundaryWaveMode = 0;
+        uiWave.value = 0;
+        vWave.textContent = "0";
+        topologicalSector = 0;
+        document.querySelector('input[name="sector"][value="0"]').checked = true;
+    });
+
+    requestAnimationFrame(loop);
+}
+
+function spawnParticle() {
+    // Spawn randomly within the circle
+    let r = Math.sqrt(Math.random()) * (radius - 5);
+    let theta = Math.random() * 2 * Math.PI;
+    return {
+        x: centerX + r * Math.cos(theta),
+        y: centerY + r * Math.sin(theta),
+        age: Math.random() * 100
+    };
+}
+
+// The Reconstruction Map R: Boundary -> Bulk
+// Calculates velocity vector at position (x,y)
+function getVelocity(x, y) {
+    let dx = x - centerX;
+    let dy = y - centerY;
+    let r = Math.sqrt(dx*dx + dy*dy);
+    let theta = Math.atan2(dy, dx);
+
+    // Normalized radius (0 to 1)
+    let rho = r / radius;
+    if (rho > 1) return { u: 0, v: 0, w: 0 }; // Outside boundary
+
+    let u = 0;
+    let v = 0;
+    let vorticity = 0;
+
+    // 1. Base Swirl (Driven by Boundary)
+    // Modeled as Solid Body Rotation near center transitioning to boundary speed
+    // v_theta = boundarySwirl * rho
+    let v_theta_base = boundarySwirl * rho;
+
+    // 2. Wave Perturbations (Boundary deformations affecting bulk)
+    if (boundaryWaveMode > 0) {
+        // Adds a radial fluctuation based on angle and time
+        // v_r = A * sin(k*theta - omega*t) * (rho^k) to satisfy continuity at center
+        let k = boundaryWaveMode + 2; 
+        let waveAmp = 0.5 * boundarySwirl;
+        let phase = k * theta - time * 2;
+        // Simplified potential flow wave component
+        v_theta_base += waveAmp * Math.pow(rho, k-1) * Math.cos(phase);
+    }
+
+    // 3. Topological Sector Contributions (Singularities/Vortices)
+    // These are "bulk degrees of freedom" constrained by the sector label T
+    let v_theta_topo = 0;
+    
+    if (topologicalSector === 1) {
+        // Central Vortex (1/r decay)
+        // To avoid singularity at r=0 in viz, we use Rankine vortex profile
+        let coreSize = 0.1;
+        if (rho < coreSize) {
+            v_theta_topo = (rho / coreSize) * 2.0;
+        } else {
+            v_theta_topo = (coreSize / rho) * 2.0;
+        }
+    } else if (topologicalSector === 2) {
+        // Dipole (Two vortices)
+        // We add velocity fields from two points
+        let d = 0.3 * radius; // separation
+        let v1 = getVortexVelocity(x, y, centerX + d, centerY, 1.5);
+        let v2 = getVortexVelocity(x, y, centerX - d, centerY, -1.5);
+        u += v1.u + v2.u;
+        v += v1.v + v2.v;
+        vorticity += v1.w + v2.w;
+    }
+
+    // Combine Polar Components to Cartesian
+    // Base + Topo (if radial symmetric)
+    let total_v_theta = v_theta_base + v_theta_topo;
+
+    u += -total_v_theta * Math.sin(theta);
+    v += total_v_theta * Math.cos(theta);
+
+    // Calculate Vorticity (Curl) for Clock Holography
+    // w = dv/dx - du/dy
+    // For solid body: 2*omega. For 1/r: 0.
+    // We approximate for visualization
+    if (topologicalSector === 0) vorticity = boundarySwirl; // Uniform vorticity
+    if (topologicalSector === 1) vorticity = (rho < 0.1) ? 10 : 0; // Point vortex
+
+    return { u, v, w: vorticity };
+}
+
+function getVortexVelocity(px, py, vx, vy, strength) {
+    let dx = px - vx;
+    let dy = py - vy;
+    let r2 = dx*dx + dy*dy;
+    let r = Math.sqrt(r2);
+    
+    // Softened core
+    let core = 400; 
+    let speed = strength * 50 / (r2 + core) * radius; 
+    
+    // Tangential velocity
+    return {
+        u: -speed * dy / r,
+        v: speed * dx / r,
+        w: strength / (r2 + 10) * 1000 // Approximate vorticity concentration
+    };
+}
+
+function loop() {
+    time += 0.02;
+
+    // Clear
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw Boundary
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#58a6ff';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Draw "Boundary Data" indicators (moving dashes on rim)
+    let numDashes = 20;
+    let speed = boundarySwirl * 0.1;
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(time * speed);
+    for (let i = 0; i < numDashes; i++) {
+        ctx.rotate((Math.PI * 2) / numDashes);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(radius - 2, -2, 4, 10);
+    }
+    ctx.restore();
+
+    // Clock Holography Mode (Heatmap)
+    if (showClock) {
+        drawClockHolography();
+    }
+
+    // Draw Vectors
+    if (showVectors && !showClock) {
+        drawVectorField();
+    }
+
+    // Update and Draw Particles
+    if (showParticles) {
+        updateParticles();
+    }
+
+    updateMetrics();
+
+    requestAnimationFrame(loop);
+}
+
+function drawVectorField() {
+    let step = 30;
+    ctx.strokeStyle = 'rgba(88, 166, 255, 0.3)';
+    ctx.lineWidth = 1;
+
+    for (let y = step/2; y < height; y += step) {
+        for (let x = step/2; x < width; x += step) {
+            let d = Math.sqrt((x-centerX)**2 + (y-centerY)**2);
+            if (d > radius) continue;
+
+            let vel = getVelocity(x, y);
+            let mag = Math.sqrt(vel.u*vel.u + vel.v*vel.v);
+            
+            if (mag > 0.1) {
+                let scale = 8;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + vel.u * scale, y + vel.v * scale);
+                ctx.stroke();
+                
+                // Arrowhead
+                let angle = Math.atan2(vel.v, vel.u);
+                ctx.beginPath();
+                ctx.fillStyle = 'rgba(88, 166, 255, 0.5)';
+                ctx.arc(x + vel.u * scale, y + vel.v * scale, 2, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+    }
+}
+
+function updateParticles() {
+    ctx.fillStyle = '#ffffff';
+    
+    particles.forEach(p => {
+        let vel = getVelocity(p.x, p.y);
+        p.x += vel.u;
+        p.y += vel.v;
+        p.age += 0.5;
+
+        // Boundary check
+        let dx = p.x - centerX;
+        let dy = p.y - centerY;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist >= radius - 2) {
+            // Respawn or bounce? Let's respawn to simulate flow through
+            // Actually, inviscid fluid shouldn't cross boundary (v.n = 0).
+            // We'll push them back in to maintain conservation illusion
+            let angle = Math.atan2(dy, dx);
+            p.x = centerX + (radius - 5) * Math.cos(angle);
+            p.y = centerY + (radius - 5) * Math.sin(angle);
+        }
+
+        // Draw
+        let alpha = 1;
+        if (showClock) alpha = 0.5;
+        ctx.globalAlpha = alpha;
+        ctx.fillRect(p.x, p.y, 2, 2);
+        ctx.globalAlpha = 1.0;
+    });
+}
+
+function drawClockHolography() {
+    // Equation (19): dt_local = dt_inf * sqrt(1 - ||w||^2 / c^2)
+    // High vorticity = Slower time (Red)
+    // Low vorticity = Normal time (Blue/Clear)
+    
+    let resolution = 10;
+    for (let y = 0; y < height; y += resolution) {
+        for (let x = 0; x < width; x += resolution) {
+            let dx = x - centerX;
+            let dy = y - centerY;
+            if (dx*dx + dy*dy > radius*radius) continue;
+
+            // Sample velocity gradient roughly
+            let v = getVelocity(x, y);
+            let v_right = getVelocity(x+1, y);
+            let v_down = getVelocity(x, y+1);
+            
+            // Curl approx
+            let dv_dx = v_right.v - v.v;
+            let du_dy = v_down.u - v.u;
+            let curl = Math.abs(dv_dx - du_dy) * 5; // Scale for visual
+
+            // Add explicit vorticity from getVelocity for point sources
+            curl += Math.abs(v.w);
+
+            // Map curl to color
+            // High curl -> Time Dilation -> Red
+            // Low curl -> Flat Space -> Blue/Black
+            
+            let intensity = Math.min(curl, 1.0);
+            
+            // Heatmap gradient: Blue (0) -> Cyan -> Green -> Yellow -> Red (1)
+            let r = Math.floor(intensity * 255);
+            let g = Math.floor((1 - Math.abs(intensity - 0.5)*2) * 100);
+            let b = Math.floor((1 - intensity) * 255);
+            
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.3)`;
+            ctx.fillRect(x, y, resolution, resolution);
+        }
+    }
+    
+    // Legend
+    ctx.font = "10px monospace";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("High Swirl (Slow Time)", centerX - 60, centerY + radius + 20);
+}
+
+function updateMetrics() {
+    // 1. Circulation: Integral of v dot dl around boundary
+    // Proportional to boundarySwirl
+    let circ = boundarySwirl * 2 * Math.PI * radius / 100;
+    mCirc.textContent = circ.toFixed(2);
+
+    // 2. Energy: Sum of v^2 in bulk
+    // Rough approximation based on swirl and sector
+    let energyBase = Math.abs(boundarySwirl) * 50;
+    if (topologicalSector === 1) energyBase += 100;
+    if (topologicalSector === 2) energyBase += 150;
+    mEnergy.textContent = energyBase.toFixed(2);
+
+    // 3. Max Vorticity
+    let maxW = Math.abs(boundarySwirl);
+    if (topologicalSector > 0) maxW += 10; // Singularity
+    mVort.textContent = maxW.toFixed(2);
+
+    // 4. Clock Rate (at center)
+    // If vortex at center, clock stops (0). If laminar, depends on swirl.
+    let clock = 1.0;
+    if (topologicalSector === 1) {
+        clock = 0.1; // Near singularity
+    } else {
+        // Time dilation due to rotation? 
+        // In the paper, clock depends on vorticity. 
+        // For solid body rotation, vorticity is constant.
+        clock = Math.max(0.1, 1.0 - (Math.abs(boundarySwirl)/20));
+    }
+    mClock.textContent = clock.toFixed(3);
+}
+
+// Start
+init();
+
+</script>
+</body>
+</html>

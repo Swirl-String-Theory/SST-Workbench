@@ -1,0 +1,463 @@
+%! Author = Omar Iskandarani
+%! Date = 12/21/2025
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.18388670}
+\newcommand{\papertitle}{A Topology-Driven Invariant Mass Kernel in Swirl--String Theory (SST):\\
+Reference Implementation and Benchmark Against Atomic and Molecular Masses}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+
+\geometry{margin=1in}
+
+
+% -------------------------
+% SST house macros (minimal, compile-safe)
+% -------------------------
+\newcommand{\swirlL}{\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirlvec}{\mathbf{v}_{\!\swirlL}}
+\newcommand{\rhoCore}{\rho_{\text{core}}}
+
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} 
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert} % swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ee}{\mathrm{e}}
+% ===============================
+% Policy: the golden constant is only allowed via hyperbolic functions.
+\newcommand{\xig}{\operatorname{asinh}\!\left(0.5\right)}
+\newcommand{\phig}{e^{\ \xig}}
+\newcommand{\phialg}{\bigl(1+\sqrt{5}\bigr)/2}
+\newcommand{\xigold}{\tfrac{3}{2}\,\xig}
+\newcommand{\GoldenDeclare}{%
+    \textbf{Golden (hyperbolic)}:\ \(\ln\phi=\xig\), hence \(\phi=\phig\).
+    \\ \emph{(Algebraic form \(\phi=\phialg\) is equivalent.)}%
+}
+
+\sisetup{
+    scientific-notation = true,
+    exponent-product = \times,
+    output-product = \cdot,
+    round-mode = figures,
+    round-precision = 6
+}
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}  \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+        \begin{abstract}
+            This manuscript documents a canonical reference implementation of the Swirl--String Theory (SST) invariant mass kernel, as encoded in \texttt{SST\_Atom\_Mass\_Invariant.py}. The kernel maps a topological object $T$ (specified by braid index $b_T$, Seifert genus $g_T$, component count $n_T$, and a dimensionless total ropelength $L_{\mathrm{tot}}(T)$) into an inertial mass $M(T)$ via a fixed, mode-independent functional.
+            Three computation paths are supported: \emph{canonical} (strict evaluation with fixed quark-geometry factors), \emph{sector\_norm} (single baryon-sector normalization fixed by the proton), and \emph{exact\_closure} (analytic closure in which the proton and neutron are matched exactly without modifying the kernel).
+            A semi-empirical nuclear binding correction is used to map nucleon-level predictions to atomic masses.
+            In the \emph{exact\_closure} mode (electron, proton, neutron exact by construction), the benchmark over elements H--U yields mean absolute percentage error $\approx \SI{0.196}{\percent}$ with maximum absolute error $\approx \SI{1.84}{\percent}$ for the fixed $(Z,N)$ table used. A small molecule set (19 formulas) yields mean absolute percentage error $\approx \SI{0.156}{\percent}$.
+        \end{abstract}
+    \titlepageClose
+
+
+
+
+        \section{Scope and conventions}
+            The goal is to present (i) the invariant kernel used in code, (ii) the calibration/closure steps that feed its geometric inputs, and (iii) a transparent benchmark against a fixed table of elemental $(Z,N)$ choices and standard atomic weights (molar masses).
+
+            This document is a \emph{methods + benchmark} paper: it does not attempt to derive the SST kernel from first principles beyond the canonical master equation assumption.
+
+        \section{Canonical constants and reference values}
+        \GoldenDeclare \\
+            The implementation uses the following constants (as literal numeric values in code):
+            \begin{align}
+                \phi &= \frac{1+\sqrt{5}}{2}, \\
+                \alpha &\equiv \alpha_{\mathrm{fs}} = \num{7.2973525643e-3}, \\
+                c &= \SI{299792458}{m.s^{-1}}, \\
+                \vswirl &= \SI{1.09384563e6}{m.s^{-1}}, \\
+                \rc &= \SI{1.40897017e-15}{m}, \\
+                \rhoCore &= \SI{3.8934358266918687e18}{kg.m^{-3}}, \\
+                N_A &= \num{6.02214076e23}\;\mathrm{mol^{-1}}.
+            \end{align}
+
+            Particle rest masses used for calibration and reporting are taken as fixed numerical targets in the code (electron, muon, tau, proton, neutron).
+
+
+        \section{Invariant mass kernel}
+            \subsection{Energy density and effective volume}
+                Define the characteristic kinetic energy density
+                \begin{equation}
+                    u \;=\; \frac{1}{2}\,\rhoCore\,\vswirl^{2},
+                    \label{eq:u}
+                \end{equation}
+                with units $\mathrm{J\,m^{-3}}$.
+
+                The code uses an effective volume proxy
+                \begin{equation}
+                    V(T) \;=\; \pi\,\rc^{3}\,L_{\mathrm{tot}}(T),
+                    \label{eq:V}
+                \end{equation}
+                where $L_{\mathrm{tot}}(T)$ is dimensionless.
+
+            \subsection{Kernel definition}
+                For each topological object $T$ with invariants $(b_T,g_T,n_T,L_{\mathrm{tot}}(T))$, the invariant mass is
+                \begin{equation}
+                    M(T)
+                    =
+                    \left(\frac{4}{\alpha}\right)
+                    \,b_T^{-3/2}
+                    \,\phi^{-g_T}
+                    \,n_T^{-1/\phi}
+                    \;\frac{u\,V(T)}{c^2}.
+                    \label{eq:kernel}
+                \end{equation}
+                All factors preceding $uV/c^2$ are dimensionless; therefore the mapping is dimensionally consistent:
+                $uV$ is energy and division by $c^2$ yields mass.
+
+                \paragraph{10-year-old analogy (one sentence).}
+                    Think of $u$ as how ``packed'' the motion-energy is in a material, and $V(T)$ as how much of that packed region the string-shape occupies; more packed energy times more occupied volume means more mass.
+
+        \section{Topology-to-geometry assembly and computation paths}
+        \subsection{Lepton calibration}
+            A base topology for each lepton is specified as:
+            \begin{align}
+                \text{electron base:}\quad &(b,g,n)=(2,1,1),\\
+                \text{muon base:}\quad &(b,g,n)=(5,2,1),\\
+                \text{tau base:}\quad &(b,g,n)=(7,3,1).
+            \end{align}
+            Given a target mass $M_{\mathrm{target}}$ and fixed $(b,g,n)$, the code solves for the required ropelength by rearranging \eqref{eq:kernel}:
+            \begin{equation}
+                L_{\mathrm{tot}}(T)
+                =
+                \frac{M_{\mathrm{target}}c^2}
+                {\left(\frac{4}{\alpha}\right)b^{-3/2}\phi^{-g}n^{-1/\phi}\;u\;\pi \rc^3 }.
+                \label{eq:Lsolve}
+            \end{equation}
+            This step makes each listed lepton mass exact for its chosen base topology (it is a calibration, not a prediction).
+
+        \subsection{Baryon-sector ropelength mapping}
+            The baryon sector uses fixed $(b,g,n)=(3,2,3)$ and constructs baryon ropelengths from two geometric factors $(s_u,s_d)$ via
+            \begin{align}
+                L_{\mathrm{tot}}(p) &= \lambda_b\,(2\pi^2\kappa_R)\,(2s_u+s_d),\\
+                L_{\mathrm{tot}}(n) &= \lambda_b\,(2\pi^2\kappa_R)\,(s_u+2s_d),
+            \end{align}
+            with $\kappa_R \approx 2$ (default $\kappa_R=2$ in code).
+
+            \paragraph{Modes.}
+                \begin{itemize}
+                    \item \textbf{canonical:} $(s_u,s_d)$ fixed by constants (hyperbolic-volume assignments external to this script); $\lambda_b=1$.
+                    \item \textbf{sector\_norm:} $(s_u,s_d)$ fixed as in canonical; $\lambda_b$ chosen so the proton mass is exact.
+                    \item \textbf{exact\_closure (default):} $(s_u,s_d)$ solved analytically so that \emph{both} proton and neutron are exact with $\lambda_b=1$.
+                \end{itemize}
+
+        \subsection{Analytic closure used in \texttt{exact\_closure}}
+        Let $A(b,g,n)$ denote the kernel prefactor multiplying $L_{\mathrm{tot}}$:
+        \begin{equation}
+            A(b,g,n)=
+            \left(\frac{4}{\alpha}\right)b^{-3/2}\phi^{-g}n^{-1/\phi}\;\frac{u\,\pi \rc^3}{c^2}.
+        \end{equation}
+        Define $S\equiv 2\pi^2\kappa_R$ and $K\equiv A(3,2,3)\,S$. Then
+        \begin{align}
+            M_p &= K(2s_u+s_d),\\
+            M_n &= K(s_u+2s_d).
+        \end{align}
+        Solving yields
+        \begin{align}
+            s_u &= \frac{2M_p - M_n}{3K},\\
+            s_d &= \frac{M_p}{K} - 2s_u.
+            \label{eq:susdc}
+        \end{align}
+        This is the exact algebra implemented by \texttt{fit\_quark\_geom\_factors\_for\_baryons}.
+
+        \section{From nucleons to atoms and molecules}
+        \subsection{Atomic mass assembly and binding correction}
+            For a chosen nuclide $(Z,N)$ with $A=Z+N$, the script constructs
+            \begin{equation}
+                M_{\mathrm{sum}}(Z,N)=Z\,M_p^{\mathrm{pred}} + N\,M_n^{\mathrm{pred}} + Z\,M_e^{\mathrm{pred}}.
+            \end{equation}
+            It then subtracts a semi-empirical mass defect (binding energy divided by $c^2$),
+            \begin{equation}
+                M_{\mathrm{atom}}^{\mathrm{pred}}(Z,N)=M_{\mathrm{sum}}(Z,N)-\Delta m(Z,N),
+            \end{equation}
+            where $\Delta m(Z,N)$ is computed via the semi-empirical mass formula (SEMF)
+            \begin{align}
+                B(Z,N) &=
+                a_v A
+                -a_s A^{2/3}
+                -a_c\frac{Z(Z-1)}{A^{1/3}}
+                -a_a\frac{(N-Z)^2}{A}
+                +\delta(A,Z)\,a_pA^{-1/2},
+                \label{eq:semf}\\[4pt]
+                \Delta m(Z,N) &= \frac{B(Z,N)}{c^2}.
+            \end{align}
+            The code uses a MeV$\rightarrow$kg conversion factor to implement $\Delta m$ directly in kilograms. Coefficients are fixed in the script:
+            \[
+                (a_v,a_s,a_c,a_a,a_p)=(15.75,17.8,0.711,23.7,11.18)\;\mathrm{MeV}.
+            \]
+
+        \subsection{Molecules}
+            Chemical binding energies are neglected (eV scale). A molecular mass prediction is the sum of predicted atomic masses of constituents:
+            \begin{equation}
+                M_{\mathrm{mol}}^{\mathrm{pred}}(\mathrm{formula})
+                =
+                \sum_{i}\nu_i\,M_{\mathrm{atom}}^{\mathrm{pred}}(Z_i,N_i),
+            \end{equation}
+            where $\nu_i$ are stoichiometric coefficients.
+
+        \subsection{Reference conversion from molar mass}
+            For each table entry with molar mass $M_{\mathrm{mol}}$ (g/mol), the script uses
+            \begin{equation}
+                M_{\mathrm{ref}} = \frac{M_{\mathrm{mol}}\times 10^{-3}}{N_A}\quad[\mathrm{kg}],
+            \end{equation}
+            to obtain a per-entity reference mass.
+
+        \section{Results (from the provided run)}
+        This section records the numerical outcomes printed by the script for the run corresponding to \emph{exact\_closure} (the observed command-line mode string in the log is non-canonical but triggers the exact-closure branch in the current implementation).
+
+        \subsection{Fitted/derived geometric quantities}
+            With $\kappa_R=2$,
+            \begin{align}
+                S &= 2\pi^2\kappa_R = \num{39.47841760435743},\\
+                A(3,2,3) &= \num{4.653602747355529e-30},\\
+                K &= A(3,2,3)\,S = \num{1.8371687262488663e-28}.
+            \end{align}
+            Exact-closure geometric factors (dimensionless):
+            \begin{align}
+                s_u &= \num{3.03059870599629},\\
+                s_d &= \num{3.0431483119037868},\\
+                \lambda_b &= 1.
+            \end{align}
+            Calibrated ropelengths (dimensionless):
+            \begin{align}
+                L_{\mathrm{tot}}(e) &= \num{0.03339627337436369},\\
+                L_{\mathrm{tot}}(\mu) &= \num{44.16513700970573},\\
+                L_{\mathrm{tot}}(\tau) &= \num{1990.712148304272},\\
+                L_{\mathrm{tot}}(p) &= \num{359.42516250242664},\\
+                L_{\mathrm{tot}}(n) &= \num{359.9206010852129}.
+            \end{align}
+            Reported ratios:
+            \begin{align}
+                \frac{L_{\mu}}{L_e} &\approx \num{1322.4570},\\
+                \frac{L_{\tau}}{L_{\mu}} &\approx \num{45.0743}.
+            \end{align}
+
+        \subsection{Benchmark summary statistics}
+            Define percentage error as
+            \[
+                \varepsilon = 100\%\times \frac{M^{\mathrm{pred}}-M^{\mathrm{ref}}}{M^{\mathrm{ref}}}.
+            \]
+            For the elements table (92 entries, H--U) in \emph{exact\_closure}:
+            \begin{align}
+                \mathrm{MAE}(|\varepsilon|) &\approx \SI{0.196}{\percent},\\
+                \mathrm{median}(|\varepsilon|) &\approx \SI{0.0690}{\percent},\\
+                \mathrm{RMSE}(|\varepsilon|) &\approx \SI{0.374}{\percent},\\
+                \max |\varepsilon| &\approx \SI{1.84}{\percent},\\
+                \mathrm{p95}(|\varepsilon|) &\approx \SI{0.808}{\percent}.
+            \end{align}
+            For the molecules table (19 entries):
+            \begin{align}
+                \mathrm{MAE}(|\varepsilon|) &\approx \SI{0.156}{\percent},\\
+                \mathrm{median}(|\varepsilon|) &\approx \SI{0.0386}{\percent},\\
+                \max |\varepsilon| &\approx \SI{1.33}{\percent}.
+            \end{align}
+
+        \subsection{Selected examples}
+            Table~\ref{tab:examples} lists representative entries (exact\_closure).
+
+            \begin{table}[h]
+                \centering
+                \caption{Selected benchmark entries in \emph{exact\_closure}.}
+                \label{tab:examples}
+                \begin{tabular}{@{}l S[table-format=1.3e-1] S[table-format=1.3e-1] S[table-format=2.3]@{}}
+                    \toprule
+                    Object & {Actual mass (kg)} & {Predicted mass (kg)} & {$\varepsilon$ (\%)}\\
+                    \midrule
+                    H   & \num{1.673558e-27} & \num{1.673533e-27} & -0.00148 \\
+                    He  & \num{6.646477e-27} & \num{6.656203e-27} &  0.146 \\
+                    C   & \num{1.994473e-26} & \num{1.993101e-26} & -0.0688 \\
+                    O   & \num{2.656696e-26} & \num{2.656312e-26} & -0.0145 \\
+                    Fe  & \num{9.273280e-26} & \num{9.287658e-26} &  0.155 \\
+                    Au  & \num{3.270764e-25} & \num{3.270622e-25} & -0.00435 \\
+                    U   & \num{3.952581e-25} & \num{3.952694e-25} &  0.00285 \\
+                    H$_2$O & \num{2.991461e-26} & \num{2.991018e-26} & -0.0148 \\
+                    CO$_2$ & \num{7.308032e-26} & \num{7.305725e-26} & -0.0316 \\
+                    C$_8$H$_{10}$N$_4$O$_2$ & \num{3.224601e-25} & \num{3.223412e-25} & -0.0369 \\
+                    \bottomrule
+                \end{tabular}
+            \end{table}
+
+        \subsection{Largest deviations in the fixed table}
+            Table~\ref{tab:worst} lists the largest absolute errors over the element and molecule sets.
+
+            \begin{table}[h]
+                \centering
+                \caption{Largest absolute percentage errors in \emph{exact\_closure} for the fixed $(Z,N)$ table used by the script.}
+                \label{tab:worst}
+                \begin{tabular}{@{}l S[table-format=1.3e-1] S[table-format=1.3e-1] S[table-format=2.3]@{}}
+                    \toprule
+                    Object & {Actual mass (kg)} & {Predicted mass (kg)} & {$\varepsilon$ (\%)}\\
+                    \midrule
+                    B   & \num{1.795043e-26} & \num{1.828057e-26} &  1.839 \\
+                    Cl  & \num{5.886611e-26} & \num{5.806218e-26} & -1.366 \\
+                    Mg  & \num{4.035940e-26} & \num{3.982563e-26} & -1.323 \\
+                    Li  & \num{1.152414e-26} & \num{1.164990e-26} &  1.091 \\
+                    Ne  & \num{3.350968e-26} & \num{3.319443e-26} & -0.941 \\
+                    \midrule
+                    HCl & \num{6.054325e-26} & \num{5.973572e-26} & -1.334 \\
+                    NaCl & \num{9.704190e-26} & \num{9.623190e-26} & -0.835 \\
+                    \bottomrule
+                \end{tabular}
+            \end{table}
+
+        \section{Interpretation and limitations}
+        \paragraph{(1) Table mismatch: isotopes vs standard atomic weights.}
+            The element table fixes a single $(Z,N)$ per element, while the ``actual'' mass is computed from a standard molar mass (often an isotopic average). A strict test should compare against isotope-specific atomic masses (e.g., AME tables) for the chosen $(Z,N)$.
+
+        \paragraph{(2) Nuclear binding model is semi-empirical.}
+            The SEMF step \eqref{eq:semf} is a phenomenological correction. The reported accuracy for atoms therefore reflects the combined effect of (i) exact nucleon calibration in \emph{exact\_closure}, and (ii) an empirical nuclear binding proxy.
+
+        \paragraph{(3) Leptons beyond the electron are not predicted in this implementation.}
+            Muon and tau ropelengths are solved from their measured masses via \eqref{eq:Lsolve}; they should be treated as calibrations unless an independent SST rule for lepton $L_{\mathrm{tot}}$ is introduced.
+
+        \paragraph{(4) Mode-handling robustness.}
+            In the current code, any unrecognized \texttt{mode} string falls through to the \emph{exact\_closure} branch. For publication-quality reproducibility, the CLI should validate mode strings and fail loudly on invalid values.
+
+        \section{Falsifiable checks enabled by this kernel}
+        Even within this script’s structure, two immediate falsifiers can be stated:
+
+        \begin{itemize}
+            \item \textbf{Canonical baryons:} Fix $(s_u,s_d)$ from hyperbolic-volume assignments and set $\lambda_b=1$. The resulting proton/neutron residuals become a direct test of the Canon mapping (independent of the exact-closure fit).
+            \item \textbf{Isotope-resolved benchmark:} Replace standard atomic weights with isotope masses for the script’s chosen $(Z,N)$ (or update $(Z,N)$ to match dominant isotopes) and re-evaluate error statistics.
+        \end{itemize}
+
+        \section{Reproducibility}
+        The script writes \texttt{SST\_Invariant\_Mass\_Results\_\{mode\}.csv} and optionally a cross-mode comparison CSV. For non-interactive environments, the optional prompt should be disabled or guarded by \texttt{sys.stdin.isatty()}.
+
+        \section*{Acknowledgments}
+        The author acknowledges the historical mathematical literature on knot invariants and ropelength as enabling tools for parameterizing geometric complexity in a compact, dimensionless form.
+
+% =====================================================================
+        \begin{thebibliography}{99}
+
+            \bibitem{IskandaraniSSTCanon2025}
+            O.~Iskandarani (2025),
+            \textit{Swirl String Theory (SST) Canon v0.6.0},
+            Zenodo preprint,
+            DOI: 10.5281/zenodo.17899592.
+
+            \bibitem{IskandaraniSSTCode2025}
+            O.~Iskandarani (2025),
+            \textit{SST\_Atom\_Mass\_Invariant.py (SST Invariant Master Mass reference implementation)},
+            software manuscript (unpublished; accompanying code for this paper).
+
+            \bibitem{Einstein1905}
+            A.~Einstein (1905),
+            \textit{Ist die Trägheit eines Körpers von seinem Energieinhalt abhängig?},
+            Annalen der Physik \textbf{323}(13), 639--641,
+            DOI: 10.1002/andp.19053231314.
+
+            \bibitem{Mohr2021CODATA2018}
+            P.~J.~Mohr, D.~B.~Newell, and B.~N.~Taylor (2021),
+            \textit{CODATA Recommended Values of the Fundamental Physical Constants: 2018},
+            Rev. Mod. Phys. \textbf{93}, 025010,
+            DOI: 10.1103/RevModPhys.93.025010.
+
+            \bibitem{PDG2024}
+            Particle Data Group (2024),
+            \textit{Review of Particle Physics},
+            Phys. Rev. D \textbf{110}, 030001,
+            DOI: 10.1103/PhysRevD.110.030001.
+
+            \bibitem{Batchelor1967}
+            G.~K.~Batchelor (1967),
+            \textit{An Introduction to Fluid Dynamics},
+            Cambridge University Press,
+            ISBN: 978-0-521-66396-0.
+
+            \bibitem{Saffman1992}
+            P.~G.~Saffman (1992),
+            \textit{Vortex Dynamics},
+            Cambridge University Press,
+            ISBN: 978-0-521-42058-7.
+
+            \bibitem{Weizsaecker1935}
+            C.~F.~von~Weizsäcker (1935),
+            \textit{Zur Theorie der Kernmassen},
+            Zeitschrift für Physik \textbf{96}, 431--458,
+            DOI: 10.1007/BF01341391.
+
+            \bibitem{SEMFcoeffLecture}
+            R.~E.~Walters (n.d.),
+            \textit{The Semi-Empirical Mass Formula},
+            lecture notes (public course material),
+            (used for the specific coefficient set implemented in code).
+
+            \bibitem{AtomicWeights2019}
+            M.~E.~Wieser, M.~Berglund, J.~Bouman, et al. (2020),
+            \textit{Atomic weights of the elements 2019 (IUPAC Technical Report)},
+            Pure and Applied Chemistry,
+            DOI: 10.1515/pac-2019-0603.
+
+            \bibitem{Cantarella2002Ropelength}
+            J.~Cantarella, R.~Kusner, and J.~M.~Sullivan (2002),
+            \textit{On the Minimum Ropelength of Knots and Links},
+            Inventiones Mathematicae \textbf{150}, 257--286,
+            DOI: 10.1007/s00222-002-0234-y,
+            arXiv: math/0103224.
+
+            \bibitem{Adams1994}
+            C.~C.~Adams (1994),
+            \textit{The Knot Book},
+            W. H. Freeman,
+            ISBN: 978-0-8050-7380-1.
+
+        \end{thebibliography}
+
+\end{document}

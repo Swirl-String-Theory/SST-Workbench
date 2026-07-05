@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Starship Coil Simulator</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #111115;
+            --text: #a0a0a0;
+            --accent: #00f0ff;
+            --accent-dim: #005f66;
+            --danger: #ff2a2a;
+            --success: #00ff88;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* HUD Overlay */
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid #333;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .status-badge {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        .status-badge.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-dim);
+        }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a20 0%, #000 100%);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls Sidebar */
+        aside {
+            width: 320px;
+            background: var(--panel);
+            border-left: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            z-index: 20;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .control-group {
+            background: #1a1a1e;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: #fff;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-family: var(--font-mono);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: #333;
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .readout {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-align: right;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+        .unit {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .analogy-box {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #ccc;
+            font-style: italic;
+            border-left: 3px solid var(--accent);
+            padding-left: 10px;
+            margin-top: 10px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .warning {
+            color: var(--danger);
+            animation: pulse 0.5s infinite;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            main { flex-direction: column; }
+            aside { width: 100%; height: 40%; border-left: none; border-top: 1px solid #333; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST Starship Coil</h1>
+        <div style="font-size: 0.7rem; color: #666;">Topological Vorticity Confinement System</div>
+    </div>
+    <div class="status-badge" id="system-status">SYSTEM IDLE</div>
+</header>
+
+<main>
+    <div id="canvas-container">
+        <div class="hud"></div>
+        <canvas id="simCanvas"></canvas>
+    </div>
+
+    <aside>
+        <div class="control-group">
+            <h3>Resonance Tuner</h3>
+            <label>Drive Frequency <span id="freq-val">0 kHz</span></label>
+            <input type="range" id="freq-slider" min="0" max="200" value="10" step="0.1">
+            
+            <label>Input Power <span id="power-val">0%</span></label>
+            <input type="range" id="power-slider" min="0" max="100" value="50">
+
+            <div class="readout">
+                <span id="pressure-readout">0.00</span>
+                <span class="unit">MPa (Vacuum Stress)</span>
+            </div>
+            <div class="warning" id="resonance-warning">⚠️ RESONANCE LOCK ⚠️</div>
+        </div>
+
+        <div class="control-group">
+            <h3>Coil Geometry (p, q)</h3>
+            <label>Poloidal Winding (p)</label>
+            <input type="range" id="p-slider" min="2" max="10" value="5" step="1">
+            <label>Toroidal Winding (q)</label>
+            <input type="range" id="q-slider" min="2" max="20" value="12" step="1">
+            <div style="font-size: 0.7rem; color: #666;">Standard Starship Config: (5, 12)</div>
+        </div>
+
+        <div class="control-group">
+            <h3>SST Theory</h3>
+            <div class="analogy-box">
+                "Imagine a swimming pool. Spin a rope in a knot. At the right rhythm, the water creates a 'hole' in pressure. This device pulls the vacuum itself."
+            </div>
+        </div>
+    </aside>
+</main>
+
+<script>
+    /**
+     * SWIRL STRING THEORY SIMULATOR
+     * Based on the provided document by Omar Iskandarani
+     * 
+     * Core Physics Implemented:
+     * 1. (p,q) Torus Knot Geometry
+     * 2. Resonance condition at approx 130kHz
+     * 3. Pressure Deficit (Delta P) visualization
+     * 4. "Vacuum Well" particle attraction effect
+     */
+
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // UI Elements
+    const freqSlider = document.getElementById('freq-slider');
+    const powerSlider = document.getElementById('power-slider');
+    const pSlider = document.getElementById('p-slider');
+    const qSlider = document.getElementById('q-slider');
+    const freqVal = document.getElementById('freq-val');
+    const powerVal = document.getElementById('power-val');
+    const pressureReadout = document.getElementById('pressure-readout');
+    const warningEl = document.getElementById('resonance-warning');
+    const statusBadge = document.getElementById('system-status');
+
+    // Simulation State
+    let time = 0;
+    let particles = [];
+    const PARTICLE_COUNT = 150;
+    
+    // Physics Constants from paper
+    const TARGET_FREQ = 130.0; // kHz
+    const RESONANCE_WIDTH = 15.0; // How picky the resonance is
+    const MAX_PRESSURE = 1.7; // MPa (approx 1.7 x 10^6 Pa from paper)
+
+    // Geometry State
+    let P = 5;
+    let Q = 12;
+    let R = 150; // Major radius (scaled for canvas)
+    let r = 60;  // Minor radius (scaled)
+    
+    // User Input State
+    let currentFreq = 10;
+    let currentPower = 50;
+    let resonanceFactor = 0; // 0.0 to 1.0
+
+    // Initialize Particles
+    for(let i=0; i<PARTICLE_COUNT; i++) {
+        particles.push({
+            x: (Math.random() - 0.5) * 2000,
+            y: (Math.random() - 0.5) * 1000,
+            z: (Math.random() - 0.5) * 1000,
+            vx: 0, vy: 0, vz: 0,
+            size: Math.random() * 2
+        });
+    }
+
+    function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Input Listeners
+    freqSlider.addEventListener('input', (e) => {
+        currentFreq = parseFloat(e.target.value);
+        freqVal.innerText = currentFreq.toFixed(1) + " kHz";
+    });
+
+    powerSlider.addEventListener('input', (e) => {
+        currentPower = parseInt(e.target.value);
+        powerVal.innerText = currentPower + "%";
+    });
+
+    pSlider.addEventListener('input', (e) => { P = parseInt(e.target.value); });
+    qSlider.addEventListener('input', (e) => { Q = parseInt(e.target.value); });
+
+    // 3D Projection Helper
+    function project(x, y, z) {
+        const fov = 400;
+        const cameraZ = 600;
+        const scale = fov / (fov + z + cameraZ);
+        return {
+            x: canvas.width / 2 + x * scale,
+            y: canvas.height / 2 + y * scale,
+            scale: scale
+        };
+    }
+
+    // Rotation Matrix
+    function rotateY(x, y, z, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+            x: x * cos - z * sin,
+            y: y,
+            z: x * sin + z * cos
+        };
+    }
+
+    function rotateX(x, y, z, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+            x: x,
+            y: y * cos - z * sin,
+            z: y * sin + z * cos
+        };
+    }
+
+    function calculateResonance() {
+        // Gaussian curve for resonance
+        const diff = Math.abs(currentFreq - TARGET_FREQ);
+        // Calculate factor (0 to 1)
+        let factor = Math.exp(-(diff * diff) / (2 * (RESONANCE_WIDTH * RESONANCE_WIDTH)));
+        
+        // Scale by power input
+        factor *= (currentPower / 100);
+        
+        return factor;
+    }
+
+    function draw() {
+        // Clear screen
+        ctx.fillStyle = 'rgba(5, 5, 5, 0.4)'; // Trail effect
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        resonanceFactor = calculateResonance();
+        
+        // Update UI based on physics
+        const pressure = resonanceFactor * MAX_PRESSURE;
+        pressureReadout.innerText = pressure.toFixed(2);
+        
+        if (resonanceFactor > 0.8) {
+            warningEl.style.display = 'block';
+            statusBadge.innerText = "CRITICAL VACUUM";
+            statusBadge.classList.add('active');
+        } else if (resonanceFactor > 0.3) {
+            warningEl.style.display = 'none';
+            statusBadge.innerText = "FIELD BUILDING";
+            statusBadge.classList.remove('active');
+            statusBadge.style.color = "#fff";
+        } else {
+            warningEl.style.display = 'none';
+            statusBadge.innerText = "SYSTEM IDLE";
+            statusBadge.classList.remove('active');
+            statusBadge.style.color = "#666";
+        }
+
+        // Draw Particles (The Vacuum Fluid)
+        ctx.fillStyle = `rgba(100, 200, 255, ${0.3 + resonanceFactor})`;
+        
+        particles.forEach(p => {
+            // Physics: If resonance is high, suck particles into center (Gravity Well)
+            if (resonanceFactor > 0.1) {
+                const dist = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+                const pull = (1000 / (dist + 10)) * resonanceFactor * 5;
+                
+                p.vx -= (p.x / dist) * pull;
+                p.vy -= (p.y / dist) * pull;
+                p.vz -= (p.z / dist) * pull;
+                
+                // Drag
+                p.vx *= 0.95;
+                p.vy *= 0.95;
+                p.vz *= 0.95;
+            } else {
+                // Brownian motion
+                p.vx += (Math.random() - 0.5) * 0.5;
+                p.vy += (Math.random() - 0.5) * 0.5;
+                p.vz += (Math.random() - 0.5) * 0.5;
+                // Keep in bounds
+                if(Math.abs(p.x) > 1000) p.vx *= -1;
+                if(Math.abs(p.y) > 500) p.vy *= -1;
+            }
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.z += p.vz;
+
+            // Rotate particles with the scene
+            let rP = rotateY(p.x, p.y, p.z, time * 0.2);
+            rP = rotateX(rP.x, rP.y, rP.z, time * 0.1);
+            
+            const proj = project(rP.x, rP.y, rP.z);
+            
+            if (proj.scale > 0) {
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, p.size * proj.scale, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        // Draw The Starship Coil (Torus Knot)
+        // Parametric equations:
+        // x = (R + r * cos(q*t)) * cos(p*t)
+        // y = (R + r * cos(q*t)) * sin(p*t)
+        // z = r * sin(q*t)
+        
+        ctx.beginPath();
+        const steps = 600;
+        let firstPoint = null;
+
+        // Dynamic Color based on resonance
+        // Blue -> Cyan -> White
+        const rVal = Math.floor(resonanceFactor * 255);
+        const gVal = Math.floor(240 + resonanceFactor * 15);
+        const bVal = 255;
+        const color = `rgb(${rVal}, ${gVal}, ${bVal})`;
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2 + (resonanceFactor * 4);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Glow effect
+        ctx.shadowBlur = 10 + (resonanceFactor * 40);
+        ctx.shadowColor = color;
+
+        // Jitter for high energy
+        const jitter = resonanceFactor * 2;
+
+        for (let i = 0; i <= steps; i++) {
+            const t = (i / steps) * Math.PI * 2;
+            
+            // Apply Golden Ratio aspect from paper if close to default
+            const phi = 1.618;
+            let currentR = R;
+            let currentr = r;
+            
+            // Calculate Knot Coords
+            let kx = (currentR + currentr * Math.cos(Q * t)) * Math.cos(P * t);
+            let ky = (currentR + currentr * Math.cos(Q * t)) * Math.sin(P * t);
+            let kz = currentr * Math.sin(Q * t);
+
+            // Add Jitter
+            if (jitter > 0) {
+                kx += (Math.random() - 0.5) * jitter;
+                ky += (Math.random() - 0.5) * jitter;
+                kz += (Math.random() - 0.5) * jitter;
+            }
+
+            // Rotate the entire coil
+            let rot = rotateY(kx, ky, kz, time);
+            rot = rotateX(rot.x, rot.y, rot.z, time * 0.5);
+
+            const proj = project(rot.x, rot.y, rot.z);
+
+            if (i === 0) {
+                ctx.moveTo(proj.x, proj.y);
+                firstPoint = proj;
+            } else {
+                ctx.lineTo(proj.x, proj.y);
+            }
+        }
+        
+        // Close the loop visually
+        if (firstPoint) ctx.lineTo(firstPoint.x, firstPoint.y);
+        
+        ctx.stroke();
+        ctx.shadowBlur = 0; // Reset for next frame
+
+        // Draw Bifilar "Ghost" Coil (The counter-rotating pair mentioned in paper)
+        // We draw it slightly offset and fainter
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${rVal}, ${gVal}, ${bVal}, 0.3)`;
+        ctx.lineWidth = 1;
+        
+        for (let i = 0; i <= steps; i++) {
+            const t = (i / steps) * Math.PI * 2;
+            // Slight phase shift for the second filament
+            const t2 = t + 0.05; 
+            
+            let kx = (R + r * Math.cos(Q * t2)) * Math.cos(P * t2);
+            let ky = (R + r * Math.cos(Q * t2)) * Math.sin(P * t2);
+            let kz = r * Math.sin(Q * t2);
+
+            let rot = rotateY(kx, ky, kz, time);
+            rot = rotateX(rot.x, rot.y, rot.z, time * 0.5);
+            const proj = project(rot.x, rot.y, rot.z);
+            if (i === 0) ctx.moveTo(proj.x, proj.y);
+            else ctx.lineTo(proj.x, proj.y);
+        }
+        ctx.stroke();
+
+        // Increment time
+        // Spin faster if resonant
+        time += 0.01 + (resonanceFactor * 0.02);
+        
+        requestAnimationFrame(draw);
+    }
+
+    // Start
+    draw();
+
+</script>
+</body>
+</html>

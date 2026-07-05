@@ -1,0 +1,186 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,bm}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\title{Golden Rapidity and Tangential Velocity in VAM}
+\author{O. Iskandarani}
+\date{\today}
+
+%========================
+% Golden Hyperbolic Basis (with controlled algebraic echo)
+%========================
+% Policy: The "golden" constant is fundamentally hyperbolic.
+% Primary:  \xig = asinh(1/2),  \phi = exp(\xig)
+% Secondary (allowed but derivative): \phi = (1+sqrt{5})/2 may appear
+%   only parenthetically *after* the hyperbolic definition has been given.
+
+% --- Core macros ---
+\newcommand{\xig}{\operatorname{asinh}\!\left(\tfrac{1}{2}\right)} % base hyperbolic scale
+\newcommand{\phig}{\exp(\xig)}                                     % golden from hyperbolic
+\newcommand{\phialg}{\bigl(1+\sqrt{5}\bigr)/2}                     % algebraic echo (use sparingly)
+
+% --- Display helpers (optional) ---
+\newcommand{\GoldenDeclare}{%
+    \textbf{Golden (hyperbolic)}:\ \(\ln\phi=\xig\), hence \(\phi=\phig\).
+    \ \emph{(Equivalently, \(\phi=\phialg\); this algebraic form is derivative.)}%
+}
+
+% --- Golden rapidity (the 3/2 motif) ---
+\newcommand{\xigold}{\tfrac{3}{2}\,\xig} % "golden rapidity" scale
+
+% --- Canonical identity (hyperbolic-only proof, algebraic as corollary) ---
+\newtheorem{identity}{Identity}
+\begin{identity}[Golden rapidity \(\Rightarrow\) velocity fraction]
+    Let \(\xig=\operatorname{asinh}\!\left(\tfrac{1}{2}\right)\) and \(\phi=\exp(\xig)\).
+    Define the golden rapidity \( \xi_g:=\xigold \).
+    Then
+    \[
+        \boxed{\ \tanh(\xi_g) \;=\; e^{-\xig} \;=\; \phi^{-1}\ }.
+    \]
+    \emph{Hyperbolic proof sketch:} \(\tanh(\xi)=\frac{e^{2\xi}-1}{e^{2\xi}+1}\) with \(\xi_g=\tfrac{3}{2}\xig\)
+    gives \(\tanh(\xi_g)=\frac{e^{3\xig}-1}{e^{3\xig}+1}\).
+    Since \(e^{\xig}=\phi\), \(\tanh(\xi_g)=\frac{\phi^3-1}{\phi^3+1}\).
+    Using only \(\ln\phi=\xig\), we also have \(e^{-\xig}=\phi^{-1}\);
+    direct substitution verifies equality.
+    \emph{Algebraic corollary (optional):} if one later notes \(\phi=\phialg\), then
+    \(\tanh(\xi_g)=1/\phi\) matches the familiar golden ratio without invoking radicals in the proof. \qed
+\end{identity}
+
+% --- Swirl mapping (keep it hyperbolic-first) ---
+% Use your \vswirl macro if defined elsewhere:
+% \newcommand{\swirlarrow}{\!\!\scriptsize\boldsymbol{\circlearrowleft}}
+% \newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+
+\paragraph{Golden swirl scales (hyperbolic-first).}
+With rapidity \(\xi\) defined by \(\tanh\xi=\|\vswirl\|/C_e\), the golden layer at \(\xi=\xigold\) yields
+\[
+    \beta_g \equiv \frac{\|\vswirl\|}{C_e} = \tanh(\xigold) = e^{-\xig} = \phi^{-1},\quad
+    \|\vswirl\|_g = C_e\,e^{-\xig},\quad
+    \Omega_g = \frac{\|\vswirl\|_g}{r_c} = e^{-\xig}\,\frac{C_e}{r_c}.
+\]
+\emph{Parenthetical algebraic echo (allowed after the above):} \(\phi=\phialg\).
+
+% --- Style guard (light, not draconian) ---
+% Guideline: If \phialg appears before \phig in a section, add a brief parenthetical:
+% “We use \(\ln\phi=\operatorname{asinh}(1/2)\) as the defining relation.”
+
+% --- 3/2 motif note (QM/Kelvin scaling resonance) ---
+\paragraph{On the \(3/2\) exponent.}
+The \(\tfrac{3}{2}\) multiplier in \(\xi_g=\tfrac{3}{2}\xig\) mirrors common spectral/dispersion scalings
+(quantum level spacings, Kelvin-wave cascades), and will be used to label “golden layers” in SST.
+
+% --- “Five” and pentagon transient (context hook) ---
+\paragraph{Remark (pentagon transient).}
+When an unknotting filament strikes a boundary, a short-lived five-vertex symmetry (pentagon-like)
+is empirically observed; in SST we treat this as a \emph{transient morphometric feature} of the
+filament’s curvature–torsion flow rather than as a defining identity for \(\phi\).
+
+\begin{document}
+\maketitle
+
+Let the golden ratio be
+
+\begin{equation}
+    \varphi \;\equiv\; \exp\!\big(\xig\big), \qquad
+    \ln\varphi \;=\; \xig, \qquad
+    \text{(no algebraic definition used)}.
+\end{equation}
+Recall the definition of the inverse hyperbolic sine \cite{NISTDLMF}:
+\begin{equation}
+    \operatorname{asinh}(x) = \ln\!\Big(x + \sqrt{x^2 + 1}\Big).
+    \label{eq:asinh_def}
+\end{equation}
+Substituting $x=\tfrac{1}{2}$ into \eqref{eq:asinh_def} gives
+\begin{align}
+    \operatorname{asinh}\!\left(\tfrac{1}{2}\right)
+    &= \ln\!\left(\tfrac{1}{2} + \sqrt{\tfrac{1}{4} + 1}\right) \\
+    &= \ln\!\left(\tfrac{1 + \sqrt{5}}{2}\right) \\
+    &= \ln \varphi.
+\end{align}
+Exponentiating both sides yields the clean identity
+\begin{equation}
+    \boxed{\;\varphi = \exp\!\left(\operatorname{asinh}\!\left(\tfrac{1}{2}\right)\right)\; }.
+\end{equation}
+
+\paragraph{Numerical check.}
+Using double precision,
+\(
+\varphi \approx 1.618033988749895
+\)
+and
+\(
+\exp(\operatorname{asinh}(1/2)) \approx 1.618033988749895
+\),
+matching to machine precision.
+
+
+\section*{Setup}
+Let the golden ratio be
+\begin{equation}
+  \varphi \equiv \frac{1+\sqrt{5}}{2}, \qquad \varphi^2=\varphi+1.
+\end{equation}
+Define the \emph{golden rapidity}
+\begin{equation}
+  \xi_g \;\equiv\; \frac{3}{2}\ln\varphi.
+\end{equation}
+We use the standard hyperbolic functions (definitions in \cite{NISTDLMF}).
+
+\section*{Identity: \(\tanh(\xi_g)=1/\varphi\)}
+Using $\tanh y = \dfrac{e^{2y}-1}{e^{2y}+1}$, substitute $y=\xi_g$ to obtain
+\begin{equation}
+  \tanh(\xi_g) \;=\; \frac{e^{3\ln\varphi}-1}{e^{3\ln\varphi}+1}
+  \;=\; \frac{\varphi^3-1}{\varphi^3+1}.
+\end{equation}
+From $\varphi^2=\varphi+1$ it follows $\varphi^3=\varphi(\varphi+1)=2\varphi+1$. Hence
+\begin{equation}
+  \tanh(\xi_g) \;=\; \frac{(2\varphi+1)-1}{(2\varphi+1)+1}
+  \;=\; \frac{2\varphi}{2(\varphi+1)}
+  \;=\; \frac{\varphi}{\varphi+1}
+  \;=\; \frac{\varphi}{\varphi^2}
+  \;=\; \frac{1}{\varphi}.
+\end{equation}
+Therefore
+\begin{equation}
+  \boxed{\;\tanh\!\big(\tfrac{3}{2}\ln\varphi\big)=\frac{1}{\varphi}\;}
+  \qquad\Longleftrightarrow\qquad
+  \boxed{\;\coth\!\big(\tfrac{3}{2}\ln\varphi\big)=\varphi\; }.
+\end{equation}
+
+\section*{VAM Mapping to Tangential Velocity}
+In a rapidity parametrization, the dimensionless speed is
+\begin{equation}
+  \beta \;\equiv\; \frac{v}{C_e} \;=\; \tanh \xi.
+\end{equation}
+Setting $\xi=\xi_g$ gives the \emph{golden} tangential fraction
+\begin{equation}
+  \beta_g \;=\; \tanh(\xi_g) \;=\; \frac{1}{\varphi},
+\end{equation}
+and thus a characteristic tangential velocity and swirl frequency
+\begin{equation}
+  v_g \;=\; \frac{C_e}{\varphi}, \qquad
+  \Omega_g \;=\; \frac{v_g}{r_c} \;=\; \frac{1}{\varphi}\,\frac{C_e}{r_c}.
+\end{equation}
+Both are dimensionally consistent: $v_g$ has units of \(\si{m/s}\) and $\Omega_g$ of \(\si{s^{-1}}\).
+
+\section*{Numerical Validation (User Constants)}
+Using $C_e=\SI{1093845.63}{m/s}$ and $r_c=\SI{1.40897017e-15}{m}$,
+\begin{align}
+  \varphi &\approx 1.618033988749895,\\
+  \xi_g &= \tfrac{3}{2}\ln\varphi \approx 0.721817737589405,\\
+  \beta_g &= \tanh\xi_g \approx 0.618033988749895 \;=\; \frac{1}{\varphi},\\
+  v_g &= \frac{C_e}{\varphi} \approx \SI{6.760337777855416e5}{m/s},\\
+  \Omega &= \frac{C_e}{r_c} \approx \SI{7.763440655383073e20}{s^{-1}},\\
+  \Omega_g &= \frac{\Omega}{\varphi} \approx \SI{4.798070194669498e20}{s^{-1}}.
+\end{align}
+
+\paragraph{Consistency checks.}
+Since $\beta_g=1/\varphi$, we have $v_g=C_e/\varphi$ and $\Omega_g=\Omega/\varphi$ exactly, up to machine precision in floating-point arithmetic.
+
+\section*{Discussion}
+This construction supplies a natural, dimensionless benchmark ($1/\varphi$) for tangential speeds in VAM. If swirl states quantize in hyperbolic angle $\xi$, the golden rapidity $\xi_g$ defines a preferred scaling layer where tangential velocity and core swirl frequency are reduced by a factor $\varphi$ relative to their maxima, potentially useful for defining stable vortex\hyp{}knot operating points or resonance bands in the spectrum.
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+\end{document}

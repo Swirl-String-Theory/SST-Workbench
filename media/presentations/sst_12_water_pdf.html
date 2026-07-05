@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Lab: Rotating Cylinder & Skyrmion Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --fluid-color: rgba(6, 182, 212, 0.3);
+            --fluid-border: rgba(6, 182, 212, 0.6);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Control Panel */
+        .controls {
+            width: 300px;
+            background-color: var(--panel-bg);
+            padding: 1.5rem;
+            border-right: 1px solid #334155;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 10;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent-cyan);
+        }
+
+        .value-display {
+            color: var(--accent-cyan);
+            font-family: monospace;
+        }
+
+        button.primary-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), #0891b2);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        button.primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        button.primary-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        /* Center Simulation Area */
+        .simulation-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 70%);
+            perspective: 1000px;
+        }
+
+        /* The Cylinder Visualization */
+        .cylinder-container {
+            position: relative;
+            width: 200px;
+            height: 400px; /* Base height, scaled by JS */
+            transform-style: preserve-3d;
+            transition: height 0.5s ease;
+        }
+
+        .cylinder-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(6, 182, 212, 0.2);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            transform: rotateX(70deg) translateY(-20px);
+            z-index: 10;
+            box-shadow: 0 0 15px var(--accent-cyan);
+            transition: all 0.3s;
+        }
+
+        .cylinder-body {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            height: calc(100% - 40px);
+            background: linear-gradient(90deg, 
+                rgba(6, 182, 212, 0.1) 0%, 
+                rgba(6, 182, 212, 0.05) 20%, 
+                rgba(6, 182, 212, 0.05) 80%, 
+                rgba(6, 182, 212, 0.1) 100%);
+            border-left: 2px solid var(--fluid-border);
+            border-right: 2px solid var(--fluid-border);
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .cylinder-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(6, 182, 212, 0.4);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            transform: rotateX(70deg) translateY(20px);
+            z-index: 1;
+        }
+
+        .motor {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 40px;
+            background: #334155;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .motor::after {
+            content: "DC MOTOR";
+        }
+
+        /* Animation Elements */
+        .impulse-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to top, var(--accent-pink), transparent);
+            opacity: 0;
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        .surface-ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border: 2px solid var(--accent-pink);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 5px white;
+        }
+
+        /* Right Data Panel */
+        .data-panel {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .rosetta-card {
+            background: #0f172a;
+            margin: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+
+        .rosetta-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--accent-pink);
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .equation-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+
+        .equation-row span:first-child {
+            color: #94a3b8;
+        }
+        .equation-row span:last-child {
+            color: #e2e8f0;
+            font-family: monospace;
+        }
+
+        .monitor {
+            padding: 1rem;
+            border-top: 1px solid #334155;
+        }
+
+        .monitor-item {
+            margin-bottom: 1rem;
+        }
+
+        .monitor-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .monitor-value {
+            font-size: 1.5rem;
+            font-family: monospace;
+            color: var(--accent-cyan);
+        }
+
+        .status-log {
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 1rem;
+            color: #64748b;
+            height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid #334155;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+        }
+        .log-entry.success { color: var(--accent-cyan); }
+        .log-entry.event { color: var(--accent-pink); }
+
+        /* Spinner Animation for Rotation */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .rotation-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border: 3px dashed var(--accent-cyan);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        /* Game Mode Overlay */
+        .game-overlay {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--accent-pink);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST: Swirl-String Theory Lab</h1>
+        <div class="subtitle">Impulsive Axisymmetric Forcing Simulator</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 0.8rem; color: #94a3b8;">Mode:</span>
+        <select id="modeSelect" style="background: #334155; color: white; border: none; padding: 5px; border-radius: 4px;">
+            <option value="sim">Free Simulation</option>
+            <option value="game">Target Match (Game)</option>
+        </select>
+    </div>
+</header>
+
+<main>
+    <!-- Controls -->
+    <div class="controls">
+        <div class="control-group">
+            <label>Rotation Rate (Ω) <span id="val-omega" class="value-display">2.0 rad/s</span></label>
+            <input type="range" id="omega" min="0.1" max="10.0" step="0.1" value="2.0">
+        </div>
+
+        <div class="control-group">
+            <label>Cylinder Height (H) <span id="val-height" class="value-display">0.30 m</span></label>
+            <input type="range" id="height" min="0.1" max="1.0" step="0.05" value="0.30">
+        </div>
+
+        <div class="control-group">
+            <label>Cylinder Radius (R) <span id="val-radius" class="value-display">0.075 m</span></label>
+            <input type="range" id="radius" min="0.05" max="0.3" step="0.01" value="0.075">
+        </div>
+
+        <div class="rosetta-card" style="margin: 0; background: #1e293b; border: none; padding: 0;">
+            <div class="rosetta-header">Physics Constants</div>
+            <div class="equation-row">
+                <span>Radial Wavenumber (kr)</span>
+                <span id="val-kr">51.0 m⁻¹</span>
+            </div>
+            <div class="equation-row">
+                <span>Axial Wavenumber (kz)</span>
+                <span id="val-kz">10.5 m⁻¹</span>
+            </div>
+        </div>
+
+        <button id="fireBtn" class="primary-btn">Fire Impulse</button>
+        <div style="font-size: 0.7rem; color: #64748b; text-align: center; margin-top: 5px;">
+            Triggers "Push-Pull" Signal
+        </div>
+    </div>
+
+    <!-- Simulation -->
+    <div class="simulation-area">
+        <div id="gameTarget" class="game-overlay">
+            Target Arrival Time: <span id="targetTime" style="color: var(--accent-pink); font-weight: bold;">4.10s</span>
+        </div>
+
+        <div class="cylinder-container" id="cylinder">
+            <div class="cylinder-top" id="surface">
+                <!-- Surface ripples will appear here -->
+            </div>
+            <div class="cylinder-body">
+                <div class="impulse-wave" id="wave"></div>
+            </div>
+            <div class="cylinder-bottom"></div>
+            <div class="motor"></div>
+        </div>
+        
+        <div class="rotation-indicator" id="rotIndicator"></div>
+    </div>
+
+    <!-- Data Panel -->
+    <div class="data-panel">
+        <div class="rosetta-card">
+            <div class="rosetta-header">
+                <span>Rosetta Card (SST ↔ Mainstream)</span>
+                <span>📄 Pg 1</span>
+            </div>
+            <div class="equation-row">
+                <span>Swirl Clock (St)</span>
+                <span id="calc-st">--</span>
+            </div>
+            <div class="equation-row">
+                <span>Char. Freq (Ω₀)</span>
+                <span id="calc-omega0">--</span>
+            </div>
+            <div class="equation-row">
+                <span>Mass Density (ρm)</span>
+                <span>ρE/c²</span>
+            </div>
+        </div>
+
+        <div class="monitor">
+            <div class="monitor-item">
+                <div class="monitor-label">Group Velocity (cg,z)</div>
+                <div class="monitor-value" id="calc-cgz">0.00 m/s</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">Arrival Time (t_arr)</div>
+                <div class="monitor-value" id="calc-tarr">0.00 s</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-label">Est. Surface Rise (η)</div>
+                <div class="monitor-value" id="calc-eta">0.00 mm</div>
+            </div>
+        </div>
+
+        <div class="status-log" id="log">
+            <div class="log-entry">System initialized.</div>
+            <div class="log-entry">Ready for impulse.</div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Physics Constants based on the paper
+    const CONSTANTS = {
+        kr_factor: 3.83, // Bessel root approximation
+        kz_pi: Math.PI,
+        rho_f: 7.0e-7, // kg m^-3
+        c: 3e8, // Speed of light (approx)
+        rc: 1.4089e-15 // SST characteristic radius
+    };
+
+    // State
+    let state = {
+        omega: 2.0,
+        height: 0.30,
+        radius: 0.075,
+        isSimulating: false,
+        mode: 'sim',
+        targetTime: 4.1
+    };
+
+    // DOM Elements
+    const ui = {
+        omega: document.getElementById('omega'),
+        height: document.getElementById('height'),
+        radius: document.getElementById('radius'),
+        valOmega: document.getElementById('val-omega'),
+        valHeight: document.getElementById('val-height'),
+        valRadius: document.getElementById('val-radius'),
+        valKr: document.getElementById('val-kr'),
+        valKz: document.getElementById('val-kz'),
+        calcCgz: document.getElementById('calc-cgz'),
+        calcTarr: document.getElementById('calc-tarr'),
+        calcEta: document.getElementById('calc-eta'),
+        calcSt: document.getElementById('calc-st'),
+        calcOmega0: document.getElementById('calc-omega0'),
+        fireBtn: document.getElementById('fireBtn'),
+        cylinder: document.getElementById('cylinder'),
+        wave: document.getElementById('wave'),
+        surface: document.getElementById('surface'),
+        log: document.getElementById('log'),
+        rotIndicator: document.getElementById('rotIndicator'),
+        modeSelect: document.getElementById('modeSelect'),
+        gameTarget: document.getElementById('gameTarget'),
+        targetTime: document.getElementById('targetTime')
+    };
+
+    // Helper: Log to console
+    function log(msg, type = 'normal') {
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.textContent = `> ${msg}`;
+        ui.log.prepend(div);
+    }
+
+    // Core Physics Calculations (Equations 1, 2, 3 from Paper)
+    function calculatePhysics() {
+        const R = state.radius;
+        const H = state.height;
+        const Omega = state.omega;
+
+        // Approximations from paper text
+        const kr = CONSTANTS.kr_factor / R; 
+        const kz = CONSTANTS.kz_pi / H;
+        const k = Math.sqrt(kr*kr + kz*kz);
+
+        // Equation (2): Group velocity cg,z = (2 * Omega * kr^2) / k^3
+        const cgz = (2 * Omega * Math.pow(kr, 2)) / Math.pow(k, 3);
+
+        // Equation (3): Arrival time t_arr = H / cg,z
+        // Note: Paper says t_arr approx H * k^3 / (2 * Omega * kr^2) which is H/cgz
+        const t_arr = H / cgz;
+
+        // Surface Rise (Proportionality from Eq 10: eta_max proportional to Omega)
+        // We'll use a dummy scalar to make it visible in UI
+        const eta = Omega * 0.5; 
+
+        // SST Rosetta Calculations (Page 1)
+        // v_swirl approx Omega * R (simplified for visualization)
+        const v_swirl = Omega * R; 
+        const omega0 = v_swirl / CONSTANTS.rc;
+        
+        // Swirl Clock St = sqrt(1 - v^2/c^2)
+        // Since v << c in this lab, it will be basically 1, but let's show the formula working
+        // To make it interesting, we display 1 - delta
+        const v_c_ratio = v_swirl / CONSTANTS.c;
+        const St = Math.sqrt(1 - v_c_ratio*v_c_ratio);
+
+        return {
+            kr, kz, cgz, t_arr, eta, St, omega0
+        };
+    }
+
+    // Update UI
+    function updateUI() {
+        // Update labels
+        ui.valOmega.textContent = `${state.omega.toFixed(1)} rad/s`;
+        ui.valHeight.textContent = `${state.height.toFixed(2)} m`;
+        ui.valRadius.textContent = `${state.radius.toFixed(3)} m`;
+
+        // Run Physics
+        const phys = calculatePhysics();
+
+        // Update Derived Values
+        ui.valKr.textContent = `${phys.kr.toFixed(1)} m⁻¹`;
+        ui.valKz.textContent = `${phys.kz.toFixed(1)} m⁻¹`;
+        
+        // Scientific notation for small/large numbers
+        ui.calcCgz.textContent = `${phys.cgz.toExponential(2)} m/s`;
+        ui.calcTarr.textContent = `${phys.t_arr.toFixed(2)} s`;
+        ui.calcEta.textContent = `~${phys.eta.toFixed(2)} mm`;
+        
+        ui.calcSt.textContent = `≈ 1.0`; // It's extremely close to 1
+        ui.calcOmega0.textContent = `${phys.omega0.toExponential(2)} s⁻¹`;
+
+        // Visual Updates
+        // Scale cylinder height visually (base 300px + height factor)
+        const visualHeight = 200 + (state.height * 400);
+        ui.cylinder.style.height = `${visualHeight}px`;
+
+        // Rotation speed visual
+        const rotDuration = 2 / state.omega; // faster omega = lower duration
+        ui.rotIndicator.style.animation = `spin ${rotDuration}s linear infinite`;
+
+        // Game Logic Check
+        if(state.mode === 'game') {
+            const diff = Math.abs(phys.t_arr - state.targetTime);
+            if(diff < 0.1) {
+                ui.gameTarget.style.borderColor = '#4ade80'; // Green
+                ui.targetTime.style.color = '#4ade80';
+            } else {
+                ui.gameTarget.style.borderColor = 'var(--accent-pink)';
+                ui.targetTime.style.color = 'var(--accent-pink)';
+            }
+        }
+    }
+
+    // Animation Logic
+    function fireImpulse() {
+        if (state.isSimulating) return;
+        state.isSimulating = true;
+        ui.fireBtn.disabled = true;
+
+        const phys = calculatePhysics();
+        log(`Impulse fired. Expected arrival: ${phys.t_arr.toFixed(2)}s`, 'event');
+
+        // Visual duration needs to be clamped so the user doesn't wait 10 minutes or 0 seconds
+        // We map t_arr to a visual duration between 1s and 5s for UX
+        // But we display the REAL physics time.
+        let visualDuration = phys.t_arr;
+        
+        // Clamp for UX: if physics says 100s, we show it in 5s but say "100s"
+        // If physics says 0.01s, we show it in 0.5s.
+        const speedFactor = visualDuration > 5 ? 5 : (visualDuration < 0.5 ? 0.5 : visualDuration);
+
+        // Reset animations
+        ui.wave.style.transition = 'none';
+        ui.wave.style.bottom = '0%';
+        ui.wave.style.opacity = '1';
+        
+        // Force reflow
+        void ui.wave.offsetWidth;
+
+        // Animate Wave
+        ui.wave.style.transition = `bottom ${speedFactor}s linear, opacity ${speedFactor}s ease-in`;
+        ui.wave.style.bottom = '95%';
+        ui.wave.style.opacity = '0.5';
+
+        // Schedule Arrival
+        setTimeout(() => {
+            triggerSurfaceResponse(phys.eta);
+            log(`Wave arrived at surface.`, 'success');
+            
+            // Skyrmion/Photon emission effect if Omega is high enough
+            if(state.omega > 5.0) {
+                emitPhotons();
+            }
+
+            // Game Win Condition
+            if(state.mode === 'game') {
+                const diff = Math.abs(phys.t_arr - state.targetTime);
+                if(diff < 0.1) {
+                    log("TARGET MATCHED! EXCELLENT WORK.", "success");
+                    createConfetti();
+                }
+            }
+
+            state.isSimulating = false;
+            ui.fireBtn.disabled = false;
+            
+            // Reset wave visual
+            setTimeout(() => {
+                ui.wave.style.transition = 'opacity 0.5s';
+                ui.wave.style.opacity = '0';
+            }, 200);
+
+        }, speedFactor * 1000);
+    }
+
+    function triggerSurfaceResponse(magnitude) {
+        // Create a ripple element
+        const ripple = document.createElement('div');
+        ripple.className = 'surface-ripple';
+        ui.surface.appendChild(ripple);
+
+        // Animate
+        // Scale based on magnitude (eta)
+        const scale = 1 + (magnitude * 0.5);
+        
+        ripple.animate([
+            { width: '0px', height: '0px', opacity: 1, borderWidth: '4px' },
+            { width: '100%', height: '100%', opacity: 0, borderWidth: '0px' }
+        ], {
+            duration: 1000,
+            easing: 'ease-out'
+        });
+
+        // Surface bobbing
+        ui.surface.animate([
+            { transform: 'rotateX(70deg) translateY(-20px)' },
+            { transform: 'rotateX(70deg) translateY(-30px)' },
+            { transform: 'rotateX(70deg) translateY(-20px)' }
+        ], {
+            duration: 500,
+            easing: 'ease-in-out'
+        });
+
+        // Cleanup ripple
+        setTimeout(() => ripple.remove(), 1000);
+    }
+
+    function emitPhotons() {
+        log("High energy detected: Skyrmionic Photon Emission!", "event");
+        for(let i=0; i<10; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            ui.cylinder.appendChild(p);
+            
+            // Random start pos at top
+            const left = 20 + Math.random() * 160;
+            p.style.left = `${left}px`;
+            p.style.top = '0px';
+
+            // Animate up and fade
+            p.animate([
+                { transform: 'translateY(0) scale(1)', opacity: 1 },
+                { transform: `translateY(-${50 + Math.random()*100}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: 1000 + Math.random() * 1000,
+                easing: 'ease-out'
+            });
+
+            setTimeout(() => p.remove(), 2000);
+        }
+    }
+
+    function createConfetti() {
+        // Simple CSS confetti for game win
+        for(let i=0; i<30; i++) {
+            const c = document.createElement('div');
+            c.style.position = 'absolute';
+            c.style.width = '10px';
+            c.style.height = '10px';
+            c.style.backgroundColor = Math.random() > 0.5 ? 'var(--accent-cyan)' : 'var(--accent-pink)';
+            c.style.left = '50%';
+            c.style.top = '50%';
+            c.style.zIndex = '100';
+            document.body.appendChild(c);
+
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 100 + Math.random() * 200;
+            const x = Math.cos(angle) * dist;
+            const y = Math.sin(angle) * dist;
+
+            c.animate([
+                { transform: 'translate(0,0)' },
+                { transform: `translate(${x}px, ${y}px) rotate(${Math.random()*360}deg)`, opacity: 0 }
+            ], {
+                duration: 1500,
+                easing: 'ease-out'
+            });
+
+            setTimeout(() => c.remove(), 1500);
+        }
+    }
+
+    // Event Listeners
+    ui.omega.addEventListener('input', (e) => { state.omega = parseFloat(e.target.value); updateUI(); });
+    ui.height.addEventListener('input', (e) => { state.height = parseFloat(e.target.value); updateUI(); });
+    ui.radius.addEventListener('input', (e) => { state.radius = parseFloat(e.target.value); updateUI(); });
+    
+    ui.fireBtn.addEventListener('click', fireImpulse);
+
+    ui.modeSelect.addEventListener('change', (e) => {
+        state.mode = e.target.value;
+        if(state.mode === 'game') {
+            ui.gameTarget.style.display = 'block';
+            // Generate random target
+            state.targetTime = (Math.random() * 5 + 2).toFixed(2); // 2s to 7s
+            ui.targetTime.textContent = `${state.targetTime}s`;
+            log(`Game Mode: Adjust H, R, and Ω to hit arrival time ${state.targetTime}s`, 'event');
+        } else {
+            ui.gameTarget.style.display = 'none';
+        }
+        updateUI();
+    });
+
+    // Initialize
+    updateUI();
+
+</script>
+</body>
+</html>

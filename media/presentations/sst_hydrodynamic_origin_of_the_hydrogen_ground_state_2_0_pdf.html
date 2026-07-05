@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory Laboratory</title>
+    <style>
+        :root {
+            --bg-color: #0a0b10;
+            --panel-bg: #14161f;
+            --accent-cyan: #00f3ff;
+            --accent-gold: #ffd700;
+            --accent-red: #ff4d4d;
+            --text-main: #e0e0e0;
+            --text-dim: #8892b0;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-cyan); }
+        .subtitle { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* Main Layout */
+        main {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            flex: 1;
+            height: calc(100vh - 60px);
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--panel-bg);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-right {
+            border-right: none;
+            border-left: 1px solid #333;
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            color: var(--accent-cyan);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: transparent;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            margin-top: -5px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .value-display {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            float: right;
+        }
+
+        /* Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            background: #2a2d3d;
+            border: 1px solid #444;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        button:hover { background: #3a3e52; border-color: var(--accent-cyan); }
+        button.active { background: var(--accent-cyan); color: #000; font-weight: bold; }
+
+        /* Canvas Area */
+        #viewport {
+            position: relative;
+            background: radial-gradient(circle at center, #1a1d29 0%, #000 100%);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #overlay-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+
+        .hud-text {
+            font-family: var(--font-mono);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        /* Data Output */
+        .data-card {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 2px solid var(--accent-gold);
+        }
+
+        .data-label { font-size: 0.7rem; color: var(--text-dim); }
+        .data-value { font-family: var(--font-mono); font-size: 0.9rem; color: white; margin-top: 2px; }
+        .data-unit { color: #666; font-size: 0.7rem; }
+
+        .formula {
+            font-family: "Times New Roman", serif;
+            font-style: italic;
+            color: var(--accent-cyan);
+            text-align: center;
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+
+        /* Alert/Notification */
+        #notification {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            main { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+            .panel { height: auto; max-height: 200px; border-right: none; border-bottom: 1px solid #333; }
+            .panel-right { border-left: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>SST Laboratory</h1>
+        <div class="subtitle">Hydrodynamic Origin of Matter Simulator</div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-gold);">
+        OFFLINE MODE // v2.1
+    </div>
+</header>
+
+<main>
+    <!-- LEFT PANEL: CONTROLS -->
+    <div class="panel">
+        <h2>Vacuum Parameters</h2>
+        <p style="font-size: 0.8rem; color: #888;">Adjust the properties of the superfluid vacuum condensate.</p>
+        
+        <div class="control-group">
+            <label>Fluid Density (ρ<sub>f</sub>) <span id="val-rho" class="value-display">7.0e-7</span></label>
+            <input type="range" id="input-rho" min="1" max="100" value="70">
+        </div>
+
+        <div class="control-group">
+            <label>Circulation Quantum (Γ<sub>0</sub>) <span id="val-gamma" class="value-display">1.0</span></label>
+            <input type="range" id="input-gamma" min="50" max="150" value="100">
+        </div>
+
+        <div class="control-group">
+            <label>Viscosity Limit (Re) <span id="val-visc" class="value-display">∞</span></label>
+            <input type="range" id="input-visc" min="0" max="100" value="100">
+        </div>
+
+        <h2>Topology Selector</h2>
+        <div class="btn-grid">
+            <button id="btn-electron" class="active" onclick="setMode('electron')">Electron (3₁)</button>
+            <button id="btn-proton" onclick="setMode('proton')">Proton (Composite)</button>
+            <button id="btn-hydrogen" onclick="setMode('hydrogen')">Hydrogen Atom</button>
+            <button id="btn-vacuum" onclick="setMode('vacuum')">Pure Vacuum</button>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 0.75rem; color: #666; border-top: 1px solid #333; padding-top: 10px;">
+            <p><strong>Theory Note:</strong> Particles are not points, but knotted vortices in an inviscid fluid. Mass is the energy of the fluid disturbance.</p>
+        </div>
+    </div>
+
+    <!-- CENTER PANEL: VIEWPORT -->
+    <div id="viewport">
+        <canvas id="simCanvas"></canvas>
+        <div id="overlay-info">
+            <div class="hud-text">FLOW: LAMINAR</div>
+            <div class="hud-text" id="hud-velocity">MAX VELOCITY: 1.09e6 m/s</div>
+            <div class="hud-text" id="hud-pressure">PRESSURE DEFICIT: -13.6 eV</div>
+        </div>
+        <div id="notification">Topology Stabilized</div>
+    </div>
+
+    <!-- RIGHT PANEL: DATA -->
+    <div class="panel panel-right">
+        <h2>Derived Constants</h2>
+        <p style="font-size: 0.8rem; color: #888;">Real-time calculation based on vacuum parameters.</p>
+
+        <div class="formula">E<sub>B</sub> ≈ ρ<sub>f</sub> Γ₀² / r<sub>c</sub></div>
+
+        <div class="data-card">
+            <div class="data-label">Fine Structure Constant (α)</div>
+            <div class="data-value" id="out-alpha">1/137.036</div>
+            <div class="data-unit">Geometric Ratio</div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-label">Bohr Radius (a₀)</div>
+            <div class="data-value" id="out-bohr">5.29 × 10⁻¹¹</div>
+            <div class="data-unit">meters</div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-label">Ground State Energy (E₁)</div>
+            <div class="data-value" id="out-energy">-13.606</div>
+            <div class="data-unit">eV</div>
+        </div>
+
+        <div class="data-card">
+            <div class="data-label">Proton Mass (Derived)</div>
+            <div class="data-value" id="out-mass">1.67 × 10⁻²⁷</div>
+            <div class="data-unit">kg (Topology: 2x5₂ + 6₁)</div>
+        </div>
+
+        <h2>Swirl Clock</h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent-cyan); display: flex; justify-content: center; align-items: center;">
+                <div id="clock-hand" style="width: 2px; height: 15px; background: var(--accent-red); transform-origin: bottom center;"></div>
+            </div>
+            <div style="font-size: 0.8rem; color: #aaa;">
+                Time Dilation Factor: <span id="time-dilation" style="color: white;">1.000</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    /**
+     * SWIRL-STRING THEORY SIMULATOR
+     * Based on the provided document.
+     * 
+     * Core Concepts implemented:
+     * 1. Particles as Knots (Trefoil, etc)
+     * 2. Vacuum as Fluid (Flow visualization)
+     * 3. Forces as Pressure Gradients (1/r potential)
+     */
+
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // State
+    let width, height;
+    let mode = 'electron'; // electron, proton, hydrogen, vacuum
+    let time = 0;
+    let particles = [];
+    const particleCount = 400;
+
+    // Physics Constants (Scaled for Simulation)
+    let params = {
+        rho: 7.0,      // Fluid Density
+        gamma: 1.0,    // Circulation
+        viscosity: 1.0 // 1.0 = inviscid, lower = viscous
+    };
+
+    // Real Physics Constants (for display calculation)
+    const REAL_C = 299792458;
+    const REAL_H_BAR = 1.0545718e-34;
+    const REAL_E_MASS = 9.10938356e-31;
+    
+    // UI Elements
+    const els = {
+        rho: document.getElementById('input-rho'),
+        gamma: document.getElementById('input-gamma'),
+        visc: document.getElementById('input-visc'),
+        valRho: document.getElementById('val-rho'),
+        valGamma: document.getElementById('val-gamma'),
+        valVisc: document.getElementById('val-visc'),
+        outAlpha: document.getElementById('out-alpha'),
+        outBohr: document.getElementById('out-bohr'),
+        outEnergy: document.getElementById('out-energy'),
+        outMass: document.getElementById('out-mass'),
+        clockHand: document.getElementById('clock-hand'),
+        timeDilation: document.getElementById('time-dilation'),
+        hudVel: document.getElementById('hud-velocity'),
+        hudPress: document.getElementById('hud-pressure'),
+        notif: document.getElementById('notification')
+    };
+
+    // Initialization
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // Spawn ether particles
+        for(let i=0; i<particleCount; i++) {
+            particles.push(createParticle());
+        }
+
+        // Listeners
+        els.rho.addEventListener('input', updateParams);
+        els.gamma.addEventListener('input', updateParams);
+        els.visc.addEventListener('input', updateParams);
+
+        updateParams();
+        loop();
+    }
+
+    function resize() {
+        width = canvas.width = document.getElementById('viewport').clientWidth;
+        height = canvas.height = document.getElementById('viewport').clientHeight;
+    }
+
+    function createParticle() {
+        return {
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: 0,
+            vy: 0,
+            life: Math.random() * 100,
+            size: Math.random() * 1.5 + 0.5
+        };
+    }
+
+    function updateParams() {
+        // Map slider 1-100 to scientific ranges roughly
+        const rVal = parseInt(els.rho.value);
+        const gVal = parseInt(els.gamma.value);
+        
+        params.rho = 7.0 * (rVal / 70); // Base 7.0e-7
+        params.gamma = 1.0 * (gVal / 100);
+        
+        // Update UI Text
+        els.valRho.innerText = (params.rho).toFixed(1) + "e-7";
+        els.valGamma.innerText = (params.gamma).toFixed(2);
+        
+        const vVal = parseInt(els.visc.value);
+        params.viscosity = vVal / 100;
+        els.valVisc.innerText = vVal === 100 ? "∞ (Superfluid)" : vVal + "%";
+
+        recalculatePhysics();
+    }
+
+    function recalculatePhysics() {
+        // Simulate the derivation of constants from the paper
+        // Alpha depends on geometric ratio of swirl speed to light speed
+        // E = -13.6 eV * (rho / rho_standard) * (gamma / gamma_standard)^2
+        
+        const standardRho = 7.0;
+        const standardGamma = 1.0;
+
+        const ratio = (params.rho / standardRho) * Math.pow(params.gamma / standardGamma, 2);
+        
+        // Energy
+        const energy = -13.606 * ratio;
+        els.outEnergy.innerText = energy.toFixed(3);
+        els.outEnergy.style.color = Math.abs(energy + 13.606) < 0.1 ? "#00f3ff" : "#ff4d4d";
+
+        // Alpha (Fine Structure)
+        // In SST, alpha ~ 2 * v_swirl / c. If gamma increases, v_swirl increases.
+        const alphaInv = 137.036 / (params.gamma / standardGamma);
+        els.outAlpha.innerText = "1/" + alphaInv.toFixed(3);
+
+        // Bohr Radius scales inversely with Energy/Mass
+        const bohr = 5.29 * (1/ratio);
+        els.outBohr.innerText = bohr.toFixed(2) + " × 10⁻¹¹";
+
+        // Proton Mass (Topological derivation from paper)
+        // Mass = rho_eff * Volume_proton
+        // Volume depends on knots (5_2 + 5_2 + 6_1)
+        const mass = 1.67 * (params.rho / standardRho);
+        els.outMass.innerText = mass.toFixed(2) + " × 10⁻²⁷";
+
+        // HUD updates
+        els.hudPress.innerText = `BINDING ENERGY: ${energy.toFixed(2)} eV`;
+        const vel = 1.09 * (params.gamma / standardGamma);
+        els.hudVel.innerText = `CORE VELOCITY: ${vel.toFixed(2)}e6 m/s`;
+    }
+
+    function setMode(newMode) {
+        mode = newMode;
+        document.querySelectorAll('.btn-grid button').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + newMode).classList.add('active');
+        
+        const msg = {
+            'electron': 'Topology: Trefoil Knot (3₁)',
+            'proton': 'Topology: Composite (2×5₂ + 6₁)',
+            'hydrogen': 'System: Proton Core + Electron Shell',
+            'vacuum': 'State: Ground State Condensate'
+        }[mode];
+        
+        showNotification(msg);
+    }
+
+    function showNotification(text) {
+        els.notif.innerText = text;
+        els.notif.style.opacity = 1;
+        setTimeout(() => els.notif.style.opacity = 0, 3000);
+    }
+
+    // --- DRAWING FUNCTIONS ---
+
+    function drawKnot(cx, cy, scale, t, type) {
+        ctx.beginPath();
+        ctx.strokeStyle = type === 'proton' ? '#ff4d4d' : '#00f3ff';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = ctx.strokeStyle;
+
+        // Parametric equations for knots
+        const steps = 100;
+        for (let i = 0; i <= steps; i++) {
+            let theta = (i / steps) * Math.PI * 2;
+            let x, y;
+
+            if (type === 'electron' || type === 'hydrogen_electron') {
+                // Trefoil (2D projection approximation)
+                // x = sin(t) + 2sin(2t)
+                // y = cos(t) - 2cos(2t)
+                // Rotate entire knot by t (spin)
+                let spin = t * 2;
+                let rawX = Math.sin(theta) + 2 * Math.sin(2 * theta);
+                let rawY = Math.cos(theta) - 2 * Math.cos(2 * theta);
+                
+                // Rotation matrix
+                x = rawX * Math.cos(spin) - rawY * Math.sin(spin);
+                y = rawX * Math.sin(spin) + rawY * Math.cos(spin);
+                
+            } else if (type === 'proton') {
+                // Complex shape (Cinquefoil-ish approximation for visual)
+                let spin = t * 0.5;
+                let k = 5; // 5 lobes
+                let r = Math.cos(k * theta);
+                let rawX = (3 + r) * Math.cos(theta);
+                let rawY = (3 + r) * Math.sin(theta);
+                
+                x = rawX * Math.cos(spin) - rawY * Math.sin(spin);
+                y = rawX * Math.sin(spin) + rawY * Math.cos(spin);
+            }
+
+            ctx.lineTo(cx + x * scale, cy + y * scale);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    function loop() {
+        requestAnimationFrame(loop);
+        
+        // Clear background with trail effect
+        ctx.fillStyle = 'rgba(10, 11, 16, 0.2)';
+        ctx.fillRect(0, 0, width, height);
+
+        time += 0.01 * (params.gamma); // Time flows based on circulation intensity
+
+        // Update Swirl Clock UI
+        // In SST, time dilation depends on fluid velocity.
+        // We simulate this by rotating the clock hand.
+        let dilation = 1.0;
+        if(mode === 'hydrogen') dilation = 0.8; // Slower near heavy mass
+        els.clockHand.style.transform = `rotate(${time * 50 * dilation}deg)`;
+        els.timeDilation.innerText = (1/dilation).toFixed(3);
+
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Draw Physics Objects
+        if (mode === 'electron') {
+            drawKnot(cx, cy, 20, time, 'electron');
+            applyForceField(cx, cy, 1);
+        } else if (mode === 'proton') {
+            drawKnot(cx, cy, 30, time, 'proton');
+            applyForceField(cx, cy, -2); // Stronger pull
+        } else if (mode === 'hydrogen') {
+            // Proton in center
+            drawKnot(cx, cy, 30, time, 'proton');
+            
+            // Electron orbiting
+            let orbitR = 150;
+            let orbitSpeed = time * 2;
+            let ex = cx + Math.cos(orbitSpeed) * orbitR;
+            let ey = cy + Math.sin(orbitSpeed) * orbitR;
+            
+            // Draw Orbit path
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.arc(cx, cy, orbitR, 0, Math.PI*2);
+            ctx.stroke();
+
+            drawKnot(ex, ey, 10, time*3, 'hydrogen_electron');
+            
+            applyForceField(cx, cy, -2); // Proton pull
+            applyForceField(ex, ey, 0.5); // Electron disturbance
+        } else {
+            // Vacuum - random fluctuations
+            if(Math.random() > 0.95) {
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.beginPath();
+                ctx.arc(Math.random()*width, Math.random()*height, Math.random()*50, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+
+        // Render Fluid Particles
+        ctx.fillStyle = '#00f3ff';
+        
+        particles.forEach(p => {
+            // Move
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            // Friction (Viscosity)
+            p.vx *= 0.95 * params.viscosity + (1-params.viscosity)*0.99;
+            p.vy *= 0.95 * params.viscosity + (1-params.viscosity)*0.99;
+
+            // Reset if out of bounds or dead
+            p.life--;
+            if (p.life <= 0 || p.x < 0 || p.x > width || p.y < 0 || p.y > height) {
+                Object.assign(p, createParticle());
+                // Spawn at edges if vacuum mode, or random if particle mode
+                if(mode !== 'vacuum') {
+                   // p.x = Math.random() * width;
+                   // p.y = Math.random() * height;
+                }
+            }
+
+            // Draw
+            let alpha = p.life / 100;
+            ctx.globalAlpha = alpha * 0.5;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.globalAlpha = 1.0;
+        });
+    }
+
+    function applyForceField(cx, cy, strength) {
+        // According to paper: 1/r potential, velocity ~ 1/r
+        // We add velocity to particles based on distance to center
+        
+        particles.forEach(p => {
+            let dx = cx - p.x;
+            let dy = cy - p.y;
+            let distSq = dx*dx + dy*dy;
+            let dist = Math.sqrt(distSq);
+            
+            if (dist < 5) return; // Core radius cutoff
+
+            // Swirl Force (Tangential)
+            // v_theta ~ 1/r
+            let force = (1000 * strength * params.gamma) / distSq;
+            
+            // Tangent vector (-dy, dx)
+            p.vx += (-dy / dist) * force;
+            p.vy += (dx / dist) * force;
+
+            // Pressure Gradient (Radial) - Suction towards knot
+            // Paper: dp/dr = rho * v^2 / r
+            let suction = (200 * Math.abs(strength)) / distSq;
+            p.vx += (dx / dist) * suction * 0.1;
+            p.vy += (dy / dist) * suction * 0.1;
+        });
+    }
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>

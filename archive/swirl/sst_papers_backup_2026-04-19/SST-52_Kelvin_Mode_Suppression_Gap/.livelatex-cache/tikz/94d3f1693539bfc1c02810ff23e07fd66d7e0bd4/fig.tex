@@ -1,0 +1,126 @@
+\documentclass[border=1pt]{standalone}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{siunitx}
+
+
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\pgfplotsset{compat=newest}
+
+
+
+
+\newcommand{\papertitle}{Spectroscopic Constraints on Kelvin-Like Internal Modes in Effective Filament Models of Atomic Bound States}
+\newcommand{\papershorttitle}{Kelvin-Like Internal Modes in Atomic Bound States}
+\newcommand{\paperdoi}{10.5281/zenodo.18018084}
+\newcommand{\paperorcid}{0009-0006-1686-3961}
+\newcommand{\paperemail}{info@omariskandarani.com}
+\newcommand{\papercity}{Groningen}
+\newcommand{\papercountry}{The Netherlands}
+\newcommand{\paperkeywords}{Kelvin modes, effective filament models, atomic spectroscopy, excitation gap, low-energy reduction}
+
+\raggedbottom
+\\pgfplotsset{compat=1.18}
+
+
+\providecommand{\papertitle}{Spectroscopic Constraints on Kelvin-Like Internal Modes in Effective Filament Models of Atomic Bound States}
+\providecommand{\papershorttitle}{Kelvin-Like Internal Modes in Atomic Bound States}
+\providecommand{\paperdoi}{10.5281/zenodo.18018084}
+\providecommand{\paperorcid}{0009-0006-1686-3961}
+\providecommand{\paperemail}{info@omariskandarani.com}
+\providecommand{\papercity}{Groningen}
+\providecommand{\papercountry}{The Netherlands}
+\providecommand{\paperkeywords}{Kelvin modes, effective filament models, atomic spectroscopy, excitation gap, low-energy reduction}
+\providecommand{\epsilonK}{\varepsilon_K}
+
+\usetikzlibrary{
+    spath3,
+    intersections,
+    arrows,
+    arrows.meta,
+    knots,
+    calc,
+    hobby,
+    decorations.pathreplacing,
+    shapes.geometric,
+}
+
+% ---------------- Global styles (safe for 'knots') ----------------
+\tikzset{
+    knot diagram/every strand/.append style={
+        line cap=round,
+        line join=round,
+        ultra thick,
+        black
+    },
+    every knot/.style={line cap=round,line join=round,very thick},
+    strand/.style={line cap=round,line join=round,line width=3pt,draw=black},
+    over/.style={preaction={draw=white,line width=6.5pt}},
+% DO NOT set a global "every path" here; it breaks internal clip paths.
+}
+\providecommand{\swirlarrow}{\rightsquigarrow}
+\begin{document}
+\begin{tikzpicture}
+[
+                width=12cm,
+                height=8cm,
+                xlabel={$T$ [K]},
+                ylabel={$U(T)$ [arb. units]},
+                legend style={at={(0.05,0.95)}, anchor=north west},
+                domain=0:1.5,
+                samples=100,
+                axis lines=left,
+                enlargelimits=true,
+                grid=both,
+                xtick={0.5,1.0,1.5},
+                ytick={0,1,2,3,4},
+                xlabel style={font=\small},
+                ylabel style={font=\small},
+                title={Kelvin-Mode Thermal Energy vs Temperature},
+                title style={font=\bfseries\small},
+                thick
+                ]
+
+                \addplot[blue,thick] {4*x^2};
+                \addlegendentry{Ungapped case: illustrative algebraic example}
+
+                \addplot[red,thick,dashed] {5*exp(-1/x)};
+                \addlegendentry{Gapped case: exponential suppression}
+                
+
+
+                [shift={(7.8,4.3)}]
+                    [
+                    width=4.2cm,
+                    height=3.5cm,
+                    title={Kelvin Spectrum},
+                    title style={font=\bfseries\tiny},
+                    xlabel={$k$},
+                    ylabel={$E(k)$},
+                    axis lines=left,
+                    ticks=none,
+                    xmin=0, xmax=3.5,
+                    ymin=0, ymax=4.5,
+                    xtick=\empty,
+                    ytick=\empty,
+                    clip=false
+                    ]
+                    \fill[gray!20] (axis cs:0,0) rectangle (axis cs:3.5,1.5);
+                    \draw[dashed, gray] (axis cs:0,1.5) -- (axis cs:3.5,1.5);
+                    \foreach \x in {0.5,1.0,1.5,2.0,2.5,3.0} {
+                        \addplot[only marks, mark=*, red] coordinates {(\x, {1.5 + 0.5*\x})};
+                    }
+                    \node[align=center,font=\tiny] at (axis cs:1.75,0.75) {No modes\\[-0.3em]($E<\Delta_K$)};
+\end{tikzpicture}
+\end{document}

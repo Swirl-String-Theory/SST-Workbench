@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variational Quantum Phase Explorer</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --accent-gold: #fbbf24;
+            --border-color: #334155;
+            --font-main: 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 600; }
+        .subtitle { font-size: 0.9rem; color: #94a3b8; }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Panel: Controls */
+        .controls-panel {
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+        
+        select, input[type="range"] {
+            width: 100%;
+            background: #334155;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .slider-val {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            text-align: right;
+        }
+
+        .equation-display {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .equation-part { display: inline-block; margin: 0 2px; }
+        .phase-term { color: var(--accent-blue); }
+        .binding-term { color: var(--accent-red); }
+
+        /* Center Panel: Graph */
+        .graph-panel {
+            position: relative;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #energyGraph {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: crosshair;
+        }
+
+        .graph-overlay {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Right Panel: Visualization */
+        .viz-panel {
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        .viz-box {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .viz-title {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Atom Visualization */
+        #atomCanvas { width: 100%; height: 200px; }
+        
+        /* Spectrum Visualization */
+        #spectrumCanvas { width: 100%; height: 300px; }
+
+        /* Interactive Elements */
+        button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        button:hover { background: #2563eb; }
+        button.secondary { background: #334155; }
+        button.secondary:hover { background: #475569; }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 400px auto;
+                overflow-y: auto;
+            }
+            body { overflow: auto; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Variational Quantum Phase Explorer</h1>
+        <div class="subtitle">Interactive visualization of phase-quantized mesoscopic systems</div>
+    </div>
+    <div style="font-size: 0.8rem; color: #64748b;">
+        Based on "A Variational Principle for Phase-Quantized Mesoscopic Quantum Systems"
+    </div>
+</header>
+
+<div class="main-container">
+    
+    <!-- LEFT: CONTROLS -->
+    <div class="controls-panel">
+        <div class="equation-display" id="eqDisplay">
+            E<sub>n</sub>(R) = <span class="phase-term">An²/R²</span> + <span class="binding-term">U(R)</span>
+        </div>
+
+        <div class="control-group">
+            <label>System Type</label>
+            <select id="systemSelect">
+                <option value="hydrogenic">Hydrogenic (Rydberg Atom)</option>
+                <option value="qdot">Quantum Dot (Harmonic)</option>
+                <option value="custom">Custom Potential</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <div style="display:flex; justify-content:space-between;">
+                <label>Quantum Number (n)</label>
+                <span id="val-n" class="slider-val">1</span>
+            </div>
+            <input type="range" id="slider-n" min="1" max="10" step="1" value="1">
+        </div>
+
+        <div class="control-group">
+            <div style="display:flex; justify-content:space-between;">
+                <label>Phase Stiffness (A)</label>
+                <span id="val-A" class="slider-val">1.0</span>
+            </div>
+            <input type="range" id="slider-A" min="0.1" max="5.0" step="0.1" value="1.0">
+            <div style="font-size: 0.7rem; color:#64748b; margin-top:2px;">Controls phase-closure cost</div>
+        </div>
+
+        <div class="control-group" id="group-B">
+            <div style="display:flex; justify-content:space-between;">
+                <label>Coulomb Strength (B)</label>
+                <span id="val-B" class="slider-val">2.0</span>
+            </div>
+            <input type="range" id="slider-B" min="0.5" max="10.0" step="0.1" value="2.0">
+            <div style="font-size: 0.7rem; color:#64748b; margin-top:2px;">Binding strength (Ze²)</div>
+        </div>
+
+        <div class="control-group" id="group-C" style="display:none;">
+            <div style="display:flex; justify-content:space-between;">
+                <label>Confinement (C)</label>
+                <span id="val-C" class="slider-val">0.5</span>
+            </div>
+            <input type="range" id="slider-C" min="0.1" max="5.0" step="0.1" value="0.5">
+            <div style="font-size: 0.7rem; color:#64748b; margin-top:2px;">Harmonic trap strength</div>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <button id="resetBtn" class="secondary" style="width:100%">Reset Parameters</button>
+        </div>
+    </div>
+
+    <!-- CENTER: GRAPH -->
+    <div class="graph-panel">
+        <canvas id="energyGraph"></canvas>
+        <div class="graph-overlay">
+            <div class="legend-item"><div class="dot" style="background:var(--accent-blue)"></div> Phase Cost (~1/R²)</div>
+            <div class="legend-item"><div class="dot" style="background:var(--accent-red)"></div> Potential U(R)</div>
+            <div class="legend-item"><div class="dot" style="background:white; border:1px solid #fff;"></div> Total Energy E(R)</div>
+            <div style="margin-top:0.5rem; font-size:0.8rem; color:#94a3b8;">
+                Min Radius R<sub>n</sub>: <span id="readout-Rn" style="color:white; font-weight:bold;">--</span><br>
+                Energy E<sub>n</sub>: <span id="readout-En" style="color:white; font-weight:bold;">--</span>
+            </div>
+        </div>
+        <div id="graphTooltip" class="tooltip"></div>
+    </div>
+
+    <!-- RIGHT: VISUALIZATION -->
+    <div class="viz-panel">
+        <div class="viz-box">
+            <div class="viz-title">Physical Realization</div>
+            <canvas id="atomCanvas"></canvas>
+            <div style="font-size: 0.8rem; text-align: center; color: #94a3b8; margin-top: 0.5rem;">
+                Visualizing Coherence Scale R
+            </div>
+        </div>
+
+        <div class="viz-box" style="flex:1;">
+            <div class="viz-title">Spectral Ladder</div>
+            <canvas id="spectrumCanvas"></canvas>
+            <div style="font-size: 0.8rem; text-align: center; color: #94a3b8; margin-top: 0.5rem;">
+                Energy Levels for n=1..5
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Configuration & State ---
+    const state = {
+        system: 'hydrogenic', // 'hydrogenic' | 'qdot' | 'custom'
+        n: 1,
+        A: 1.0,
+        B: 2.0,
+        C: 0.5,
+        R_max: 10,  // Max radius for graph X-axis
+        E_min: -5,  // Graph Y-axis min
+        E_max: 5    // Graph Y-axis max
+    };
+
+    // --- DOM Elements ---
+    const canvasGraph = document.getElementById('energyGraph');
+    const ctxGraph = canvasGraph.getContext('2d');
+    const canvasAtom = document.getElementById('atomCanvas');
+    const ctxAtom = canvasAtom.getContext('2d');
+    const canvasSpec = document.getElementById('spectrumCanvas');
+    const ctxSpec = canvasSpec.getContext('2d');
+
+    const inputs = {
+        sys: document.getElementById('systemSelect'),
+        n: document.getElementById('slider-n'),
+        A: document.getElementById('slider-A'),
+        B: document.getElementById('slider-B'),
+        C: document.getElementById('slider-C'),
+    };
+
+    const displays = {
+        n: document.getElementById('val-n'),
+        A: document.getElementById('val-A'),
+        B: document.getElementById('val-B'),
+        C: document.getElementById('val-C'),
+        Rn: document.getElementById('readout-Rn'),
+        En: document.getElementById('readout-En'),
+        eq: document.getElementById('eqDisplay'),
+        groupB: document.getElementById('group-B'),
+        groupC: document.getElementById('group-C')
+    };
+
+    // --- Physics Engine ---
+
+    function getPhaseEnergy(R, n, A) {
+        if (R <= 0.05) return 100; // Avoid singularity
+        return (A * n * n) / (R * R);
+    }
+
+    function getPotential(R, B, C, type) {
+        if (R <= 0.05) return type === 'hydrogenic' ? -100 : 0;
+        
+        if (type === 'hydrogenic') {
+            return -B / R;
+        } else if (type === 'qdot') {
+            return C * R * R;
+        } else {
+            // Custom: Mix of both for fun
+            return -B/R + C*R*R*0.1; 
+        }
+    }
+
+    function getTotalEnergy(R, n, A, B, C, type) {
+        return getPhaseEnergy(R, n, A) + getPotential(R, B, C, type);
+    }
+
+    // Find the minimum energy radius (R_n)
+    // For Hydrogenic: Rn = (2A/B) * n^2
+    // For QDot: Rn = (A/C)^(1/4) * sqrt(n)
+    // We can also solve numerically for custom potentials
+    function solveSystem() {
+        let Rn, En;
+        
+        if (state.system === 'hydrogenic') {
+            Rn = (2 * state.A / state.B) * (state.n * state.n);
+            En = getTotalEnergy(Rn, state.n, state.A, state.B, state.C, 'hydrogenic');
+        } else if (state.system === 'qdot') {
+            Rn = Math.pow(state.A / state.C, 0.25) * Math.sqrt(state.n);
+            En = getTotalEnergy(Rn, state.n, state.A, state.B, state.C, 'qdot');
+        } else {
+            // Numerical search for Custom
+            let minE = Infinity;
+            let bestR = 0.1;
+            for(let r = 0.1; r < 20; r+=0.01) {
+                let e = getTotalEnergy(r, state.n, state.A, state.B, state.C, 'custom');
+                if(e < minE) { minE = e; bestR = r; }
+            }
+            Rn = bestR;
+            En = minE;
+        }
+        return { Rn, En };
+    }
+
+    // --- Rendering ---
+
+    function resizeCanvas(canvas) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width - 32; // padding adjustment
+        canvas.height = rect.height - 32;
+    }
+
+    function mapX(x, width) {
+        // Map R from 0 to state.R_max to canvas width
+        return (x / state.R_max) * width;
+    }
+
+    function mapY(y, height) {
+        // Map Energy from state.E_min to state.E_max to canvas height (inverted)
+        const range = state.E_max - state.E_min;
+        const norm = (y - state.E_min) / range;
+        return height - (norm * height);
+    }
+
+    function drawGraph() {
+        resizeCanvas(canvasGraph);
+        const w = canvasGraph.width;
+        const h = canvasGraph.height;
+        
+        // Auto-scale Y axis based on current n=1 energy to keep things visible
+        // Calculate E at n=1 for scaling baseline
+        const baseSol = solveSystem(); // Current solution
+        
+        // Dynamic Zoom
+        let yRange = 5;
+        if (Math.abs(baseSol.En) > 2) yRange = Math.abs(baseSol.En) * 2;
+        state.E_min = -yRange;
+        state.E_max = yRange;
+        state.R_max = Math.max(baseSol.Rn * 2.5, 5);
+
+        ctxGraph.clearRect(0, 0, w, h);
+
+        // Grid
+        ctxGraph.strokeStyle = '#334155';
+        ctxGraph.lineWidth = 1;
+        ctxGraph.beginPath();
+        // Zero line
+        const y0 = mapY(0, h);
+        ctxGraph.moveTo(0, y0);
+        ctxGraph.lineTo(w, y0);
+        ctxGraph.stroke();
+
+        // Plot Functions
+        const step = state.R_max / w; // 1 pixel step
+        
+        // 1. Phase Cost (Blue)
+        ctxGraph.beginPath();
+        ctxGraph.strokeStyle = '#3b82f6';
+        ctxGraph.lineWidth = 2;
+        for(let px = 0; px < w; px++) {
+            const r = (px * step) || 0.01;
+            const y = mapY(getPhaseEnergy(r, state.n, state.A), h);
+            if (px===0) ctxGraph.moveTo(px, y); else ctxGraph.lineTo(px, y);
+        }
+        ctxGraph.stroke();
+
+        // 2. Potential (Red)
+        ctxGraph.beginPath();
+        ctxGraph.strokeStyle = '#ef4444';
+        for(let px = 0; px < w; px++) {
+            const r = (px * step) || 0.01;
+            const y = mapY(getPotential(r, state.B, state.C, state.system), h);
+            if (px===0) ctxGraph.moveTo(px, y); else ctxGraph.lineTo(px, y);
+        }
+        ctxGraph.stroke();
+
+        // 3. Total Energy (White/Black)
+        ctxGraph.beginPath();
+        ctxGraph.strokeStyle = '#fff';
+        ctxGraph.lineWidth = 3;
+        for(let px = 0; px < w; px++) {
+            const r = (px * step) || 0.01;
+            const y = mapY(getTotalEnergy(r, state.n, state.A, state.B, state.C, state.system), h);
+            // Clamp for drawing
+            if (y < -100 || y > h + 100) continue;
+            if (px===0) ctxGraph.moveTo(px, y); else ctxGraph.lineTo(px, y);
+        }
+        ctxGraph.stroke();
+
+        // Draw Solution Point
+        const sol = solveSystem();
+        const solX = mapX(sol.Rn, w);
+        const solY = mapY(sol.En, h);
+
+        ctxGraph.fillStyle = '#fbbf24';
+        ctxGraph.beginPath();
+        ctxGraph.arc(solX, solY, 6, 0, Math.PI*2);
+        ctxGraph.fill();
+        
+        // Dashed line to X axis
+        ctxGraph.setLineDash([5, 5]);
+        ctxGraph.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctxGraph.lineWidth = 1;
+        ctxGraph.beginPath();
+        ctxGraph.moveTo(solX, solY);
+        ctxGraph.lineTo(solX, h); // Down to bottom? Or to y=0? Let's go to axis
+        ctxGraph.stroke();
+        ctxGraph.setLineDash([]);
+
+        // Update Text Readouts
+        displays.Rn.textContent = sol.Rn.toFixed(3);
+        displays.En.textContent = sol.En.toFixed(3);
+    }
+
+    function drawAtom() {
+        resizeCanvas(canvasAtom);
+        const w = canvasAtom.width;
+        const h = canvasAtom.height;
+        const cx = w/2;
+        const cy = h/2;
+        
+        ctxAtom.clearRect(0, 0, w, h);
+        
+        const sol = solveSystem();
+        // Scale Rn to fit in canvas. Max R is roughly 10-20 depending on sliders.
+        // Let's normalize so Rn=5 fills half the canvas
+        const scale = Math.min(w, h) / 3 / (state.system === 'hydrogenic' ? 5 : 2);
+        const radiusPx = sol.Rn * scale;
+
+        // Draw Center (Nucleus or Trap Center)
+        ctxAtom.fillStyle = '#fff';
+        ctxAtom.beginPath();
+        ctxAtom.arc(cx, cy, 4, 0, Math.PI*2);
+        ctxAtom.fill();
+
+        // Draw Orbit / Cloud
+        if (state.system === 'hydrogenic') {
+            // Draw orbit ring
+            ctxAtom.strokeStyle = 'rgba(59, 130, 246, 0.8)';
+            ctxAtom.lineWidth = 2;
+            ctxAtom.beginPath();
+            ctxAtom.arc(cx, cy, radiusPx, 0, Math.PI*2);
+            ctxAtom.stroke();
+            
+            // Electron particle
+            const time = Date.now() / 500;
+            const ex = cx + Math.cos(time) * radiusPx;
+            const ey = cy + Math.sin(time) * radiusPx;
+            
+            ctxAtom.fillStyle = '#fbbf24';
+            ctxAtom.beginPath();
+            ctxAtom.arc(ex, ey, 6, 0, Math.PI*2);
+            ctxAtom.fill();
+            
+            // Label
+            ctxAtom.fillStyle = '#94a3b8';
+            ctxAtom.font = '12px sans-serif';
+            ctxAtom.fillText(`R = ${sol.Rn.toFixed(2)}`, cx + 10, cy - 10);
+
+        } else {
+            // Quantum Dot / Harmonic
+            // Draw a fuzzy cloud representing the probability density
+            const grad = ctxAtom.createRadialGradient(cx, cy, 0, cx, cy, radiusPx * 1.5);
+            grad.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
+            grad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            
+            ctxAtom.fillStyle = grad;
+            ctxAtom.beginPath();
+            ctxAtom.arc(cx, cy, radiusPx * 1.5, 0, Math.PI*2);
+            ctxAtom.fill();
+            
+            // Draw confinement boundary hint
+            ctxAtom.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+            ctxAtom.setLineDash([4, 4]);
+            ctxAtom.beginPath();
+            ctxAtom.arc(cx, cy, radiusPx, 0, Math.PI*2);
+            ctxAtom.stroke();
+            ctxAtom.setLineDash([]);
+        }
+    }
+
+    function drawSpectrum() {
+        resizeCanvas(canvasSpec);
+        const w = canvasSpec.width;
+        const h = canvasSpec.height;
+        
+        ctxSpec.clearRect(0, 0, w, h);
+
+        // Calculate levels for n=1 to 5
+        const levels = [];
+        for(let i=1; i<=5; i++) {
+            let Rn_i, En_i;
+            if (state.system === 'hydrogenic') {
+                Rn_i = (2 * state.A / state.B) * (i * i);
+                En_i = getTotalEnergy(Rn_i, i, state.A, state.B, state.C, 'hydrogenic');
+            } else if (state.system === 'qdot') {
+                Rn_i = Math.pow(state.A / state.C, 0.25) * Math.sqrt(i);
+                En_i = getTotalEnergy(Rn_i, i, state.A, state.B, state.C, 'qdot');
+            } else {
+                 // Simple approx for custom
+                 Rn_i = i; 
+                 En_i = getTotalEnergy(i, i, state.A, state.B, state.C, 'custom');
+            }
+            levels.push({ n: i, E: En_i });
+        }
+
+        // Determine scale
+        const minE = Math.min(...levels.map(l => l.E));
+        const maxE = Math.max(...levels.map(l => l.E));
+        const range = maxE - minE || 1;
+        const padding = 40;
+        const drawH = h - padding * 2;
+
+        levels.forEach(lvl => {
+            // Map E to Y (inverted, higher energy on top)
+            // Note: Hydrogenic energies are negative. 
+            // We want higher values (less negative) at top.
+            const norm = (lvl.E - minE) / range;
+            const y = (h - padding) - (norm * drawH);
+            
+            // Draw Line
+            ctxSpec.beginPath();
+            if (lvl.n === parseInt(state.n)) {
+                ctxSpec.strokeStyle = '#fbbf24'; // Highlight selected
+                ctxSpec.lineWidth = 3;
+            } else {
+                ctxSpec.strokeStyle = '#94a3b8';
+                ctxSpec.lineWidth = 1;
+            }
+            ctxSpec.moveTo(40, y);
+            ctxSpec.lineTo(w - 40, y);
+            ctxSpec.stroke();
+
+            // Label
+            ctxSpec.fillStyle = lvl.n === parseInt(state.n) ? '#fbbf24' : '#64748b';
+            ctxSpec.font = '12px monospace';
+            ctxSpec.fillText(`n=${lvl.n}`, 10, y + 4);
+            ctxSpec.textAlign = 'right';
+            ctxSpec.fillText(lvl.E.toFixed(2), w - 5, y + 4);
+            ctxSpec.textAlign = 'left';
+        });
+    }
+
+    function updateUI() {
+        // Update slider displays
+        displays.n.textContent = state.n;
+        displays.A.textContent = parseFloat(state.A).toFixed(1);
+        displays.B.textContent = parseFloat(state.B).toFixed(1);
+        displays.C.textContent = parseFloat(state.C).toFixed(1);
+
+        // Toggle controls based on system
+        if (state.system === 'hydrogenic') {
+            displays.groupB.style.display = 'flex';
+            displays.groupC.style.display = 'none';
+            displays.eq.innerHTML = `E<sub>n</sub>(R) = <span class="phase-term">An²/R²</span> - <span class="binding-term">B/R</span>`;
+        } else if (state.system === 'qdot') {
+            displays.groupB.style.display = 'none';
+            displays.groupC.style.display = 'flex';
+            displays.eq.innerHTML = `E<sub>n</sub>(R) = <span class="phase-term">An²/R²</span> + <span class="binding-term">CR²</span>`;
+        } else {
+            displays.groupB.style.display = 'flex';
+            displays.groupC.style.display = 'flex';
+            displays.eq.innerHTML = `E<sub>n</sub>(R) = <span class="phase-term">An²/R²</span> - B/R + CR²`;
+        }
+    }
+
+    function render() {
+        drawGraph();
+        drawAtom();
+        drawSpectrum();
+    }
+
+    // --- Event Listeners ---
+
+    inputs.sys.addEventListener('change', (e) => {
+        state.system = e.target.value;
+        updateUI();
+        render();
+    });
+
+    inputs.n.addEventListener('input', (e) => {
+        state.n = parseInt(e.target.value);
+        updateUI();
+        render();
+    });
+
+    inputs.A.addEventListener('input', (e) => {
+        state.A = parseFloat(e.target.value);
+        updateUI();
+        render();
+    });
+
+    inputs.B.addEventListener('input', (e) => {
+        state.B = parseFloat(e.target.value);
+        updateUI();
+        render();
+    });
+
+    inputs.C.addEventListener('input', (e) => {
+        state.C = parseFloat(e.target.value);
+        updateUI();
+        render();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        state.n = 1;
+        state.A = 1.0;
+        state.B = 2.0;
+        state.C = 0.5;
+        inputs.n.value = 1;
+        inputs.A.value = 1;
+        inputs.B.value = 2;
+        inputs.C.value = 0.5;
+        updateUI();
+        render();
+    });
+
+    // Window resize handling
+    window.addEventListener('resize', render);
+
+    // Animation Loop for the Atom
+    function animate() {
+        drawAtom();
+        requestAnimationFrame(animate);
+    }
+
+    // Init
+    updateUI();
+    render();
+    animate(); // Start atom animation
+
+    // Interactive Graph Hover
+    canvasGraph.addEventListener('mousemove', (e) => {
+        const rect = canvasGraph.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const w = canvasGraph.width;
+        
+        // Convert x back to R
+        const rHover = (x / w) * state.R_max;
+        
+        // Calculate energies at this R
+        const ePhase = getPhaseEnergy(rHover, state.n, state.A);
+        const ePot = getPotential(rHover, state.B, state.C, state.system);
+        const eTot = ePhase + ePot;
+
+        // Tooltip
+        const tt = document.getElementById('graphTooltip');
+        tt.style.display = 'block';
+        tt.style.left = (e.clientX + 10) + 'px';
+        tt.style.top = (e.clientY + 10) + 'px';
+        tt.innerHTML = `R: ${rHover.toFixed(2)}<br>E: ${eTot.toFixed(2)}`;
+    });
+
+    canvasGraph.addEventListener('mouseleave', () => {
+        document.getElementById('graphTooltip').style.display = 'none';
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relational TOA Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .math-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Animation Track */
+        .track {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .detector-line {
+            position: absolute;
+            right: 20%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+            z-index: 10;
+        }
+
+        .wavepacket {
+            position: absolute;
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #a855f7 0%, transparent 70%);
+            box-shadow: 0 0 20px #a855f7;
+            transition: left 2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+
+        .wavepacket.moving {
+            left: 80%;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 8px rgba(255,255,255,0.3);
+        }
+
+        canvas {
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <header class="w-full max-w-6xl mb-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-2">
+            Relational Time-of-Arrival (TOA)
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base max-w-3xl mx-auto">
+            Interactive visualization of Eq. 8.15: Broadening of arrival-time distribution due to clock-sector effective field theory variance.
+        </p>
+    </header>
+
+    <main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Controls & Simulation -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Simulation Panel -->
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span class="text-purple-400">1+1D</span> Wavepacket Simulation
+                </h2>
+                
+                <div class="track mb-4">
+                    <div class="detector-line"></div>
+                    <div class="absolute right-[20%] top-1 text-xs text-red-400 font-bold translate-x-1/2 math-font">
+                        Detector &Sigma;
+                    </div>
+                    <div id="particle" class="wavepacket"></div>
+                </div>
+
+                <button id="fireBtn" class="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-lg font-semibold transition-all transform active:scale-95 shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                    Trigger Event Current (Fire)
+                </button>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="glass-panel p-6 rounded-xl shadow-2xl flex-grow">
+                <h2 class="text-xl font-semibold mb-6 border-b border-slate-600 pb-2">System Parameters</h2>
+                
+                <div class="space-y-8">
+                    <!-- Semiclassical Width -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-sm font-medium text-cyan-300">Semiclassical Flux Width (<span class="math-font">&sigma;<sub>t</sub></span>)</label>
+                            <span id="sigmat-val" class="text-sm math-font text-slate-300">10.0</span>
+                        </div>
+                        <input type="range" id="sigmat" min="2" max="30" step="0.5" value="10">
+                        <p class="text-xs text-slate-500 mt-1">Intrinsic spread of the matter wavepacket.</p>
+                    </div>
+
+                    <!-- Clock Variance -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-sm font-medium text-purple-400">Clock Variance (<span class="math-font">&sigma;<sub>&tau;,&ell;</sub></span>)</label>
+                            <span id="sigmatau-val" class="text-sm math-font text-slate-300">15.0</span>
+                        </div>
+                        <input type="range" id="sigmatau" min="0" max="40" step="0.5" value="15">
+                        <p class="text-xs text-slate-500 mt-1">Fluctuations from the clock-sector EFT (coarse-grained).</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-2">Theoretical Prediction</h3>
+                    <div class="math-font text-sm text-center text-yellow-200 bg-black/30 p-2 rounded">
+                        Var(&Theta;) = &sigma;<sub>t</sub>&sup2; + &sigma;<sub>&tau;,&ell;</sub>&sup2;
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 text-center">
+                        The clock sector produces a predictive broadening beyond the semiclassical limit.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Graph -->
+        <div class="lg:col-span-7 glass-panel p-6 rounded-xl shadow-2xl flex flex-col">
+            <h2 class="text-xl font-semibold mb-2">Relational TOA Distribution <span class="math-font text-slate-400 text-base">p(&Theta;)</span></h2>
+            <p class="text-sm text-slate-400 mb-4">Convolution of semiclassical flux profile with local clock readout distribution.</p>
+            
+            <div class="relative flex-grow w-full min-h-[400px]">
+                <canvas id="toaChart" class="absolute inset-0 w-full h-full"></canvas>
+                
+                <!-- Legend -->
+                <div class="absolute top-4 right-4 bg-slate-900/80 p-3 rounded border border-slate-600 text-xs space-y-2 backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-0.5 bg-cyan-400"></div>
+                        <span class="text-slate-200">Ideal Semiclassical Limit</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-0.5 bg-purple-400 shadow-[0_0_5px_#a855f7]"></div>
+                        <span class="text-slate-200">Relational Broadened TOA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // DOM Elements
+        const canvas = document.getElementById('toaChart');
+        const ctx = canvas.getContext('2d');
+        const sliderSigmaT = document.getElementById('sigmat');
+        const sliderSigmaTau = document.getElementById('sigmatau');
+        const valSigmaT = document.getElementById('sigmat-val');
+        const valSigmaTau = document.getElementById('sigmatau-val');
+        const fireBtn = document.getElementById('fireBtn');
+        const particle = document.getElementById('particle');
+
+        // State
+        let sigma_t = parseFloat(sliderSigmaT.value);
+        let sigma_tau = parseFloat(sliderSigmaTau.value);
+        let isAnimating = false;
+        let flashOpacity = 0;
+
+        // Resize canvas to match container
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawGraph();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // Math Functions
+        // Gaussian distribution: f(x) = (1 / (sigma * sqrt(2PI))) * e^(-0.5 * ((x-mu)/sigma)^2)
+        function gaussian(x, mu, sigma) {
+            const variance = sigma * sigma;
+            const factor = 1 / Math.sqrt(2 * Math.PI * variance);
+            const exponent = -Math.pow(x - mu, 2) / (2 * variance);
+            return factor * Math.exp(exponent);
+        }
+
+        // Draw the graph
+        function drawGraph() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Flash effect if animating
+            if (flashOpacity > 0) {
+                ctx.fillStyle = `rgba(168, 85, 247, ${flashOpacity})`;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // Grid & Axes
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            // X axis
+            const yAxisPos = height - 40;
+            ctx.moveTo(40, yAxisPos);
+            ctx.lineTo(width - 20, yAxisPos);
+            // Y axis
+            const xAxisPos = width / 2; // Center mu
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, yAxisPos);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px Inter';
+            ctx.fillText('Time (Θ)', width - 60, yAxisPos + 20);
+            ctx.save();
+            ctx.translate(20, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Probability p(Θ)', -40, 0);
+            ctx.restore();
+
+            // Graph Parameters
+            const mu = width / 2; // Center of the canvas
+            const scaleX = 3; // Spread factor for visual purposes
+            const scaleY = height * 15; // Height multiplier
+
+            // Calculate Combined Variance (Eq 8.16: Var(Θ) = σ_t^2 + σ_τ,ℓ^2)
+            const combined_variance = (sigma_t * sigma_t) + (sigma_tau * sigma_tau);
+            const combined_sigma = Math.sqrt(combined_variance);
+
+            // Draw Ideal Curve (Cyan)
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)'; // Cyan
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 2;
+            for (let px = 40; px < width - 20; px++) {
+                // Map pixel X to logical X
+                const logicalX = (px - mu) / scaleX;
+                const logicalY = gaussian(logicalX, 0, sigma_t);
+                const py = yAxisPos - (logicalY * scaleY);
+                
+                if (px === 40) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset dash
+
+            // Draw Broadened Curve (Purple)
+            ctx.beginPath();
+            ctx.strokeStyle = '#a855f7'; // Purple
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#a855f7';
+            ctx.shadowBlur = 10;
+            
+            // Fill gradient
+            const fillGradient = ctx.createLinearGradient(0, 0, 0, yAxisPos);
+            fillGradient.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
+            fillGradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+
+            for (let px = 40; px < width - 20; px++) {
+                const logicalX = (px - mu) / scaleX;
+                const logicalY = gaussian(logicalX, 0, combined_sigma);
+                const py = yAxisPos - (logicalY * scaleY);
+                
+                if (px === 40) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            
+            // Fill area under curve
+            ctx.lineTo(width - 20, yAxisPos);
+            ctx.lineTo(40, yAxisPos);
+            ctx.closePath();
+            ctx.fillStyle = fillGradient;
+            ctx.fill();
+            
+            ctx.shadowBlur = 0; // Reset shadow
+
+            // Draw t_cl marker
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(mu, yAxisPos);
+            ctx.lineTo(mu, yAxisPos + 5);
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('t_cl', mu - 10, yAxisPos + 20);
+        }
+
+        // Event Listeners for Sliders
+        function updateValues() {
+            sigma_t = parseFloat(sliderSigmaT.value);
+            sigma_tau = parseFloat(sliderSigmaTau.value);
+            valSigmaT.textContent = sigma_t.toFixed(1);
+            valSigmaTau.textContent = sigma_tau.toFixed(1);
+            
+            // Adjust particle visual based on sigma_t (intrinsic spread)
+            const baseSize = 20;
+            const spread = baseSize + (sigma_t / 2);
+            particle.style.width = `${spread}px`;
+            particle.style.height = `${spread}px`;
+            
+            drawGraph();
+        }
+
+        sliderSigmaT.addEventListener('input', updateValues);
+        sliderSigmaTau.addEventListener('input', updateValues);
+
+        // Animation Logic
+        fireBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            isAnimating = true;
+            fireBtn.disabled = true;
+            fireBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Reset particle
+            particle.style.transition = 'none';
+            particle.classList.remove('moving');
+            
+            // Force reflow
+            void particle.offsetWidth;
+
+            // Start animation
+            particle.style.transition = 'left 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            particle.classList.add('moving');
+
+            // Wait for it to hit detector (approx 80% of the 1.5s based on position)
+            setTimeout(() => {
+                triggerGraphFlash();
+            }, 1200);
+
+            // Reset after full animation
+            setTimeout(() => {
+                isAnimating = false;
+                fireBtn.disabled = false;
+                fireBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                particle.classList.remove('moving');
+            }, 2000);
+        });
+
+        function triggerGraphFlash() {
+            flashOpacity = 0.15;
+            
+            function fadeOut() {
+                flashOpacity -= 0.01;
+                drawGraph();
+                if (flashOpacity > 0) {
+                    requestAnimationFrame(fadeOut);
+                } else {
+                    flashOpacity = 0;
+                    drawGraph();
+                }
+            }
+            fadeOut();
+        }
+
+        // Initialize
+        setTimeout(() => {
+            resizeCanvas();
+            updateValues();
+        }, 100);
+
+    </script>
+</body>
+</html>

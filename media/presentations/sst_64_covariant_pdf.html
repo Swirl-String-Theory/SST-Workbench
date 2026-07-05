@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Relativistic Physics Lab</title>
+    <style>
+        :root {
+            --bg-color: #0a0b10;
+            --text-color: #e0e6ed;
+            --accent-cyan: #00f2ff;
+            --accent-purple: #bc13fe;
+            --accent-green: #0aff0a;
+            --panel-bg: #14161f;
+            --border-color: #2d3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--panel-bg) 0%, #000 100%);
+            padding: 20px;
+            border-bottom: 2px solid var(--accent-cyan);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-purple);
+            margin-bottom: 15px;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #888;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #1a1d29;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: #888;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        nav button:hover {
+            color: var(--text-color);
+            border-color: var(--accent-cyan);
+        }
+
+        nav button.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            min-height: 80vh;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            background: #000;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 5px;
+            background: #333;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        button.action-btn {
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        button.action-btn:hover {
+            background: #fff;
+        }
+
+        /* Kinematics Visualizer */
+        .relativity-viz {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .track {
+            position: relative;
+            height: 100px;
+            background: repeating-linear-gradient(90deg, #222 0px, #222 49px, #333 50px);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .ship {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 30px;
+            background: var(--accent-cyan);
+            clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 10% 50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .clocks-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .clock-box {
+            text-align: center;
+        }
+
+        .clock {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--text-color);
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto 10px;
+            background: #000;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 2px;
+            height: 40%;
+            background: var(--accent-green);
+            transform-origin: bottom center;
+            transition: transform 0.05s linear;
+        }
+
+        /* Gravity Canvas */
+        #gravityCanvas {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            cursor: crosshair;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            pointer-events: none;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Flowchart */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .node {
+            background: #1a1d29;
+            border: 1px solid var(--accent-purple);
+            padding: 15px;
+            width: 300px;
+            text-align: center;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .node:hover {
+            transform: scale(1.05);
+            background: #252938;
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+        }
+
+        .node::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #555;
+            font-size: 20px;
+        }
+
+        .node:last-child::after {
+            display: none;
+        }
+
+        .node-details {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #aaa;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .metric-item {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .metric-val {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Unified Field Theory Lab</h1>
+    <p class="subtitle">Based on "Unification of Relativistic Kinematics and Gravitational Dynamics from a Single Covariant Action"</p>
+</header>
+
+<nav>
+    <button class="active" onclick="switchTab('kinematics')">1. Kinematics (SR)</button>
+    <button onclick="switchTab('dynamics')">2. Dynamics (GR)</button>
+    <button onclick="switchTab('theory')">3. The Theory</button>
+</nav>
+
+<main>
+
+    <!-- SECTION 1: KINEMATICS -->
+    <div id="kinematics" class="section active">
+        <div class="card">
+            <h2>Local Special-Relativistic Kinematics</h2>
+            <p>The paper proves that Special Relativity emerges locally from the covariant action. Adjust the velocity ($v$) to see time dilation in effect.</p>
+            
+            <div class="formula">
+                γ = 1 / √(1 - v²/c²)
+            </div>
+
+            <div class="controls">
+                <label>Velocity (v/c): <span id="vel-display" style="color:var(--accent-cyan)">0.00</span></label>
+                <input type="range" id="velocitySlider" min="0" max="0.99" step="0.01" value="0">
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-val" id="gamma-val">1.000</div>
+                    <div class="metric-label">Lorentz Factor (γ)</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-val" id="time-dilation-val">1.00s</div>
+                    <div class="metric-label">Moving 1s = Static ?s</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="relativity-viz">
+                <div class="track">
+                    <div class="ship" id="ship">u^μ</div>
+                </div>
+                
+                <div class="clocks-container">
+                    <div class="clock-box">
+                        <div class="clock"><div class="hand" id="static-hand"></div></div>
+                        <p>Lab Frame (Observer)</p>
+                        <p id="static-time">0.00 s</p>
+                    </div>
+                    <div class="clock-box">
+                        <div class="clock" style="border-color: var(--accent-cyan)"><div class="hand" id="moving-hand" style="background: var(--accent-cyan)"></div></div>
+                        <p>Moving Frame (Proper Time)</p>
+                        <p id="moving-time">0.00 s</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: DYNAMICS -->
+    <div id="dynamics" class="section">
+        <div class="card">
+            <h2>Gravitational Dynamics Simulator</h2>
+            <p>The paper derives Einstein's field equations ($G_{\mu\nu} = 8\pi G T_{\mu\nu}$) and universal free fall from the action. </p>
+            <p style="font-size: 0.9rem; color: #888; margin-top:5px;"><strong>Instructions:</strong> Click on the canvas to place a massive object (Star). The probe (Green) will follow the geodesic determined by the metric curvature.</p>
+            
+            <div class="formula">
+                ∇_μ T^(m)μν = 0  ⇒  U^μ ∇_μ U^ν = 0
+            </div>
+
+            <div class="controls">
+                <button class="action-btn" onclick="resetGravity()">Reset Simulation</button>
+                <div style="color: #666; font-size: 0.8rem; margin-left: auto;">
+                    Probe Status: <span id="probe-status" style="color: var(--accent-green)">Free Fall</span>
+                </div>
+            </div>
+
+            <div style="position: relative;">
+                <canvas id="gravityCanvas"></canvas>
+                <div class="canvas-overlay">Spacetime Slice (M, g_μν)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: THEORY -->
+    <div id="theory" class="section">
+        <div class="card">
+            <h2>The Unification Logic</h2>
+            <p>Interactive visualization of Figure 1 from the paper. Click blocks to reveal the underlying mathematical derivation.</p>
+            
+            <div class="flowchart">
+                <div class="node" onclick="toggleNode(this)">
+                    <strong>Covariant Action</strong>
+                    <div class="node-details">
+                        S = S_g + S_u + S_m<br>
+                        Assumes: Diffeomorphism invariance, Lorentzian metric, Unit timelike vector field.
+                    </div>
+                </div>
+
+                <div class="node" onclick="toggleNode(this)">
+                    <strong>Local Inertial Frames</strong>
+                    <div class="node-details">
+                        At any point p, metric reduces to Minkowski.<br>
+                        Proper time dτ² = dt²(1 - v²/c²).<br>
+                        <strong>Result: Special Relativity</strong>
+                    </div>
+                </div>
+
+                <div class="node" onclick="toggleNode(this)">
+                    <strong>Metric Variation</strong>
+                    <div class="node-details">
+                        Variation w.r.t g_μν yields Field Equations.<br>
+                        G_μν = 8πG(T_m + T_u)<br>
+                        <strong>Result: Einstein Equations</strong>
+                    </div>
+                </div>
+
+                <div class="node" onclick="toggleNode(this)">
+                    <strong>Conservation Laws</strong>
+                    <div class="node-details">
+                        Bianchi Identity ⇒ ∇_μ T^μν = 0.<br>
+                        For minimal coupling, matter follows geodesics.<br>
+                        <strong>Result: Universality of Free Fall</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Key Conclusions</h2>
+            <ul style="padding-left: 20px; color: #ccc;">
+                <li>Special Relativity is not an independent axiom but a local consequence.</li>
+                <li>General Relativity is recovered when the "timelike sector" stress tensor vanishes.</li>
+                <li>PPN parameters γ and β are naturally 1 (matching GR).</li>
+                <li>Gravitational waves travel at speed c (c1 + c3 ≈ 0).</li>
+            </ul>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // --- Navigation Logic ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+        if(tabId === 'dynamics') {
+            initGravityGame();
+        }
+    }
+
+    function toggleNode(element) {
+        const details = element.querySelector('.node-details');
+        if (details.style.display === 'block') {
+            details.style.display = 'none';
+        } else {
+            details.style.display = 'block';
+        }
+    }
+
+    // --- Kinematics Logic ---
+    const slider = document.getElementById('velocitySlider');
+    const velDisplay = document.getElementById('vel-display');
+    const gammaDisplay = document.getElementById('gamma-val');
+    const timeDilationDisplay = document.getElementById('time-dilation-val');
+    const ship = document.getElementById('ship');
+    const staticHand = document.getElementById('static-hand');
+    const movingHand = document.getElementById('moving-hand');
+    const staticTimeText = document.getElementById('static-time');
+    const movingTimeText = document.getElementById('moving-time');
+
+    let velocity = 0;
+    let gamma = 1;
+    let staticTime = 0;
+    let movingTime = 0;
+    let shipPos = 0;
+
+    slider.addEventListener('input', (e) => {
+        velocity = parseFloat(e.target.value);
+        velDisplay.textContent = velocity.toFixed(2);
+        
+        // Calculate Gamma
+        if (velocity >= 1) velocity = 0.99;
+        gamma = 1 / Math.sqrt(1 - velocity*velocity);
+        
+        gammaDisplay.textContent = gamma.toFixed(3);
+        timeDilationDisplay.textContent = gamma.toFixed(2) + "s";
+    });
+
+    function animateKinematics() {
+        // Update Time
+        const dt = 0.016; // approx 60fps
+        staticTime += dt;
+        movingTime += dt / gamma; // Time dilation formula
+
+        // Update Clocks Visuals
+        staticHand.style.transform = `rotate(${staticTime * 360}deg)`; // 1 sec per rotation
+        movingHand.style.transform = `rotate(${movingTime * 360}deg)`;
+
+        staticTimeText.textContent = staticTime.toFixed(2) + " s";
+        movingTimeText.textContent = movingTime.toFixed(2) + " s";
+
+        // Update Ship Position
+        // Speed scaling for visual effect
+        const visualSpeed = velocity * 5; 
+        shipPos += visualSpeed;
+        if (shipPos > 100) shipPos = -10;
+        ship.style.left = shipPos + "%";
+
+        requestAnimationFrame(animateKinematics);
+    }
+    animateKinematics();
+
+    // --- Dynamics (Gravity Game) Logic ---
+    const canvas = document.getElementById('gravityCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    
+    // Game State
+    let masses = []; // {x, y, mass}
+    let probe = {
+        x: 50,
+        y: 200,
+        vx: 2,
+        vy: 0,
+        trail: []
+    };
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = 400;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function resetGravity() {
+        masses = [];
+        probe = { x: 50, y: canvas.height/2, vx: 2.5, vy: 0, trail: [] };
+        document.getElementById('probe-status').textContent = "Free Fall";
+        document.getElementById('probe-status').style.color = "var(--accent-green)";
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        masses.push({
+            x: x,
+            y: y,
+            mass: 500 + Math.random() * 500 // Random mass
+        });
+    });
+
+    function drawGrid() {
+        ctx.strokeStyle = '#1a1d29';
+        ctx.lineWidth = 1;
+        const gridSize = 40;
+        
+        // Simple grid distortion effect based on masses
+        for(let x = 0; x <= canvas.width; x += gridSize) {
+            for(let y = 0; y <= canvas.height; y += gridSize) {
+                // Calculate distortion
+                let dx = 0, dy = 0;
+                masses.forEach(m => {
+                    const dist = Math.sqrt((x - m.x)**2 + (y - m.y)**2);
+                    const force = m.mass / (dist * dist + 1000) * 20;
+                    const angle = Math.atan2(m.y - y, m.x - x);
+                    dx += Math.cos(angle) * force;
+                    dy += Math.sin(angle) * force;
+                });
+                
+                // Draw point
+                ctx.fillStyle = '#2d3748';
+                ctx.fillRect(x + dx - 1, y + dy - 1, 2, 2);
+            }
+        }
+    }
+
+    function updatePhysics() {
+        const G = 0.5; // Visual gravitational constant
+        
+        // Probe physics
+        masses.forEach(m => {
+            const dx = m.x - probe.x;
+            const dy = m.y - probe.y;
+            const distSq = dx*dx + dy*dy;
+            const dist = Math.sqrt(distSq);
+            
+            // F = G * M / r^2
+            // a = F (assuming probe mass = 1)
+            if (dist > 10) { // Collision radius
+                const a = (G * m.mass) / distSq;
+                probe.vx += (dx / dist) * a;
+                probe.vy += (dy / dist) * a;
+            } else {
+                // Crash
+                document.getElementById('probe-status').textContent = "Singularity Reached (Crash)";
+                document.getElementById('probe-status').style.color = "red";
+                probe.vx = 0;
+                probe.vy = 0;
+            }
+        });
+
+        probe.x += probe.vx;
+        probe.y += probe.vy;
+
+        // Boundary check (wrap around)
+        if (probe.x > canvas.width) probe.x = 0;
+        if (probe.x < 0) probe.x = canvas.width;
+        if (probe.y > canvas.height) probe.y = 0;
+        if (probe.y < 0) probe.y = canvas.height;
+
+        // Trail
+        probe.trail.push({x: probe.x, y: probe.y});
+        if (probe.trail.length > 100) probe.trail.shift();
+    }
+
+    function draw() {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawGrid();
+
+        // Draw Masses
+        masses.forEach(m => {
+            // Glow
+            const gradient = ctx.createRadialGradient(m.x, m.y, 5, m.x, m.y, 30);
+            gradient.addColorStop(0, 'rgba(188, 19, 254, 1)');
+            gradient.addColorStop(1, 'rgba(188, 19, 254, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, 30, 0, Math.PI*2);
+            ctx.fill();
+
+            // Core
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, 5, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        // Draw Probe Trail
+        ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        probe.trail.forEach((p, i) => {
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+
+        // Draw Probe
+        ctx.fillStyle = '#0aff0a';
+        ctx.beginPath();
+        ctx.arc(probe.x, probe.y, 4, 0, Math.PI*2);
+        ctx.fill();
+
+        updatePhysics();
+        animationId = requestAnimationFrame(draw);
+    }
+
+    function initGravityGame() {
+        if (!animationId) {
+            draw();
+        }
+    }
+
+    // Start Kinematics by default
+    switchTab('kinematics');
+
+</script>
+
+</body>
+</html>

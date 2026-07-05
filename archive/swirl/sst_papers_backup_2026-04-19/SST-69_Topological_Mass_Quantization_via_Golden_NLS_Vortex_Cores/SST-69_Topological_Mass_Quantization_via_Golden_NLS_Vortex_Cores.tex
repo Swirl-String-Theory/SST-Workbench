@@ -1,0 +1,545 @@
+%! Author = Omar Iskandarani
+%! Date = 3/8/2026
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.xxx}
+\newcommand{\papertitle}{\textbf{Topological Mass Quantization via Golden NLS Vortex Cores:}\\ \Large A First-Principles Derivation of the Lepton Spectrum and Emergent $\hbar$ in Swirl-String Theory (SST)}
+
+\newcommand{\paperkeywords}{PAPER_KEYWORDS}
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[absolute,overlay]{textpos}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{pgfplots.groupplots}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}  % swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+\newcommand{\rhocore}{\rho_{\text{core}}}
+\newcommand{\GammaSST}{\Gamma_0}
+
+
+\begin{document}
+    \thispagestyle{empty}%
+    \begin{center}
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\small Independent Researcher, Groningen, The Netherlands\par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+    \end{center}
+    
+    \begin{abstract}
+        We present a hydrodynamic closure program for selected lepton-scale observables within Swirl String Theory (SST). Using an incompressible, inviscid structured medium and a smooth-core nonlinear Schrödinger (NLS) vortex-ring closure, we infer a compact electron geometry consistent with a fat-core, hole-closing regime. We then record an emergent angular-momentum scaling relation \(\hbar_{\text{SST}} \sim \rho_{\text{core}} r_c^3 \Gamma_{\text{SST}}\), derive the corresponding leading-order magnetic moment scale, and reinterpret acoustic dressing as a possible correction mechanism for \(g-2\). Finally, we distinguish topology from thermodynamic layering: knot type is treated as the primary identity label, while discrete layers are reinterpreted as radiative/thermal dressing states rather than as species-defining labels. This version is organized to separate derived relations, calibrated inferences, and conjectural extensions.
+    \end{abstract}
+    Keywords: \paperkeywords
+    
+    
+    \begin{textblock*}{1\textwidth}(0.15\textwidth,1.1\textheight)\raggedright\footnotesize\renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt}\\[0.5em]
+        \textsuperscript{\textbf{*}} Email: \texttt{info@omariskandarani.com}\\
+        ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}}\\
+        DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+    \end{textblock*}
+    
+
+    
+    
+    \paragraph{Canonical constant anchor (summary).}
+        SST fixes its core and continuum scales from textbook constants \((e,m_e,c,\hbar,\epsilon_0)\) via the classical electron radius
+        \[
+            r_e=\frac{\alpha\hbar}{m_e c},
+        \]
+        the SST core closure \(\rc=r_e/2\), and the Compton-frequency swirl identification
+        \[
+            \lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert
+            =
+            \left(\frac{m_e c^2}{\hbar}\right)\rc.
+        \]
+        With the SST Hooke closure \(m_ec^2=\tfrac12 k r_e^2\), one obtains
+        \[
+            F_{\text{swirl}}^{\max}=\frac{m_e c^2}{2\rc},
+            \qquad
+            \rho_{\text{core}}=\frac{F_{\text{swirl}}^{\max}}{\pi \rc^2 \lVert \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\rVert^2},
+            \qquad
+            \rho_{\!E}=\rho_{\text{core}}c^2,
+        \]
+        and the effective fluid density is anchored independently by
+        \[
+            \rho_{\!f}=
+            \frac{2 m_e c^2}{
+                \left(\alpha \, m_e c^2/\hbar\right)^2 \left(r_e^3/3\right)}
+            \approx 6.84\times 10^{-7}\ \mathrm{kg\,m^{-3}}.
+        \]
+        A full derivation and numerical validation are given in Sec.~\ref{sec:sst-first-principles-constants}.
+
+%======================================================================
+    \section{Derivation of Core and Continuum Scales from Textbook Constants}
+    \label{sec:sst-first-principles-constants}
+%======================================================================
+    
+    We derive the SST core scale \(\rc\), swirl speed \(\vswirl\), maximum swirl force \(F_{\text{swirl}}^{\max}\), and effective fluid density \(\rho_{\!f}\) from textbook constants
+    \[
+        \{e,m_e,c,\hbar,\epsilon_0\},
+        \qquad
+        \alpha = \frac{e^2}{4\pi \epsilon_0 \hbar c}.
+    \]
+    The derivation uses standard classical-electron and Compton-frequency quantities, plus explicit SST closure assumptions.
+    
+    \subsection{Classical electron radius and SST core radius}
+        The classical electron radius is
+        \begin{equation}
+            r_e=\frac{e^2}{4\pi\epsilon_0 m_e c^2}
+            =\frac{\alpha\hbar}{m_e c}.
+            \label{eq:re-classical}
+        \end{equation}
+        
+        \paragraph{SST geometric identification.}
+            In the SST toroidal-core picture, the core radius is identified as one-half of the classical electron radius:
+            \begin{equation}
+                \boxed{\rc=\frac{r_e}{2}}.
+                \label{eq:rc-from-re}
+            \end{equation}
+            This is a geometric closure assumption.
+            
+            Using CODATA values,
+            \[
+                r_e = 2.8179403262\times 10^{-15}\ \mathrm{m}
+                \quad\Rightarrow\quad
+                \boxed{\rc = 1.4089701631\times 10^{-15}\ \mathrm{m}}.
+            \]
+    
+    \subsection{Compton angular frequency and the swirl speed}
+    Define the electron Compton angular frequency
+    \begin{equation}
+        \omega_C = \frac{m_e c^2}{\hbar}.
+        \label{eq:omegaC}
+    \end{equation}
+    
+    \paragraph{SST kinematic identification.}
+        We assign the local swirl angular rate to the Compton angular frequency:
+        \begin{equation}
+            \Omega_{\text{swirl}}=\omega_C.
+            \label{eq:OmegaSwirl-omegaC}
+        \end{equation}
+        Then the characteristic tangential swirl speed at radius \(\rc\) is
+        \begin{equation}
+            \boxed{\lVert \vswirl\rVert = \Omega_{\text{swirl}}\,\rc = \omega_C \rc.}
+            \label{eq:vswirl-from-omegaC-rc}
+        \end{equation}
+        
+        Numerically,
+        \[
+            \omega_C \approx 7.763440716\times 10^{20}\ \mathrm{s^{-1}},
+        \]
+        so with \(\rc=r_e/2\),
+        \[
+            \boxed{
+                \lVert \vswirl\rVert
+                = \omega_C \rc
+                \approx 1.09384563\times 10^6\ \mathrm{m\,s^{-1}}
+            }.
+        \]
+    
+    \subsection{Maximum swirl force from a Hooke-law closure}
+    Let the rest-energy of the electron be represented by a Hooke-law storage over the full classical length scale \(r_e=2\rc\):
+    \begin{equation}
+        m_e c^2 = \frac{1}{2}k\,r_e^2.
+        \label{eq:hooke-rest-energy}
+    \end{equation}
+    This defines an effective stiffness
+    \begin{equation}
+        k = \frac{2m_e c^2}{r_e^2}.
+        \label{eq:k-effective}
+    \end{equation}
+    Evaluating the restoring force at displacement \(x=\rc=r_e/2\),
+    \begin{equation}
+        F_{\text{swirl}}^{\max} = k\,\rc
+        = \frac{m_e c^2}{r_e}
+        = \frac{m_e c^2}{2\rc}.
+        \label{eq:Fswirlmax-from-hooke}
+    \end{equation}
+    Thus,
+    \begin{equation}
+        \boxed{
+            F_{\text{swirl}}^{\max}=\frac{m_e c^2}{r_e}=\frac{m_e c^2}{2\rc}
+        }.
+    \end{equation}
+    Numerically,
+    \[
+        \boxed{
+            F_{\text{swirl}}^{\max}\approx 29.053507\ \mathrm{N}
+        }.
+    \]
+    
+    \subsection{Core density from force balance}
+    Once \(F_{\text{swirl}}^{\max}\), \(\rc\), and \(\lVert\vswirl\rVert\) are fixed, the core mass density follows from a dynamical-pressure scale over the core cross-section \(A=\pi \rc^2\):
+    \begin{equation}
+        F_{\text{swirl}}^{\max} = \rho_{\text{core}}\,\lVert \vswirl\rVert^2\,(\pi \rc^2).
+        \label{eq:F-dyn-pressure-core}
+    \end{equation}
+    Hence
+    \begin{equation}
+        \boxed{
+            \rho_{\text{core}}=\frac{F_{\text{swirl}}^{\max}}{\pi \rc^2\,\lVert\vswirl\rVert^2}
+        }.
+        \label{eq:rho-core-derived}
+    \end{equation}
+    This yields
+    \[
+        \boxed{
+            \rho_{\text{core}}=3.8934358266918687\times 10^{18}\ \mathrm{kg\,m^{-3}}
+        }
+    \]
+    and therefore
+    \begin{equation}
+        \boxed{
+            \rho_{\!E} = \rho_{\text{core}}c^2
+            = 3.4992456123\times 10^{35}\ \mathrm{J\,m^{-3}}.
+        }
+        \label{eq:rhoE-core}
+    \end{equation}
+    
+    \subsection{Effective fluid density}
+    We define the effective fluid density using the SST anchor formula
+    \begin{equation}
+        \boxed{
+            \rho_{\!f}
+            =
+            \frac{2 m_e c^2}{
+                \left(\alpha\cdot \dfrac{m_e c^2}{\hbar}\right)^2
+                \left(r_e^3/3\right)}
+        }.
+        \label{eq:rhoF-anchor}
+    \end{equation}
+    Using CODATA constants, this gives
+    \[
+        \boxed{
+            \rho_{\!f} \approx 6.8398588\times 10^{-7}\ \mathrm{kg\,m^{-3}}
+        }.
+    \]
+    
+    \subsection{Summary of the constant chain}
+    The resulting SST constant chain is
+    \begin{align}
+        r_e &= \frac{\alpha\hbar}{m_e c}, \\
+        \rc &= \frac{r_e}{2}, \\
+        \omega_C &= \frac{m_e c^2}{\hbar}, \\
+        \lVert\vswirl\rVert &= \omega_C \rc, \\
+        F_{\text{swirl}}^{\max} &= \frac{m_e c^2}{2\rc}, \\
+        \rho_{\text{core}} &= \frac{F_{\text{swirl}}^{\max}}{\pi \rc^2 \lVert\vswirl\rVert^2}, \\
+        \rho_{\!E} &= \rho_{\text{core}}c^2, \\
+        \rho_{\!f} &= \frac{2 m_e c^2}{\left(\alpha \, m_e c^2/\hbar\right)^2 (r_e^3/3)}.
+    \end{align}
+
+%======================================================================
+    \section{Golden NLS Core Closure and Electron Geometry}
+    \label{sec:nls_core}
+%======================================================================
+    
+    In SST, the NLS/Gross--Pitaevskii vortex-ring asymptotics are used as a smooth-core closure template to regularize thin-filament divergences and motivate finite-core corrections. This is a reference-model bridge, not a completed identity map to the full SST ontology.
+    
+    \subsection{Golden-core closure branch}
+        A standard smooth-core vortex-ring asymptotic form is
+        \begin{align}
+            E(R) &= \frac{1}{2}\,\rho\,\Gamma_{\text{SST}}^2 R
+            \left(\ln \frac{8R}{\rc} - A \right), \\
+            V(R) &= \frac{\Gamma_{\text{SST}}}{4\pi R}
+            \left(\ln \frac{8R}{\rc} - B \right),
+        \end{align}
+        with \(A\) and \(B\) determined by the chosen core model.
+        
+        We isolate a closure branch by imposing the constant-pressure boundary relation
+        \begin{equation}
+            B = A - 1.
+            \label{eq:BA_constdruk}
+        \end{equation}
+        The algebraic identity \(\varphi^{-1}=\varphi-1\) motivates the Golden branch
+        \begin{equation}
+            A=\varphi,\qquad B=\varphi^{-1}.
+            \label{eq:goldenAB}
+        \end{equation}
+        Hence
+        \begin{equation}
+            E(R)=\frac{1}{2}\,\rho\,\Gamma_{\text{SST}}^2 R
+            \left(\ln \frac{8R}{\rc} - \varphi \right).
+            \label{eq:golden-energy}
+        \end{equation}
+        Equation \eqref{eq:BA_constdruk} is treated here as a closure condition rather than as a completed theorem.
+    
+    \subsection{Density regime declaration}
+        We distinguish:
+        \[
+            \rho_{\!f}\ \text{(effective ambient fluid density)},\qquad
+            \rho_{\text{core}}\ \text{(collapsed/high-density core regime)},
+        \]
+        \[
+            \rho_{\!E}\ \text{(swirl energy density)},\qquad
+            \rho_{\!m}=\rho_{\!E}/c^2\ \text{(mass-equivalent density)}.
+        \]
+        Whenever \(\rho_{\!f}\) is replaced by \(\rho_{\text{core}}\), this is an explicit core-dominated regime assumption.
+    
+    \subsection{Calibrated inference of the electron radius}
+        Using the core-dominated Golden closure,
+        \begin{equation}
+            m_{\text{calc}} = \frac{\rho_{\text{core}} \Gamma_{\text{SST}}^2 R}{2 c^2}
+            \left( \ln \frac{8R}{\rc} - \varphi \right),
+            \label{eq:mcalc-golden}
+        \end{equation}
+        and defining \(x=R/\rc\), one obtains
+        \begin{equation}
+            \frac{m_e}{K_{\rm core}\rc}
+            =
+            x\left(\ln(8x)-\varphi\right),
+            \qquad
+            K_{\rm core}=\frac{\rho_{\text{core}}\Gamma_{\text{SST}}^2}{2c^2}.
+        \end{equation}
+        For the canonical values used in \texttt{SSTcore}, the numerical solver gives
+        \begin{equation}
+            x=\frac{R_e}{\rc}\approx 0.89838128,
+            \qquad
+            R_e\approx 1.26579243\times 10^{-15}\ \mathrm{m}.
+        \end{equation}
+        
+        This is a calibrated geometric inference under the adopted closure, not an independent prediction of \(m_e\). Since \(R_e<\rc\), the solution lies in a fat-core / hole-closing regime, suggesting a compact droplet-like configuration. We refer to this as a Hill-like spherical-vortex limit analogy; exact equivalence would require a full velocity- and pressure-field match.
+
+%======================================================================
+    \section{Emergent Angular-Momentum Scaling and Magnetic Moment}
+    \label{sec:spin_magnetic}
+%======================================================================
+    
+    The compact electron geometry motivates a volumetric core treatment. A recurrent SST scaling relation is
+    \begin{equation}
+        \hbar_{\text{SST}} \equiv \rho_{\text{core}} \rc^3 \Gamma_{\text{SST}}.
+        \label{eq:hbar-sst}
+    \end{equation}
+    Dimensional check:
+    \[
+        [\rho_{\text{core}}\rc^3\Gamma_{\text{SST}}]
+        =
+        (\mathrm{kg\,m^{-3}})(\mathrm{m^3})(\mathrm{m^2\,s^{-1}})
+        =
+        \mathrm{kg\,m^2\,s^{-1}}
+        =
+        \mathrm{J\,s}.
+    \]
+    Numerically,
+    \begin{equation}
+        \hbar_{\text{SST}}
+        =
+        (3.893\times 10^{18})(2.797\times 10^{-45})(9.684\times 10^{-9})
+        \approx 1.054\times 10^{-34}\ \mathrm{J\,s}.
+    \end{equation}
+    This is best interpreted at present as an emergent angular-momentum scaling law; a full derivation would require an explicit core-profile angular momentum integral.
+    
+    Substituting \(\hbar_{\text{SST}}\) into the Bohr magneton relation gives the leading-order SST magnetic moment scale:
+    \begin{equation}
+        \mu_{\text{SST}} = \frac{e \hbar_{\text{SST}}}{2 m_e}.
+    \end{equation}
+    This reproduces the Dirac-scale magnetic moment at leading order within the adopted hydrodynamic closure.
+
+%======================================================================
+    \section{Acoustic Dressing and the Anomalous Magnetic Moment}
+    \label{sec:g_factor}
+%======================================================================
+    
+    In standard QED, the electron magnetic moment anomaly \(a_e=(g-2)/2\) is attributed to radiative corrections. In SST, we treat the analogous correction as a conjectural hydrodynamic dressing effect of the compact core interacting with its irrotational envelope.
+    
+    At leading order, we record the phenomenological correspondence
+    \begin{equation}
+        a_e \approx \frac{\alpha}{2\pi} \approx 0.0011614.
+    \end{equation}
+    This is not yet a first-principles derivation. Rather, it motivates the interpretation that shear at the core--envelope boundary may generate an acoustic dressing contribution. In that language,
+    \begin{equation}
+        \mu_e = \frac{e \hbar_{\text{SST}}}{2 m_e}
+        \left(1+\frac{\alpha}{2\pi}+\mathcal{O}(\alpha^2)\right)
+    \end{equation}
+    is a closure-level ansatz for the dressed magnetic moment.
+
+%======================================================================
+    \section{Topology, Thermodynamic Layering, and Lepton Hierarchies}
+    \label{sec:topology_layers}
+%======================================================================
+    
+    \subsection{Topology first: identity vs state}
+        Earlier drafts conflated knot identity with discrete \(\varphi^{-2k}\) screening layers. We separate these roles here:
+        
+        \begin{quote}
+            \emph{Topology is treated as the primary identity label. Layering is treated as a thermodynamic/radiative state variable, not as the primary label of particle species.}
+        \end{quote}
+        
+        Accordingly, we write
+        \begin{equation}
+            E_{\rm obs}(K,n)=E_0(K)+E_{\rm dress}(K,n),
+            \qquad
+            m_{\rm obs}(K,n)=\frac{E_{\rm obs}(K,n)}{c^2},
+        \end{equation}
+        where \(K\) denotes knot type and \(n\) denotes a layer/dressing state.
+    
+    \subsection{Why the old \texorpdfstring{\(\varphi^{-2k}\)}{phi^-2k} identity picture is insufficient}
+        For a fixed three-state lepton scaffold (tau-calibrated), the effective base inferred from the muon and electron gaps is not unique:
+        \begin{equation}
+            b_{\rm eff}=\left(\frac{m_\tau}{m}\right)^{1/(2k)}.
+        \end{equation}
+        Using the evaluator output,
+        \[
+            b_{\mu}\approx 1.600628,\qquad
+            b_{e}\approx 1.615503,\qquad
+            \varphi\approx 1.618034.
+        \]
+        Thus, the lepton gaps do not uniquely select \(\varphi\) on their own. This motivates reinterpreting layers as dressing/excitation rather than as species-defining labels.
+    
+    \subsection{SST photoelectric-style balance}
+        A natural role for layering is thermodynamic/radiative loading. We therefore write an SST-generalized photoelectric balance:
+        \begin{equation}
+            h\nu
+            =
+            \Phi_{\rm topo}(K)
+            +
+            K_{\max}
+            +
+            \Delta E_{\rm dress}(K;n\to n').
+            \label{eq:SST_photoelectric_balance}
+        \end{equation}
+        Here \(\Phi_{\rm topo}(K)\) is a topology-dependent detachment/work threshold, and \(\Delta E_{\rm dress}\) records the energy absorbed by layer reconfiguration.
+    
+    \subsection{Three minimal dressing models}
+        We consider three nested descriptions.
+        
+        \paragraph{Model C: additive layer quanta}
+            \begin{equation}
+                \Delta E_{\rm dress} = \Delta n\,\epsilon_\ell,
+                \qquad
+                \Delta n \in \mathbb{Z}_{\ge 0}.
+                \label{eq:dress_additive}
+            \end{equation}
+        
+        \paragraph{Model A: pure entropy cost}
+            \begin{equation}
+                \Delta E_{\rm dress}
+                =
+                T_{\rm eff}\Delta S_{\rm layer}
+                =
+                k_B T_{\rm eff}\ln\!\left(\frac{g_{n'}}{g_n}\right).
+                \label{eq:dress_entropy}
+            \end{equation}
+        
+        \paragraph{Model B: entropy ladder / geometric degeneracy}
+            If \(g_n=g_0 q^n\), then
+            \begin{equation}
+                \Delta E_{\rm dress}
+                =
+                k_B T_{\rm eff}\,\Delta n\,\ln q
+                \equiv
+                \Delta n\,\epsilon_S,
+                \qquad
+                \epsilon_S\equiv k_B T_{\rm eff}\ln q.
+                \label{eq:dress_entropy_ladder}
+            \end{equation}
+            Model B reduces numerically to Model C but provides a thermodynamic interpretation of the layer quantum.
+    
+    \subsection{Topology families}
+    The topology program remains independent of the thermodynamic layer variable. Candidate lepton and quark sectors may therefore still be organized by knot family (e.g. torus knots, twist knots, or other topology classes), while \(n\) labels radiative/thermal state rather than particle identity itself.
+
+%======================================================================
+    \section{Supplementary Knot-Energy Functional Notes}
+    \label{sec:knot_functional_notes}
+%======================================================================
+    
+    We retain the general SST mass-functional form
+    \begin{equation}
+        \Eeff[K]=\alpha C(K)+\beta L(K)+\gamma \mathcal{H}(K),
+    \end{equation}
+    where \(C\) is a crossing/contact proxy, \(L\) a length/ropelength proxy, and \(\mathcal{H}\) a helicity-like term. At the present stage, this is best treated as an organizing ansatz. Additional knot-complexity measures, such as polynomial degree or tangle decompositions, may be useful as coarse proxies, but they should not be identified uncritically with minimal crossing number or exact mass scaling without separate justification.
+    
+    Likewise, NLS-core line-tension forms such as
+    \begin{equation}
+        \beta_{\rm NLS}
+        =
+        \frac{\pi \rho_{\!f}\hbar^2}{m^2}
+        \ln\!\left(\frac{1.464 R}{\xi}\right)
+    \end{equation}
+    are best interpreted as reference-model bridge expressions motivating smooth-core regularization, not as final SST field equations.
+
+%======================================================================
+    \section{Conclusion}
+%======================================================================
+    
+    This version of the manuscript organizes the Golden-NLS closure program in a canon-safe way. The main points are:
+    
+    \begin{enumerate}
+        \item SST core and continuum scales are explicitly anchored to textbook constants plus stated geometric closures.
+        \item The Golden NLS branch is treated as a selected smooth-core closure, not a completed theorem.
+        \item The electron solution \(R_e/\rc \approx 0.89838128\) is presented as a calibrated geometric inference under the core-dominated closure.
+        \item The relation \(\hbar_{\text{SST}}=\rho_{\text{core}}\rc^3\Gamma_{\text{SST}}\) is retained as an emergent angular-momentum scaling law.
+        \item Acoustic dressing is retained as a conjectural correction framework for \(g-2\).
+        \item Most importantly, topology and layering are separated: knot topology labels identity, while discrete layers are reinterpreted as thermodynamic/radiative dressing states.
+    \end{enumerate}
+    
+    This provides a cleaner foundation for future work on topology-first particle classification, thermodynamic layer excitations, and SST-style photoelectric/absorption processes.
+    
+    \begin{thebibliography}{99}
+        
+        \bibitem{SSTCanon2026}
+        Swirl String Theory Collaboration, 2026,
+        \textit{SST Core Canonical Constants and Rosetta}.
+        Internal / repository source.
+        
+        \bibitem{Hill1894}
+        M. J. M. Hill, 1894,
+        ``On a Spherical Vortex,''
+        \textit{Philosophical Transactions of the Royal Society A} \textbf{185}, 213--245.
+        DOI: 10.1098/rsta.1894.0006.
+        
+        \bibitem{RobertsGrant1971}
+        P. H. Roberts and J. Grant, 1971,
+        ``Motions in a Bose Condensate. I. The Structure of the Large Circular Vortex,''
+        \textit{Journal of Physics A: General Physics} \textbf{4}(1), 55--72.
+        DOI: 10.1088/0305-4470/4/1/306.
+        
+        \bibitem{Pitaevskii1961}
+        L. P. Pitaevskii, 1961,
+        ``Vortex Lines in an Imperfect Bose Gas,''
+        \textit{Soviet Physics JETP} \textbf{13}(2), 451--454.
+        
+        \bibitem{PethickSmith2008}
+        C. J. Pethick and H. Smith, 2008,
+        \textit{Bose--Einstein Condensation in Dilute Gases}, 2nd ed.,
+        Cambridge University Press.
+        DOI: 10.1017/CBO9780511802850.
+        
+        \bibitem{Conway1970}
+        J. H. Conway, 1970,
+        ``An Enumeration of Knots and Links, and Some of Their Algebraic Properties,''
+        in \textit{Computational Problems in Abstract Algebra},
+        Pergamon Press, pp.~329--358.
+        DOI: 10.1016/B978-0-08-012975-4.50034-5.
+        
+        \bibitem{Kauffman2001}
+        L. H. Kauffman, 2001,
+        \textit{Knots and Physics}, 3rd ed.,
+        World Scientific.
+    
+    \end{thebibliography}
+
+\end{document}

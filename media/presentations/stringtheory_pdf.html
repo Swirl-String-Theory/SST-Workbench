@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Topology Visualizer</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --panel-bg: #1a1d2d;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border: #334155;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        header .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 0.2rem;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 5;
+        }
+
+        .panel-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-section h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .control-header span.val {
+            font-family: var(--font-mono);
+            color: var(--accent);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        .toggle-btn {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            width: 100%;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--accent);
+            color: var(--bg-color);
+        }
+
+        .data-box {
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+        .data-row:last-child {
+            margin-bottom: 0;
+        }
+        .data-val {
+            color: #a78bfa;
+        }
+
+        .main-view {
+            flex: 1;
+            position: relative;
+            cursor: grab;
+        }
+
+        .main-view:active {
+            cursor: grabbing;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay-text {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        .equation {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .main-view {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Swirl-String Topology Visualizer</h1>
+            <div class="subtitle">Interactive Torus Knot Parametrization</div>
+        </div>
+        <div style="font-size: 1.5rem;">🌀</div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="panel-section">
+                <h2>Geometric Parameters</h2>
+                
+                <div class="control-group">
+                    <div class="control-header">
+                        <label title="Poloidal windings">p (Poloidal)</label>
+                        <span class="val" id="val-p">3</span>
+                    </div>
+                    <input type="range" id="slider-p" min="1" max="15" step="1" value="3">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label title="Toroidal windings">q (Toroidal)</label>
+                        <span class="val" id="val-q">2</span>
+                    </div>
+                    <input type="range" id="slider-q" min="1" max="15" step="1" value="2">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label title="Major radius">R (Major Scale)</label>
+                        <span class="val" id="val-R">2.0</span>
+                    </div>
+                    <input type="range" id="slider-R" min="0.5" max="5.0" step="0.1" value="2.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label title="Minor radius">r (Minor Scale)</label>
+                        <span class="val" id="val-r">0.8</span>
+                    </div>
+                    <input type="range" id="slider-r" min="0.1" max="3.0" step="0.1" value="0.8">
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2>Visualization</h2>
+                <div class="control-group">
+                    <button id="btn-autorotate" class="toggle-btn active">Auto-Rotate: ON</button>
+                </div>
+                <div class="control-group">
+                    <button id="btn-color" class="toggle-btn">Color Mode: Phase</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2>SST Fundamental Input</h2>
+                <div class="data-box">
+                    <div class="data-row">
+                        <span>ω_c (freq)</span>
+                        <span class="data-val">7.76×10²⁰ s⁻¹</span>
+                    </div>
+                    <div class="data-row">
+                        <span>ρ_f (density)</span>
+                        <span class="data-val">7.0×10⁻⁷ kg/m³</span>
+                    </div>
+                    <div class="data-row">
+                        <span>v_⟲ (swirl)</span>
+                        <span class="data-val">1.09×10⁶ m/s</span>
+                    </div>
+                    <div style="margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px;">
+                        <div class="data-row">
+                            <span>Derived r_c</span>
+                            <span class="data-val">1.40×10⁻¹⁵ m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-view" id="canvas-container">
+            <canvas id="renderCanvas"></canvas>
+            <div class="overlay-text">
+                <div class="equation">x(σ) = (R + r cos(qσ)) cos(pσ)</div>
+                <div class="equation">y(σ) = (R + r cos(qσ)) sin(pσ)</div>
+                <div class="equation">z(σ) = -r sin(qσ)</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('renderCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // State
+        let p = 3;
+        let q = 2;
+        let R = 2.0;
+        let r = 0.8;
+        
+        let rotationX = 0.5;
+        let rotationY = 0.5;
+        let autoRotate = true;
+        let colorMode = 'phase'; // 'phase' or 'solid'
+
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // UI Elements
+        const sliderP = document.getElementById('slider-p');
+        const sliderQ = document.getElementById('slider-q');
+        const sliderR = document.getElementById('slider-R');
+        const sliderr = document.getElementById('slider-r');
+        const valP = document.getElementById('val-p');
+        const valQ = document.getElementById('val-q');
+        const valR = document.getElementById('val-R');
+        const valr = document.getElementById('val-r');
+        const btnAutoRotate = document.getElementById('btn-autorotate');
+        const btnColor = document.getElementById('btn-color');
+
+        // Event Listeners for UI
+        function updateState() {
+            p = parseInt(sliderP.value);
+            q = parseInt(sliderQ.value);
+            R = parseFloat(sliderR.value);
+            r = parseFloat(sliderr.value);
+            
+            valP.textContent = p;
+            valQ.textContent = q;
+            valR.textContent = R.toFixed(1);
+            valr.textContent = r.toFixed(1);
+        }
+
+        sliderP.addEventListener('input', updateState);
+        sliderQ.addEventListener('input', updateState);
+        sliderR.addEventListener('input', updateState);
+        sliderr.addEventListener('input', updateState);
+
+        btnAutoRotate.addEventListener('click', () => {
+            autoRotate = !autoRotate;
+            btnAutoRotate.textContent = autoRotate ? 'Auto-Rotate: ON' : 'Auto-Rotate: OFF';
+            btnAutoRotate.classList.toggle('active', autoRotate);
+        });
+
+        btnColor.addEventListener('click', () => {
+            colorMode = colorMode === 'phase' ? 'solid' : 'phase';
+            btnColor.textContent = `Color Mode: ${colorMode.charAt(0).toUpperCase() + colorMode.slice(1)}`;
+            btnColor.classList.toggle('active', colorMode === 'phase');
+        });
+
+        // Resize handling
+        function resize() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Mouse/Touch Interaction for rotation
+        function handleStart(e) {
+            isDragging = true;
+            autoRotate = false;
+            btnAutoRotate.textContent = 'Auto-Rotate: OFF';
+            btnAutoRotate.classList.remove('active');
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            lastMouseX = clientX;
+            lastMouseY = clientY;
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const deltaX = clientX - lastMouseX;
+            const deltaY = clientY - lastMouseY;
+            
+            rotationY += deltaX * 0.01;
+            rotationX += deltaY * 0.01;
+            
+            lastMouseX = clientX;
+            lastMouseY = clientY;
+        }
+
+        function handleEnd() {
+            isDragging = false;
+        }
+
+        canvas.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        
+        canvas.addEventListener('touchstart', handleStart, {passive: true});
+        window.addEventListener('touchmove', handleMove, {passive: true});
+        window.addEventListener('touchend', handleEnd);
+
+        // 3D Math & Rendering
+        function getKnotPoint(sigma) {
+            // Equations from the document
+            const x = (R + r * Math.cos(q * sigma)) * Math.cos(p * sigma);
+            const y = (R + r * Math.cos(q * sigma)) * Math.sin(p * sigma);
+            const z = -r * Math.sin(q * sigma);
+            return { x, y, z, sigma };
+        }
+
+        function rotate3D(point, rx, ry) {
+            // Rotate around X
+            let cosX = Math.cos(rx);
+            let sinX = Math.sin(rx);
+            let y1 = point.y * cosX - point.z * sinX;
+            let z1 = point.y * sinX + point.z * cosX;
+
+            // Rotate around Y
+            let cosY = Math.cos(ry);
+            let sinY = Math.sin(ry);
+            let x2 = point.x * cosY + z1 * sinY;
+            let z2 = -point.x * sinY + z1 * cosY;
+
+            return { x: x2, y: y1, z: z2, sigma: point.sigma };
+        }
+
+        function project(point, width, height) {
+            const fov = Math.min(width, height) * 0.8;
+            const viewerDistance = 8; // Adjust based on max R+r
+            
+            // Prevent division by zero or negative distance
+            const z = point.z + viewerDistance;
+            const scale = z > 0 ? fov / z : 0;
+            
+            return {
+                x: point.x * scale + width / 2,
+                y: point.y * scale + height / 2,
+                z: point.z, // Keep original Z for depth sorting
+                sigma: point.sigma,
+                scale: scale
+            };
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (autoRotate) {
+                rotationY += 0.005;
+                rotationX += 0.002;
+            }
+
+            const segments = 1000; // Resolution of the curve
+            const points3D = [];
+
+            // 1. Generate Points
+            for (let i = 0; i <= segments; i++) {
+                const sigma = (i / segments) * Math.PI * 2;
+                points3D.push(getKnotPoint(sigma));
+            }
+
+            // 2. Rotate Points
+            const rotatedPoints = points3D.map(pt => rotate3D(pt, rotationX, rotationY));
+
+            // 3. Create line segments and sort by depth (Z)
+            const lines = [];
+            for (let i = 0; i < segments; i++) {
+                const p1 = rotatedPoints[i];
+                const p2 = rotatedPoints[i+1];
+                const avgZ = (p1.z + p2.z) / 2;
+                lines.push({ p1, p2, z: avgZ });
+            }
+
+            // Sort descending (draw furthest first)
+            lines.sort((a, b) => b.z - a.z);
+
+            // 4. Project and Draw
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const proj1 = project(line.p1, canvas.width, canvas.height);
+                const proj2 = project(line.p2, canvas.width, canvas.height);
+
+                // Skip drawing if behind viewer
+                if (proj1.scale === 0 || proj2.scale === 0) continue;
+
+                ctx.beginPath();
+                ctx.moveTo(proj1.x, proj1.y);
+                ctx.lineTo(proj2.x, proj2.y);
+
+                // Dynamic styling based on depth and phase
+                const depthFactor = (line.z + (R+r)) / ((R+r)*2); // Normalize 0 to 1 approx
+                const opacity = Math.max(0.1, 1 - depthFactor * 0.8);
+                const thickness = Math.max(0.5, proj1.scale * 0.5);
+
+                ctx.lineWidth = thickness;
+
+                if (colorMode === 'phase') {
+                    // Color based on position along the string (sigma)
+                    const hue = (line.p1.sigma / (Math.PI * 2)) * 360;
+                    ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${opacity})`;
+                    ctx.shadowBlur = thickness * 2;
+                    ctx.shadowColor = `hsla(${hue}, 80%, 60%, ${opacity * 0.5})`;
+                } else {
+                    // Solid neon blue
+                    ctx.strokeStyle = `rgba(56, 189, 248, ${opacity})`;
+                    ctx.shadowBlur = thickness * 2;
+                    ctx.shadowColor = `rgba(56, 189, 248, ${opacity * 0.5})`;
+                }
+
+                ctx.stroke();
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        // Start loop
+        render();
+
+    </script>
+</body>
+</html>

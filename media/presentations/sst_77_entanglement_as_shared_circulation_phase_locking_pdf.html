@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Delay-Coupled Phase Locking Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Swirl Node Styles */
+        .node-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swirl {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.05s linear;
+        }
+
+        .glow-a { filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6)); }
+        .glow-b { filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.6)); }
+
+        .indicator {
+            position: absolute;
+            width: 4px;
+            height: 50%;
+            top: 0;
+            left: calc(50% - 2px);
+            transform-origin: bottom center;
+            border-radius: 2px;
+        }
+
+        .indicator-a { background: #22d3ee; box-shadow: 0 0 10px #22d3ee; }
+        .indicator-b { background: #f472b6; box-shadow: 0 0 10px #f472b6; }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        canvas {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+        .locked { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+        .unlocked { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+        .transient { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <header class="max-w-6xl w-full mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-end border-b border-slate-700 pb-4">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 mb-2">
+                SST Delayed Phase Dynamics
+            </h1>
+            <p class="text-slate-400 max-w-2xl">
+                Interactive simulation of the minimal toy model for delay-coupled phase locking on shared circulation carriers, based on the paper by Omar Iskandarani.
+            </p>
+        </div>
+        <div id="lockStatus" class="mt-4 md:mt-0 px-4 py-2 rounded-full font-mono text-sm font-bold status-badge transient flex items-center gap-2">
+            <span class="relative flex h-3 w-3">
+              <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-current"></span>
+            </span>
+            <span id="statusText">INITIALIZING</span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Panel: Controls & Math -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <div class="glass-panel p-6 rounded-xl">
+                <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    System Parameters
+                </h2>
+                
+                <!-- Omega 0 -->
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm font-medium text-slate-300">Intrinsic Freq (<span class="font-mono text-cyan-300">ω₀</span>)</label>
+                        <span id="w0-val" class="font-mono text-sm text-cyan-400">20.0 s⁻¹</span>
+                    </div>
+                    <input type="range" id="w0" min="0" max="50" step="0.1" value="20">
+                    <p class="text-xs text-slate-500 mt-1">Base rotation speed of the carriers.</p>
+                </div>
+
+                <!-- Kappa -->
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm font-medium text-slate-300">Coupling Rate (<span class="font-mono text-pink-300">κ_{AB}</span>)</label>
+                        <span id="kappa-val" class="font-mono text-sm text-pink-400">8.0 s⁻¹</span>
+                    </div>
+                    <input type="range" id="kappa" min="0" max="20" step="0.1" value="8">
+                    <p class="text-xs text-slate-500 mt-1">Strength of phase-locking (depends on overlap O_AB).</p>
+                </div>
+
+                <!-- Tau -->
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm font-medium text-slate-300">Transport Delay (<span class="font-mono text-purple-300">τ</span>)</label>
+                        <span id="tau-val" class="font-mono text-sm text-purple-400">0.35 s</span>
+                    </div>
+                    <input type="range" id="tau" min="0" max="1.5" step="0.01" value="0.35">
+                    <p class="text-xs text-slate-500 mt-1">Time for phase info to travel (L / ||v⟲||).</p>
+                </div>
+
+                <div class="pt-4 border-t border-slate-700 flex gap-3">
+                    <button id="btnPerturb" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded transition-colors text-sm font-semibold">
+                        Perturb System
+                    </button>
+                    <button id="btnReset" class="flex-1 border border-slate-600 hover:bg-slate-800 text-slate-300 py-2 px-4 rounded transition-colors text-sm font-semibold">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl">
+                <h3 class="text-sm uppercase tracking-wider text-slate-400 font-bold mb-3">Governing Equations</h3>
+                <div class="font-mono text-xs text-slate-300 space-y-2 bg-slate-900 p-3 rounded border border-slate-800">
+                    <p><span class="text-cyan-400">dφ_A/dt</span> = ω₀ + κ_{AB} sin(<span class="text-pink-400">φ_B(t-τ)</span> - <span class="text-cyan-400">φ_A(t)</span>)</p>
+                    <p><span class="text-pink-400">dφ_B/dt</span> = ω₀ + κ_{AB} sin(<span class="text-cyan-400">φ_A(t-τ)</span> - <span class="text-pink-400">φ_B(t)</span>)</p>
+                    <div class="h-px bg-slate-700 my-2"></div>
+                    <p>Δ(t) = φ_A(t) - φ_B(t)</p>
+                </div>
+                <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                    The system exhibits delayed Kuramoto-type phase locking. Depending on the dimensionless parameter <span class="font-mono">2κτ</span>, the system will settle into an in-phase (Δ=0) or anti-phase branch.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Right Panel: Visualization -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            
+            <!-- Swirl Visualizer -->
+            <div class="glass-panel p-6 rounded-xl flex flex-col items-center justify-center relative overflow-hidden min-h-[250px]">
+                <!-- Background connection line -->
+                <div class="absolute top-1/2 left-1/4 right-1/4 h-1 border-t-2 border-dashed border-slate-600 -translate-y-1/2 z-0 opacity-50"></div>
+                
+                <div class="flex justify-around w-full z-10">
+                    <!-- Site A -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="text-cyan-400 font-mono font-bold">Site A</div>
+                        <div class="node-container">
+                            <svg class="swirl glow-a" id="svgA" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#0891b2" stroke-width="2" stroke-dasharray="4 4"/>
+                                <circle cx="50" cy="50" r="30" fill="none" stroke="#22d3ee" stroke-width="4" opacity="0.5"/>
+                                <path d="M50 20 A 30 30 0 0 1 80 50" fill="none" stroke="#22d3ee" stroke-width="6" stroke-linecap="round"/>
+                                <circle cx="50" cy="50" r="10" fill="#22d3ee"/>
+                                <line x1="50" y1="50" x2="50" y2="5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="font-mono text-xs text-slate-400">φ_A: <span id="valPhiA" class="text-cyan-300">0.00</span></div>
+                    </div>
+
+                    <!-- Delay Indicator -->
+                    <div class="flex flex-col items-center justify-center pt-8">
+                        <div class="text-xs text-slate-500 font-mono mb-1">Delay τ</div>
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-full bg-slate-600 animate-pulse" style="animation-delay: 0s"></div>
+                            <div class="w-2 h-2 rounded-full bg-slate-600 animate-pulse" style="animation-delay: 0.2s"></div>
+                            <div class="w-2 h-2 rounded-full bg-slate-600 animate-pulse" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Site B -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="text-pink-400 font-mono font-bold">Site B</div>
+                        <div class="node-container">
+                            <svg class="swirl glow-b" id="svgB" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#be185d" stroke-width="2" stroke-dasharray="4 4"/>
+                                <circle cx="50" cy="50" r="30" fill="none" stroke="#f472b6" stroke-width="4" opacity="0.5"/>
+                                <path d="M50 20 A 30 30 0 0 1 80 50" fill="none" stroke="#f472b6" stroke-width="6" stroke-linecap="round"/>
+                                <circle cx="50" cy="50" r="10" fill="#f472b6"/>
+                                <line x1="50" y1="50" x2="50" y2="5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="font-mono text-xs text-slate-400">φ_B: <span id="valPhiB" class="text-pink-300">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph -->
+            <div class="glass-panel p-6 rounded-xl flex-1 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-white">Phase Difference Time Series</h2>
+                    <div class="font-mono text-sm">
+                        Δ(t) = <span id="valDelta" class="font-bold text-white">0.000</span> rad
+                    </div>
+                </div>
+                <div class="relative w-full flex-1 min-h-[300px]">
+                    <canvas id="plotCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                    <!-- Y-axis labels -->
+                    <div class="absolute left-2 top-2 text-xs font-mono text-slate-400">+4</div>
+                    <div class="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400">0</div>
+                    <div class="absolute left-2 bottom-2 text-xs font-mono text-slate-400">-4</div>
+                    <!-- X-axis label -->
+                    <div class="absolute right-2 bottom-2 text-xs font-mono text-slate-400">Time (t) →</div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3 text-center">
+                    Recreation of Figure 4: Wrapped phase difference Δ(t) relaxing toward the stationary branch.
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- Simulation State ---
+        let w0 = 20.0;
+        let kappa = 8.0;
+        let tau = 0.35;
+        
+        // Time step for integration
+        const dt = 0.016; // roughly 60fps
+        let t = 0;
+
+        // Initial conditions (from paper section 15)
+        let phiA = 0.15;
+        let phiB = 2.10;
+
+        // History arrays for delay differential equation
+        // We need to store past values up to max_tau / dt
+        const maxTau = 2.0; 
+        const maxHistoryLength = Math.ceil(maxTau / dt) + 10;
+        
+        let historyA = [];
+        let historyB = [];
+        let timeHistory = [];
+        let deltaHistory = []; // For plotting
+
+        // Initialize history with constant initial conditions
+        function initHistory() {
+            historyA = [];
+            historyB = [];
+            timeHistory = [];
+            deltaHistory = [];
+            t = 0;
+            phiA = 0.15;
+            phiB = 2.10;
+            
+            for (let i = 0; i < maxHistoryLength; i++) {
+                historyA.push(phiA);
+                historyB.push(phiB);
+            }
+            // Pre-fill delta history for canvas
+            for(let i=0; i<400; i++) deltaHistory.push(null);
+        }
+
+        initHistory();
+
+        // --- DOM Elements ---
+        const elW0 = document.getElementById('w0');
+        const elKappa = document.getElementById('kappa');
+        const elTau = document.getElementById('tau');
+        
+        const valW0 = document.getElementById('w0-val');
+        const valKappa = document.getElementById('kappa-val');
+        const valTau = document.getElementById('tau-val');
+
+        const svgA = document.getElementById('svgA');
+        const svgB = document.getElementById('svgB');
+        
+        const textPhiA = document.getElementById('valPhiA');
+        const textPhiB = document.getElementById('valPhiB');
+        const textDelta = document.getElementById('valDelta');
+
+        const canvas = document.getElementById('plotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const lockStatus = document.getElementById('lockStatus');
+        const statusText = document.getElementById('statusText');
+        const statusPing = document.getElementById('statusPing');
+
+        // --- Event Listeners ---
+        function updateParams() {
+            w0 = parseFloat(elW0.value);
+            kappa = parseFloat(elKappa.value);
+            tau = parseFloat(elTau.value);
+            
+            valW0.innerText = w0.toFixed(1) + ' s⁻¹';
+            valKappa.innerText = kappa.toFixed(1) + ' s⁻¹';
+            valTau.innerText = tau.toFixed(2) + ' s';
+        }
+
+        elW0.addEventListener('input', updateParams);
+        elKappa.addEventListener('input', updateParams);
+        elTau.addEventListener('input', updateParams);
+
+        document.getElementById('btnReset').addEventListener('click', () => {
+            initHistory();
+            updateParams();
+        });
+
+        document.getElementById('btnPerturb').addEventListener('click', () => {
+            // Add a random kick to phase A to knock it out of lock
+            phiA += (Math.random() * 4 - 2); 
+            // Overwrite recent history slightly to make the perturbation stick
+            for(let i=0; i<10; i++) {
+                historyA[historyA.length - 1 - i] = phiA;
+            }
+        });
+
+        // --- Canvas Setup ---
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        // Initial call after a tiny delay to ensure layout is done
+        setTimeout(resizeCanvas, 100);
+
+        // --- Math Helpers ---
+        // Wrap phase difference to [-pi, pi] as shown in paper figures
+        function wrapPhase(angle) {
+            let wrapped = angle % (2 * Math.PI);
+            if (wrapped > Math.PI) wrapped -= 2 * Math.PI;
+            if (wrapped < -Math.PI) wrapped += 2 * Math.PI;
+            return wrapped;
+        }
+
+        // --- Main Simulation Loop ---
+        function simulateStep() {
+            // Determine how many steps back to look for delay tau
+            let delaySteps = Math.floor(tau / dt);
+            if (delaySteps >= historyA.length) delaySteps = historyA.length - 1;
+
+            // Get delayed phases
+            let pastA = historyA[historyA.length - 1 - delaySteps];
+            let pastB = historyB[historyB.length - 1 - delaySteps];
+
+            // Euler integration of Delayed Kuramoto equations
+            let dPhiA = w0 + kappa * Math.sin(pastB - phiA);
+            let dPhiB = w0 + kappa * Math.sin(pastA - phiB);
+
+            phiA += dPhiA * dt;
+            phiB += dPhiB * dt;
+            t += dt;
+
+            // Wrap absolute phases to 0-2pi just to prevent float overflow over long times
+            // Note: the differential equation depends on differences, so wrapping individual 
+            // phases requires care. Actually, it's safer NOT to wrap the absolute phases 
+            // for the DDE logic, only wrap for display.
+            
+            // Store new values
+            historyA.push(phiA);
+            historyB.push(phiB);
+
+            // Keep history bounded
+            if (historyA.length > maxHistoryLength) {
+                historyA.shift();
+                historyB.shift();
+            }
+
+            // Calculate delta for display
+            let delta = wrapPhase(phiA - phiB);
+            
+            deltaHistory.push(delta);
+            if(deltaHistory.length > canvas.width / 2) { // Keep enough points to fill screen
+                deltaHistory.shift();
+            }
+
+            updateVisuals(delta);
+        }
+
+        function updateVisuals(delta) {
+            // Update Text
+            textPhiA.innerText = (phiA % (2*Math.PI)).toFixed(2);
+            textPhiB.innerText = (phiB % (2*Math.PI)).toFixed(2);
+            textDelta.innerText = delta.toFixed(3);
+
+            // Update Swirl Rotations (convert radians to degrees)
+            svgA.style.transform = `rotate(${phiA * (180/Math.PI)}deg)`;
+            svgB.style.transform = `rotate(${phiB * (180/Math.PI)}deg)`;
+
+            // Update Lock Status Badge
+            const absDelta = Math.abs(delta);
+            lockStatus.className = 'mt-4 md:mt-0 px-4 py-2 rounded-full font-mono text-sm font-bold status-badge flex items-center gap-2 ';
+            
+            // Check stability condition from paper: 2*kappa*tau < pi/2 for stable in-phase
+            const stabilityParam = 2 * kappa * tau;
+            const isTheoreticallyStable = stabilityParam < (Math.PI / 2);
+
+            if (absDelta < 0.05) {
+                lockStatus.classList.add('locked');
+                statusText.innerText = 'PHASE LOCKED (Δ ≈ 0)';
+                statusPing.style.display = 'none';
+            } else if (absDelta > 3.0) { // Close to pi
+                 lockStatus.classList.add('unlocked');
+                 statusText.innerText = 'ANTI-PHASE (Δ ≈ π)';
+                 statusPing.style.display = 'block';
+            } else {
+                lockStatus.classList.add('transient');
+                statusText.innerText = 'TRANSIENT...';
+                statusPing.style.display = 'block';
+            }
+
+            // Draw Graph
+            drawGraph();
+        }
+
+        function drawGraph() {
+            if (!canvas.width) return;
+            
+            const w = canvas.width / window.devicePixelRatio;
+            const h = canvas.height / window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw grid lines
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            // Center line (0)
+            ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
+            // Pi and -Pi lines approx (+- 3.14)
+            const yRange = 8; // -4 to 4
+            const scaleY = h / yRange;
+            
+            let yPi = h/2 - (Math.PI * scaleY);
+            let yMinusPi = h/2 - (-Math.PI * scaleY);
+            
+            ctx.stroke();
+
+            ctx.strokeStyle = '#475569';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, yPi); ctx.lineTo(w, yPi);
+            ctx.moveTo(0, yMinusPi); ctx.lineTo(w, yMinusPi);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Data
+            ctx.beginPath();
+            ctx.strokeStyle = '#e2e8f0'; // White/slate line
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+
+            const pts = deltaHistory.length;
+            const stepX = w / 300; // Show last 300 points
+
+            let started = false;
+            for (let i = 0; i < pts; i++) {
+                let val = deltaHistory[i];
+                if (val === null) continue;
+
+                let x = w - ((pts - 1 - i) * stepX);
+                let y = h/2 - (val * scaleY);
+
+                if (!started) {
+                    ctx.moveTo(x, y);
+                    started = true;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw glow effect for the line
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(255,255,255,0.3)';
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        // Animation Loop
+        let lastTime = 0;
+        function loop(timestamp) {
+            // Run multiple physics steps per frame to speed up simulation visually
+            // while keeping dt small for numerical stability
+            for(let i=0; i<3; i++) {
+                simulateStep();
+            }
+            requestAnimationFrame(loop);
+        }
+
+        // Start
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>
