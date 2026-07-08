@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST 3D Collider — Robuste Cilinder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg:#0B1020; --panel:rgba(16,24,48,.88); --line:#1E2C4A;
+            --txt:#C9D6E3; --dim:#6F82A0;
+            --amber:#FFAE45; --ice:#55D6FF; --warn:#FF6E6E; --ok:#7BE8A8; --purple:#A855F7;
+        }
+        html, body, #root { margin:0; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--txt); font-family:"IBM Plex Mono",Consolas,monospace; }
+        #viewport-root { position:fixed; inset:0; overflow:hidden; }
+        #canvas-wrap { position:absolute; inset:0; z-index:1; }
+        #canvas-wrap canvas { width:100%; height:100%; display:block; touch-action:none; }
+        .glass-panel { background:var(--panel); backdrop-filter:blur(12px); border:1px solid var(--line); }
+        .ui-layer { position:absolute; inset:0; z-index:10; pointer-events:none; }
+        .pe-auto { pointer-events:auto; }
+        #ui-left {
+            position:absolute; top:0; left:0; z-index:10;
+            width:min(360px,32vw); max-height:100vh; overflow-y:auto;
+            padding:12px; pointer-events:none;
+        }
+        #ui-right {
+            position:absolute; top:0; right:0; z-index:10;
+            width:min(320px,28vw); height:100vh; overflow-y:auto;
+            padding:12px; pointer-events:none;
+        }
+        #ui-left > *, #ui-right > * { pointer-events:auto; }
+        .scroll-panel { overflow-y:auto; }
+        #flag-banner { position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:20; max-width:min(420px,90vw); }
+        .seg-btn { flex:1; padding:6px 4px; font-size:10px; border:1px solid var(--line); border-radius:4px; background:var(--bg); color:var(--dim); cursor:pointer; }
+        .seg-btn.active { border-color:var(--ice); color:#EAF2FA; background:rgba(85,214,255,.12); }
+        .seg-btn:disabled { opacity:.4; cursor:not-allowed; }
+        input[type=range] { width:100%; accent-color:var(--ice); }
+        select { width:100%; background:var(--bg); color:var(--txt); border:1px solid var(--line); border-radius:4px; padding:5px; font-size:11px; }
+        .ind-on-alpha { border-color:var(--warn)!important; background:rgba(255,110,110,.12)!important; }
+        .ind-on-beta { border-color:var(--amber)!important; background:rgba(255,174,69,.12)!important; }
+        .ind-on-gamma { border-color:var(--purple)!important; background:rgba(168,85,247,.12)!important; }
+        .ind-on-sep { border-color:#fff!important; background:rgba(255,255,255,.1)!important; }
+        .katex { font-size:1em; }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="js/ideal_knots_data.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/scene3d.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const phy = window.SSTPhysics;
+const EXPLAIN = {
+    alpha: {
+        title: "α C(K) — Biot-Savart Afstoting",
+        text: "De massieve wervelkernen naderen elkaar, maar incompressibiliteit creëert een oneindige drukbarrière (pressure well intersectie) die instorten en reconnectie voorkomt.",
+        cls: "text-rose-400"
+    },
+    beta: {
+        title: "β L(K) — Lijnspanning",
+        text: "De samentrekkende kracht van de wervelstreng. De buis probeert zijn booglengte te minimaliseren tegen de afstotingskracht in.",
+        cls: "text-yellow-400"
+    },
+    gamma: {
+        title: "γ H(K) — Hopf Stabiliteit",
+        text: "De topologische verstrengeling (kruis-heliciteit) van de poloidale stroomlijnen die het macroscopische deeltje als één samenhangend geheel bijeen houdt.",
+        cls: "text-purple-400"
+    },
+    sep: {
+        title: "∂V — Separatrix / Taylor Caps",
+        text: "Roterende kolom sluit stroming af aan de z-einden van de cilinder. Taylor caps zijn de projecties van de separatrix op de boven- en onderkap.",
+        cls: "text-white"
+    }
+};
+
+function fmtSpeed(v) {
+    const c = Math.abs(v) * 100;
+    return (c >= 10 ? c.toFixed(1) : c.toFixed(2)) + " cm/s";
+}
+function fmtGaSlider(x) {
+    const ga = x * 1e-3;
+    return x.toFixed(1) + "·10⁻³ m²/s · v≈" + fmtSpeed(phy.vFromGamma(ga));
+}
+function fmtOmSlider(x) {
+    return x.toFixed(2) + " rad/s · v≈" + fmtSpeed(phy.vFromOmega(x));
+}
+
+function drawSpark(canvas, hist, count) {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#6F82A0";
+    ctx.font = "9px monospace";
+    ctx.fillText(count === 1 ? "R_A (—)" : "R_A, R_B (—)  Δz (··)", 4, 10);
+    if (hist.length < 2) return;
+    const t0 = hist[0].t, t1 = hist[hist.length - 1].t || 1;
+    const Rmax = Math.max(0.1, ...hist.map(p => Math.max(p.RA, p.RB)));
+    const Zmax = Math.max(0.1, ...hist.map(p => p.dz));
+    function line(key, color, dash, vmax) {
+        ctx.strokeStyle = color;
+        ctx.setLineDash(dash);
+        ctx.beginPath();
+        hist.forEach((p, i) => {
+            const x = 4 + (w - 8) * (p.t - t0) / Math.max(1e-9, t1 - t0);
+            const y = h - 4 - (h - 18) * (p[key] / vmax);
+            i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    line("RA", "#FFAE45", [], Rmax);
+    if (count === 2) {
+        line("RB", "#55D6FF", [], Rmax);
+        line("dz", "#C9D6E3", [3, 3], Zmax);
+    }
+}
+
+function MathBlock({ tex, className }) {
+    const ref = useRef(null);
+    useEffect(() => {
+        if (ref.current && window.katex) {
+            katex.render(tex, ref.current, { throwOnError: false });
+        }
+    }, [tex]);
+    return <span ref={ref} className={className} />;
+}
+
+function App() {
+    const canvasRef = useRef(null);
+    const wrapRef = useRef(null);
+    const sparkRef = useRef(null);
+    const lastUmax = useRef({ value: 0.02 });
+    const frameRef = useRef(0);
+    const loopRef = useRef(null);
+    const sceneReady = useRef(false);
+
+    const [indicators, setIndicators] = useState({ alpha: false, beta: false, gamma: false, sep: false });
+    const [showCenterline, setShowCenterline] = useState(false);
+    const [metrics, setMetrics] = useState({ H: 0, Wr: 0, Lk: 0, wrel: 2, tPhys: 0, subtitle: "" });
+    const [flag, setFlag] = useState("");
+    const [paused, setPaused] = useState(false);
+    const [refFrame, setRefFrame] = useState("lab");
+
+    const [count, setCount] = useState(2);
+    const [topology, setTopology] = useState("ring");
+    const [coreModel, setCoreModel] = useState("solid");
+    const [quality, setQuality] = useState("medium");
+    const [knotId, setKnotId] = useState("3:1:1");
+    const [compA, setCompA] = useState(1);
+    const [compB, setCompB] = useState(1);
+    const [Om, setOm] = useState(1);
+    const [gaSlider, setGaSlider] = useState(2);
+    const [aSlider, setASlider] = useState(1.5);
+    const [offSlider, setOffSlider] = useState(0);
+    const [mirrorB, setMirrorB] = useState(false);
+    const [ccwA, setCcwA] = useState(true);
+    const [ccwB, setCcwB] = useState(false);
+    const [acc, setAcc] = useState(8);
+    const [vzA, setVzA] = useState(0);
+    const [vzB, setVzB] = useState(0);
+    const [lockVz, setLockVz] = useState(true);
+
+    const syncPhyParams = useCallback(() => {
+        const P = phy.P;
+        P.count = count;
+        P.topology = topology;
+        P.coreModel = coreModel;
+        P.quality = quality;
+        P.knotId = knotId;
+        P.compA = compA;
+        P.compB = compB;
+        P.Om = Om;
+        P.GaMag = gaSlider * 1e-3;
+        P.a = aSlider * 1e-3;
+        P.off = offSlider * 1e-3;
+        P.mirrorB = mirrorB;
+        P.ccwA = ccwA;
+        P.ccwB = ccwB;
+        P.acc = acc;
+        P.vzA = vzA * 1e-3;
+        P.vzB = vzB * 1e-3;
+        P.lockVz = lockVz;
+        phy.Flags.alpha = indicators.alpha;
+        phy.Flags.beta = indicators.beta;
+        phy.Flags.gamma = indicators.gamma;
+        phy.Flags.sep = indicators.sep;
+        phy.refFrame = refFrame;
+        phy.paused = paused;
+    }, [count, topology, coreModel, quality, knotId, compA, compB, Om, gaSlider, aSlider, offSlider, mirrorB, ccwA, ccwB, acc, vzA, vzB, lockVz, indicators, refFrame, paused]);
+
+    useEffect(() => {
+        syncPhyParams();
+    }, [syncPhyParams]);
+
+    useEffect(() => {
+        if (sceneReady.current) SSTScene.setShowCenterline(showCenterline);
+    }, [showCenterline]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const wrap = wrapRef.current;
+        if (!canvas || !wrap || sceneReady.current) return;
+        sceneReady.current = true;
+
+        syncPhyParams();
+        phy.reinitSimulation();
+        SSTScene.init(canvas, phy);
+        SSTScene.setShowCenterline(showCenterline);
+        SSTScene.onReinit();
+        lastUmax.current.value = 0.02;
+        SSTScene.resize(wrap.clientWidth || window.innerWidth, wrap.clientHeight || window.innerHeight);
+
+        let lastT = performance.now();
+        const loop = (now) => {
+            loopRef.current = requestAnimationFrame(loop);
+            const dtReal = Math.min(0.05, (now - lastT) / 1000);
+            lastT = now;
+
+            phy.physicsStep(dtReal, lastUmax.current);
+            SSTScene.frameUpdate(phy.tPhys);
+
+            frameRef.current++;
+            if (frameRef.current % 3 === 0) {
+                phy.pushHistory();
+                const m = phy.getMetrics();
+                setMetrics(m);
+                setFlag(m.flagged || "");
+                drawSpark(sparkRef.current, phy.hist, phy.P.count);
+            }
+
+            const w = wrap.clientWidth || window.innerWidth;
+            const h = wrap.clientHeight || window.innerHeight;
+            if (w > 0 && h > 0) SSTScene.resize(w, h);
+            SSTScene.render();
+        };
+        loopRef.current = requestAnimationFrame(loop);
+
+        const onWinResize = () => {
+            const w = wrap.clientWidth || window.innerWidth;
+            const h = wrap.clientHeight || window.innerHeight;
+            if (w > 0 && h > 0) SSTScene.resize(w, h);
+        };
+        window.addEventListener("resize", onWinResize);
+
+        return () => {
+            sceneReady.current = false;
+            cancelAnimationFrame(loopRef.current);
+            window.removeEventListener("resize", onWinResize);
+        };
+    }, []);
+
+    const reinit = () => {
+        syncPhyParams();
+        phy.reinitSimulation();
+        SSTScene.onReinit();
+        lastUmax.current.value = 0.02;
+        phy.clearFlag();
+        setFlag("");
+        setMetrics(phy.getMetrics());
+    };
+
+    const reset = () => {
+        syncPhyParams();
+        phy.resetState();
+        phy.clearFlag();
+        setFlag("");
+        SSTScene.onReinit();
+        setMetrics(phy.getMetrics());
+    };
+
+    const toggleInd = (key) => {
+        setIndicators(prev => {
+            const next = { ...prev, [key]: !prev[key] };
+            phy.Flags[key] = next[key];
+            if (key === "gamma") SSTScene.onCoreModelChange();
+            else if (key === "beta" || key === "sep") SSTScene.onIndicatorChange();
+            return next;
+        });
+    };
+
+    const onTopology = (t) => {
+        setTopology(t);
+        phy.P.topology = t;
+        reinit();
+    };
+
+    const onCount = (n) => {
+        setCount(n);
+        phy.P.count = n;
+        reinit();
+    };
+
+    const onQuality = (q) => {
+        setQuality(q);
+        phy.P.quality = q;
+        reinit();
+    };
+
+    const onKnotChange = (id) => {
+        setKnotId(id);
+        phy.P.knotId = id;
+        const k = phy.activeKnot();
+        setCompA(1);
+        setCompB(Math.min(2, k ? k.components.length : 1));
+        phy.P.compA = 1;
+        phy.P.compB = Math.min(2, k ? k.components.length : 1);
+        reset();
+    };
+
+    const knot = phy.activeKnot();
+    const multiComp = topology === "ideal" && knot && knot.components.length > 1;
+    const qualEnabled = topology === "trefoil" || topology === "ideal";
+
+    const formulaParts = [
+        { key: "alpha", tex: "\\alpha C(K)", cls: indicators.alpha ? "text-rose-500 font-bold" : "text-rose-400/70" },
+        { key: "beta", tex: "\\beta L(K)", cls: indicators.beta ? "text-yellow-300 font-bold" : "text-yellow-400/70" },
+        { key: "gamma", tex: "\\gamma \\mathcal{H}(K)", cls: indicators.gamma ? "text-purple-400 font-bold" : "text-purple-400/70" },
+        { key: "sep", tex: "\\partial V", cls: indicators.sep ? "text-white font-bold" : "text-gray-400" }
+    ];
+
+    return (
+        <div id="viewport-root">
+            <div id="canvas-wrap" ref={wrapRef}>
+                <canvas ref={canvasRef} />
+            </div>
+
+            {flag && (
+                <div id="flag-banner" className="pe-auto glass-panel border-red-500/60 text-red-400 text-xs p-3 rounded-lg">
+                    {flag}
+                </div>
+            )}
+
+            {/* Linker kolom — formule, uitleg, metrics, sparkline */}
+            <div id="ui-left" className="flex flex-col gap-3">
+                <div className="glass-panel rounded-xl p-4 shadow-xl">
+                    <h1 className="text-base font-bold text-cyan-400 mb-1">SST 3D Collider — Robuste Cilinder</h1>
+                    <p className="text-xs text-gray-400 mb-3 leading-relaxed">{metrics.subtitle || "Superfluïde collider · cilinder 1.0 m × Ø2.0 m"}</p>
+                    <div className="bg-neutral-900/80 p-3 rounded-lg border border-neutral-700 text-center mb-2">
+                        <span className="text-sm text-gray-200">
+                            <MathBlock tex="\\mathcal{E}_{\\rm eff}[K] =" />{" "}
+                            {formulaParts.map((p, i) => (
+                                <React.Fragment key={p.key}>
+                                    {i > 0 && " + "}
+                                    <MathBlock tex={p.tex} className={p.cls} />
+                                </React.Fragment>
+                            ))}
+                        </span>
+                    </div>
+                    <div className="text-xs text-gray-500">Ω = {Om.toFixed(2)} rad·s⁻¹ · |Γ| = {(gaSlider).toFixed(1)}×10⁻³ m²/s</div>
+                </div>
+
+                <div className="glass-panel rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Energie Functionaal</h2>
+                        <label className="flex items-center gap-1.5 text-[10px] text-gray-400 cursor-pointer">
+                            <input type="checkbox" checked={showCenterline} onChange={e => setShowCenterline(e.target.checked)} />
+                            Kernlijn
+                        </label>
+                    </div>
+                    {Object.entries(EXPLAIN).map(([key, ex]) => (
+                        <button key={key} onClick={() => toggleInd(key)}
+                            className={`w-full text-left p-2.5 rounded-lg border transition-all ${indicators[key] ? "ind-on-" + key : "border-neutral-700 hover:border-gray-500"}`}>
+                            <div className={`font-mono font-bold mb-0.5 text-xs ${ex.cls}`}>{ex.title}</div>
+                            <div className="text-[10px] text-gray-300 leading-relaxed">{ex.text}</div>
+                        </button>
+                    ))}
+                </div>
+
+                <div className="glass-panel rounded-lg p-3">
+                    <div className="text-[10px] text-gray-500 tracking-wider mb-1"><MathBlock tex="\\mathcal{H} = Wr + 2Lk" /></div>
+                    <div className="text-2xl font-bold text-white" style={{ color: Math.abs(metrics.H) < 0.02 ? "#7BE8A8" : "#FFAE45" }}>
+                        {metrics.H != null ? metrics.H.toFixed(3) : "0.000"}
+                    </div>
+                    <div className="flex justify-between text-xs mt-1"><span className="text-gray-500">Wr</span><span>{metrics.Wr?.toFixed(3)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-gray-500">Lk</span><span>{metrics.Lk?.toFixed(3)}</span></div>
+                    <div className="flex justify-between text-xs">
+                        <span className="text-gray-500">ω_rel</span>
+                        <span title={indicators.sep ? "ζ_rel (Taylor-kolom)" : "2Ω (achtergrond)"}>
+                            {metrics.wrel?.toFixed(2)} s⁻¹ ẑ
+                            {indicators.sep && <span className="text-gray-500 ml-1">ζ</span>}
+                        </span>
+                    </div>
+                    {indicators.sep && metrics.taylorA && (
+                        <div className="flex justify-between text-[10px] text-gray-500">
+                            <span>r_cap A</span>
+                            <span>{(metrics.taylorA.rCap * 100).toFixed(1)} cm</span>
+                        </div>
+                    )}
+                    {metrics.sA && (
+                        <div className="flex justify-between text-xs">
+                            <span className="text-gray-500">R{count === 2 ? " A/B" : ""}</span>
+                            <span>{count === 1
+                                ? (metrics.sA.R * 100).toFixed(1) + " cm"
+                                : (metrics.sA.R * 100).toFixed(1) + " / " + (metrics.sB.R * 100).toFixed(1) + " cm"}</span>
+                        </div>
+                    )}
+                    {count === 2 && metrics.dz != null && (
+                        <>
+                            <div className="flex justify-between text-xs"><span className="text-gray-500">Δz</span><span>{(metrics.dz * 100).toFixed(1)} cm</span></div>
+                            <div className="flex justify-between text-xs"><span className="text-gray-500">v_z</span><span>{(metrics.vzA * 1000).toFixed(0)} / {(metrics.vzB * 1000).toFixed(0)} mm/s</span></div>
+                            {metrics.approachV != null && (
+                                <div className="flex justify-between text-xs"><span className="text-gray-500">nadering</span><span>{(metrics.approachV * 1000).toFixed(1)} mm/s</span></div>
+                            )}
+                        </>
+                    )}
+                    <div className="flex justify-between text-xs mt-1"><span className="text-gray-500">t</span><span>{metrics.tPhys?.toFixed(1)} s</span></div>
+                </div>
+
+                <div className="glass-panel rounded-lg p-2">
+                    <canvas ref={sparkRef} width={320} height={72} className="w-full" />
+                </div>
+
+                <div className="text-[10px] text-gray-600 font-mono pb-2">Muis: draai & zoom · Ideal-knopen uit ideal_favorites.txt</div>
+            </div>
+
+            {/* Rechter kolom — alleen controls */}
+            <div id="ui-right">
+                <div className="glass-panel rounded-xl p-4 scroll-panel space-y-3 text-xs h-full">
+                        <div>
+                            <label className="text-gray-500 block mb-1">Aantal (N)</label>
+                            <div className="flex gap-1">
+                                <button className={"seg-btn " + (count === 1 ? "active" : "")} onClick={() => onCount(1)}>1 Centraal</button>
+                                <button className={"seg-btn " + (count === 2 ? "active" : "")} onClick={() => onCount(2)}>2 Botsing</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-gray-500 block mb-1">Topologie</label>
+                            <div className="flex gap-1 flex-wrap">
+                                {[["ring","Ring 0₁"],["trefoil","Trefoil 3₁"],["ideal","Ideal knot"]].map(([t,l]) => (
+                                    <button key={t} className={"seg-btn " + (topology === t ? "active" : "")} onClick={() => onTopology(t)}>{l}</button>
+                                ))}
+                            </div>
+                        </div>
+                        {topology === "ideal" && (
+                            <div>
+                                <label className="text-gray-500 block mb-1">Ideal knoop</label>
+                                <select value={knotId} onChange={e => onKnotChange(e.target.value)}>
+                                    {(window.IDEAL_KNOT_IDS || []).map(id => {
+                                        const k = window.IDEAL_KNOT_DB[id];
+                                        return <option key={id} value={id}>{id}{k?.conway ? " · " + k.conway : ""}{k?.components?.length > 1 ? " [" + k.components.length + " comp]" : ""}</option>;
+                                    })}
+                                </select>
+                            </div>
+                        )}
+                        {multiComp && (
+                            <div className="flex gap-2">
+                                <div className="flex-1"><label className="text-gray-500">comp A</label>
+                                    <select value={compA} onChange={e => { setCompA(+e.target.value); phy.P.compA = +e.target.value; reset(); }}>
+                                        {knot.components.map((_, i) => <option key={i} value={i+1}>comp {i+1}</option>)}
+                                    </select></div>
+                                <div className="flex-1"><label className="text-gray-500">comp B</label>
+                                    <select value={compB} onChange={e => { setCompB(+e.target.value); phy.P.compB = +e.target.value; reset(); }}>
+                                        {knot.components.map((_, i) => <option key={i} value={i+1}>comp {i+1}</option>)}
+                                    </select></div>
+                            </div>
+                        )}
+                        <div>
+                            <label className="text-gray-500 block mb-1">Kwaliteit {qualEnabled ? "" : "(alleen knoop)"}</label>
+                            <div className="flex gap-1">
+                                {[["low","Laag"],["medium","Med"],["high","Hoog"]].map(([q,l]) => (
+                                    <button key={q} disabled={!qualEnabled} className={"seg-btn " + (quality === q ? "active" : "")} onClick={() => onQuality(q)}>{l}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-gray-500 block mb-1">Kernstructuur</label>
+                            <div className="flex gap-1">
+                                <button className={"seg-btn " + (coreModel === "solid" ? "active" : "")} onClick={() => { setCoreModel("solid"); phy.P.coreModel = "solid"; SSTScene.onCoreModelChange(); }}>Vast</button>
+                                <button className={"seg-btn " + (coreModel === "hollow" ? "active" : "")} onClick={() => { setCoreModel("hollow"); phy.P.coreModel = "hollow"; SSTScene.onCoreModelChange(); }}>Hol</button>
+                            </div>
+                        </div>
+
+                        <div><label className="flex justify-between text-gray-500 mb-1"><span>Ω</span><span className="text-white">{fmtOmSlider(Om)}</span></label>
+                            <input type="range" min="-2" max="2" step="0.05" value={Om} onChange={e => setOm(+e.target.value)} /></div>
+
+                        <div><label className="flex justify-between text-gray-500 mb-1"><span>|Γ| ×10⁻³</span><span className="text-white">{fmtGaSlider(gaSlider)}</span></label>
+                            <input type="range" min="0" max="50" step="0.5" value={gaSlider} onChange={e => setGaSlider(+e.target.value)} /></div>
+
+                        <div className="flex gap-3">
+                            {count >= 1 && <label className="flex items-center gap-1 text-gray-400"><input type="checkbox" checked={ccwA} onChange={e => { setCcwA(e.target.checked); phy.P.ccwA = e.target.checked; reset(); }} /> A CCW</label>}
+                            {count === 2 && <label className="flex items-center gap-1 text-gray-400"><input type="checkbox" checked={ccwB} onChange={e => { setCcwB(e.target.checked); phy.P.ccwB = e.target.checked; reset(); }} /> B CCW</label>}
+                        </div>
+
+                        <div><label className="flex justify-between text-gray-500 mb-1"><span>a kernstraal</span><span>{aSlider.toFixed(1)} mm</span></label>
+                            <input type="range" min="0.5" max="3" step="0.1" value={aSlider} onChange={e => setASlider(+e.target.value)} /></div>
+
+                        {count === 2 && (
+                            <>
+                                <div><label className="flex justify-between text-gray-500 mb-1"><span>Δx offset</span><span>{offSlider.toFixed(0)} mm</span></label>
+                                    <input type="range" min="-100" max="100" step="1" value={offSlider} onChange={e => setOffSlider(+e.target.value)} onMouseUp={reset} onTouchEnd={reset} /></div>
+                                <label className="flex items-center gap-2 text-gray-400"><input type="checkbox" checked={mirrorB} onChange={e => { setMirrorB(e.target.checked); phy.P.mirrorB = e.target.checked; reset(); }} /> Mirror B (−Δx)</label>
+                            </>
+                        )}
+
+                        <div><label className="flex justify-between text-gray-500 mb-1"><span>v_z A</span><span>{vzA.toFixed(0)} mm/s</span></label>
+                            <input type="range" min="-200" max="200" step="1" value={vzA} onChange={e => { const v = +e.target.value; setVzA(v); if (lockVz) setVzB(v); }} /></div>
+                        {count === 2 && (
+                            <div><label className="flex justify-between text-gray-500 mb-1"><span>v_z B</span><span>{vzB.toFixed(0)} mm/s</span></label>
+                                <input type="range" min="-200" max="200" step="1" value={vzB} disabled={lockVz} onChange={e => setVzB(+e.target.value)} /></div>
+                        )}
+                        <label className="flex items-center gap-2 text-gray-400"><input type="checkbox" checked={lockVz} onChange={e => { setLockVz(e.target.checked); if (e.target.checked) setVzB(vzA); }} /> z-snelheid A = B</label>
+
+                        <div><label className="flex justify-between text-gray-500 mb-1"><span>Tijdversnelling</span><span>{acc}×</span></label>
+                            <input type="range" min="1" max="60" step="1" value={acc} onChange={e => setAcc(+e.target.value)} /></div>
+
+                        <div className="flex gap-2 pt-2 flex-wrap">
+                            <button className="seg-btn px-3" onClick={() => setPaused(p => { phy.paused = !p; return !p; })}>{paused ? "Hervat" : "Pauzeer"}</button>
+                            <button className="seg-btn px-3" onClick={reset}>Reset</button>
+                            <button className="seg-btn px-3" onClick={() => { const nf = refFrame === "lab" ? "rotating" : "lab"; setRefFrame(nf); phy.refFrame = nf; }}>
+                                Kader: {refFrame === "lab" ? "Lab" : "Meebewegend"}
+                            </button>
+                        </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>

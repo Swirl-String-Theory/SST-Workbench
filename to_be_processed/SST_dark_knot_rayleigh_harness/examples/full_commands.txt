@@ -1,0 +1,28 @@
+# Full command examples — run from the package root.
+
+# Build C++ backend if pybind11 and compiler are available.
+python -m sst_dark_knot_harness.build_ext_if_needed
+python -m sst_dark_knot_harness.build_ext_if_needed --force
+python -m sst_dark_knot_harness.build_ext_if_needed --force --strict
+
+# Single 4_1 Rayleigh audit.
+python run_example.py --knot 4_1 --n 256 --omega 1.0 --epsilon-bs 1.0 --shell-dr 0.25 --shell-h 0.5 --summary-only
+
+# Single 3_1 control audit.
+python run_example.py --knot 3_1 --n 256 --omega 1.0 --epsilon-bs 1.0 --summary-only
+
+# Force Python fallback only.
+python run_example.py --knot 4_1 --force-python --summary-only
+
+# Smoke-only synthetic rocking/breathing response.
+python run_example.py --knot 4_1 --proxy-response-gain 0.02 --out smoke_proxy_4_1.json
+
+# Use actual relaxed response vertices.
+python run_example.py --knot 4_1 --input-csv V0_4_1.csv --vertices-plus Vplus_4_1.csv --vertices-minus Vminus_4_1.csv --out audit_4_1_real_response.json
+
+# Regularization sweep.
+python run_sweep.py --knots 3_1,4_1 --omegas 0.25,0.5,1.0 --epsilons 0.5,1.0,2.0 --n 256 --out-json sweep.json --out-csv sweep.csv
+
+# Full battery.
+python run_all_checks.py --out-dir audit_out
+python run_all_checks.py --out-dir audit_out_python --force-python
