@@ -1,0 +1,36 @@
+% ============================================================
+% make_trefoil_relaxed.kps
+% Standalone KnotPlot script for SST trefoil intake.
+%
+% Run interactively:
+%   < make_trefoil_relaxed.kps
+%
+% Run batch from a project folder:
+%   knotplot -nog < make_trefoil_relaxed.kps
+%
+% Outputs:
+%   knots/knot_3.1/knot_3.1_relaxed.txt
+%   knots/knot_3.1/knot_3.1_relaxed.eps
+% ============================================================
+
+silent = false
+
+alias sstbase "mode cb; elecforce = OFF; stusplit = 0; dstep = 1; close = 0.20; max-dr = 0.02"
+alias ssttopo "safe; dowker; gauss"
+alias sstgeom "length; distance; angle; acn"
+alias sstreport "safe; dowker; gauss; length; distance; angle; acn"
+
+reset all
+load 3.1
+sstbase
+split; split; split; split; split; split; split; split;
+fitto avlength 0.5
+sstreport
+
+% Atomic relaxation is preferred in scripts.
+ago 1000
+centre
+sstreport
+
+save knots/knot_3.1/knot_3.1_relaxed.txt
+psout knots/knot_3.1/knot_3.1_relaxed

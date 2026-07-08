@@ -1,0 +1,171 @@
+--- sst_v0_8_17_verification_suite.py
++++ sst_v0_8_19_verification_suite_impedance_patched.py
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
+ """
+-sst_v0_8_17_verification_suite.py
++sst_v0_8_19_verification_suite.py
+ =================================
+ Consolidated, single-file numerical verification suite for the
+-**Swirl-String Theory (SST) Canon v0.8.17-compatible**.
++**Swirl-String Theory (SST) Canon v0.8.19-compatible**.
+ 
+ It bundles, into one runnable file, every claim that can be *honestly* checked
+ in seconds on a laptop (numpy only): the deterministic constants / calibrated
+@@ -20,20 +20,21 @@
+     the alpha section is ain OBSTRUCTION ledger, NOT a derivation of alpha.
+   * Heavy torch sweeps (N=32000) are NOT bundled; the light versions reproduce
+     the same limits and say so.
+-  * This v0.8.17-compatible port keeps the numerical claim suite unchanged;
+-    the v0.8.17 update is a textual/status patch layer, not a new constants chain.
++  * This v0.8.19-compatible port keeps the numerical claim suite unchanged;
++    the v0.8.19 update is a textual/status patch layer, not a new constants chain.
+ 
+ Provenance of recovered algorithms (from prior project chats):
+   * gauss_linking / torus framing  -> chat 840c733d
+   * Biot-Savart E_bs / A_K plateau  -> chat fc5e123d
+   * alpha obstruction numbers       -> chat f4172ebc (finite_cell_obstruction)
+   * Onsager T_KT                    -> chat fc5e123d (SST-15 complement)
++  * Route-I heat split / impedance  -> SST_CANON-v0.8.19 research-track patch
+ 
+ Usage:
+-  python3 sst_v0_8_17_verification_suite.py            # run all sections
+-  python3 sst_v0_8_17_verification_suite.py --list     # list sections
+-  python3 sst_v0_8_17_verification_suite.py --only constants topology
+-  python3 sst_v0_8_17_verification_suite.py --json out.json
++  python3 sst_v0_8_19_verification_suite.py            # run all sections
++  python3 sst_v0_8_19_verification_suite.py --list     # list sections
++  python3 sst_v0_8_19_verification_suite.py --only constants topology
++  python3 sst_v0_8_19_verification_suite.py --json out.json
+ """
+ 
+ import math
+@@ -326,6 +327,60 @@
+ 
+ 
+ # ===========================================================================
++# SECTION: impedance_matching  -- Route-I heat split + core-torsion residual
++# v0.8.19 research-track protocol, NOT a derivation of M_torsion[K].
++# Verifies only algebraic guardrails that can be checked without a PDE solver:
++#   (i)  c/vchar = 274.0719986 wrong-speed Unruh factor;
++#   (ii) a Kelvin-normalized inertial tensor gives chi = (c/vchar)^2;
++#   (iii) the canonical target tensor gives chi = 1 by definition.
++# A real SSTcore torsion solver must replace M_target below by computed data.
++# ===========================================================================
++def sec_impedance_matching(S):
++    header("SECTION impedance_matching  -- Route-I heat split and core-torsion residual")
++    if not HAVE_NUMPY:
++        S.note("RT-Bridge", "[SKIP]", "numpy required for tensor residual audit")
++        return
++
++    wrong_unruh_factor = C / VCHAR
++    S.check("RT-I", "Route-I sector guard", "[RESEARCH-TRACK]",
++            "T_vchar/T_c = c/vchar wrong-speed Unruh factor",
++            wrong_unruh_factor, 274.0719986, rel_tol=5e-9)
++
++    cs = VCHAR / math.sqrt(2.0)
++    S.note("RT-I", "[GUARD]",
++           f"core sound diagnostic c_s=vchar/sqrt(2)={cs:.8e} m/s; "
++           "not eligible as the Jacobson/Unruh causal speed")
++
++    # Protocol benchmark: electron rest energy used only as a neutral E0 scale.
++    # This is not a computed knot tensor; it is a normalization sanity check for
++    # M_torsion[K] ?= (2E0[K]/c_T^2) I in the current research-track convention.
++    E0_K = M_E * C**2
++    lambda_target = 2.0 * E0_K / C**2
++    M_target = np.eye(3) * lambda_target
++    lambda_iso = float(np.trace(M_target) / 3.0)
++    chi_target = (C**2 / (2.0 * E0_K)) * lambda_iso
++    S.check("RT-Bridge", "eq:rt_core_torsion_matching_lemma", "[PROTOCOL]",
++            "target tensor M=(2E0/c^2)I gives chi_K^(T)=1 by normalization",
++            chi_target, 1.0, rel_tol=1e-12)
++
++    # Wrong-sector falsifier: if a Kelvin-normalized tensor is tested on the
++    # torsion/horizon cone, the residual is (c/vchar)^2, not 1.
++    M_kelvin_target = np.eye(3) * (2.0 * E0_K / VCHAR**2)
++    lambda_kelvin = float(np.trace(M_kelvin_target) / 3.0)
++    chi_kelvin_as_torsion = (C**2 / (2.0 * E0_K)) * lambda_kelvin
++    S.check("RT-Bridge", "wrong-speed residual guard", "[FALSIFIER]",
++            "Kelvin-normalized inertia tested on c_T=c gives chi=(c/vchar)^2",
++            chi_kelvin_as_torsion, (C/VCHAR)**2, rel_tol=1e-12)
++    S.check_max("RT-Bridge", "wrong-speed residual guard", "[FALSIFIER]",
++                "wrong-speed residual is far outside unity tolerance (1/chi <= 1e-4)",
++                1.0/chi_kelvin_as_torsion, 1e-4)
++
++    S.note("RT-Bridge", "[OPEN]",
++           "This section does not compute M_torsion[K]. A real solver must report "
++           "E0[K], the three eigenvalues of the torsion-dressed tensor, chi_K^(T), "
++           "anisotropy max|lambda_i/lambda_iso-1|, and a K_T stiffness sweep at c_T=c.")
++
++# ===========================================================================
+ # SECTION: delay  (claim 26) -- DDE mode condition, current SSTcore aligned
+ # ===========================================================================
+ def sec_delay(S):
+@@ -362,7 +417,7 @@
+     # Historical audit issue only: the old plus-sign residual was
+     # Omega - omega0 - kappa sin(Omega tau), which is not the current v0.8.12 form.
+     S.note(26, "[STATUS]",
+-           "Current SSTcore v0.8.12/v0.8.17-compatible delay residual and Newton derivative are aligned with Canon; "
++           "Current SSTcore v0.8.12/v0.8.19-compatible delay residual and Newton derivative are aligned with Canon; "
+            "old plus-sign mismatch is retained only as historical audit context.")
+ 
+ 
+@@ -393,11 +448,11 @@
+ # SECTION: sstcore_alignment  -- mirror the ACTUAL C++ code formulas and
+ # assert code == canon, in one run. Mirrors:
+ #   canonical_constants.cpp, sst_tension_scales.cpp, sst_gravity.h,
+-#   chronos_kelvin_transport.cpp  (SSTcore v0.8.12/v0.8.17-compatible, after patch 0003 CODATA-2018).
++#   chronos_kelvin_transport.cpp  (SSTcore v0.8.12/v0.8.19-compatible, after patch 0003 CODATA-2018).
+ # Each check: got = code-form value, expected = canon-form value.
+ # ===========================================================================
+ def sec_sstcore_alignment(S):
+-    header("SECTION sstcore_alignment  -- SSTcore v0.8.12/v0.8.17-compatible C++ formulas vs canon")
++    header("SECTION sstcore_alignment  -- SSTcore v0.8.12/v0.8.19-compatible C++ formulas vs canon")
+ 
+     # inputs as the C++ receives them: v_swirl is passed in (= alpha c/2 calibration)
+     v = VCHAR
+@@ -484,7 +539,7 @@
+ 
+ # ===========================================================================
+ # SECTION: pauli  (claim 38) -- hydrodynamic exchange / Pauli benchmark
+-# Mirrors AtomicBridgeModel::pauli_barrier_scale (SSTcore v0.8.12/v0.8.17-compatible).
++# Mirrors AtomicBridgeModel::pauli_barrier_scale (SSTcore v0.8.12/v0.8.19-compatible).
+ # [CALIBRATED BENCHMARK], not a derived theorem.
+ # ===========================================================================
+ def sec_pauli(S):
+@@ -595,6 +650,7 @@
+     "topology":   sec_topology,
+     "biotsavart": sec_biotsavart,
+     "onsager":    sec_onsager,
++    "impedance_matching": sec_impedance_matching,
+     "delay":      sec_delay,
+     "alpha":      sec_alpha,
+     "pauli":      sec_pauli,
+@@ -623,13 +679,16 @@
+                  SPARC dataset is bundled and r_s is fitted, not derived
+                  (coherence-length lemma OPEN).
+   NOW REPRODUCED (standalone scripts + suite sections):
++    Route-I     section 'impedance_matching' adds the v0.8.19 heat-sector guard
++                 and chi_K^(T) protocol check; it is a normalization/falsifier
++                 audit, not a PDE-level M_torsion[K] solver.
+     claim 38     reproduce_pauli_barrier.py  + section 'pauli'  [CALIBRATED BENCHMARK]
+     claim 61/67  reproduce_em_qed_normalization.py + section 'em_qed'
+                  (correct prefactor m_e/e; B_core=B_QED=4.414e9 T)
+ """
+ 
+ def main():
+-    ap = argparse.ArgumentParser(description="SST Canon v0.8.17-compatible verification suite")
++    ap = argparse.ArgumentParser(description="SST Canon v0.8.19-compatible verification suite")
+     ap.add_argument("--list", action="store_true", help="list sections and exit")
+     ap.add_argument("--only", nargs="+", metavar="SEC", help="run only these sections")
+     ap.add_argument("--json", metavar="FILE", help="write machine-readable results")
+@@ -644,7 +703,7 @@
+         print("Unknown section(s):", bad, "\nAvailable:", ", ".join(SECTIONS)); sys.exit(2)
+ 
+     print("#"*78)
+-    print("# SST Canon v0.8.17-compatible -- consolidated claim verification suite")
++    print("# SST Canon v0.8.19-compatible -- consolidated claim verification suite")
+     print("# numpy:", "yes" if HAVE_NUMPY else "NO (topology/biotsavart skipped)")
+     print("#"*78)
+ 

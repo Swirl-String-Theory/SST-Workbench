@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST Tri-Vortex Simulator</title>
+    
+    <!-- Tailwind CSS voor styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel voor het lezen van de JSX code in de browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #171717; color: #f3f4f6; margin: 0; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function App() {
+            // Initiële state
+            const [a, setA] = useState(5);
+            const [b, setB] = useState(6);
+            const [c, setC] = useState(7);
+            const [omega, setOmega] = useState(1.0);
+
+            // Controleer of de driehoek geldig is (Driehoeks-ongelijkheid)
+            const isValid = a + b > c && a + c > b && b + c > a;
+
+            // Wiskundige berekeningen
+            const { x, h, area, gamma } = useMemo(() => {
+                if (!isValid) return { x: 0, h: 0, area: 0, gamma: 0 };
+                
+                // x = (a^2 - b^2 + c^2) / 2c
+                const calcX = (a * a - b * b + c * c) / (2 * c);
+                
+                // h = sqrt(a^2 - x^2)
+                const hSquared = a * a - calcX * calcX;
+                const calcH = hSquared > 0 ? Math.sqrt(hSquared) : 0;
+                
+                // Flux Oppervlakte A = 0.5 * c * h
+                const calcArea = 0.5 * c * calcH;
+                
+                // SST Circulatie Γ ≈ ω * A
+                const calcGamma = omega * calcArea;
+
+                return { x: calcX, h: calcH, area: calcArea, gamma: calcGamma };
+            }, [a, b, c, omega, isValid]);
+
+            // --- SVG Schaling & Viewport Logica ---
+            const svgWidth = 800;
+            const svgHeight = 400;
+            const padding = 50;
+
+            const minXMath = Math.min(0, x);
+            const maxXMath = Math.max(c, x);
+            const mathWidth = maxXMath - minXMath;
+            const mathHeight = h;
+
+            const scale = isValid && mathWidth > 0 && mathHeight > 0 
+                ? Math.min((svgWidth - 2 * padding) / mathWidth, (svgHeight - 2 * padding) / mathHeight) 
+                : 1;
+
+            const offsetX = (svgWidth - mathWidth * scale) / 2 - minXMath * scale;
+            const offsetY = (svgHeight + mathHeight * scale) / 2;
+
+            const ptA = { cx: offsetX, cy: offsetY };
+            const ptB = { cx: offsetX + c * scale, cy: offsetY };
+            const ptC = { cx: offsetX + x * scale, cy: offsetY - h * scale };
+            const ptProj = { cx: offsetX + x * scale, cy: offsetY };
+
+            const centroid = {
+                cx: offsetX + ((0 + c + x) / 3) * scale,
+                cy: offsetY - ((0 + 0 + h) / 3) * scale
+            };
+
+            return (
+                <div className="min-h-screen p-6 font-sans flex flex-col items-center">
+                    <div className="w-full max-w-5xl space-y-6">
+                        
+                        {/* Header */}
+                        <div>
+                            <h1 className="text-3xl font-bold text-cyan-400">SST Flux & Driehoeks-Geometrie</h1>
+                            <p className="text-gray-400 mt-2">
+                                Visuele mapping van wiskundige coherentiepaden (zijden) naar hydrodynamische flux.
+                            </p>
+                        </div>
+
+                        {/* Visualisatie Canvas */}
+                        <div className="relative w-full aspect-[2/1] bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
+                            {!isValid ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-red-500 font-medium text-lg px-4 py-2 bg-red-500/10 rounded-lg">
+                                        Fysisch ongeldige paden (driehoeks-ongelijkheid geschonden). Het fluïdum scheurt.
+                                    </span>
+                                </div>
+                            ) : (
+                                <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-full">
+                                    <defs>
+                                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#grid)" />
+
+                                    <polygon 
+                                        points={`${ptA.cx},${ptA.cy} ${ptB.cx},${ptB.cy} ${ptC.cx},${ptC.cy}`}
+                                        fill="rgba(34, 211, 238, 0.05)"
+                                        stroke="none"
+                                    />
+
+                                    <line 
+                                        x1={ptC.cx} y1={ptC.cy} x2={ptProj.cx} y2={ptProj.cy} 
+                                        stroke="#ec4899" strokeWidth="2" strokeDasharray="6,6"
+                                    />
+                                    
+                                    <polyline 
+                                        points={`${ptProj.cx},${ptProj.cy - 12} ${ptProj.cx > ptA.cx ? ptProj.cx - 12 : ptProj.cx + 12},${ptProj.cy - 12} ${ptProj.cx > ptA.cx ? ptProj.cx - 12 : ptProj.cx + 12},${ptProj.cy}`}
+                                        stroke="#ec4899" strokeWidth="1.5" fill="none" opacity="0.6"
+                                    />
+
+                                    <line x1={ptA.cx} y1={ptA.cy} x2={ptC.cx} y2={ptC.cy} stroke="#22d3ee" strokeWidth="3" />
+                                    <line x1={ptB.cx} y1={ptB.cy} x2={ptC.cx} y2={ptC.cy} stroke="#22d3ee" strokeWidth="3" />
+                                    <line x1={ptA.cx} y1={ptA.cy} x2={ptB.cx} y2={ptB.cy} stroke="#cbd5e1" strokeWidth="4" />
+
+                                    <line 
+                                        x1={ptA.cx} y1={ptA.cy + 15} x2={ptProj.cx} y2={ptProj.cy + 15} 
+                                        stroke="#facc15" strokeWidth="2"
+                                    />
+
+                                    <circle cx={ptA.cx} cy={ptA.cy} r="5" fill="#fff" />
+                                    <circle cx={ptB.cx} cy={ptB.cy} r="5" fill="#fff" />
+                                    <circle cx={ptC.cx} cy={ptC.cy} r="5" fill="#22d3ee" />
+                                    <circle cx={ptProj.cx} cy={ptProj.cy} r="4" fill="#ec4899" />
+
+                                    <g style={{ transformOrigin: `${centroid.cx}px ${centroid.cy}px`, animation: `spin ${5 / Math.max(0.1, omega)}s linear infinite` }}>
+                                        <circle 
+                                            cx={centroid.cx} cy={centroid.cy} 
+                                            r={Math.min(scale * h * 0.25, 100)} 
+                                            stroke="#a855f7" strokeWidth="2" strokeDasharray="8 8" fill="none" opacity="0.8"
+                                        />
+                                        <circle 
+                                            cx={centroid.cx} cy={centroid.cy} 
+                                            r={Math.min(scale * h * 0.15, 60)} 
+                                            stroke="#22d3ee" strokeWidth="3" strokeDasharray="4 6" fill="none" opacity="0.8"
+                                        />
+                                        <circle cx={centroid.cx} cy={centroid.cy} r="2" fill="#a855f7" />
+                                    </g>
+
+                                    <text x={ptA.cx / 2 + ptC.cx / 2 - 20} y={ptA.cy / 2 + ptC.cy / 2 - 10} fill="#22d3ee" fontSize="14" fontWeight="bold">a</text>
+                                    <text x={ptB.cx / 2 + ptC.cx / 2 + 10} y={ptB.cy / 2 + ptC.cy / 2 - 10} fill="#22d3ee" fontSize="14" fontWeight="bold">b</text>
+                                    <text x={ptA.cx / 2 + ptB.cx / 2} y={ptA.cy + 35} fill="#cbd5e1" fontSize="14" fontWeight="bold" textAnchor="middle">c = {c}</text>
+                                    <text x={ptA.cx / 2 + ptProj.cx / 2} y={ptA.cy + 30} fill="#facc15" fontSize="12" fontWeight="bold" textAnchor="middle">x</text>
+                                    <text x={ptProj.cx + 10} y={ptProj.cy / 2 + ptC.cy / 2} fill="#ec4899" fontSize="14" fontWeight="bold">h</text>
+                                </svg>
+                            )}
+                        </div>
+
+                        {/* Real-time Data Readouts */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-neutral-900 border border-neutral-700 p-4 rounded-lg text-center">
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Projectiepunt (x)</p>
+                                <p className="text-2xl font-mono text-yellow-400">{x.toFixed(3)}</p>
+                            </div>
+                            <div className="bg-neutral-900 border border-neutral-700 p-4 rounded-lg text-center">
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Hoogte (h)</p>
+                                <p className="text-2xl font-mono text-pink-500">{h.toFixed(3)}</p>
+                            </div>
+                            <div className="bg-neutral-900 border border-neutral-700 p-4 rounded-lg text-center">
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Flux Opp. (A)</p>
+                                <p className="text-2xl font-mono text-cyan-400">{area.toFixed(3)}</p>
+                            </div>
+                            <div className="bg-neutral-900 border border-neutral-700 p-4 rounded-lg text-center">
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">SST Circulatie (Γ)</p>
+                                <p className="text-2xl font-mono text-purple-500">{gamma.toFixed(3)}</p>
+                            </div>
+                        </div>
+
+                        {/* Sliders (Controls) */}
+                        <div className="bg-neutral-900 border border-neutral-700 p-6 rounded-lg space-y-6">
+                            <div className="flex items-center space-x-4">
+                                <label className="w-48 text-sm font-medium text-cyan-400">Coherentiepad a</label>
+                                <input 
+                                    type="range" min="1" max="20" step="0.1" value={a} onChange={(e) => setA(parseFloat(e.target.value))}
+                                    className="w-full accent-cyan-500"
+                                />
+                                <span className="w-12 text-right font-mono">{a}</span>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <label className="w-48 text-sm font-medium text-cyan-400">Coherentiepad b</label>
+                                <input 
+                                    type="range" min="1" max="20" step="0.1" value={b} onChange={(e) => setB(parseFloat(e.target.value))}
+                                    className="w-full accent-cyan-500"
+                                />
+                                <span className="w-12 text-right font-mono">{b}</span>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <label className="w-48 text-sm font-medium text-slate-300">Basis c</label>
+                                <input 
+                                    type="range" min="1" max="20" step="0.1" value={c} onChange={(e) => setC(parseFloat(e.target.value))}
+                                    className="w-full accent-slate-400"
+                                />
+                                <span className="w-12 text-right font-mono">{c}</span>
+                            </div>
+
+                            <div className="pt-4 border-t border-neutral-800 flex items-center space-x-4">
+                                <label className="w-48 text-sm font-medium text-purple-400">Lokale Vorticiteit (ω)</label>
+                                <input 
+                                    type="range" min="0.1" max="5.0" step="0.1" value={omega} onChange={(e) => setOmega(parseFloat(e.target.value))}
+                                    className="w-full accent-purple-500"
+                                />
+                                <span className="w-12 text-right font-mono">{omega.toFixed(1)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

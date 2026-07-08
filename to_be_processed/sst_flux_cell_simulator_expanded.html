@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SST Flux Cell Simulator — Triangle / Hexagon / Icosahedron</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root { color-scheme: dark; }
+    body { background: #0a0a0a; color: #f3f4f6; margin: 0; }
+    input[type="range"] { cursor: pointer; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes pulseGlow { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+    .glass { background: rgba(23,23,23,.82); backdrop-filter: blur(10px); }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // ============================
+    // SST canonical constants
+    // ============================
+    const C_LIGHT = 2.99792458e8;                         // m s^-1
+    const V_SWIRL = 1.09384563e6;                         // m s^-1
+    const R_C = 1.40897017e-15;                           // m
+    const R_E = 2 * R_C;                                  // m, classical electron radius in SST convention
+    const RHO_F = 7.0e-7;                                 // kg m^-3
+    const A0 = Math.PI * R_C * R_C;                       // m^2
+    const GAMMA0 = 2 * Math.PI * R_C * V_SWIRL;           // m^2 s^-1
+    const OMEGA_CORE = V_SWIRL / R_C;                     // s^-1
+    const OMEGA_VORT_CORE = 2 * V_SWIRL / R_C;            // s^-1, rigid-core vorticity estimate
+    const PHI = (1 + Math.sqrt(5)) / 2;
+
+    const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+    const sq = x => x * x;
+    const rad = deg => deg * Math.PI / 180;
+    const abs = Math.abs;
+
+    function fmt(x, digits = 4) {
+      if (!Number.isFinite(x)) return "—";
+      return x.toLocaleString("nl-NL", { maximumFractionDigits: digits, minimumFractionDigits: 0 });
+    }
+
+    function sci(x, digits = 5, unit = "") {
+      if (!Number.isFinite(x)) return "—";
+      if (x === 0) return `0${unit ? " " + unit : ""}`;
+      return `${x.toExponential(digits).replace("e", "×10^")}${unit ? " " + unit : ""}`;
+    }
+
+    function pct(x, digits = 3) {
+      if (!Number.isFinite(x)) return "—";
+      return `${(100 * x).toFixed(digits)}%`;
+    }
+
+    function triangleAreaBySides(a, b, c) {
+      const valid = a + b > c && a + c > b && b + c > a;
+      if (!valid) return { valid: false, s: 0, area: 0, x: 0, h: 0, degeneracy: 0 };
+      const s = (a + b + c) / 2;
+      const area2 = Math.max(0, s * (s - a) * (s - b) * (s - c));
+      const area = Math.sqrt(area2);
+      const x = (a * a - b * b + c * c) / (2 * c);
+      const h2 = Math.max(0, a * a - x * x);
+      const h = Math.sqrt(h2);
+      const degeneracy = area / (Math.PI * Math.max(a, b, c) * Math.max(a, b, c));
+      return { valid, s, area, x, h, degeneracy };
+    }
+
+    function regularTriangleArea(side) {
+      return Math.sqrt(3) * side * side / 4;
+    }
+
+    function regularHexArea(side) {
+      return 3 * Math.sqrt(3) * side * side / 2;
+    }
+
+    function icoRadii(side) {
+      const circum = side * Math.sqrt(10 + 2 * Math.sqrt(5)) / 4;
+      const inradius = side * Math.sqrt(3) * (3 + Math.sqrt(5)) / 12;
+      const midradius = side * (1 + Math.sqrt(5)) / 4;
+      return { circum, inradius, midradius };
+    }
+
+    function vecAdd(a,b){ return [a[0]+b[0], a[1]+b[1], a[2]+b[2]]; }
+    function vecSub(a,b){ return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+    function vecScale(a,s){ return [a[0]*s, a[1]*s, a[2]*s]; }
+    function vecDot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
+    function vecCross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+    function vecNorm(a){ return Math.sqrt(vecDot(a,a)); }
+    function vecUnit(a){ const n = vecNorm(a) || 1; return vecScale(a, 1/n); }
+
+    const icoVertsRaw = [
+      [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
+      [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
+      [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1]
+    ];
+    const icoFaces = [
+      [0,11,5], [0,5,1], [0,1,7], [0,7,10], [0,10,11],
+      [1,5,9], [5,11,4], [11,10,2], [10,7,6], [7,1,8],
+      [3,9,4], [3,4,2], [3,2,6], [3,6,8], [3,8,9],
+      [4,9,5], [2,4,11], [6,2,10], [8,6,7], [9,8,1]
+    ];
+
+    function rotatePoint(p, yawDeg, pitchDeg) {
+      const y = rad(yawDeg), x = rad(pitchDeg);
+      const cy = Math.cos(y), sy = Math.sin(y);
+      const cx = Math.cos(x), sx = Math.sin(x);
+      const x1 = cy * p[0] + sy * p[2];
+      const z1 = -sy * p[0] + cy * p[2];
+      const y1 = p[1];
+      const y2 = cx * y1 - sx * z1;
+      const z2 = sx * y1 + cx * z1;
+      return [x1, y2, z2];
+    }
+
+    function faceNormal(verts, f) {
+      const a = verts[f[0]], b = verts[f[1]], c = verts[f[2]];
+      const n = vecCross(vecSub(b,a), vecSub(c,a));
+      const centroid = vecScale(vecAdd(vecAdd(a,b),c), 1/3);
+      const u = vecUnit(n);
+      // Ensure outward orientation by comparing to centroid direction.
+      return vecDot(u, centroid) < 0 ? vecScale(u, -1) : u;
+    }
+
+    function SectionCard({ title, children, accent = "cyan" }) {
+      const color = accent === "purple" ? "text-purple-300 border-purple-500/40" : accent === "yellow" ? "text-yellow-300 border-yellow-500/40" : accent === "emerald" ? "text-emerald-300 border-emerald-500/40" : "text-cyan-300 border-cyan-500/40";
+      return (
+        <div className={`glass border ${color.split(" ")[1]} rounded-xl p-5 shadow-xl`}>
+          <h2 className={`font-bold text-lg mb-3 ${color.split(" ")[0]}`}>{title}</h2>
+          {children}
+        </div>
+      );
+    }
+
+    function Stat({ label, value, sub, tone = "cyan" }) {
+      const tones = {
+        cyan: "text-cyan-300 border-cyan-500/25 bg-cyan-500/5",
+        purple: "text-purple-300 border-purple-500/25 bg-purple-500/5",
+        yellow: "text-yellow-300 border-yellow-500/25 bg-yellow-500/5",
+        emerald: "text-emerald-300 border-emerald-500/25 bg-emerald-500/5",
+        red: "text-red-300 border-red-500/25 bg-red-500/5",
+        slate: "text-slate-200 border-slate-500/25 bg-slate-500/5"
+      };
+      return (
+        <div className={`rounded-lg border p-3 ${tones[tone] || tones.cyan}`}>
+          <div className="text-[11px] uppercase tracking-widest text-gray-400 font-bold">{label}</div>
+          <div className={`mono text-lg md:text-xl font-semibold ${tones[tone].split(" ")[0]}`}>{value}</div>
+          {sub && <div className="text-xs text-gray-500 mt-1">{sub}</div>}
+        </div>
+      );
+    }
+
+    function Slider({ label, value, min, max, step, onChange, suffix = "", tone = "cyan" }) {
+      const accents = {
+        cyan: "accent-cyan-500 text-cyan-300",
+        purple: "accent-purple-500 text-purple-300",
+        yellow: "accent-yellow-500 text-yellow-300",
+        emerald: "accent-emerald-500 text-emerald-300",
+        slate: "accent-slate-400 text-slate-300"
+      };
+      const cls = accents[tone] || accents.cyan;
+      return (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <label className={`sm:w-56 text-sm font-medium ${cls.split(" ")[1]}`}>{label}</label>
+          <input className={`w-full ${cls.split(" ")[0]}`} type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} />
+          <span className="mono sm:w-28 text-right text-sm text-gray-200">{fmt(value, 5)}{suffix}</span>
+        </div>
+      );
+    }
+
+    function Formula({ children }) {
+      return <pre className="overflow-x-auto rounded-lg bg-black/40 border border-neutral-800 p-3 text-sm text-gray-200 leading-relaxed">{children}</pre>;
+    }
+
+    function ModeButton({ active, onClick, children }) {
+      return (
+        <button onClick={onClick} className={`px-4 py-2 rounded-lg border text-sm font-bold transition ${active ? "bg-cyan-500/15 border-cyan-400 text-cyan-200" : "bg-neutral-900 border-neutral-700 text-gray-400 hover:border-neutral-500"}`}>
+          {children}
+        </button>
+      );
+    }
+
+    function TriangleSvg({ a, b, c, geom, omegaMultiplier }) {
+      const svgWidth = 900, svgHeight = 470, padding = 70;
+      if (!geom.valid) {
+        return <div className="h-[420px] flex items-center justify-center text-red-300 bg-red-950/20 rounded-xl border border-red-500/30">Geometrisch ongeldig: driehoeksongelijkheid geschonden.</div>;
+      }
+      const { x, h } = geom;
+      const minXMath = Math.min(0, x), maxXMath = Math.max(c, x);
+      const mathWidth = Math.max(0.001, maxXMath - minXMath);
+      const mathHeight = Math.max(0.001, h);
+      const scale = Math.min((svgWidth - 2 * padding) / mathWidth, (svgHeight - 2 * padding) / mathHeight);
+      const offsetX = (svgWidth - mathWidth * scale) / 2 - minXMath * scale;
+      const offsetY = (svgHeight + mathHeight * scale) / 2;
+      const ptA = { x: offsetX, y: offsetY };
+      const ptB = { x: offsetX + c * scale, y: offsetY };
+      const ptC = { x: offsetX + x * scale, y: offsetY - h * scale };
+      const ptP = { x: offsetX + x * scale, y: offsetY };
+      const centroid = { x: (ptA.x + ptB.x + ptC.x) / 3, y: (ptA.y + ptB.y + ptC.y) / 3 };
+      const spinPeriod = `${clamp(5 / Math.max(0.05, omegaMultiplier), .8, 20)}s`;
+      return (
+        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full rounded-xl bg-neutral-950 border border-neutral-800">
+          <defs>
+            <pattern id="gridTri" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            </pattern>
+            <radialGradient id="triGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(168,85,247,.45)" />
+              <stop offset="100%" stopColor="rgba(34,211,238,.02)" />
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#gridTri)" />
+          <polygon points={`${ptA.x},${ptA.y} ${ptB.x},${ptB.y} ${ptC.x},${ptC.y}`} fill="rgba(34,211,238,.08)" stroke="rgba(34,211,238,.18)" strokeWidth="2" />
+          <line x1={ptC.x} y1={ptC.y} x2={ptP.x} y2={ptP.y} stroke="#ec4899" strokeWidth="2" strokeDasharray="7,7" />
+          <line x1={ptA.x} y1={ptA.y} x2={ptC.x} y2={ptC.y} stroke="#22d3ee" strokeWidth="4" />
+          <line x1={ptB.x} y1={ptB.y} x2={ptC.x} y2={ptC.y} stroke="#22d3ee" strokeWidth="4" />
+          <line x1={ptA.x} y1={ptA.y} x2={ptB.x} y2={ptB.y} stroke="#cbd5e1" strokeWidth="5" />
+          <line x1={ptA.x} y1={ptA.y + 20} x2={ptP.x} y2={ptP.y + 20} stroke="#facc15" strokeWidth="2" />
+          <g style={{ transformOrigin: `${centroid.x}px ${centroid.y}px`, animation: `spin ${spinPeriod} linear infinite` }}>
+            <circle cx={centroid.x} cy={centroid.y} r={Math.min(120, Math.max(28, h * scale * .32))} fill="url(#triGlow)" stroke="#a855f7" strokeWidth="2" strokeDasharray="8 8" />
+            <circle cx={centroid.x} cy={centroid.y} r={Math.min(75, Math.max(18, h * scale * .20))} fill="none" stroke="#22d3ee" strokeWidth="3" strokeDasharray="5 7" />
+            <path d={`M ${centroid.x-30} ${centroid.y} C ${centroid.x-8} ${centroid.y-28}, ${centroid.x+25} ${centroid.y-10}, ${centroid.x+32} ${centroid.y-34}`} fill="none" stroke="#f0abfc" strokeWidth="2" opacity=".75" />
+          </g>
+          {[ptA, ptB, ptC, ptP].map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={i === 2 ? 6 : 5} fill={i === 2 ? "#22d3ee" : i === 3 ? "#ec4899" : "#fff"} />)}
+          <text x={(ptA.x + ptC.x)/2 - 22} y={(ptA.y + ptC.y)/2 - 12} fill="#67e8f9" fontSize="16" fontWeight="bold">a</text>
+          <text x={(ptB.x + ptC.x)/2 + 14} y={(ptB.y + ptC.y)/2 - 12} fill="#67e8f9" fontSize="16" fontWeight="bold">b</text>
+          <text x={(ptA.x + ptB.x)/2} y={ptA.y + 42} fill="#e2e8f0" fontSize="16" fontWeight="bold" textAnchor="middle">c</text>
+          <text x={(ptA.x + ptP.x)/2} y={ptA.y + 38} fill="#facc15" fontSize="13" fontWeight="bold" textAnchor="middle">x</text>
+          <text x={ptP.x + 12} y={(ptP.y + ptC.y)/2} fill="#f472b6" fontSize="16" fontWeight="bold">h</text>
+          <text x="25" y="35" fill="#94a3b8" fontSize="13">Triangular Stokes cell: Γ ≈ ω⊥ A△</text>
+        </svg>
+      );
+    }
+
+    function HexSvg({ sideK, omegaMultiplier, mode }) {
+      const W = 900, H = 470;
+      const cx = W/2, cy = H/2;
+      const R = 150;
+      const pts = Array.from({length: 6}, (_, i) => {
+        const ang = -Math.PI/6 + i * Math.PI/3;
+        return [cx + R * Math.cos(ang), cy + R * Math.sin(ang)];
+      });
+      const spinPeriod = `${clamp(5 / Math.max(0.05, omegaMultiplier), .8, 20)}s`;
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl bg-neutral-950 border border-neutral-800">
+          <defs>
+            <pattern id="gridHex" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            </pattern>
+            <radialGradient id="hexGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(34,197,94,.35)" />
+              <stop offset="100%" stopColor="rgba(34,211,238,.02)" />
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#gridHex)" />
+          {pts.map((p, i) => {
+            const q = pts[(i+1)%6];
+            return <polygon key={i} points={`${cx},${cy} ${p[0]},${p[1]} ${q[0]},${q[1]}`} fill={i%2 ? "rgba(34,211,238,.08)" : "rgba(34,197,94,.08)"} stroke="rgba(255,255,255,.08)" strokeWidth="1" />;
+          })}
+          <polygon points={pts.map(p => `${p[0]},${p[1]}`).join(" ")} fill="url(#hexGlow)" stroke="#34d399" strokeWidth="4" />
+          {pts.map((p, i) => <line key={`r${i}`} x1={cx} y1={cy} x2={p[0]} y2={p[1]} stroke="rgba(255,255,255,.18)" strokeWidth="2" />)}
+          {pts.map((p, i) => <circle key={`p${i}`} cx={p[0]} cy={p[1]} r="5" fill="#d1fae5" />)}
+          <g style={{ transformOrigin: `${cx}px ${cy}px`, animation: `spin ${spinPeriod} linear infinite` }}>
+            <circle cx={cx} cy={cy} r="92" fill="none" stroke="#a855f7" strokeWidth="2" strokeDasharray="8 9" />
+            <circle cx={cx} cy={cy} r="55" fill="none" stroke="#22d3ee" strokeWidth="3" strokeDasharray="5 7" />
+            <path d={`M ${cx-65} ${cy} C ${cx-35} ${cy-45}, ${cx+42} ${cy-18}, ${cx+70} ${cy-60}`} fill="none" stroke="#f0abfc" strokeWidth="2" opacity=".75" />
+          </g>
+          <circle cx={cx} cy={cy} r="6" fill="#34d399" />
+          <text x="25" y="35" fill="#94a3b8" fontSize="13">Hexagonal packing cell: A⬡ = 6 A△ = (3√3/2) ℓ²</text>
+          <text x={cx} y={cy + R + 38} fill="#bbf7d0" fontSize="16" fontWeight="bold" textAnchor="middle">ℓ = {fmt(sideK,4)} r_c</text>
+          <text x="25" y="430" fill="#64748b" fontSize="12">Use as tube/cross-section packing diagnostic, not as independent mass law.</text>
+        </svg>
+      );
+    }
+
+    function IcoSvg({ sideK, omegaMultiplier, yaw, pitch, leak }) {
+      const W = 900, H = 470;
+      const cx = W/2, cy = H/2;
+      const scale = 105;
+      const verts = icoVertsRaw.map(p => rotatePoint(p, yaw, pitch));
+      const axis = vecUnit([0,0,1]);
+      const faceData = icoFaces.map((f, idx) => {
+        const n = faceNormal(verts, f);
+        const centroid = vecScale(vecAdd(vecAdd(verts[f[0]], verts[f[1]]), verts[f[2]]), 1/3);
+        const omegaNorm = vecDot(n, axis) + leak;
+        return { f, idx, n, centroid, depth: centroid[2], omegaNorm };
+      }).sort((a,b) => a.depth - b.depth);
+      const project = p => [cx + p[0] * scale, cy - p[1] * scale];
+      const colorFor = v => {
+        const t = clamp((v + 1.2) / 2.4, 0, 1);
+        const hue = 190 + 100 * t;
+        const alpha = 0.16 + 0.35 * Math.abs(v);
+        return `hsla(${hue}, 85%, 58%, ${clamp(alpha, .12, .52)})`;
+      };
+      const spinPeriod = `${clamp(5 / Math.max(0.05, omegaMultiplier), .8, 20)}s`;
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl bg-neutral-950 border border-neutral-800">
+          <defs>
+            <pattern id="gridIco" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.045)" strokeWidth="1" />
+            </pattern>
+            <radialGradient id="icoCore" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(168,85,247,.35)" />
+              <stop offset="100%" stopColor="rgba(168,85,247,0)" />
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#gridIco)" />
+          <circle cx={cx} cy={cy} r="165" fill="url(#icoCore)" />
+          {faceData.map(({f, idx, omegaNorm}) => {
+            const p = f.map(i => project(verts[i]));
+            return <polygon key={idx} points={p.map(q => `${q[0]},${q[1]}`).join(" ")} fill={colorFor(omegaNorm)} stroke="rgba(255,255,255,.22)" strokeWidth="1.2" />;
+          })}
+          {verts.map((p, i) => {
+            const q = project(p);
+            return <circle key={i} cx={q[0]} cy={q[1]} r="3.2" fill="#e0f2fe" opacity=".9" />;
+          })}
+          <g style={{ transformOrigin: `${cx}px ${cy}px`, animation: `spin ${spinPeriod} linear infinite` }}>
+            <circle cx={cx} cy={cy} r="60" fill="none" stroke="#22d3ee" strokeWidth="2" strokeDasharray="6 8" />
+            <circle cx={cx} cy={cy} r="34" fill="none" stroke="#a855f7" strokeWidth="3" strokeDasharray="4 6" />
+          </g>
+          <text x="25" y="35" fill="#94a3b8" fontSize="13">Icosahedral shell: 20 triangular Stokes faces; closed-vorticity residual should vanish.</text>
+          <text x={cx} y="435" fill="#ddd6fe" fontSize="16" fontWeight="bold" textAnchor="middle">ℓ = {fmt(sideK,4)} r_c · yaw {fmt(yaw,0)}° · pitch {fmt(pitch,0)}°</text>
+        </svg>
+      );
+    }
+
+    function Guardrails() {
+      return (
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
+            <div className="font-bold text-cyan-300 mb-1">CANON</div>
+            <div className="text-sm text-gray-300">Stokes identity, dimensional checks, core reference area A₀ = πr_c², circulation Γ₀ = 2πr_c v⟲.</div>
+          </div>
+          <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4">
+            <div className="font-bold text-yellow-300 mb-1">RESEARCH TRACK</div>
+            <div className="text-sm text-gray-300">Hexagonal tube packing, icosahedral shell sampling, mesh-quality diagnostics, face-wise swirl residuals.</div>
+          </div>
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+            <div className="font-bold text-red-300 mb-1">NIET CANON</div>
+            <div className="text-sm text-gray-300">Massa, druk, of wave intensity direct uit een driehoek/hexagon/icosahedron-oppervlak alleen.</div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [mode, setMode] = useState("triangle");
+      const [aK, setAK] = useState(5);
+      const [bK, setBK] = useState(6);
+      const [cK, setCK] = useState(7);
+      const [omegaMult, setOmegaMult] = useState(1.0);
+      const [hexSideK, setHexSideK] = useState(Math.sqrt(2 * Math.PI / (3 * Math.sqrt(3))));
+      const [icoSideK, setIcoSideK] = useState(Math.sqrt(4 * Math.PI / Math.sqrt(3)));
+      const [yaw, setYaw] = useState(25);
+      const [pitch, setPitch] = useState(18);
+      const [leak, setLeak] = useState(0.0);
+      const [showJson, setShowJson] = useState(false);
+
+      const omegaPhysical = omegaMult * OMEGA_VORT_CORE;
+      const triangle = useMemo(() => {
+        const g = triangleAreaBySides(aK, bK, cK);
+        const areaSI = g.area * R_C * R_C;
+        const gamma = omegaPhysical * areaSI;
+        const energyPrismPerRc = 0.5 * RHO_F * sq(V_SWIRL) * areaSI * R_C;
+        return { ...g, areaSI, gamma, gammaRatio: gamma / GAMMA0, coreUnits: areaSI / A0, energyPrismPerRc };
+      }, [aK, bK, cK, omegaPhysical]);
+
+      const hex = useMemo(() => {
+        const areaK2 = regularHexArea(hexSideK);
+        const triAreaK2 = regularTriangleArea(hexSideK);
+        const areaSI = areaK2 * R_C * R_C;
+        const gamma = omegaPhysical * areaSI;
+        const coreUnits = areaSI / A0;
+        const triCoreUnits = triAreaK2 / Math.PI;
+        const singleCoreSideK = Math.sqrt(2 * Math.PI / (3 * Math.sqrt(3)));
+        const sixCoreTriangleSideK = Math.sqrt(4 * Math.PI / Math.sqrt(3));
+        return { areaK2, triAreaK2, areaSI, gamma, gammaRatio: gamma / GAMMA0, coreUnits, triCoreUnits, singleCoreSideK, sixCoreTriangleSideK };
+      }, [hexSideK, omegaPhysical]);
+
+      const ico = useMemo(() => {
+        const faceAreaK2 = regularTriangleArea(icoSideK);
+        const totalAreaK2 = 20 * faceAreaK2;
+        const faceAreaSI = faceAreaK2 * R_C * R_C;
+        const totalAreaSI = totalAreaK2 * R_C * R_C;
+        const radii = icoRadii(icoSideK);
+        const eqSphereRk = Math.sqrt(totalAreaK2 / (4 * Math.PI));
+        const verts = icoVertsRaw.map(p => rotatePoint(p, yaw, pitch));
+        const axis = vecUnit([0,0,1]);
+        let residual = 0;
+        let absFlux = 0;
+        let minFace = Infinity;
+        let maxFace = -Infinity;
+        const faceFluxes = icoFaces.map(f => {
+          const n = faceNormal(verts, f);
+          const localOmega = omegaPhysical * (vecDot(n, axis) + leak);
+          const flux = localOmega * faceAreaSI;
+          residual += flux;
+          absFlux += Math.abs(flux);
+          minFace = Math.min(minFace, flux);
+          maxFace = Math.max(maxFace, flux);
+          return flux;
+        });
+        const normResidual = residual / (omegaPhysical * totalAreaSI || 1);
+        return { faceAreaK2, totalAreaK2, faceAreaSI, totalAreaSI, coreUnits: totalAreaSI / A0, faceCoreUnits: faceAreaSI / A0, gammaShellScale: omegaPhysical * totalAreaSI, radii, eqSphereRk, residual, absFlux, normResidual, minFace, maxFace, faceFluxes };
+      }, [icoSideK, omegaPhysical, yaw, pitch, leak]);
+
+      const activeSummary = useMemo(() => {
+        if (mode === "triangle") {
+          return {
+            mode: "triangle_stokes_cell",
+            sides_in_rc: { a: aK, b: bK, c: cK },
+            valid_triangle: triangle.valid,
+            area_core_units: triangle.coreUnits,
+            gamma_over_gamma0: triangle.gammaRatio,
+            omega_over_omega_vort_core: omegaMult,
+            canon_status: "CANON identity only; Research-Track as mesh diagnostic"
+          };
+        }
+        if (mode === "hex") {
+          return {
+            mode: "hexagonal_packing_cell",
+            side_in_rc: hexSideK,
+            area_core_units: hex.coreUnits,
+            per_triangle_core_units: hex.triCoreUnits,
+            gamma_over_gamma0: hex.gammaRatio,
+            canon_status: "Research Track packing diagnostic"
+          };
+        }
+        return {
+          mode: "icosahedral_shell_diagnostic",
+          side_in_rc: icoSideK,
+          total_area_core_units: ico.coreUnits,
+          face_area_core_units: ico.faceCoreUnits,
+          equivalent_sphere_radius_in_rc: ico.eqSphereRk,
+          closed_shell_flux_residual: ico.residual,
+          normalized_residual: ico.normResidual,
+          leak_parameter: leak,
+          canon_status: "Research Track shell diagnostic; residual should vanish for divergence-free vorticity"
+        };
+      }, [mode, aK, bK, cK, triangle, omegaMult, hexSideK, hex, icoSideK, ico, leak]);
+
+      const setHexPreset = (kind) => {
+        if (kind === "oneHexOneCore") setHexSideK(hex.singleCoreSideK);
+        if (kind === "oneTriOneCore") setHexSideK(hex.sixCoreTriangleSideK);
+        if (kind === "edgeRc") setHexSideK(1);
+      };
+      const setIcoPreset = (kind) => {
+        if (kind === "oneFaceOneCore") setIcoSideK(Math.sqrt(4 * Math.PI / Math.sqrt(3)));
+        if (kind === "totalTwentyCore") setIcoSideK(Math.sqrt(4 * Math.PI / Math.sqrt(3)));
+        if (kind === "edgeRc") setIcoSideK(1);
+        if (kind === "reShell") {
+          // Solve equivalent sphere radius sqrt(totalArea/(4π)) = R_E/r_c = 2
+          // totalAreaK2 = 20*(sqrt(3)/4)*ell^2; eqR^2 = totalAreaK2/(4π)
+          const targetEqR = 2;
+          const ell = Math.sqrt((targetEqR * targetEqR * 4 * Math.PI) / (20 * Math.sqrt(3) / 4));
+          setIcoSideK(ell);
+        }
+      };
+
+      return (
+        <div className="min-h-screen p-4 md:p-7 font-sans">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+              <div>
+                <div className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-bold">SST Research-Track Simulator</div>
+                <h1 className="text-3xl md:text-5xl font-black text-white mt-2">Flux Cells: Triangle → Hexagon → Icosahedron</h1>
+                <p className="text-gray-400 mt-3 max-w-4xl">Een canon-veilige uitbreiding van de tri-vortex demo: lokale Stokes-flux, hexagonale packing, en gesloten icosahedral shell residuals. Alles schaalt op <span className="text-cyan-300 mono">r_c</span>, <span className="text-purple-300 mono">Γ₀</span> en <span className="text-emerald-300 mono">πr_c²</span>.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <ModeButton active={mode === "triangle"} onClick={() => setMode("triangle")}>△ Triangle</ModeButton>
+                <ModeButton active={mode === "hex"} onClick={() => setMode("hex")}>⬡ Hexagon</ModeButton>
+                <ModeButton active={mode === "ico"} onClick={() => setMode("ico")}>◈ Icosahedron</ModeButton>
+                <ModeButton active={mode === "audit"} onClick={() => setMode("audit")}>✓ Canon Audit</ModeButton>
+              </div>
+            </header>
+
+            <Guardrails />
+
+            <div className="grid lg:grid-cols-[1.45fr_.9fr] gap-6">
+              <main className="space-y-6">
+                {mode === "triangle" && (
+                  <>
+                    <TriangleSvg a={aK} b={bK} c={cK} geom={triangle} omegaMultiplier={omegaMult} />
+                    <div className="grid md:grid-cols-4 gap-3">
+                      <Stat label="A△ / A₀" value={fmt(triangle.coreUnits, 6)} sub="core-area units" tone="cyan" />
+                      <Stat label="Γ△ / Γ₀" value={fmt(triangle.gammaRatio, 6)} sub="normalized circulation" tone="purple" />
+                      <Stat label="h / r_c" value={fmt(triangle.h, 6)} sub="altitude" tone="yellow" />
+                      <Stat label="x / r_c" value={fmt(triangle.x, 6)} sub="signed base projection" tone="emerald" />
+                    </div>
+                  </>
+                )}
+
+                {mode === "hex" && (
+                  <>
+                    <HexSvg sideK={hexSideK} omegaMultiplier={omegaMult} mode={mode} />
+                    <div className="grid md:grid-cols-4 gap-3">
+                      <Stat label="A⬡ / A₀" value={fmt(hex.coreUnits, 6)} sub="hex cell size" tone="emerald" />
+                      <Stat label="A△ / A₀" value={fmt(hex.triCoreUnits, 6)} sub="per subtriangle" tone="cyan" />
+                      <Stat label="Γ⬡ / Γ₀" value={fmt(hex.gammaRatio, 6)} sub="if uniform ω⊥" tone="purple" />
+                      <Stat label="ℓ / r_c" value={fmt(hexSideK, 6)} sub="hex side" tone="yellow" />
+                    </div>
+                  </>
+                )}
+
+                {mode === "ico" && (
+                  <>
+                    <IcoSvg sideK={icoSideK} omegaMultiplier={omegaMult} yaw={yaw} pitch={pitch} leak={leak} />
+                    <div className="grid md:grid-cols-4 gap-3">
+                      <Stat label="ΣA / A₀" value={fmt(ico.coreUnits, 6)} sub="total shell area" tone="purple" />
+                      <Stat label="Aface / A₀" value={fmt(ico.faceCoreUnits, 6)} sub="per triangular face" tone="cyan" />
+                      <Stat label="R_eq / r_c" value={fmt(ico.eqSphereRk, 6)} sub="equal-area sphere" tone="emerald" />
+                      <Stat label="Flux residual" value={pct(ico.normResidual, 5)} sub="ΣωᵢAᵢ /(ωΣA)" tone={Math.abs(ico.normResidual) < 1e-9 ? "emerald" : "red"} />
+                    </div>
+                  </>
+                )}
+
+                {mode === "audit" && (
+                  <SectionCard title="Canon / Research-Track beslislaag" accent="yellow">
+                    <div className="space-y-4 text-gray-300 leading-relaxed">
+                      <p><span className="text-cyan-300 font-bold">Doel:</span> deze simulator mag geometrie en vorticiteitsflux meten, maar mag geen massa-, druk- of golfintensiteitswet claimen zonder extra veldvergelijking.</p>
+                      <Formula>{`CANON:
+Γ_i = ∮_{∂S_i} v · dℓ = ∫_{S_i} (∇×v)·n̂ dA
+Γ_i ≈ ω_{⊥,i} A_i  only for nearly uniform normal vorticity.
+
+REFERENCE:
+A₀ = π r_c²
+Γ₀ = 2π r_c v_⟲
+ω_vort,c = 2 v_⟲/r_c
+Γ₀ / ω_vort,c = π r_c² = A₀
+
+RESEARCH TRACK:
+hexagonal packing diagnostics;
+icosahedral closed-shell residual diagnostics.
+
+NOT CANON:
+M ∝ A alone;
+pressure ∝ A alone;
+wave intensity ∝ 1/A without transport derivation.`}</Formula>
+                      <div className="grid md:grid-cols-3 gap-3">
+                        <Stat label="A₀" value={sci(A0, 6, "m²")} sub="πr_c²" tone="cyan" />
+                        <Stat label="Γ₀" value={sci(GAMMA0, 6, "m² s⁻¹")} sub="2πr_c v⟲" tone="purple" />
+                        <Stat label="ω_vort,c" value={sci(OMEGA_VORT_CORE, 6, "s⁻¹")} sub="2v⟲/r_c" tone="emerald" />
+                      </div>
+                    </div>
+                  </SectionCard>
+                )}
+              </main>
+
+              <aside className="space-y-6">
+                <SectionCard title="Canonieke schaal" accent="cyan">
+                  <div className="grid grid-cols-1 gap-3">
+                    <Stat label="r_c" value={sci(R_C, 8, "m")} sub="localized swirl core radius" tone="cyan" />
+                    <Stat label="R_e = 2r_c" value={sci(R_E, 8, "m")} sub="classical-electron-radius scale" tone="slate" />
+                    <Stat label="v⟲" value={sci(V_SWIRL, 8, "m s⁻¹")} sub="characteristic swirl speed" tone="purple" />
+                    <Stat label="ρ_f" value={sci(RHO_F, 3, "kg m⁻³")} sub="effective fluid density" tone="emerald" />
+                  </div>
+                </SectionCard>
+
+                <SectionCard title="Global controls" accent="purple">
+                  <div className="space-y-4">
+                    <Slider label="ω⊥ / ω_vort,c" value={omegaMult} min={0.05} max={3} step={0.01} onChange={setOmegaMult} tone="purple" />
+                    <div className="text-xs text-gray-500">ω⊥ is hier een lokale normale vorticiteit. Niet verwarren met Compton angular frequency.</div>
+                    <Stat label="ω⊥" value={sci(omegaPhysical, 5, "s⁻¹")} sub="current local normal vorticity" tone="purple" />
+                  </div>
+                </SectionCard>
+
+                {mode === "triangle" && (
+                  <SectionCard title="Triangle controls" accent="cyan">
+                    <div className="space-y-4">
+                      <Slider label="a / r_c" value={aK} min={0.2} max={12} step={0.01} onChange={setAK} tone="cyan" />
+                      <Slider label="b / r_c" value={bK} min={0.2} max={12} step={0.01} onChange={setBK} tone="cyan" />
+                      <Slider label="c / r_c" value={cK} min={0.2} max={12} step={0.01} onChange={setCK} tone="slate" />
+                      <Formula>{`A_△ = sqrt[s(s-a)(s-b)(s-c)]
+x = (a²-b²+c²)/(2c)
+h = sqrt(a²-x²)
+Γ_△ ≈ ω_⊥ A_△`}</Formula>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Stat label="A△" value={sci(triangle.areaSI, 5, "m²")} tone="cyan" />
+                        <Stat label="Γ△" value={sci(triangle.gamma, 5, "m² s⁻¹")} tone="purple" />
+                      </div>
+                    </div>
+                  </SectionCard>
+                )}
+
+                {mode === "hex" && (
+                  <SectionCard title="Hexagon controls" accent="emerald">
+                    <div className="space-y-4">
+                      <Slider label="ℓ / r_c" value={hexSideK} min={0.1} max={6} step={0.001} onChange={setHexSideK} tone="emerald" />
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => setHexPreset("edgeRc")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">ℓ = r_c</button>
+                        <button onClick={() => setHexPreset("oneHexOneCore")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">A⬡ = A₀</button>
+                        <button onClick={() => setHexPreset("oneTriOneCore")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">each △ = A₀</button>
+                      </div>
+                      <Formula>{`A_⬡ = 6A_△ = (3√3/2)ℓ²
+N_⬡ = A_⬡ / (πr_c²)
+Γ_⬡ ≈ ω_⊥ A_⬡`}</Formula>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Stat label="A⬡" value={sci(hex.areaSI, 5, "m²")} tone="emerald" />
+                        <Stat label="Γ⬡" value={sci(hex.gamma, 5, "m² s⁻¹")} tone="purple" />
+                      </div>
+                    </div>
+                  </SectionCard>
+                )}
+
+                {mode === "ico" && (
+                  <SectionCard title="Icosahedron controls" accent="purple">
+                    <div className="space-y-4">
+                      <Slider label="ℓ / r_c" value={icoSideK} min={0.2} max={6} step={0.001} onChange={setIcoSideK} tone="purple" />
+                      <Slider label="yaw" value={yaw} min={-180} max={180} step={1} onChange={setYaw} suffix="°" tone="slate" />
+                      <Slider label="pitch" value={pitch} min={-80} max={80} step={1} onChange={setPitch} suffix="°" tone="slate" />
+                      <Slider label="uniform leak bias" value={leak} min={-0.3} max={0.3} step={0.001} onChange={setLeak} tone="yellow" />
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => setIcoPreset("edgeRc")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">ℓ = r_c</button>
+                        <button onClick={() => setIcoPreset("oneFaceOneCore")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">each face = A₀</button>
+                        <button onClick={() => setIcoPreset("reShell")} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">R_eq = R_e</button>
+                        <button onClick={() => setLeak(0)} className="px-3 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs">zero leak</button>
+                      </div>
+                      <Formula>{`A_ico = 20(√3/4)ℓ²
+R_eq = sqrt(A_ico/(4π))
+Σ_i ω_{⊥,i} A_i ≈ 0
+because ∇·(∇×v)=0`}</Formula>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Stat label="R_circ/r_c" value={fmt(ico.radii.circum, 5)} tone="purple" />
+                        <Stat label="R_in/r_c" value={fmt(ico.radii.inradius, 5)} tone="cyan" />
+                        <Stat label="Σ flux" value={sci(ico.residual, 4, "m² s⁻¹")} tone={Math.abs(ico.normResidual) < 1e-9 ? "emerald" : "red"} />
+                        <Stat label="abs flux sum" value={sci(ico.absFlux, 4, "m² s⁻¹")} tone="yellow" />
+                      </div>
+                    </div>
+                  </SectionCard>
+                )}
+
+                <SectionCard title="Machine-readable result" accent="yellow">
+                  <button onClick={() => setShowJson(!showJson)} className="w-full px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 font-bold hover:bg-yellow-500/20">
+                    {showJson ? "Verberg JSON" : "Toon JSON"}
+                  </button>
+                  {showJson && <pre className="mt-3 max-h-72 overflow-auto rounded-lg bg-black/50 border border-neutral-800 p-3 text-xs text-gray-300">{JSON.stringify(activeSummary, null, 2)}</pre>}
+                </SectionCard>
+              </aside>
+            </div>
+
+            <footer className="text-xs text-gray-500 border-t border-neutral-800 pt-5 pb-8">
+              <p><span className="text-cyan-300 font-bold">SST note:</span> Deze simulator gebruikt driehoeken, hexagons en icosahedra als discretisatie- en fluxdiagnostiek. De canonieke kern is Stokes + dimensiecontrole. Energetische claims vereisen een afzonderlijk volume-element en kinetic-energy density.</p>
+            </footer>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>

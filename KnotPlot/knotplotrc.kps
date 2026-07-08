@@ -1,0 +1,71 @@
+
+% ============================================================
+% SST / KnotPlot user presets
+% File: knotplotrc.kps
+% ============================================================
+mode cb;  elecforce = off; stusplit = 0; dstep = 1; close = 0.20; max-dr = 0.02
+% ------------------------------------------------------------
+% Global default behavior
+% ------------------------------------------------------------
+
+silent = false
+
+alias sstbase "mode cb;  elecforce = off; stusplit = 0; dstep = 1; close = 0.20; max-dr = 0.02"
+
+% Apply SST defaults automatically after reset / reset all.
+alias .user-reset "sstbase"
+
+% ------------------------------------------------------------
+% Standard SST report block
+% ------------------------------------------------------------
+
+alias sstreport "safe; dowker; gauss; length; distance; acn"
+
+% Optional shorter topology-only check.
+alias ssttopo "safe; dowker; gauss"
+
+% Optional geometry-only check.
+alias sstgeom "length; distance; acn"
+
+% ------------------------------------------------------------
+% Trefoil intake preset: core candidate 3_1
+% ------------------------------------------------------------
+
+alias ssttrefoil "reset all; load 3.1; mode cb; split; split; split; split; split; split; split; split; fitto avlength 0.5; show labels; bradius = 0.02; cradius = 0.01; display true; elecforce = off; stusplit = 0; dstep = 1; nbeads = 300 close = 0.20; max-dr = 0.02; sstreport"
+
+% Run 100 relaxation steps and report topology + geometry.
+alias sstgo100 "ago 100; sstreport"
+alias sstgo1000 "ago 1000; sstreport"
+alias sstgo5000 "ago 5000; sstreport"
+alias sstgo10000 "ago 10000; sstreport"
+
+
+% Safe repeated trefoil run.
+alias ssttrefoilrun "ssttrefoil; sstgo1000; save knots/knot_3.1/trefoil_safe_001.txt; sstgo1000; save knots/knot_3.1/trefoil_safe_002.txt; sstgo1000; save knots/knot_3.1/trefoil_safe_003.txt;"
+
+% ------------------------------------------------------------
+% Useful SST candidate loaders
+% ------------------------------------------------------------
+
+alias k31 "reset all; load 3.1; sstbase; sstreport"
+alias k41 "reset all; load 4.1; sstbase; sstreport"
+alias k51 "reset all; load 5.1; sstbase; sstreport"
+alias k52 "reset all; load 5.2; sstbase; sstreport"
+alias k62 "reset all; load 6.2; sstbase; sstreport"
+alias k74 "reset all; load 7.4; sstbase; sstreport"
+
+% ------------------------------------------------------------
+% Mirror / chirality test
+% ------------------------------------------------------------
+
+alias sstmirrorx "reflect x; sstreport"
+alias sstmirrory "reflect y; sstreport"
+alias sstmirrorz "reflect z; sstreport"
+
+% ------------------------------------------------------------
+% Export helpers
+% ------------------------------------------------------------
+
+alias sstsave "save sst_current.txt; psout sst_current"
+
+silent = false

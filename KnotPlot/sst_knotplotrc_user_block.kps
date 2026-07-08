@@ -1,0 +1,89 @@
+% ============================================================
+% SST / KnotPlot user customizations
+% Paste this block below "USER CUSTOMIZATIONS" in:
+% C:\Users\oscar\AppData\Roaming\KnotPlot\knotplotrc.kps
+%
+% Do NOT paste your licence key into public scripts.
+% Keep your existing "admin level ..." line above this block.
+% ============================================================
+
+silent = false
+
+% ------------------------------------------------------------
+% SST base geometry / safety defaults
+% ------------------------------------------------------------
+% cb = cylinders + beads / PL geometry mode.
+% elecforce = OFF prevents the electric-like repulsion from dominating a controlled SST run.
+% close and max-dr are the safety/step parameters you used in the prior SST run.
+
+alias sstbase "mode cb; elecforce = off; mechforce = on; stusplit = 0; dstep = 1; close = 0.20; max-dr = 0.02"
+
+% Run SST defaults automatically after reset / reset all.
+alias .user-reset "sstbase"
+
+% ------------------------------------------------------------
+% Standard SST report gates
+% ------------------------------------------------------------
+% Topology guard: safe, Dowker, extended Gauss.
+% Geometry guard: length, distance, angle, average crossing / writhe.
+
+alias ssttopo "safe; dowker; gauss"
+alias sstgeom "length; distance; angle; acn"
+alias sstreport "safe; dowker; gauss; length; distance; angle; acn"
+
+% ------------------------------------------------------------
+% Candidate loaders
+% ------------------------------------------------------------
+% These load canonical SST candidate knots and immediately report gates.
+
+alias k31 "reset all; load 3.1; sstbase; sstreport"
+alias k41 "reset all; load 4.1; sstbase; sstreport"
+alias k51 "reset all; load 5.1; sstbase; sstreport"
+alias k52 "reset all; load 5.2; sstbase; sstreport"
+alias k62 "reset all; load 6.2; sstbase; sstreport"
+alias k74 "reset all; load 7.4; sstbase; sstreport"
+
+% ------------------------------------------------------------
+% Standard trefoil SST intake
+% ------------------------------------------------------------
+% This is the interactive preset that matches the style of your earlier trefoil run.
+
+alias ssttrefoil "reset all; load 3.1; mode cb; split; split; split; split; split; split; split; split; fitto avlength 0.5; sstbase; sstreport"
+
+% Relaxation blocks.
+alias sstgo100 "go 100; sstreport"
+alias sstgo250 "go 250; sstreport"
+alias sstgo1000 "go 1000; sstreport"
+
+% Atomic relaxation blocks for scripted/automated use.
+alias sstago100 "ago 100; sstreport"
+alias sstago250 "ago 250; sstreport"
+alias sstago1000 "ago 1000; sstreport"
+
+% Save current geometry and EPS diagram.
+alias sstsave "save sst_current.txt; psout sst_current"
+
+% Full trefoil run producing knots/knot_3.1/knot_3.1_relaxed.txt and .eps.
+alias sstmake_trefoil_relaxed "reset all; load 3.1; mode cb; #6 split; fitto mindist 1.0; sstbase; safe; distance; length; angle; acn; dowker; gauss; energy model MD; energy; ago 1000; safe; distance; length; angle; acn; dowker; gauss; energy; save knots/knot_3.1/knot_3.1_relaxed.txt; psout knots/knot_3.1/knot_3.1_relaxed"
+
+% ------------------------------------------------------------
+% Mirror / chirality tests
+% ------------------------------------------------------------
+% reflect x/y/z creates a mirror embedding; then re-run topology/geometry gates.
+
+alias sstmirrorx "reflect x; sstreport"
+alias sstmirrory "reflect y; sstreport"
+alias sstmirrorz "reflect z; sstreport"
+
+% Save mirror variants for downstream SSTcore tests.
+alias sstsave_mirrorx "reflect x; sstreport; save sst_mirror_x.txt; psout sst_mirror_x"
+alias sstsave_mirrory "reflect y; sstreport; save sst_mirror_y.txt; psout sst_mirror_y"
+alias sstsave_mirrorz "reflect z; sstreport; save sst_mirror_z.txt; psout sst_mirror_z"
+
+% ------------------------------------------------------------
+% Utility loaders / exports
+% ------------------------------------------------------------
+
+alias sstexporttxt "save sst_current.txt"
+alias sstexporteps "psout sst_current"
+alias sstexportobj "export sst_current"

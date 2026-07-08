@@ -1,0 +1,129 @@
+{
+  "harness": {
+    "name": "sst_nonfit_prediction_harness",
+    "version": "sst-v0.8.19-nonfit-harness-draft1",
+    "epistemic_status": "RESEARCH-TRACK harness; not a canon proof.",
+    "strict_nonfit": true
+  },
+  "target": {
+    "knot_id": "3:1:1",
+    "label": "trefoil 3_1",
+    "candidate_sector": "lepton/electron-candidate",
+    "ropelength_Ltot": 16.371637,
+    "ropelength_source": {
+      "source": "manifest_fallback"
+    }
+  },
+  "constants": {
+    "c_m_s": 299792458.0,
+    "v_swirl_m_s": 1093845.63,
+    "r_c_m": 1.40897017e-15,
+    "rho_f_kg_m3": 7e-07,
+    "rho_core_kg_m3": 3.8934358266918687e+18,
+    "m_e_kg_evaluation_only": 9.1093837015e-31,
+    "alpha_evaluation_only": 0.0072973525643
+  },
+  "dimensionless_checks": {
+    "lambda_c_over_pi_r_c": 548.1439972475823,
+    "2c_over_v_swirl": 548.1439972475824,
+    "c_over_v_swirl": 274.0719986237912,
+    "c_over_v_swirl_squared": 75115.46042963941,
+    "gamma_0_m2_s": 9.683619203488876e-09
+  },
+  "used_as_prediction_inputs": [
+    "c_m_s",
+    "v_swirl_m_s",
+    "r_c_m",
+    "rho_core_kg_m3",
+    "knot_id",
+    "ropelength_Ltot",
+    "exposure_gate_G"
+  ],
+  "gates": {
+    "i_topological_mass_kernel_closure": {
+      "status": "RESEARCH_TRACK",
+      "summary": "No predeclared topology kernel; reports required kernel but does not use it.",
+      "equations": {
+        "lambda_c_closure": "lambda_c = 2*pi*c*r_c/v_swirl",
+        "baseline_mass": "M0 = 2*pi^3*rho_m*r_c^5*Ltot/lambda_c^2",
+        "prediction": "M = (lambda_c/(pi*r_c))^G * Xi_K * M0"
+      },
+      "inputs": {
+        "Ltot": 16.371637,
+        "exposure_gate_G": 0,
+        "topology_kernel_Xi": null,
+        "kernel_status": "RESEARCH_TRACK"
+      },
+      "computed": {
+        "lambda_c_from_closure_m": 2.4263102545940797e-12,
+        "alpha_gate_predicted_lambda_over_pi_rc": 548.1439972475823,
+        "baseline_mass_kg_Xi1_G0": 3.72838769999569e-30,
+        "predicted_mass_kg": null,
+        "predicted_energy_j": null,
+        "target_mass_kg_evaluation_only": 9.1093837015e-31,
+        "target_energy_j_evaluation_only": 8.187105776823886e-14,
+        "mass_rel_error_if_target_available": null,
+        "required_Xi_for_target_not_used": 0.24432501216304656,
+        "dimension_check": "rho_m[kg m^-3] * r_c^5/lambda_c^2[m^3] -> kg"
+      },
+      "primary_residual": null,
+      "notes": "A required_Xi value is diagnostic only; using it as input sets gate status FAILED."
+    },
+    "ii_non_fitted_prediction_protocol": {
+      "status": "DERIVED",
+      "summary": "Frozen-input protocol satisfied; no target residual minimized.",
+      "forbidden_fit_inputs": [
+        "m_e_kg_evaluation_only",
+        "alpha_evaluation_only",
+        "target_mass_kg",
+        "target_energy_j",
+        "required_impedance_scale_for_chi_one",
+        "required_density_for_chi_one_kg_m3",
+        "empirical_residual_minimizer",
+        "posthoc_topology_kernel"
+      ],
+      "used_as_inputs": [
+        "c_m_s",
+        "v_swirl_m_s",
+        "r_c_m",
+        "rho_core_kg_m3",
+        "knot_id",
+        "ropelength_Ltot",
+        "exposure_gate_G"
+      ],
+      "forbidden_used": [],
+      "primary_residual": 0,
+      "notes": "This gate only audits protocol purity; it does not certify physical correctness."
+    },
+    "iii_spinorial_boundary_theta_pi": {
+      "status": "RESEARCH_TRACK",
+      "summary": "theta=pi boundary condition not yet derived; treated as research-track.",
+      "inputs": {
+        "expected_theta_rad": 3.141592653589793,
+        "theta_pi_derived": false,
+        "parity_class": "odd candidate",
+        "status": "RESEARCH_TRACK"
+      },
+      "computed": {
+        "theta_expected_rad": 3.141592653589793,
+        "theta_minus_pi_abs": 0.0,
+        "theta_pi_derived": false
+      },
+      "primary_residual": 0.0,
+      "notes": "This gate must be promoted only by a topological boundary derivation, not by particle-label selection."
+    },
+    "iv_core_torsion_impedance_matching": {
+      "status": "NOT_AVAILABLE",
+      "summary": "No torsion tensor audit JSON supplied.",
+      "primary_residual": null,
+      "notes": "Run the standalone torsion-impedance pybind11 audit and pass --torsion-json."
+    }
+  },
+  "overall_status": "RESEARCH_TRACK",
+  "next_required_promotions": [
+    "Derive Xi_K without target masses.",
+    "Lock freeze-then-predict manifest before residual evaluation.",
+    "Derive theta=pi from a spinorial/topological boundary obstruction.",
+    "Derive torsion impedance scale/density instead of using required scale diagnostics."
+  ]
+}

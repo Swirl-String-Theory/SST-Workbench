@@ -1,0 +1,31 @@
+########################################################################################
+# SST Planck-time route audit: four parallel candidate routes
+########################################################################################
+Reference t_p = 5.391246446662e-44 s
+Reference L_p = 1.616255023929e-35 m
+Reference G   = 6.674300000000e-11 m^3 kg^-1 s^-2
+Reference Fgr = 3.025638910846e+43 N
+Tolerance     = 1.0e-06
+
+Route                            Status                 Verdict        t_p [s]      rel_t              G      rel_G          Input
+----------------------------------------------------------------------------------------------------------------------------------
+A_line_density_entropy           REQUIRED_TARGET_OPEN   PASS      5.391246e-44  1.847e-16   6.674300e-11  0.000e+00   1.914037e+69
+B_induced_gravity_modes          REQUIRED_TARGET_OPEN   PASS      5.391246e-44  0.000e+00   6.674300e-11  1.936e-16   7.599479e+39
+C_swirl_Newtonian_closure        REQUIRED_TARGET_OPEN   PASS      5.391246e-44  3.585e-09   6.674300e-11  0.000e+00   6.674300e-11
+D_maximum_tension                REQUIRED_TARGET_OPEN   PASS      5.391246e-44  0.000e+00   6.674300e-11  0.000e+00   3.025639e+43
+
+Required target inputs for exact CODATA matching:
+  A: Lambda_L_required(sigma=1) = 1.914036558579e+69 m^-2
+     spacing d_Lambda = Lambda_L^(-1/2) = 2.285729775093e-35 m = 1.41421356 L_p
+  B: N_required(beta=1)          = 7.599479038086e+39
+  C: G_swirl_required            = 6.674300000000e-11 m^3 kg^-1 s^-2
+  D: F_gr^max_required           = 3.025638910846e+43 N
+
+Epistemic notes:
+  - A_line_density_entropy: No independent Lambda_L supplied; using required sigma*Lambda_L = 1/(2 L_p^2). Non-circular only if Lambda_L is derived from SST vacuum statistics.
+  - B_induced_gravity_modes: No independent N supplied; using required N = beta*(r_c/L_p)^2. Non-circular only if N is derived from torsion/shear vacuum mode counting.
+  - C_swirl_Newtonian_closure: No independent G_swirl supplied; using required G. Non-circular only if G_swirl is derived from SST pressure/stress susceptibility without using t_p or G.
+  - D_maximum_tension: No independent F_gr^max supplied; using required c^4/(4G). Non-circular only if gravitational horizon tension is derived independently.
+
+[wrote JSON] /mnt/data/planck_routes_parallel.json
+[wrote CSV ] /mnt/data/planck_routes_parallel.csv

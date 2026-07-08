@@ -1,0 +1,50 @@
+##############################################################################
+# SST Canon v0.8.19-compatible -- consolidated claim verification suite
+# numpy: yes
+##############################################################################
+
+==============================================================================
+SECTION impedance_matching  -- Route-I heat split and core-torsion residual
+==============================================================================
+  [PASS] claim  RT-I [RESEARCH-TRACK] T_vchar/T_c = c/vchar wrong-speed Unruh factor
+          got=274.0719982   expected=274.0719986   (rel.dev=1.58e-09, tol=5e-09)
+  [INFO ] claim  RT-I [GUARD]      core sound diagnostic c_s=vchar/sqrt(2)=7.73465664e+05 m/s; not eligible as the Jacobson/Unruh causal speed
+  [PASS] claim RT-Bridge [PROTOCOL]   target tensor M=(2E0/c^2)I gives chi_K^(T)=1 by normalization
+          got=1   expected=1   (rel.dev=2.22e-16, tol=1e-12)
+  [PASS] claim RT-Bridge [FALSIFIER]  Kelvin-normalized inertia tested on c_T=c gives chi=(c/vchar)^2
+          got=75115.46018   expected=75115.46018   (rel.dev=1.94e-16, tol=1e-12)
+  [PASS] claim RT-Bridge [FALSIFIER]  wrong-speed residual is far outside unity tolerance (1/chi <= 1e-4)
+          got=1.331283863e-05   max=0.0001 
+  [INFO ] claim RT-Bridge [OPEN]       This section does not compute M_torsion[K]. A real solver must report E0[K], the three eigenvalues of the torsion-dressed tensor, chi_K^(T), anisotropy max|lambda_i/lambda_iso-1|, and a K_T stiffness sweep at c_T=c.
+
+==============================================================================
+RESULT: 4/4 graded checks passed (1 section(s): impedance_matching)
+==============================================================================
+
+SOURCE MAP (after Results.zip / trefoil_closure.zip / code.zip / routeB_RT_bem.zip):
+  RECOVERED (script now located in user sources):
+    claim 45/46  code/reproduce_alpha_cell_closure.py  (runs -> 137.036 closure;
+                 NOTE: uses inserted E_eff~274 => OBSTRUCTION, not a derivation)
+    claim 45     Results/sst_knot_candidate_robustness_outputs_v10_2/ (v10 sweep)
+    claim 22/44  routeB_RT_bem/knotplot/sst_helicity_balance_scan.py +
+                 Results/SST_helicity_by_base.csv ; taxonomy_builder_v3b.py
+    claim 40     trefoil_closure/SST_ATOM_MASS_INVARIANT_SEMF_patched.py +
+                 SST_Invariant_Mass_Results_CANON.csv
+    claim 47/48  routeB_RT_bem/SST_CoilLab_v2_work/ (rodin6lane, sawbowl fields)
+    routeB neg.  routeB_RT_bem/routeB_RT_bem_v18_multiknot_exponent_test.py
+    alpha gates  code/solve_one_cell_hodge_phase_hessian.py, gp_core_second_variation
+                 (w_perp obstruction), audit_derived_label_gates.py
+  OPEN / RESEARCH-TRACK (fit machinery exists; external data + derivation still open):
+    claim 42     fit_galactic_swirl_rotation_sparc.py provides the standalone
+                 SPARC rotmod fitter + section 'galactic' (synthetic demo), but no
+                 SPARC dataset is bundled and r_s is fitted, not derived
+                 (coherence-length lemma OPEN).
+  NOW REPRODUCED (standalone scripts + suite sections):
+    Route-I     section 'impedance_matching' adds the v0.8.19 heat-sector guard
+                 and chi_K^(T) protocol check; it is a normalization/falsifier
+                 audit, not a PDE-level M_torsion[K] solver.
+    claim 38     reproduce_pauli_barrier.py  + section 'pauli'  [CALIBRATED BENCHMARK]
+    claim 61/67  reproduce_em_qed_normalization.py + section 'em_qed'
+                 (correct prefactor m_e/e; B_core=B_QED=4.414e9 T)
+
+[wrote /mnt/data/impedance_check_v0_8_19.json]

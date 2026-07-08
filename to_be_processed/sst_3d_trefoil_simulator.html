@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SST 3D Trefoil Simulator</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0a0a0a; color: #f3f4f6; font-family: sans-serif; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; p-6; }
+        .pointer-events-auto { pointer-events: auto; }
+        .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function App() {
+            const mountRef = useRef(null);
+            
+            // State voor UI en 3D Scene communicatie
+            const [activeIndicator, setActiveIndicator] = useState('none'); // 'none', 'alpha', 'beta', 'gamma'
+            const [bgSpeed, setBgSpeed] = useState(1.0);
+            
+            // Refs voor 3D objecten (zodat we ze buiten de useEffect scope kunnen muteren)
+            const refs = useRef({
+                alphaGroup: null,
+                betaMesh: null,
+                gammaGroup: null,
+                bgParticles: null,
+                streamlines: null,
+                knot: null,
+                spinContainer: null
+            });
+
+            // Initialiseer Three.js Scene
+            useEffect(() => {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+
+                const scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(0x0a0a0a, 0.008);
+
+                const camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
+                camera.position.set(0, 30, 60);
+
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(w, h);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                mountRef.current.appendChild(renderer.domElement);
+
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 0.5;
+
+                // --- Belichting ---
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+                scene.add(ambientLight);
+                
+                const pointLight1 = new THREE.PointLight(0x22d3ee, 2, 100);
+                pointLight1.position.set(20, 20, 20);
+                scene.add(pointLight1);
+                
+                const pointLight2 = new THREE.PointLight(0xa855f7, 2, 100);
+                pointLight2.position.set(-20, -20, -20);
+                scene.add(pointLight2);
+
+                // --- NIEUW: Containers voor 90 graden tilt en gecoördineerde spin ---
+                const spinContainer = new THREE.Group();
+                scene.add(spinContainer);
+                refs.current.spinContainer = spinContainer;
+
+                const tiltContainer = new THREE.Group();
+                // Roteer 90 graden over de X-as zodat het gat op de Y-as (cilinder as) ligt
+                tiltContainer.rotation.x = Math.PI / 2;
+                spinContainer.add(tiltContainer);
+
+                // --- 1. De Trefoil Wervel (SST Grondtoestand) ---
+                // (p=3, q=2) torus knoop
+                const knotGeo = new THREE.TorusKnotGeometry(10, 3, 300, 32, 2, 3);
+                const knotMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x06b6d4,
+                    metalness: 0.2,
+                    roughness: 0.1,
+                    transmission: 0.9, // Glas-achtig fluïdum
+                    thickness: 2,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const knot = new THREE.Mesh(knotGeo, knotMat);
+                tiltContainer.add(knot);
+                refs.current.knot = knot;
+
+                // --- 2. Achtergrond Rotatie (Feynman-Onsager / Taylor-kolom equivalent) ---
+                const bgGeo = new THREE.BufferGeometry();
+                const bgCount = 8000;
+                const bgPos = new Float32Array(bgCount * 3);
+                for(let i = 0; i < bgCount * 3; i += 3) {
+                    const r = 18 + Math.random() * 80; // Buiten de trefoil
+                    const theta = Math.random() * Math.PI * 2;
+                    const y = (Math.random() - 0.5) * 120;
+                    bgPos[i] = r * Math.cos(theta);
+                    bgPos[i+1] = y;
+                    bgPos[i+2] = r * Math.sin(theta);
+                }
+                bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+                const bgMat = new THREE.PointsMaterial({ color: 0x22d3ee, size: 0.3, transparent: true, opacity: 0.4 });
+                const bgParticles = new THREE.Points(bgGeo, bgMat);
+                scene.add(bgParticles);
+                refs.current.bgParticles = bgParticles;
+
+                // --- 3. Stroomlijnen (Poloidale & Toroidale stroom) ---
+                const streamGroup = new THREE.Group();
+                for(let i = 0; i < 8; i++) {
+                    const radius = 15 + i * 5;
+                    const streamGeo = new THREE.TorusGeometry(radius, 0.05, 8, 100);
+                    const streamMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.2 });
+                    const stream = new THREE.Mesh(streamGeo, streamMat);
+                    stream.rotation.x = Math.PI / 2;
+                    stream.position.y = (Math.random() - 0.5) * 60;
+                    streamGroup.add(stream);
+                }
+                scene.add(streamGroup);
+                refs.current.streamlines = streamGroup;
+
+                // --- INDICATOR: Alpha C (Biot-Savart Afstoting) ---
+                const alphaGroup = new THREE.Group();
+                // 3 bollen nabij de binnenste kruisingen
+                for(let i = 0; i < 3; i++) {
+                    const angle = (i * Math.PI * 2) / 3;
+                    const sphereGeo = new THREE.SphereGeometry(2.5, 32, 32);
+                    const sphereMat = new THREE.MeshBasicMaterial({ color: 0xff0055, transparent: true, opacity: 0.8 });
+                    const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+                    // Aangepast naar XY-vlak omdat de tiltContainer alles al roteert
+                    sphere.position.set(5.5 * Math.cos(angle), 5.5 * Math.sin(angle), 0);
+                    alphaGroup.add(sphere);
+                }
+                alphaGroup.visible = false;
+                tiltContainer.add(alphaGroup);
+                refs.current.alphaGroup = alphaGroup;
+
+                // --- INDICATOR: Beta L (Lijnspanning) ---
+                const betaMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, wireframe: true, transparent: true, opacity: 0.2 });
+                const betaMesh = new THREE.Mesh(knotGeo, betaMat);
+                betaMesh.scale.set(1.02, 1.02, 1.02); // Iets groter om de lengte te accentueren
+                betaMesh.visible = false;
+                tiltContainer.add(betaMesh);
+                refs.current.betaMesh = betaMesh;
+
+                // --- INDICATOR: Gamma H (Hopf Stabiliteit / Heliciteit) ---
+                const gammaGroup = new THREE.Group();
+                // Gebruik een torus knot met meer wikkels om stroomlijnen óm de wervelkern heen te simuleren
+                const gammaGeo = new THREE.TorusKnotGeometry(10, 3.2, 300, 12, 2, 3);
+                const gammaMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.4 });
+                const gammaMesh = new THREE.Mesh(gammaGeo, gammaMat);
+                gammaGroup.add(gammaMesh);
+                gammaGroup.visible = false;
+                tiltContainer.add(gammaGroup);
+                refs.current.gammaGroup = gammaGroup;
+
+                // --- Animatielus ---
+                let animationId;
+                const clock = new THREE.Clock();
+
+                const animate = () => {
+                    animationId = requestAnimationFrame(animate);
+                    const delta = clock.getDelta();
+
+                    controls.update();
+
+                    // Roteer achtergronddeeltjes gebaseerd op UI slider (Taylor-kolom)
+                    if (refs.current.bgParticles) {
+                        refs.current.bgParticles.rotation.y += 0.5 * delta * bgSpeed;
+                    }
+                    if (refs.current.streamlines) {
+                        refs.current.streamlines.rotation.y += 0.5 * delta * bgSpeed;
+                    }
+
+                    // Spin de geneste container zeer traag om de cilinder as
+                    if (refs.current.spinContainer) refs.current.spinContainer.rotation.y += 0.1 * delta;
+
+                    // Laat de Alpha bollen pulseren om druk aan te geven
+                    if (refs.current.alphaGroup && refs.current.alphaGroup.visible) {
+                        const scale = 1 + 0.1 * Math.sin(clock.elapsedTime * 5);
+                        refs.current.alphaGroup.scale.set(scale, scale, scale);
+                    }
+
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                // Window resize handler
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+
+                // Cleanup
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    cancelAnimationFrame(animationId);
+                    mountRef.current.removeChild(renderer.domElement);
+                };
+            }, []);
+
+            // Update zichtbaarheid van 3D objecten op basis van React state
+            useEffect(() => {
+                if (refs.current.alphaGroup) refs.current.alphaGroup.visible = activeIndicator === 'alpha';
+                if (refs.current.betaMesh) refs.current.betaMesh.visible = activeIndicator === 'beta';
+                if (refs.current.gammaGroup) refs.current.gammaGroup.visible = activeIndicator === 'gamma';
+            }, [activeIndicator]);
+
+            return (
+                <div className="w-full h-full relative">
+                    {/* 3D Canvas Container */}
+                    <div id="canvas-container" ref={mountRef}></div>
+
+                    {/* UI Overlay */}
+                    <div id="ui-layer" className="p-6">
+                        
+                        {/* Header */}
+                        <div className="pointer-events-auto glass-panel p-6 rounded-xl max-w-lg shadow-2xl">
+                            <h1 className="text-3xl font-bold text-cyan-400 mb-2">SST Trefoil Stabiliteit</h1>
+                            <p className="text-sm text-gray-300 leading-relaxed mb-4">
+                                Topologische relaxatie en massa-emergentie in een incompressibel continuüm. De wervel overleeft kwantumreconnectie door massieve kern-afstoting.
+                            </p>
+                            <div className="bg-neutral-900/80 p-3 rounded-lg border border-neutral-700 text-center">
+                                <span className="font-mono text-lg text-white">
+                                    E<sub>eff</sub>[K] = <span className={activeIndicator === 'alpha' ? 'text-rose-500 font-bold' : ''}>αC(K)</span> + <span className={activeIndicator === 'beta' ? 'text-yellow-400 font-bold' : ''}>βL(K)</span> + <span className={activeIndicator === 'gamma' ? 'text-purple-400 font-bold' : ''}>γH(K)</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Controls Panel (Rechts) */}
+                        <div className="pointer-events-auto absolute top-6 right-6 flex flex-col space-y-4 w-80">
+                            
+                            <div className="glass-panel p-5 rounded-xl space-y-4 shadow-2xl">
+                                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Achtergrond Rotatie (Ω)</h2>
+                                <input 
+                                    type="range" min="0" max="5" step="0.1" 
+                                    value={bgSpeed} onChange={(e) => setBgSpeed(parseFloat(e.target.value))}
+                                    className="w-full accent-cyan-500"
+                                />
+                                <div className="text-xs text-gray-400 text-center font-mono">
+                                    Rotatiesnelheid: {bgSpeed.toFixed(1)}x
+                                </div>
+                            </div>
+
+                            <div className="glass-panel p-5 rounded-xl space-y-3 shadow-2xl">
+                                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Energie Functionaal</h2>
+                                
+                                <button 
+                                    onClick={() => setActiveIndicator(activeIndicator === 'alpha' ? 'none' : 'alpha')}
+                                    className={`w-full text-left p-3 rounded-lg border transition-all ${activeIndicator === 'alpha' ? 'bg-rose-500/20 border-rose-500' : 'bg-transparent border-neutral-700 hover:border-gray-500'}`}
+                                >
+                                    <div className="font-mono text-rose-400 font-bold mb-1">α C(K) - Biot-Savart Afstoting</div>
+                                    <div className="text-xs text-gray-300">
+                                        De massieve wervelkernen naderen elkaar, maar incompressibiliteit creëert een oneindige drukbarrière (pressure well intersectie) die instorten en reconnectie voorkomt.
+                                    </div>
+                                </button>
+
+                                <button 
+                                    onClick={() => setActiveIndicator(activeIndicator === 'beta' ? 'none' : 'beta')}
+                                    className={`w-full text-left p-3 rounded-lg border transition-all ${activeIndicator === 'beta' ? 'bg-yellow-500/20 border-yellow-400' : 'bg-transparent border-neutral-700 hover:border-gray-500'}`}
+                                >
+                                    <div className="font-mono text-yellow-400 font-bold mb-1">β L(K) - Lijnspanning</div>
+                                    <div className="text-xs text-gray-300">
+                                        De samentrekkende kracht van de wervelstreng. De buis probeert zijn booglengte te minimaliseren tegen de afstotingskracht in.
+                                    </div>
+                                </button>
+
+                                <button 
+                                    onClick={() => setActiveIndicator(activeIndicator === 'gamma' ? 'none' : 'gamma')}
+                                    className={`w-full text-left p-3 rounded-lg border transition-all ${activeIndicator === 'gamma' ? 'bg-purple-500/20 border-purple-400' : 'bg-transparent border-neutral-700 hover:border-gray-500'}`}
+                                >
+                                    <div className="font-mono text-purple-400 font-bold mb-1">γ H(K) - Hopf Stabiliteit</div>
+                                    <div className="text-xs text-gray-300">
+                                        De topologische verstrengeling (kruis-heliciteit) van de poloidale stroomlijnen die het macroscopische deeltje als één samenhangend geheel bijeen houdt.
+                                    </div>
+                                </button>
+
+                            </div>
+                        </div>
+
+                        {/* Footer info */}
+                        <div className="pointer-events-auto text-xs text-gray-500 font-mono">
+                            Muis/Touch: Draai & Zoom de camera.
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+C:\workspace\projects\SST-Workbench\.venv\Scripts\python.exe C:\workspace\projects\SST-Workbench\to_be_processed\routeI_heat_guard_patch_bundle_v0_8_19\sst_v0_8_19_verification_suite_impedance_patched.py 
+##############################################################################
+# SST Canon v0.8.19-compatible -- consolidated claim verification suite
+# numpy: yes
+##############################################################################
+
+==============================================================================
+SECTION constants  -- primitive chain, tension scales, EMG numerics
+==============================================================================
+  [PASS] claim     3 [ORTHODOX]   omega_c = m_e c^2/hbar
+          got=7.763440711e+20 rad/s  expected=7.763440711e+20 rad/s  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     5 [CALIBRATED] eta_0 = vchar/c = alpha/2 (alpha injected here)
+          got=0.003648676285   expected=0.003648676285   (rel.dev=1.19e-16, tol=1e-06)
+  [PASS] claim     2 [DERIVED]    r_c = vchar/omega_c
+          got=1.408970162e-15 m  expected=1.408970162e-15 m  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     2 [CALIBRATED] r_c = alpha hbar/(2 m_e c)  (=> only via vchar=alpha c/2)
+          got=1.408970162e-15 m  expected=1.408970162e-15 m  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     2 [CALIBRATED] r_c = r_e/2
+          got=1.408970162e-15 m  expected=1.408970163e-15 m  (rel.dev=6.10e-10, tol=1e-06)
+  [PASS] claim     4 [DERIVED]    Gamma_0 = 2 pi r_c vchar = 2 pi vchar^2/omega_c
+          got=9.683619166e-09 m^2/s  expected=9.683619166e-09 m^2/s  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     7 [CALIBRATED] rho_E = 1/2 rho_f vchar^2  (rho_f=7.0e-7 free param)
+          got=418774.3932 Pa  expected=418774.39 Pa  (rel.dev=7.62e-09, tol=1e-05)
+  [PASS] claim     8 [CALIBRATED] rho_horn = m_e c^2/(2 pi vchar^2 r_c^3)
+          got=3.893436276e+18 kg/m^3  expected=3.893436276e+18 kg/m^3  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    13 [CALIBRATED] F_max = hbar omega_c/(2 r_c) = vchar hbar/(2 r_c^2)
+          got=29.05351013 N  expected=29.05351013 N  (rel.dev=1.22e-16, tol=1e-06)
+  [PASS] claim    13 [CALIBRATED] F_max numeric
+          got=29.05351013 N  expected=29.053507 N  (rel.dev=1.08e-07, tol=1e-04)
+  [PASS] claim    14 [CALIBRATED] F_max = e^2/(16 pi eps0 r_c^2)
+          got=29.05351013 N  expected=29.05351015 N  (rel.dev=6.10e-10, tol=1e-06)
+  [PASS] claim    14 [CALIBRATED] F_max = h alpha c/(8 pi r_c^2)
+          got=29.05351013 N  expected=29.05351013 N  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    16 [CALIBRATED] F_max/F_gr = 4 alpha_g/alpha
+          got=9.602438026e-43   expected=9.602438026e-43   (rel.dev=1.66e-16, tol=1e-06)
+  [PASS] claim    17 [CALIBRATED] F_pp(r_c) = 4 F_max (quarter-Coulomb)
+          got=116.2140406   expected=116.2140405   (rel.dev=6.10e-10, tol=1e-06)
+  [PASS] claim    18 [CONDITIONAL] omega_spring = sqrt(K_e/m_e) = omega_c/alpha (n=2 POSIT)
+          got=1.063870854e+23 rad/s  expected=1.063870854e+23 rad/s  (rel.dev=1.58e-16, tol=1e-06)
+  [PASS] claim    18 [CONDITIONAL] E_spring = 1/2 K_e r_c^2 = m_e c^2/8 (n=2 POSIT)
+          got=1.023388222e-14 J  expected=1.023388222e-14 J  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    15 [CALIBRATED] R_inf = vchar^3/(pi r_c c^3) (hidden m_e,alpha)
+          got=10973731.57 1/m  expected=10973731.57 1/m  (rel.dev=5.09e-16, tol=1e-06)
+  [PASS] claim    32 [CALIBRATED] G_swirl = vchar c^3 t_p^2/(r_c m_e) (t_p contains G)
+          got=6.6743e-11 m^3/kg/s^2  expected=6.6743e-11 m^3/kg/s^2  (rel.dev=0.00e+00, tol=1e-05)
+  [PASS] claim    33 [DERIVED]    Swirl-Clock S_(t)
+          got=0.9999933436   expected=0.9999933436   (rel.dev=4.15e-11, tol=1e-07)
+  [PASS] claim    33 [DERIVED]    optical index n_gamma-1
+          got=6.656485778e-06   expected=6.6564858e-06   (rel.dev=3.35e-09, tol=1e-04)
+
+==============================================================================
+SECTION gate  -- master-equation geometric gate Pi_K (audit BG-1)
+==============================================================================
+  [PASS] claim    12 [CALIBRATED] lambda_c/(pi r_c)=4/alpha  REQUIRES lambda_c=h/(m_e c) (non-reduced)
+          got=548.1439963   expected=548.1439963   (rel.dev=0.00e+00, tol=1e-06)
+  [INFO ] claim    12 [BG-1]       reduced-lambda gate = 87.2398 = (4/alpha)/(2pi) = 87.2398  -> canon must fix lambda_c def
+
+==============================================================================
+SECTION topology  -- torus self-linking SL_tor(T(p,q)) = pq (non-circular)
+==============================================================================
+    T(2,3): SL=  -6.000  |SL|= 6.000  pq=  6  PASS  (sign - = chirality sector)
+    T(2,5): SL= -10.000  |SL|=10.000  pq= 10  PASS  (sign - = chirality sector)
+    T(2,7): SL= -14.001  |SL|=14.001  pq= 14  PASS  (sign - = chirality sector)
+    T(2,9): SL= -18.002  |SL|=18.002  pq= 18  PASS  (sign - = chirality sector)
+    T(2,11): SL= -22.006  |SL|=22.006  pq= 22  PASS  (sign - = chirality sector)
+    T(3,2): SL=  -6.000  |SL|= 6.000  pq=  6  PASS  (sign - = chirality sector)
+    T(3,4): SL= -12.001  |SL|=12.001  pq= 12  PASS  (sign - = chirality sector)
+    => SL_tor=pq verified target-free. pq+1 ladder = pq[DERIVED]+1[POSIT].  PASS
+
+==============================================================================
+SECTION biotsavart  -- Biot-Savart log coefficient A_K -> 1/(4pi)
+==============================================================================
+  [PASS] claim    45 [DERIVED]    A_K trends to 1/(4pi) (LIMIT; coarse run, torch sweep ratio=0.99992)
+          got=0.06967699788   expected=0.07957747155   (rel.dev=1.24e-01, tol=3e-01)
+  [INFO ] claim    45 [LIMIT]      A_K = 0.06968, ratio A_K*4pi = 0.876 (target 1.000; coarse single-curve demonstrator)
+  [INFO ] claim    45 [ORTHODOX]   ideal trefoil ropelength L_K = 16.372 (tabulated, external input)
+  [INFO ] claim    46 [COINCIDENCE] (8 pi/3) L_K = 137.158  vs alpha^-1 = 137.036
+
+==============================================================================
+SECTION onsager  -- Kosterlitz-Thouless transition (SST-15 complement)
+==============================================================================
+  [PASS] claim SST-15 [DERIVED]    T_KT = rho_f Gamma^2/(4 pi k_B)  (closed form, dim-checked)
+          got=0.3783382895 K  expected=0.3783382895 K  (rel.dev=0.00e+00, tol=1e-06)
+  [INFO ] claim SST-15 [INFO]       numeric T_KT = 3.7834e-01 K at canonical (rho_f,Gamma)
+
+==============================================================================
+SECTION impedance_matching  -- Route-I heat split and core-torsion residual
+==============================================================================
+  [PASS] claim  RT-I [RESEARCH-TRACK] T_vchar/T_c = c/vchar wrong-speed Unruh factor
+          got=274.0719982   expected=274.0719986   (rel.dev=1.58e-09, tol=5e-09)
+  [INFO ] claim  RT-I [GUARD]      core sound diagnostic c_s=vchar/sqrt(2)=7.73465664e+05 m/s; not eligible as the Jacobson/Unruh causal speed
+  [PASS] claim RT-Bridge [PROTOCOL]   target tensor M=(2E0/c^2)I gives chi_K^(T)=1 by normalization
+          got=1   expected=1   (rel.dev=2.22e-16, tol=1e-12)
+  [PASS] claim RT-Bridge [FALSIFIER]  Kelvin-normalized inertia tested on c_T=c gives chi=(c/vchar)^2
+          got=75115.46018   expected=75115.46018   (rel.dev=1.94e-16, tol=1e-12)
+  [PASS] claim RT-Bridge [FALSIFIER]  wrong-speed residual is far outside unity tolerance (1/chi <= 1e-4)
+          got=1.331283863e-05   max=0.0001 
+  [INFO ] claim RT-Bridge [OPEN]       This section does not compute M_torsion[K]. A real solver must report E0[K], the three eigenvalues of the torsion-dressed tensor, chi_K^(T), anisotropy max|lambda_i/lambda_iso-1|, and a K_T stiffness sweep at c_T=c.
+
+==============================================================================
+SECTION delay  -- DDE locked-mode condition (claim 26), current SSTcore aligned
+==============================================================================
+  [PASS] claim    26 [CODE=CANON] Omega = omega0 - kappa sin(Omega tau)
+          got=-5.551115123e-17   expected=0   (rel.dev=5.55e-17, tol=1e-09)
+  [PASS] claim    26 [CODE=CANON] f'(Omega) = 1 + kappa tau cos(Omega tau)
+          got=1.097282932   expected=1.097282932   (rel.dev=2.83e-11, tol=1e-06)
+  [INFO ] claim    26 [STATUS]     Current SSTcore v0.8.12/v0.8.19-compatible delay residual and Newton derivative are aligned with Canon; old plus-sign mismatch is retained only as historical audit context.
+
+==============================================================================
+SECTION alpha  -- finite-cell coincidence + ppm OBSTRUCTION (NOT derivation)
+==============================================================================
+  [INFO ] claim    46 [COINCIDENCE] leading (8 pi/3) L_K = 137.1577; alpha^-1 = 137.0360; gap = 888 ppm
+  [INFO ] claim    46 [OBSTRUCTION] closure needs w_perp = 1.0675; GP core gives w_perp = 2.076 (wrong side by ~94.5%; ppm closure remains unresolved)
+  [INFO ] claim    46 [STATUS]     alpha is NOT derived: N_p=4 derived, but ppm closure non-identifiable (5 interchangeable routes, G1 fails independently). Label [CONDITIONAL]/[OPEN].
+
+==============================================================================
+SECTION pauli  -- Pauli-barrier benchmark 7.6 eV (claim 38)
+==============================================================================
+  [PASS] claim    38 [CALIBRATED] rho_f Gamma0^2/(4pi)*(L/a_cut) = 7.69 eV (a_cut=r_c calibrated)
+          got=7.693649369 eV  expected=7.69365 eV  (rel.dev=8.21e-08, tol=1e-03)
+  [INFO ] claim    38 [BENCHMARK]  cutoff-calibrated atomic-window scale; NOT a derivation
+
+==============================================================================
+SECTION em_qed  -- swirl<->EM normalization B_core=B_QED (claims 61/67)
+==============================================================================
+  [PASS] claim    61 [CALIBRATED] (m_e/e)*omega_c == m_e^2 c^2/(e hbar) == B_QED
+          got=4414005221 T  expected=4414005221 T  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    67 [ORTHODOX]   B_QED ~ 4.414e9 T (Schwinger critical field)
+          got=4414005221 T  expected=4414005200 T  (rel.dev=4.85e-09, tol=1e-05)
+  [PASS] claim    61 [DERIVED]   (e/m_e)*omega_c is NOT tesla (inverted form rejected)
+          got=1.365e+32 (arb.)  threshold>1e25  -> above threshold
+
+==============================================================================
+SECTION galactic  -- swirl flat-tail fit machinery (claim 42, research-track)
+==============================================================================
+  [PASS] claim    42 [RESEARCH-TRACK] chi2/dof <= 1.5 on noisy synthetic demo (fit machinery sanity)
+          got=0.8144723537   max=1.5 
+  [INFO ] claim    42 [RESEARCH-TRACK] synthetic fit: Y_disk=0.699 (truth 0.5), Y_bul=0.541 (truth 0.7), C_tail=97.0 km/s (truth 110.0), r_s=3.39 kpc (truth 3.0); RMS=4.12 km/s
+  [INFO ] claim    42 [OPEN]       Standalone fit_galactic_swirl_rotation_sparc.py provides SPARC rotmod fitter; no SPARC dataset bundled; r_s is fitted, not derived (coherence-length lemma OPEN).
+
+==============================================================================
+SECTION sstcore_alignment  -- SSTcore v0.8.12/v0.8.19-compatible C++ formulas vs canon
+==============================================================================
+  [PASS] claim     3 [CODE=CANON] m_e*c*c/hbar == omega_c
+          got=7.763440711e+20 rad/s  expected=7.763440711e+20 rad/s  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     2 [CODE=CANON] v_swirl/omega_c == r_c
+          got=1.408970162e-15 m  expected=1.408970162e-15 m  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     4 [CODE=CANON] 2pi r_c v == 2pi v^2/omega_c
+          got=9.683619166e-09 m^2/s  expected=9.683619166e-09 m^2/s  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     7 [CODE=CANON] 0.5*rho_f*v^2 == rho_E
+          got=418774.3932 Pa  expected=418774.3932 Pa  (rel.dev=1.39e-16, tol=1e-06)
+  [PASS] claim     8 [CODE=CANON] m_e c^2/(2pi v^2 r_c^3) == rho_horn (patch 0002 alias)
+          got=3.893436276e+18 kg/m^3  expected=3.893436276e+18 kg/m^3  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    12 [CODE=CANON] geometric_gate uses full lambda_c -> 4/alpha (resolves audit BG-1)
+          got=548.1439963   expected=548.1439963   (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    13 [CODE=CANON] hbar*omega_c/(2 r_c) == F_max
+          got=29.05351013 N  expected=29.053507 N  (rel.dev=1.08e-07, tol=1e-04)
+  [PASS] claim    15 [CODE=CANON] v^3/(pi r_c c^3) == R_inf
+          got=10973731.57 1/m  expected=10973731.57 1/m  (rel.dev=5.09e-16, tol=1e-06)
+  [PASS] claim    16 [CODE=CANON] 4 alpha_g/alpha == F_max/F_gr
+          got=9.602438026e-43   expected=9.602438026e-43   (rel.dev=1.66e-16, tol=1e-06)
+  [PASS] claim    17 [CODE=CANON] e^2/(4pi eps0 r_c^2) == 4 F_max (quarter-Coulomb)
+          got=116.2140406 N  expected=116.2140405 N  (rel.dev=6.10e-10, tol=1e-06)
+  [PASS] claim    18 [CODE=CANON] sqrt(K_e/m_e) == omega_c/alpha (n=2)
+          got=1.063870854e+23 rad/s  expected=1.063870854e+23 rad/s  (rel.dev=1.58e-16, tol=1e-06)
+  [PASS] claim    18 [CODE=CANON] 0.5 K_e r_c^2 == m_e c^2/8 (n=2)
+          got=1.023388222e-14 J  expected=1.023388222e-14 J  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim    32 [CODE=CANON] v c^5 t_p^2/(2 F_max r_c^2) == v c^3 t_p^2/(r_c m_e) == G
+          got=6.6743e-11 m^3/kg/s^2  expected=6.6743e-11 m^3/kg/s^2  (rel.dev=0.00e+00, tol=1e-09)
+  [INFO ] claim    32 [CROSS-CHECK] both G_swirl forms = 6.6743000e-11 (target G=6.6743e-11)
+  [PASS] claim     9 [CONVENTION] code omega = canon vorticity / 2 (angular-frequency convention)
+          got=7.763440711e+20 rad/s  expected=7.763440711e+20 rad/s  (rel.dev=0.00e+00, tol=1e-06)
+  [PASS] claim     9 [CODE=CANON] patched vorticity == canon 2c/r_c sqrt(1-S^2)
+          got=1.552688142e+21 rad/s  expected=1.552688142e+21 rad/s  (rel.dev=0.00e+00, tol=1e-06)
+
+==============================================================================
+RESULT: 50/50 graded checks passed (12 section(s): constants, gate, topology, biotsavart, onsager, impedance_matching, delay, alpha, pauli, em_qed, galactic, sstcore_alignment)
+==============================================================================
+
+SOURCE MAP (after Results.zip / trefoil_closure.zip / code.zip / routeB_RT_bem.zip):
+  RECOVERED (script now located in user sources):
+    claim 45/46  code/reproduce_alpha_cell_closure.py  (runs -> 137.036 closure;
+                 NOTE: uses inserted E_eff~274 => OBSTRUCTION, not a derivation)
+    claim 45     Results/sst_knot_candidate_robustness_outputs_v10_2/ (v10 sweep)
+    claim 22/44  routeB_RT_bem/knotplot/sst_helicity_balance_scan.py +
+                 Results/SST_helicity_by_base.csv ; taxonomy_builder_v3b.py
+    claim 40     trefoil_closure/SST_ATOM_MASS_INVARIANT_SEMF_patched.py +
+                 SST_Invariant_Mass_Results_CANON.csv
+    claim 47/48  routeB_RT_bem/SST_CoilLab_v2_work/ (rodin6lane, sawbowl fields)
+    routeB neg.  routeB_RT_bem/routeB_RT_bem_v18_multiknot_exponent_test.py
+    alpha gates  code/solve_one_cell_hodge_phase_hessian.py, gp_core_second_variation
+                 (w_perp obstruction), audit_derived_label_gates.py
+  OPEN / RESEARCH-TRACK (fit machinery exists; external data + derivation still open):
+    claim 42     fit_galactic_swirl_rotation_sparc.py provides the standalone
+                 SPARC rotmod fitter + section 'galactic' (synthetic demo), but no
+                 SPARC dataset is bundled and r_s is fitted, not derived
+                 (coherence-length lemma OPEN).
+  NOW REPRODUCED (standalone scripts + suite sections):
+    Route-I     section 'impedance_matching' adds the v0.8.19 heat-sector guard
+                 and chi_K^(T) protocol check; it is a normalization/falsifier
+                 audit, not a PDE-level M_torsion[K] solver.
+    claim 38     reproduce_pauli_barrier.py  + section 'pauli'  [CALIBRATED BENCHMARK]
+    claim 61/67  reproduce_em_qed_normalization.py + section 'em_qed'
+                 (correct prefactor m_e/e; B_core=B_QED=4.414e9 T)
+
+
+Process finished with exit code 0
