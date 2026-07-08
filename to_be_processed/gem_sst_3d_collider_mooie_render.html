@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SST 3D Collider — KaTeX & Fysica Engine</title>
+
+	<!-- KaTeX CSS & JS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+	<style>
+      :root{
+          --bg:#0B1020; --panel:#101830; --line:#1E2C4A;
+          --txt:#C9D6E3; --dim:#6F82A0;
+          --amber:#FFAE45; --ice:#55D6FF; --warn:#FF6E6E; --ok:#7BE8A8; --purple:#A855F7;
+      }
+      *{box-sizing:border-box; margin:0; padding:0;}
+      html,body{height:100%; background:var(--bg); color:var(--txt);
+          font-family:"IBM Plex Mono","SFMono-Regular",Consolas,monospace; font-size:13px; overflow:hidden;}
+      #app{display:flex; flex-direction:column; height:100%;}
+      header{padding:10px 14px 6px; border-bottom:1px solid var(--line); background:var(--bg); z-index:20;}
+      header h1{font-size:14px; letter-spacing:.06em; font-weight:600; color:#EAF2FA;}
+      header .sub{color:var(--dim); font-size:11px; margin-top:2px;}
+      #stage{position:relative; flex:1 1 auto; min-height:0; overflow:hidden;}
+      #c3d{position:absolute; inset:0; touch-action:none; width:100%; height:100%; display:block;}
+      #hud{position:absolute; top:10px; left:10px; background:rgba(16,24,48,.82);
+          border:1px solid var(--line); border-radius:6px; padding:10px 12px; min-width:190px;}
+      #hud .big{font-size:26px; font-weight:600; color:#EAF2FA; line-height:1.1;}
+      #hud .lbl{color:var(--dim); font-size:11px; letter-spacing:.08em; margin-bottom: 2px;}
+      #hud .row{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:4px;}
+      #hud .val{color:#EAF2FA; font-weight:600;}
+      #flag{position:absolute; top:10px; right:10px; max-width:210px; background:rgba(16,24,48,.85);
+          border:1px solid var(--warn); border-radius:6px; padding:8px 10px; color:var(--warn);
+          font-size:11px; display:none;}
+      #spark{position:absolute; left:10px; bottom:10px; background:rgba(16,24,48,.82);
+          border:1px solid var(--line); border-radius:6px; padding:6px;}
+      #panel{position:relative; z-index:5; flex-shrink:0; border-top:1px solid var(--line); background:var(--panel); padding:10px 14px 14px; max-height: 45vh; overflow-y: auto;}
+
+      .ctrls{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px 16px;}
+      .ctrl label{display:flex; justify-content:space-between; color:var(--dim); font-size:11px; margin-bottom:3px; align-items:center;}
+      .ctrl label .v{color:#EAF2FA;}
+      input[type=range]{width:100%; accent-color:var(--ice); height:20px;}
+      .seg{display:flex; gap:4px; width:100%;}
+      .seg-btn{flex:1; padding:7px 6px; font-size:11px; border:1px solid var(--line); border-radius:4px;
+          background:var(--bg); color:var(--dim); cursor:pointer; font-family:inherit; line-height:1.2; transition:all 0.2s;}
+      .seg-btn:hover:not(:disabled){border-color:var(--ice); color:var(--txt);}
+      .seg-btn.active{border-color:var(--ice); color:#EAF2FA; background:rgba(85,214,255,.12);}
+      .seg-btn:disabled{opacity:0.4; cursor:not-allowed;}
+      .seg.disabled{opacity:0.45; pointer-events:none;}
+      .btns{display:flex; gap:8px; margin-top:10px;}
+      button{background:transparent; color:var(--txt); border:1px solid var(--line);
+          border-radius:5px; padding:7px 14px; font-family:inherit; font-size:12px; cursor:pointer; transition:all 0.2s;}
+      button:hover,button:focus-visible{border-color:var(--ice); color:#EAF2FA; background:var(--line); outline:none;}
+      .note{color:var(--dim); font-size:10.5px; margin-top:8px; line-height:1.45;}
+      .kA{color:var(--amber);} .kB{color:var(--ice);}
+
+      /* Indicator knoppen css voor KaTeX integratie */
+      .ind-btn {
+          flex: 1; padding: 6px 4px; font-size: 11px; border: 1px solid var(--line); border-radius: 4px;
+          background: var(--bg); color: var(--dim); cursor: pointer; transition: all 0.2s;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      }
+      .ind-btn:hover { filter: brightness(1.2); border-color: var(--dim); }
+      .ind-btn .kx { pointer-events: none; /* Voorkom dat kliks op de formule het target veranderen */ }
+      .ind-btn .desc { font-size: 9px; pointer-events: none; }
+
+      .ind-btn.active.alpha { border-color: var(--warn); color: var(--warn); background: rgba(255,110,110,0.1); }
+      .ind-btn.active.beta { border-color: var(--amber); color: var(--amber); background: rgba(255,174,69,0.1); }
+      .ind-btn.active.sep { border-color: #fff; color: #fff; background: rgba(255,255,255,0.1); }
+      .ind-btn.active.gamma { border-color: var(--purple); color: var(--purple); background: rgba(168,85,247,0.1); }
+
+      @media (prefers-reduced-motion:reduce){ #spark{display:none;} }
+	</style>
+</head>
+<body>
+<div id="app">
+	<header>
+		<h1>SUPERFLUÏDE COLLIDER · cilinder 1.0 m × Ø0.5 m · <span id="kx-title-omega"></span> = <span id="hOm">1.00</span> rad·s⁻¹</h1>
+		<div class="sub" id="hSub">Twee coaxiale ringen, |Γ| identiek, frontaal · gedesingulariseerde Biot–Savart op kernlijnen</div>
+	</header>
+
+	<div id="stage">
+		<canvas id="c3d"></canvas>
+
+		<div id="hud">
+			<div class="lbl" id="kx-hel-title"></div>
+			<div class="big" id="hHel">0.000</div>
+			<div class="row"><span class="lbl" id="kx-wr"></span><span class="val" id="hWr">0.000</span></div>
+			<div class="row"><span class="lbl" id="kx-lk"></span><span class="val" id="hLk">0.000</span></div>
+			<div class="row"><span class="lbl" id="kx-wrel"></span><span class="val" id="hWrel">2.00 s⁻¹ ẑ</span></div>
+			<div class="row"><span class="lbl"><span id="hRLbl">R</span><span class="kA">A</span> / <span id="hRLblB">R</span><span class="kB">B</span></span><span class="val" id="hR">—</span></div>
+			<div class="row"><span class="lbl" id="kx-dz"></span><span class="val" id="hDz">—</span></div>
+			<div class="row"><span class="lbl">naderingssnelheid</span><span class="val" id="hV">—</span></div>
+			<div class="row"><span class="lbl">t (fysisch)</span><span class="val" id="hT">0.0 s</span></div>
+		</div>
+
+		<div id="flag"></div>
+
+		<div id="spark"><canvas id="cspark" width="220" height="72"></canvas></div>
+	</div>
+
+	<div id="panel">
+		<div class="ctrls">
+			<div class="ctrl"><label>Topologie</label>
+				<div class="seg" id="topoSeg">
+					<button type="button" class="seg-btn active" data-topo="ring">Ringen (0₁)</button>
+					<button type="button" class="seg-btn" data-topo="trefoil">Trefoil (3₁)</button>
+				</div>
+			</div>
+			<div class="ctrl"><label>Kernstructuur (SST vs Orthodox)</label>
+				<div class="seg" id="coreSeg">
+					<button type="button" class="seg-btn active" data-core="solid">Vast ($\rho_{core}$)</button>
+					<button type="button" class="seg-btn" data-core="hollow">Hol (Vacuüm)</button>
+				</div>
+			</div>
+
+			<div class="ctrl"><label>Achtergrond rotatie <span id="kx-lbl-om"></span><span class="v" id="vOm">1.00 rad/s</span></label>
+				<input type="range" id="sOm" min="0" max="2" step="0.05" value="1"></div>
+			<div class="ctrl"><label>Circulatie <span id="kx-lbl-ga"></span><span class="v" id="vGa">2.0·10⁻³ m²/s</span></label>
+				<input type="range" id="sGa" min="0.5" max="5" step="0.1" value="2"></div>
+			<div class="ctrl"><label>Kernstraal <span id="kx-lbl-a"></span><span class="v" id="vA">1.5 mm</span></label>
+				<input type="range" id="sA" min="0.5" max="3" step="0.1" value="1.5"></div>
+			<div class="ctrl"><label>Laterale offset <span id="kx-lbl-dx"></span><span class="v" id="vOff">0 mm</span></label>
+				<input type="range" id="sOff" min="0" max="50" step="1" value="0"></div>
+
+			<!-- Knoppen met KaTeX rendering -->
+			<div class="ctrl" style="grid-column: 1 / -1;">
+				<label>Effectieve Energie Functionaal: <span id="kx-eeff" style="color:#EAF2FA;"></span></label>
+				<div style="display:flex; gap:8px; margin-top: 4px;">
+					<button id="bAlpha" class="ind-btn alpha">
+						<span id="kx-alpha" class="kx"></span><span class="desc">Biot-Savart</span>
+					</button>
+					<button id="bBeta" class="ind-btn beta">
+						<span id="kx-beta" class="kx"></span><span class="desc">Lijnspanning</span>
+					</button>
+					<button id="bSep" class="ind-btn sep">
+						<span id="kx-sep" class="kx"></span><span class="desc">Separatrix</span>
+					</button>
+					<button id="bGamma" class="ind-btn gamma">
+						<span id="kx-gamma" class="kx"></span><span class="desc">Swirl Flow</span>
+					</button>
+				</div>
+			</div>
+
+		</div>
+		<div class="btns">
+			<button id="bPause">Pauzeer</button>
+			<button id="bReset">Reset &amp; herstart</button>
+			<button id="bFrame" style="margin-left: auto; border-color: var(--ice); color: var(--ice);">Kader: Lab</button>
+		</div>
+	</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // ==========================================
+    // 0. KaTeX INITIALISATIE (Statische UI elementen)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+        const renderMath = (tex, id) => {
+            katex.render(tex, document.getElementById(id), { throwOnError: false, displayMode: false });
+        };
+        renderMath("\\Omega", "kx-title-omega");
+        renderMath("\\mathcal{H} = Wr + 2Lk", "kx-hel-title");
+        renderMath("Wr(A) + Wr(B)", "kx-wr");
+        renderMath("Lk(A, B)", "kx-lk");
+        renderMath("\\omega_{\\text{rel}}", "kx-wrel");
+        renderMath("\\Delta z", "kx-dz");
+
+        renderMath("\\Omega", "kx-lbl-om");
+        renderMath("|\\Gamma|", "kx-lbl-ga");
+        renderMath("a", "kx-lbl-a");
+        renderMath("\\Delta x", "kx-lbl-dx");
+
+        renderMath("\\mathcal{E}_{\\rm eff}[K] = \\alpha C(K) + \\beta L(K) + \\gamma \\mathcal{H}(K)", "kx-eeff");
+        renderMath("\\alpha C(K)", "kx-alpha");
+        renderMath("\\beta L(K)", "kx-beta");
+        renderMath("\\partial V", "kx-sep");
+        renderMath("\\gamma \\mathcal{H}(K)", "kx-gamma");
+
+        // Fix voor de core buttons in de HTML zelf
+        katex.render("Vast (\\rho_{\\text{core}})", document.querySelector('[data-core="solid"]'), {throwOnError: false});
+    });
+
+    // ==========================================
+    // 1. DATA & STATE
+    // ==========================================
+    const IDEAL_TREFOIL_3_1_1 = {
+        knotId: "3:1:1", L: 16.371637,
+        coeffs: [
+            {I:1,A:[0.374139, 0, 0],B:[0, 0.37392799999999998, 0]},
+            {I:2,A:[0.82424600000000003, 0.75026000000000004, 0.00035199999999999999],B:[0.75044999999999995, -0.82395200000000002, -0.0019910000000000001]},
+            {I:3,A:[0.00025700000000000001, -0.00093199999999999999, 0.35239700000000002],B:[-0.00076999999999999996, 0.00072599999999999997, -0.386764]},
+            {I:4,A:[0.011651999999999999, -0.010656000000000001, 0.00074299999999999995],B:[0.010739, 0.011613, -0.00023000000000000001]},
+            {I:5,A:[0.010503999999999999, 0.110306, 0.00019900000000000001],B:[0.110745, -0.010366, -0.00023499999999999999]},
+            {I:6,A:[1.5e-05, -6.0000000000000002e-06, -0.047465],B:[-5.0000000000000002e-05, -9.9999999999999995e-07, 0.0045950000000000001]},
+            {I:7,A:[-0.000292, 0.0024169999999999999, -7.9999999999999996e-06],B:[-0.002529, -0.00025500000000000002, -9.0000000000000002e-06]},
+            {I:8,A:[0.016487000000000002, -0.021784000000000001, 4.1e-05],B:[-0.021922000000000001, -0.016421000000000002, -4.3999999999999999e-05]},
+            {I:9,A:[-2.9e-05, -1.8e-05, 0.011178],B:[4.8999999999999998e-05, 4.1e-05, 0.0084139999999999996]},
+            {I:10,A:[-0.00021599999999999999, -0.00029, -1.8e-05],B:[0.00031100000000000002, -0.00019699999999999999, -4.3999999999999999e-05]},
+            {I:11,A:[-0.011727, 0.0021840000000000002, 6.9999999999999999e-06],B:[0.002202, 0.011682, 2.0000000000000002e-05]},
+            {I:12,A:[2.5999999999999998e-05, 1.9000000000000001e-05, -0.0013079999999999999],B:[-3.9999999999999998e-06, -1.9000000000000001e-05, -0.0070390000000000001]},
+            {I:13,A:[0.00032499999999999999, 5.5000000000000002e-05, -9.0000000000000002e-06],B:[-5.8999999999999998e-05, 0.00028899999999999998, 2.4000000000000001e-05]},
+            {I:14,A:[0.0052129999999999998, 0.0032009999999999999, 9.9999999999999995e-07],B:[0.0032100000000000002, -0.0051879999999999999, 1.0000000000000001e-05]}
+        ]
+    };
+
+    const P = {
+        Om: 1.0, Ga: 2.0e-3, a: 1.5e-3, off: 0.0, acc: 8,
+        R0: 0.07, zA: 0.08, zB: 0.92, Rcyl: 0.25, Hcyl: 1.0,
+        topology: "ring", quality: "medium",
+        qualityN: { low: 64, medium: 128, high: 256 }
+    };
+    const SUB_RING = "Twee coaxiale ringen (0₁), frontale botsing · Biot-Savart op kernlijnen";
+    const SUB_TREFOIL = "Twee coaxiale ideal-trefoils (3₁), Fourier parameters · frontale botsing · Biot-Savart";
+
+    let knotN = 48;
+    let paused = false, tPhys = 0, flagged = "";
+    let refFrame = 'lab';
+    let coreModel = 'solid';
+
+    // FIX: Expliciete object-gebaseerde state vlaggen om closure/window issues te voorkomen
+    const Flags = {
+        alpha: false,
+        beta: false,
+        sep: false,
+        gamma: false
+    };
+
+    let VA, VB, KA, KB, TA, TB, XA, XB;
+
+    function currentKnotN() { return P.topology === "ring" ? 48 : P.qualityN[P.quality]; }
+
+    function allocBuffers() {
+        const n3 = 3 * knotN;
+        VA = new Float64Array(n3); VB = new Float64Array(n3);
+        KA = new Float64Array(n3); KB = new Float64Array(n3);
+        TA = new Float64Array(n3); TB = new Float64Array(n3);
+    }
+
+    function sampleFourierKnot(coeffs, n) {
+        const x = new Float64Array(3 * n);
+        for (let k = 0; k < n; k++) {
+            const t = 2 * Math.PI * k / n;
+            let px = 0, py = 0, pz = 0;
+            for (const c of coeffs) {
+                const ct = Math.cos(c.I * t), st = Math.sin(c.I * t);
+                px += ct * c.A[0] + st * c.B[0];
+                py += ct * c.A[1] + st * c.B[1];
+                pz += ct * c.A[2] + st * c.B[2];
+            }
+            x[3 * k] = px; x[3 * k + 1] = py; x[3 * k + 2] = pz;
+        }
+        return x;
+    }
+
+    function makeTrefoil(z0, cx, ccw) {
+        const raw = sampleFourierKnot(IDEAL_TREFOIL_3_1_1.coeffs, knotN);
+        let cx0 = 0, cy0 = 0, cz0 = 0;
+        for (let k = 0; k < knotN; k++) { cx0 += raw[3 * k]; cy0 += raw[3 * k + 1]; cz0 += raw[3 * k + 2]; }
+        cx0 /= knotN; cy0 /= knotN; cz0 /= knotN;
+        let rMax = 0;
+        for (let k = 0; k < knotN; k++) {
+            const dx = raw[3 * k] - cx0, dy = raw[3 * k + 1] - cy0;
+            const r = Math.hypot(dx, dy);
+            if (r > rMax) rMax = r;
+        }
+        const scale = P.R0 / Math.max(rMax, 1e-12);
+        const x = new Float64Array(3 * knotN);
+        for (let k = 0; k < knotN; k++) {
+            const sk = ccw ? k : knotN - 1 - k;
+            x[3 * k] = cx + (raw[3 * sk] - cx0) * scale;
+            x[3 * k + 1] = (raw[3 * sk + 1] - cy0) * scale;
+            x[3 * k + 2] = z0 + (raw[3 * sk + 2] - cz0) * scale;
+        }
+        return x;
+    }
+
+    function makeRing(z0, cx, ccw) {
+        const x = new Float64Array(3 * knotN);
+        for (let k = 0; k < knotN; k++) {
+            const th = (ccw ? 1 : -1) * 2 * Math.PI * k / knotN;
+            x[3 * k] = cx + P.R0 * Math.cos(th);
+            x[3 * k + 1] = P.R0 * Math.sin(th);
+            x[3 * k + 2] = z0;
+        }
+        return x;
+    }
+
+    function makeCarrier(z0, cx, ccw) { return P.topology === "trefoil" ? makeTrefoil(z0, cx, ccw) : makeRing(z0, cx, ccw); }
+
+    function computeVel(Xa, Xb, Va, Vb) {
+        const N = knotN, a2 = P.a * P.a, pref = P.Ga / (4 * Math.PI);
+        const rings = [Xa, Xb];
+        const mid = [new Float64Array(3 * N), new Float64Array(3 * N)];
+        const dl = [new Float64Array(3 * N), new Float64Array(3 * N)];
+        for (let r = 0; r < 2; r++) {
+            const X = rings[r];
+            for (let k = 0; k < N; k++) {
+                const k2 = (k + 1) % N;
+                for (let d = 0; d < 3; d++) {
+                    mid[r][3 * k + d] = 0.5 * (X[3 * k + d] + X[3 * k2 + d]);
+                    dl[r][3 * k + d] = X[3 * k2 + d] - X[3 * k + d];
+                }
+            }
+        }
+        const V = [Va, Vb];
+        let umax = 0;
+        for (let rt = 0; rt < 2; rt++) {
+            const Xt = rings[rt], Vt = V[rt];
+            for (let i = 0; i < N; i++) {
+                let ux = 0, uy = 0, uz = 0;
+                const px = Xt[3 * i], py = Xt[3 * i + 1], pz = Xt[3 * i + 2];
+                for (let rs = 0; rs < 2; rs++) {
+                    const sg = pref;
+                    for (let j = 0; j < N; j++) {
+                        const rx = px - mid[rs][3 * j], ry = py - mid[rs][3 * j + 1], rz = pz - mid[rs][3 * j + 2];
+                        const r2 = rx * rx + ry * ry + rz * rz + a2;
+                        const inv = 1 / (r2 * Math.sqrt(r2));
+                        const dx = dl[rs][3 * j], dy = dl[rs][3 * j + 1], dz = dl[rs][3 * j + 2];
+                        ux += sg * (dy * rz - dz * ry) * inv;
+                        uy += sg * (dz * rx - dx * rz) * inv;
+                        uz += sg * (dx * ry - dy * rx) * inv;
+                    }
+                }
+                ux += -P.Om * py; uy += P.Om * px;
+                Vt[3 * i] = ux; Vt[3 * i + 1] = uy; Vt[3 * i + 2] = uz;
+                const um = Math.sqrt(ux * ux + uy * uy + uz * uz);
+                if (um > umax) umax = um;
+            }
+        }
+        return umax;
+    }
+
+    function stepRK2(dt) {
+        const um1 = computeVel(XA, XB, VA, VB);
+        const n3 = 3 * knotN;
+        for (let i = 0; i < n3; i++) {
+            TA[i] = XA[i] + dt * VA[i];
+            TB[i] = XB[i] + dt * VB[i];
+        }
+        computeVel(TA, TB, KA, KB);
+        for (let i = 0; i < n3; i++) {
+            XA[i] += 0.5 * dt * (VA[i] + KA[i]);
+            XB[i] += 0.5 * dt * (VB[i] + KB[i]);
+        }
+        return um1;
+    }
+
+    function ringStats(X) {
+        let cx = 0, cy = 0, cz = 0;
+        for (let k = 0; k < knotN; k++) { cx += X[3 * k]; cy += X[3 * k + 1]; cz += X[3 * k + 2]; }
+        cx /= knotN; cy /= knotN; cz /= knotN;
+        let R = 0;
+        for (let k = 0; k < knotN; k++) { R += Math.hypot(X[3 * k] - cx, X[3 * k + 1] - cy); }
+        return { R: R / knotN, z: cz, cx: cx, cy: cy, cz: cz };
+    }
+
+    function gauss(X1, X2, same) {
+        const N = knotN; let S = 0;
+        for (let i = 0; i < N; i++) {
+            const i2 = (i + 1) % N;
+            const ax = X1[3 * i], ay = X1[3 * i + 1], az = X1[3 * i + 2];
+            const t1x = X1[3 * i2] - ax, t1y = X1[3 * i2 + 1] - ay, t1z = X1[3 * i2 + 2] - az;
+            const m1x = ax + 0.5 * t1x, m1y = ay + 0.5 * t1y, m1z = az + 0.5 * t1z;
+            for (let j = 0; j < N; j++) {
+                if (same) { const dd = Math.abs(i - j); if (dd < 2 || dd > N - 2) continue; }
+                const j2 = (j + 1) % N;
+                const bx = X2[3 * j], by = X2[3 * j + 1], bz = X2[3 * j + 2];
+                const t2x = X2[3 * j2] - bx, t2y = X2[3 * j2 + 1] - by, t2z = X2[3 * j2 + 2] - bz;
+                const m2x = bx + 0.5 * t2x, m2y = by + 0.5 * t2y, m2z = bz + 0.5 * t2z;
+                const rx = m1x - m2x, ry = m1y - m2y, rz = m1z - m2z;
+                const r2 = rx * rx + ry * ry + rz * rz;
+                if (r2 < 1e-12) continue;
+                const cxx = t1y * t2z - t1z * t2y, cyy = t1z * t2x - t1x * t2z, czz = t1x * t2y - t1y * t2x;
+                S += (cxx * rx + cyy * ry + czz * rz) / (r2 * Math.sqrt(r2));
+            }
+        }
+        return S / (4 * Math.PI);
+    }
+
+    function minGap() {
+        let m = 1e9;
+        for (let i = 0; i < knotN; i++) {
+            for (let j = 0; j < knotN; j++) {
+                const dx = XA[3 * i] - XB[3 * j], dy = XA[3 * i + 1] - XB[3 * j + 1], dz = XA[3 * i + 2] - XB[3 * j + 2];
+                const d = dx * dx + dy * dy + dz * dz;
+                if (d < m) m = d;
+            }
+        }
+        return Math.sqrt(m);
+    }
+
+    // ==========================================
+    // 2. THREE.JS INITIALISATIE & CUSTOM CURVES
+    // ==========================================
+    class DynamicArrayCurve extends THREE.Curve {
+        constructor(array, n) { super(); this.array = array; this.n = n; }
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+            let idx = t * this.n; let i = Math.floor(idx); let f = idx - i;
+            if (i >= this.n) { i = this.n - 1; f = 1; }
+            let i2 = (i + 1) % this.n;
+            let x = this.array[i*3] + f*(this.array[i2*3]-this.array[i*3]);
+            let y = this.array[i*3+1] + f*(this.array[i2*3+1]-this.array[i*3+1]);
+            let z = this.array[i*3+2] + f*(this.array[i2*3+2]-this.array[i*3+2]);
+            return optionalTarget.set(x, y, z);
+        }
+    }
+
+    const canvas = document.getElementById("c3d");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    const scene = new THREE.Scene();
+
+    // AANPASSING: Mist is veel subtieler ingesteld, zodat uitzoomen niet alles zwart maakt.
+    scene.fog = new THREE.FogExp2(0x0B1020, 0.05);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 20);
+    camera.up.set(0, 0, 1);
+    let camTh = 0.9, camPh = 1.15, camD = 1.6, camTarget = new THREE.Vector3(0, 0, 0.5);
+
+    function updCam() {
+        camera.position.set(
+            camTarget.x + camD * Math.sin(camPh) * Math.cos(camTh),
+            camTarget.y + camD * Math.sin(camPh) * Math.sin(camTh),
+            camTarget.z + camD * Math.cos(camPh));
+        camera.lookAt(camTarget);
+    }
+
+    // AANPASSING: Lichten reiken verder en zijn feller
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const light1 = new THREE.PointLight(0x55D6FF, 2, 50); light1.position.set(2, 2, 2); scene.add(light1);
+    const light2 = new THREE.PointLight(0xFFAE45, 2, 50); light2.position.set(-2, -2, -2); scene.add(light2);
+
+    const rootGroup = new THREE.Group();
+    scene.add(rootGroup);
+
+    // Cilinder Wand
+    const cylGeo = new THREE.CylinderGeometry(P.Rcyl, P.Rcyl, P.Hcyl, 48, 1, true);
+    cylGeo.rotateX(Math.PI / 2);
+    cylGeo.translate(0, 0, 0.5);
+    const cyl = new THREE.Mesh(cylGeo, new THREE.MeshBasicMaterial({ color: 0x1E2C4A, wireframe: true, transparent: true, opacity: 0.25 }));
+    rootGroup.add(cyl);
+
+    // Verticale Taylor-kolommen (AANPASSING: Opaciteit is verlaagd van 0.2 naar 0.04 voor een eleganter, spookachtig weefsel)
+    const latticeGrp = new THREE.Group();
+    rootGroup.add(latticeGrp);
+    const vortexGeo = new THREE.BufferGeometry();
+    const vPos = new Float32Array(200 * 2 * 3);
+    for(let i=0; i<200; i++) {
+        const r = P.Rcyl * Math.sqrt(Math.random()) * 0.95 + 0.02;
+        const th = Math.random() * 2 * Math.PI;
+        const x = r * Math.cos(th), y = r * Math.sin(th);
+        vPos[i*6] = x; vPos[i*6+1] = y; vPos[i*6+2] = -0.5;
+        vPos[i*6+3] = x; vPos[i*6+4] = y; vPos[i*6+5] = 1.5;
+    }
+    vortexGeo.setAttribute('position', new THREE.BufferAttribute(vPos, 3));
+    const vortexMat = new THREE.LineBasicMaterial({ color: 0x6F82A0, transparent: true, opacity: 0.04 });
+    const vortexLines = new THREE.LineSegments(vortexGeo, vortexMat);
+    latticeGrp.add(vortexLines);
+
+    // Centrale Z-as
+    const zGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-0.5), new THREE.Vector3(0,0,1.5)]);
+    const zMat = new THREE.LineDashedMaterial({ color: 0x55D6FF, dashSize: 0.05, gapSize: 0.05, transparent: true, opacity: 0.5 });
+    const zAxis = new THREE.Line(zGeo, zMat);
+    zAxis.computeLineDistances();
+    rootGroup.add(zAxis);
+
+    // --- MATERIALEN EN KERN MESHES ---
+    let meshA, meshB, flowA, flowB;
+
+    const matSolidA = new THREE.MeshPhysicalMaterial({ color: 0xFFAE45, metalness: 0.3, roughness: 0.2, transmission: 0.0, opacity: 1.0 });
+    const matSolidB = new THREE.MeshPhysicalMaterial({ color: 0x55D6FF, metalness: 0.3, roughness: 0.2, transmission: 0.0, opacity: 1.0 });
+    const matHollowA = new THREE.MeshPhysicalMaterial({ color: 0xFFAE45, metalness: 0.1, roughness: 0.1, transmission: 0.95, thickness: 0.01, transparent: true, opacity: 0.6 });
+    const matHollowB = new THREE.MeshPhysicalMaterial({ color: 0x55D6FF, metalness: 0.1, roughness: 0.1, transmission: 0.95, thickness: 0.01, transparent: true, opacity: 0.6 });
+
+    const flowMatA = new THREE.MeshBasicMaterial({ color: 0xA855F7, wireframe: true, transparent: true, opacity: 0.3 });
+    const flowMatB = new THREE.MeshBasicMaterial({ color: 0xA855F7, wireframe: true, transparent: true, opacity: 0.3 });
+
+    // Indicator: Beta L (Lijnspanning)
+    const betaGeoA = new THREE.BufferGeometry(); const betaGeoB = new THREE.BufferGeometry();
+    betaGeoA.setAttribute('position', new THREE.BufferAttribute(new Float32Array((384+1)*3), 3));
+    betaGeoB.setAttribute('position', new THREE.BufferAttribute(new Float32Array((384+1)*3), 3));
+    const betaLineA = new THREE.LineLoop(betaGeoA, new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 2}));
+    const betaLineB = new THREE.LineLoop(betaGeoB, new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 2}));
+    rootGroup.add(betaLineA); rootGroup.add(betaLineB);
+
+    // Indicator: Separatrix Bollen
+    const sepGeo = new THREE.SphereGeometry(1, 32, 32);
+    const sepMat = new THREE.MeshPhysicalMaterial({color: 0xffffff, transmission: 0.9, opacity: 0.15, roughness: 0.0, depthWrite: false, transparent: true});
+    const sepA = new THREE.Mesh(sepGeo, sepMat); const sepB = new THREE.Mesh(sepGeo, sepMat);
+    rootGroup.add(sepA); rootGroup.add(sepB);
+
+    // Indicator: Alpha Bollen (Biot Savart / Pressure wells)
+    const alphaGeo = new THREE.SphereGeometry(1, 16, 16);
+    const alphaMat = new THREE.MeshBasicMaterial({color: 0xFF6E6E, transparent: true, opacity: 0.8});
+    const alphaA = new THREE.Mesh(alphaGeo, alphaMat); const alphaB = new THREE.Mesh(alphaGeo, alphaMat);
+    rootGroup.add(alphaA); rootGroup.add(alphaB);
+
+    function updateBeautifulMeshes() {
+        if (meshA) { meshA.geometry.dispose(); rootGroup.remove(meshA); }
+        if (meshB) { meshB.geometry.dispose(); rootGroup.remove(meshB); }
+        if (flowA) { flowA.geometry.dispose(); rootGroup.remove(flowA); }
+        if (flowB) { flowB.geometry.dispose(); rootGroup.remove(flowB); }
+
+        const tubeRadius = P.a * 2.5;
+        const curveA = new DynamicArrayCurve(XA, knotN);
+        const curveB = new DynamicArrayCurve(XB, knotN);
+
+        const geoA = new THREE.TubeGeometry(curveA, knotN, tubeRadius, 8, true);
+        const geoB = new THREE.TubeGeometry(curveB, knotN, tubeRadius, 8, true);
+
+        meshA = new THREE.Mesh(geoA, coreModel === 'solid' ? matSolidA : matHollowA);
+        meshB = new THREE.Mesh(geoB, coreModel === 'solid' ? matSolidB : matHollowB);
+
+        rootGroup.add(meshA);
+        rootGroup.add(meshB);
+
+        if (Flags.gamma) {
+            const flowGeoA = new THREE.TubeGeometry(curveA, knotN, tubeRadius * 1.6, 12, true);
+            const flowGeoB = new THREE.TubeGeometry(curveB, knotN, tubeRadius * 1.6, 12, true);
+            flowA = new THREE.Mesh(flowGeoA, flowMatA);
+            flowB = new THREE.Mesh(flowGeoB, flowMatB);
+            rootGroup.add(flowA);
+            rootGroup.add(flowB);
+        }
+    }
+
+    // ==========================================
+    // 3. UI EVENT LISTENERS
+    // ==========================================
+    function updateSubtitle() {
+        document.getElementById("hSub").textContent = P.topology === "trefoil" ? SUB_TREFOIL : SUB_RING;
+        const lbl = P.topology === "trefoil" ? "gem. ρ" : "R";
+        document.getElementById("hRLbl").textContent = lbl;
+        document.getElementById("hRLblB").textContent = lbl;
+    }
+
+    function resetState() {
+        XA = makeCarrier(P.zA, 0, true);
+        XB = makeCarrier(P.zB, P.off, false);
+        tPhys = 0; flagged = ""; hist.length = 0;
+        document.getElementById("flag").style.display = "none";
+        updateSubtitle(); updateBeautifulMeshes();
+    }
+
+    function reinitSimulation() {
+        knotN = currentKnotN();
+        allocBuffers();
+
+        // Sync UI Toggles
+        document.querySelectorAll("#topoSeg .seg-btn").forEach(btn => { btn.classList.toggle("active", btn.dataset.topo === P.topology); });
+        const qualSeg = document.getElementById("qualSeg");
+        if(qualSeg) {
+            const on = P.topology === "trefoil";
+            qualSeg.classList.toggle("disabled", !on);
+            qualSeg.querySelectorAll(".seg-btn").forEach(btn => {
+                btn.disabled = !on;
+                btn.classList.toggle("active", on && btn.dataset.qual === P.quality);
+            });
+        }
+        resetState();
+    }
+
+    function bind(id, fmt, set) {
+        const s = document.getElementById("s" + id), v = document.getElementById("v" + id);
+        s.addEventListener("input", () => { const x = parseFloat(s.value); set(x); v.textContent = fmt(x); });
+    }
+
+    bind("Om", x => x.toFixed(2) + " rad/s", x => { P.Om = x; document.getElementById("hOm").textContent = x.toFixed(2); });
+    bind("Ga", x => x.toFixed(1) + "·10⁻³ m²/s", x => P.Ga = x * 1e-3);
+    bind("A", x => x.toFixed(1) + " mm", x => P.a = x * 1e-3);
+    bind("Off", x => x.toFixed(0) + " mm", x => { P.off = x * 1e-3; resetState(); });
+
+    document.getElementById("topoSeg").addEventListener("click", e => {
+        const btn = e.target.closest("[data-topo]");
+        if (!btn || btn.dataset.topo === P.topology) return;
+        P.topology = btn.dataset.topo;
+        reinitSimulation();
+    });
+
+    document.getElementById("coreSeg").addEventListener("click", e => {
+        const btn = e.target.closest("[data-core]");
+        if (!btn || btn.dataset.core === coreModel) return;
+        coreModel = btn.dataset.core;
+        document.querySelectorAll("#coreSeg .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.core === coreModel));
+        updateBeautifulMeshes();
+    });
+
+    // FIX: Indicator knoppen gekoppeld aan de globaal object vlaggen (Flags)
+    const setupIndicator = (id, flagName) => {
+        document.getElementById(id).addEventListener("click", e => {
+            Flags[flagName] = !Flags[flagName];
+            e.currentTarget.classList.toggle("active", Flags[flagName]);
+            if (flagName === 'gamma') updateBeautifulMeshes();
+        });
+    };
+    setupIndicator("bAlpha", "alpha");
+    setupIndicator("bBeta", "beta");
+    setupIndicator("bSep", "sep");
+    setupIndicator("bGamma", "gamma");
+
+    document.getElementById("bPause").addEventListener("click", e => { paused = !paused; e.target.textContent = paused ? "Hervat" : "Pauzeer"; });
+    document.getElementById("bReset").addEventListener("click", resetState);
+
+    document.getElementById("bFrame").addEventListener("click", e => {
+        refFrame = refFrame === 'lab' ? 'rotating' : 'lab';
+        e.target.textContent = refFrame === 'lab' ? "Kader: Lab" : "Kader: Meebewegend";
+        e.target.style.borderColor = refFrame === 'lab' ? 'var(--ice)' : 'var(--amber)';
+        e.target.style.color = refFrame === 'lab' ? 'var(--ice)' : 'var(--amber)';
+    });
+
+    function setFlag(msg) {
+        flagged = msg;
+        const f = document.getElementById("flag");
+        f.textContent = msg; f.style.display = "block";
+    }
+
+    // Camera en touch interacties
+    let drag = false, lx = 0, ly = 0;
+    canvas.addEventListener("pointerdown", e => { drag = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener("pointermove", e => {
+        if (!drag) return;
+        camTh -= (e.clientX - lx) * 0.008;
+        camPh = Math.min(2.9, Math.max(0.2, camPh - (e.clientY - ly) * 0.008));
+        lx = e.clientX; ly = e.clientY;
+    });
+    canvas.addEventListener("pointerup", () => drag = false);
+    canvas.addEventListener("wheel", e => { e.preventDefault(); camD = Math.min(4, Math.max(0.4, camD * (1 + 0.001 * e.deltaY))); }, { passive: false });
+    let pinch0 = 0;
+    canvas.addEventListener("touchmove", e => {
+        if (e.touches.length === 2) {
+            const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            if (pinch0) camD = Math.min(4, Math.max(0.4, camD * pinch0 / d));
+            pinch0 = d;
+        }
+    }, { passive: true });
+    canvas.addEventListener("touchend", () => pinch0 = 0);
+
+    const hist = [];
+    const sctx = document.getElementById("cspark").getContext("2d");
+
+    function drawSpark() {
+        const w = 220, h = 72;
+        sctx.clearRect(0, 0, w, h);
+        sctx.fillStyle = "#6F82A0";
+        sctx.font = "9px monospace";
+        sctx.fillText("R_A, R_B (—)  Δz (··)", 4, 10);
+        if (hist.length < 2) return;
+        const t0 = hist[0].t, t1 = hist[hist.length - 1].t || 1;
+        const Rmax = Math.max(0.1, ...hist.map(p => Math.max(p.RA, p.RB)));
+        const Zmax = Math.max(0.1, ...hist.map(p => p.dz));
+        function line(key, color, dash, vmax) {
+            sctx.strokeStyle = color;
+            sctx.setLineDash(dash);
+            sctx.beginPath();
+            hist.forEach((p, i) => {
+                const x = 4 + (w - 8) * (p.t - t0) / Math.max(1e-9, t1 - t0);
+                const y = h - 4 - (h - 18) * (p[key] / vmax);
+                i ? sctx.lineTo(x, y) : sctx.moveTo(x, y);
+            });
+            sctx.stroke();
+            sctx.setLineDash([]);
+        }
+        line("RA", "#FFAE45", [], Rmax);
+        line("RB", "#55D6FF", [], Rmax);
+        line("dz", "#C9D6E3", [3, 3], Zmax);
+    }
+
+    // ==========================================
+    // 4. ANIMATION LOOP
+    // ==========================================
+    reinitSimulation();
+    updCam();
+    let lastT = performance.now(), frame = 0, lastUmax = 0.02;
+
+    function loop(now) {
+        requestAnimationFrame(loop);
+        const dtReal = Math.min(0.05, (now - lastT) / 1000);
+        lastT = now;
+
+        if (!paused && !flagged) {
+            let budget = P.acc * dtReal, guard = 0;
+            while (budget > 1e-6 && guard < 40) {
+                const umax = Math.max(1e-6, lastUmax);
+                let dt = Math.min(0.03, 0.3 * P.a / umax, budget);
+                lastUmax = stepRK2(dt);
+                tPhys += dt; budget -= dt; guard++;
+            }
+
+            const gap = minGap();
+            const sA = ringStats(XA), sB = ringStats(XB);
+            if (gap < 3 * P.a) {
+                setFlag("⚠ kernen binnen 3a — reconnectieregime bereikt; filamentmodel niet langer geldig. Reset om opnieuw te draaien.");
+            } else if (Math.max(sA.R, sB.R) > 0.9 * P.Rcyl) {
+                setFlag("⚠ filament nadert cilinderwand — wandbeelden niet gemodelleerd.");
+            }
+
+            updateBeautifulMeshes();
+
+            // --- INDICATOREN UPDATES VIA FLAGS ---
+            if(Flags.beta) {
+                betaLineA.visible = true; betaLineB.visible = true;
+                const pA = betaLineA.geometry.attributes.position.array;
+                const pB = betaLineB.geometry.attributes.position.array;
+                for(let i=0; i<=knotN; i++) {
+                    const idx = (i % knotN) * 3;
+                    pA[i*3] = XA[idx]; pA[i*3+1] = XA[idx+1]; pA[i*3+2] = XA[idx+2];
+                    pB[i*3] = XB[idx]; pB[i*3+1] = XB[idx+1]; pB[i*3+2] = XB[idx+2];
+                }
+                betaLineA.geometry.attributes.position.needsUpdate = true;
+                betaLineB.geometry.attributes.position.needsUpdate = true;
+            } else {
+                betaLineA.visible = false; betaLineB.visible = false;
+            }
+
+            if(Flags.sep) {
+                sepA.visible = true; sepB.visible = true;
+                sepA.position.set(sA.cx, sA.cy, sA.cz);
+                sepB.position.set(sB.cx, sB.cy, sB.cz);
+                const rSepA = sA.R * 1.5 + P.a * 3;
+                const rSepB = sB.R * 1.5 + P.a * 3;
+                sepA.scale.set(rSepA, rSepA, rSepA);
+                sepB.scale.set(rSepB, rSepB, rSepB);
+            } else {
+                sepA.visible = false; sepB.visible = false;
+            }
+
+            if(Flags.alpha) {
+                alphaA.visible = true; alphaB.visible = true;
+                alphaA.position.set(sA.cx, sA.cy, sA.cz);
+                alphaB.position.set(sB.cx, sB.cy, sB.cz);
+                const pScale = (P.a * 6) * (1 + 0.2 * Math.sin(tPhys * 20));
+                alphaA.scale.set(pScale, pScale, pScale);
+                alphaB.scale.set(pScale, pScale, pScale);
+            } else {
+                alphaA.visible = false; alphaB.visible = false;
+            }
+
+            if(Flags.gamma && flowA && flowB) {
+                flowMatA.opacity = 0.2 + 0.15 * Math.sin(tPhys * 15);
+                flowMatB.opacity = 0.2 + 0.15 * Math.sin(tPhys * 15 + Math.PI);
+            }
+        }
+
+        // --- REFERENTIEKADER ---
+        if (refFrame === 'lab') {
+            latticeGrp.rotation.z = P.Om * tPhys;
+            rootGroup.rotation.z = 0;
+        } else {
+            latticeGrp.rotation.z = P.Om * tPhys;
+            rootGroup.rotation.z = -P.Om * tPhys;
+        }
+
+        if (frame % 3 === 0) {
+            const sA = ringStats(XA), sB = ringStats(XB);
+            const Wr = gauss(XA, XA, true) + gauss(XB, XB, true);
+            const Lk = gauss(XA, XB, false);
+            const H = Wr + 2 * Lk;
+            document.getElementById("hHel").textContent = H.toFixed(3);
+            document.getElementById("hHel").style.color = Math.abs(H) < 0.02 ? "#7BE8A8" : "#FFAE45";
+            document.getElementById("hWr").textContent = Wr.toFixed(3);
+            document.getElementById("hLk").textContent = Lk.toFixed(3);
+            document.getElementById("hWrel").textContent = (2 * P.Om).toFixed(2) + " s⁻¹ ẑ";
+            document.getElementById("hR").textContent = (sA.R * 100).toFixed(1) + " / " + (sB.R * 100).toFixed(1) + " cm";
+            document.getElementById("hDz").textContent = (Math.abs(sB.z - sA.z) * 100).toFixed(1) + " cm";
+            document.getElementById("hT").textContent = tPhys.toFixed(1) + " s";
+            hist.push({ t: tPhys, RA: sA.R, RB: sB.R, dz: Math.abs(sB.z - sA.z) });
+            if (hist.length > 400) hist.shift();
+            if (hist.length > 5) {
+                const p = hist[hist.length - 5], q = hist[hist.length - 1];
+                const v = (p.dz - q.dz) / Math.max(1e-9, q.t - p.t);
+                document.getElementById("hV").textContent = (v * 1000).toFixed(1) + " mm/s";
+            }
+            drawSpark();
+        }
+        frame++;
+
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+
+        updCam();
+        renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+python -m sst_horn_bem.build_ext_if_needed --force
+
+python run_horn_bem.py --lambda 1.2 --no-bem --out horn_ring_1p2.json
+python run_horn_bem.py --lambda 1.2 --bem --bem-n-eta 12 --bem-n-phi 24 --out horn_bem_1p2.json
+python run_horn_sweep.py --lambdas 1.05,1.1,1.2,1.5,2.0 --bem --out-json horn_bem_sweep.json --out-csv horn_bem_sweep.csv
+
+python run_panel_refinement.py --lambda 1.2 --panel-grids 8x16,12x24,16x32 --out-json horn_panel_refinement.json --out-csv horn_panel_refinement.csv
+python run_volume_refinement.py --lambda 1.2 --n-volumes 14,18,22 --out-json horn_volume_refinement.json --out-csv horn_volume_refinement.csv
+python run_offset_probe.py --lambda 1.2 --out-json horn_offset_probe.json --out-csv horn_offset_probe.csv
+
+python run_all_audits.py --out-dir audit_out

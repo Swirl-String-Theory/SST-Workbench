@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>SST 3D Trefoil Simulator - Dashboard</title>
+	<title>SST Tri-Vortex Collider — heliciteit & ideale ropelength</title>
 
 	<!-- Tailwind CSS -->
 	<script src="https://cdn.tailwindcss.com"></script>
@@ -22,31 +22,27 @@
 
 	<style>
       :root {
-          --bg: #050810;
-          --panel: rgba(11, 16, 32, 0.85);
+          --bg: #0B1020;
+          --panel: #101830;
           --line: #1E2C4A;
           --txt: #C9D6E3;
-          --ice: #55D6FF;
+          --dim: #6F82A0;
           --amber: #FFAE45;
+          --ice: #55D6FF;
           --warn: #FF6E6E;
           --ok: #7BE8A8;
           --purple: #A855F7;
       }
-      body { margin: 0; overflow: hidden; background-color: var(--bg); color: var(--txt); font-family: 'IBM Plex Mono', monospace; }
+      body { margin: 0; overflow: hidden; background-color: var(--bg); color: var(--txt); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
       #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
       #ui-layer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
       .pointer-events-auto { pointer-events: auto; }
 
-      .sci-panel {
-          background: var(--panel);
-          backdrop-filter: blur(8px);
-          border: 1px solid var(--line);
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-      }
+      .sci-panel { background: rgba(16, 24, 48, 0.85); backdrop-filter: blur(10px); border: 1px solid var(--line); }
+      .sci-header { border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 12px; }
 
-      /* Custom Range Slider */
       input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; }
-      input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--amber); cursor: pointer; margin-top: -6px; }
+      input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--amber); cursor: pointer; margin-top: -5px; }
       input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--line); border-radius: 2px; }
 	</style>
 </head>
@@ -56,6 +52,63 @@
 <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    // ==========================================
+    // 1. DATA: IDEAL TREFOIL FOURIER COEFFICIENTS
+    // ==========================================
+    const IDEAL_TREFOIL_3_1_1 = {
+        knotId: "3:1:1",
+        L: 16.371637,
+        coeffs: [
+            {I:1,A:[0.374139, 0, 0],B:[0, 0.37392799999999998, 0]},
+            {I:2,A:[0.82424600000000003, 0.75026000000000004, 0.00035199999999999999],B:[0.75044999999999995, -0.82395200000000002, -0.0019910000000000001]},
+            {I:3,A:[0.00025700000000000001, -0.00093199999999999999, 0.35239700000000002],B:[-0.00076999999999999996, 0.00072599999999999997, -0.386764]},
+            {I:4,A:[0.011651999999999999, -0.010656000000000001, 0.00074299999999999995],B:[0.010739, 0.011613, -0.00023000000000000001]},
+            {I:5,A:[0.010503999999999999, 0.110306, 0.00019900000000000001],B:[0.110745, -0.010366, -0.00023499999999999999]},
+            {I:6,A:[1.5e-05, -6.0000000000000002e-06, -0.047465],B:[-5.0000000000000002e-05, -9.9999999999999995e-07, 0.0045950000000000001]},
+            {I:7,A:[-0.000292, 0.0024169999999999999, -7.9999999999999996e-06],B:[-0.002529, -0.00025500000000000002, -9.0000000000000002e-06]},
+            {I:8,A:[0.016487000000000002, -0.021784000000000001, 4.1e-05],B:[-0.021922000000000001, -0.016421000000000002, -4.3999999999999999e-05]},
+            {I:9,A:[-2.9e-05, -1.8e-05, 0.011178],B:[4.8999999999999998e-05, 4.1e-05, 0.0084139999999999996]},
+            {I:10,A:[-0.00021599999999999999, -0.00029, -1.8e-05],B:[0.00031100000000000002, -0.00019699999999999999, -4.3999999999999999e-05]},
+            {I:11,A:[-0.011727, 0.0021840000000000002, 6.9999999999999999e-06],B:[0.002202, 0.011682, 2.0000000000000002e-05]},
+            {I:12,A:[2.5999999999999998e-05, 1.9000000000000001e-05, -0.0013079999999999999],B:[-3.9999999999999998e-06, -1.9000000000000001e-05, -0.0070390000000000001]},
+            {I:13,A:[0.00032499999999999999, 5.5000000000000002e-05, -9.0000000000000002e-06],B:[-5.8999999999999998e-05, 0.00028899999999999998, 2.4000000000000001e-05]},
+            {I:14,A:[0.0052129999999999998, 0.0032009999999999999, 9.9999999999999995e-07],B:[0.0032100000000000002, -0.0051879999999999999, 1.0000000000000001e-05]},
+            {I:15,A:[-1.5e-05, -1.5999999999999999e-05, -0.0019170000000000001],B:[-1.7e-05, 9.9999999999999995e-07, 0.0031210000000000001]},
+            {I:16,A:[-0.000136, 6.2000000000000003e-05, 1.9000000000000001e-05],B:[-7.4999999999999993e-05, -0.000112, -6.9999999999999999e-06]},
+            {I:17,A:[-0.00099500000000000001, -0.0034629999999999999, -9.9999999999999995e-07],B:[-0.0034740000000000001, 0.00098799999999999995, -1.5e-05]},
+            {I:18,A:[3.0000000000000001e-06, 7.9999999999999996e-06, 0.0021779999999999998],B:[1.9000000000000001e-05, 7.9999999999999996e-06, -0.00061499999999999999]},
+            {I:19,A:[3.3000000000000003e-05, -9.3999999999999994e-05, -1.5999999999999999e-05],B:[0.000113, 2.8e-05, -3.9999999999999998e-06]},
+            {I:20,A:[-0.0009990000000000001, 0.002013, -0],B:[0.002019, 0.00099799999999999997, 0]},
+            {I:21,A:[3.9999999999999998e-06, 9.9999999999999995e-07, -0.0012700000000000001],B:[-1.2999999999999999e-05, -1.2e-05, -0.00062600000000000004]},
+            {I:22,A:[3.4e-05, 6.0000000000000002e-05, 9.0000000000000002e-06],B:[-7.2000000000000002e-05, 2.5999999999999998e-05, 1.0000000000000001e-05]},
+            {I:23,A:[0.0013829999999999999, -0.00053899999999999998, 1.9999999999999999e-06],B:[-0.00054000000000000001, -0.001382, 3.9999999999999998e-06]},
+            {I:24,A:[-5.0000000000000004e-06, -1.1e-05, 0.00034400000000000001],B:[9.0000000000000002e-06, 6.9999999999999999e-06, 0.00088999999999999995]},
+            {I:25,A:[-5.7000000000000003e-05, -2.5000000000000001e-05, 9.9999999999999995e-07],B:[1.9000000000000001e-05, -4.8000000000000001e-05, -7.9999999999999996e-06]},
+            {I:26,A:[-0.00093099999999999997, -0.00035599999999999998, -0],B:[-0.000357, 0.00093099999999999997, -5.0000000000000004e-06]}
+            // (Note: To save some visual space, we evaluate up to order 26 which forms the knot perfectly)
+        ]
+    };
+
+    // Custom Three.js Curve for the Ideal Trefoil
+    class IdealTrefoilCurve extends THREE.Curve {
+        constructor(scale = 15) {
+            super();
+            this.scale = scale;
+        }
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+            const angle = t * Math.PI * 2;
+            let x = 0, y = 0, z = 0;
+            for (const c of IDEAL_TREFOIL_3_1_1.coeffs) {
+                const cosVal = Math.cos(c.I * angle);
+                const sinVal = Math.sin(c.I * angle);
+                x += c.A[0] * cosVal + c.B[0] * sinVal;
+                y += c.A[1] * cosVal + c.B[1] * sinVal;
+                z += c.A[2] * cosVal + c.B[2] * sinVal;
+            }
+            return optionalTarget.set(x * this.scale, y * this.scale, z * this.scale);
+        }
+    }
+
     function App() {
         const mountRef = useRef(null);
         const graphCanvasRef = useRef(null);
@@ -63,26 +116,21 @@
         const [activeIndicator, setActiveIndicator] = useState('none');
         const [refFrameUI, setRefFrameUI] = useState('lab');
 
-        // Ref structure for animation loop access without stale closures
         const stateRef = useRef({
-            omegaRatio: 0.1, // 0 to 0.99 (Approaching v_swirl limit)
+            omegaRatio: 0.1,
             history: [],
             time: 0,
-            refFrame: 'lab' // 'lab' or 'rotating'
+            refFrame: 'lab'
         });
 
-        // Forced re-render for top bar readouts
-        const [displayData, setDisplayData] = useState({ st: 1.0, mass: 1.0, omega: 0.1 });
+        const [displayData, setDisplayData] = useState({ st: 1.0, mass: 1.0, omega: 0.1, L: IDEAL_TREFOIL_3_1_1.L });
 
-        // Update mutable ref on slider change
         const handleSliderChange = (e) => {
             const val = parseFloat(e.target.value);
             stateRef.current.omegaRatio = val;
-
-            // Direct math for UI
             const st = Math.sqrt(Math.max(0, 1 - val * val));
             const mass = 1.0 / Math.max(st, 0.01);
-            setDisplayData({ st, mass, omega: val });
+            setDisplayData(prev => ({ ...prev, st, mass, omega: val }));
         };
 
         const toggleFrame = () => {
@@ -98,20 +146,22 @@
             vortexLines: null,
             streamlines: null,
             knotMat: null,
-            spinContainer: null
+            spinContainer: null,
+            gammaParticles: null
         });
 
-        // Initialize Three.js
+        // ==========================================
+        // 2. SCENE INITIALIZATION
+        // ==========================================
         useEffect(() => {
             const w = window.innerWidth;
             const h = window.innerHeight;
 
             const scene = new THREE.Scene();
-            // Diep donkerblauw voor het SST continuüm
-            scene.fog = new THREE.FogExp2(0x050810, 0.012);
+            scene.fog = new THREE.FogExp2(0x0B1020, 0.012); // --bg color
 
             const camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
-            camera.position.set(0, 30, 65);
+            camera.position.set(0, 35, 65);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(w, h);
@@ -122,7 +172,6 @@
             controls.enableDamping = true;
             controls.autoRotate = false;
 
-            // Belichting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambientLight);
 
@@ -134,122 +183,135 @@
             pointLight2.position.set(-20, -20, -20);
             scene.add(pointLight2);
 
-            // Centrale Z-as (visueel Y-as in 3D engine) - Stippellijn
+            // --- Z-AS STIPPELLIJN (Y-as in Three.js) ---
             const zAxisGeo = new THREE.BufferGeometry().setFromPoints([
                 new THREE.Vector3(0, -150, 0),
                 new THREE.Vector3(0, 150, 0)
             ]);
             const zAxisMat = new THREE.LineDashedMaterial({
-                color: 0x55D6FF,
-                linewidth: 1,
-                scale: 1,
-                dashSize: 2,
-                gapSize: 4,
-                transparent: true,
-                opacity: 0.6
+                color: 0x55D6FF, linewidth: 1, scale: 1, dashSize: 2, gapSize: 4, transparent: true, opacity: 0.6
             });
             const centerLine = new THREE.Line(zAxisGeo, zAxisMat);
-            centerLine.computeLineDistances(); // Essentieel voor dashed material
+            centerLine.computeLineDistances();
             scene.add(centerLine);
 
-            // Spin container (Cilinder-as rotatie)
+            // --- SPIN & TILT CONTAINERS ---
             const spinContainer = new THREE.Group();
             scene.add(spinContainer);
             refs.current.spinContainer = spinContainer;
 
-            // Tilt Container (Gat op de Y-as/Z-as van cilinder)
             const tiltContainer = new THREE.Group();
+            // We roteren het ideale fourier-object met X 90° ZODAT HET GAT OP DE Z/Y AS LIGT.
             tiltContainer.rotation.x = Math.PI / 2;
             spinContainer.add(tiltContainer);
 
-            // De Trefoil
-            const knotGeo = new THREE.TorusKnotGeometry(10, 3, 300, 32, 2, 3);
+            // --- DE IDEALE TREFOIL (TUBE GEOMETRY) ---
+            const idealCurve = new IdealTrefoilCurve(15);
+            // 300 segmenten, radius 2.5
+            const knotGeo = new THREE.TubeGeometry(idealCurve, 300, 2.5, 32, true);
             const knotMat = new THREE.MeshPhysicalMaterial({
-                color: 0x55D6FF, // Ice blue base
+                color: 0x55D6FF,
                 emissive: 0x000000,
-                metalness: 0.3,
-                roughness: 0.2,
-                transmission: 0.9,
-                thickness: 2,
-                transparent: true,
-                opacity: 0.8
+                metalness: 0.3, roughness: 0.2, transmission: 0.9, thickness: 2,
+                transparent: true, opacity: 0.8
             });
             const knot = new THREE.Mesh(knotGeo, knotMat);
             tiltContainer.add(knot);
             refs.current.knotMat = knotMat;
 
-            // NIEUW: Taylor-Kolom Vortexlijnen (Verticale draden)
+            // --- VERTICALE VORTEXLIJNEN (TAYLOR KOLOMMEN) ---
             const lineGeo = new THREE.BufferGeometry();
             const lineCount = 300;
             const linePositions = new Float32Array(lineCount * 2 * 3);
             for(let i = 0; i < lineCount; i++) {
-                const r = 18 + Math.random() * 80; // Buiten de trefoil kern
+                const r = 22 + Math.random() * 80;
                 const theta = Math.random() * Math.PI * 2;
                 const x = r * Math.cos(theta);
                 const z = r * Math.sin(theta);
-                const y1 = -150;
-                const y2 = 150;
-
                 const idx = i * 6;
-                linePositions[idx] = x;   linePositions[idx+1] = y1; linePositions[idx+2] = z;
-                linePositions[idx+3] = x; linePositions[idx+4] = y2; linePositions[idx+5] = z;
+                linePositions[idx] = x;   linePositions[idx+1] = -150; linePositions[idx+2] = z;
+                linePositions[idx+3] = x; linePositions[idx+4] = 150;  linePositions[idx+5] = z;
             }
             lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x6F82A0, transparent: true, opacity: 0.15 });
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x6F82A0, transparent: true, opacity: 0.2 });
             const vortexLines = new THREE.LineSegments(lineGeo, lineMat);
             scene.add(vortexLines);
             refs.current.vortexLines = vortexLines;
 
-            // Stroomlijnen (Horizontale torus banden)
+            // --- STROOMLIJNEN ---
             const streamGroup = new THREE.Group();
-            for(let i = 0; i < 6; i++) {
-                const streamGeo = new THREE.TorusGeometry(20 + i * 8, 0.03, 8, 120);
-                const streamMat = new THREE.MeshBasicMaterial({ color: 0x55D6FF, transparent: true, opacity: 0.15 });
+            for(let i = 0; i < 5; i++) {
+                const streamGeo = new THREE.TorusGeometry(25 + i * 10, 0.05, 8, 120);
+                const streamMat = new THREE.MeshBasicMaterial({ color: 0x55D6FF, transparent: true, opacity: 0.1 });
                 const stream = new THREE.Mesh(streamGeo, streamMat);
                 stream.rotation.x = Math.PI / 2;
-                stream.position.y = (Math.random() - 0.5) * 40;
+                stream.position.y = (Math.random() - 0.5) * 60;
                 streamGroup.add(stream);
             }
             scene.add(streamGroup);
             refs.current.streamlines = streamGroup;
 
-            // --- INDICATOREN ---
+            // ==========================================
+            // 3. INDICATORS (αC, βL, γH)
+            // ==========================================
+
+            // ALPHA C: Biot-Savart Repulsion (Inner crossings)
+            // We use fixed spheres placed close to the center along the 3 symmetry lobes
             const alphaGroup = new THREE.Group();
             for(let i = 0; i < 3; i++) {
-                const angle = (i * Math.PI * 2) / 3;
+                const t = i / 3.0;
+                const pt = idealCurve.getPoint(t);
+                // Push them towards the origin to sit in the actual inner crossing
+                pt.multiplyScalar(0.4);
                 const sphereGeo = new THREE.SphereGeometry(2.5, 32, 32);
                 const sphereMat = new THREE.MeshBasicMaterial({ color: 0xFF6E6E, transparent: true, opacity: 0.8 });
                 const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-                sphere.position.set(5.5 * Math.cos(angle), 5.5 * Math.sin(angle), 0);
+                sphere.position.copy(pt);
                 alphaGroup.add(sphere);
             }
             alphaGroup.visible = false;
             tiltContainer.add(alphaGroup);
             refs.current.alphaGroup = alphaGroup;
 
-            const betaMat = new THREE.MeshBasicMaterial({ color: 0xFFAE45, wireframe: true, transparent: true, opacity: 0.25 });
+            // BETA L: Ropelength Wireframe
+            const betaMat = new THREE.MeshBasicMaterial({ color: 0xFFAE45, wireframe: true, transparent: true, opacity: 0.4 });
             const betaMesh = new THREE.Mesh(knotGeo, betaMat);
             betaMesh.scale.set(1.02, 1.02, 1.02);
             betaMesh.visible = false;
             tiltContainer.add(betaMesh);
             refs.current.betaMesh = betaMesh;
 
-            const gammaGeo = new THREE.TorusKnotGeometry(10, 3.2, 300, 12, 2, 3);
-            const gammaMat = new THREE.MeshBasicMaterial({ color: 0xA855F7, wireframe: true, transparent: true, opacity: 0.4 });
-            const gammaMesh = new THREE.Mesh(gammaGeo, gammaMat);
-            gammaMesh.visible = false;
-            tiltContainer.add(gammaMesh);
-            refs.current.gammaGroup = gammaMesh;
+            // GAMMA H: Helicity / Poloidal-Toroidal Flow Particles
+            const gammaGroup = new THREE.Group();
+            const particleCount = 1000;
+            const gGeo = new THREE.BufferGeometry();
+            const gPos = new Float32Array(particleCount * 3);
+            const gPhase = new Float32Array(particleCount);
+            const gOffset = new Float32Array(particleCount); // Position around the tube
 
-            // 2D Graph Context
+            for(let i = 0; i < particleCount; i++) {
+                gPhase[i] = Math.random(); // t along the main curve (0 to 1)
+                gOffset[i] = Math.random() * Math.PI * 2; // angle around the tube cross-section
+            }
+            gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
+            gGeo.setAttribute('phase', new THREE.BufferAttribute(gPhase, 1));
+            gGeo.setAttribute('offset', new THREE.BufferAttribute(gOffset, 1));
+
+            const gMat = new THREE.PointsMaterial({ color: 0xA855F7, size: 0.5, transparent: true, opacity: 0.8 });
+            const gammaParticles = new THREE.Points(gGeo, gMat);
+            gammaGroup.add(gammaParticles);
+            gammaGroup.visible = false;
+            tiltContainer.add(gammaGroup);
+            refs.current.gammaGroup = gammaGroup;
+            refs.current.gammaParticles = { points: gammaParticles, phases: gPhase, offsets: gOffset, curve: idealCurve };
+
+            // --- 2D Graph Setup ---
             const ctx = graphCanvasRef.current.getContext('2d');
-
             let animationId;
             const clock = new THREE.Clock();
 
-            // Basis kleuren voor kleur-interpolatie van de knot
-            const colorRest = new THREE.Color(0x55D6FF); // Ice
-            const colorHighEnergy = new THREE.Color(0xFF6E6E); // Warn (Red)
+            const colorRest = new THREE.Color(0x55D6FF);
+            const colorHighEnergy = new THREE.Color(0xFF6E6E);
 
             const animate = () => {
                 animationId = requestAnimationFrame(animate);
@@ -261,36 +323,68 @@
                 const omegaRatio = stateRef.current.omegaRatio;
                 const frame = stateRef.current.refFrame;
 
-                // Fysica berekeningen voor deze frame
                 const s_t = Math.sqrt(Math.max(0, 1 - omegaRatio * omegaRatio));
                 const mass = 1.0 / Math.max(s_t, 0.01);
 
-                // 1. Update 3D Rotaties
-                // In het meebewegende kader is de visuele relatieve snelheid 0.
+                // Rotations
                 const visualRotSpeed = frame === 'lab' ? (omegaRatio * 5.0) : 0;
-
                 if (refs.current.vortexLines) refs.current.vortexLines.rotation.y += delta * visualRotSpeed;
                 if (refs.current.streamlines) refs.current.streamlines.rotation.y += delta * visualRotSpeed;
                 if (refs.current.spinContainer) refs.current.spinContainer.rotation.y += delta * visualRotSpeed;
 
-                // 2. Visuele Massa-divergentie (Kleurverschuiving)
-                // Deze schaalt nog steeds op omegaRatio, ongeacht het referentiekader!
+                // Mass Divergence Coloring
                 if (refs.current.knotMat) {
                     refs.current.knotMat.color.copy(colorRest).lerp(colorHighEnergy, Math.pow(omegaRatio, 3));
                     refs.current.knotMat.emissive.copy(colorHighEnergy).multiplyScalar(Math.pow(omegaRatio, 6) * 0.5);
                 }
 
+                // Animate Alpha (Pulse)
                 if (refs.current.alphaGroup && refs.current.alphaGroup.visible) {
-                    const scale = 1 + 0.1 * Math.sin(stateRef.current.time * 5);
+                    const scale = 1 + 0.15 * Math.sin(stateRef.current.time * 6);
                     refs.current.alphaGroup.scale.set(scale, scale, scale);
+                }
+
+                // Animate Gamma H (Particles flowing along the Trefoil)
+                if (refs.current.gammaGroup && refs.current.gammaGroup.visible) {
+                    const gp = refs.current.gammaParticles;
+                    const posAttr = gp.points.geometry.attributes.position;
+                    const R_tube = 2.7;
+
+                    for(let i=0; i<particleCount; i++) {
+                        // Move particle forward in time (toroidal + poloidal speed)
+                        gp.phases[i] += delta * 0.2;
+                        if(gp.phases[i] > 1) gp.phases[i] -= 1;
+
+                        gp.offsets[i] += delta * 2.0; // Poloidal twist
+
+                        const t = gp.phases[i];
+                        const p1 = gp.curve.getPoint(t);
+                        const p2 = gp.curve.getPoint((t + 0.01) % 1.0);
+
+                        // Calculate normal/binormal for cross section
+                        const tangent = new THREE.Vector3().subVectors(p2, p1).normalize();
+                        const up = new THREE.Vector3(0, 1, 0);
+                        let normal = new THREE.Vector3().crossVectors(tangent, up);
+                        if(normal.length() < 0.001) normal = new THREE.Vector3(1,0,0);
+                        normal.normalize();
+                        const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+
+                        // Calculate position on the tube surface
+                        const theta = gp.offsets[i];
+                        const offsetVec = new THREE.Vector3()
+                            .addScaledVector(normal, Math.cos(theta) * R_tube)
+                            .addScaledVector(binormal, Math.sin(theta) * R_tube);
+
+                        posAttr.setXYZ(i, p1.x + offsetVec.x, p1.y + offsetVec.y, p1.z + offsetVec.z);
+                    }
+                    posAttr.needsUpdate = true;
                 }
 
                 renderer.render(scene, camera);
 
-                // 3. Update en Teken de 2D Grafiek
+                // Graph Update
                 stateRef.current.history.push({ st: s_t, mass: mass });
                 if (stateRef.current.history.length > 200) stateRef.current.history.shift();
-
                 drawGraph(ctx, stateRef.current.history);
             };
 
@@ -310,151 +404,119 @@
             };
         }, []);
 
-        // Teken de real-time historie grafiek
         const drawGraph = (ctx, history) => {
             const w = ctx.canvas.width;
             const h = ctx.canvas.height;
             ctx.clearRect(0, 0, w, h);
-
             if(history.length < 2) return;
-
             const step = w / 200;
 
-            // Draw Swirl-Clock S_t (Cyan Line)
-            ctx.beginPath();
-            ctx.strokeStyle = '#55D6FF';
-            ctx.lineWidth = 2;
+            // Swirl-Clock S_t
+            ctx.beginPath(); ctx.strokeStyle = '#55D6FF'; ctx.lineWidth = 2;
             history.forEach((pt, i) => {
-                const x = i * step;
-                const y = h - (pt.st * h * 0.9);
-                if(i===0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
+                const x = i * step; const y = h - (pt.st * h * 0.9);
+                if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }); ctx.stroke();
 
-            // Draw Mass Divergence (Amber/Red Line)
-            ctx.beginPath();
-            ctx.strokeStyle = '#FFAE45';
-            ctx.lineWidth = 2;
+            // Mass Divergence
+            ctx.beginPath(); ctx.strokeStyle = '#FFAE45'; ctx.lineWidth = 2;
             history.forEach((pt, i) => {
                 const x = i * step;
                 const maxScaleMass = 10;
-                let m = pt.mass;
-                if(m > maxScaleMass) m = maxScaleMass;
+                let m = pt.mass > maxScaleMass ? maxScaleMass : pt.mass;
                 const y = h - ((m / maxScaleMass) * h * 0.9);
-                if(i===0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
+                if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }); ctx.stroke();
         };
-
-        // React State -> 3D Object visibility
-        useEffect(() => {
-            if (refs.current.alphaGroup) refs.current.alphaGroup.visible = activeIndicator === 'alpha';
-            if (refs.current.betaMesh) refs.current.betaMesh.visible = activeIndicator === 'beta';
-            if (refs.current.gammaGroup) refs.current.gammaGroup.visible = activeIndicator === 'gamma';
-        }, [activeIndicator]);
 
         return (
             <div className="w-full h-full relative">
-                {/* 3D Canvas Container */}
                 <div id="canvas-container" ref={mountRef}></div>
 
-                {/* UI Overlay */}
                 <div id="ui-layer" className="p-4 md:p-6">
 
-                    {/* TOP BAR */}
-                    <div className="pointer-events-auto sci-panel w-full flex flex-wrap justify-between items-center p-3 px-6 rounded-md mb-6 border-b-2 border-b-cyan-500/30">
+                    {/* TOP BAR - vortexring-botsing style */}
+                    <div className="pointer-events-auto sci-panel w-full flex flex-wrap justify-between items-center p-3 px-6 rounded-md mb-6">
                         <div>
-                            <h1 className="text-lg font-bold text-gray-100 tracking-wide uppercase">SST Tri-Vortex Collider</h1>
-                            <p className="text-xs text-gray-500 mt-1">Taylor-kolom & Asymptotische Divergentie</p>
+                            <h1 className="text-[14px] font-bold text-[#EAF2FA] tracking-wide uppercase">SST Ideal Trefoil — heliciteit & vorticiteit</h1>
+                            <p className="text-[11px] text-[var(--dim)] mt-1">Incompressibel Continuüm & Topologische Relaxatie</p>
                         </div>
 
-                        <div className="flex space-x-6 text-sm">
+                        <div className="flex space-x-6 text-[12px]">
                             <div className="flex flex-col">
-                                <span className="text-gray-500 text-[10px] uppercase">Rotatie Veld (Ω / v_swirl)</span>
-                                <span className="font-bold text-ice">{displayData.omega.toFixed(3)} c</span>
+                                <span className="text-[var(--dim)] text-[10px] uppercase">Ropelength (L)</span>
+                                <span className="font-bold text-[var(--txt)]">{displayData.L.toFixed(3)}</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-gray-500 text-[10px] uppercase">Swirl-Clock (S_t)</span>
-                                <span className="font-bold text-ok">{displayData.st.toFixed(3)} s</span>
+                                <span className="text-[var(--dim)] text-[10px] uppercase">Rotatie Veld (Ω/v_swirl)</span>
+                                <span className="font-bold text-[var(--ice)]">{displayData.omega.toFixed(3)} c</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-gray-500 text-[10px] uppercase">Emergente Massa (ρ_m)</span>
-                                <span className="font-bold" style={{color: displayData.mass > 5 ? '#FF6E6E' : '#FFAE45'}}>{displayData.mass.toFixed(2)}x</span>
+                                <span className="text-[var(--dim)] text-[10px] uppercase">Swirl-Clock (S_t)</span>
+                                <span className="font-bold text-[var(--ok)]">{displayData.st.toFixed(3)} s</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[var(--dim)] text-[10px] uppercase">Emergente Massa (ρ_m)</span>
+                                <span className="font-bold" style={{color: displayData.mass > 5 ? 'var(--warn)' : 'var(--amber)'}}>{displayData.mass.toFixed(2)}x</span>
                             </div>
                             <div className="flex flex-col hidden md:flex">
-                                <span className="text-gray-500 text-[10px] uppercase">Totale Heliciteit (H)</span>
-                                <span className="font-bold text-purple">-3.001</span>
+                                <span className="text-[var(--dim)] text-[10px] uppercase">Totale Heliciteit (H)</span>
+                                <span className="font-bold text-[var(--purple)]">3.000</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="flex-1 flex items-end justify-between">
 
-                        {/* BOTTOM LEFT: Live Telemetry Graph */}
+                        {/* BOTTOM LEFT: Telemetry */}
                         <div className="pointer-events-auto sci-panel p-4 rounded-md w-80">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-gray-400">TELEMETRIE</span>
+                            <div className="sci-header flex justify-between items-center">
+                                <span className="text-[11px] font-bold text-[var(--dim)]">TELEMETRIE DIVERGENTIE</span>
                                 <div className="flex space-x-3 text-[10px]">
-                                    <span className="text-ice">■ Tijd (S_t)</span>
-                                    <span className="text-amber">■ Massa (ρ)</span>
+                                    <span className="text-[var(--ice)]">■ Tijd (S_t)</span>
+                                    <span className="text-[var(--amber)]">■ Massa (ρ)</span>
                                 </div>
                             </div>
-                            <canvas ref={graphCanvasRef} width="300" height="100" className="w-full h-24 bg-[#050810] border border-gray-800 rounded"></canvas>
-                            <div className="text-[10px] text-gray-600 mt-2 text-center">Tijdsdomein asymptotische limiet nadert...</div>
+                            <canvas ref={graphCanvasRef} width="300" height="100" className="w-full h-24 bg-[#050810] border border-[var(--line)] rounded mt-2"></canvas>
                         </div>
 
                         {/* BOTTOM RIGHT: Controls */}
-                        <div className="pointer-events-auto flex flex-col space-y-4 w-80">
+                        <div className="pointer-events-auto flex flex-col space-y-3 w-80">
 
-                            {/* Ref Frame Toggle */}
                             <div className="sci-panel p-2 rounded-md">
-                                <button
-                                    onClick={toggleFrame}
-                                    className="w-full py-2 px-3 text-xs font-bold text-gray-300 bg-[#1E2C4A]/50 hover:bg-[#1E2C4A] border border-cyan-500/30 rounded flex justify-between items-center transition-all"
-                                >
-                                    <span className="uppercase text-gray-500">Referentiekader:</span>
-                                    <span className={refFrameUI === 'lab' ? 'text-ice' : 'text-amber'}>
+                                <button onClick={toggleFrame} className="w-full py-2 px-3 text-[11px] font-bold text-[var(--txt)] bg-[var(--line)] hover:bg-[#2A3F68] border border-[var(--ice)] rounded flex justify-between items-center transition-all">
+                                    <span className="uppercase text-[var(--dim)]">Referentiekader:</span>
+                                    <span className={refFrameUI === 'lab' ? 'text-[var(--ice)]' : 'text-[var(--amber)]'}>
                                             {refFrameUI === 'lab' ? 'Laboratorium (Stationair)' : 'Meebewegend (Roterend)'}
                                         </span>
                                 </button>
                             </div>
 
-                            {/* Slider */}
-                            <div className="sci-panel p-5 rounded-md space-y-4">
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex justify-between">
+                            <div className="sci-panel p-4 rounded-md space-y-3">
+                                <h2 className="sci-header text-[11px] font-bold text-[var(--dim)] uppercase tracking-wider flex justify-between border-b-0 mb-0 pb-0">
                                     <span>Rotatie Gradiënt (Ω)</span>
-                                    <span className="text-amber">{displayData.omega.toFixed(2)}</span>
+                                    <span className="text-[var(--amber)]">{displayData.omega.toFixed(2)}</span>
                                 </h2>
-                                <input
-                                    type="range" min="0.0" max="0.99" step="0.01"
-                                    defaultValue="0.1"
-                                    onChange={handleSliderChange}
-                                />
-                                <p className="text-[10px] text-gray-500 leading-tight">
-                                    Pas de asymptotische stroomsnelheid aan. Naarmate Ω → 1, convergeert de trefoil-energiedichtheid naar de divergentielimiet.
-                                </p>
+                                <input type="range" min="0.0" max="0.99" step="0.01" defaultValue="0.1" onChange={handleSliderChange} />
                             </div>
 
-                            {/* Indicators */}
-                            <div className="sci-panel p-5 rounded-md space-y-2">
-                                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Energie Functionaal Knoop</h2>
+                            <div className="sci-panel p-4 rounded-md space-y-2">
+                                <h2 className="sci-header text-[11px] font-bold text-[var(--dim)] uppercase tracking-wider">Energie Functionaal Knoop</h2>
 
                                 <button onClick={() => setActiveIndicator(activeIndicator === 'alpha' ? 'none' : 'alpha')}
-                                        className={`w-full text-left px-3 py-2 rounded text-xs transition-all flex items-center justify-between ${activeIndicator === 'alpha' ? 'bg-[#FF6E6E]/20 text-[#FF6E6E] border border-[#FF6E6E]/50' : 'text-gray-400 hover:bg-gray-800'}`}>
+                                        className={`w-full text-left px-3 py-2 rounded text-[11px] transition-all flex items-center justify-between ${activeIndicator === 'alpha' ? 'bg-[var(--warn)]/20 text-[var(--warn)] border border-[var(--warn)]' : 'text-[var(--txt)] hover:bg-[var(--line)] border border-transparent'}`}>
                                     <span className="font-bold">α C(K)</span>
                                     <span>Biot-Savart Afstoting</span>
                                 </button>
 
                                 <button onClick={() => setActiveIndicator(activeIndicator === 'beta' ? 'none' : 'beta')}
-                                        className={`w-full text-left px-3 py-2 rounded text-xs transition-all flex items-center justify-between ${activeIndicator === 'beta' ? 'bg-[#FFAE45]/20 text-[#FFAE45] border border-[#FFAE45]/50' : 'text-gray-400 hover:bg-gray-800'}`}>
+                                        className={`w-full text-left px-3 py-2 rounded text-[11px] transition-all flex items-center justify-between ${activeIndicator === 'beta' ? 'bg-[var(--amber)]/20 text-[var(--amber)] border border-[var(--amber)]' : 'text-[var(--txt)] hover:bg-[var(--line)] border border-transparent'}`}>
                                     <span className="font-bold">β L(K)</span>
                                     <span>Lijnspanning</span>
                                 </button>
 
                                 <button onClick={() => setActiveIndicator(activeIndicator === 'gamma' ? 'none' : 'gamma')}
-                                        className={`w-full text-left px-3 py-2 rounded text-xs transition-all flex items-center justify-between ${activeIndicator === 'gamma' ? 'bg-[#A855F7]/20 text-[#A855F7] border border-[#A855F7]/50' : 'text-gray-400 hover:bg-gray-800'}`}>
+                                        className={`w-full text-left px-3 py-2 rounded text-[11px] transition-all flex items-center justify-between ${activeIndicator === 'gamma' ? 'bg-[var(--purple)]/20 text-[var(--purple)] border border-[var(--purple)]' : 'text-[var(--txt)] hover:bg-[var(--line)] border border-transparent'}`}>
                                     <span className="font-bold">γ H(K)</span>
                                     <span>Hopf Stabiliteit</span>
                                 </button>

@@ -1,0 +1,11 @@
+# Build C++ backend when available; otherwise NumPy fallback remains usable.
+python -m sst_horn_bem.build_ext_if_needed --force
+
+# One BEM-corrected run.
+python run_horn_bem.py --lambda 1.2 --bem --bem-n-eta 12 --bem-n-phi 24 --n-ring 256 --n-surface 32 --n-volume 18 --box-radius 6.0 --out horn_bem_1p2.json
+
+# Compare against the uncorrected ring field.
+python run_horn_bem.py --lambda 1.2 --no-bem --n-ring 256 --n-surface 32 --n-volume 18 --box-radius 6.0 --out horn_ring_1p2.json
+
+# Sweep.
+python run_horn_sweep.py --lambdas 1.05,1.1,1.2,1.5,2.0 --bem --bem-n-eta 12 --bem-n-phi 24 --out-json horn_bem_sweep.json --out-csv horn_bem_sweep.csv

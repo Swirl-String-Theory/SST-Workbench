@@ -1,0 +1,4 @@
+Base plate and axle for Triple gear by henryseg on Thingiverse: https://www.thingiverse.com/thing:78218
+
+Summary:
+Video.  This is intended to work with Triple gear. The axle threads through the central hole in the gears. Rotating the axle makes the gears turn. The gears sit on the baseplate, which prevents them from rotating around the axle itself. The axle has a 5mm diameter cylindrical hole in the bottom, for fitting onto a motor.  This is also available at Shapeways.  If you watch the video, you'll see that the motion isn't perfectly smooth. Possibly some improvements could be made to the shape of the baseplate and/or axle and/or triple gear to make it smoother.
