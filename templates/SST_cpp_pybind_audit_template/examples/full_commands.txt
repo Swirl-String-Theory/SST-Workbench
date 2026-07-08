@@ -1,0 +1,67 @@
+# Full command reference — every CLI flag illustrated.
+# Run from the project root (template folder or your renamed copy).
+
+# ---------------------------------------------------------------------------
+# build_ext_if_needed.py  (python -m native_ext.build_ext_if_needed)
+# ---------------------------------------------------------------------------
+python -m native_ext.build_ext_if_needed
+python -m native_ext.build_ext_if_needed --quiet
+python -m native_ext.build_ext_if_needed --force
+python -m native_ext.build_ext_if_needed --force --quiet
+python -m native_ext.build_ext_if_needed --strict
+python -m native_ext.build_ext_if_needed --force --strict
+
+# ---------------------------------------------------------------------------
+# run_example.py — single run
+# ---------------------------------------------------------------------------
+# Defaults (--a 2 --b 3 --expected auto=a+b)
+python run_example.py
+
+# Operands
+python run_example.py --a 1.5 --b 2.5
+python run_example.py --a 0 --b 0
+python run_example.py --a -1 --b 4
+
+# Explicit expected value (pass/fail threshold)
+python run_example.py --a 2 --b 3 --expected 5
+python run_example.py --a 2 --b 3 --expected 6
+
+# Backend selection / build control
+python run_example.py --force-python
+python run_example.py --skip-build
+python run_example.py --force-build
+python run_example.py --build-verbose
+python run_example.py --force-build --build-verbose
+
+# Output
+python run_example.py --out example_out.json
+python run_example.py --summary-only
+python run_example.py --a 2 --b 3 --out example_out.json --summary-only
+
+# Combined (typical audit run)
+python run_example.py --a 2 --b 3 --force-build --build-verbose --out example_cpp.json
+python run_example.py --a 2 --b 3 --force-python --out example_python.json
+
+# ---------------------------------------------------------------------------
+# run_sweep.py — parameter sweep
+# ---------------------------------------------------------------------------
+python run_sweep.py
+python run_sweep.py --values-a 1.0,2.0,3.0
+python run_sweep.py --values-b 0.5,1.5,2.5
+python run_sweep.py --values-a 1,2,3 --values-b 0.5,1.5,2.5
+python run_sweep.py --force-python
+python run_sweep.py --skip-build
+python run_sweep.py --force-build
+python run_sweep.py --build-verbose
+python run_sweep.py --out-json example_sweep.json --out-csv example_sweep.csv
+python run_sweep.py --values-a 1,2 --values-b 0.5,1.5 --force-build --build-verbose --out-json sweep_full.json --out-csv sweep_full.csv
+
+# ---------------------------------------------------------------------------
+# run_all_checks.py — smoke + sweep battery
+# ---------------------------------------------------------------------------
+python run_all_checks.py
+python run_all_checks.py --out-dir audit_out
+python run_all_checks.py --out-dir examples/smoke_outputs
+python run_all_checks.py --force-python
+python run_all_checks.py --force-build
+python run_all_checks.py --force-build --out-dir audit_out_full
