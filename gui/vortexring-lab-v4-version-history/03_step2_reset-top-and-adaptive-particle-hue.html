@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superfluïde vortexlab v4 — ringen, trefoil, heliciteit</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+  :root{
+    --bg:#0B1020; --panel:#101830; --line:#1E2C4A;
+    --txt:#C9D6E3; --dim:#6F82A0;
+    --amber:#FFAE45; --ice:#55D6FF; --warn:#FF6E6E; --ok:#7BE8A8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; background:var(--bg); color:var(--txt);
+    font-family:"IBM Plex Mono","SFMono-Regular",Consolas,monospace; font-size:13px;}
+  html,body{overflow:hidden;}
+  #stage{position:fixed; inset:0; overflow:hidden;}
+  #c3d{position:absolute; inset:0; touch-action:none; width:100%; height:100%; display:block;}
+  #ui-left{position:absolute; top:0; left:0; z-index:10; width:min(360px,32vw); max-height:100vh;
+    overflow-y:auto; padding:10px 12px; pointer-events:none;}
+  #ui-left > *{pointer-events:auto;}
+  #ui-left h1{font-size:13px; letter-spacing:.06em; font-weight:600; color:#EAF2FA; line-height:1.35;}
+  #ui-left .sub{color:var(--dim); font-size:11px; margin-top:3px;}
+  #ui-left .hdr-btns{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  #ui-right{position:absolute; top:0; right:0; z-index:10; width:min(320px,28vw); height:100vh;
+    overflow-y:auto; padding:10px 12px 24px; pointer-events:none;
+    background:rgba(16,24,48,.92); border-left:1px solid var(--line);}
+  #ui-right > *{pointer-events:auto;}
+  #ui-right .grp{margin-bottom:10px;}
+  #ui-right .ctrls{grid-template-columns:1fr; gap:8px;}
+  #ui-right .seg-btn{font-size:10px; padding:6px 4px;}
+  #ui-right details.coll{margin-bottom:6px;}
+  #hud{background:rgba(16,24,48,.84); border:1px solid var(--line); border-radius:6px;
+    padding:10px 12px; min-width:196px; margin-top:8px;}
+  #hud .big{font-size:26px; font-weight:600; color:#EAF2FA; line-height:1.1;}
+  #hud .lbl{color:var(--dim); font-size:10px; letter-spacing:.08em;}
+  #hud .row{display:flex; justify-content:space-between; gap:10px; margin-top:4px;}
+  #hud .val{color:#EAF2FA; text-align:right;}
+  #flag{position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:20;
+    max-width:min(420px,90vw); background:rgba(16,24,48,.92); border:1px solid var(--warn);
+    border-radius:6px; padding:8px 12px; color:var(--warn); font-size:11px; display:none; line-height:1.4;}
+  #flag.warnonly{border-color:var(--amber); color:var(--amber);}
+  #spark{margin-top:8px; background:rgba(16,24,48,.84); border:1px solid var(--line);
+    border-radius:6px; padding:6px; display:inline-block;}
+  .signed-row{display:flex; align-items:center; gap:6px; margin-bottom:2px;}
+  .signed-row input[type=range]{flex:1;}
+  .rev-chk{font-size:10px; color:var(--dim); white-space:nowrap; min-width:2.6em;}
+  .rev-chk input{accent-color:var(--amber); margin-right:3px;}
+  .grp{margin-bottom:8px;}
+  .grp>.gl{color:var(--dim); font-size:9.5px; letter-spacing:.14em; margin-bottom:5px;}
+  .ctrls{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:10px 16px;}
+  .ctrl label{display:flex; justify-content:space-between; color:var(--dim); font-size:11px; margin-bottom:3px; gap:6px;}
+  .ctrl label .v{color:#EAF2FA; text-align:right; font-size:10px; line-height:1.25;}
+  input[type=range]{width:100%; accent-color:var(--ice); height:20px;}
+  select{width:100%; background:var(--bg); color:var(--txt); border:1px solid var(--line);
+    border-radius:4px; padding:6px 8px; font-family:inherit; font-size:11px;}
+  .seg{display:flex; gap:4px; width:100%;}
+  .seg-btn{flex:1; padding:7px 5px; font-size:10.5px; border:1px solid var(--line); border-radius:4px;
+    background:var(--bg); color:var(--dim); cursor:pointer; font-family:inherit; line-height:1.2;}
+  .seg-btn:hover:not(:disabled){border-color:var(--ice); color:var(--txt);}
+  .seg-btn.active{border-color:var(--ice); color:#EAF2FA; background:rgba(85,214,255,.12);}
+  .seg-btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btns{display:flex; gap:8px; margin-top:6px; align-items:center; flex-wrap:wrap;}
+  button{background:transparent; color:var(--txt); border:1px solid var(--line);
+    border-radius:5px; padding:7px 14px; font-family:inherit; font-size:12px; cursor:pointer;}
+  button:hover,button:focus-visible{border-color:var(--ice); color:#EAF2FA; outline:none;}
+  #bReset{border-color:var(--amber); color:#EAF2FA; background:rgba(255,174,69,.08);}
+  #bReset:hover,#bReset:focus-visible{background:rgba(255,174,69,.18);}
+  .chk{display:flex; align-items:center; gap:8px; font-size:11px; color:var(--dim);}
+  .chk input{accent-color:var(--ice);}
+  .note{color:var(--dim); font-size:10.5px; margin-top:8px; line-height:1.45;}
+  .kA{color:var(--amber);} .kB{color:var(--ice);}
+  .hidden{display:none !important;}
+  /* GEM-stijl uitleeskaarten */
+  #cards{position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:66vw; z-index:6;}
+  .mcard{background:rgba(16,24,48,.86); border:1px solid var(--line); border-radius:8px;
+    padding:7px 12px; text-align:center; min-width:104px;}
+  .mcard .ml{color:var(--dim); font-size:9px; letter-spacing:.12em; margin-bottom:2px; text-transform:uppercase;}
+  .mcard .mv{font-size:19px; font-weight:600; line-height:1.1; font-family:inherit;}
+  .mcard .ms{color:var(--dim); font-size:8.5px; margin-top:2px;}
+  .wgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px 12px; margin-top:10px;}
+  /* physics overlay */
+  #physOverlay{position:fixed; inset:0; background:rgba(11,16,32,.96); z-index:10000;
+    overflow-y:auto; padding:58px 20px 30px; display:none; pointer-events:none;}
+  #physOverlay.open{display:block; pointer-events:auto;}
+  #physOverlay h2{font-size:13px; color:#EAF2FA; letter-spacing:.08em; margin:18px 0 6px;
+    border-bottom:1px solid var(--line); padding-bottom:4px;}
+  #physOverlay h2:first-of-type{margin-top:4px;}
+  #physOverlay p{font-size:12px; line-height:1.6; margin:6px 0; max-width:820px;}
+  #physOverlay .card{border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+    margin:8px 0; max-width:820px; background:rgba(16,24,48,.5);}
+  #physOverlay .card .ct{font-size:11px; letter-spacing:.1em; margin-bottom:4px;}
+  #physOverlay .katex{font-size:1.02em;}
+  #bPhysClose{position:fixed; top:12px; right:12px; z-index:10001;
+    background:var(--panel); border-color:var(--ice); color:#EAF2FA; pointer-events:auto;}
+  #bPhysClose:hover,#bPhysClose:focus-visible{background:rgba(85,214,255,.12);}
+  .tag{display:inline-block; border:1px solid var(--line); border-radius:3px; padding:1px 6px;
+    font-size:9.5px; color:var(--dim); letter-spacing:.08em; margin-left:6px; vertical-align:middle;}
+  #eFormula{font-size:11px; color:var(--dim); margin-top:4px;}
+  #hTitle{font-size:13px; letter-spacing:.04em; color:#EAF2FA; line-height:1.4;}
+  #eFormula .katex{font-size:1em;}
+  details.coll{border:1px solid var(--line); border-radius:6px; margin-bottom:8px; background:rgba(11,16,32,.35);}
+  details.coll>summary{cursor:pointer; padding:8px 10px; font-size:9.5px; letter-spacing:.14em; color:var(--dim); list-style:none;}
+  details.coll>summary::-webkit-details-marker{display:none;}
+  details.coll>summary::before{content:"▸ "; color:var(--ice);}
+  details.coll[open]>summary::before{content:"▾ ";}
+  details.coll .coll-body{padding:0 10px 10px;}
+  .seg-btn.on-alpha{border-color:var(--warn)!important; color:#EAF2FA!important; background:rgba(255,110,110,.12)!important;}
+  .seg-btn.on-beta{border-color:var(--amber)!important; color:#EAF2FA!important; background:rgba(255,174,69,.12)!important;}
+  .seg-btn.on-gamma{border-color:#A855F7!important; color:#EAF2FA!important; background:rgba(168,85,247,.12)!important;}
+  .seg-btn.on-sep{border-color:#fff!important; color:#EAF2FA!important; background:rgba(255,255,255,.1)!important;}
+  .energy-help{font-size:10px; color:var(--dim); line-height:1.45; margin:6px 0;}
+  @media (prefers-reduced-motion:reduce){ #spark{display:none;} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="c3d"></canvas>
+
+  <div id="ui-left">
+    <div id="hTitle">SUPERFLUÏDE VORTEXLAB · cilinder 1.0 m × Ø50 cm · Ω = <span id="hOm">1.00</span> rad·s⁻¹</div>
+    <div class="sub" id="hSub">—</div>
+    <div id="eFormula"></div>
+    <div class="hdr-btns">
+      <button id="bReset" type="button" title="Herstel de huidige configuratie naar de beginpositie">↺ Reset</button>
+      <button id="bPhys" type="button">ⓘ Fysica</button>
+    </div>
+
+    <div id="hud">
+      <div class="lbl">CENTERLINE-HELICITEIT H / Γ²</div>
+      <div class="big" id="hHel">0.000</div>
+      <div class="row"><span class="lbl" id="hWrLbl">Wr(<span class="kA">A</span>)+Wr(<span class="kB">B</span>)</span><span class="val" id="hWr">0.000</span></div>
+      <div class="row" id="rowLk"><span class="lbl">Lk(A,B)</span><span class="val" id="hLk">0.000</span></div>
+      <div class="row hidden" id="rowDWr"><span class="lbl">ΔWr sinds t=0</span><span class="val" id="hDWr">0.000</span></div>
+      <div class="row hidden" id="rowOmBodyA"><span class="lbl">Ω_body A</span><span class="val" id="hOmBodyA">—</span></div>
+      <div class="row hidden" id="rowOmBodyB"><span class="lbl">Ω_body B</span><span class="val" id="hOmBodyB">—</span></div>
+      <div class="row hidden" id="rowChi"><span class="lbl">χ̂ (xy)</span><span class="val" id="hChi">—</span></div>
+      <div class="row hidden" id="rowTw"><span class="lbl">Tw_proxy · Wr+Tw</span><span class="val" id="hTw">—</span></div>
+      <div class="row"><span class="lbl" id="hWrelLbl">ω_rel achtergrond</span><span class="val" id="hWrel">2.00 s⁻¹ ẑ</span></div>
+      <div class="row"><span class="lbl">tracer ΔΩ₉₀ / kleurschaal</span><span class="val" id="hTracerOmega">—</span></div>
+      <div class="row hidden" id="rowRcap"><span class="lbl">r_cap A</span><span class="val" id="hRcap">—</span></div>
+      <div class="row hidden" id="rowGfil"><span class="lbl">Γ filament</span><span class="val" id="hGfil">—</span></div>
+      <div class="row hidden" id="rowGsheet"><span class="lbl">Γ_sheet @ r_cap</span><span class="val" id="hGsheet">—</span></div>
+      <div class="row hidden" id="rowGrel"><span class="lbl">Γ_rel / Γ_bg</span><span class="val" id="hGrel">—</span></div>
+      <div class="row"><span class="lbl">n_v = 2Ω/κ</span><span class="val" id="hNv">—</span></div>
+      <div class="row"><span class="lbl" id="hRLbl">R̄ A / B</span><span class="val" id="hR">—</span></div>
+      <div class="row" id="rowDz"><span class="lbl">Δz kernen</span><span class="val" id="hDz">—</span></div>
+      <div class="row"><span class="lbl" id="hVLbl">naderingssnelheid</span><span class="val" id="hV">—</span></div>
+      <div class="row" id="rowUth"><span class="lbl">U gem. / Kelvin</span><span class="val" id="hUth">—</span></div>
+      <div class="row"><span class="lbl">t (fysisch)</span><span class="val" id="hT">0.0 s</span></div>
+      <div class="row"><span class="lbl">effectieve versnelling</span><span class="val" id="hAcc">—</span></div>
+    </div>
+
+    <div id="spark"><canvas id="cspark" width="230" height="76"></canvas></div>
+  </div>
+
+  <div id="flag"></div>
+
+  <div id="cards">
+    <div class="mcard"><div class="ml">C(K) · ACN</div><div class="mv" id="cardC" style="color:#FF6E6E">—</div><div class="ms">gem. kruisingsgetal</div></div>
+    <div class="mcard"><div class="ml">L̂ = L/L₀</div><div class="mv" id="cardL" style="color:#FFAE45">—</div><div class="ms">reklengte</div></div>
+    <div class="mcard"><div class="ml">Ĥ = H/Γ²</div><div class="mv" id="cardH" style="color:#A855F7">—</div><div class="ms">Wr + 2Lk</div></div>
+    <div class="mcard"><div class="ml">Ê_eff proxy</div><div class="mv" id="cardE" style="color:#55D6FF">—</div><div class="ms">αC + βL̂ + γĤ</div></div>
+    <div class="mcard"><div class="ml">Γ</div><div class="mv" id="cardGam" style="color:#EAF2FA;font-size:14px">—</div><div class="ms">circulatie</div></div>
+  </div>
+
+  <div id="physOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Fysica-uitleg">
+      <button id="bPhysClose" type="button" aria-label="Sluit fysica-uitleg" onclick="event.preventDefault();event.stopPropagation();const o=this.closest('#physOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');document.getElementById('bPhys')?.focus();">Sluit ✕</button>
+      <h2>BEWEGINGSMODEL</h2>
+      <p>Schwarz-splitsing op kernlijnen: lokale (LIA-)term plus niet-lokale Biot–Savart-som,</p>
+      <p>\[ \mathbf u(\mathbf x_i) \;=\; \underbrace{\frac{\Gamma}{4\pi}\Big[\ln\!\frac{2\sqrt{\ell_+\ell_-}}{e^{\Delta}\,a}+c_0\Big]\;\mathbf s'\!\times\mathbf s''}_{\text{lokaal}} \;+\; \underbrace{\frac{\Gamma}{4\pi}\sum_{j\notin\{i-1,\,i\}} \frac{d\boldsymbol\ell_j\times\mathbf r_{ij}}{\left(|\mathbf r_{ij}|^2+\delta\,a^2\right)^{3/2}}}_{\text{niet-lokaal}} \;+\; w\,\hat{\mathbf z}\;\text{(solo)}, \]</p>
+      <p>De axiale superstroming \(w\,\hat{\mathbf z}\) geldt uitsluitend in <b>solo-modus</b> (één knoop). In botsing-modus gebruik je per-drager <em>v_z-drift</em> sliders i.p.v. \(w\).</p>
+      <p>met \(\delta=0\) op het eigen filament (de kernfysica zit volledig in de lokale term) en \(\delta=1\) voor de kruisterm tussen dragers. De constante \(c_0=0.1395\) is een <em>gemeten</em> discretisatieconstante van dit schema, geverifieerd universeel over \(R\in[4,10]\,\mathrm{cm}\), \(a\in[0.5,3]\,\mathrm{mm}\), \(N\in[48,256]\) en alle drie kernmodellen. Integratie: RK4 met Kelvin-golf-CFL \(\omega_{\max}\,\Delta t\le 0.5\), \(\omega=\nu k^2\), \(\nu=\tfrac{\Gamma}{4\pi}\Lambda\). RK2 is hier principieel ongeschikt: Kelvin-golven zijn zuiver dispersief en RK2 heeft geen stabiliteit op de imaginaire as.</p>
+      <p><b>Validatie:</b> ringsnelheid vs. Kelvin-formule: \(|\text{fout}|\le 0.01\%\) voor alle kernmodellen bij \(N=48\!-\!256\) (resolutie-onafhankelijk). De rotatie wordt exact behandeld door in het meeroterende frame te integreren; \(\Omega\) legt dus géén tijdstaplimiet op.</p>
+
+      <h2>KERNMODELLEN</h2>
+      <p>De translatiesnelheid van een dunne ring hangt via één constante af van de kernstructuur:</p>
+      <p>\[ U \;=\; \frac{\Gamma}{4\pi R}\Big[\ln\frac{8R}{a}-\Delta\Big], \qquad \Delta=\begin{cases}\tfrac12 & \text{holle kern (klassiek He-II hollow-core)}\\[2pt] \tfrac14 & \text{vaste kern / Rankine (Kelvin 1867)}\\[2pt] 0.615 & \text{GP/NLSE-kern, } a\to\xi \text{ (Roberts–Grant 1971)}\end{cases} \]</p>
+      <p>Een vaste kern is dus het snelst, GP het langzaamst; het verschil zit uitsluitend in \(\Delta\). Niet gemodelleerd: kernvolume-verandering bij rek (holle en vaste kern reageren daar verschillend op) en kern-twist.</p>
+
+      <h2>HELICITEIT &amp; TOPOLOGIE</h2>
+      <p>\[ H=\int \mathbf u\cdot\boldsymbol\omega\,dV \;=\; \Gamma^2\Big(\textstyle\sum_i \mathrm{Wr}_i + 2\!\!\sum_{i<j}\!\mathrm{Lk}_{ij}\Big) \quad\text{(centerline-benadering)}, \]</p>
+      <p>met Wr en Lk via discrete Gauss-integralen \(\frac{1}{4\pi}\oint\!\oint \frac{(d\mathbf x_1\times d\mathbf x_2)\cdot(\mathbf x_1-\mathbf x_2)}{|\mathbf x_1-\mathbf x_2|^3}\). Let op: twist \(\mathrm{Tw}\) is in een filamentmodel niet gerepresenteerd; de behouden combinatie is \(\mathrm{Wr}+\mathrm{Tw}\). De ΔWr-uitlezing toont dus expliciet het ontbrekende twist-kanaal — drift in Wr is géén numerieke fout maar een modelgrens.</p>
+      <p>De frontale configuratie (twee coaxiale dragers, gelijk \(|\Gamma|\), antiparallelle oriëntatie) heeft \(H\equiv 0\) — symmetrie-beschermd. <b>Empirisch resultaat uit deze code:</b> ook mét laterale offset (getest: \(\Delta x=30\) mm, tot aan de reconnectiedrempel bij \(\Delta z\approx 7\) cm) blijft \(H=0.0000\). Offset breekt de axisymmetrie — de ringen kantelen en precesseren — maar een quasi-vlakke gekantelde kromme heeft nog steeds \(\mathrm{Wr}=0\), en \(\mathrm{Lk}\neq0\) vereist reconnectie. Heliciteit ontstaat in gladde filamentdynamica dus niet spontaan; de heliciteitsdrager in dit lab is de <em>trefoil</em>, met \(H/\Gamma^2=\mathrm{Wr}\approx-3.41\) vanaf \(t=0\).</p>
+      <p>Ideal trefoil \(3_1\) (Gilbert-Fourier, 183 modi): gemeten \(|\mathrm{Wr}|\approx 3.41\!-\!3.42\) bij \(N=96\!-\!384\); literatuurwaarde voor de ideal \(3_1\) is \(\approx 3.51\). Het verschil komt door Fourier-afvlakking van de reconstructie plus de discrete Gauss-som; het teken volgt uit chiraliteit en traversalrichting.</p>
+
+      <h2>ROTATIE &amp; ROOSTER</h2>
+      <p>Een superfluïde kan niet als star lichaam roteren; de rotatie wordt gedragen door een rooster van gekwantiseerde vortexlijnen met Feynman-dichtheid</p>
+      <p>\[ n_v=\frac{2\Omega}{\kappa}\;:\qquad \text{He-II bij }\Omega=1\ \mathrm{rad/s}:\ 2.0\times10^{7}\ \mathrm{m^{-2}},\qquad \text{SST}:\ 2.1\times10^{8}\ \mathrm{m^{-2}}. \]</p>
+      <p>Het getoonde rooster is representatief (aantal ∝ Ω), niet op ware dichtheid. De achtergrond is coarse-grained solid-body met \(\boldsymbol\omega_{\mathrm{rel}}=2\Omega\,\hat{\mathbf z}\). Coaxiale dragers zijn invariant onder deze rotatie; alleen bij offset zie je precessie (in het lab-frame).</p>
+
+      <h2>MEDIA</h2>
+      <div class="card"><div class="ct kB">HELIUM-II</div>
+        <p>\(\kappa = h/m_4 = 9.969\times10^{-8}\ \mathrm{m^2\,s^{-1}}\); kernstraal \(a_0\sim 1\ \text{Å}\); \(\rho_s\approx 145\ \mathrm{kg\,m^{-3}}\) (\(T\to0\)). Historisch kernmodel: hol (Rayfield–Reif); modern: GP-achtig.</p></div>
+      <div class="card"><div class="ct kA">SST <span class="tag">CANON v0.8.19</span></div>
+        <p>\(\Gamma_0 = 2\pi r_c v_{\circlearrowleft} = 9.68362\times10^{-9}\ \mathrm{m^2\,s^{-1}}\); \(r_c = 1.40897\times10^{-15}\ \mathrm m\); \(v_{\circlearrowleft} = 1.09384563\times10^{6}\ \mathrm{m\,s^{-1}}\); \(\rho_f = 7.0\times10^{-7}\ \mathrm{kg\,m^{-3}}\); \(p_{\circlearrowleft,0}=\tfrac12\rho_f v_{\circlearrowleft}^2 = 4.188\times10^{5}\ \mathrm{Pa}\). Kernmodel per Canon: GP/NLSE.</p></div>
+      <p><b>Schaalmodel-eerlijkheid.</b> In de sim staat \(a\) op mm-schaal; de echte kern is Å (He-II) resp. fm (SST) — dat gat is niet resolveerbaar in een filamentcode op meterschaal. \(U\) schaalt \(\propto\Gamma\) en slechts logaritmisch met \(a\); de topologische diagnostiek (Wr, Lk, \(H/\Gamma^2\)) is exact schaal-invariant. Kies je een medium, dan is \(\Gamma=n\kappa\) fysisch en staat de tijdversnelling navenant hoog.</p>
+
+      <h2>TAYLOR-KOLOM &amp; STEWARTSON (Research Track)</h2>
+      <p>Axiale kolom-snelheid \(w\) drijft een Stewartson-afschuiflaag op \(r=r_{\rm cap}\). Analytisch (Ro≪1): \(u_\theta \approx -w/(2\Omega r_{\rm cap})\), \(\Gamma_{\rm sheet}=2\pi r_{\rm cap}\,u_\theta\). Referentie achtergrond: \(\Gamma_{\rm bg}=2\Omega\pi r_{\rm cap}^2\). Negatieve \(\Gamma_{\rm rel}=\Gamma_{\rm sheet}-\Gamma_{\rm bg}\) = buis tegengesteld aan achtergrondrotatie.</p>
+      <p><b>Lab-frame (co-rot uit):</b> \(\omega_b=2\Omega\,\hat z\). <b>Co-rotating frame (coRot aan):</b> bulk \(\omega_{\rm rel}\approx 0\); Stewartson-laag blijft lokaal zichtbaar via \(w\)-gradient.</p>
+
+      <h2>FILAMENT-SPIN &amp; ACHTERGROND-Ω</h2>
+      <p><b>Body-frame:</b> \(\Omega_{\rm body}\) uit least-squares fit van punt-snelheden in het xy-vlak; \(\hat\chi\) = chiraliteitsrichting (trefoil/knoop). Ring: \(\mathrm{Wr}=0\), geen macroscopische spin.</p>
+      <p><b>Achtergrond Omega koppelen</b> (optioneel, default uit): lab-frame superflow \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) met \(\Omega=P.Om\,\hat z\) — Feynman-rooster advectie. Uit wanneer co-rot frame aan.</p>
+      <p><b>Tw_proxy</b> (Research Track): lichte segment-twist advectie \(\dot\theta=\mathbf u\cdot\mathbf t'\); geen volledige C–T–F-theorie.</p>
+
+      <h2>NIET GEMODELLEERD</h2>
+      <p>Reconnecties (run stopt bij onderlinge afstand \(<3a\); in LIA-modus alleen een waarschuwing, want LIA ziet de nadering niet) · wandbeelden · kern-twist · wederzijdse wrijving / normale component (\(T=0\)) · kernvolume bij rek · echte roosterdynamica (Tkachenko-modi).</p>
+      <p class="note" style="max-width:820px;">Trefoil-geometrie: Brian Gilbert ideal <code>3:1:1</code> (183 Fourier-modi) uit <code>sst_ideal_trefoil_biot_package_v2</code>. Optioneel: leg <code>ideal_knots_data.js</code> naast dit bestand om de volledige knopencatalogus te laden.</p>
+    </div>
+</div>
+
+<div id="ui-right">
+    <div class="grp"><div class="gl">CONFIGURATIE</div>
+      <div class="ctrls">
+        <div class="ctrl"><label>modus</label>
+          <div class="seg" id="modeSeg">
+            <button type="button" class="seg-btn active" data-mode="botsing">Botsing (2)</button>
+            <button type="button" class="seg-btn" data-mode="solo">Solo</button>
+          </div></div>
+        <div class="ctrl"><label>topologie</label>
+          <div class="seg" id="topoSeg">
+            <button type="button" class="seg-btn active" data-topo="ring">Ring (0₁)</button>
+            <button type="button" class="seg-btn" data-topo="trefoil">Trefoil (3₁)</button>
+          </div></div>
+        <div class="ctrl" id="interRow"><label>interactie</label>
+          <div class="seg" id="interSeg">
+            <button type="button" class="seg-btn active" data-inter="bs">Biot–Savart</button>
+            <button type="button" class="seg-btn" data-inter="lia">LIA (lokaal)</button>
+          </div></div>
+        <div class="ctrl hidden" id="knotRow"><label>ideal knoop</label>
+          <select id="knotSelect"></select></div>
+        <div class="ctrl hidden" id="compRow">
+          <label>componenten</label>
+          <div class="ctrls" style="grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+            <div><label style="font-size:10px;">comp A</label><select id="compA"></select></div>
+            <div><label style="font-size:10px;">comp B</label><select id="compB"></select></div>
+          </div>
+        </div>
+        <div class="ctrl" id="qualRow"><label>kwaliteit</label>
+          <div class="seg" id="qualSeg">
+            <button type="button" class="seg-btn" data-qual="laag">Laag</button>
+            <button type="button" class="seg-btn active" data-qual="mid">Mid</button>
+            <button type="button" class="seg-btn" data-qual="hoog">Hoog</button>
+          </div></div>
+      </div>
+    </div>
+
+    <div class="grp"><div class="gl">MEDIUM &amp; KERN</div>
+      <div class="ctrls">
+        <div class="ctrl"><label>medium</label>
+          <div class="seg" id="medSeg">
+            <button type="button" class="seg-btn active" data-med="demo">Demo</button>
+            <button type="button" class="seg-btn" data-med="he">He-II</button>
+            <button type="button" class="seg-btn" data-med="sst">SST</button>
+          </div></div>
+        <div class="ctrl"><label>kernmodel <span class="v" id="vCore">Δ = ½</span></label>
+          <div class="seg" id="coreSeg">
+            <button type="button" class="seg-btn active" data-core="hol">Hol</button>
+            <button type="button" class="seg-btn" data-core="vast">Vast</button>
+            <button type="button" class="seg-btn" data-core="gp">GP/NLSE</button>
+          </div></div>
+        <div class="ctrl" id="gaRow"><label>Γ circulatie <span class="v" id="vGa">2.0·10⁻³ m²/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revGa"> rev</label>
+            <input type="range" id="sGa" min="0" max="50" step="0.5" value="2">
+          </div></div>
+        <div class="ctrl hidden" id="nqRow"><label>n (quanta) <span class="v" id="vNq">1 → Γ = κ</span></label>
+          <input type="range" id="sNq" min="1" max="10" step="1" value="1"></div>
+        <div class="ctrl"><label>kernstraal a <span class="v" id="vA">1.5 mm</span></label>
+          <input type="range" id="sA" min="0.5" max="3" step="0.1" value="1.5"></div>
+      </div>
+    </div>
+
+    <div class="grp"><div class="gl">VOLUME</div>
+      <div class="ctrls">
+        <div class="ctrl"><label>Ø cilinder <span class="v" id="vDiam">50 cm</span></label>
+          <input type="range" id="sDiam" min="0" max="200" step="1" value="50"></div>
+        <div class="note" style="margin-top:0;">Volume-kader (coarse-grained domein), geen fysieke wand.</div>
+      </div>
+    </div>
+
+    <details class="coll" id="collParams" open>
+      <summary>PARAMETERS</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>Ω rotatie <span class="v" id="vOm">1.00 rad/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revOm"> rev</label>
+            <input type="range" id="sOm" min="0" max="2" step="0.05" value="1">
+          </div></div>
+        <div class="ctrl" id="offRow"><label>offset Δx (B) <span class="v" id="vOff">0 mm</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revOff"> rev</label>
+            <input type="range" id="sOff" min="0" max="100" step="1" value="0">
+          </div></div>
+        <div class="ctrl hidden" id="wRow"><label>superstroming w <span class="v" id="vW">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revW"> rev</label>
+            <input type="range" id="sW" min="0" max="200" step="1" value="0">
+          </div></div>
+        <div class="ctrl hidden" id="vzARow"><label>v_z drift A <span class="v" id="vVzA">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revVzA"> rev</label>
+            <input type="range" id="sVzA" min="0" max="200" step="1" value="0">
+          </div></div>
+        <div class="ctrl hidden" id="vzBRow"><label>v_z drift B <span class="v" id="vVzB">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revVzB"> rev</label>
+            <input type="range" id="sVzB" min="0" max="200" step="1" value="0">
+          </div></div>
+        <div class="ctrl"><label>tijdversnelling <span class="v" id="vAcc">8×</span></label>
+          <input type="range" id="sAcc" min="0" max="7" step="0.05" value="0.9"></div>
+      </div>
+      <div class="btns" style="margin-top:8px;">
+        <label class="chk hidden" id="ccwARow"><input type="checkbox" id="cCcwA" checked> A CCW</label>
+        <label class="chk hidden" id="ccwBRow"><input type="checkbox" id="cCcwB"> B CCW</label>
+        <label class="chk hidden" id="mirrorRow"><input type="checkbox" id="cMirror"> Mirror B</label>
+        <label class="chk hidden" id="lockVzRow"><input type="checkbox" id="cLockVz" checked> v_z A = B</label>
+        <label class="chk" style="margin-top:6px;"><input type="checkbox" id="cBgOmega"> Achtergrond Ω koppelen</label>
+        <div class="note" style="margin-top:4px;">Integreer in lab-frame \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) i.p.v. frame-splitsing — fysisch identiek voor deze achtergrond, maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking.</div>
+      </div>
+      </div>
+    </details>
+
+    <details class="coll" id="collEnergy">
+      <summary>ENERGIE E_eff</summary>
+      <div class="coll-body">
+        <p class="energy-help">Visuele termen van \(\mathcal{E}_{\rm eff}[K]\). β = geel wireframe 1.03×; ∂V = Taylor-caps + Stewartson-torus.</p>
+        <div class="seg ind-seg" id="indSeg">
+          <button type="button" class="seg-btn" data-ind="alpha" title="α C(K) — Biot-Savart afstoting bij nadering">α C</button>
+          <button type="button" class="seg-btn" data-ind="beta" title="β L(K) — lijnspanning overlay">β L</button>
+          <button type="button" class="seg-btn" data-ind="gamma" title="γ H(K) — Hopf / flow overlay">γ H</button>
+          <button type="button" class="seg-btn" data-ind="sep" title="∂V — Taylor caps + Stewartson Γ_sheet">∂V</button>
+        </div>
+        <div class="wgrid">
+          <div class="ctrl"><label>α <span class="v" id="vWAl">1.0</span></label>
+            <input type="range" id="sWAl" min="0" max="3" step="0.1" value="1"></div>
+          <div class="ctrl"><label>β <span class="v" id="vWBe">1.0</span></label>
+            <input type="range" id="sWBe" min="0" max="3" step="0.1" value="1"></div>
+          <div class="ctrl"><label>γ <span class="v" id="vWGa">1.0</span></label>
+            <input type="range" id="sWGa" min="0" max="3" step="0.1" value="1"></div>
+        </div>
+        <div class="note" style="margin-top:4px;">Kaarten onderaan: C = ACN (Gauss-|integraal|), L̂ = L/L₀, Ĥ = Wr+2Lk. Ê_eff = αC+βL̂+γĤ is een <b>genormaliseerde proxy</b> met vrije gewichten — geen canon-grootheid.</div>
+        <label class="chk" style="margin-top:8px;"><input type="checkbox" id="cCenterline"> Kernlijn</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cGhostRing"> Ghost Stewartson ring</label>
+        <label class="chk hidden" id="oscRow" style="margin-top:4px;"><input type="checkbox" id="cTaylorOsc"> w(t) oscillatie (Taylor)</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTwProxy"> Tw_proxy (segment)</label>
+      </div>
+    </details>
+
+    <details class="coll" id="collVis">
+      <summary>VISUALISATIE</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>weergave</label>
+          <div class="seg" id="visSeg">
+            <button type="button" class="seg-btn active" data-vis="tube">Buis</button>
+            <button type="button" class="seg-btn" data-vis="line">Lijn</button>
+          </div></div>
+        <div class="ctrl"><label>buismateriaal</label>
+          <div class="seg" id="tubeSeg">
+            <button type="button" class="seg-btn active" data-tube="solid">Vast</button>
+            <button type="button" class="seg-btn" data-tube="hol">Hol</button>
+          </div></div>
+        <label class="chk" style="margin-top:8px;"><input type="checkbox" id="cChiArrow"> Chiraliteitspijl (χ̂)</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTracers" checked> Deeltjeswolk (600 tracers, advectie)</label>
+        <div class="note" style="margin-top:3px;">Deeltjeskleur vergelijkt de lokale lab-frame-hoeksnelheid met de cilinder: groen = lager/tegenroterend, cyaan = ongeveer gelijk, paars = hoger. Het kleurcontrast schaalt adaptief op de 90e percentielwaarde van |ΔΩ|; de fysieke schaal staat links in de HUD.</div>
+      </div>
+      </div>
+    </details>
+
+    <div class="btns">
+      <button id="bPreset" type="button">🪣 Supervloeistof</button>
+      <button id="bPresetTaylor" type="button">Taylor kolom</button>
+      <button id="bPresetPistol" type="button">Pistool (solo)</button>
+      <button id="bPause">Pauzeer</button>
+      <label class="chk"><input type="checkbox" id="cCoRot"> co-rot frame</label>
+    </div>
+    <div class="note" id="footNote">
+      v4 · Schwarz + RK4 · volume-kader geen wand · alle opties in beide modi (LIA in botsing = géén wederzijdse inductie) · tracers = passieve advectie-visualisatie, verplaatsing/frame afgetopt · sleep/knijp camera.
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="ideal_knots_data.js" onerror="void 0"></script>
+<script>
+"use strict";
+// ================= dataset: ideal trefoil 3:1:1 (Gilbert, 183 modi) =================
+const IDEAL_TREFOIL_3_1_1 = {
+  knotId: "3:1:1",
+  L: 16.371637,
+  coeffs: [
+  {I:1,A:[0.374139, 0, 0],B:[0, 0.37392799999999998, 0]},
+  {I:2,A:[0.82424600000000003, 0.75026000000000004, 0.00035199999999999999],B:[0.75044999999999995, -0.82395200000000002, -0.0019910000000000001]},
+  {I:3,A:[0.00025700000000000001, -0.00093199999999999999, 0.35239700000000002],B:[-0.00076999999999999996, 0.00072599999999999997, -0.386764]},
+  {I:4,A:[0.011651999999999999, -0.010656000000000001, 0.00074299999999999995],B:[0.010739, 0.011613, -0.00023000000000000001]},
+  {I:5,A:[0.010503999999999999, 0.110306, 0.00019900000000000001],B:[0.110745, -0.010366, -0.00023499999999999999]},
+  {I:6,A:[1.5e-05, -6.0000000000000002e-06, -0.047465],B:[-5.0000000000000002e-05, -9.9999999999999995e-07, 0.0045950000000000001]},
+  {I:7,A:[-0.000292, 0.0024169999999999999, -7.9999999999999996e-06],B:[-0.002529, -0.00025500000000000002, -9.0000000000000002e-06]},
+  {I:8,A:[0.016487000000000002, -0.021784000000000001, 4.1e-05],B:[-0.021922000000000001, -0.016421000000000002, -4.3999999999999999e-05]},
+  {I:9,A:[-2.9e-05, -1.8e-05, 0.011178],B:[4.8999999999999998e-05, 4.1e-05, 0.0084139999999999996]},
+  {I:10,A:[-0.00021599999999999999, -0.00029, -1.8e-05],B:[0.00031100000000000002, -0.00019699999999999999, -4.3999999999999999e-05]},
+  {I:11,A:[-0.011727, 0.0021840000000000002, 6.9999999999999999e-06],B:[0.002202, 0.011682, 2.0000000000000002e-05]},
+  {I:12,A:[2.5999999999999998e-05, 1.9000000000000001e-05, -0.0013079999999999999],B:[-3.9999999999999998e-06, -1.9000000000000001e-05, -0.0070390000000000001]},
+  {I:13,A:[0.00032499999999999999, 5.5000000000000002e-05, -9.0000000000000002e-06],B:[-5.8999999999999998e-05, 0.00028899999999999998, 2.4000000000000001e-05]},
+  {I:14,A:[0.0052129999999999998, 0.0032009999999999999, 9.9999999999999995e-07],B:[0.0032100000000000002, -0.0051879999999999999, 1.0000000000000001e-05]},
+  {I:15,A:[-1.5e-05, -1.5999999999999999e-05, -0.0019170000000000001],B:[-1.7e-05, 9.9999999999999995e-07, 0.0031210000000000001]},
+  {I:16,A:[-0.000136, 6.2000000000000003e-05, 1.9000000000000001e-05],B:[-7.4999999999999993e-05, -0.000112, -6.9999999999999999e-06]},
+  {I:17,A:[-0.00099500000000000001, -0.0034629999999999999, -9.9999999999999995e-07],B:[-0.0034740000000000001, 0.00098799999999999995, -1.5e-05]},
+  {I:18,A:[3.0000000000000001e-06, 7.9999999999999996e-06, 0.0021779999999999998],B:[1.9000000000000001e-05, 7.9999999999999996e-06, -0.00061499999999999999]},
+  {I:19,A:[3.3000000000000003e-05, -9.3999999999999994e-05, -1.5999999999999999e-05],B:[0.000113, 2.8e-05, -3.9999999999999998e-06]},
+  {I:20,A:[-0.0009990000000000001, 0.002013, -0],B:[0.002019, 0.00099799999999999997, 0]},
+  {I:21,A:[3.9999999999999998e-06, 9.9999999999999995e-07, -0.0012700000000000001],B:[-1.2999999999999999e-05, -1.2e-05, -0.00062600000000000004]},
+  {I:22,A:[3.4e-05, 6.0000000000000002e-05, 9.0000000000000002e-06],B:[-7.2000000000000002e-05, 2.5999999999999998e-05, 1.0000000000000001e-05]},
+  {I:23,A:[0.0013829999999999999, -0.00053899999999999998, 1.9999999999999999e-06],B:[-0.00054000000000000001, -0.001382, 3.9999999999999998e-06]},
+  {I:24,A:[-5.0000000000000004e-06, -1.1e-05, 0.00034400000000000001],B:[9.0000000000000002e-06, 6.9999999999999999e-06, 0.00088999999999999995]},
+  {I:25,A:[-5.7000000000000003e-05, -2.5000000000000001e-05, 9.9999999999999995e-07],B:[1.9000000000000001e-05, -4.8000000000000001e-05, -7.9999999999999996e-06]},
+  {I:26,A:[-0.00093099999999999997, -0.00035599999999999998, -0],B:[-0.000357, 0.00093099999999999997, -5.0000000000000004e-06]},
+  {I:27,A:[6.0000000000000002e-06, 9.0000000000000002e-06, 0.00022800000000000001],B:[-1.9999999999999999e-06, -0, -0.00059699999999999998]},
+  {I:28,A:[4.0000000000000003e-05, -6.9999999999999999e-06, -3.9999999999999998e-06],B:[1.9000000000000001e-05, 3.6000000000000001e-05, 3.9999999999999998e-06]},
+  {I:29,A:[0.00030800000000000001, 0.000611, 9.9999999999999995e-07],B:[0.000611, -0.00030699999999999998, 6.9999999999999999e-06]},
+  {I:30,A:[1.9999999999999999e-06, 9.9999999999999995e-07, -0.00039100000000000002],B:[-6.0000000000000002e-06, 9.9999999999999995e-07, 0.000195]},
+  {I:31,A:[-1.5e-05, 1.9000000000000001e-05, 3.0000000000000001e-06],B:[-3.1000000000000001e-05, -1.2e-05, 9.9999999999999995e-07]},
+  {I:32,A:[0.000125, -0.00045199999999999998, 3.9999999999999998e-06],B:[-0.00045199999999999998, -0.00012400000000000001, -3.9999999999999998e-06]},
+  {I:33,A:[-6.0000000000000002e-06, -9.9999999999999995e-07, 0.000281],B:[3.9999999999999998e-06, -3.0000000000000001e-06, 7.7000000000000001e-05]},
+  {I:34,A:[-1.9999999999999999e-06, -7.9999999999999996e-06, -1.9999999999999999e-06],B:[2.4000000000000001e-05, -5.0000000000000004e-06, -9.9999999999999995e-07]},
+  {I:35,A:[-0.000272, 0.000173, -1.9999999999999999e-06],B:[0.00017200000000000001, 0.00027300000000000002, -3.9999999999999998e-06]},
+  {I:36,A:[6.0000000000000002e-06, -9.9999999999999995e-07, -0.00010399999999999999],B:[1.9999999999999999e-06, 3.9999999999999998e-06, -0.000164]},
+  {I:37,A:[7.9999999999999996e-06, 3.0000000000000001e-06, -9.9999999999999995e-07],B:[-9.0000000000000002e-06, 3.9999999999999998e-06, 9.9999999999999995e-07]},
+  {I:38,A:[0.00021499999999999999, 3.6000000000000001e-05, -3.9999999999999998e-06],B:[3.6999999999999998e-05, -0.000214, 3.9999999999999998e-06]},
+  {I:39,A:[-1.9999999999999999e-06, -1.9999999999999999e-06, -2.0000000000000002e-05],B:[1.9999999999999999e-06, -9.9999999999999995e-07, 0.000121]},
+  {I:41,A:[-8.8999999999999995e-05, -0.000113, 3.9999999999999998e-06],B:[-0.000113, 8.7999999999999998e-05, 1.9999999999999999e-06]},
+  {I:42,A:[1.9999999999999999e-06, 0, 5.8999999999999998e-05],B:[-0, 3.0000000000000001e-06, -4.6e-05]},
+  {I:43,A:[-6.9999999999999999e-06, 6.9999999999999999e-06, -0],B:[-1.9999999999999999e-06, 3.9999999999999998e-06, -0]},
+  {I:44,A:[-5.0000000000000004e-06, 8.7999999999999998e-05, -0],B:[9.0000000000000006e-05, 5.0000000000000004e-06, -3.9999999999999998e-06]},
+  {I:46,A:[0, -7.9999999999999996e-06, -9.9999999999999995e-07],B:[1.1e-05, -5.0000000000000004e-06, -9.9999999999999995e-07]},
+  {I:47,A:[3.6000000000000001e-05, -3.6000000000000001e-05, 9.9999999999999995e-07],B:[-3.6000000000000001e-05, -3.6000000000000001e-05, -9.9999999999999995e-07]},
+  {I:48,A:[3.0000000000000001e-06, -3.0000000000000001e-06, 1.1e-05],B:[3.0000000000000001e-06, 1.9999999999999999e-06, 9.0000000000000002e-06]},
+  {I:49,A:[9.0000000000000002e-06, 3.9999999999999998e-06, -0],B:[-1.1e-05, 1.1e-05, 3.0000000000000001e-06]},
+  {I:50,A:[-2.0999999999999999e-05, 3.9999999999999998e-06, -9.9999999999999995e-07],B:[3.9999999999999998e-06, 2.3e-05, -9.9999999999999995e-07]},
+  {I:51,A:[-9.9999999999999995e-07, 9.9999999999999995e-07, -3.9999999999999998e-06],B:[-3.0000000000000001e-06, 1.9999999999999999e-06, 6.0000000000000002e-06]},
+  {I:52,A:[-1.5e-05, 1.9999999999999999e-06, -0],B:[-9.9999999999999995e-07, -1.5999999999999999e-05, -9.9999999999999995e-07]},
+  {I:53,A:[3.9999999999999998e-06, -0, 3.0000000000000001e-06],B:[-9.9999999999999995e-07, -3.9999999999999998e-06, 1.9999999999999999e-06]},
+  {I:54,A:[-0, 1.9999999999999999e-06, 1.2999999999999999e-05],B:[9.9999999999999995e-07, -9.9999999999999995e-07, -1.1e-05]},
+  {I:55,A:[1.0000000000000001e-05, -1.2e-05, 9.9999999999999995e-07],B:[1.2e-05, 1.4e-05, 0]},
+  {I:56,A:[-3.0000000000000001e-06, 1.2999999999999999e-05, 9.9999999999999995e-07],B:[1.2e-05, 1.9999999999999999e-06, -1.9999999999999999e-06]},
+  {I:57,A:[-1.9999999999999999e-06, -9.9999999999999995e-07, -2.5999999999999998e-05],B:[0, -1.9999999999999999e-06, -0]},
+  {I:58,A:[3.0000000000000001e-06, 2.0000000000000002e-05, 0],B:[-1.5999999999999999e-05, -3.9999999999999998e-06, -9.9999999999999995e-07]},
+  {I:59,A:[1.5e-05, -1.5999999999999999e-05, -9.9999999999999995e-07],B:[-1.4e-05, -1.5999999999999999e-05, 1.9999999999999999e-06]},
+  {I:60,A:[3.9999999999999998e-06, -1.9999999999999999e-06, 2.4000000000000001e-05],B:[1.9999999999999999e-06, 3.0000000000000001e-06, 2.0999999999999999e-05]},
+  {I:61,A:[-1.2999999999999999e-05, -1.8e-05, -0],B:[1.0000000000000001e-05, -1.1e-05, -9.9999999999999995e-07]},
+  {I:62,A:[-2.8e-05, 1.9999999999999999e-06, -0],B:[1.9999999999999999e-06, 2.9e-05, 0]},
+  {I:63,A:[-9.9999999999999995e-07, 3.9999999999999998e-06, -3.9999999999999998e-06],B:[-5.0000000000000004e-06, -1.9999999999999999e-06, -3.4e-05]},
+  {I:64,A:[1.5999999999999999e-05, 6.0000000000000002e-06, -9.9999999999999995e-07],B:[1.9999999999999999e-06, 2.0000000000000002e-05, 1.9999999999999999e-06]},
+  {I:65,A:[2.5999999999999998e-05, 2.0999999999999999e-05, 0],B:[1.9000000000000001e-05, -2.6999999999999999e-05, -0]},
+  {I:66,A:[-3.0000000000000001e-06, -5.0000000000000004e-06, -2.1999999999999999e-05],B:[3.9999999999999998e-06, -9.9999999999999995e-07, 2.9e-05]},
+  {I:67,A:[-1.2999999999999999e-05, 1.0000000000000001e-05, 9.9999999999999995e-07],B:[-1.2e-05, -1.7e-05, -9.9999999999999995e-07]},
+  {I:68,A:[-6.9999999999999999e-06, -3.4e-05, -9.9999999999999995e-07],B:[-3.4e-05, 6.0000000000000002e-06, -1.9999999999999999e-06]},
+  {I:69,A:[3.9999999999999998e-06, 3.0000000000000001e-06, 3.4e-05],B:[-9.9999999999999995e-07, 3.0000000000000001e-06, -6.9999999999999999e-06]},
+  {I:70,A:[1.9999999999999999e-06, -1.7e-05, -9.9999999999999995e-07],B:[1.7e-05, 5.0000000000000004e-06, -0]},
+  {I:71,A:[-1.9000000000000001e-05, 3.1000000000000001e-05, -9.9999999999999995e-07],B:[3.1000000000000001e-05, 1.9000000000000001e-05, 1.9999999999999999e-06]},
+  {I:72,A:[-1.9999999999999999e-06, 0, -3.1999999999999999e-05],B:[-1.9999999999999999e-06, -3.9999999999999998e-06, -1.9000000000000001e-05]},
+  {I:73,A:[1.0000000000000001e-05, 1.2999999999999999e-05, 0],B:[-1.5e-05, 9.0000000000000002e-06, 0]},
+  {I:74,A:[3.3000000000000003e-05, -1.1e-05, 3.0000000000000001e-06],B:[-1.1e-05, -3.3000000000000003e-05, -9.9999999999999995e-07]},
+  {I:75,A:[0, -1.9999999999999999e-06, 1.0000000000000001e-05],B:[9.9999999999999995e-07, 9.9999999999999995e-07, 3.1000000000000001e-05]},
+  {I:76,A:[-1.5999999999999999e-05, -3.0000000000000001e-06, -9.9999999999999995e-07],B:[5.0000000000000004e-06, -1.4e-05, 0]},
+  {I:77,A:[-3.1000000000000001e-05, -1.5e-05, -1.9999999999999999e-06],B:[-1.4e-05, 3.1999999999999999e-05, -9.9999999999999995e-07]},
+  {I:78,A:[9.9999999999999995e-07, 9.9999999999999995e-07, 1.5e-05],B:[-9.9999999999999995e-07, 0, -2.9e-05]},
+  {I:79,A:[1.5999999999999999e-05, -7.9999999999999996e-06, -0],B:[6.0000000000000002e-06, 1.0000000000000001e-05, 0]},
+  {I:80,A:[1.2999999999999999e-05, 3.1000000000000001e-05, 0],B:[2.9e-05, -1.2999999999999999e-05, 3.0000000000000001e-06]},
+  {I:81,A:[-0, 9.9999999999999995e-07, -2.6999999999999999e-05],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, 1.1e-05]},
+  {I:82,A:[-6.9999999999999999e-06, 1.2e-05, 9.9999999999999995e-07],B:[-1.4e-05, -1.9999999999999999e-06, 0]},
+  {I:83,A:[1.0000000000000001e-05, -3.0000000000000001e-05, 9.9999999999999995e-07],B:[-2.9e-05, -1.1e-05, -9.9999999999999995e-07]},
+  {I:84,A:[-9.9999999999999995e-07, -0, 2.5999999999999998e-05],B:[9.9999999999999995e-07, -9.9999999999999995e-07, 1.0000000000000001e-05]},
+  {I:85,A:[-3.0000000000000001e-06, -9.0000000000000002e-06, -0],B:[1.5e-05, -6.0000000000000002e-06, -9.9999999999999995e-07]},
+  {I:86,A:[-2.4000000000000001e-05, 1.2999999999999999e-05, -9.9999999999999995e-07],B:[1.4e-05, 2.5999999999999998e-05, -0]},
+  {I:87,A:[1.9999999999999999e-06, -1.9999999999999999e-06, -1.2e-05],B:[9.9999999999999995e-07, 1.9999999999999999e-06, -2.3e-05]},
+  {I:88,A:[1.2e-05, 1.9999999999999999e-06, -0],B:[-6.9999999999999999e-06, 1.1e-05, 9.9999999999999995e-07]},
+  {I:89,A:[2.5000000000000001e-05, 6.9999999999999999e-06, 9.9999999999999995e-07],B:[6.0000000000000002e-06, -2.5999999999999998e-05, 0]},
+  {I:90,A:[-9.9999999999999995e-07, 1.9999999999999999e-06, -6.0000000000000002e-06],B:[-1.9999999999999999e-06, 0, 2.3e-05]},
+  {I:91,A:[-1.2e-05, 5.0000000000000004e-06, 0],B:[-3.0000000000000001e-06, -7.9999999999999996e-06, -0]},
+  {I:92,A:[-1.4e-05, -1.9000000000000001e-05, 9.9999999999999995e-07],B:[-2.0000000000000002e-05, 1.4e-05, 0]},
+  {I:93,A:[-1.9999999999999999e-06, -9.9999999999999995e-07, 1.9000000000000001e-05],B:[1.9999999999999999e-06, -9.9999999999999995e-07, -1.1e-05]},
+  {I:94,A:[6.0000000000000002e-06, -9.0000000000000002e-06, -9.9999999999999995e-07],B:[9.0000000000000002e-06, 3.0000000000000001e-06, -9.9999999999999995e-07]},
+  {I:95,A:[-3.0000000000000001e-06, 2.0999999999999999e-05, 0],B:[2.1999999999999999e-05, 3.0000000000000001e-06, -0]},
+  {I:96,A:[3.0000000000000001e-06, 0, -1.8e-05],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, -3.0000000000000001e-06]},
+  {I:97,A:[3.0000000000000001e-06, 6.9999999999999999e-06, 0],B:[-9.0000000000000002e-06, 1.9999999999999999e-06, 0]},
+  {I:98,A:[1.5e-05, -1.2999999999999999e-05, -9.9999999999999995e-07],B:[-1.2999999999999999e-05, -1.4e-05, 1.9999999999999999e-06]},
+  {I:99,A:[-1.9999999999999999e-06, 9.9999999999999995e-07, 1.0000000000000001e-05],B:[-1.9999999999999999e-06, -9.9999999999999995e-07, 1.2999999999999999e-05]},
+  {I:100,A:[-6.9999999999999999e-06, -3.9999999999999998e-06, 0],B:[3.9999999999999998e-06, -6.0000000000000002e-06, -0]},
+  {I:101,A:[-1.8e-05, -0, 9.9999999999999995e-07],B:[-9.9999999999999995e-07, 1.7e-05, -0]},
+  {I:102,A:[0, -9.9999999999999995e-07, 1.9999999999999999e-06],B:[1.9999999999999999e-06, 9.9999999999999995e-07, -1.4e-05]},
+  {I:103,A:[6.9999999999999999e-06, -0, 9.9999999999999995e-07],B:[3.0000000000000001e-06, 6.9999999999999999e-06, -0]},
+  {I:104,A:[1.1e-05, 1.0000000000000001e-05, -1.9999999999999999e-06],B:[1.1e-05, -1.1e-05, -9.9999999999999995e-07]},
+  {I:105,A:[9.9999999999999995e-07, 9.9999999999999995e-07, -9.0000000000000002e-06],B:[-9.9999999999999995e-07, 0, 7.9999999999999996e-06]},
+  {I:106,A:[-3.0000000000000001e-06, 3.9999999999999998e-06, -0],B:[-6.0000000000000002e-06, -3.9999999999999998e-06, -0]},
+  {I:107,A:[-0, -1.2999999999999999e-05, 0],B:[-1.2999999999999999e-05, 9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:108,A:[-9.9999999999999995e-07, -9.9999999999999995e-07, 1.2e-05],B:[0, -9.9999999999999995e-07, 0]},
+  {I:109,A:[-1.9999999999999999e-06, -6.0000000000000002e-06, 0],B:[6.0000000000000002e-06, 9.9999999999999995e-07, 0]},
+  {I:110,A:[-6.9999999999999999e-06, 9.0000000000000002e-06, 9.9999999999999995e-07],B:[7.9999999999999996e-06, 6.9999999999999999e-06, -1.9999999999999999e-06]},
+  {I:111,A:[0, -0, -6.9999999999999999e-06],B:[0, 9.9999999999999995e-07, -6.0000000000000002e-06]},
+  {I:112,A:[5.0000000000000004e-06, 3.9999999999999998e-06, 0],B:[-1.9999999999999999e-06, 3.0000000000000001e-06, 0]},
+  {I:113,A:[9.0000000000000002e-06, -1.9999999999999999e-06, -9.9999999999999995e-07],B:[-1.9999999999999999e-06, -1.0000000000000001e-05, 9.9999999999999995e-07]},
+  {I:114,A:[0, 9.9999999999999995e-07, 9.9999999999999995e-07],B:[-9.9999999999999995e-07, -9.9999999999999995e-07, 7.9999999999999996e-06]},
+  {I:115,A:[-3.9999999999999998e-06, -1.9999999999999999e-06, 0],B:[-1.9999999999999999e-06, -3.9999999999999998e-06, -0]},
+  {I:116,A:[-6.9999999999999999e-06, -3.9999999999999998e-06, 9.9999999999999995e-07],B:[-3.9999999999999998e-06, 7.9999999999999996e-06, 0]},
+  {I:117,A:[-0, -0, 5.0000000000000004e-06],B:[-9.9999999999999995e-07, -0, -5.0000000000000004e-06]},
+  {I:118,A:[1.9999999999999999e-06, -9.9999999999999995e-07, 0],B:[3.9999999999999998e-06, 3.0000000000000001e-06, 0]},
+  {I:119,A:[1.9999999999999999e-06, 6.9999999999999999e-06, -9.9999999999999995e-07],B:[6.0000000000000002e-06, -3.0000000000000001e-06, -9.9999999999999995e-07]},
+  {I:120,A:[-0, -0, -5.0000000000000004e-06],B:[0, 0, 1.9999999999999999e-06]},
+  {I:121,A:[9.9999999999999995e-07, 3.0000000000000001e-06, -0],B:[-3.0000000000000001e-06, -1.9999999999999999e-06, -0]},
+  {I:122,A:[1.9999999999999999e-06, -5.0000000000000004e-06, -0],B:[-6.0000000000000002e-06, -1.9999999999999999e-06, 0]},
+  {I:123,A:[9.9999999999999995e-07, 0, 3.9999999999999998e-06],B:[0, 9.9999999999999995e-07, 3.0000000000000001e-06]},
+  {I:124,A:[-3.0000000000000001e-06, -3.0000000000000001e-06, -0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, -0]},
+  {I:125,A:[-3.9999999999999998e-06, 1.9999999999999999e-06, 9.9999999999999995e-07],B:[1.9999999999999999e-06, 3.9999999999999998e-06, -0]},
+  {I:126,A:[-0, 0, -9.9999999999999995e-07],B:[-9.9999999999999995e-07, -9.9999999999999995e-07, -3.9999999999999998e-06]},
+  {I:127,A:[3.0000000000000001e-06, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, 1.9999999999999999e-06, 0]},
+  {I:128,A:[3.9999999999999998e-06, 0, -0],B:[9.9999999999999995e-07, -3.0000000000000001e-06, 9.9999999999999995e-07]},
+  {I:129,A:[-0, -9.9999999999999995e-07, -0],B:[0, 0, 3.0000000000000001e-06]},
+  {I:130,A:[-1.9999999999999999e-06, 9.9999999999999995e-07, 0],B:[-1.9999999999999999e-06, -1.9999999999999999e-06, 0]},
+  {I:131,A:[-1.9999999999999999e-06, -1.9999999999999999e-06, -9.9999999999999995e-07],B:[-1.9999999999999999e-06, 1.9999999999999999e-06, -0]},
+  {I:132,A:[9.9999999999999995e-07, 9.9999999999999995e-07, 1.9999999999999999e-06],B:[-9.9999999999999995e-07, 0, -9.9999999999999995e-07]},
+  {I:133,A:[0, -1.9999999999999999e-06, 0],B:[3.0000000000000001e-06, 9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:135,A:[-9.9999999999999995e-07, -0, -1.9999999999999999e-06],B:[0, -0, -0]},
+  {I:136,A:[9.9999999999999995e-07, 9.9999999999999995e-07, -0],B:[-1.9999999999999999e-06, 9.9999999999999995e-07, -0]},
+  {I:137,A:[9.9999999999999995e-07, -9.9999999999999995e-07, 9.9999999999999995e-07],B:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07]},
+  {I:138,A:[9.9999999999999995e-07, -0, 9.9999999999999995e-07],B:[9.9999999999999995e-07, 9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:139,A:[-1.9999999999999999e-06, 0, -0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:140,A:[-9.9999999999999995e-07, 9.9999999999999995e-07, -9.9999999999999995e-07],B:[9.9999999999999995e-07, 0, 0]},
+  {I:141,A:[-9.9999999999999995e-07, 0, 0],B:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07]},
+  {I:145,A:[-9.9999999999999995e-07, 9.9999999999999995e-07, -0],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, 0]},
+  {I:147,A:[9.9999999999999995e-07, -0, -0],B:[-9.9999999999999995e-07, 0, -0]},
+  {I:148,A:[0, -0, 0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, 0]},
+  {I:149,A:[9.9999999999999995e-07, 0, -9.9999999999999995e-07],B:[0, -9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:150,A:[-9.9999999999999995e-07, 0, 0],B:[-0, 0, 0]},
+  {I:151,A:[9.9999999999999995e-07, -9.9999999999999995e-07, 0],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, -0]},
+  {I:152,A:[-1.9999999999999999e-06, -9.9999999999999995e-07, 0],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, 0]},
+  {I:154,A:[-9.9999999999999995e-07, 9.9999999999999995e-07, -0],B:[9.9999999999999995e-07, 0, 0]},
+  {I:155,A:[9.9999999999999995e-07, 1.9999999999999999e-06, -9.9999999999999995e-07],B:[1.9999999999999999e-06, -9.9999999999999995e-07, -9.9999999999999995e-07]},
+  {I:156,A:[0, -9.9999999999999995e-07, -9.9999999999999995e-07],B:[-0, 0, 9.9999999999999995e-07]},
+  {I:157,A:[9.9999999999999995e-07, -9.9999999999999995e-07, -0],B:[0, -9.9999999999999995e-07, -0]},
+  {I:158,A:[9.9999999999999995e-07, -1.9999999999999999e-06, -0],B:[-1.9999999999999999e-06, -0, 9.9999999999999995e-07]},
+  {I:159,A:[0, 0, 9.9999999999999995e-07],B:[0, 0, 0]},
+  {I:161,A:[-1.9999999999999999e-06, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, 1.9999999999999999e-06, 0]},
+  {I:162,A:[-0, -0, -9.9999999999999995e-07],B:[-0, -9.9999999999999995e-07, -9.9999999999999995e-07]},
+  {I:163,A:[0, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, -0]},
+  {I:164,A:[1.9999999999999999e-06, 0, -0],B:[0, -1.9999999999999999e-06, 0]},
+  {I:166,A:[9.9999999999999995e-07, -9.9999999999999995e-07, -0],B:[-0, 0, -0]},
+  {I:167,A:[-9.9999999999999995e-07, -1.9999999999999999e-06, 0],B:[-1.9999999999999999e-06, 9.9999999999999995e-07, 0]},
+  {I:168,A:[0, 0, 9.9999999999999995e-07],B:[-0, -0, -9.9999999999999995e-07]},
+  {I:170,A:[-0, 1.9999999999999999e-06, 0],B:[1.9999999999999999e-06, 0, -0]},
+  {I:171,A:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07],B:[0, -0, -0]},
+  {I:173,A:[1.9999999999999999e-06, -9.9999999999999995e-07, -0],B:[-9.9999999999999995e-07, -1.9999999999999999e-06, -0]},
+  {I:174,A:[9.9999999999999995e-07, 0, 9.9999999999999995e-07],B:[0, 0, 9.9999999999999995e-07]},
+  {I:176,A:[-1.9999999999999999e-06, 0, 0],B:[0, 1.9999999999999999e-06, 0]},
+  {I:177,A:[-9.9999999999999995e-07, 0, -0],B:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07]},
+  {I:179,A:[9.9999999999999995e-07, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, 0]},
+  {I:182,A:[-0, -1.9999999999999999e-06, -0],B:[-1.9999999999999999e-06, 0, -0]},
+  {I:185,A:[-9.9999999999999995e-07, 1.9999999999999999e-06, 0],B:[9.9999999999999995e-07, 9.9999999999999995e-07, 0]},
+  {I:188,A:[1.9999999999999999e-06, -9.9999999999999995e-07, 0],B:[-0, -1.9999999999999999e-06, -9.9999999999999995e-07]},
+  {I:189,A:[9.9999999999999995e-07, -0, 0],B:[0, 0, 9.9999999999999995e-07]},
+  {I:191,A:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07],B:[-9.9999999999999995e-07, 9.9999999999999995e-07, 0]},
+  {I:192,A:[-0, 9.9999999999999995e-07, 9.9999999999999995e-07],B:[-9.9999999999999995e-07, -0, -9.9999999999999995e-07]},
+  {I:194,A:[0, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, -9.9999999999999995e-07, 0]},
+  {I:195,A:[-0, -0, -9.9999999999999995e-07],B:[0, -0, 0]},
+  {I:197,A:[0, -1.9999999999999999e-06, -0],B:[-9.9999999999999995e-07, -0, -0]},
+  {I:198,A:[0, 0, 9.9999999999999995e-07],B:[-0, 0, 0]},
+  {I:200,A:[-9.9999999999999995e-07, 9.9999999999999995e-07, -0],B:[0, 9.9999999999999995e-07, 9.9999999999999995e-07]},
+  {I:203,A:[9.9999999999999995e-07, 0, 0],B:[0, -9.9999999999999995e-07, -0]},
+  {I:206,A:[-0, -9.9999999999999995e-07, 0],B:[-9.9999999999999995e-07, 0, -0]},
+  {I:209,A:[-0, 9.9999999999999995e-07, 0],B:[9.9999999999999995e-07, 0, 0]},
+  {I:212,A:[9.9999999999999995e-07, 0, 0],B:[-0, -9.9999999999999995e-07, -0]},
+  {I:215,A:[-9.9999999999999995e-07, -0, -0],B:[0, 9.9999999999999995e-07, 0]},
+  {I:218,A:[0, 9.9999999999999995e-07, -0],B:[0, 0, -0]},
+  {I:250,A:[0, -0, -0],B:[9.9999999999999995e-07, -0, 0]}
+  ]
+};
+
+// ================= parameters & state =================
+const KAPPA_HE  = 9.9693e-8;      // m^2/s  (h/m4)
+const GAMMA0_SST= 9.683619e-9;    // m^2/s  (2*pi*r_c*v_swirl, Canon v0.8.19)
+const C0        = 0.1395;         // gemeten discretisatieconstante Schwarz-schema
+const DELTA     = {hol:0.5, vast:0.25, gp:0.615};
+const P = {
+  mode:'botsing', topo:'ring', inter:'bs', core:'hol', med:'demo', qual:'mid',
+  Om:1.0, GaDemo:2.0, nQ:1, a:1.5e-3, off:0.0, w:0.0, accExp:0.9, coRot:false,
+  R0:0.07, zA:0.08, zB:0.92, zSolo:0.5, Rcyl:0.25, Hcyl:1.0,
+  knotIdx:-1, knotKey:'', compA:1, compB:1,
+  ccwA:true, ccwB:false, mirrorB:false, vzA:0, vzB:0, lockVz:true,
+  vis:'tube', tubeMat:'solid', showCenterline:false,
+  revOm:false, revGa:false, revOff:false, revW:false, revVzA:false, revVzB:false,
+  ghostStewartson:false,
+  taylorOsc:{enabled:false, amplitude:0.25, period:8},
+  bgOmegaCoupling:false, showChiArrow:false, twistProxyEnabled:false,
+  wAl:1, wBe:1, wGa:1, showTracers:true
+};
+function signedMag(x){return Math.abs(x);}
+function applySigned(rev,mag){return rev?-mag:mag;}
+function updateHeaderTitle(){
+  const d=(2*P.Rcyl*100).toFixed(0);
+  document.getElementById('hTitle').innerHTML=
+    `SUPERFLUÏDE VORTEXLAB · cilinder ${P.Hcyl.toFixed(1)} m × Ø${d} cm · Ω = <span id="hOm">${P.Om.toFixed(2)}</span> rad·s⁻¹`;
+}
+const Flags = {alpha:false, beta:false, gamma:false, sep:false};
+const EXPLAIN = {
+  alpha:{title:'α C(K) — Biot-Savart Afstoting', cls:'on-alpha', color:'#FF6E6E',
+    text:'Massieve wervelkernen naderen elkaar; incompressibiliteit creëert een drukbarrière die reconnectie voorkomt.'},
+  beta:{title:'β L(K) — Lijnspanning', cls:'on-beta', color:'#FFAE45',
+    text:'Samentrekkende kracht van de wervelstreng — geel wireframe overlay op 1.03× straal.'},
+  gamma:{title:'γ H(K) — Hopf Stabiliteit', cls:'on-gamma', color:'#A855F7',
+    text:'Topologische verstrengeling (kruis-heliciteit) houdt het macroscopische geheel bijeen.'},
+  sep:{title:'∂V — Separatrix / Taylor Caps', cls:'on-sep', color:'#fff',
+    text:'Roterende kolom sluit stroming af; caps volgen z-drift en relatieve vorticiteit ζ_rel.'}
+};
+function clamp(x,lo,hi){return Math.max(lo,Math.min(hi,x));}
+function effectiveW(){
+  if(P.mode!=='solo') return P.w;
+  if(P.taylorOsc.enabled){
+    const Omosc=2*Math.PI/Math.max(0.5,P.taylorOsc.period);
+    return P.taylorOsc.amplitude*Omosc*Math.cos(Omosc*tPhys);
+  }
+  return P.w;
+}
+function stewartsonCirculation(w,rCap,Om){
+  const r=Math.max(rCap,0.025);
+  const OmA=Math.max(1e-6,Math.abs(Om));
+  const uTheta=-w/(2*OmA*r);
+  const gammaSheet=2*Math.PI*r*uTheta;
+  const gammaBg=2*OmA*Math.PI*r*r;
+  const gammaRel=gammaSheet-gammaBg*Math.sign(Om||1);
+  const ratio=Math.abs(gammaBg)>1e-12?gammaRel/gammaBg:0;
+  return {gammaSheet,gammaBg,gammaRel,ratio,uTheta,rCap:r};
+}
+function taylorColumnState(s,vz){
+  const Ga=Math.abs(Gamma()), rBase=s.R*1.5+P.a*3;
+  const zetaAbs=2*P.Om+Ga/(Math.PI*Math.max(s.R*s.R,P.a*P.a));
+  const Lchar=Math.max(0.05,2*rBase);
+  const zetaRel=zetaAbs-2*P.Om-vz/Lchar;
+  const ratio=Math.abs(zetaAbs)/Math.max(1e-6,Math.abs(zetaRel));
+  const rFoot=P.Rcyl*0.25;
+  const rDyn=rBase*Math.sqrt(clamp(ratio,0.16,6.25));
+  const rCap=Flags.sep?Math.max(rFoot,rDyn):rDyn;
+  return {rCap,zTop:Math.min(0.99,s.z+rCap),zBot:Math.max(0.01,s.z-rCap),zetaRel,zetaAbs,rBase,rFoot};
+}
+const QUAL_N = {
+  botsing:{laag:64, mid:96, hoog:128},
+  solo:  {laag:96, mid:192, hoog:288}
+};
+const RING_N = 48;
+const EVAL_BUDGET = 1.5e6;   // kernel-evals per frame
+
+let Y=null, fils=[], ghostFil=null, tPhys=0, phi=0, paused=false;
+let flagged="", warned=false, lastUmax=1e-9;
+let Wr0=null, L0=1;
+let K1,K2,K3,K4,TT;
+let effAcc=0;
+const hist=[];
+let twistProxy=null;
+let chiArrows=[];
+let lastFrameVel=null;
+
+function Gamma(){
+  if(P.med==='he')  return P.nQ*KAPPA_HE;
+  if(P.med==='sst') return P.nQ*GAMMA0_SST;
+  const g=P.GaDemo; const s=g<0?-1:1;
+  return s*Math.max(Math.abs(g),0.2)*1e-3;
+}
+function kappaMedium(){
+  if(P.med==='he')  return KAPPA_HE;
+  if(P.med==='sst') return GAMMA0_SST;
+  return null;
+}
+function acc(){ return Math.pow(10,P.accExp); }
+const RING_QUAL={laag:48, mid:96, hoog:144};
+function carrierN(){
+  if(isRingTopo()) return RING_QUAL[P.qual];
+  return QUAL_N[P.mode][P.qual];
+}
+function activeCoeffs(forCarrier){
+  const ci=forCarrier==='B'?P.compB-1:P.compA-1;
+  if(P.knotKey && window.IDEAL_KNOT_DB && IDEAL_KNOT_DB[P.knotKey]){
+    const k=IDEAL_KNOT_DB[P.knotKey];
+    const comp=k.components[Math.min(ci,k.components.length-1)];
+    return comp.coeffs;
+  }
+  if(P.knotIdx>=0 && window.IDEAL_KNOTS && IDEAL_KNOTS[P.knotIdx]){
+    const e=IDEAL_KNOTS[P.knotIdx];
+    return e.coeffs||(e.components&&e.components[0])||IDEAL_TREFOIL_3_1_1.coeffs;
+  }
+  return IDEAL_TREFOIL_3_1_1.coeffs;
+}
+function activeKnotEntry(){
+  if(P.knotKey && window.IDEAL_KNOT_DB) return IDEAL_KNOT_DB[P.knotKey];
+  if(P.knotIdx>=0 && window.IDEAL_KNOTS) return IDEAL_KNOTS[P.knotIdx];
+  return null;
+}
+function carrierWantDir(which){
+  // CCW gezien vanaf +z => drager beweegt +z; CW => -z. Autoaim dwingt dit af (ook voor knopen).
+  const ccw=which==='B'?P.ccwB:P.ccwA;
+  return ccw?+1:-1;
+}
+function carrierOffsetX(which){
+  if(P.mode!=='botsing') return P.off;   // solo: drager zelf laterale offset
+  if(which==='B') return P.mirrorB?-P.off:P.off;
+  return 0;
+}
+
+function isRingTopo(){
+  return P.topo==='ring'&&P.knotIdx<0&&!P.knotKey;
+}
+function kelvinSpeed(R){
+  const Ga=Math.abs(Gamma());
+  return Ga/(4*Math.PI*Math.max(R,1e-6))*(Math.log(8*R/P.a)-DELTA[P.core]);
+}
+function chiHatFromFilament(f){
+  if(isRingTopo())return null;
+  const N=f.N,o=f.off;
+  const st=carrierStats(f);
+  let maxR=0,mx=0,my=0;
+  for(let k=0;k<N;k++){
+    const rx=Y[o+3*k]-st.cx,ry=Y[o+3*k+1]-st.cy;
+    const r=Math.hypot(rx,ry);
+    if(r>maxR){maxR=r;mx=rx;my=ry;}
+  }
+  if(maxR<1e-9)return {x:1,y:0,phi:0};
+  return {x:mx/maxR,y:my/maxR,phi:Math.atan2(my,mx)*180/Math.PI};
+}
+function bodyFrameState(f,V){
+  const st=carrierStats(f);
+  const N=f.N,o=f.off;
+  let num=0,den=0;
+  for(let k=0;k<N;k++){
+    const rx=Y[o+3*k]-st.cx,ry=Y[o+3*k+1]-st.cy;
+    const vx=V[o+3*k],vy=V[o+3*k+1];
+    num+=rx*vy-ry*vx;
+    den+=rx*rx+ry*ry;
+  }
+  const omegaZ=den>1e-12?num/den:0;
+  const chi=chiHatFromFilament(f);
+  return {omegaZ,chi,cx:st.cx,cy:st.cy,cz:st.z,R:st.R};
+}
+function initTwistProxy(){
+  twistProxy=fils.map(f=>new Float64Array(f.N));
+}
+function twistProxySum(){
+  if(!twistProxy)return 0;
+  let s=0;
+  twistProxy.forEach(tw=>{for(let k=0;k<tw.length;k++)s+=tw[k];});
+  return s/(2*Math.PI);
+}
+function updateTwistProxy(dt,V){
+  if(!P.twistProxyEnabled||!twistProxy||!Y)return;
+  fils.forEach((f,fi)=>{
+    const N=f.N,o=f.off,tw=twistProxy[fi];
+    for(let k=0;k<N;k++){
+      const k2=(k+1)%N;
+      const tx=Y[o+3*k2]-Y[o+3*k],ty=Y[o+3*k2+1]-Y[o+3*k+1],tz=Y[o+3*k2+2]-Y[o+3*k+2];
+      const tl=Math.hypot(tx,ty,tz)||1;
+      const ux=V[o+3*k],uy=V[o+3*k+1],uz=V[o+3*k+2];
+      tw[k]+=dt*(ux*tx/tl+uy*ty/tl+uz*tz/tl);
+    }
+  });
+}
+function fmtOmegaBody(om){
+  const deg=om*180/Math.PI;
+  if(Math.abs(deg)>=0.01)return deg.toFixed(2)+'°/s';
+  return (om*1000).toFixed(2)+' mrad/s';
+}
+function allFils(){return ghostFil?[...fils,ghostFil]:fils;}
+function filamentGamma(f){return f.ghost?f.gammaVal:Gamma();}
+function sampleFourierKnot(coeffs,n){
+  const x=new Float64Array(3*n);
+  for(let k=0;k<n;k++){
+    const t=2*Math.PI*k/n; let px=0,py=0,pz=0;
+    for(const c of coeffs){
+      const ct=Math.cos(c.I*t), st=Math.sin(c.I*t);
+      px+=ct*c.A[0]+st*c.B[0]; py+=ct*c.A[1]+st*c.B[1]; pz+=ct*c.A[2]+st*c.B[2];
+    }
+    x[3*k]=px;x[3*k+1]=py;x[3*k+2]=pz;
+  }
+  return x;
+}
+function ringPts(N,z0,cx){
+  const x=new Float64Array(3*N);
+  for(let k=0;k<N;k++){const th=2*Math.PI*k/N;
+    x[3*k]=cx+P.R0*Math.cos(th);x[3*k+1]=P.R0*Math.sin(th);x[3*k+2]=z0;}
+  return x;
+}
+function knotPts(N,z0,cx,which){
+  const raw=sampleFourierKnot(activeCoeffs(which==='B'?'B':'A'),N);
+  let c0=[0,0,0];
+  for(let k=0;k<N;k++)for(let d=0;d<3;d++)c0[d]+=raw[3*k+d];
+  for(let d=0;d<3;d++)c0[d]/=N;
+  let rMax=0;
+  for(let k=0;k<N;k++){const r=Math.hypot(raw[3*k]-c0[0],raw[3*k+1]-c0[1]);if(r>rMax)rMax=r;}
+  const s=P.R0/Math.max(rMax,1e-12), x=new Float64Array(3*N);
+  for(let k=0;k<N;k++){
+    x[3*k]=cx+(raw[3*k]-c0[0])*s; x[3*k+1]=(raw[3*k+1]-c0[1])*s; x[3*k+2]=z0+(raw[3*k+2]-c0[2])*s;}
+  return x;
+}
+function reverseTraversal(x,N){
+  const y=new Float64Array(3*N);
+  for(let k=0;k<N;k++){const s=N-1-k;
+    y[3*k]=x[3*s];y[3*k+1]=x[3*s+1];y[3*k+2]=x[3*s+2];}
+  return y;
+}
+// auto-richting: bouw drager, meet zelfgeïnduceerde v_z, keer traversal om indien nodig
+function makeCarrier(N,z0,cx,wantDir,which){
+  let x=(P.topo==='trefoil'||P.knotIdx>=0||P.knotKey)?knotPts(N,z0,cx,which||'A'):ringPts(N,z0,cx);
+  const V=new Float64Array(3*N);
+  velocitySingle(x,N,V);
+  let vz=0;for(let k=0;k<N;k++)vz+=V[3*k+2];
+  if(vz*wantDir<0) x=reverseTraversal(x,N);
+  return x;
+}
+
+// ================= fysica: Schwarz-splitsing =================
+// snelheid van één losstaand filament (voor auto-richting)
+function velocitySingle(X,N,V){
+  const fils1=[{off:0,N}]; velocityCore(X,fils1,V,false);
+}
+// hoofdroutine: Y = alle punten, fils = [{off,N}], OUT zelfde lengte als Y
+function velocityCore(Yv,fl,OUT,liaOnly){
+  const a=P.a, a2=a*a, eD=Math.exp(DELTA[P.core]);
+  // segmentdata per filament
+  const mids=[],dls=[];
+  for(const f of fl){
+    const N=f.N, o=f.off, mid=new Float64Array(3*N), dl=new Float64Array(3*N);
+    for(let k=0;k<N;k++){const k2=(k+1)%N;
+      for(let d=0;d<3;d++){
+        mid[3*k+d]=0.5*(Yv[o+3*k+d]+Yv[o+3*k2+d]);
+        dl[3*k+d]=Yv[o+3*k2+d]-Yv[o+3*k+d];}}
+    mids.push(mid);dls.push(dl);
+  }
+  let umax=0;
+  for(let ft=0;ft<fl.length;ft++){
+    const Ga=filamentGamma(fl[ft]), pref=Ga/(4*Math.PI);
+    const N=fl[ft].N, o=fl[ft].off, dlt=dls[ft];
+    for(let i=0;i<N;i++){
+      const im=(i-1+N)%N, ip=i;
+      const px=Yv[o+3*i],py=Yv[o+3*i+1],pz=Yv[o+3*i+2];
+      const dmx=dlt[3*im],dmy=dlt[3*im+1],dmz=dlt[3*im+2];
+      const dpx=dlt[3*ip],dpy=dlt[3*ip+1],dpz=dlt[3*ip+2];
+      const lm=Math.sqrt(dmx*dmx+dmy*dmy+dmz*dmz), lp=Math.sqrt(dpx*dpx+dpy*dpy+dpz*dpz);
+      const cxv=dmy*dpz-dmz*dpy, cyv=dmz*dpx-dmx*dpz, czv=dmx*dpy-dmy*dpx;
+      const lf=pref*(Math.log(2*Math.sqrt(lm*lp)/(eD*a))+C0)*2/(lm*lp*(lm+lp));
+      let ux=lf*cxv, uy=lf*cyv, uz=lf*czv;
+      const perDrift=(P.mode==='solo')?P.vzA:(ft===0?P.vzA:(P.lockVz?P.vzA:P.vzB));
+      const zBias=fl[ft].ghost?0:(effectiveW()+perDrift);
+      uz+=zBias;
+      if(P.bgOmegaCoupling&&!P.coRot&&!fl[ft].ghost){
+        ux+=-P.Om*py;
+        uy+= P.Om*px;
+      }
+      if(!liaOnly){
+        for(let fs=0;fs<fl.length;fs++){
+          const M=fl[fs].N, mid=mids[fs], dl=dls[fs];
+          const reg=(fs===ft)?0:a2;   // eigen filament: kale kern-vrije kernel; kruisterm: gladgestreken
+          for(let j=0;j<M;j++){
+            if(fs===ft && (j===im||j===ip)) continue;
+            const rx=px-mid[3*j],ry=py-mid[3*j+1],rz=pz-mid[3*j+2];
+            const r2=rx*rx+ry*ry+rz*rz+reg;
+            const inv=pref/(r2*Math.sqrt(r2));
+            ux+=(dl[3*j+1]*rz-dl[3*j+2]*ry)*inv;
+            uy+=(dl[3*j+2]*rx-dl[3*j]*rz)*inv;
+            uz+=(dl[3*j]*ry-dl[3*j+1]*rx)*inv;
+          }
+        }
+      }
+      OUT[o+3*i]=ux;OUT[o+3*i+1]=uy;OUT[o+3*i+2]=uz;
+      const um=ux*ux+uy*uy+uz*uz;if(um>umax)umax=um;
+    }
+  }
+  return Math.sqrt(umax);
+}
+function velAll(Yv,OUT){
+  const lia=(P.inter==='lia');
+  return velocityCore(Yv,allFils(),OUT,lia);
+}
+function rk4Step(dt){
+  const n=Y.length;
+  const u1=velAll(Y,K1);
+  for(let i=0;i<n;i++)TT[i]=Y[i]+0.5*dt*K1[i];
+  velAll(TT,K2);
+  for(let i=0;i<n;i++)TT[i]=Y[i]+0.5*dt*K2[i];
+  velAll(TT,K3);
+  for(let i=0;i<n;i++)TT[i]=Y[i]+dt*K3[i];
+  velAll(TT,K4);
+  for(let i=0;i<n;i++)Y[i]+=dt/6*(K1[i]+2*K2[i]+2*K3[i]+K4[i]);
+  constrainGhostRing();
+  if(P.twistProxyEnabled) updateTwistProxy(dt,K4);
+  return u1;
+}
+function dtCFL(){
+  const lm=lminAll();
+  const nu=(Math.abs(Gamma())/(4*Math.PI))*(Math.log(2*lm/(Math.exp(DELTA[P.core])*P.a))+C0);
+  const om=Math.max(1e-12,Math.abs(nu)*Math.pow(Math.PI/lm,2));
+  let dt=0.5/om;
+  dt=Math.min(dt, 0.25*lm/Math.max(1e-12,lastUmax));
+  if(P.bgOmegaCoupling&&Math.abs(P.Om)>1e-9)dt=Math.min(dt,0.2/Math.abs(P.Om));
+  return dt;
+}
+function evalsPerStep(){
+  let tot=0;for(const f of allFils())tot+=f.N;
+  const lia=(P.inter==='lia');
+  const n=allFils().length;
+  return lia? 4*tot*8 : 4*tot*tot;
+}
+
+function ghostRingPts(N,rCap,cx,cy,cz){
+  const x=new Float64Array(3*N);
+  for(let k=0;k<N;k++){
+    const th=2*Math.PI*k/N;
+    x[3*k]=cx+rCap*Math.cos(th);x[3*k+1]=cy+rCap*Math.sin(th);x[3*k+2]=cz;}
+  return x;
+}
+function lminAll(){
+  let m=1e9;
+  for(const f of allFils()){const N=f.N,o=f.off;
+    for(let k=0;k<N;k++){const k2=(k+1)%N;
+      const d=Math.hypot(Y[o+3*k2]-Y[o+3*k],Y[o+3*k2+1]-Y[o+3*k+1],Y[o+3*k2+2]-Y[o+3*k+2]);
+      if(d<m)m=d;}}
+  return m;
+}
+function rebuildRKBuffers(){
+  K1=new Float64Array(Y.length);K2=new Float64Array(Y.length);
+  K3=new Float64Array(Y.length);K4=new Float64Array(Y.length);TT=new Float64Array(Y.length);
+}
+function syncGhostRing(){
+  if(!P.ghostStewartson||P.mode!=='solo'||!fils.length||!Y){
+    if(ghostFil){
+      removeGhostFromY();rebuildRKBuffers();rebuildLines();rebuildTubes(true);
+    }
+    return;
+  }
+  const st=carrierStats(fils[0]);
+  const w=effectiveW();
+  const t=taylorColumnState(st,w);
+  const stw=stewartsonCirculation(w,t.rCap,P.Om);
+  const N=RING_N;
+  if(!ghostFil){
+    const off=Y.length;
+    const pts=ghostRingPts(N,t.rCap,st.cx,st.cy,st.z);
+    const Y2=new Float64Array(Y.length+3*N);
+    Y2.set(Y);Y2.set(pts,off);
+    Y=Y2;rebuildRKBuffers();
+    ghostFil={off,N,ghost:true,gammaVal:-stw.gammaSheet,rCap:t.rCap,cx:st.cx,cy:st.cy,cz:st.z};
+    rebuildLines();rebuildTubes(true);
+  }else{
+    ghostFil.gammaVal=-stw.gammaSheet;
+    ghostFil.rCap=t.rCap;ghostFil.cx=st.cx;ghostFil.cy=st.cy;ghostFil.cz=st.z;
+    constrainGhostRing();
+  }
+}
+function constrainGhostRing(){
+  if(!ghostFil||!Y)return;
+  const {off,N,rCap,cx,cy,cz}=ghostFil;
+  for(let k=0;k<N;k++){
+    const th=2*Math.PI*k/N;
+    Y[off+3*k]=cx+rCap*Math.cos(th);
+    Y[off+3*k+1]=cy+rCap*Math.sin(th);
+    Y[off+3*k+2]=cz;
+  }
+}
+function removeGhostFromY(){
+  if(!ghostFil||!Y)return;
+  const go=ghostFil.off, n=3*ghostFil.N;
+  const Y2=new Float64Array(Y.length-n);
+  Y2.set(Y.subarray(0,go),0);
+  Y2.set(Y.subarray(go+n),go);
+  Y=Y2;
+  ghostFil=null;
+}
+
+// ================= diagnostiek =================
+function gauss(o1,N1,o2,N2,same,absMode){
+  let S=0;
+  const skip=same?Math.max(2,Math.round(N1/24)):0;
+  for(let i=0;i<N1;i++){
+    const i2=(i+1)%N1;
+    const t1x=Y[o1+3*i2]-Y[o1+3*i],t1y=Y[o1+3*i2+1]-Y[o1+3*i+1],t1z=Y[o1+3*i2+2]-Y[o1+3*i+2];
+    const m1x=Y[o1+3*i]+.5*t1x,m1y=Y[o1+3*i+1]+.5*t1y,m1z=Y[o1+3*i+2]+.5*t1z;
+    for(let j=0;j<N2;j++){
+      if(same){const dd=Math.abs(i-j);if(dd<skip||dd>N1-skip)continue;}
+      const j2=(j+1)%N2;
+      const t2x=Y[o2+3*j2]-Y[o2+3*j],t2y=Y[o2+3*j2+1]-Y[o2+3*j+1],t2z=Y[o2+3*j2+2]-Y[o2+3*j+2];
+      const m2x=Y[o2+3*j]+.5*t2x,m2y=Y[o2+3*j+1]+.5*t2y,m2z=Y[o2+3*j+2]+.5*t2z;
+      const rx=m1x-m2x,ry=m1y-m2y,rz=m1z-m2z;
+      const r2=rx*rx+ry*ry+rz*rz;if(r2<1e-12)continue;
+      const cx=t1y*t2z-t1z*t2y,cy=t1z*t2x-t1x*t2z,cz=t1x*t2y-t1y*t2x;
+      const gTerm=(cx*rx+cy*ry+cz*rz)/(r2*Math.sqrt(r2));
+      S+=absMode?Math.abs(gTerm):gTerm;
+    }
+  }
+  return S/(4*Math.PI);
+}
+function arcLength(f){
+  let L=0;const N=f.N,o=f.off;
+  for(let k=0;k<N;k++){const k2=(k+1)%N;
+    L+=Math.hypot(Y[o+3*k2]-Y[o+3*k],Y[o+3*k2+1]-Y[o+3*k+1],Y[o+3*k2+2]-Y[o+3*k+2]);}
+  return L;
+}
+function carrierStats(f){
+  const N=f.N,o=f.off;
+  let cx=0,cy=0,cz=0;
+  for(let k=0;k<N;k++){cx+=Y[o+3*k];cy+=Y[o+3*k+1];cz+=Y[o+3*k+2];}
+  cx/=N;cy/=N;cz/=N;
+  let R=0,rWall=0;
+  for(let k=0;k<N;k++){
+    R+=Math.hypot(Y[o+3*k]-cx,Y[o+3*k+1]-cy);
+    const rw=Math.hypot(Y[o+3*k],Y[o+3*k+1]);if(rw>rWall)rWall=rw;
+  }
+  return {R:R/N,z:cz,rWall,cx,cy};
+}
+function minGapCross(){
+  if(fils.length<2)return 1e9;
+  const [f1,f2]=fils;let m=1e9;
+  for(let i=0;i<f1.N;i++)for(let j=0;j<f2.N;j++){
+    const dx=Y[f1.off+3*i]-Y[f2.off+3*j],dy=Y[f1.off+3*i+1]-Y[f2.off+3*j+1],dz=Y[f1.off+3*i+2]-Y[f2.off+3*j+2];
+    const d=dx*dx+dy*dy+dz*dz;if(d<m)m=d;}
+  return Math.sqrt(m);
+}
+function dminSelf(f){
+  const N=f.N,o=f.off,skip=Math.max(4,Math.round(N/24));let m=1e9;
+  for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+    const dd=Math.min(j-i,N-(j-i));if(dd<skip)continue;
+    const d=(Y[o+3*i]-Y[o+3*j])**2+(Y[o+3*i+1]-Y[o+3*j+1])**2+(Y[o+3*i+2]-Y[o+3*j+2])**2;
+    if(d<m)m=d;}
+  return Math.sqrt(m);
+}
+
+// ================= reset / rebuild =================
+function applyCanonPreset(){
+  P.mode='botsing'; P.topo='ring'; P.inter='bs'; P.core='hol'; P.med='demo'; P.qual='mid';
+  P.Om=1; P.GaDemo=2; P.nQ=1; P.a=1.5e-3; P.off=0; P.w=0; P.accExp=0.9; P.coRot=false;
+  P.R0=0.07; P.zA=0.08; P.zB=0.92; P.Rcyl=0.25; P.Hcyl=1.0;
+  P.knotIdx=-1; P.knotKey=''; P.compA=1; P.compB=1;
+  P.ccwA=true; P.ccwB=false; P.mirrorB=false; P.vzA=0; P.vzB=0; P.lockVz=true;
+  P.revOm=false; P.revGa=false; P.revOff=false; P.revW=false; P.revVzA=false; P.revVzB=false;
+  P.ghostStewartson=false; P.taylorOsc.enabled=false;
+  P.bgOmegaCoupling=false;
+  Object.keys(Flags).forEach(k=>{Flags[k]=false;});
+  renderFormula(); syncEnergyToggles();
+  rebuildVolumeEnvelope();
+  syncUi();
+}
+function applyPistolPreset(){
+  P.mode='solo'; P.topo='ring'; P.inter='bs'; P.core='hol'; P.med='demo'; P.qual='mid';
+  P.Om=0; P.GaDemo=2; P.nQ=1; P.a=1.5e-3; P.off=0; P.accExp=0.3; P.coRot=false;
+  P.R0=0.07; P.zSolo=0.08; P.Rcyl=0.25; P.Hcyl=1.0;
+  P.knotIdx=-1; P.knotKey=''; P.w=0; P.vzA=0; P.vzB=0;
+  P.ccwA=true; P.ghostStewartson=false; P.taylorOsc.enabled=false;
+  P.bgOmegaCoupling=false; P.twistProxyEnabled=false;
+  P.revOm=false; P.revGa=false; P.revW=false;
+  Object.keys(Flags).forEach(k=>{Flags[k]=false;});
+  renderFormula(); syncEnergyToggles();
+  rebuildVolumeEnvelope();
+  syncUi();
+}
+function applyTaylorPreset(){
+  P.mode='solo'; P.topo='ring'; P.inter='bs'; P.core='hol'; P.med='demo'; P.qual='mid';
+  P.Om=1; P.GaDemo=2; P.nQ=1; P.a=1.5e-3; P.off=0; P.accExp=0.9; P.coRot=false;
+  P.R0=0.07; P.zSolo=0.5; P.Rcyl=0.25; P.Hcyl=1.0;
+  P.knotIdx=-1; P.knotKey='';
+  P.w=0.03; P.revW=false;
+  P.ghostStewartson=false;
+  P.taylorOsc={enabled:false, amplitude:0.25, period:8};
+  P.revOm=false; P.revGa=false;
+  Object.keys(Flags).forEach(k=>{Flags[k]=false;});
+  Flags.sep=true;
+  renderFormula(); syncEnergyToggles();
+  rebuildVolumeEnvelope();
+  syncUi();
+}
+function resetState(){
+  ghostFil=null;
+  const N=carrierN();
+  if(P.mode==='botsing'){
+    const XA=makeCarrier(N,P.zA,0,carrierWantDir('A'),'A');
+    const XB=makeCarrier(N,P.zB,carrierOffsetX('B'),carrierWantDir('B'),'B');
+    Y=new Float64Array(6*N);
+    Y.set(XA,0);Y.set(XB,3*N);
+    fils=[{off:0,N},{off:3*N,N}];
+  }else{
+    const XA=makeCarrier(N,P.zSolo,carrierOffsetX('A'),carrierWantDir('A'),'A');
+    Y=new Float64Array(3*N);
+    Y.set(XA,0);
+    fils=[{off:0,N}];
+  }
+  K1=new Float64Array(Y.length);K2=new Float64Array(Y.length);
+  K3=new Float64Array(Y.length);K4=new Float64Array(Y.length);TT=new Float64Array(Y.length);
+  tPhys=0;phi=0;flagged="";warned=false;lastUmax=1e-9;effAcc=0;hist.length=0;
+  Wr0=gauss(fils[0].off,fils[0].N,fils[0].off,fils[0].N,true);
+  L0=0;for(const f of fils)L0+=arcLength(f);
+  document.getElementById('flag').style.display='none';
+  rebuildLines();
+  rebuildTubes(true);
+  updateSubtitle();
+  initTwistProxy();
+  syncGhostRing();
+}
+function applyTaylorOscillation(){
+  if(!P.taylorOsc.enabled||!Y||!fils.length)return;
+  const st=carrierStats(fils[0]);
+  const zAnchor=(P.mode==='solo')?P.zSolo:P.zA;
+  const zT=zAnchor+P.taylorOsc.amplitude*Math.sin(2*Math.PI*tPhys/Math.max(0.5,P.taylorOsc.period));
+  const dz=zT-st.z;
+  if(Math.abs(dz)<1e-9)return;
+  const o=fils[0].off,N=fils[0].N;
+  for(let k=0;k<N;k++)Y[o+3*k+2]+=dz;
+}
+
+// ================= three.js scène =================
+const canvas=document.getElementById('c3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0B1020);
+const camera=new THREE.PerspectiveCamera(45,1,0.01,20);
+let camTh=0.9,camPh=1.15,camD=1.6;
+const camTarget=new THREE.Vector3(0,0,0.5);
+function updCam(){
+  camera.position.set(
+    camTarget.x+camD*Math.sin(camPh)*Math.cos(camTh),
+    camTarget.y+camD*Math.sin(camPh)*Math.sin(camTh),
+    camTarget.z+camD*Math.cos(camPh));
+  camera.up.set(0,0,1);camera.lookAt(camTarget);
+}
+const worldGrp=new THREE.Group();scene.add(worldGrp);
+const filGrp=new THREE.Group();scene.add(filGrp);   // filament-frame (Y-coördinaten)
+const volumeGrp=new THREE.Group();scene.add(volumeGrp);
+let cylMesh=null, endRings=[], footprintDiscs=[];
+
+function disposeMesh(m){
+  if(!m)return;
+  if(m.geometry)m.geometry.dispose();
+  if(m.material){
+    if(Array.isArray(m.material))m.material.forEach(x=>x.dispose());
+    else m.material.dispose();
+  }
+}
+function rebuildVolumeEnvelope(){
+  while(volumeGrp.children.length){
+    const c=volumeGrp.children.pop();
+    disposeMesh(c);
+  }
+  cylMesh=null; endRings=[]; footprintDiscs=[];
+  const cylGeo=new THREE.CylinderGeometry(P.Rcyl,P.Rcyl,P.Hcyl,48,1,true);
+  cylGeo.rotateX(Math.PI/2);cylGeo.translate(0,0,P.Hcyl*0.5);
+  cylMesh=new THREE.Mesh(cylGeo,new THREE.MeshBasicMaterial({color:0x1E2C4A,wireframe:true,transparent:true,opacity:0.32}));
+  volumeGrp.add(cylMesh);
+  for(const z of [0,P.Hcyl]){
+    const pts=[];
+    for(let k=0;k<=64;k++){const th=2*Math.PI*k/64;
+      pts.push(new THREE.Vector3(P.Rcyl*Math.cos(th),P.Rcyl*Math.sin(th),z));}
+    const ring=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({color:0x2A4A7A,transparent:true,opacity:0.6}));
+    volumeGrp.add(ring); endRings.push(ring);
+  }
+  const rFp=P.Rcyl*0.25;
+  for(const z of [0,P.Hcyl]){
+    const d=new THREE.Mesh(new THREE.RingGeometry(rFp*0.92,rFp,48),
+      new THREE.MeshBasicMaterial({color:0x55D6FF,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
+    d.position.set(0,0,z); d.visible=false; filGrp.add(d); footprintDiscs.push(d);
+  }
+  rebuildLattice();
+  updateHeaderTitle();
+}
+// vortexrooster (representatief, hex-gepakt, aantal ∝ |Ω|)
+const latticeGrp=new THREE.Group();worldGrp.add(latticeGrp);
+function rebuildLattice(){
+  while(latticeGrp.children.length){const c=latticeGrp.children.pop();c.geometry.dispose();c.material.dispose();}
+  const target=Math.min(90,Math.round(40*Math.abs(P.Om)));
+  if(target<1)return;
+  const r=0.93*P.Rcyl;
+  const d=Math.sqrt(2*Math.PI*r*r/(Math.sqrt(3)*target));
+  const rows=Math.ceil(2*r/(d*Math.sqrt(3)/2));
+  let n=0;
+  for(let j=-rows;j<=rows&&n<target+10;j++){
+    const yy=j*d*Math.sqrt(3)/2;
+    for(let i=-rows;i<=rows;i++){
+      const xx=i*d+(j&1?d/2:0);
+      if(xx*xx+yy*yy>r*r)continue;
+      const op=0.3+0.28*((Math.sin(i*12.9898+j*78.233)*43758.5453)%1+1)%1;
+      const g=new THREE.BufferGeometry().setFromPoints(
+        [new THREE.Vector3(xx,yy,0.01),new THREE.Vector3(xx,yy,P.Hcyl-0.01)]);
+      latticeGrp.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0x2E5C9E,transparent:true,opacity:op})));
+      n++;
+    }
+  }
+}
+// pistolen op de as
+const gunGrp=new THREE.Group();worldGrp.add(gunGrp);
+function gun(z,flip,color){
+  const g=new THREE.ConeGeometry(0.02,0.05,16);g.rotateX(flip?Math.PI/2:-Math.PI/2);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color}));
+  m.position.set(0,0,z);gunGrp.add(m);return m;
+}
+const gunA=gun(0.01,false,0xFFAE45), gunB=gun(0.99,true,0x55D6FF);
+
+// ================= uitgebreide 3D visualisatie (collider features) =================
+class DynCurve extends THREE.Curve{
+  constructor(f){super();this.f=f;}
+  getPoint(t,op=new THREE.Vector3()){
+    const N=this.f.N,o=this.f.off;let i=Math.floor(t*N),fr=t*N-i;if(i>=N){i=N-1;fr=1;}
+    const i2=(i+1)%N,s=o+3*i,s2=o+3*i2;
+    return op.set(Y[s]+fr*(Y[s2]-Y[s]),Y[s+1]+fr*(Y[s2+1]-Y[s+1]),Y[s+2]+fr*(Y[s2+2]-Y[s+2]));
+  }
+}
+const matSolidA=new THREE.MeshPhysicalMaterial({color:0xFFAE45,metalness:0.3,roughness:0.2});
+const matSolidB=new THREE.MeshPhysicalMaterial({color:0x55D6FF,metalness:0.3,roughness:0.2});
+const matHolA=new THREE.MeshPhysicalMaterial({color:0xFFAE45,transmission:0.95,transparent:true,opacity:0.6,roughness:0.1});
+const matHolB=new THREE.MeshPhysicalMaterial({color:0x55D6FF,transmission:0.95,transparent:true,opacity:0.6,roughness:0.1});
+const flowMat=new THREE.MeshBasicMaterial({color:0xA855F7,wireframe:true,transparent:true,opacity:0.3});
+const betaMat=new THREE.MeshBasicMaterial({color:0xfacc15,wireframe:true,transparent:true,opacity:0.55});
+// ===== deeltjeswolk: passieve tracers geadvecteerd door het echte BS-veld =====
+const TR_N=600;
+const TR_HUE_SLOW=0.33;       // groen
+const TR_HUE_EQUAL=0.53;      // cyaan
+const TR_HUE_FAST=0.78;       // paars
+let trGeo=null,trPts=null,trArr=null,trColArr=null,trOmegaDeltaArr=null;
+let trOmegaP90=0,trOmegaColorScale=1;
+const trColorTmp=new THREE.Color();
+function setTracerHue(i,normalizedDelta){
+  // normalizedDelta in [-1,1]: negatief = lager/tegenroterend,
+  // positief = sneller in de draairichting van de cilinder.
+  const q=clamp(normalizedDelta,-1,1);
+  const hue=q<0
+    ?TR_HUE_EQUAL+(TR_HUE_SLOW-TR_HUE_EQUAL)*(-q)
+    :TR_HUE_EQUAL+(TR_HUE_FAST-TR_HUE_EQUAL)*q;
+  const light=0.54+0.10*Math.abs(q);
+  trColorTmp.setHSL(clamp(hue,0,1),0.96,light);
+  trColArr[3*i]=trColorTmp.r;
+  trColArr[3*i+1]=trColorTmp.g;
+  trColArr[3*i+2]=trColorTmp.b;
+}
+function respawnTracer(i){
+  const r=Math.sqrt(Math.random())*P.Rcyl*0.95, th=Math.random()*2*Math.PI;
+  trArr[3*i]=r*Math.cos(th);trArr[3*i+1]=r*Math.sin(th);
+  trArr[3*i+2]=0.02+Math.random()*(P.Hcyl-0.04);
+  if(trOmegaDeltaArr)trOmegaDeltaArr[i]=0;
+  if(trColArr)setTracerHue(i,0);
+}
+function initTracers(){
+  trArr=new Float32Array(TR_N*3);
+  trColArr=new Float32Array(TR_N*3);
+  trOmegaDeltaArr=new Float32Array(TR_N);
+  for(let i=0;i<TR_N;i++)respawnTracer(i);
+  trGeo=new THREE.BufferGeometry();
+  trGeo.setAttribute('position',new THREE.BufferAttribute(trArr,3));
+  trGeo.setAttribute('color',new THREE.BufferAttribute(trColArr,3));
+  trPts=new THREE.Points(trGeo,new THREE.PointsMaterial({size:0.013,vertexColors:true,
+    transparent:true,opacity:0.78,depthWrite:false,blending:THREE.AdditiveBlending}));
+  filGrp.add(trPts);
+}
+function updateTracerColorScale(){
+  // Gebruik P90 in plaats van het maximum, zodat één core-near outlier
+  // niet de hele wolk cyaan drukt. Dit is alleen een visuele contrastschaal;
+  // de fysieke ΔΩ-P90 wordt afzonderlijk in de HUD getoond.
+  const absVals=new Array(TR_N);
+  for(let i=0;i<TR_N;i++)absVals[i]=Math.abs(trOmegaDeltaArr[i]);
+  absVals.sort((a,b)=>a-b);
+  trOmegaP90=absVals[Math.min(TR_N-1,Math.floor(0.90*(TR_N-1)))]||0;
+  const omegaCylinder=Math.abs(P.Om);
+  const minimumScale=Math.max(1e-4,0.005*Math.max(1,omegaCylinder));
+  const targetScale=Math.max(minimumScale,trOmegaP90);
+  trOmegaColorScale=Number.isFinite(trOmegaColorScale)
+    ?0.78*trOmegaColorScale+0.22*targetScale
+    :targetScale;
+  const scale=Math.max(minimumScale,trOmegaColorScale);
+  for(let i=0;i<TR_N;i++){
+    // tanh geeft een duidelijke, maar vloeiende kleurrespons rond ΔΩ=0.
+    setTracerHue(i,Math.tanh(1.45*trOmegaDeltaArr[i]/scale));
+  }
+  const h=document.getElementById('hTracerOmega');
+  if(h)h.textContent=`${trOmegaP90.toFixed(trOmegaP90<0.1?3:2)} / ±${scale.toFixed(scale<0.1?3:2)} s⁻¹`;
+}
+function stepTracers(dtSim){
+  if(!trPts)return;
+  trPts.visible=P.showTracers;
+  if(!P.showTracers||!Y||!fils.length||dtSim<=0)return;
+  const a2=P.a*P.a, segs=[];
+  for(const f of fils){
+    const N=f.N,o=f.off,mid=new Float64Array(3*N),dl=new Float64Array(3*N);
+    for(let k=0;k<N;k++){const k2=(k+1)%N;
+      for(let d=0;d<3;d++){mid[3*k+d]=.5*(Y[o+3*k+d]+Y[o+3*k2+d]);dl[3*k+d]=Y[o+3*k2+d]-Y[o+3*k+d];}}
+    segs.push({N,mid,dl,pref:filamentGamma(f)/(4*Math.PI)});
+  }
+  const wz=effectiveW();
+  for(let i=0;i<TR_N;i++){
+    const px=trArr[3*i],py=trArr[3*i+1],pz=trArr[3*i+2];
+    let ux=0,uy=0,uz=wz;
+    for(const sg of segs){const M=sg.N,mid=sg.mid,dl=sg.dl,pref=sg.pref;
+      for(let j=0;j<M;j++){
+        const rx=px-mid[3*j],ry=py-mid[3*j+1],rz=pz-mid[3*j+2];
+        const r2=rx*rx+ry*ry+rz*rz+a2, inv=pref/(r2*Math.sqrt(r2));
+        ux+=(dl[3*j+1]*rz-dl[3*j+2]*ry)*inv;
+        uy+=(dl[3*j+2]*rx-dl[3*j]*rz)*inv;
+        uz+=(dl[3*j]*ry-dl[3*j+1]*rx)*inv;}}
+    const omegaBgIsInVelocity=P.bgOmegaCoupling&&!P.coRot;
+    if(omegaBgIsInVelocity){ux+=-P.Om*py;uy+=P.Om*px;}
+
+    // Orbitale tracer-hoeksnelheid rond de z-as:
+    // Ω_p,z = (r × u)_z / r_perp².
+    // De kleur gebruikt ΔΩ = Ω_p,lab - Ω_cilinder in de draairichting
+    // van de cilinder. Daarmee reageert de wolk direct op Γ, lokale
+    // Biot-Savart-inductie en de achtergrondrotatie.
+    const r2xy=px*px+py*py;
+    let omegaFromIntegratedVelocity=0;
+    if(r2xy>1e-10)omegaFromIntegratedVelocity=(px*uy-py*ux)/r2xy;
+    const omegaLab=omegaFromIntegratedVelocity+(omegaBgIsInVelocity?0:P.Om);
+    const spinDir=Math.sign(P.Om)||1;
+    trOmegaDeltaArr[i]=spinDir*omegaLab-Math.abs(P.Om);
+
+    let dx=ux*dtSim,dy=uy*dtSim,dz=uz*dtSim;
+    const dm=Math.hypot(dx,dy,dz);
+    if(dm>0.03){const sc=0.03/dm;dx*=sc;dy*=sc;dz*=sc;}
+    const nx=px+dx,ny=py+dy,nz=pz+dz;
+    if(nx*nx+ny*ny>Math.pow(0.98*P.Rcyl,2)||nz<0.005||nz>P.Hcyl-0.005)respawnTracer(i);
+    else{trArr[3*i]=nx;trArr[3*i+1]=ny;trArr[3*i+2]=nz;}
+  }
+  updateTracerColorScale();
+  trGeo.attributes.position.needsUpdate=true;
+  trGeo.attributes.color.needsUpdate=true;
+}
+let lineObjs=[], tubeObjs=[], wireObjs=[], betaObjs=[], flowObjs=[], ghostTubeObj=null;
+let sepObjs=[], capDiscs=[], capRings=[], colSils=[], alphaObjs=[];
+let stewartsonTorus=null, stewartsonArrows=null;
+const ghostTubeMat=new THREE.MeshBasicMaterial({color:0x66CCFF,wireframe:true,transparent:true,opacity:0.38,depthWrite:false});
+const stewartsonMat=new THREE.MeshBasicMaterial({color:0xFF7043,transparent:true,opacity:0.32,side:THREE.DoubleSide,depthWrite:false});
+const stewartsonMatNeg=new THREE.MeshBasicMaterial({color:0x26C6DA,transparent:true,opacity:0.32,side:THREE.DoubleSide,depthWrite:false});
+let meshFrame=0;
+
+function disposeObj(m){if(!m)return;filGrp.remove(m);if(m.geometry)m.geometry.dispose();}
+function makeWire(color){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(1536),3));
+  const l=new THREE.LineLoop(g,new THREE.LineBasicMaterial({color}));
+  l.visible=false;filGrp.add(l);return l;
+}
+function makeSepSphere(){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(1,24,24),
+    new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.12,depthWrite:false}));
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.SphereGeometry(1,12,12)),
+    new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.6})));
+  m.visible=false;filGrp.add(m);return m;
+}
+function makeCapDisc(color){
+  const m=new THREE.Mesh(new THREE.CircleGeometry(1,48),
+    new THREE.MeshBasicMaterial({color,transparent:true,opacity:0.35,side:THREE.DoubleSide}));
+  m.visible=false;filGrp.add(m);return m;
+}
+function makeCapRing(color){
+  const m=new THREE.Mesh(new THREE.RingGeometry(0.92,1,48),
+    new THREE.MeshBasicMaterial({color,transparent:true,opacity:0.75,side:THREE.DoubleSide}));
+  m.visible=false;filGrp.add(m);return m;
+}
+function makeColSil(color){
+  const g=new THREE.CylinderGeometry(1,1,1,24,1,true);g.rotateX(Math.PI/2);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color,wireframe:true,transparent:true,opacity:0.15}));
+  m.visible=false;filGrp.add(m);return m;
+}
+function initVisExtras(){
+  sepObjs=[makeSepSphere(),makeSepSphere()];
+  capDiscs=[makeCapDisc(0xFFAE45),makeCapDisc(0xFFAE45),makeCapDisc(0x55D6FF),makeCapDisc(0x55D6FF)];
+  capRings=[makeCapRing(0xFFAE45),makeCapRing(0xFFAE45),makeCapRing(0x55D6FF),makeCapRing(0x55D6FF)];
+  colSils=[makeColSil(0xFFAE45),makeColSil(0x55D6FF)];
+  alphaObjs=[new THREE.Mesh(new THREE.SphereGeometry(1,16,16),
+    new THREE.MeshBasicMaterial({color:0xFF6E6E,transparent:true,opacity:0.8})),
+    new THREE.Mesh(new THREE.SphereGeometry(1,16,16),
+    new THREE.MeshBasicMaterial({color:0xFF6E6E,transparent:true,opacity:0.8}))];
+  alphaObjs.forEach(m=>{m.visible=false;filGrp.add(m);});
+  const torGeo=new THREE.CylinderGeometry(1,1,1,48,1,true);
+  torGeo.rotateX(Math.PI/2);
+  stewartsonTorus=new THREE.Mesh(torGeo,stewartsonMat.clone());
+  stewartsonTorus.visible=false;filGrp.add(stewartsonTorus);
+  stewartsonArrows=new THREE.InstancedMesh(new THREE.ConeGeometry(0.007,0.022,8),
+    new THREE.MeshBasicMaterial({color:0xFFB74D}),12);
+  stewartsonArrows.visible=false;filGrp.add(stewartsonArrows);
+  initChiArrows();
+}
+function initChiArrows(){
+  chiArrows=[];
+  for(let i=0;i<2;i++){
+    const col=i===0?0xFFAE45:0x55D6FF;
+    const a=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),0.06,col,0.018,0.01);
+    a.visible=false;filGrp.add(a);chiArrows.push(a);
+  }
+}
+function updateChiArrows(bodyStates){
+  chiArrows.forEach((a,i)=>{
+    if(!P.showChiArrow||i>=fils.length||!bodyStates[i]){
+      a.visible=false;return;
+    }
+    const b=bodyStates[i];
+    if(!b.chi){a.visible=false;return;}
+    const len=0.035+0.1*Math.min(1,Math.abs(b.omegaZ)*2);
+    a.position.set(b.cx,b.cy,b.cz);
+    a.setDirection(new THREE.Vector3(b.chi.x,b.chi.y,0.001).normalize());
+    a.setLength(Math.max(0.02,len),0.018,0.01);
+    a.visible=true;
+  });
+}
+initVisExtras();
+initTracers();
+
+function rebuildLines(){
+  [...lineObjs,...tubeObjs,...wireObjs,...betaObjs,...flowObjs].forEach(o=>{
+    filGrp.remove(o);if(o.geometry)o.geometry.dispose();});
+  lineObjs=[];tubeObjs=[];wireObjs=[];betaObjs=[];flowObjs=[];
+  const cols=[0xFFAE45,0x55D6FF];
+  fils.forEach((f,i)=>{
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(3*(f.N+1)),3));
+    const l=new THREE.Line(geo,new THREE.LineBasicMaterial({color:cols[i%2]}));
+    l.visible=(P.vis==='line');filGrp.add(l);lineObjs.push(l);
+    wireObjs.push(makeWire(cols[i%2]));
+  });
+  gunB.visible=(P.mode==='botsing');
+  meshFrame=0;
+}
+function pushLines(){
+  fils.forEach((f,i)=>{
+    if(lineObjs[i]){
+      const p=lineObjs[i].geometry.attributes.position.array;
+      for(let k=0;k<=f.N;k++){const s=f.off+(k%f.N)*3;
+        p[3*k]=Y[s];p[3*k+1]=Y[s+1];p[3*k+2]=Y[s+2];}
+      lineObjs[i].geometry.attributes.position.needsUpdate=true;
+    }
+    if(wireObjs[i]&&P.showCenterline){
+      const p=wireObjs[i].geometry.attributes.position.array;
+      for(let k=0;k<=f.N;k++){const s=f.off+(k%f.N)*3;
+        p[3*k]=Y[s];p[3*k+1]=Y[s+1];p[3*k+2]=Y[s+2];}
+      wireObjs[i].geometry.attributes.position.needsUpdate=true;
+      wireObjs[i].visible=true;
+    }else if(wireObjs[i]) wireObjs[i].visible=false;
+  });
+}
+function rebuildTubes(force){
+  if(P.vis!=='tube'){tubeObjs.forEach(disposeObj);betaObjs.forEach(disposeObj);flowObjs.forEach(disposeObj);
+    if(ghostTubeObj){disposeObj(ghostTubeObj);ghostTubeObj=null;}
+    tubeObjs=[];betaObjs=[];flowObjs=[];return;}
+  meshFrame++;if(!force&&meshFrame%2!==0)return;
+  tubeObjs.forEach(disposeObj);betaObjs.forEach(disposeObj);flowObjs.forEach(disposeObj);
+  tubeObjs=[];betaObjs=[];flowObjs=[];
+  const tr=P.a*2.5, mats=[P.tubeMat==='solid'?matSolidA:matHolA,P.tubeMat==='solid'?matSolidB:matHolB];
+  fils.forEach((f,i)=>{
+    try{
+      const curve=new DynCurve(f);
+      tubeObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,tr,8,true),mats[i%2]));
+      filGrp.add(tubeObjs[tubeObjs.length-1]);
+      if(Flags.beta){
+        betaObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,tr*1.03,10,true),betaMat));
+        filGrp.add(betaObjs[betaObjs.length-1]);
+      }
+      if(Flags.gamma){
+        flowObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,tr*1.6,12,true),flowMat));
+        filGrp.add(flowObjs[flowObjs.length-1]);
+      }
+    }catch(e){}
+  });
+  if(ghostFil){
+    try{
+      disposeObj(ghostTubeObj);
+      const curve=new DynCurve(ghostFil);
+      ghostTubeObj=new THREE.Mesh(new THREE.TubeGeometry(curve,ghostFil.N,P.a*2,6,true),ghostTubeMat);
+      filGrp.add(ghostTubeObj);
+    }catch(e){ghostTubeObj=null;}
+  }else if(ghostTubeObj){disposeObj(ghostTubeObj);ghostTubeObj=null;}
+}
+function updateStewartsonVisuals(st,w,t,stw){
+  if(!stewartsonTorus||!stewartsonArrows)return;
+  const negRel=stw.gammaRel*stw.gammaBg<0;
+  stewartsonTorus.material=negRel?stewartsonMat:stewartsonMatNeg;
+  stewartsonTorus.visible=true;
+  stewartsonTorus.position.set(st.cx,st.cy,(t.zTop+t.zBot)*0.5);
+  stewartsonTorus.scale.set(t.rCap,t.rCap,Math.max(0.02,t.zTop-t.zBot));
+  stewartsonArrows.visible=true;
+  stewartsonArrows.material.color.setHex(negRel?0xFF7043:0x26C6DA);
+  const n=stewartsonArrows.count, zMid=(t.zTop+t.zBot)*0.5;
+  const sgn=stw.uTheta>=0?1:-1;
+  const m=new THREE.Matrix4(), q=new THREE.Quaternion(), p=new THREE.Vector3(), s=new THREE.Vector3(1,1,1);
+  for(let i=0;i<n;i++){
+    const th=2*Math.PI*i/n;
+    const tx=-Math.sin(th), ty=Math.cos(th);
+    p.set(st.cx+t.rCap*Math.cos(th), st.cy+t.rCap*Math.sin(th), zMid);
+    q.setFromUnitVectors(new THREE.Vector3(0,1,0), new THREE.Vector3(sgn*tx, sgn*ty, 0));
+    m.compose(p,q,s);
+    stewartsonArrows.setMatrixAt(i,m);
+  }
+  stewartsonArrows.instanceMatrix.needsUpdate=true;
+  footprintDiscs.forEach(d=>{
+    d.visible=true;
+    const rFp=t.rFoot||P.Rcyl*0.25;
+    d.scale.set(rFp,rFp,1);
+    d.position.set(st.cx,st.cy,d.position.z);
+  });
+}
+function hideStewartsonVisuals(){
+  if(stewartsonTorus)stewartsonTorus.visible=false;
+  if(stewartsonArrows)stewartsonArrows.visible=false;
+}
+function setTaylorCaps(topD,botD,topR,botR,colSil,cx,cy,zT,zB,rC){
+  topD.visible=botD.visible=topR.visible=botR.visible=colSil.visible=true;
+  topD.position.set(cx,cy,zT);botD.position.set(cx,cy,zB);
+  topR.position.set(cx,cy,zT);botR.position.set(cx,cy,zB);
+  colSil.position.set(cx,cy,(zT+zB)*0.5);
+  const sc=[topD,botD,topR,botR];sc.forEach(m=>m.scale.set(rC,rC,1));
+  colSil.scale.set(rC,rC,Math.max(0.01,zT-zB));
+}
+function hideTaylorCaps(topD,botD,topR,botR,colSil){
+  [topD,botD,topR,botR,colSil].forEach(m=>m.visible=false);
+}
+function updateIndicators(tPhys){
+  rebuildTubes(false);
+  const stats=fils.map(f=>carrierStats(f));
+  stats.forEach((st,i)=>{
+    if(Flags.alpha&&alphaObjs[i]){
+      alphaObjs[i].visible=true;
+      alphaObjs[i].position.set(st.cx,st.cy,st.z);
+      const sc=P.a*6*(1+0.2*Math.sin(tPhys*20));
+      alphaObjs[i].scale.set(sc,sc,sc);
+    }else if(alphaObjs[i]) alphaObjs[i].visible=false;
+  });
+  if(!Flags.sep){
+    sepObjs.forEach(s=>s.visible=false);
+    hideTaylorCaps(capDiscs[0],capDiscs[1],capRings[0],capRings[1],colSils[0]);
+    hideTaylorCaps(capDiscs[2],capDiscs[3],capRings[2],capRings[3],colSils[1]);
+    footprintDiscs.forEach(d=>d.visible=false);
+    hideStewartsonVisuals();
+    return;
+  }
+  let stewartsonShown=false;
+  fils.forEach((f,i)=>{
+    const st=stats[i];
+    const vz=(P.mode==='solo')?effectiveW():(i===0?P.vzA:(P.lockVz?P.vzA:P.vzB));
+    const t=taylorColumnState(st,vz);
+    if(sepObjs[i]){sepObjs[i].visible=true;sepObjs[i].position.set(st.cx,st.cy,st.z);
+      sepObjs[i].scale.set(t.rCap,t.rCap,t.rCap);}
+    if(i===0) setTaylorCaps(capDiscs[0],capDiscs[1],capRings[0],capRings[1],colSils[0],st.cx,st.cy,t.zTop,t.zBot,t.rCap);
+    else setTaylorCaps(capDiscs[2],capDiscs[3],capRings[2],capRings[3],colSils[1],st.cx,st.cy,t.zTop,t.zBot,t.rCap);
+    if(P.mode==='solo'&&i===0&&!stewartsonShown){
+      const stw=stewartsonCirculation(vz,t.rCap,P.Om);
+      updateStewartsonVisuals(st,vz,t,stw);
+      stewartsonShown=true;
+    }
+  });
+  if(!stewartsonShown) hideStewartsonVisuals();
+  if(fils.length<2){
+    if(sepObjs[1]) sepObjs[1].visible=false;
+    hideTaylorCaps(capDiscs[2],capDiscs[3],capRings[2],capRings[3],colSils[1]);
+  }
+}
+function fmtGamma(g){
+  const e=Math.floor(Math.log10(Math.max(1e-12,Math.abs(g))));
+  return (g/Math.pow(10,e)).toFixed(2)+'·10'+supExp(e);
+}
+function updateGammaHud(st,vz){
+  const show=Flags.sep&&P.mode==='solo';
+  document.getElementById('rowGfil').classList.toggle('hidden',!show);
+  document.getElementById('rowGsheet').classList.toggle('hidden',!show);
+  document.getElementById('rowGrel').classList.toggle('hidden',!show);
+  if(!show)return;
+  const t=taylorColumnState(st,vz);
+  const stw=stewartsonCirculation(vz,t.rCap,P.Om);
+  const gFil=Gamma();
+  document.getElementById('hGfil').textContent=fmtGamma(gFil)+' m²/s';
+  document.getElementById('hGsheet').textContent=fmtGamma(stw.gammaSheet)+' m²/s';
+  const relTxt=stw.ratio.toFixed(3)+(stw.gammaRel<0?' ↓':' ↑');
+  document.getElementById('hGrel').textContent=relTxt;
+  document.getElementById('hGrel').style.color=stw.gammaRel*stw.gammaBg<0?'#FF7043':'#26C6DA';
+}
+// interactie
+let drag=false,lx=0,ly=0,pinch0=0;
+canvas.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;
+  camTh-=(e.clientX-lx)*0.008;camPh=Math.min(2.9,Math.max(0.2,camPh-(e.clientY-ly)*0.008));
+  lx=e.clientX;ly=e.clientY;});
+canvas.addEventListener('pointerup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{e.preventDefault();camD=Math.min(4,Math.max(0.4,camD*(1+0.001*e.deltaY)));},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(pinch0)camD=Math.min(4,Math.max(0.4,camD*pinch0/d));
+    pinch0=d;}
+},{passive:true});
+canvas.addEventListener('touchend',()=>pinch0=0);
+
+// ================= sparkline =================
+const sctx=document.getElementById('cspark').getContext('2d');
+function drawSpark(){
+  const w=230,h=76;sctx.clearRect(0,0,w,h);
+  sctx.fillStyle='#6F82A0';sctx.font='9px monospace';
+  sctx.fillText(P.mode==='botsing'?'R̄ (—)  Ω_body A (··)':(Flags.sep?'ρ̄ (—)  z (—)  Γ_rel (··)':(P.twistProxyEnabled?'ρ̄ (—)  Ω_body (··)':'ρ̄ (—)  z (—)  Wr (··)')),4,10);
+  if(hist.length<2)return;
+  const t0=hist[0].t,t1=hist[hist.length-1].t||1;
+  function line(key,color,dash){
+    let vmax=1e-9;for(const p of hist)vmax=Math.max(vmax,Math.abs(p[key]));
+    sctx.strokeStyle=color;sctx.setLineDash(dash);sctx.beginPath();
+    hist.forEach((p,i)=>{
+      const x=4+(w-8)*(p.t-t0)/Math.max(1e-9,t1-t0);
+      const y=h-4-(h-18)*(0.5+0.5*p[key]/vmax);
+      i?sctx.lineTo(x,y):sctx.moveTo(x,y);});
+    sctx.stroke();sctx.setLineDash([]);
+  }
+  if(P.mode==='botsing'){line('RA','#FFAE45',[]);line('RB','#55D6FF',[]);line('omA','#A855F7',[3,3]);}
+  else{
+    line('RA','#FFAE45',[]);line('zA','#55D6FF',[]);
+    if(Flags.sep) line('gRel','#FF7043',[3,3]);
+    else if(P.twistProxyEnabled) line('omA','#A855F7',[3,3]);
+    else line('Wr','#C9D6E3',[3,3]);
+  }
+}
+
+// ================= UI =================
+function fmtGa(){
+  const g=Gamma();
+  const e=Math.floor(Math.log10(Math.abs(g)));
+  const m=g/Math.pow(10,e);
+  const q=kappaMedium()?` (${P.nQ}κ)`:'';
+  return `${m.toFixed(2)}·10${supExp(e)} m²/s${q}`;
+}
+function supExp(e){
+  const map={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  return String(e).split('').map(c=>map[c]||c).join('');
+}
+function fmtAcc(x){
+  if(x<1000)return x.toFixed(x<20?1:0)+'×';
+  const e=Math.floor(Math.log10(x));
+  return (x/Math.pow(10,e)).toFixed(1)+'·10'+supExp(e)+'×';
+}
+function updateSubtitle(){
+  const topoTxt=P.knotKey?`ideal knoop ${P.knotKey}`:(P.knotIdx>=0?`ideal knoop ${knotLabel(P.knotIdx)}`:(P.topo==='trefoil'?'ideal trefoil 3₁ (Gilbert)':'ring 0₁'));
+  const medTxt={demo:'demo-Γ',he:'He-II, Γ=nκ',sst:'SST, Γ=nΓ₀ [Canon 0.8.19]'}[P.med];
+  const coreTxt={hol:'holle kern',vast:'vaste kern',gp:'GP-kern'}[P.core];
+  const modeTxt=P.mode==='botsing'
+    ?`Twee coaxiale ${topoTxt}-dragers, |Γ| identiek, frontaal${P.inter==='lia'?' · LIA (geen wederzijdse inductie!)':''}`
+    :`Eén ${topoTxt} op de middenas${P.inter==='lia'?' · LIA':''}`;
+  document.getElementById('hSub').textContent=`${modeTxt} · ${coreTxt} · ${medTxt}`;
+  document.getElementById('hWrLbl').innerHTML=P.mode==='botsing'
+    ?'Wr(<span class="kA">A</span>)+Wr(<span class="kB">B</span>)':'Wr';
+  document.getElementById('hRLbl').textContent=P.mode==='botsing'
+    ?(P.topo==='ring'&&!P.knotKey?'R̄ A / B':'ρ̄ A / B'):'ρ̄';
+  document.getElementById('hVLbl').textContent=P.mode==='botsing'?'naderingssnelheid':'v_z (w)';
+  document.getElementById('rowLk').classList.toggle('hidden',P.mode!=='botsing');
+  document.getElementById('rowDz').classList.toggle('hidden',P.mode!=='botsing');
+  const soloKnot=P.mode==='solo'&&!isRingTopo();
+  document.getElementById('rowDWr').classList.toggle('hidden',P.mode==='botsing'||!soloKnot);
+  const showUth=(P.topo==='ring'&&P.knotIdx<0&&!P.knotKey)&&(P.mode==='botsing'||P.mode==='solo');
+  document.getElementById('rowUth').classList.toggle('hidden',!showUth);
+  document.getElementById('rowOmBodyA').classList.toggle('hidden',false);
+  document.getElementById('rowOmBodyB').classList.toggle('hidden',P.mode!=='botsing');
+  document.getElementById('rowChi').classList.toggle('hidden',isRingTopo());
+  document.getElementById('rowTw').classList.toggle('hidden',!P.twistProxyEnabled);
+  renderFormula();
+}
+function updateBodyHud(bodyStates,Wr){
+  if(!bodyStates.length)return;
+  const bA=bodyStates[0];
+  document.getElementById('hOmBodyA').textContent=fmtOmegaBody(bA.omegaZ);
+  if(P.mode==='botsing'&&bodyStates[1]){
+    document.getElementById('hOmBodyB').textContent=fmtOmegaBody(bodyStates[1].omegaZ);
+  }
+  if(bA.chi){
+    document.getElementById('hChi').textContent=`(${bA.chi.x.toFixed(2)}, ${bA.chi.y.toFixed(2)}) · ${bA.chi.phi.toFixed(0)}°`;
+  }else{
+    document.getElementById('hChi').textContent='— (ring, Wr=0)';
+  }
+  if(P.twistProxyEnabled&&twistProxy){
+    const tw=twistProxySum();
+    document.getElementById('hTw').textContent=`${tw.toFixed(3)} · ${(Wr+tw).toFixed(3)}`;
+  }
+}
+function knotLabel(i){
+  if(window.IDEAL_KNOT_IDS&&IDEAL_KNOT_IDS[i]) return IDEAL_KNOT_IDS[i];
+  const e=window.IDEAL_KNOTS&&window.IDEAL_KNOTS[i];
+  return e?(e.knotId||e.id||e.name||('#'+i)):'3:1:1';
+}
+function renderFormula(){
+  const el=document.getElementById('eFormula');
+  if(!el||!window.katex)return;
+  const parts=[
+    {on:Flags.alpha,t:'\\alpha C(K)',c:'#FF6E6E'},{on:Flags.beta,t:'\\beta L(K)',c:'#FFAE45'},
+    {on:Flags.gamma,t:'\\gamma \\mathcal{H}(K)',c:'#A855F7'},{on:Flags.sep,t:'\\partial V',c:'#EAF2FA'}
+  ];
+  el.innerHTML='';
+  const lead=document.createElement('span');
+  katex.render('\\mathcal{E}_{\\rm eff}[K]=',lead);el.appendChild(lead);
+  parts.forEach((p,i)=>{
+    if(i) el.appendChild(document.createTextNode(' + '));
+    const s=document.createElement('span');
+    s.style.color=p.on?p.c:'#6F82A0';if(p.on)s.style.fontWeight='600';
+    katex.render(p.t,s);el.appendChild(s);
+  });
+}
+function initEnergyToggles(){
+  syncEnergyToggles();
+}
+function syncEnergyToggles(){
+  document.querySelectorAll('#indSeg .seg-btn').forEach(b=>{
+    const key=b.dataset.ind;
+    if(!EXPLAIN[key])return;
+    b.classList.toggle(EXPLAIN[key].cls,!!Flags[key]);
+  });
+}
+function setIndFlag(key,on){
+  if(!(key in Flags))return;
+  Flags[key]=on;
+  syncEnergyToggles();
+  renderFormula();
+  rebuildTubes(true);
+  updateIndicators(tPhys);
+}
+function syncCompSelects(){
+  const entry=activeKnotEntry();
+  const row=document.getElementById('compRow');
+  if(!entry||!entry.components||entry.components.length<2){row.classList.add('hidden');return;}
+  row.classList.remove('hidden');
+  const fill=(sel,val)=>{
+    sel.innerHTML=entry.components.map((_,i)=>`<option value="${i+1}">comp ${i+1}</option>`).join('');
+    sel.value=String(Math.min(val,entry.components.length));
+  };
+  fill(document.getElementById('compA'),P.compA);
+  fill(document.getElementById('compB'),P.compB);
+}
+function syncSeg(id,attr,val){
+  document.querySelectorAll(`#${id} .seg-btn`).forEach(b=>b.classList.toggle('active',b.dataset[attr]===val));
+}
+function syncSignedUi(sliderId,revId,val,fmtVal){
+  const s=document.getElementById('s'+sliderId);
+  const r=document.getElementById(revId);
+  const v=document.getElementById('v'+sliderId);
+  if(!s||!r)return;
+  r.checked=val<0;
+  P['rev'+sliderId]=val<0;
+  s.value=Math.abs(val);
+  if(v&&fmtVal)v.textContent=fmtVal(val);
+}
+function syncUi(){
+  syncSeg('modeSeg','mode',P.mode);
+  syncSeg('topoSeg','topo',P.topo);
+  syncSeg('interSeg','inter',P.inter);
+  syncSeg('coreSeg','core',P.core);
+  syncSeg('medSeg','med',P.med);
+  syncSeg('qualSeg','qual',P.qual);
+  syncSeg('visSeg','vis',P.vis);
+  syncSeg('tubeSeg','tube',P.tubeMat);
+  document.getElementById('interRow').classList.remove('hidden');
+  document.getElementById('offRow').classList.remove('hidden');
+  document.getElementById('wRow').classList.remove('hidden');
+  document.getElementById('vzARow').classList.remove('hidden');
+  document.getElementById('vzBRow').classList.toggle('hidden',P.mode!=='botsing'||P.lockVz);
+  document.getElementById('ccwARow').classList.remove('hidden');
+  document.getElementById('ccwBRow').classList.toggle('hidden',P.mode!=='botsing');
+  document.getElementById('mirrorRow').classList.toggle('hidden',P.mode!=='botsing');
+  document.getElementById('lockVzRow').classList.toggle('hidden',P.mode!=='botsing');
+  document.getElementById('qualRow').classList.remove('hidden');
+  document.getElementById('gaRow').classList.toggle('hidden',P.med!=='demo');
+  document.getElementById('nqRow').classList.toggle('hidden',P.med==='demo');
+  document.getElementById('cCenterline').checked=P.showCenterline;
+  document.getElementById('cCcwA').checked=P.ccwA;
+  document.getElementById('cCcwB').checked=P.ccwB;
+  document.getElementById('cMirror').checked=P.mirrorB;
+  document.getElementById('cLockVz').checked=P.lockVz;
+  document.getElementById('cCoRot').checked=P.coRot;
+  document.getElementById('cBgOmega').checked=P.bgOmegaCoupling;
+  document.getElementById('cChiArrow').checked=P.showChiArrow;
+  document.getElementById('cTwProxy').checked=P.twistProxyEnabled;
+  document.getElementById('cGhostRing').checked=P.ghostStewartson;
+  document.getElementById('cTaylorOsc').checked=P.taylorOsc.enabled;
+  document.getElementById('oscRow').classList.remove('hidden');
+  [['WAl','wAl'],['WBe','wBe'],['WGa','wGa']].forEach(([id,key])=>{
+    const el=document.getElementById('s'+id);
+    if(el){el.value=P[key];document.getElementById('v'+id).textContent=P[key].toFixed(1);}});
+  const cT=document.getElementById('cTracers');if(cT)cT.checked=P.showTracers;
+  syncEnergyToggles();
+  document.getElementById('vCore').textContent='Δ = '+({hol:'½',vast:'¼',gp:'0.615'}[P.core]);
+  document.getElementById('vGa').textContent=fmtGa();
+  document.getElementById('vNq').textContent=`${P.nQ} → Γ = ${P.nQ===1?'':P.nQ}κ`;
+  document.getElementById('vAcc').textContent=fmtAcc(acc());
+  syncSignedUi('Om','revOm',P.Om,x=>x.toFixed(2)+' rad/s');
+  syncSignedUi('Ga','revGa',P.GaDemo,()=>fmtGa());
+  syncSignedUi('Off','revOff',P.off*1000,x=>x.toFixed(0)+' mm');
+  syncSignedUi('W','revW',P.w*1000,x=>x.toFixed(0)+' mm/s');
+  syncSignedUi('VzA','revVzA',P.vzA*1000,x=>x.toFixed(0)+' mm/s');
+  syncSignedUi('VzB','revVzB',P.vzB*1000,x=>x.toFixed(0)+' mm/s');
+  document.getElementById('sDiam').value=(P.Rcyl*200).toFixed(0);
+  document.getElementById('vDiam').textContent=(P.Rcyl*200).toFixed(0)+' cm';
+  document.getElementById('hOm').textContent=P.Om.toFixed(2);
+  syncCompSelects();
+  updateHeaderTitle();
+}
+function bindSignedRange(sliderId,revId,fmt,apply){
+  const s=document.getElementById('s'+sliderId);
+  const r=document.getElementById(revId);
+  const v=document.getElementById('v'+sliderId);
+  function refresh(){
+    const mag=parseFloat(s.value);
+    const rev=r.checked;
+    P['rev'+sliderId]=rev;
+    apply(applySigned(rev,mag), mag, rev);
+    if(v) v.textContent=fmt(applySigned(rev,mag), mag, rev);
+  }
+  s.addEventListener('input',refresh);
+  r.addEventListener('change',refresh);
+  return refresh;
+}
+function bindRange(id,fmt,set){
+  const s=document.getElementById('s'+id),v=document.getElementById('v'+id);
+  s.addEventListener('input',()=>{const x=parseFloat(s.value);set(x);if(v)v.textContent=fmt(x);});
+}
+bindSignedRange('Om','revOm',(x)=>x.toFixed(2)+' rad/s',(x)=>{P.Om=x;document.getElementById('hOm').textContent=x.toFixed(2);rebuildLattice();updateHeaderTitle();});
+bindSignedRange('Ga','revGa',()=>fmtGa(),(x)=>{P.GaDemo=x;syncUi();});
+bindRange('Nq',x=>`${x} → Γ = ${x===1?'':x}κ`,x=>{P.nQ=x;syncUi();});
+bindRange('A',x=>x.toFixed(1)+' mm',x=>P.a=x*1e-3);
+bindSignedRange('Off','revOff',x=>x.toFixed(0)+' mm',x=>{P.off=x*1e-3;resetState();});
+bindSignedRange('W','revW',x=>x.toFixed(0)+' mm/s',x=>P.w=x*1e-3);
+bindSignedRange('VzA','revVzA',x=>x.toFixed(0)+' mm/s',x=>{P.vzA=x*1e-3;if(P.lockVz){P.vzB=P.vzA;syncSignedUi('VzB','revVzB',P.vzB,y=>y.toFixed(0)+' mm/s');}});
+bindSignedRange('VzB','revVzB',x=>x.toFixed(0)+' mm/s',x=>P.vzB=x*1e-3);
+bindRange('Acc',()=>fmtAcc(acc()),x=>P.accExp=x);
+bindRange('Diam',x=>x.toFixed(0)+' cm',x=>{P.Rcyl=Math.max(0.025,x/200);rebuildVolumeEnvelope();});
+bindRange('WAl',x=>x.toFixed(1),x=>P.wAl=x);
+bindRange('WBe',x=>x.toFixed(1),x=>P.wBe=x);
+bindRange('WGa',x=>x.toFixed(1),x=>P.wGa=x);
+function segHandler(id,attr,fn){
+  document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('[data-'+attr+']');
+    if(!b||b.disabled)return;fn(b.dataset[attr]);
+  });
+}
+segHandler('modeSeg','mode',v=>{
+  if(v===P.mode)return;P.mode=v;
+  if(v==='solo'&&P.topo==='ring'&&P.knotIdx<0&&!P.knotKey)P.topo='trefoil';
+  syncUi();resetState();
+});
+segHandler('topoSeg','topo',v=>{if(v===P.topo)return;P.topo=v;P.knotIdx=-1;P.knotKey='';syncKnotSel();syncUi();resetState();});
+segHandler('interSeg','inter',v=>{if(v===P.inter)return;P.inter=v;syncUi();resetState();});
+segHandler('coreSeg','core',v=>{if(v===P.core)return;P.core=v;syncUi();updateSubtitle();});
+segHandler('qualSeg','qual',v=>{if(v===P.qual)return;P.qual=v;resetState();});
+segHandler('visSeg','vis',v=>{if(v===P.vis)return;P.vis=v;syncUi();rebuildLines();rebuildTubes(true);});
+segHandler('tubeSeg','tube',v=>{if(v===P.tubeMat)return;P.tubeMat=v;syncUi();rebuildTubes(true);});
+segHandler('medSeg','med',v=>{
+  if(v===P.med)return;P.med=v;
+  if(v==='he'){P.core='hol';P.accExp=5;}
+  else if(v==='sst'){P.core='gp';P.accExp=6;}
+  else{P.accExp=0.9;}
+  document.getElementById('sAcc').value=P.accExp;
+  syncUi();updateSubtitle();
+});
+document.getElementById('bPause').addEventListener('click',e=>{paused=!paused;e.target.textContent=paused?'Hervat':'Pauzeer';});
+document.getElementById('bReset').addEventListener('click',resetState);
+document.getElementById('cCoRot').addEventListener('change',e=>{
+  P.coRot=e.target.checked;
+  if(P.coRot&&P.bgOmegaCoupling){
+    P.bgOmegaCoupling=false;
+    document.getElementById('cBgOmega').checked=false;
+  }
+});
+document.getElementById('cBgOmega').addEventListener('change',e=>{
+  P.bgOmegaCoupling=e.target.checked;
+  if(P.bgOmegaCoupling&&P.coRot){
+    P.coRot=false;
+    document.getElementById('cCoRot').checked=false;
+  }
+});
+document.getElementById('cChiArrow').addEventListener('change',e=>{P.showChiArrow=e.target.checked;});
+document.getElementById('cTracers').addEventListener('change',e=>{P.showTracers=e.target.checked;});
+document.getElementById('cTwProxy').addEventListener('change',e=>{
+  P.twistProxyEnabled=e.target.checked;
+  if(e.target.checked&&!twistProxy)initTwistProxy();
+  updateSubtitle();
+});
+const physOverlay=document.getElementById('physOverlay');
+const physOpenButton=document.getElementById('bPhys');
+const physCloseButton=document.getElementById('bPhysClose');
+
+window.closePhysicsOverlay=function(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  physOverlay.classList.remove('open');
+  physOverlay.setAttribute('aria-hidden','true');
+  if(physOpenButton) physOpenButton.focus({preventScroll:true});
+};
+
+function openPhysicsOverlay(){
+  physOverlay.classList.add('open');
+  physOverlay.setAttribute('aria-hidden','false');
+  if(window.renderMathInElement&&!physOverlay.dataset.rendered){
+    renderMathInElement(physOverlay,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]});
+    physOverlay.dataset.rendered='1';
+  }
+  requestAnimationFrame(()=>physCloseButton&&physCloseButton.focus({preventScroll:true}));
+}
+
+physOpenButton.addEventListener('click',openPhysicsOverlay);
+physCloseButton.addEventListener('click',window.closePhysicsOverlay);
+physOverlay.addEventListener('click',event=>{
+  if(event.target===physOverlay) window.closePhysicsOverlay(event);
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&physOverlay.classList.contains('open')){
+    window.closePhysicsOverlay(event);
+  }
+});
+document.getElementById('cCenterline').addEventListener('change',e=>{P.showCenterline=e.target.checked;});
+document.getElementById('cGhostRing').addEventListener('change',e=>{
+  P.ghostStewartson=e.target.checked;
+  syncGhostRing();
+});
+document.getElementById('cTaylorOsc').addEventListener('change',e=>{
+  P.taylorOsc.enabled=e.target.checked;
+  if(P.taylorOsc.enabled) P.w=0;
+  syncSignedUi('W','revW',P.w,x=>x.toFixed(0)+' mm/s');
+});
+segHandler('indSeg','ind',key=>setIndFlag(key,!Flags[key]));
+document.getElementById('cCcwA').addEventListener('change',e=>{P.ccwA=e.target.checked;resetState();});
+document.getElementById('cCcwB').addEventListener('change',e=>{P.ccwB=e.target.checked;resetState();});
+document.getElementById('cMirror').addEventListener('change',e=>{P.mirrorB=e.target.checked;resetState();});
+document.getElementById('cLockVz').addEventListener('change',e=>{
+  P.lockVz=e.target.checked;if(P.lockVz)P.vzB=P.vzA;
+  syncUi();
+});
+document.getElementById('bPreset').addEventListener('click',()=>{applyCanonPreset();resetState();});
+document.getElementById('bPresetTaylor').addEventListener('click',()=>{applyTaylorPreset();resetState();});
+document.getElementById('bPresetPistol').addEventListener('click',()=>{applyPistolPreset();resetState();});
+document.getElementById('compA').addEventListener('change',e=>{P.compA=+e.target.value;resetState();});
+document.getElementById('compB').addEventListener('change',e=>{P.compB=+e.target.value;resetState();});
+// optionele knopencatalogus (ideal_knots_data.js)
+function syncKnotSel(){
+  const sel=document.getElementById('knotSelect');
+  if(P.knotKey) sel.value=P.knotKey;
+  else sel.value=String(P.knotIdx);
+}
+(function initKnots(){
+  const row=document.getElementById('knotRow');
+  const sel=document.getElementById('knotSelect');
+  if(window.IDEAL_KNOT_IDS&&window.IDEAL_KNOT_DB){
+    row.classList.remove('hidden');
+    sel.innerHTML='<option value="">3:1:1 trefoil (ingebouwd)</option>'+
+      IDEAL_KNOT_IDS.map(id=>{
+        const k=IDEAL_KNOT_DB[id];
+        const nc=k.components&&k.components.length>1?' ['+k.components.length+' comp]':'';
+        return `<option value="${id}">${id}${k.conway?' · '+k.conway:''}${nc}</option>`;
+      }).join('');
+    sel.addEventListener('change',()=>{
+      P.knotKey=sel.value;P.knotIdx=-1;
+      if(P.knotKey)P.topo='trefoil';
+      syncCompSelects();syncUi();updateSubtitle();resetState();
+    });
+    return;
+  }
+  if(!Array.isArray(window.IDEAL_KNOTS)||!window.IDEAL_KNOTS.length)return;
+  row.classList.remove('hidden');
+  sel.innerHTML='<option value="-1">3:1:1 trefoil (ingebouwd)</option>'+
+    window.IDEAL_KNOTS.map((e,i)=>`<option value="${i}">${knotLabel(i)}</option>`).join('');
+  sel.addEventListener('change',()=>{
+    P.knotIdx=parseInt(sel.value,10);P.knotKey='';
+    if(P.knotIdx>=0)P.topo='trefoil';
+    syncUi();updateSubtitle();resetState();
+  });
+})();
+initEnergyToggles();renderFormula();
+(function stewartsonSanity(){
+  const z0=stewartsonCirculation(0,0.0625,1);
+  const zp=stewartsonCirculation(0.03,0.0625,1);
+  const zm=stewartsonCirculation(-0.03,0.0625,1);
+  console.assert(Math.abs(z0.gammaSheet)<1e-9,'Γ_sheet→0 when w=0');
+  console.assert(zp.gammaRel*zp.gammaBg<0,'Γ_rel opposite Γ_bg for w>0, Ω>0');
+  console.assert(zp.gammaRel*zm.gammaRel<0,'rev w flips Γ_rel sign');
+  console.log('[Taylor] stewartsonCirculation OK', {w0:z0,wPlus:zp,wMinus:zm});
+})();
+(function spinSanity(){
+  console.assert(typeof bodyFrameState==='function'&&typeof kelvinSpeed==='function','spin helpers OK');
+  const uk=kelvinSpeed(0.07);
+  console.assert(uk>0,'Kelvin U > 0');
+  console.log('[Spin] sanity OK, Kelvin U≈',uk.toFixed(4),'m/s');
+})();
+
+function setFlag(msg,warnOnly){
+  const f=document.getElementById('flag');
+  f.textContent=msg;f.style.display='block';
+  f.classList.toggle('warnonly',!!warnOnly);
+  if(!warnOnly)flagged=msg;else warned=true;
+}
+
+// ================= hoofdlus =================
+applyCanonPreset();
+resetState();
+updCam();
+let lastT=performance.now(),frame=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const dtReal=Math.min(0.05,(now-lastT)/1000);lastT=now;
+  let advThisFrame=0;
+  if(!paused&&!flagged){
+    let budget=acc()*dtReal, evals=0, advanced=0;
+    while(budget>1e-12&&evals<EVAL_BUDGET){
+      let dt=Math.min(dtCFL(),budget);
+      lastUmax=rk4Step(dt);
+      applyTaylorOscillation();
+      if(P.ghostStewartson) syncGhostRing();
+      phi+=P.Om*dt;tPhys+=dt;budget-=dt;advanced+=dt;
+      evals+=evalsPerStep();
+    }
+    advThisFrame=advanced;
+    const ea=advanced/Math.max(1e-9,dtReal);
+    effAcc=effAcc?0.9*effAcc+0.1*ea:ea;
+    // vlaggen
+    const lia=(P.inter==='lia');
+    if(P.mode==='botsing'&&!lia&&minGapCross()<3*P.a)
+      setFlag('⚠ dragers binnen 3a — reconnectieregime; filamentmodel niet langer geldig. Reset om opnieuw te draaien.');
+    for(const f of fils){
+      if(f.N>RING_N||P.topo==='trefoil'||P.knotKey||P.knotIdx>=0){
+        const ds=dminSelf(f);
+        if(ds<3*P.a){
+          if(lia){if(!warned)setFlag('⚠ strengen < 3a: LIA negeert deze interactie — resultaat vanaf hier kwalitatief.',true);}
+          else setFlag('⚠ strengen binnen 3a — zelfreconnectieregime: hier zou de knoop ontknopen (Kleckner–Irvine); niet gemodelleerd.');
+        }
+      }
+      const st=carrierStats(f);
+      if(st.rWall>0.9*P.Rcyl)setFlag('filament buiten volume-kader (r > R_cyl)',true);
+      if(st.z<0.02||st.z>P.Hcyl-0.02)setFlag('filament buiten z-domein [0, H_cyl]',true);
+    }
+  }
+  // weergave
+  worldGrp.rotation.z=P.coRot?0:phi;
+  filGrp.rotation.z=P.bgOmegaCoupling?(P.coRot?-phi:0):(P.coRot?0:phi);
+  pushLines();
+  stepTracers(advThisFrame);
+  updateIndicators(tPhys);
+  let bodyStates=[];
+  if(Y&&fils.length){
+    if(!lastFrameVel||lastFrameVel.length!==Y.length) lastFrameVel=new Float64Array(Y.length);
+    velAll(Y,lastFrameVel);
+    bodyStates=fils.map(f=>bodyFrameState(f,lastFrameVel));
+  }
+  updateChiArrows(bodyStates);
+  if(frame%3===0&&!flagged){
+    const Ga=Gamma();
+    let Wr=0;for(const f of fils)Wr+=gauss(f.off,f.N,f.off,f.N,true);
+    const Lk=fils.length>1?gauss(fils[0].off,fils[0].N,fils[1].off,fils[1].N,false):0;
+    const H=Wr+2*Lk;
+    document.getElementById('hHel').textContent=H.toFixed(3);
+    document.getElementById('hHel').style.color=Math.abs(H)<0.02?'#7BE8A8':'#FFAE45';
+    document.getElementById('hWr').textContent=Wr.toFixed(3);
+    document.getElementById('hLk').textContent=Lk.toFixed(3);
+    document.getElementById('hDWr').textContent=(Wr-Wr0).toFixed(3);
+    updateBodyHud(bodyStates,Wr);
+    const sA=carrierStats(fils[0]);
+    const vzRel=P.mode==='solo'?effectiveW():P.vzA;
+    const taylor=taylorColumnState(sA,vzRel);
+    const wrelLbl=Flags.sep
+      ?(P.coRot?'bulk ω_rel (co-rot)':'ω_rel @ cap')
+      :(P.coRot?'bulk ω_rel (co-rot)':'ω_rel achtergrond');
+    document.getElementById('hWrelLbl').textContent=wrelLbl;
+    document.getElementById('hWrel').textContent=(Flags.sep?taylor.zetaRel:(P.coRot?0:2*P.Om)).toFixed(2)+' s⁻¹ ẑ';
+    document.getElementById('rowRcap').classList.toggle('hidden',!Flags.sep);
+    if(Flags.sep) document.getElementById('hRcap').textContent=(taylor.rCap*100).toFixed(1)+' cm';
+    updateGammaHud(sA,vzRel);
+    const km=kappaMedium();
+    document.getElementById('hNv').textContent=km
+      ?(2*Math.abs(P.Om)/km).toExponential(2).replace('e+','·10^')+' m⁻²':'— (demo)';
+    const sB=fils.length>1?carrierStats(fils[1]):null;
+    document.getElementById('hR').textContent=sB
+      ?(sA.R*100).toFixed(1)+' / '+(sB.R*100).toFixed(1)+' cm'
+      :(sA.R*100).toFixed(1)+' cm';
+    if(sB)document.getElementById('hDz').textContent=(Math.abs(sB.z-sA.z)*100).toFixed(1)+' cm';
+    document.getElementById('hT').textContent=tPhys<100?tPhys.toFixed(1)+' s':tPhys.toExponential(2)+' s';
+    document.getElementById('hAcc').textContent=fmtAcc(Math.max(1e-3,effAcc));
+    hist.push({t:tPhys,RA:sA.R,RB:sB?sB.R:0,dz:sB?Math.abs(sB.z-sA.z):0,zA:sA.z,Wr,
+      gRel:Flags.sep&&P.mode==='solo'?stewartsonCirculation(vzRel,taylor.rCap,P.Om).ratio:0,
+      wSolo:P.mode==='solo'?vzRel:0,omA:bodyStates[0]?bodyStates[0].omegaZ:0});
+    if(hist.length>400)hist.shift();
+    if(hist.length>5){
+      const p=hist[hist.length-5],q=hist[hist.length-1];
+      const dtq=Math.max(1e-12,q.t-p.t);
+      const v=sB?(p.dz-q.dz)/dtq:(q.zA-p.zA)/dtq;
+      document.getElementById('hV').textContent=fmtSpeed(v);
+      const showKelvin=isRingTopo();
+      if(showKelvin){
+        const Uth=kelvinSpeed(sA.R);
+        const Umeas=P.mode==='botsing'&&sB?Math.abs(v)/2:Math.abs(v);
+        document.getElementById('hUth').textContent=fmtSpeed(Umeas)+' / '+fmtSpeed(Uth);
+      }
+    }
+    // GEM-stijl E_eff-kaarten
+    let ACN=0;for(const f of fils)ACN+=gauss(f.off,f.N,f.off,f.N,true,true);
+    if(fils.length>1)ACN+=gauss(fils[0].off,fils[0].N,fils[1].off,fils[1].N,false,true);
+    let Lnow=0;for(const f of fils)Lnow+=arcLength(f);
+    const Lhat=Lnow/Math.max(1e-9,L0);
+    const Eeff=P.wAl*ACN+P.wBe*Lhat+P.wGa*H;
+    document.getElementById('cardC').textContent=ACN.toFixed(3);
+    document.getElementById('cardL').textContent=Lhat.toFixed(4);
+    document.getElementById('cardH').textContent=H.toFixed(3);
+    document.getElementById('cardE').textContent=Eeff.toFixed(3);
+    document.getElementById('cardGam').textContent=fmtGa();
+    drawSpark();
+  }
+  frame++;
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(canvas.width!==w||canvas.height!==h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  updCam();renderer.render(scene,camera);
+}
+function fmtSpeed(v){
+  const av=Math.abs(v);
+  if(av>=1e-3)return (v*1e3).toFixed(1)+' mm/s';
+  if(av>=1e-6)return (v*1e6).toFixed(1)+' µm/s';
+  return (v*1e9).toFixed(1)+' nm/s';
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
