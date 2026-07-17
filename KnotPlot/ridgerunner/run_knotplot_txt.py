@@ -274,6 +274,7 @@ def split_args(argv: list[str]) -> tuple[Path, list[str]]:
 
 
 def last_logfile_value(path: Path) -> float | None:
+    """Last numeric value from a 2-column logfile (step value)."""
     if not path.is_file():
         return None
     last: float | None = None
@@ -287,6 +288,53 @@ def last_logfile_value(path: Path) -> float | None:
     return last
 
 
+def last_strutcount_logfile(
+    path: Path,
+) -> tuple[float | None, float | None]:
+    """Parse strutcount.dat lines: ``step Str [MRstruts]``.
+
+    Returns (strutcount, mr_struts_or_None). Never treats MRstruts as strutcount.
+    """
+    if not path.is_file():
+        return None, None
+    strut: float | None = None
+    mr: float | None = None
+    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        parts = raw.strip().split()
+        nums: list[float] = []
+        for p in parts:
+            try:
+                nums.append(float(p))
+            except ValueError:
+                break
+        if len(nums) >= 3:
+            # step, Str, MRstruts
+            strut = nums[1]
+            mr = nums[2]
+        elif len(nums) == 2:
+            # step, Str (legacy)
+            strut = nums[1]
+    return strut, mr
+
+
+def parse_struts_header(final_struts: Path) -> tuple[int | None, int | None]:
+    """Read ``N M`` after the STRUTS header from a .final.struts file."""
+    if not final_struts.is_file():
+        return None, None
+    lines = final_struts.read_text(encoding="utf-8", errors="replace").splitlines()
+    for i, raw in enumerate(lines):
+        if raw.strip().upper().startswith("STRUTS"):
+            if i + 1 < len(lines):
+                parts = lines[i + 1].strip().split()
+                if len(parts) >= 2:
+                    try:
+                        return int(float(parts[0])), int(float(parts[1]))
+                    except ValueError:
+                        return None, None
+            break
+    return None, None
+
+
 def parse_mr_struts_from_text(text: str) -> int | None:
     # Progress lines look like: "  20 Rop: ... Str:  17 MRstruts:   0 Thi: ..."
     pattern = re.compile(r"MRstruts:\s*(\d+)", re.IGNORECASE)
@@ -297,6 +345,15 @@ def parse_mr_struts_from_text(text: str) -> int | None:
             last = int(match.group(1))
     return last
 
+
+def parse_str_from_text(text: str) -> int | None:
+    pattern = re.compile(r"\bStr:\s*(\d+)", re.IGNORECASE)
+    last: int | None = None
+    for line in text.splitlines():
+        match = pattern.search(line)
+        if match:
+            last = int(match.group(1))
+    return last
 
 def edge_length_stats(
     components: list[list[Point]],
@@ -573,23 +630,37 @@ def build_metrics(
     logfiles = rr_dir / "logfiles"
     checkpoint_stem = final_vect.name.replace(".final.vect", "")
     log_path = rr_dir / f"{checkpoint_stem}.log"
+    final_struts = rr_dir / f"{checkpoint_stem}.final.struts"
 
-    mr_struts = parse_mr_struts_from_text(stdout_text)
-    if mr_struts is None and log_path.is_file():
-        mr_struts = parse_mr_struts_from_text(
+    # strutcount vs mr_struts: never conflate (strutcount.dat is step Str MRstruts)
+    strut_hdr, mr_hdr = parse_struts_header(final_struts)
+    strut_log, mr_log = last_strutcount_logfile(logfiles / "strutcount.dat")
+    strut_stdout = parse_str_from_text(stdout_text)
+    mr_stdout = parse_mr_struts_from_text(stdout_text)
+    if mr_stdout is None and log_path.is_file():
+        mr_stdout = parse_mr_struts_from_text(
+            log_path.read_text(encoding="utf-8", errors="replace")
+        )
+    if strut_stdout is None and log_path.is_file():
+        strut_stdout = parse_str_from_text(
             log_path.read_text(encoding="utf-8", errors="replace")
         )
 
-    # Prefer last progress "Str:" from stdout when strutcount.dat looks empty/zero.
-    strut_from_stdout: float | None = None
-    strut_pat = re.compile(r"Str:\s*(\d+)", re.IGNORECASE)
-    for line in stdout_text.splitlines():
-        match = strut_pat.search(line)
-        if match:
-            strut_from_stdout = float(match.group(1))
-    strutcount = last_logfile_value(logfiles / "strutcount.dat")
-    if strut_from_stdout is not None and (strutcount is None or strutcount == 0.0):
-        strutcount = strut_from_stdout
+    if strut_hdr is not None:
+        strutcount: float | None = float(strut_hdr)
+    elif strut_log is not None:
+        strutcount = strut_log
+    elif strut_stdout is not None:
+        strutcount = float(strut_stdout)
+    else:
+        strutcount = None
+
+    if mr_hdr is not None:
+        mr_struts: int | None = mr_hdr
+    elif mr_log is not None:
+        mr_struts = int(mr_log)
+    else:
+        mr_struts = mr_stdout
 
     edges = edge_length_stats(out_components)
 

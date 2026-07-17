@@ -2,9 +2,10 @@
 """
 Select one KnotPlot trial checkpoint for the ridgerunner 3-stage pipeline.
 
-Uses signed length gain, per-component flatness, segment-based D_proxy / R_proxy,
-topology sidecars (knot_type for 1-comp; linking_matrix for multilinks), and
-quality classes A/B/C. Raw Dowker codes are audit-only (not hard-compared).
+Uses R_proxy settle (not raw length), per-component flatness, segment-based
+D_proxy / R_proxy, topology sidecars (knot_type for 1-comp; linking_matrix for
+multilinks; Dowker consistency fallback), and quality classes A/B/C.
+Applies to knot_* / torus_* / link_* folders.
 """
 from __future__ import annotations
 
@@ -321,6 +322,16 @@ def trial_k(path: Path) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _dowker_code(sc: dict[str, Any] | None) -> str | None:
+    if not sc:
+        return None
+    d = sc.get("dowker_code")
+    if d is None:
+        return None
+    s = str(d).strip()
+    return s if s else None
+
+
 def topology_ok(
     cps: list[Checkpoint], allow_unverified: bool
 ) -> tuple[bool, str]:
@@ -333,6 +344,7 @@ def topology_ok(
         return False, "geometry-qualified-topology-unverified"
     n0 = len(base.components)
     verts0 = [len(c) for c in base.components]
+    d0 = _dowker_code(base.sidecar)
     for cp in cps:
         if cp.sidecar is None:
             if allow_unverified:
@@ -351,24 +363,43 @@ def topology_ok(
         if n0 == 1:
             t0 = normalize_knot_type(base.sidecar.get("knot_type"))
             t1 = normalize_knot_type(sc.get("knot_type"))
-            # If both present and differ → DQ; missing type with allow stays warning
             if t0 and t1 and t0 != t1:
                 cp.disqualified = True
                 cp.dq_reasons.append(f"knot_type {t1} != {t0}")
             elif not t0 or not t1:
-                if not allow_unverified:
+                d1 = _dowker_code(sc)
+                if d0 and d1 and d0 == d1:
+                    cp.warnings.append("topology via dowker consistency")
+                elif allow_unverified:
+                    cp.warnings.append("knot_type missing (dowker audit only)")
+                else:
                     return False, "geometry-qualified-topology-unverified"
-                cp.warnings.append("knot_type missing (dowker audit only)")
         else:
-            m0 = base.sidecar.get("linking_matrix")
-            m1 = sc.get("linking_matrix")
-            if m0 is not None and m1 is not None and m0 != m1:
+            # Multilink: prefer catalog link_type (from link_* folder), then
+            # linking_matrix equality, then Dowker (projection-sensitive).
+            lt0 = normalize_knot_type(base.sidecar.get("link_type"))
+            lt1 = normalize_knot_type(sc.get("link_type"))
+            if lt0 and lt1 and lt0 != lt1:
                 cp.disqualified = True
-                cp.dq_reasons.append("linking_matrix mismatch")
-            elif m0 is None or m1 is None:
-                if not allow_unverified:
-                    return False, "geometry-qualified-topology-unverified"
-                cp.warnings.append("linking_matrix missing")
+                cp.dq_reasons.append(f"link_type {lt1} != {lt0}")
+            elif lt0 and lt1:
+                pass  # catalog id matches
+            else:
+                m0 = base.sidecar.get("linking_matrix")
+                m1 = sc.get("linking_matrix")
+                if m0 is not None and m1 is not None and m0 != m1:
+                    cp.disqualified = True
+                    cp.dq_reasons.append("linking_matrix mismatch")
+                elif m0 is not None and m1 is not None:
+                    pass
+                else:
+                    d1 = _dowker_code(sc)
+                    if d0 and d1 and d0 == d1:
+                        cp.warnings.append("topology via dowker consistency")
+                    elif allow_unverified:
+                        cp.warnings.append("linking_matrix/link_type missing")
+                    else:
+                        return False, "geometry-qualified-topology-unverified"
     return True, "topology-verified"
 
 
@@ -449,27 +480,14 @@ def select_seed(
             "selection_status": topo_status,
             "plateau_detected": False,
             "error": topo_status,
-            "checkpoints": [],
+            "checkpoints": [_cp_row(c) for c in cps],
         }
 
-    # Signed gains + plateau
+    # Signed length gains (diagnostics only; plateau uses R_proxy)
     for i in range(1, len(cps)):
         prev, cur = cps[i - 1], cps[i]
         if prev.length > 0:
             cur.gain = (prev.length - cur.length) / prev.length
-
-    plateau_idx: int | None = None
-    for i in range(1, len(cps) - 1):
-        g0, g1 = cps[i].gain, cps[i + 1].gain
-        if (
-            g0 is not None
-            and g1 is not None
-            and 0.0 <= g0 < 0.001
-            and 0.0 <= g1 < 0.001
-        ):
-            plateau_idx = i  # first of the two small-gain steps → seed at cps[i]
-            break
-    plateau_detected = plateau_idx is not None
 
     # Soft / hard flatness vs best earlier flatness_min
     best_flat: float | None = None
@@ -515,7 +533,7 @@ def select_seed(
         return {
             "selected": None,
             "selection_status": "all-disqualified",
-            "plateau_detected": plateau_detected,
+            "plateau_detected": False,
             "error": "all checkpoints disqualified",
             "checkpoints": [_cp_row(c) for c in cps],
         }
@@ -530,31 +548,35 @@ def select_seed(
         r = c.proxy.get("length_over_diameter_proxy")
         return r if r is not None else float("inf")
 
-    eligible.sort(key=r_key)
-    r_min = r_key(eligible[0])
-    near = [
-        c
-        for c in eligible
-        if r_min > 0 and abs(r_key(c) - r_min) / r_min < 1e-3
-    ]
-    if not near:
-        near = [eligible[0]]
+    # R_proxy settle: argmin, then |delta| to next eligible < 0.001
+    by_k = sorted(eligible, key=lambda c: c.k)
+    imin = min(range(len(by_k)), key=lambda i: r_key(by_k[i]))
+    plateau_seed = by_k[imin]
+    plateau_detected = False
+    r_at_min = r_key(plateau_seed)
+    if imin + 1 < len(by_k) and r_at_min > 0 and r_at_min != float("inf"):
+        r_next = r_key(by_k[imin + 1])
+        if abs(r_next - r_at_min) / r_at_min < 0.001:
+            plateau_detected = True
 
-    if plateau_detected and plateau_idx is not None:
-        plateau_seed = cps[plateau_idx]
-        near_plateau = [c for c in near if c.k <= plateau_seed.k]
-        if near_plateau:
-            chosen = min(near_plateau, key=lambda c: c.k)
-        else:
-            chosen = min(near, key=lambda c: c.k)
+    r_min = r_key(min(eligible, key=r_key))
+    if plateau_detected:
+        near = [
+            c
+            for c in eligible
+            if r_min > 0
+            and r_min != float("inf")
+            and abs(r_key(c) - r_min) / r_min < 1e-3
+        ]
+        if not near:
+            near = [plateau_seed]
+        near_plateau = [c for c in near if c.k >= plateau_seed.k]
+        chosen = min(near_plateau or near, key=lambda c: c.k)
+        status = "settled-after-local-minimum"
     else:
-        chosen = min(near, key=lambda c: c.k)
-
-    status = (
-        "selected-plateau"
-        if plateau_detected
-        else "best-so-far-no-plateau"
-    )
+        # Pure min R_proxy — no earliest-among-0.1%-tie
+        chosen = min(eligible, key=r_key)
+        status = "best-so-far-no-plateau"
     return {
         "selected": str(chosen.path),
         "selection_status": status,

@@ -105,15 +105,20 @@ run_build.cmd knot_4.1 -rr --allow-unverified-topology
 
 `-rr` does **not** pipeline every TXT. It runs `select_knotplot_seed.py`
 (after `parse_knotplot_log.py`) and sends **one** seed to `run_three_stage.cmd`.
+After polish, stage 4 writes a **separate** VortexLab copy via
+`resample_closed_knot_txt.py --points 300` → `*_polish_uniform_N300.txt`
+(+ VECT). The Ridgerunner `*_polish.txt` is left untouched; do not re-run
+Ridgerunner on the uniform file.
 
 **Robuuste checkpoint-gate (summary):**
 
-- Signed length gain `(L_prev-L_k)/L_prev`; plateau = two steps with `0 ≤ gain < 0.001`
+- Plateau on **`R_proxy = L/D_proxy`** deltas (`|ΔR/R| < 0.001` after the local min) → status `settled-after-local-minimum`; earliest 0.1%-tie only among candidates at/after that min. No plateau → pure min `R_proxy` (`best-so-far-no-plateau`); **no** earliest-tie without settle. Same path for `knot_*` / `torus_*` / `link_*`.
+- Signed length gain is logged for diagnostics only (KnotPlot length often grows).
 - Per-component flatness `√(λ3/λ1)`; 5% drop = soft penalty; ~20–25% + worse `D_proxy`/`R_proxy` = hard DQ
 - `D_proxy = min(2·MinRad, d_self_nonlocal, d_inter)` from **segment–segment** distances (arc-length exclusion window)
-- Rank by class A/B/C then lowest `R_proxy = L/D_proxy`; near-ties → earliest plateau seed
-- Topology sidecars: 1-comp uses **`knot_type`** (raw `dowker_code` is audit only); multilinks use `linking_matrix`
-- No plateau by 15k → `best-so-far-no-plateau` warning, still may RR
+- Rank by class A/B/C then lowest `R_proxy`
+- Topology (`knot_*` / `torus_*` / `link_*`): 1-comp prefers **`knot_type`** from folder (`knot_X.Y` / `torus_p.q`); `link_*` prefers **`link_type`** from folder (then `linking_matrix`). If the primary field is missing, consistent non-empty **`dowker_code`** across checkpoints verifies. Hard fail if both are absent.
+- No settle by 15k → `best-so-far-no-plateau` warning, still may RR
 
 Check `*.metrics.json` after eqfinal/polish: residual ≤ 0.01, prefer
 `edge_length_ratio` ≤ 1.10 and `edge_length_cv` ≤ 0.01.
@@ -128,8 +133,9 @@ ridgerunner -a -s 5000 C:\workspace\projects\SST-Workbench\KnotPlot\knots\knot_3
 ### Metrics
 
 Each checkpoint writes JSON with length, thickness, ropelength, residual,
-strutcount, edge_length_variance, **edge_length_min/max/ratio/mean/cv** (from
-final XYZ), mr_struts, flatness, component sizes, and paths.
+**strutcount** (contact struts, from `.final.struts` / `strutcount.dat` col 2 — not MRstruts),
+edge_length_variance, **edge_length_min/max/ratio/mean/cv** (from
+final XYZ), **mr_struts** (separate), flatness, component sizes, and paths.
 
 ### Multilink without blank-line separators
 

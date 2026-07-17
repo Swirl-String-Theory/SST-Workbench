@@ -11,11 +11,16 @@ rem
 rem Stage 1: -a --EqOn          coarse tighten (residual 0.05, max 10k)
 rem Stage 2: -c --EqForceOn     equilateralize + converge (residual 0.01, max 50k)
 rem Stage 3: -c --EqOn          unbiased polish (residual 0.01, max 20k)
+rem Stage 4: uniform arc-length resample → *_polish_uniform_N300.txt (+ VECT)
 rem
-rem Polish output (*_rr_020k_polish.txt) is the near-ideal candidate.
+rem Polish output (*_rr_020k_polish.txt) is the near-ideal Ridgerunner audit.
+rem Uniform copy is for VortexLab / solvers — do not re-run Ridgerunner on it.
 
 set "BUNDLE=%~dp0"
 set "RR=%BUNDLE%ridgerunner.cmd"
+set "ROOT=%BUNDLE%.."
+set "RESAMPLE=%ROOT%\resample_closed_knot_txt.py"
+set "TO_VECT=%ROOT%\knotplot_txt_to_vect.py"
 
 if "%~1"=="" (
   echo Usage: run_three_stage.cmd path\to\seed.txt
@@ -91,8 +96,43 @@ if not exist "%R3%" (
 )
 
 echo.
-echo Done. Near-ideal candidate:
-echo   %R3%
+echo [4/4] VortexLab uniform resample: N=300 per component
+if not exist "%RESAMPLE%" (
+  echo ERROR: missing "%RESAMPLE%"
+  exit /b 1
+)
+where python >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: python not found on PATH
+  exit /b 1
+)
+python "%RESAMPLE%" "%R3%" --points 300
+if errorlevel 1 (
+  echo ERROR: uniform resample failed
+  exit /b 1
+)
+
+rem Prefer single-N naming: *_polish_uniform_N300.txt
+set "R4=%SEED_DIR%%SEED_STEM%_rr_010k_coarse_rr_050k_eqfinal_rr_020k_polish_uniform_N300.txt"
+if not exist "%R4%" (
+  echo ERROR: uniform output missing: "%R4%"
+  exit /b 1
+)
+
+if exist "%TO_VECT%" (
+  python "%TO_VECT%" "%R4%" --overwrite
+  if errorlevel 1 (
+    echo WARNING: VECT conversion failed for uniform TXT
+  )
+) else (
+  echo WARNING: knotplot_txt_to_vect.py not found; skipped VECT
+)
+
+echo.
+echo Done. Catalog pair:
+echo   Ridgerunner polish ^(audit^): %R3%
+echo   VortexLab uniform N=300:     %R4%
+echo Do not re-run Ridgerunner on the uniform file.
 exit /b 0
 
 :usage
@@ -102,5 +142,6 @@ echo.
 echo Stage 1: ridgerunner -a --EqOn -s 10000 --StopResidual=0.05 --label coarse
 echo Stage 2: ridgerunner -c --EqForceOn -s 50000 --StopResidual=0.01 --Stop20=0.000001 --label eqfinal
 echo Stage 3: ridgerunner -c --EqOn -s 20000 --StopResidual=0.01 --Stop20=0.0000001 --label polish
+echo Stage 4: resample_closed_knot_txt.py --points 300  -^> *_polish_uniform_N300.txt + VECT
 echo.
 exit /b 1

@@ -116,7 +116,9 @@ if not exist "%SCRIPT%" (
 )
 
 for %%F in ("%SCRIPT%") do set "OUTDIR=%%~dpF"
-set "LOG=%OUTDIR%build_knotplot.log"
+rem Trailing backslash breaks "...\dir\" quoting in Python/PowerShell args
+if "!OUTDIR:~-1!"=="\" set "OUTDIR=!OUTDIR:~0,-1!"
+set "LOG=!OUTDIR!\build_knotplot.log"
 
 pushd "%KP_CWD%" || exit /b 1
 
@@ -144,13 +146,17 @@ if errorlevel 1 (
   echo ERROR: python not found on PATH ^(needed for sidecars / seed selection^)
   exit /b 1
 )
-python "%ROOT%ridgerunner\parse_knotplot_log.py" "%OUTDIR%" --log "%LOG%"
+python "%ROOT%ridgerunner\parse_knotplot_log.py" "!OUTDIR!" --log "!LOG!"
 if errorlevel 1 (
-  echo WARNING: sidecar parse failed; continuing
+  if defined DO_RR (
+    echo ERROR: sidecar parse failed — aborting -rr. See parser output above.
+    exit /b 1
+  )
+  echo WARNING: sidecar parse failed; continuing without -rr sidecars
 )
 
 if not defined DO_RR (
-  echo KnotPlot build finished. Log: "%LOG%"
+  echo KnotPlot build finished. Log: "!LOG!"
   exit /b 0
 )
 
@@ -161,7 +167,7 @@ if not exist "%RR_PIPE%" (
   exit /b 1
 )
 
-set "SEL_ARGS=%OUTDIR%"
+set "SEL_ARGS=!OUTDIR!"
 if defined SEED_OPT set "SEL_ARGS=!SEL_ARGS! --seed !SEED_OPT!"
 if defined ALLOW_UNVERIFIED set "SEL_ARGS=!SEL_ARGS! --allow-unverified-topology"
 
@@ -176,9 +182,9 @@ if errorlevel 1 (
 )
 
 rem Read selected path from seed_selection.json
-for /f "usebackq delims=" %%S in (`powershell -NoProfile -Command "$j=Get-Content -Raw '%OUTDIR%seed_selection.json' | ConvertFrom-Json; if ($j.selected) { $j.selected } else { exit 2 }"`) do set "SELECTED=%%S"
+for /f "usebackq delims=" %%S in (`powershell -NoProfile -Command "$j=Get-Content -Raw '!OUTDIR!\seed_selection.json' | ConvertFrom-Json; if ($j.selected) { $j.selected } else { exit 2 }"`) do set "SELECTED=%%S"
 if not defined SELECTED (
-  echo ERROR: no seed selected ^(see "%OUTDIR%seed_selection.json"^)
+  echo ERROR: no seed selected ^(see "!OUTDIR!\seed_selection.json"^)
   exit /b 1
 )
 
@@ -187,7 +193,7 @@ call "%RR_PIPE%" "!SELECTED!"
 if errorlevel 1 exit /b 1
 
 if defined MULTISTART (
-  for %%A in ("%OUTDIR%*_analytic_D1.txt") do (
+  for %%A in ("!OUTDIR!\*_analytic_D1.txt") do (
     if exist "%%~fA" (
       echo.%%~nxA| findstr /I /C:"_rr_" >nul
       if errorlevel 1 (
@@ -203,7 +209,7 @@ if defined MULTISTART (
 )
 
 echo.
-echo Ridgerunner pipeline finished.
+echo Ridgerunner pipeline finished ^(polish + VortexLab uniform N=300^).
 exit /b 0
 
 :resolve_script
@@ -224,7 +230,8 @@ if /I "!ID:~0,11!"=="build_knot_" set "ID=!ID:~11!"
 if /I "!ID:~0,11!"=="build_link_" set "ID=!ID:~11!"
 if /I "!ID:~0,12!"=="build_torus_" set "ID=!ID:~12!"
 if /I "!ID:~0,12!"=="build_Tlink_" set "ID=Tlink_!ID:~12!"
-if /I "!ID:~0,6!"=="knot_" set "ID=!ID:~6!"
+rem knot_ and link_ are 5 chars; torus_ and Tlink_ are 6
+if /I "!ID:~0,5!"=="knot_" set "ID=!ID:~5!"
 if /I "!ID:~0,5!"=="link_" set "ID=!ID:~5!"
 if /I "!ID:~0,6!"=="torus_" set "ID=!ID:~6!"
 if /I "!ID:~0,6!"=="Tlink_" set "ID=Tlink_!ID:~6!"
@@ -273,5 +280,7 @@ echo   --multistart                 also run analytic after selected trial
 echo   --allow-unverified-topology  continue if KnotPlot sidecars incomplete
 echo.
 echo Without -rr: KnotPlot only (15k checkpoints, log + sidecars).
-echo With -rr: checkpoint gate picks one trial (not all txts).
+echo With -rr: checkpoint gate picks one trial, 3-stage RR, then
+echo   VortexLab uniform resample (*_polish_uniform_N300.txt + VECT).
+echo   Ridgerunner polish TXT is kept unchanged as audit reference.
 goto :eof
