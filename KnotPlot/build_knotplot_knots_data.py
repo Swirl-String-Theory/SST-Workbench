@@ -1,33 +1,19 @@
 #!/usr/bin/env python3
 """
-Build or update knotplot_knots_data.js from KnotPlot plain-text XYZ exports.
+Build or update knotplot_knots_data.js from VortexLab-uniform XYZ exports
+(and optional legacy KnotPlot plain-text XYZ).
 
-Expected input format
----------------------
-- One "x y z" vertex per line.
-- Blank lines separate link components.
-- Closed components are implicit: the last vertex connects to the first.
+Preferred pipeline
+------------------
+    run_build.cmd knot_3.1 -rr
+    → *_polish_uniform_N300.txt
+    → build_knotplot_knots_data.py --from-rr-outdir knots/knot_3.1
 
-Recommended filename convention
--------------------------------
-Tlink_<p>_<q>_<normalization>_<checkpoint>k.txt
+Canonical IDs are folder names: knot_3.1, torus_6.9, link_0.2.1.
+Legacy Tlink_* catalog IDs are dropped (use torus_p.q).
 
-Examples:
-    Tlink_6_9_D1_040k.txt
-    Tlink_3_3_D1_080k.txt
-    Tlink_2_4_raw_020k.txt
-
-Default behaviour
------------------
-- Uses a stable canonical catalog key such as "Tlink_6_9".
-- A later checkpoint replaces an older checkpoint for the same canonical key.
-- Converts each polygonal component to a discrete Fourier representation.
-- Preserves all harmonics by default, including the Nyquist term.
-- Computes geometry metadata and an approximate Gauss linking matrix.
-- Merges/upserts into an existing generated JS file.
-
-This is a candidate-geometry converter. It does not certify a global ideal or
-ropelength-minimizing embedding.
+Status comes from catalog_status.json when present
+(relaxed-seed | near-ideal-candidate | near-ideal).
 """
 
 from __future__ import annotations
@@ -86,6 +72,32 @@ def parse_xyz_components(path: Path) -> list[np.ndarray]:
 
 def parse_source_name(path: Path) -> dict:
     stem = path.stem
+    # Strip RR / uniform suffixes for id guessing
+    base_stem = re.sub(
+        r"_rr_.*$",
+        "",
+        stem,
+        flags=re.IGNORECASE,
+    )
+    base_stem = re.sub(
+        r"_uniform_N\d+.*$",
+        "",
+        base_stem,
+        flags=re.IGNORECASE,
+    )
+    base_stem = re.sub(
+        r"_trial_\d+k$",
+        "",
+        base_stem,
+        flags=re.IGNORECASE,
+    )
+    base_stem = re.sub(
+        r"_analytic_D\d+$",
+        "",
+        base_stem,
+        flags=re.IGNORECASE,
+    )
+
     suffix = re.search(
         r"_(?P<normalization>D\d+(?:[p.]\d+)?|raw)_(?P<checkpoint>\d+)k$",
         stem,
@@ -94,38 +106,92 @@ def parse_source_name(path: Path) -> dict:
 
     normalization = None
     checkpoint_steps = None
-    base = stem
+    base = base_stem
 
     if suffix:
         normalization = suffix.group("normalization")
         checkpoint_steps = int(suffix.group("checkpoint")) * 1000
         base = stem[: suffix.start()]
 
+    # Prefer parent folder name for knot_/torus_/link_ pipelines
+    parent = path.parent.name
+    folder_id = None
+    for prefix in ("knot_", "torus_", "link_"):
+        if parent.lower().startswith(prefix):
+            folder_id = parent
+            break
+        if base.lower().startswith(prefix):
+            # e.g. knot_3.1_... already stripped to knot_3.1
+            m = re.match(
+                rf"({prefix}[\d.]+(?:\.[\d.]+)*)",
+                base,
+                flags=re.IGNORECASE,
+            )
+            if m:
+                folder_id = m.group(1)
+            else:
+                folder_id = base
+            break
+
+    metadata = {
+        "canonical_id": folder_id or base,
+        "normalization_label": normalization,
+        "checkpoint_steps": checkpoint_steps,
+        "torus": None,
+        "family_hint": None,
+    }
+
+    # torus_6.9 / torus_2.3 folder → torus metadata (never remap to Tlink_*)
+    tm = re.fullmatch(
+        r"torus_(?P<p>\d+)[._](?P<q>\d+)",
+        (folder_id or base),
+        flags=re.IGNORECASE,
+    )
+    if tm:
+        p = int(tm.group("p"))
+        q = int(tm.group("q"))
+        d = math.gcd(p, q)
+        metadata["canonical_id"] = f"torus_{p}.{q}"
+        metadata["family_hint"] = "torus-knot" if d == 1 else "torus-link"
+        metadata["torus"] = {
+            "p": p,
+            "q": q,
+            "componentCountExpected": d,
+            "componentType": f"T({p // d},{q // d})" if d > 1 else f"T({p},{q})",
+            "expectedPairwiseLinkingAbs": (p * q) // (d * d) if d > 1 else 0,
+        }
+        metadata["D"] = None
+        return metadata
+
+    if folder_id and folder_id.lower().startswith("knot_"):
+        metadata["canonical_id"] = folder_id
+        metadata["family_hint"] = "classic-knot"
+        metadata["D"] = None
+        return metadata
+
+    if folder_id and folder_id.lower().startswith("link_"):
+        metadata["canonical_id"] = folder_id
+        metadata["family_hint"] = "link"
+        metadata["D"] = None
+        return metadata
+    # Legacy Tlink_p_q filenames only (not used for new torus_* pipeline)
     torus = re.fullmatch(
         r"(?P<kind>Tlink|TorusLink|TorusKnot|T)_(?P<p>\d+)_(?P<q>\d+)",
         base,
         flags=re.IGNORECASE,
     )
-
-    metadata = {
-        "canonical_id": base,
-        "normalization_label": normalization,
-        "checkpoint_steps": checkpoint_steps,
-        "torus": None,
-    }
-
     if torus:
         p = int(torus.group("p"))
         q = int(torus.group("q"))
         d = math.gcd(p, q)
-        canonical_id = f"Tlink_{p}_{q}" if d > 1 else f"Tknot_{p}_{q}"
+        # Prefer torus_p.q naming; do not emit Tlink_* as catalog id
+        metadata["canonical_id"] = f"torus_{p}.{q}"
         component_p = p // d
         component_q = q // d
         component_type = f"T({component_p},{component_q})"
         if {component_p, component_q} == {2, 3}:
             component_type += " / 3_1 trefoil"
-
-        metadata["canonical_id"] = canonical_id
+        metadata["family_hint"] = "torus-link" if d > 1 else "torus-knot"
         metadata["torus"] = {
             "p": p,
             "q": q,
@@ -321,6 +387,9 @@ def build_entry(
     max_harmonic: int | None,
     linking_subdivisions: int,
     id_override: str | None = None,
+    status: str = "relaxed-seed",
+    catalog_status: dict | None = None,
+    polish_audit: str | None = None,
 ) -> tuple[str, dict]:
     components = parse_xyz_components(path)
     name_metadata = parse_source_name(path)
@@ -350,10 +419,14 @@ def build_entry(
 
     torus = name_metadata["torus"]
     if torus and torus["componentCountExpected"] != len(components):
-        raise ValueError(
-            f"{path}: filename predicts {torus['componentCountExpected']} components, "
-            f"but the file contains {len(components)}"
-        )
+        # Soft: VortexLab uniform may still be valid if KnotPlot bead rule differs
+        if torus["componentCountExpected"] > 1 and len(components) == 1:
+            pass  # single-comp torus knot OK
+        elif len(components) != torus["componentCountExpected"]:
+            raise ValueError(
+                f"{path}: filename predicts {torus['componentCountExpected']} "
+                f"components, but the file contains {len(components)}"
+            )
 
     normalization_label = name_metadata["normalization_label"]
     checkpoint_steps = name_metadata["checkpoint_steps"]
@@ -361,28 +434,50 @@ def build_entry(
         f"{checkpoint_steps // 1000}k" if checkpoint_steps is not None else "unspecified"
     )
 
+    family = name_metadata.get("family_hint") or "knotplot-relaxed"
     if torus:
         label = (
-            f"T({torus['p']},{torus['q']}) · KnotPlot "
-            f"{checkpoint_label} · {normalization_label or 'unscaled'}"
+            f"T({torus['p']},{torus['q']}) / {catalog_id} / "
+            f"{checkpoint_label} / {normalization_label or 'RR/VortexLab'}"
         )
-        family = "torus-link" if len(components) > 1 else "torus-knot"
+        if not name_metadata.get("family_hint"):
+            family = "torus-link" if len(components) > 1 else "torus-knot"
     else:
-        label = f"{catalog_id} · KnotPlot {checkpoint_label}"
-        family = "knotplot-relaxed"
+        label = f"{catalog_id} / VortexLab uniform N300"
 
-    d_value = name_metadata["D"]
+    status_val = status
+    warning = (
+        "Not certified as a global ideal/tight or ropelength-minimizing embedding."
+    )
+    ideal = False
+    extra_diag: dict = {}
+    if catalog_status:
+        status_val = catalog_status.get("status", status_val)
+        ideal = bool(catalog_status.get("ideal", False))
+        # Never promote to certified-ideal automatically
+        if status_val == "certified-ideal":
+            status_val = "near-ideal"
+            ideal = False
+        reasons = catalog_status.get("reason") or []
+        if reasons:
+            warning = "; ".join(reasons[:6])
+        extra_diag["catalogStatus"] = {
+            "strict_near_ideal": catalog_status.get("strict_near_ideal"),
+            "epsilon_R": catalog_status.get("epsilon_R"),
+            "reference": catalog_status.get("reference"),
+            "checks": catalog_status.get("checks"),
+        }
+
+    d_value = name_metadata.get("D")
+    if d_value is None:
+        d_value = 1.0
     normalization = {
-        "label": normalization_label,
+        "label": normalization_label or "uniform-N300",
         "D": d_value,
-        "method": (
-            f"KnotPlot fitto mindist {d_value:g}"
-            if d_value is not None
-            else "not encoded in filename"
-        ),
+        "method": "ridgerunner polish + arc-length uniform resample N=300",
         "note": (
-            "KnotPlot mindist normalization; this metadata does not independently "
-            "certify a canonical tube diameter or a global ropelength minimum."
+            "VortexLab discrete centerline; Ridgerunner polish remains the audit "
+            "geometry. Do not re-run Ridgerunner on this uniform file."
         ),
     }
 
@@ -393,15 +488,17 @@ def build_entry(
         "label": label,
         "sourceFile": path.name,
         "sourceSha256": sha256_file(path),
-        "source": "KnotPlot plain-text centerline converted to discrete Fourier series",
-        "sourceFormat": "XYZ vertices; blank lines separate closed components",
-        "generator": "build_knotplot_knots_data.py",
-        "ideal": False,
-        "status": "relaxed-candidate",
-        "warning": (
-            "KnotPlot-relaxed candidate; not certified as a global ideal/tight "
-            "or ropelength-minimizing embedding."
+        "source": (
+            "Ridgerunner polish → uniform arc-length XYZ converted to "
+            "discrete Fourier series"
         ),
+        "sourceFormat": "XYZ vertices; blank lines separate closed components",
+        "sourceRole": "vortexlab-uniform-N300",
+        "polishAudit": polish_audit,
+        "generator": "build_knotplot_knots_data.py",
+        "ideal": ideal,
+        "status": status_val,
+        "warning": warning,
         "family": family,
         "checkpointSteps": checkpoint_steps,
         "normalization": normalization,
@@ -419,6 +516,7 @@ def build_entry(
                 "maxRmsNodeReconstructionError": reconstruction_rms,
                 "fullSpectrum": max_harmonic is None,
             },
+            **extra_diag,
         },
         "components": component_rows,
     }
@@ -482,16 +580,74 @@ def collect_inputs(positional: list[Path], scan: Path | None, glob_pattern: str)
     return unique
 
 
+def resolve_rr_outdir_inputs(outdir: Path) -> tuple[Path, dict | None, str | None]:
+    """Return (uniform_N300.txt, catalog_status, polish_audit_path)."""
+    outdir = outdir.resolve()
+    uniforms = sorted(outdir.glob("*_polish_uniform_N300.txt"))
+    if not uniforms:
+        uniforms = sorted(outdir.glob("*_uniform_N300.txt"))
+    if not uniforms:
+        raise FileNotFoundError(
+            f"{outdir}: no *_polish_uniform_N300.txt (run three-stage + resample first)"
+        )
+    # Prefer uniform matching seed_selection / newest polish
+    status = None
+    status_path = outdir / "catalog_status.json"
+    if status_path.is_file():
+        status = json.loads(status_path.read_text(encoding="utf-8"))
+    primary = None
+    if status and status.get("primary_polish"):
+        polish_stem = Path(status["primary_polish"]).stem
+        for u in uniforms:
+            if polish_stem in u.stem or polish_stem.replace(".metrics", "") in u.name:
+                primary = u
+                break
+            # polish stem without .metrics
+            base = polish_stem.replace(".metrics.json", "").replace(".metrics", "")
+            if base and base in u.stem:
+                primary = u
+                break
+    if primary is None:
+        # Prefer selected seed stem
+        sel_path = outdir / "seed_selection.json"
+        if sel_path.is_file():
+            sel = json.loads(sel_path.read_text(encoding="utf-8"))
+            selected = sel.get("selected")
+            if selected:
+                stem = Path(selected).stem
+                for u in uniforms:
+                    if stem in u.name:
+                        primary = u
+                        break
+    if primary is None:
+        primary = uniforms[-1]
+
+    polish_audit = None
+    # Sibling polish without uniform
+    cand = Path(str(primary).replace("_uniform_N300", "").replace(".txt", ".txt"))
+    # primary is ..._polish_uniform_N300.txt → ..._polish.txt
+    audit = Path(str(primary).replace("_uniform_N300.txt", ".txt"))
+    if audit.is_file():
+        polish_audit = str(audit)
+    return primary, status, polish_audit
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Build/update knotplot_knots_data.js from KnotPlot XYZ exports."
+        description="Build/update knotplot_knots_data.js from KnotPlot/VortexLab XYZ exports."
     )
     parser.add_argument("inputs", nargs="*", type=Path, help="KnotPlot .txt exports")
     parser.add_argument("--scan", type=Path, help="scan this directory")
     parser.add_argument(
         "--glob",
-        default="*_D1_*k.txt",
-        help="glob used with --scan (default: *_D1_*k.txt)",
+        default="*_polish_uniform_N300.txt",
+        help="glob used with --scan (default: *_polish_uniform_N300.txt)",
+    )
+    parser.add_argument(
+        "--from-rr-outdir",
+        type=Path,
+        default=None,
+        help="knots/<id> folder: pick *_polish_uniform_N300.txt + catalog_status.json",
     )
     parser.add_argument(
         "--output",
@@ -521,17 +677,42 @@ def main() -> int:
         help="catalog ID override; valid only with one input",
     )
     parser.add_argument(
+        "--status",
+        default=None,
+        help="override status (relaxed-seed|near-ideal-candidate|near-ideal)",
+    )
+    parser.add_argument(
+        "--catalog-status-json",
+        type=Path,
+        default=None,
+        help="optional catalog_status.json (else read from --from-rr-outdir)",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="replace an existing canonical entry even with an older/unknown checkpoint",
+    )
+    parser.add_argument(
+        "--drop-ids",
+        default="Tlink_6_9,Tknot_6_9",
+        help="comma-separated catalog IDs to remove from the DB (default drops legacy Tlink_6_9)",
     )
     parser.add_argument("--compact", action="store_true", help="compact JSON in JS output")
     parser.add_argument("--dry-run", action="store_true", help="validate without writing")
 
     args = parser.parse_args()
     inputs = collect_inputs(args.inputs, args.scan, args.glob)
-    if not inputs:
-        parser.error("provide input files or use --scan")
+    catalog_status = None
+    polish_audit = None
+    if args.from_rr_outdir is not None:
+        uni, catalog_status, polish_audit = resolve_rr_outdir_inputs(args.from_rr_outdir)
+        inputs = [uni] + inputs
+    if args.catalog_status_json is not None:
+        catalog_status = json.loads(
+            args.catalog_status_json.read_text(encoding="utf-8")
+        )
+    if not inputs and not args.drop_ids:
+        parser.error("provide input files, --scan, or --from-rr-outdir")
     if args.id_override and len(inputs) != 1:
         parser.error("--id is valid only with exactly one input")
     if args.link_subdivisions < 1:
@@ -547,8 +728,15 @@ def main() -> int:
         if max_harmonic < 0:
             parser.error("--max-harmonic must be non-negative")
 
-    database = read_existing_database(args.output)
+    database = read_existing_database(args.output) if args.output.exists() else {}
+    # Always drop legacy bad IDs
+    for bad in [x.strip() for x in (args.drop_ids or "").split(",") if x.strip()]:
+        if bad in database:
+            del database[bad]
+            print(f"removed legacy catalog id: {bad}")
+
     changed = 0
+    default_status = args.status or "relaxed-seed"
 
     for input_path in inputs:
         if not input_path.exists():
@@ -557,12 +745,22 @@ def main() -> int:
         id_override = args.id_override
         if args.keep_checkpoints:
             id_override = input_path.stem
+        # Prefer folder name when from-rr-outdir
+        if args.from_rr_outdir is not None and id_override is None:
+            id_override = args.from_rr_outdir.resolve().name
+
+        status = default_status
+        if catalog_status and catalog_status.get("status"):
+            status = catalog_status["status"]
 
         catalog_id, entry = build_entry(
             input_path,
             max_harmonic=max_harmonic,
             linking_subdivisions=args.link_subdivisions,
             id_override=id_override,
+            status=status,
+            catalog_status=catalog_status,
+            polish_audit=polish_audit,
         )
 
         existing = database.get(catalog_id)
@@ -586,6 +784,7 @@ def main() -> int:
         link_matrix = entry["pairwiseLinking"]["roundedMatrix"]
         print(
             f"{action}: {catalog_id} <- {input_path.name}; "
+            f"status={entry['status']}; "
             f"{entry['componentCount']} components; "
             f"L={entry['L']:.12g}; linking={link_matrix}"
         )

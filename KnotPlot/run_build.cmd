@@ -17,6 +17,7 @@ set "ARG="
 set "SEED_OPT="
 set "MULTISTART="
 set "ALLOW_UNVERIFIED="
+set "CERTIFY="
 
 if not exist "%LNK%" (
   echo ERROR: KnotPlot.lnk not found at "%LNK%"
@@ -61,6 +62,13 @@ if /I "%~1"=="--multistart" (
 )
 if /I "%~1"=="--allow-unverified-topology" (
   set "ALLOW_UNVERIFIED=1"
+  shift
+  goto parse
+)
+if /I "%~1"=="--certify" (
+  set "CERTIFY=1"
+  set "DO_RR=1"
+  set "MULTISTART=1"
   shift
   goto parse
 )
@@ -208,8 +216,52 @@ if defined MULTISTART (
   )
 )
 
+if defined CERTIFY (
+  echo.
+  echo ============================================================
+  echo Resolution ladder N=600 / N=1200 ^(--certify^)
+  echo ============================================================
+  rem Find latest N=300 polish matching selected seed
+  set "POLISH="
+  for %%F in ("!OUTDIR!\!SELECTED:*\=!") do set "SELSTEM=%%~nF"
+  for %%P in ("!OUTDIR!\!SELSTEM!*_polish.txt") do (
+    echo.%%~nxP| findstr /I /C:"uniform" >nul
+    if errorlevel 1 (
+      echo.%%~nxP| findstr /I /C:"N600" /C:"N1200" >nul
+      if errorlevel 1 set "POLISH=%%~fP"
+    )
+  )
+  if not defined POLISH (
+    for %%P in ("!OUTDIR!\*_rr_*_polish.txt") do (
+      echo.%%~nxP| findstr /I /C:"uniform" /C:"N600" /C:"N1200" >nul
+      if errorlevel 1 set "POLISH=%%~fP"
+    )
+  )
+  if not defined POLISH (
+    echo ERROR: no N=300 polish found for resolution ladder
+    exit /b 1
+  )
+  call "%ROOT%ridgerunner\run_resolution_ladder.cmd" "!POLISH!"
+  if errorlevel 1 exit /b 1
+)
+
 echo.
-echo Ridgerunner pipeline finished ^(polish + VortexLab uniform N=300^).
+echo ============================================================
+echo Catalog status + VortexLab JS upsert
+echo ============================================================
+python "%ROOT%ridgerunner\classify_catalog_status.py" "!OUTDIR!"
+if errorlevel 1 (
+  echo ERROR: catalog classify failed
+  exit /b 1
+)
+python "%ROOT%build_knotplot_knots_data.py" --from-rr-outdir "!OUTDIR!" --output "%ROOT%knotplot_knots_data.js" --force
+if errorlevel 1 (
+  echo ERROR: knotplot_knots_data.js upsert failed
+  exit /b 1
+)
+
+echo.
+echo Ridgerunner pipeline finished ^(polish + VortexLab uniform N=300 + catalog^).
 exit /b 0
 
 :resolve_script
@@ -269,7 +321,7 @@ goto :eof
 echo.
 echo Usage: run_build.cmd [options] ^<id^>
 echo.
-echo   id examples: knot_3.1  link_0.2.1  torus_6.9  Tlink_6_9
+echo   id examples: knot_3.1  link_0.2.1  torus_6.9
 echo.
 echo Options:
 echo   /gui                         graphics mode
@@ -278,9 +330,10 @@ echo   -rr / --ridgerunner          select one seed + 3-stage ridgerunner
 echo   --seed analytic or trial_00Nk  force seed
 echo   --multistart                 also run analytic after selected trial
 echo   --allow-unverified-topology  continue if KnotPlot sidecars incomplete
+echo   --certify                    multi-start + N600/N1200 ladder + reclassify
 echo.
 echo Without -rr: KnotPlot only (15k checkpoints, log + sidecars).
-echo With -rr: checkpoint gate picks one trial, 3-stage RR, then
-echo   VortexLab uniform resample (*_polish_uniform_N300.txt + VECT).
-echo   Ridgerunner polish TXT is kept unchanged as audit reference.
+echo With -rr: select one trial, 3-stage RR, VortexLab uniform N=300,
+echo   catalog_status.json, upsert knotplot_knots_data.js.
+echo   Ridgerunner polish TXT stays the audit reference.
 goto :eof

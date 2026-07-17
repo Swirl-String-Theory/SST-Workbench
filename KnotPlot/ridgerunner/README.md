@@ -107,8 +107,13 @@ run_build.cmd knot_4.1 -rr --allow-unverified-topology
 (after `parse_knotplot_log.py`) and sends **one** seed to `run_three_stage.cmd`.
 After polish, stage 4 writes a **separate** VortexLab copy via
 `resample_closed_knot_txt.py --points 300` → `*_polish_uniform_N300.txt`
-(+ VECT). The Ridgerunner `*_polish.txt` is left untouched; do not re-run
-Ridgerunner on the uniform file.
+(+ VECT). Then `classify_catalog_status.py` writes `catalog_status.json` and
+`build_knotplot_knots_data.py --from-rr-outdir` upserts that uniform file into
+`knotplot_knots_data.js`. The Ridgerunner `*_polish.txt` is left untouched.
+
+Catalog statuses: `relaxed-seed` → `near-ideal-candidate` → `near-ideal`
+(optional `run_build … -rr --certify` for multi-start + N600/N1200).
+`certified-ideal` is never automatic. See `KNOTPLOT_KNOTS_DATA_README.md`.
 
 **Robuuste checkpoint-gate (summary):**
 

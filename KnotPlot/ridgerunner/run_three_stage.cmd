@@ -13,7 +13,7 @@ rem Stage 2: -c --EqForceOn     equilateralize + converge (residual 0.01, max 50
 rem Stage 3: -c --EqOn          unbiased polish (residual 0.01, max 20k)
 rem Stage 4: uniform arc-length resample → *_polish_uniform_N300.txt (+ VECT)
 rem
-rem Polish output (*_rr_020k_polish.txt) is the near-ideal Ridgerunner audit.
+rem Polish output (*_rr_020k_polish.txt) is the near-ideal-candidate Ridgerunner audit.
 rem Uniform copy is for VortexLab / solvers — do not re-run Ridgerunner on it.
 
 set "BUNDLE=%~dp0"
