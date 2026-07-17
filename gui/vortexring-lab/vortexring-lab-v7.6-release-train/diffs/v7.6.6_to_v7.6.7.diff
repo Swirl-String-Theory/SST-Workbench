@@ -1,0 +1,276 @@
+--- /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.6/vortexring-lab-v7.6.6.html	2026-07-15 01:44:58.518773669 +0000
++++ /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.7/vortexring-lab-v7.6.7.html	2026-07-15 01:44:58.668829228 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.6 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.6">
++<title>Superfluïde vortexlab v7.6.7 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.7">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.5">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control">
++<meta name="vortexlab-parent" content="7.6.6">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -409,6 +409,19 @@
+   #cards.vl-cards-overlay .mcard .ms{font-size:6.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+   #spark.vl-spark-overlay{position:static!important;flex:0 0 auto;margin:0!important;padding:6px!important;display:block!important;}
+   #spark.vl-spark-overlay canvas{display:block;width:210px;height:auto;max-width:18vw;}
++  .vl-specclock-overlay{flex:0 0 300px;width:min(320px,30vw);padding:7px;display:none;}
++  .vl-specclock-overlay.active{display:block;}
++  .vl-specclock-overlay .vl-info-section-title{margin:0 2px 6px;font-size:8.5px;letter-spacing:.13em;}
++  .vl-specclock-overlay .note{font-size:8px;line-height:1.3;margin:0 0 6px;}
++  .spec-overlay-grid{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:8px;line-height:1.3;}
++  .spec-overlay-grid .k{color:var(--dim);white-space:nowrap;}
++  .spec-overlay-grid .v{text-align:right;white-space:nowrap;color:#EAF2FA;}
++  .spec-clock-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin:8px 0 6px;align-items:center;}
++  .spec-clock-tools > .chk{margin:0;align-self:center;}
++  .spec-clock-tools > button{width:100%;}
++  .spec-clock-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:6px;}
++  .spec-clock-mini-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:6px;}
++  .spec-clock-mini-actions button{width:100%;}
+   .vl-diagnostics-section{margin:0 0 9px;border:1px solid var(--vl-border);border-radius:var(--vl-radius);background:rgba(11,18,35,.5);overflow:hidden;}
+   .vl-diagnostics-heading{min-height:38px;padding:9px 10px;display:flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.11em;color:#F0F6FC;background:rgba(18,29,54,.66);border-bottom:1px solid var(--vl-border);box-shadow:inset 3px 0 0 var(--vl-active);}
+   .vl-diagnostics-body{padding:9px;}
+@@ -436,6 +449,7 @@
+     .vl-live-overlay{flex-basis:270px;width:min(270px,27vw);}
+     #cards.vl-cards-overlay{flex-basis:390px;width:min(430px,43vw);}
+     #spark.vl-spark-overlay canvas{width:180px;}
++    .vl-specclock-overlay{flex-basis:290px;width:min(300px,31vw);}
+   }
+   @media (max-width:980px){
+     .vl-sim-bottom-overlays{left:calc(var(--vl-rail-w) + 8px);right:8px;bottom:8px;overflow-x:auto;padding-bottom:2px;}
+@@ -443,6 +457,7 @@
+     #cards.vl-cards-overlay{flex:0 0 390px;width:390px;}
+     #spark.vl-spark-overlay{flex:0 0 190px;}
+     #spark.vl-spark-overlay canvas{width:176px;max-width:none;}
++    .vl-specclock-overlay{flex:0 0 280px;width:280px;}
+     body.vl-dual-ui #flag{max-width:calc(100vw - 20px);}
+   }
+ 
+@@ -1043,6 +1058,27 @@
+               <button type="button" id="bSpecClockToggle">⚠ Activeer speculative clock</button>
+               <button type="button" id="bSpecClockCalibrate" disabled>◎ Kalibreer fase bij huidige afstand</button>
+             </div>
++            <div class="spec-clock-tools">
++              <button type="button" id="bSpecClockPreset">⏱ Pas swirl-clock sweep-preset toe</button>
++              <label class="chk"><input type="checkbox" id="cSpecClockLog"> auto-log instellingen en events</label>
++              <button type="button" id="bModelLogExportTxt" disabled>Download log.txt</button>
++              <button type="button" id="bSpecPullFromModel">↺ Lees MODEL-waarden in</button>
++            </div>
++            <div class="spec-clock-quick-grid">
++              <div class="ctrl"><label>Δz<sub>AB,0</sub> <span class="v" id="vSpecSepAB">—</span></label>
++                <input type="number" id="sSpecSepAB" min="1" max="1000" step="1" value="840"></div>
++              <div class="ctrl"><label>Δx(B) <span class="v" id="vSpecOffClone">—</span></label>
++                <input type="number" id="sSpecOffClone" min="-1000" max="1000" step="1" value="0"></div>
++              <div class="ctrl"><label>v<sub>z</sub> drift A <span class="v" id="vSpecVzA">—</span></label>
++                <input type="number" id="sSpecVzA" min="-2000" max="2000" step="0.0001" value="0"></div>
++              <div class="ctrl"><label>v<sub>z</sub> drift B <span class="v" id="vSpecVzB">—</span></label>
++                <input type="number" id="sSpecVzB" min="-2000" max="2000" step="0.0001" value="0"></div>
++            </div>
++            <div class="spec-clock-mini-actions">
++              <button type="button" id="bSpecSetApproach">⇄ Zet v<sub>z</sub> A/B naar elkaar toe</button>
++              <button type="button" id="bSpecSetSeparate">⇆ Zet v<sub>z</sub> A/B van elkaar af</button>
++            </div>
++            <div class="note" style="margin-top:6px;">Deze quick-controls spiegelen de hoofdinstellingen onder MODEL · VORTEX + KERN. Gebruik ze voor afstandssweeps en botsingen; alle wijzigingen worden via ModelLog mee gelogd zodra auto-log aan staat.</div>
+             <div class="ctrl"><label for="sSpecClockGain">visuele lag-vergroting <span class="v" id="vSpecClockGain">1×</span></label>
+               <select id="sSpecClockGain">
+                 <option value="1" selected>1× · 10 ppm volle schaal</option>
+@@ -1263,6 +1299,7 @@
+             <option value="stretchGate">🧭 SST stretch-gate · 3-profielenbenchmark</option>
+             <option value="string">🧵 String-theorie schaalprobe · ℓ_P</option>
+             <option value="friction">🌡 T &gt; 0 · ringverval (He-II 1.90 K)</option>
++            <option value="specClock">⏱ SST speculative swirl-clock sweep</option>
+           </select>
+         </div>
+         <div class="run-row">
+@@ -1281,7 +1318,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.6 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.7 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1292,7 +1329,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.6';
++const APP_VERSION='7.6.7';
+ const APP_BASE_VERSION='7.5.3';
+ const APP_PATCH_NOTES=[
+   'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
+@@ -2259,6 +2296,20 @@
+   P.accExp=3; // fysische krimp is µm/s-schaal; 10³× maakt hem zichtbaar
+   syncCoreFlowCoupling('gamma');
+ }
++function applySpecClockPreset(){
++  disableStretchProfileCoupling();
++  P.mode='botsing';P.topo='trefoil';P.inter='bs';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;
++  P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;P.R0=0.07;P.a=1.0e-3;P.nQ=1;
++  P.Om=1;P.revOm=false;P.displayFrame='lab';P.solverFrame='corot';P.bgFlow='none';P.bundleEnabled=false;
++  P.off=0;P.w=0;P.lockVz=false;P.vzA=+0.005;P.vzB=-0.005;P.ccwA=true;P.ccwB=false;P.mirrorB=false;
++  P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=false;P.tracerWrapZ=true;P.tracerSpawnMode='inner-column';
++  P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.specClockDisplayGain=1;P.specClockEnabled=true;
++  setInitialAxialSeparation(Math.min(0.84,maxInitialAxialSeparation()));
++  resetSpecClockRuntime('preset');
++  syncUi();updateSubtitle();resetState();if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
++  if(typeof ModelLog!=='undefined'){ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
++  setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, trefoil, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit, Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe.',true);
++}
+ function applyStretchGatePreset(){
+   P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=R_HORN_SST;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;P.R0=0.07;P.zSolo=0;P.off=0;P.a=1.5e-3;P.nQ=10;
+@@ -2344,6 +2395,28 @@
+   P.zA=mid-.5*applied;P.zB=mid+.5*applied;
+   return applied;
+ }
++function signedMmPerSFromMps(v){return (Number(v)||0)*1e3;}
++function fmtSignedMmPerSInput(v){
++  const x=signedMmPerSFromMps(v);
++  if(!Number.isFinite(x))return '—';
++  return (Math.round(x*10000)/10000).toString().replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1')+' mm/s';
++}
++function syncSpecClockQuickControls(){
++  const sep=document.getElementById('sSpecSepAB'),vSep=document.getElementById('vSpecSepAB');
++  const off=document.getElementById('sSpecOffClone'),vOff=document.getElementById('vSpecOffClone');
++  const vzA=document.getElementById('sSpecVzA'),vA=document.getElementById('vSpecVzA');
++  const vzB=document.getElementById('sSpecVzB'),vB=document.getElementById('vSpecVzB');
++  const cLog=document.getElementById('cSpecClockLog');
++  if(sep){sep.max=(1000*maxInitialAxialSeparation()).toFixed(3);sep.value=(1000*initialAxialSeparation()).toFixed(3).replace(/\.?0+$/,'');}
++  if(vSep)vSep.textContent=fmtLengthSI(initialAxialSeparation());
++  if(off)off.value=(P.off*1000).toFixed(3).replace(/\.?0+$/,'');
++  if(vOff)vOff.textContent=(P.off*1000).toFixed(1).replace(/\.0$/,'')+' mm';
++  if(vzA)vzA.value=signedMmPerSFromMps(P.vzA).toFixed(4).replace(/\.?0+$/,'');
++  if(vA)vA.textContent=fmtSignedMmPerSInput(P.vzA);
++  if(vzB){vzB.value=signedMmPerSFromMps(P.vzB).toFixed(4).replace(/\.?0+$/,'');vzB.disabled=P.mode!=='botsing';}
++  if(vB)vB.textContent=fmtSignedMmPerSInput(P.vzB);
++  if(cLog)cLog.checked=!!(typeof ModelLog!=='undefined'&&ModelLog.enabled);
++}
+ function updateInitialSeparationUi(){
+   const row=document.getElementById('sepABRow'),input=document.getElementById('sSepAB');
+   const value=document.getElementById('vSepAB'),readout=document.getElementById('sepABReadout');
+@@ -2625,6 +2698,34 @@
+   if(!SpecClock.calibrated){status.className='spec-clock-status warn';status.textContent='VELDROUTE ACTIEF · fase-route nog open. Kalibreer bij zo groot mogelijke A–B-afstand; herkalibreer daarna niet tijdens de afstandssweep.';}
+   else if(m.inside){status.className='spec-clock-status good';status.textContent='VOORLOPIG INGESLOTEN · R_AB^phase ligt binnen de formele veld-envelop. Dit is slechts één finite-time datapunt; canonical gates blijven open.';}
+   else{status.className='spec-clock-status bad';status.textContent='NIET INGESLOTEN · de faseproxy valt buiten de formele veld-envelop. Dit falsificeert deze parametercombinatie of de gekozen twee-knoop-superpositie/proxy.';}
++  syncSpecClockQuickControls();
++  updateSpecClockOverlay(m,pre);
++}
++function updateSpecClockOverlay(m,pre){
++  const panel=document.getElementById('specClockOverlay');
++  const body=document.getElementById('specClockOverlayBody');
++  if(!panel||!body)return;
++  const active=P.mode==='botsing'||P.specClockEnabled;
++  panel.classList.toggle('active',active);
++  if(!active){body.innerHTML='<div class="note">Alleen zichtbaar voor botsingsruns of wanneer de speculative klok actief is.</div>';return;}
++  const ct=contactThresholdInfo();
++  const gap=Number.isFinite(lastTopologyGap)?fmtLengthSI(lastTopologyGap):'—';
++  const status=(document.getElementById('specClockStatus')?.textContent||'—').replace(/</g,'&lt;');
++  const dz=fmtLengthSI(initialAxialSeparation()),dx=(P.off*1000).toFixed(1).replace(/\.0$/,'')+' mm';
++  const current=Number.isFinite(m&&m.distance)?fmtLengthSI(m.distance):'—';
++  const logState=(typeof ModelLog!=='undefined'&&ModelLog.enabled)?'aan':'uit';
++  body.innerHTML=`<div class="note"><b>Quick readout.</b> Gebruik dit als compacte simulatoroverlay tijdens afstandssweeps. Belangrijkste sweep-variabelen staan ook in het speculative paneel.</div>
++    <div class="spec-overlay-grid">
++      <div class="k">modus / topologie</div><div class="v">${P.mode} · ${P.topo}</div>
++      <div class="k">medium / interactie</div><div class="v">${P.med} · ${P.inter}</div>
++      <div class="k">kwaliteit / a_sim</div><div class="v">${P.qual} · ${fmtLengthSI(P.a)}</div>
++      <div class="k">Δz_AB,0 / Δx(B)</div><div class="v">${dz} · ${dx}</div>
++      <div class="k">v_z A / v_z B</div><div class="v">${fmtSignedMmPerSInput(P.vzA)} · ${fmtSignedMmPerSInput(P.vzB)}</div>
++      <div class="k">actuele d_AB / clearance</div><div class="v">${current} · ${gap}</div>
++      <div class="k">stopgrens</div><div class="v">${fmtLengthSI(ct.effective)}</div>
++      <div class="k">fasekalibratie / logging</div><div class="v">${SpecClock.calibrated?'ja':'nee'} · ${logState}</div>
++      <div class="k">status</div><div class="v">${status}</div>
++    </div>`;
+ }
+ 
+ function translateCarrier(which,dx,dy,dz){
+@@ -5084,6 +5185,7 @@
+       (rel(P.scaleProbe,R_HORN_SST)<1e-9?'sst':(rel(P.scaleProbe,HE_CORE_REF)<1e-9?'helium':'custom'));
+   }
+   syncDiagnosticToggles();
++  syncSpecClockQuickControls();
+   updateSpecClockDisplay();
+   const gpDeltaText=DELTA.gp.toFixed(6);
+   const gpSel=document.getElementById('gpDeltaSel');if(gpSel){gpSel.value=String(DELTA.gp);gpSel.disabled=P.core!=='gp';}
+@@ -5470,8 +5572,12 @@
+   const liveBlock=document.createElement('section');liveBlock.className='vl-live-overlay vl-overlay-surface';liveBlock.setAttribute('aria-label','Live stabiliteit');
+   const liveTitle=document.createElement('div');liveTitle.className='vl-info-section-title';liveTitle.textContent='LIVE STABILITEIT';liveBlock.appendChild(liveTitle);
+   const stabilityPanel=vlNode('stabilityPanel'),stabilityAdvice=vlNode('stabilityAdvice');vlMove(stabilityPanel,liveBlock);vlMove(stabilityAdvice,liveBlock);
++  const specOverlay=document.createElement('section');specOverlay.className='vl-specclock-overlay vl-overlay-surface';specOverlay.id='specClockOverlay';specOverlay.setAttribute('aria-label','Speculative swirl-clock overlay');
++  const specTitle=document.createElement('div');specTitle.className='vl-info-section-title';specTitle.textContent='SPEC CLOCK QUICK';specOverlay.appendChild(specTitle);
++  const specBody=document.createElement('div');specBody.id='specClockOverlayBody';specOverlay.appendChild(specBody);
+   const cards=vlNode('cards');if(cards){cards.classList.add('vl-cards-overlay','vl-overlay-surface');bottomOverlays.appendChild(cards);}
+   const spark=vlNode('spark');if(spark){spark.classList.add('vl-spark-overlay','vl-overlay-surface');bottomOverlays.appendChild(spark);}
++  bottomOverlays.insertBefore(specOverlay,bottomOverlays.firstChild);
+   bottomOverlays.insertBefore(liveBlock,bottomOverlays.firstChild);
+   shell.appendChild(bottomOverlays);
+ 
+@@ -5860,6 +5966,7 @@
+   else if(preset==='stretchGate'){applyStretchGatePreset();resetState();resetParticlesToTaylorColumn();}
+   else if(preset==='string'){applyStringTheoryPreset();syncUi();updateSubtitle();resetState();}
+   else if(preset==='friction'){applyFrictionPreset();syncUi();updateSubtitle();resetState();}
++  else if(preset==='specClock'){applySpecClockPreset();}
+ });
+ document.getElementById('compA').addEventListener('change',e=>{P.compA=+e.target.value;resetState();});
+ document.getElementById('compB').addEventListener('change',e=>{P.compB=+e.target.value;resetState();});
+@@ -6114,9 +6221,12 @@
+   function updateStats(){
+     const el=document.getElementById('modelLogStats');
+     const btn=document.getElementById('bModelLogExport');
++    const txtBtn=document.getElementById('bModelLogExportTxt');
+     const lost=dropped.actions+dropped.steps+dropped.events;
+     if(el)el.textContent=(enabled?'aan':'uit')+' · '+userActions.length+' acties · '+steps.length+' stappen · '+events.length+' events'+(lost?' · '+lost+' vervallen':'');
+-    if(btn)btn.disabled=!enabled||(!userActions.length&&!steps.length&&!events.length);
++    const dis=!enabled||(!userActions.length&&!steps.length&&!events.length);
++    if(btn)btn.disabled=dis;
++    if(txtBtn)txtBtn.disabled=dis;
+   }
+   function logUser(action,detail){
+     if(!enabled)return;
+@@ -6149,6 +6259,30 @@
+       limits:{maxActions,maxSteps,maxEvents,diagPeriodMs},dropped:Object.assign({},dropped),
+       session,initialP:session.initialP||null,userActions,steps,events,finalP:snapP(),exportedAt:new Date().toISOString()};
+   }
++  function exportText(){
++    const lines=[];
++    lines.push('VortexLab model log');
++    lines.push('session='+session.id);
++    lines.push('version='+APP_VERSION+' base='+APP_BASE_VERSION+' exportedAt='+new Date().toISOString());
++    lines.push('startedAt='+session.startedAt);
++    lines.push('enabled='+(enabled?'true':'false')+' verboseSteps='+(verboseSteps?'true':'false'));
++    lines.push('');
++    lines.push('[initialP]');
++    lines.push(JSON.stringify(session.initialP||null));
++    lines.push('');
++    lines.push('[userActions]');
++    userActions.forEach((r,i)=>lines.push(`${i+1}. wall=${new Date(r.tWall).toISOString()} tPhys=${Number(r.tPhys).toFixed(6)} action=${r.p} detail=${JSON.stringify(r.detail)} P=${JSON.stringify(r.P)}`));
++    lines.push('');
++    lines.push('[events]');
++    events.forEach((r,i)=>lines.push(`${i+1}. wall=${new Date(r.tWall).toISOString()} tPhys=${Number(r.tPhys).toFixed(6)} type=${r.type} detail=${JSON.stringify(r.detail)}`));
++    lines.push('');
++    lines.push('[steps]');
++    steps.forEach((r,i)=>lines.push(`${i+1}. ${JSON.stringify(r)}`));
++    lines.push('');
++    lines.push('[finalP]');
++    lines.push(JSON.stringify(snapP()));
++    return lines.join('\n');
++  }
+   function setEnabled(on){
+     const next=!!on;if(next===enabled){updateStats();return;}
+     if(next){enabled=true;if(!session.initialP)session.initialP=snapP();logEvent('logging-enabled',{verboseSteps});}
+@@ -6159,7 +6293,7 @@
+     const next=enabled&&!!on;if(next===verboseSteps){updateStats();return;}
+     verboseSteps=next;logEvent('verbose-steps',{enabled:verboseSteps});updateStats();
+   }
+-  return {logUser,logEvent,logDiag,logStep,exportJson,setEnabled,setVerbose,get enabled(){return enabled;}};
++  return {logUser,logEvent,logDiag,logStep,exportJson,exportText,setEnabled,setVerbose,get enabled(){return enabled;}};
+ })();
+ 
+ function runtimeFailure(kind,error){

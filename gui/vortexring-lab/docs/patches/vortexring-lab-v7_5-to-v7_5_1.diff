@@ -1,0 +1,1295 @@
+diff --git a/CURSOR-patch-instructies-v7_5_1.md b/CURSOR-patch-instructies-v7_5_1.md
+new file mode 100644
+index 0000000..ce3ee1e
+--- /dev/null
++++ b/CURSOR-patch-instructies-v7_5_1.md
+@@ -0,0 +1,80 @@
++# Cursor-instructies — vortexring-lab v7.5 → v7.5.1
++
++## Bestanden in de patch
++
++De patch hernoemt en actualiseert:
++
++- `vortexring-lab-v7_5.html` → `vortexring-lab-v7_5_1.html`
++- `validate-v7_5.py` → `validate-v7_5_1.py`
++- `release-notes-v7_5.md` → `release-notes-v7_5_1.md`
++- `browser-smoke-v7_5.mjs` → `browser-smoke-v7_5_1.mjs`
++
++Daarnaast wordt dit instructiebestand toegevoegd.
++
++## Toepassen
++
++Maak eerst een commit of reservekopie. Voer daarna vanuit de projectroot uit:
++
++```bash
++git apply --check vortexring-lab-v7_5-to-v7_5_1.diff
++git apply vortexring-lab-v7_5-to-v7_5_1.diff
++```
++
++Bij gebruik van GNU `patch`:
++
++```bash
++patch --dry-run -p1 < vortexring-lab-v7_5-to-v7_5_1.diff
++patch -p1 < vortexring-lab-v7_5-to-v7_5_1.diff
++```
++
++## Statische acceptatie
++
++```bash
++python validate-v7_5_1.py vortexring-lab-v7_5_1.html
++```
++
++Verwacht:
++
++```text
++VALIDATOR: PASS (275 unieke IDs)
++```
++
++De validator moet tevens melden dat `node --check` groen is.
++
++## Browseracceptatie
++
++```bash
++npm i puppeteer
++node browser-smoke-v7_5_1.mjs vortexring-lab-v7_5_1.html
++```
++
++Controleer daarnaast handmatig:
++
++1. Open `vortexring-lab-v7_5_1.html?selftest=1` en bevestig dat T0–T9i groen zijn.
++2. Onder **MODEL → KERN** staan drie afzonderlijke schalen:
++   - `a_sim`: numerieke filament-/contactstraal;
++   - `R_horn`: read-only canonieke waarde `1.409 fm`;
++   - `r_kern`: lege Research-Track invoer.
++3. Voer bij `r_kern` bijvoorbeeld `0.001 fm` in. De waarde moet worden geaccepteerd en kleiner blijven dan `R_horn`.
++4. Voer een waarde ≥ `R_horn` in. De simulator moet de invoer afwijzen en `r_kern` weer onbepaald maken.
++5. Activeer de SST-vortexbundel en de veldkoppeling. Tracers en stroomlijnen moeten dezelfde draairichting en eindige-bundelovergang volgen als de filamenten.
++6. Kies een bundelstraal duidelijk kleiner dan de cilinder. Binnen de bundel is de beweging solid-body; buiten de bundel neemt de azimutale snelheid af als `1/r`.
++7. De zichtbare representatieve lijnen moeten de volledige bundelschijf vullen en niet uitsluitend op de buitenrand liggen.
++8. Controleer de HUD-regels:
++   - `R_horn · r_kern · R_horn/r_kern`;
++   - `ω_c(horn) · Ω_kern · ζ_kern`.
++9. Zonder `r_kern` moeten de kernwaarden `—` tonen; er mag geen fictieve vaste-kernfrequentie uit `R_horn` worden afgeleid.
++10. Controleer de console gedurende minstens tien animatieframes op errors en unhandled rejections.
++
++## Niet accepteren
++
++Accepteer de patch niet wanneer één van de volgende situaties optreedt:
++
++- `RCORE_SST`, `OMEGA_CORE_SST`, `aPhys`, `sAPhys` of `vAPhys` komt nog voor;
++- de UI noemt GP/NLSE “het kernmodel per Canon”;
++- `a_sim`, `r_kern` en `R_horn` worden gelijkgesteld;
++- het bundelveld gebruikt buiten `R_bundle` nog `u_θ=Ωr`;
++- tracers of stroomlijnen missen de bundelbijdrage;
++- de representatieve lijnen vormen nog een cilindrische schil;
++- de simulator beweert dat expliciete verre knooplagen zijn opgelost;
++- een zelftest, validatorcheck of browser-smoke faalt.
+diff --git a/browser-smoke-v7_5.mjs b/browser-smoke-v7_5_1.mjs
+similarity index 42%
+rename from browser-smoke-v7_5.mjs
+rename to browser-smoke-v7_5_1.mjs
+index cd44fed..3bddc27 100644
+--- a/browser-smoke-v7_5.mjs
++++ b/browser-smoke-v7_5_1.mjs
+@@ -1,68 +1,70 @@
+-#!/usr/bin/env node
+-// browser-smoke-v7_5.mjs — lokale browser-smoke voor vortexring-lab-v7.5.
+-// Gebruik:  npm i puppeteer && node browser-smoke-v7_5.mjs [pad-naar-html]
+-// Vereist (conform v7.4b-acceptatie):
+-//   1. ≥10 gerenderde frames zonder console-errors of pageerrors
+-//   2. ?selftest=1 volledig groen, inclusief T0i, T1b en T8
+-//   3. nieuwe HUD-elementen aanwezig (rowGa/hGa, rowEpsRev/hEpsRev/bEpsRev)
+-//   4. frame-toggle raakt de solverkant niet (cBgOmega-stand ongewijzigd)
+-//   5. ε_rev-knop levert een eindige meting bij α=0
+-// De diag-reeksen-vergelijking (identieke ModelLog-diag in beide display-
+-// frames) blijft de gedocumenteerde handmatige check uit de spec.
+-import puppeteer from 'puppeteer';
+-import path from 'node:path';
+-import process from 'node:process';
+-
+-const file = path.resolve(process.argv[2] || 'vortexring-lab-v7_5.html');
+-const url = 'file://' + file + '?selftest=1';
+-const errors = [];
+-let pass = true;
+-const check = (name, ok, detail = '') => {
+-  console.log((ok ? 'PASS  ' : 'FAIL  ') + name + (detail ? '  — ' + detail : ''));
+-  if (!ok) pass = false;
+-};
+-
+-const browser = await puppeteer.launch({ headless: 'new' });
+-const page = await browser.newPage();
+-page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+-page.on('pageerror', e => errors.push(String(e)));
+-
+-await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+-
+-// 1. ≥10 frames
+-const frames = await page.evaluate(() => new Promise(res => {
+-  let n = 0; const tick = () => (++n >= 12 ? res(n) : requestAnimationFrame(tick));
+-  requestAnimationFrame(tick);
+-}));
+-check('≥10 gerenderde frames', frames >= 10, frames + ' frames');
+-check('geen console-/pageerrors', errors.length === 0, errors.slice(0, 3).join(' | ') || 'schoon');
+-
+-// 2. zelftest volledig groen incl. T0i/T1b/T8
+-await page.waitForSelector('#selftestOverlay', { timeout: 30000 });
+-const st = await page.evaluate(() => document.getElementById('selftestOverlay').innerText);
+-check('zelftest zonder ❌', !st.includes('❌'), st.split('\n')[0]);
+-for (const t of ['T0i', 'T1b', 'T8 frame-equivalentie'])
+-  check('zelftest bevat ' + t, st.includes(t));
+-check('zelftestkop meldt v7.5 GESLAAGD', st.includes('ZELFTEST 7.5') && st.includes('GESLAAGD'));
+-
+-// 3. nieuwe HUD-elementen
+-for (const id of ['rowGa', 'hGa', 'rowEpsRev', 'hEpsRev', 'bEpsRev'])
+-  check('HUD-element #' + id, await page.$('#' + id) !== null);
+-
+-// 4. frame-toggle is puur weergave: solverkant (cBgOmega) blijft staan
+-const bgBefore = await page.$eval('#cBgOmega', el => el.checked);
+-await page.click('#frameSeg [data-frame="absolute"]');
+-await page.click('#frameSeg [data-frame="rotating"]');
+-const bgAfter = await page.$eval('#cBgOmega', el => el.checked);
+-check('frame-toggle laat solverkeuze ongemoeid', bgBefore === bgAfter,
+-      'cBgOmega ' + bgBefore + ' → ' + bgAfter);
+-
+-// 5. ε_rev-meting op gebruikersactie
+-await page.click('#bEpsRev');
+-await new Promise(r => setTimeout(r, 500));
+-const eps = await page.$eval('#hEpsRev', el => el.textContent.trim());
+-check('ε_rev geeft eindige meting bij α=0', /e[-+]\d+/i.test(eps), 'hEpsRev=' + eps);
+-
+-await browser.close();
+-console.log(pass ? '\nBROWSER-SMOKE GROEN' : '\nBROWSER-SMOKE ROOD');
+-process.exit(pass ? 0 : 1);
++#!/usr/bin/env node
++// Browser runtime smoke for vortexring-lab v7.5.1.
++// Usage: npm i puppeteer && node browser-smoke-v7_5_1.mjs [path-to-html]
++import puppeteer from 'puppeteer';
++import path from 'node:path';
++import process from 'node:process';
++
++const file = path.resolve(process.argv[2] || 'vortexring-lab-v7_5_1.html');
++const url = 'file://' + file + '?selftest=1';
++const errors = [];
++let pass = true;
++const check = (name, ok, detail = '') => {
++  console.log((ok ? 'PASS  ' : 'FAIL  ') + name + (detail ? '  — ' + detail : ''));
++  if (!ok) pass = false;
++};
++
++const browser = await puppeteer.launch({headless: 'new'});
++const page = await browser.newPage();
++page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
++page.on('pageerror', e => errors.push(String(e)));
++await page.goto(url, {waitUntil: 'networkidle0', timeout: 60000});
++
++const frames = await page.evaluate(() => new Promise(resolve => {
++  let n = 0;
++  const tick = () => (++n >= 12 ? resolve(n) : requestAnimationFrame(tick));
++  requestAnimationFrame(tick);
++}));
++check('≥10 gerenderde frames', frames >= 10, `${frames} frames`);
++check('geen console-/pageerrors', errors.length === 0, errors.slice(0, 3).join(' | ') || 'schoon');
++
++await page.waitForSelector('#selftestOverlay', {timeout: 30000});
++const st = await page.$eval('#selftestOverlay', el => el.innerText);
++check('zelftest zonder ❌', !st.includes('❌'), st.split('\n')[0]);
++for (const marker of [
++  'T0i', 'T0j', 'T0k', 'T1b', 'T8 frame-equivalentie',
++  'T9f', 'T9g', 'T9h', 'T9i'
++]) check('zelftest bevat ' + marker, st.includes(marker));
++check('zelftestkop meldt v7.5.1 GESLAAGD', st.includes('ZELFTEST 7.5.1') && st.includes('GESLAAGD'));
++
++for (const id of [
++  'rowGa', 'hGa', 'rowEpsRev', 'hEpsRev', 'bEpsRev',
++  'rowHornCore', 'hHornCore', 'sRHorn', 'sRCorePhys', 'bundleSourceNote'
++]) check('UI-element #' + id, await page.$('#' + id) !== null);
++
++// Frame toggle remains display-only.
++const bgBefore = await page.$eval('#cBgOmega', el => el.checked);
++await page.click('#frameSeg [data-frame="absolute"]');
++await page.click('#frameSeg [data-frame="rotating"]');
++const bgAfter = await page.$eval('#cBgOmega', el => el.checked);
++check('frame-toggle laat solverkeuze ongemoeid', bgBefore === bgAfter, `cBgOmega ${bgBefore} → ${bgAfter}`);
++
++// Research-Track fixed-core input is separate from R_horn and a_sim.
++await page.$eval('#sRCorePhys', el => {
++  el.value = '0.001 fm';
++  el.dispatchEvent(new Event('change', {bubbles: true}));
++});
++const coreReadout = await page.$eval('#vRCorePhys', el => el.textContent.trim());
++const hornReadout = await page.$eval('#vRHorn', el => el.textContent.trim());
++check('r_kern-invoer geaccepteerd', coreReadout.includes('am') || coreReadout.includes('fm'), `r_kern=${coreReadout}`);
++check('R_horn blijft canoniek 1.409 fm', hornReadout.includes('1.409') && hornReadout.includes('fm'), `R_horn=${hornReadout}`);
++
++// ε_rev remains a user-triggered finite measurement at α=0.
++await page.click('#bEpsRev');
++await new Promise(r => setTimeout(r, 600));
++const eps = await page.$eval('#hEpsRev', el => el.textContent.trim());
++check('ε_rev geeft eindige meting bij α=0', /e[-+]\d+/i.test(eps), `hEpsRev=${eps}`);
++
++await browser.close();
++console.log(pass ? '\nBROWSER-SMOKE GROEN' : '\nBROWSER-SMOKE ROOD');
++process.exit(pass ? 0 : 1);
+diff --git a/release-notes-v7_5.md b/release-notes-v7_5.md
+deleted file mode 100644
+index 183511d..0000000
+--- a/release-notes-v7_5.md
++++ /dev/null
+@@ -1,35 +0,0 @@
+-# Release notes v7.5 — frames ontvlochten (volledige v7.4b-scope)
+-
+-**Basis:** v7.4.2 incl. d34-besluitacties D3/D4. **Bestand:** `vortexring-lab-v7_5.html`. **Naamkeuze:** spec §B.7 liet '7.4b' of '7.5.0-pre' open; op verzoek van Omar is de afgeronde v7.4b-scope uitgeleverd als **v7.5** (`APP_VERSION='7.5'`, `APP_BASE_VERSION='7.4.2'`). De v7.5.x-nummering uit plan v7 (lift-falsificatie enz.) sluit hier gewoon op aan.
+-
+-## Wijzigingen (spec §B.1–B.7)
+-
+-1. **Frame-ontvlechting (§B.1).** `P.solverFrame` ('lab'|'corot'), `P.displayFrame` ('lab'|'corot') en `P.bgFlow` ('none'|'wall'|'bundle') vervangen de dubbele rol van de oude frame-toggle. De identifiers `coRot`, `bgOmegaCoupling` en `bundleFlowCoupling` zijn volledig geretireerd (0 voorkomens; de validator verbiedt ze). De Ω_wall×bundel-exclusiviteit is nu een type-invariant van de bgFlow-enum in plaats van een runtime-guard. De wandadvectie u_bg=Ω×r staat uitsluitend bij `solverFrame='lab'` + `bgFlow='wall'` in het snelheidsveld; de wrijvings-v_n volgt hetzelfde predicaat (§B.1, oude mfRot-logica). Weergavetransformatie: `filGrp` roteert volgens (displayFrame − solverFrame), d.w.z. lab = R(+φ)·corot; alle vier de combinaties zijn correct afgedekt, inclusief de voorheen onbereikbare stand lab-solver + corot-display. ModelLog logt de drie velden apart in elke P-snapshot.
+-2. **Zelftest-T8 · frame-equivalentie (§B.2).** Geperturbeerde ring (N=96, ε=0.05, m=5), 24 LIA-stappen met externe termen, Ω=0.7, dt=min(½·dt_CFL, 0.05/Ω); corot-resultaat teruggeroteerd over φ=Ω·t en knooppuntsgewijs vergeleken. Gemeten in de node-spiegel: **E_frame = 6.6·10⁻⁸** bij φ=1.20 rad — ruim onder de 10⁻⁶-drempel. T9b-gedrag (bgFlow-invariantie) is in de node-regressie uitgebreid: corot+'wall' en lab+'none' zijn bewezen termloos en bit-identiek aan 'none'.
+-3. **ε_rev op gebruikersactie (§B.3).** HUD-rij `rowEpsRev` met knop "meet": 16 CFL-stappen heen + terug op een **kopie** van de actuele toestand met de werkelijk geconfigureerde dynamica (volledige externe termen, huidige interactiekern); relatieve L2-fout over de niet-ghost-filamenten; resultaat naar HUD én ModelLog (`eps-rev`-event). Expliciet 2× rekenwerk, nooit per frame. Bij α≠0 toont de rij '— (α≠0)' met de bestaande antidissipatie-waarschuwing. Momentopname wordt ook genomen bij het inschakelen van achterwaarts integreren. tPhys wordt tijdens de meting niet geadvanceerd: een eventueel tijdsafhankelijke w (Taylor-oscillatie) is bevroren — een tijdsafhankelijke aandrijving zou exacte omkeerbaarheid hoe dan ook breken.
+-4. **g_a = d_min/a (§B.4).** HUD-rij `rowGa`, gevoed uit het bestaande 12-frame-stabiliteitsrapport (`gapRatio`; `minGap` wordt nu mee-geëxporteerd) — géén extra O(N²) per HUD-tick. Exponentieel formaat bij g_a > 10⁶ (SST-schaal), '∞' zolang er geen rapport is.
+-5. **T1b N-sweep (§B.5).** Ringsnelheid bij N=96/192/384. **Eerlijke afwijking van de spec-acceptatie, met meting als grond:** de fout t.o.v. de Kelvin-asymptoot daalt niet monotoon omdat hij bij ~6.5·10⁻⁵ op de C0-kalibratievloer stuit (gemeten: U_∞ − Kelvin ≈ −7.6·10⁻⁵ relatief bij a/R≈1.8·10⁻³; de foutreeks vs Kelvin is 1.24·10⁻⁴ → 6.49·10⁻⁵ → 6.72·10⁻⁵, een tekenpassage door de vloer). Monotonie wordt daarom getest tegen een N=1536-zelfconvergentiereferentie (gemeten: 4.97·10⁻⁵ → 9.4·10⁻⁶ → 7.1·10⁻⁶, monotoon), en de spec-drempel |U(384)−Kelvin|/Kelvin < 10⁻⁴ blijft ongewijzigd staan en wordt gehaald (6.7·10⁻⁵). De motivering staat als commentaar bij de test zelf.
+-6. **D3/D4-acties (§B.6).** De d34-slice zat al in de basis; nieuw is zelftest-**T0i**: de bij scriptparse bevroren opstartdefaults (`P_DEFAULTS`) bewijzen dat een verse start `coreFlowLock=false` heeft en frames corot/corot/none.
+-7. **Provenance (§B.7).** `APP_VERSION='7.5'`, base '7.4.2', meta/title/footnote/patchnotes bijgewerkt; T0 controleert de nieuwe waarden. Validator-variant `validate-v7_5.py`: nieuwe markers (solverFrame-defaults, predicaatfuncties, rowEpsRev/rowGa, T8/T1b/T0i, ModelLog-velden, PKEYS) én verbod op de oude dubbele-rol-identifiers; node --check en unieke-ID-check (269, precies de vijf nieuwe ids bovenop 264). Browser-smoke-script mee-verhoogd: `browser-smoke-v7_5.mjs`.
+-
+-## UI-mapping (ontwerpkeuze, gedocumenteerd)
+-
+-De drie toestandsvelden zijn volledig onafhankelijk; de UI bindt ze bewust als volgt om fysisch identieke duplicaatstanden (lab+'none' ≡ corot+'none' ≡ corot+'wall') niet als schijnkeuzes aan te bieden:
+-- **frameSeg / verborgen checkbox** → uitsluitend `P.displayFrame`. Dit is het acceptatiecriterium: de toggle raakt geen enkel fysica-predicaat en verandert dus per constructie niets aan de ModelLog-diag-reeks (het diag-record bevat alleen solver-grootheden).
+-- **"Achtergrond Ω koppelen"** → aan = (`solverFrame='lab'`, `bgFlow='wall'`); uit = (`solverFrame='corot'`, wall→none). De oude wederzijdse-exclusiviteitsguard met het displayframe is vervallen: lab-solver + corot-display is nu een geldige, bereikbare stand — precies de stand voor de handmatige diag-vergelijking.
+-- **bundelveldkoppeling** → `bgFlow='bundle'`/'none'; overschrijft 'wall' met melding (enum-exclusiviteit).
+-
+-## Observatie buiten scope (beslispunt voor v7.5.x)
+-
+-Het checkboxlabel zegt "koppel coarse-grained bundelveld aan filamenten/**tracers**", maar `stepTracers` en `fieldVelocityAt` (stroomlijnen) sommeren het bundelveld niet — alleen `velocityCore` (filamenten) doet dat. Dit is bestaand v7.4.2-gedrag en is conform de spec ("geen wijziging aan … behalve waar frames expliciet genoemd") ongemoeid gelaten. Beslispunt: label aanpassen óf tracers/stroomlijnen het bundelveld geven.
+-
+-## Validatie
+-
+-- `validate-v7_5.py`: **PASS** (269 unieke IDs, node --check groen, alle markers, verboden identifiers 0×).
+-- Node-fysica-regressie (`extract_core.py` + `regression.cjs`, veldnaam-agnostisch en groen op zowel de d34-basis als deze build): T1 (3 kernen), T1b-sweep, T5-orde, T6-wrijvingsidentiteiten, B1-modusscheiding, B3-ghost-ontkoppeling, wandadvectie exact Ω×r uitsluitend bij lab+'wall', T9a-flux, bundelpredicaat, **T8 E_frame=6.6·10⁻⁸** — alles groen.
+-- **Verplicht aan jouw kant (kan hier niet):** `browser-smoke-v7_5.mjs` (≥10 frames zonder console-errors, `?selftest=1` volledig groen incl. T0i/T1b/T8, nieuwe HUD-rijen, frame-toggle-solverinvariantie, ε_rev-meting) én de handmatige spec-check: ModelLog aan, zelfde run in beide displayframes, identieke diag-reeksen.
+-- Verwacht zichtbaar gedragsverschil t.o.v. v7.4.2: geen — de refactor is gedragsbehoudend voor alle voorheen bereikbare standen; nieuw bereikbaar is alleen lab-solver + corot-display.
+-
+-## Openstaand (plan v7 ongewijzigd)
+-
+-Workbench-hernoeming WB-0.1 + pariteitsgate (D1/D2, parallel toegestaan) · v7.5.1 lift-falsificatie op de bundel (falsificatiecriteria vóór de eerste run) · v7.5.2–5 per ontwerpdoc · v7.6-S Rosetta + radiusDrive + T7.
+diff --git a/release-notes-v7_5_1.md b/release-notes-v7_5_1.md
+new file mode 100644
+index 0000000..e365ae5
+--- /dev/null
++++ b/release-notes-v7_5_1.md
+@@ -0,0 +1,164 @@
++# Release notes v7.5.1 — SST horn/core-scheiding en eindige vortexbundel
++
++**Basis:** v7.5. **Hoofdbestand:** `vortexring-lab-v7_5_1.html`.
++
++Deze correctierelease verandert geen Canon-constanten. Zij herstelt de betekenis van die constanten in de simulator en sluit het achtergrondveld, de visualisatie en de passieve transportdiagnostiek op elkaar aan.
++
++## 1. SST-schaalarchitectuur gecorrigeerd
++
++De simulator onderscheidt nu drie verschillende lengtes:
++
++\[
++R_{\rm horn}=1.40897017\times10^{-15}\ {\rm m},
++\]
++
++de canonieke Compton-locked horn-/circulatieschaal;
++
++\[
++r_{\rm kern}<R_{\rm horn},
++\]
++
++de veel kleinere vaste, rotationele vortexkern uit de Research-Track profielinterpretatie; en
++
++\[
++a_{\rm sim},
++\]
++
++de numerieke regularisatie-, buis- en contactstraal van het centerline-filamentmodel.
++
++Geen van deze drie wordt nog stilzwijgend gelijkgesteld. De oude variabele en UI-benaming `aPhys` is verwijderd. `r_kern` heeft bewust geen verzonnen standaardwaarde: de invoer blijft leeg totdat een onafhankelijke profiel- of variatieafleiding beschikbaar is.
++
++De SST-profielinterpretatie is nu expliciet Rankine-achtig:
++
++\[
++v_\theta(r)=
++\begin{cases}
++\Omega_{\rm kern}r, & 0\le r\le r_{\rm kern},\\[3pt]
++\Gamma/(2\pi r), & r>r_{\rm kern},
++\end{cases}
++\qquad
++\Omega_{\rm kern}=\frac{\Gamma}{2\pi r_{\rm kern}^2}.
++\]
++
++De lokale vorticiteit is in de vaste kern
++
++\[
++\zeta_{\rm kern}=2\Omega_{\rm kern},
++\]
++
++terwijl de buitenstroming klassiek irrotationeel is: \(\nabla\times\mathbf u=0\) voor \(r>r_{\rm kern}\), afgezien van de ingesloten kernsingulariteit/topologie.
++
++`OMEGA_CORE_SST` is verwijderd. De vaste canonieke waarde
++
++\[
++\omega_c=V_{\rm horn}/R_{\rm horn}
++\]
++
++heet nu `OMEGA_COMPTON_SST` en wordt expliciet als horn-/fasefrequentie behandeld, niet als lokale vorticiteit van de vaste kern.
++
++## 2. SST-default en statuslabels
++
++- De SST-start- en bundelpreset gebruiken de vaste/Rankine-filamentclosure (`core='vast'`).
++- GP/NLSE blijft beschikbaar als conditionele alternatieve dun-filamentkalibratie, niet als “kernmodel per Canon”.
++- Het informatiedeel verwijst nu naar **Canon v0.8.20 + Research Track**.
++- De legacy Track-B-notatie \(\xi\leftrightarrow r_c\) wordt niet meer geïnterpreteerd als \(\xi\leftrightarrow R_{\rm horn}\); de nog open profielbrug is \(\xi\leftrightarrow r_{\rm kern}\).
++- De Rankine display-similarity koppelt alleen \(a_{\rm sim}\), \(\Gamma\) en de gekozen macroscopische \(\Omega\). Zij legt geen fysische identificatie met \(r_{\rm kern}\) of \(R_{\rm horn}\) op.
++
++## 3. Eindig vortexbundelveld
++
++De bundelstraal is nu dynamisch consistent met het snelheidsveld. Voor een doorsnede met radius \(R_b(z)\) geldt:
++
++\[
++u_\theta(r,z)=
++\begin{cases}
++\Omega_b(z)r, & r\le R_b(z),\\[3pt]
++\Omega_b(z)R_b(z)^2/r, & r>R_b(z).
++\end{cases}
++\]
++
++Daarmee is de ingesloten circulatie buiten de bundel constant:
++
++\[
++\Gamma_{\rm enc}(z)=2\pi\Omega_b(z)R_b(z)^2.
++\]
++
++De eerdere implementatie gebruikte \(u_\theta=\Omega_b r\) in de gehele cilinder en liet de ingesloten circulatie ten onrechte doorgroeien buiten de gekozen bundelstraal.
++
++Voor splay blijft
++
++\[
++\Omega_b(z)\propto\lambda(z)^{-2},
++\qquad
++R_b(z)\propto\lambda(z),
++\]
++
++zodat \(n_v(z)\pi R_b(z)^2\) en \(\Gamma_{\rm enc}(z)\) constant blijven. Dit blijft een kinematische Research-Track ansatz en geen stationaire Euler/HVBK-drukoplossing.
++
++## 4. Gevulde bundelvisualisatie
++
++De representatieve vortexlijnen liggen niet langer allemaal op één cilindrische schil. Zij worden quasi-uniform over de schijf verdeeld met
++
++\[
++\rho_i=\sqrt{\frac{i+1/2}{N}},
++\qquad
++\theta_i=i\,\pi(3-\sqrt5).
++\]
++
++Daardoor visualiseert de lijnenset dezelfde gevulde doorsnede als de coarse-grained dichtheid \(n_v\pi R_b^2\).
++
++## 5. Eén achtergrondveld voor alle transportpaden
++
++`backgroundVelocityAt()` is nu de gedeelde bron voor:
++
++- filamentdynamica in `velocityCore()`;
++- passieve tracers in `stepTracers()`;
++- stroomlijnen in `fieldVelocityAt()`.
++
++Daarmee tonen tracers en stroomlijnen voortaan hetzelfde bundelveld dat de filamenten aandrijft. De oude toestand waarin alleen de filamenten de SST-bundel voelden is verwijderd.
++
++## 6. Betekenis van de verre bronlagen
++
++De runtimebron is gelabeld als:
++
++```text
++analytic-finite-closed-loop-limit
++```
++
++Dit betekent: een analytische lokale coarse-grained limiet van zeer lange **gesloten** vortexlussen, waarvan de retourpaden ver buiten het simulatiedomein liggen. De simulator beweert niet dat open vortexlijnen uit verre knopen eindigen, en berekent nog geen expliciet Biot–Savartveld van knooplagen bij \(z=\pm L\).
++
++Een toekomstige expliciete bronmodus moet gesloten lussen, retourpaden, bronafstand en een convergentietest tegen het analytische bundelveld bevatten. Deze release voegt daar geen schijnimplementatie voor toe.
++
++## 7. Nieuwe zelftests
++
++- **T0j:** \(R_{\rm horn}\), \(r_{\rm kern}\) en \(a_{\rm sim}\) blijven onderscheiden; de hornlocatie ligt in het irrotationele buitenprofiel.
++- **T0k:** continuïteit van de Rankine-kernsnelheid naar het \(1/r\)-buitenveld en \(\zeta_{\rm kern}=2\Omega_{\rm kern}\).
++- **T9f:** continu snelheidsveld op \(R_b\) en constante buiten-circulatie.
++- **T9g:** gedeeld achtergrondveld voor filament-, tracer- en stroomlijntransport.
++- **T9h:** gevulde-schijfsampling met \(\langle\rho^2\rangle=1/2\).
++- **T9i:** expliciete bronprovenance `analytic-finite-closed-loop-limit`.
++
++Bestaande T0–T9e, T8-frame-equivalentie, ACN-hotfix, ModelLog 0.2, contactvloer en deterministische stepper blijven aanwezig.
++
++## 8. Validatie
++
++Uitgevoerd op de gepatchte build:
++
++```text
++VALIDATOR: PASS (275 unieke IDs)
++node --check: groen
++```
++
++Nog verplicht in een lokale browser/WebGL-omgeving:
++
++```bash
++npm i puppeteer
++node browser-smoke-v7_5_1.mjs vortexring-lab-v7_5_1.html
++```
++
++## 9. Bewuste beperkingen
++
++- `r_kern` is een Research-Track invoer en stuurt de centerline-integrator nog niet.
++- De radiale vaste-kern/irrotationele-profielvergelijking wordt diagnostisch geëvalueerd, niet als resolved PDE opgelost.
++- De verre gesloten bronlussen en fictieve knooplagen worden niet expliciet gediscretiseerd.
++- Splay heeft nog geen drukgesloten continuumoplossing.
++- `a_sim` blijft de straal die de LIA-logaritme, regularisatie, visualisatie en contactdetectie aanstuurt.
+diff --git a/validate-v7_5.py b/validate-v7_5.py
+deleted file mode 100644
+index ceb0ac5..0000000
+--- a/validate-v7_5.py
++++ /dev/null
+@@ -1,77 +0,0 @@
+-#!/usr/bin/env python3
+-"""validate-v7_5.py — statische validator voor vortexring-lab-v7.5 (variant van
+-validate-v7.4.2 conform spec §B.7): nieuwe markers (solverFrame, rowEpsRev, T8),
+-verbod op de oude P.coRot-dubbele-rol-identifiers, node --check, unieke DOM-ids."""
+-import re, subprocess, sys, tempfile, os
+-
+-SRC = sys.argv[1] if len(sys.argv) > 1 else 'vortexring-lab-v7_5.html'
+-html = open(SRC, encoding='utf-8').read()
+-fails = []
+-
+-def check(name, ok, detail=''):
+-    print(('PASS  ' if ok else 'FAIL  ') + name + ('  — ' + detail if detail else ''))
+-    if not ok:
+-        fails.append(name)
+-
+-# 1. provenance
+-check('meta vortexlab-version 7.5', '<meta name="vortexlab-version" content="7.5">' in html)
+-check('meta vortexlab-base 7.4.2', '<meta name="vortexlab-base" content="7.4.2">' in html)
+-check('title bevat v7.5', bool(re.search(r'<title>[^<]*v7\.5[^<]*</title>', html)))
+-check("APP_VERSION='7.5'", "const APP_VERSION='7.5';" in html)
+-check("APP_BASE_VERSION='7.4.2'", "const APP_BASE_VERSION='7.4.2';" in html)
+-check('patch-meta noemt frame-split + t8 + eps-rev + ga + n-sweep',
+-      all(t in html for t in ['frame-split-solver-display-bgflow', 't8-frame-equivalence',
+-                              'eps-rev-on-demand', 'ga-hud', 't1-n-sweep', 'v7.5-validator']))
+-
+-# 2. nieuwe markers (v7.4b §B.7)
+-MARKERS = [
+-    "solverFrame:'corot', displayFrame:'corot', bgFlow:'none',",   # P-defaults
+-    'function bgWallInSolver()',
+-    'function bundleFlowActive()',
+-    'const P_DEFAULTS=Object.freeze(',
+-    'id="rowEpsRev"', 'id="hEpsRev"', 'id="bEpsRev"',
+-    'function measureEpsRev()',
+-    'id="rowGa"', 'id="hGa"',
+-    "add('T8 frame-equivalentie E_frame<1e-6'",
+-    "add('T1b N-sweep 96/192/384",
+-    "add('T0i verse start: coreFlowLock uit, frames corot/corot/none'",
+-    'solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow',  # ModelLog snapP
+-    "'solverFrame','displayFrame','bgFlow'",                                   # zelftest-PKEYS
+-]
+-for m in MARKERS:
+-    check('marker aanwezig: ' + m[:60], m in html)
+-
+-# 3. verbod op de oude dubbele-rol-identifiers (volledig geretireerd)
+-for banned in ['coRot', 'bgOmegaCoupling', 'bundleFlowCoupling']:
+-    n = html.count(banned)
+-    check('verboden identifier afwezig: ' + banned, n == 0, 'gevonden: %d' % n)
+-
+-# 4. bestaande zelftest-familie intact (T0–T9)
+-for t in ["'T0 versie/provenance", "'T1 Kelvin-snelheid", "'T2 segmentafstand",
+-          "'T3a Hopf", "'T3c trefoil", "'T4 batch-invariantie", "'T5 round-trip",
+-          "'T6 wrijving", "'T9a bundel", "'T9c rendering", "'T9d tekeninversie",
+-          "'T9e splay"]:
+-    check('zelftest-marker: ' + t, t in html)
+-
+-# 5. node --check op het inline script
+-m = re.search(r'<script>\s*("use strict";.*?)</script>', html, re.S)
+-check('inline script gevonden', bool(m))
+-if m:
+-    with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as f:
+-        f.write(m.group(1)); tmp = f.name
+-    r = subprocess.run(['node', '--check', tmp], capture_output=True, text=True)
+-    os.unlink(tmp)
+-    check('node --check', r.returncode == 0, (r.stderr or 'groen').strip().splitlines()[0][:120])
+-
+-# 6. unieke DOM-ids — alleen in de statische HTML; het inline script bevat één
+-# bewuste template-herschrijving van #hTitle (met daarin id="hOm") die de
+-# statische span vervángt, dus nooit een levende DOM-dubbeling oplevert.
+-html_only = re.sub(r'<script>\s*"use strict";.*?</script>', '', html, flags=re.S)
+-ids = re.findall(r'\bid="([^"]+)"', html_only)
+-dupes = sorted({i for i in ids if ids.count(i) > 1})
+-check('DOM-ids uniek', not dupes, '%d ids%s' % (len(set(ids)), (', dubbel: ' + ', '.join(dupes)) if dupes else ''))
+-
+-print()
+-if fails:
+-    print('VALIDATOR: FAIL (%d)' % len(fails)); sys.exit(1)
+-print('VALIDATOR: PASS (%d unieke IDs)' % len(set(ids)))
+diff --git a/validate-v7_5_1.py b/validate-v7_5_1.py
+new file mode 100644
+index 0000000..540ed45
+--- /dev/null
++++ b/validate-v7_5_1.py
+@@ -0,0 +1,153 @@
++#!/usr/bin/env python3
++"""Static integrity validator for vortexring-lab v7.5.1.
++
++Checks the v7.5 frame-refactor base plus the v7.5.1 SST horn/core scale
++separation, finite-bundle field, filled-disk sampling, transport parity,
++provenance and inline JavaScript syntax.
++"""
++from __future__ import annotations
++
++import collections
++import pathlib
++import re
++import subprocess
++import sys
++import tempfile
++
++SRC = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "vortexring-lab-v7_5_1.html")
++failures: list[str] = []
++
++
++def check(name: str, ok: bool, detail: str = "") -> None:
++    print(("PASS  " if ok else "FAIL  ") + name + ("  — " + detail if detail else ""))
++    if not ok:
++        failures.append(name)
++
++
++if not SRC.is_file():
++    print(f"FAIL  bestand ontbreekt: {SRC}")
++    raise SystemExit(1)
++
++html = SRC.read_text(encoding="utf-8")
++
++# 1. Provenance
++required = {
++    "meta version": '<meta name="vortexlab-version" content="7.5.1">',
++    "meta base": '<meta name="vortexlab-base" content="7.5">',
++    "runtime version": "const APP_VERSION='7.5.1';",
++    "runtime base": "const APP_BASE_VERSION='7.5';",
++    "patch meta horn/core": "sst-horn-solid-core-separation",
++    "patch meta finite bundle": "finite-bundle-field",
++    "patch meta transport parity": "bundle-tracer-streamline-parity",
++    "footer version": "v7.5.1 · basis v7.5",
++}
++for name, marker in required.items():
++    check(name, marker in html)
++check("title v7.5.1", bool(re.search(r"<title>[^<]*v7\.5\.1[^<]*</title>", html)))
++
++# 2. SST semantic architecture
++markers = [
++    "const R_HORN_SST= 1.40897017e-15;",
++    "const V_HORN_SST= 1.09384563e6;",
++    "const OMEGA_COMPTON_SST = V_HORN_SST/R_HORN_SST;",
++    "rCorePhysical:null,",
++    "function resolvedFixedCoreRadius()",
++    "function sstRankineProfileAtRadius(",
++    "region:'solid-core'",
++    "region:'irrotational-exterior'",
++    "vorticity:0",
++    'id="sRHorn"',
++    'id="sRCorePhys"',
++    "CANON v0.8.20 + RESEARCH TRACK",
++    "P.core='vast';",
++    "T0j SST R_horn/r_kern/a_sim gescheiden",
++    "T0k vaste Rankine-kern sluit continu aan op 1/r-buitenveld",
++]
++for marker in markers:
++    check("SST marker: " + marker[:68], marker in html)
++
++forbidden = [
++    "RCORE_SST",
++    "OMEGA_CORE_SST",
++    "omegaCorePhysical",
++    "aPhys",
++    "sAPhys",
++    "vAPhys",
++    "Kernmodel per Canon: GP/NLSE",
++    "Voor \\(n=1\\) geldt canoniek \\(a=r_c\\)",
++    "CANON v0.8.19",
++]
++for marker in forbidden:
++    check("legacy/overclaim afwezig: " + marker, marker not in html, f"count={html.count(marker)}")
++
++# 3. Finite bundle and common transport field
++bundle_markers = [
++    "const BUNDLE_SOURCE_MODEL='analytic-finite-closed-loop-limit';",
++    "function bundleBaseRadius()",
++    "function bundleRadiusAtZ(z)",
++    "function bundleCirculationAtZ(z)",
++    "function bundleVelocityProfileAt(",
++    "om*Rb*Rb/Math.max(r2,1e-30)",
++    "vorticity:inside?2*om:0",
++    "function backgroundVelocityAt(x,y,z)",
++    "function bundleSampleNormalized(i,n)",
++    "Math.sqrt((j+0.5)/N)",
++    "T9f eindige bundel continu + constante buiten-circulatie",
++    "T9g gedeeld achtergrondveld voor alle transportpaden",
++    "T9h gevulde-schijfsampling",
++    "T9i bronprovenance gesloten-luslimiet",
++]
++for marker in bundle_markers:
++    check("bundel marker: " + marker[:68], marker in html)
++
++# Definition + velocityCore + stepTracers + fieldVelocityAt.
++bg_calls = html.count("backgroundVelocityAt(")
++check("gedeeld achtergrondveld heeft drie gebruikers", bg_calls >= 4, f"definition+calls={bg_calls}")
++check("oude vortexschil-sampling afwezig", "const ang=2*Math.PI*i/target" not in html)
++check("UI noemt filamenten, tracers en stroomlijnen", "filamenten, tracers en stroomlijnen" in html)
++check("UI ontkent expliciete verre-knoopoplossing", "Verre knooplagen worden niet expliciet" in html)
++
++# 4. v7.5 base guards and selftests preserved
++for marker in [
++    "solverFrame:'corot', displayFrame:'corot', bgFlow:'none',",
++    "function bgWallInSolver()",
++    "add('T8 frame-equivalentie E_frame<1e-6'",
++    "add('T1b N-sweep 96/192/384",
++    "add('T9a bundel fluxbehoud (parallel)'",
++    "id=\"rowEpsRev\"",
++    "id=\"rowGa\"",
++    "schema:'vortexlab-model-log/0.2'",
++    "const ACN=ACNpass; // direct na de exacte passage",
++]:
++    check("basis behouden: " + marker[:68], marker in html)
++for banned in ["coRot", "bgOmegaCoupling", "bundleFlowCoupling"]:
++    check("oude frame-id afwezig: " + banned, banned not in html, f"count={html.count(banned)}")
++
++# 5. Static DOM IDs
++markup = html.split("<script", 1)[0]
++ids = re.findall(r'\bid=["\']([^"\']+)["\']', markup)
++counts = collections.Counter(ids)
++dupes = sorted(k for k, n in counts.items() if n > 1)
++check("DOM-ids uniek", not dupes, f"{len(counts)} unieke ids" + (f"; dubbel={dupes}" if dupes else ""))
++
++# 6. Inline JS syntax
++scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, re.S)
++check("inline script aanwezig", bool(scripts))
++if scripts:
++    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as f:
++        f.write(scripts[-1])
++        js_path = pathlib.Path(f.name)
++    try:
++        proc = subprocess.run(["node", "--check", str(js_path)], text=True, capture_output=True)
++        check("node --check", proc.returncode == 0, (proc.stderr or "groen").strip().splitlines()[0][:160] if proc.stderr else "groen")
++    except FileNotFoundError:
++        check("node --check", False, "Node.js ontbreekt")
++    finally:
++        js_path.unlink(missing_ok=True)
++
++print()
++if failures:
++    print(f"VALIDATOR: FAIL ({len(failures)})")
++    raise SystemExit(1)
++print(f"VALIDATOR: PASS ({len(counts)} unieke IDs)")
++print("LET OP: voer ook browser-smoke-v7_5_1.mjs uit; node --check is geen WebGL-runtimebewijs.")
+diff --git a/vortexring-lab-v7_5.html b/vortexring-lab-v7_5_1.html
+similarity index 92%
+rename from vortexring-lab-v7_5.html
+rename to vortexring-lab-v7_5_1.html
+index 2d25488..d7bf189 100644
+--- a/vortexring-lab-v7_5.html
++++ b/vortexring-lab-v7_5_1.html
+@@ -3,10 +3,10 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.5 — frames ontvlochten (v7.4b-scope) · SST vortexbundel</title>
+-<meta name="vortexlab-version" content="7.5">
+-<meta name="vortexlab-base" content="7.4.2">
+-<meta name="vortexlab-patch" content="v7.4.2-d34-decisions,frame-split-solver-display-bgflow,t8-frame-equivalence,eps-rev-on-demand,ga-hud,t1-n-sweep,v7.5-validator">
++<title>Superfluïde vortexlab v7.5.1 — SST horn/core-scheiding · eindige vortexbundel</title>
++<meta name="vortexlab-version" content="7.5.1">
++<meta name="vortexlab-base" content="7.5">
++<meta name="vortexlab-patch" content="sst-horn-solid-core-separation,finite-bundle-field,filled-disk-sampling,bundle-tracer-streamline-parity,canon-v0.8.20-labels,v7.5.1-validator">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -321,7 +321,8 @@
+       <div class="row hidden" id="rowRcap"><span class="lbl">r_cap / 2h_col</span><span class="val" id="hRcap">—</span></div>
+       <div class="row hidden" id="rowGfil"><span class="lbl">Γ filament</span><span class="val" id="hGfil">—</span></div>
+       <div class="row hidden" id="rowGsheet"><span class="lbl">Stewartson/Rossby-proxy q_S</span><span class="val" id="hGsheet">—</span></div>
+-      <div class="row hidden" id="rowOmegas"><span class="lbl">Ω_core · Ω_bundle · Ω_wall</span><span class="val" id="hOmegas">—</span></div>
++      <div class="row hidden" id="rowHornCore"><span class="lbl">R_horn · r_kern · R_horn/r_kern</span><span class="val" id="hHornCore">—</span></div>
++      <div class="row hidden" id="rowOmegas"><span class="lbl">ω_c(horn) · Ω_kern · ζ_kern</span><span class="val" id="hOmegas">—</span></div>
+       <div class="row"><span class="lbl" id="hNvLbl">n_v = 2Ω/κ</span><span class="val" id="hNv">—</span></div>
+       <div class="row hidden" id="rowBundleFlux"><span class="lbl">N_phys(bundle) · profiel</span><span class="val" id="hBundleFlux">—</span></div>
+       <div class="row"><span class="lbl" id="hRLbl">R̄ A / B</span><span class="val" id="hR">—</span></div>
+@@ -374,7 +375,7 @@
+       <h2>KERNMODELLEN</h2>
+       <p>De translatiesnelheid van een dunne ring hangt via één constante af van de kernstructuur:</p>
+       <p>\[ U \;=\; \frac{\Gamma}{4\pi R}\Big[\ln\frac{8R}{a}-\Delta\Big], \qquad \Delta=\begin{cases}\tfrac12 & \text{holle kern (klassiek He-II hollow-core)}\\[2pt] \tfrac14 & \text{vaste kern / Rankine (Kelvin 1867)}\\[2pt] 0.615 & \text{GP/NLSE-kern, } a\to\xi \text{ (Roberts–Grant 1971)}\end{cases} \]</p>
+-      <p>Een vaste kern is dus het snelst, GP het langzaamst; het verschil zit uitsluitend in \(\Delta\). Niet gemodelleerd: kernvolume-verandering bij rek (holle en vaste kern reageren daar verschillend op) en kern-twist.</p>
++      <p>Deze drie Δ-keuzes zijn dun-filamentclosures. Voor de SST-Research-Track default wordt de vaste/Rankine-keuze gebruikt: een rotationele kern r_kern met continu aangesloten irrotationeel 1/r-buitenveld. De radiale kernstructuur wordt niet opgelost; GP/NLSE blijft een conditionele alternatieve kalibratie. Niet gemodelleerd: kernvolume-verandering, kern-twist en een variatie-afleiding van r_kern.</p>
+ 
+       <h2>HELICITEIT &amp; TOPOLOGIE</h2>
+       <p>\[ H=\int \mathbf u\cdot\boldsymbol\omega\,dV \;=\; \Gamma^2\Big(\textstyle\sum_i \mathrm{Wr}_i + 2\!\!\sum_{i<j}\!\mathrm{Lk}_{ij}\Big) \quad\text{(centerline-benadering)}, \]</p>
+@@ -391,14 +392,14 @@
+       <p>Het getoonde rooster is representatief (aantal ∝ Ω), niet op ware dichtheid. De achtergrond is coarse-grained solid-body met \(\boldsymbol\omega_{\mathrm{rel}}=2\Omega\,\hat{\mathbf z}\). Coaxiale dragers zijn invariant onder deze rotatie; alleen bij offset zie je precessie (in het lab-frame).</p>
+ 
+       <h2>SST-SIMILARITEIT EN KERNKOPPELING</h2>
+-      <p>De optionele koppeling gebruikt \[|\Gamma|=2\pi a^2|\Omega|,\qquad u_{\rm core}=|\Gamma|/(2\pi a)=a|\Omega|.\] In SST-modus blijft bovendien \(\Gamma=n\Gamma_0\). De SST-preset start met \(n=1\), \(\Gamma=\Gamma_0\) en \(\Omega=1\,\mathrm{s^{-1}}\); de zichtbare similarity-radius wordt daaruit afgeleid. Bij latere wijziging van \(a\) of \(\Omega\) wordt \(n\) automatisch aangepast. Dit is niet één letterlijk femtometer-grote canonieke kern. Voor \(n=1\) geldt canoniek \(a=r_c\) en \(\Omega_{\rm core}=\Gamma_0/(2\pi r_c^2)\).</p>
++      <p>De optionele koppeling gebruikt uitsluitend de <em>numerieke Rankine display-similarity</em> \[|\Gamma|=2\pi a_{\rm sim}^2|\Omega|,\qquad u_{\rm sim}=|\Gamma|/(2\pi a_{\rm sim}).\] In SST-modus blijft bovendien \(\Gamma=n\Gamma_0\). Deze relationele visualisatieschaal is niet de fysieke vaste kern. De SST-schaalarchitectuur is: \(r_{\rm kern}\) = veel kleinere vaste/rotationele vortexkern, \(R_{\rm horn}\) = canonieke irrotationele circulatie-/envelopschaal, en \(a_{\rm sim}\) = numerieke filament- en contactstraal. Geen van deze drie wordt stilzwijgend gelijkgesteld.</p>
+       <p>Centrum-lock verwijdert na iedere RK4-stap uitsluitend de centroidtranslatie van een drager. De lokale vervorming, rotatie en Biot--Savart-interactie blijven behouden. Met de periodieke z-grens worden passieve tracers exact modulo \(2h\) doorgezet. Een vrij bewegende knoopdrager wordt als één geheel naar de tegenoverliggende zijde vertaald zodra zijn centroid \(z=+h\) of \(z=-h\) passeert; daardoor blijven de gesloten curve en haar topologie intact. Centrum-lock heft alleen de knooptranslatie op, niet de particle-wrap.</p>
+ 
+       <h2>MEDIA</h2>
+       <div class="card"><div class="ct kB">HELIUM-II</div>
+         <p>\(\kappa = h/m_4 = 9.969\times10^{-8}\ \mathrm{m^2\,s^{-1}}\); kernstraal \(a_0\sim 1\ \text{Å}\); \(\rho_s\approx 145\ \mathrm{kg\,m^{-3}}\) (\(T\to0\)). Historisch kernmodel: hol (Rayfield–Reif); modern: GP-achtig.</p></div>
+-      <div class="card"><div class="ct kA">SST <span class="tag">CANON v0.8.19</span></div>
+-        <p>\(\Gamma_0 = 2\pi r_c v_{\circlearrowleft} = 9.68362\times10^{-9}\ \mathrm{m^2\,s^{-1}}\); \(r_c = 1.40897\times10^{-15}\ \mathrm m\); \(v_{\circlearrowleft} = 1.09384563\times10^{6}\ \mathrm{m\,s^{-1}}\); \(\rho_f = 7.0\times10^{-7}\ \mathrm{kg\,m^{-3}}\); \(p_{\circlearrowleft,0}=\tfrac12\rho_f v_{\circlearrowleft}^2 = 4.188\times10^{5}\ \mathrm{Pa}\). Kernmodel per Canon: GP/NLSE.</p></div>
++      <div class="card"><div class="ct kA">SST <span class="tag">CANON v0.8.20 + RESEARCH TRACK</span></div>
++        <p>\(\Gamma_0 = 2\pi R_{\rm horn}v_{\circlearrowleft} = 9.68362\times10^{-9}\ \mathrm{m^2\,s^{-1}}\); \(R_{\rm horn}=1.40897017\times10^{-15}\ \mathrm m\); \(v_{\circlearrowleft}=1.09384563\times10^{6}\ \mathrm{m\,s^{-1}}\). Canon v0.8.20 identificeert \(R_{\rm horn}\) als horn/circulatieschaal, niet als opgeloste buisdikte. In deze Research-Track interpretatie ligt een veel kleinere vaste Rankine-kern \(r_{\rm kern}\) binnen een irrotationele buitenstroming \(v_\theta=\Gamma/(2\pi r)\) voor \(r>r_{\rm kern}\); daar is de klassieke vorticiteit nul. De huidige simulator lost dat radiale profiel niet op: hij gebruikt een centerline-filament met een gekozen \(\Delta\)-closure. GP/NLSE blijft een conditionele alternatieve closure, niet “het kernmodel per Canon”.</p></div>
+       <p><b>Schaalmodel-eerlijkheid.</b> In de sim staat \(a\) op mm-schaal; de echte kern is Å (He-II) resp. fm (SST) — dat gat is niet resolveerbaar in een filamentcode op meterschaal. \(U\) schaalt \(\propto\Gamma\) en slechts logaritmisch met \(a\); de topologische diagnostiek (Wr, Lk, \(H/\Gamma^2\)) is exact schaal-invariant. Kies je een medium, dan is \(\Gamma=n\kappa\) fysisch en staat de tijdversnelling navenant hoog.</p>
+ 
+       <h2>TAYLOR-KOLOM &amp; STEWARTSON (Research Track)</h2>
+@@ -421,7 +422,7 @@
+       <p>De maximaal instelbare kernstraal wordt dynamisch geschat uit de lokale minimale kromtestraal en de doubly-critical zelfafstand. Voor een cirkelring reduceert dit tot de horn-torusgrens \(a_{\max}\approx R\). Deze geometrische zelfcontactgrens is geen geldigheidsgrens van de slanke filamenttheorie: de stabiliteitsmeter hoort al veel eerder oranje of rood te worden.</p>
+ 
+       <h2>χ-FASE / TRACK B <span class="tag">SST-pakket v16B.0, gepatcht</span></h2>
+-      <p>Het χ-fase-pakket (v10B–v16B) volgt Track B: de kernenergie van de unit-GP/NLSE-vortex-ODE. Kernresultaten zoals meegeleverd: \(\alpha_{\rm ring}^{\rm GP}=1.619350923\) (onafhankelijk gereproduceerd sinds v12B.0), \(\beta_{\rm ring}=0.619350923\), en \(\alpha_{\rm ring}-\varphi=+1.32\times10^{-3}\) met \(\varphi=1.6180340\). De Madelung-brug (v16B) sluit gate G5 <em>voorwaardelijk</em>: uitgaand van één coherente single-modulus-envelope volgt \(A=B=C=1\) en daarmee de unit-GP-ODE; de sterkere claim dat dit al uit de bestaande SST-filamentcanon volgt is door het pakket zelf níét gevestigd. Open gates: \(\xi\leftrightarrow r_c\) (G5.4/G7, want \(c_s=c\) is niet afgeleid uit de SST-EoS) en de structurele φ-selector (G6). Expliciet niet gecanoniseerd: \(\alpha_{\rm ring}=\varphi\), \(\xi=r_c\), \(\alpha_{\rm ring}=\alpha_{\rm fs}\).</p>
++      <p>Het χ-fase-pakket (v10B–v16B) volgt Track B: de kernenergie van de unit-GP/NLSE-vortex-ODE. Kernresultaten zoals meegeleverd: \(\alpha_{\rm ring}^{\rm GP}=1.619350923\) (onafhankelijk gereproduceerd sinds v12B.0), \(\beta_{\rm ring}=0.619350923\), en \(\alpha_{\rm ring}-\varphi=+1.32\times10^{-3}\) met \(\varphi=1.6180340\). De Madelung-brug (v16B) sluit gate G5 <em>voorwaardelijk</em>: uitgaand van één coherente single-modulus-envelope volgt \(A=B=C=1\) en daarmee de unit-GP-ODE; de sterkere claim dat dit al uit de bestaande SST-filamentcanon volgt is door het pakket zelf níét gevestigd. Open gates: de legacy-notatie \(\xi\leftrightarrow r_c\) uit het pakket wordt hier niet als \(\xi\leftrightarrow R_{\rm horn}\) gelezen; de nog open profielbrug is \(\xi\leftrightarrow r_{\rm kern}\) (G5.4/G7, want \(c_s=c\) is niet afgeleid uit de SST-EoS) en de structurele φ-selector (G6). Expliciet niet gecanoniseerd: \(\alpha_{\rm ring}=\varphi\), \(\xi=R_{\rm horn}\), \(\alpha_{\rm ring}=\alpha_{\rm fs}\).</p>
+       <p>Relatie tot deze simulator: het kernmodel GP/NLSE gebruikt \(\Delta=0.615\) (Roberts–Grant), afkomstig uit exact dezelfde kern-ODE-familie. Het live ropelength-paneel \(\Lambda=L/(2\tau)\) met \(\tau=\min(r_\kappa,\,d_{\rm dc}/2)\) meet hoe ver de actuele kernlijn van de ideal-geometrie (L_K = 16.371637) af staat — een geometrische diagnose, geen α-afleiding.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+@@ -536,15 +537,18 @@
+           </div></div>
+         <div class="ctrl hidden" id="nqRow"><label>n (quanta) <span class="v" id="vNq">10 → Γ = 10Γ₀</span></label>
+           <input type="number" id="sNq" min="1" max="1000000000" step="1" value="10" title="Default-startwaarde: 10 quanta"></div>
+-        <div class="ctrl" id="coreRadiusRow"><label>kernstraal a_sim <span class="v" id="vA">1.500 mm</span></label>
++        <div class="ctrl" id="coreRadiusRow"><label>numerieke buisstraal a_sim <span class="v" id="vA">1.500 mm</span></label>
+           <input type="number" id="sA" min="1e-15" max="70" step="any" value="1.500"></div>
+-        <div class="ctrl" id="coreRadiusPhysRow"><label>fysieke kernstraal a_phys <span class="v" id="vAPhys">1.409·10⁻¹⁵ m</span></label>
+-          <input type="text" id="sAPhys" inputmode="decimal" value="1.40897e-15" autocomplete="off" aria-label="Fysieke kernstraal in meters">
+-          <div class="note" style="margin-top:3px;">Rosetta-readout (m); stuurt de filamentintegrator niet.</div></div>
++        <div class="ctrl" id="hornRadiusRow"><label>horn/circulatiestraal R_horn <span class="v" id="vRHorn">1.409 fm</span></label>
++          <input type="text" id="sRHorn" value="1.40897017 fm" readonly aria-label="Canonieke SST horn- en circulatiestraal">
++          <div class="note" style="margin-top:3px;">Canon v0.8.20: vaste Compton-locked irrotationele circulatie-/envelopschaal; niet de vaste vortexkern.</div></div>
++        <div class="ctrl" id="coreRadiusPhysRow"><label>vaste vortexkern r_kern <span class="v" id="vRCorePhys">— (niet afgeleid)</span></label>
++          <input type="text" id="sRCorePhys" inputmode="decimal" value="" placeholder="bijv. 0.001 fm; vereist 0 < r_kern < R_horn" autocomplete="off" aria-label="Research-Track straal van de vaste rotationele vortexkern">
++          <div class="note" style="margin-top:3px;">Research-Track profielinvoer; moet kleiner zijn dan R_horn en stuurt de filamentintegrator niet. Zonder onafhankelijke afleiding blijft deze waarde bewust leeg.</div></div>
+         <div class="core-flow-link" id="coreFlowLinkPanel">
+-          <label class="chk"><input type="checkbox" id="cCoreFlowLock"> Koppel kernstraal, circulatie en Ω <span style="opacity:.65">(Rankine display-similarity ansatz)</span></label>
++          <label class="chk"><input type="checkbox" id="cCoreFlowLock"> Koppel a_sim, circulatie en Ω <span style="opacity:.65">(numerieke Rankine display-similarity)</span></label>
+           <div class="core-flow-readout" id="coreFlowReadout">Vrij: a, Γ en Ω zijn onafhankelijk.</div>
+-          <div class="note" style="margin-top:4px;">Bij invoer onder de minimale n=1-similarity-radius wordt de koppeling expliciet ontgrendeld. Koppeling gebruikt de Rankine-identiteit \( |\Gamma|=2\pi a^2|\Omega| \). Voor He-II/SST blijft \(\Gamma=n\kappa\) respectievelijk \(n\Gamma_0\), zodat n automatisch wordt afgerond. Dit is een similarity-scale model, niet de claim dat de cilinderrotatie gelijk is aan de fysieke SST-kernrotatie.</div>
++          <div class="note" style="margin-top:4px;">Bij invoer onder de minimale n=1-similarity-radius wordt de koppeling expliciet ontgrendeld. Koppeling gebruikt de Rankine-identiteit \( |\Gamma|=2\pi a^2|\Omega| \). Voor He-II/SST blijft \(\Gamma=n\kappa\) respectievelijk \(n\Gamma_0\), zodat n automatisch wordt afgerond. Dit koppelt alleen a_sim aan Γ en Ω. Het is geen identificatie van a_sim met r_kern of R_horn en geen claim dat de cilinderrotatie gelijk is aan de fysieke kernrotatie.</div>
+         </div>
+       </div>
+       </div>
+@@ -632,10 +636,11 @@
+               <input type="range" id="sBundleRadiusFrac" min="0.10" max="0.93" step="0.01" value="0.72"></div>
+             <div class="ctrl"><label>zichtbare representatieve lijnen <span class="v" id="vBundleLines">61</span></label>
+               <input type="number" id="sBundleLines" min="7" max="121" step="1" value="61"></div>
+-            <label class="chk"><input type="checkbox" id="cBundleFlow"> koppel coarse-grained bundelveld aan filamenten/tracers</label>
++            <label class="chk"><input type="checkbox" id="cBundleFlow"> koppel eindig coarse-grained bundelveld aan filamenten, tracers en stroomlijnen</label>
++            <div class="note" id="bundleSourceNote" style="margin-top:2px;">Bronclosure: analytische lokale limiet van zeer lange <b>gesloten</b> vortexlussen met retourpaden ver buiten het domein. Verre knooplagen worden niet expliciet door Biot–Savart opgelost en open vortexlijnen worden niet verondersteld.</div>
+           </div>
+           <div class="bundle-readout" id="bundleReadout">—</div>
+-          <div class="note" style="margin-top:5px;">De lijnen zijn een representatieve fluxsampling, niet miljoenen afzonderlijke SST-kernen. Voor splay gebruikt de kinematische ansatz Ω(z)=Ω_ref/λ(z)², zodat n_v(z)A(z) constant blijft. Dit is geen bewezen stationaire Euler/SST-evenwichtstoestand.</div>
++          <div class="note" style="margin-top:5px;">De lijnen vormen een gevulde-schijfsampling van de bundeldoorsnede, niet miljoenen afzonderlijke SST-kernen. Binnen R_bundle geldt u_θ=Ω(z)r; erbuiten behoudt het 1/r-profiel de ingesloten circulatie. Voor splay gebruikt de kinematische ansatz Ω(z)=Ω_ref/λ(z)², zodat n_v(z)A(z) constant blijft. Dit is geen bewezen stationaire Euler/SST-evenwichtstoestand.</div>
+         </div>
+         <div class="ctrl" id="frameRefRow"><label>frame of reference <span class="v" id="vFrameRef">Rotating</span></label>
+           <div class="seg" id="frameSeg">
+@@ -643,7 +648,7 @@
+             <button type="button" class="seg-btn active" data-frame="rotating">Rotating</button>
+           </div>
+           <input type="checkbox" id="cCoRot" checked hidden>
+-          <div class="frame-note">Puur weergave (v7.5: P.displayFrame). Absolute: de flowcilinder en interne vorticiteitslijnen draaien in het lab-frame; de buitenreferentie is verborgen. Rotating: de flowcilinder staat stil en een grotere, fictieve inertiaalcilinder met alleen verticale lijnen beweegt tegengesteld met Ω. Deze keuze raakt de dynamica niet — identieke ModelLog-diag-reeksen in beide standen.</div>
++          <div class="frame-note">Puur weergave (v7.5.1: P.displayFrame). Absolute: de flowcilinder en interne vorticiteitslijnen draaien in het lab-frame; de buitenreferentie is verborgen. Rotating: de flowcilinder staat stil en een grotere, fictieve inertiaalcilinder met alleen verticale lijnen beweegt tegengesteld met Ω. Deze keuze raakt de dynamica niet — identieke ModelLog-diag-reeksen in beide standen.</div>
+         </div>
+         <div class="ctrl" id="vorticityColorRow"><label>kleur verticale vorticiteitslijnen</label>
+           <div class="color-row"><span class="note" id="vVorticityColor">#0F1A29</span><input type="color" id="sVorticityColor" value="#0F1A29" aria-label="Kleur vorticiteitslijnen"></div>
+@@ -680,7 +685,7 @@
+         <label class="chk hidden" id="mirrorRow"><input type="checkbox" id="cMirror"> Mirror B</label>
+         <label class="chk hidden" id="lockVzRow"><input type="checkbox" id="cLockVz" checked> v_z A = B</label>
+         <label class="chk" style="margin-top:6px;"><input type="checkbox" id="cBgOmega"> Achtergrond Ω koppelen</label>
+-        <div class="note" style="margin-top:4px;">Integreer in het lab-solverframe \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) (v7.5: solverFrame='lab', bgFlow='wall') i.p.v. frame-splitsing (solverFrame='corot') — fysisch identiek voor deze achtergrond (zelftest-T8), maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking. Het displayframe staat hier los van.</div>
++        <div class="note" style="margin-top:4px;">Integreer in het lab-solverframe \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) (v7.5.1: solverFrame='lab', bgFlow='wall') i.p.v. frame-splitsing (solverFrame='corot') — fysisch identiek voor deze achtergrond (zelftest-T8), maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking. Het displayframe staat hier los van.</div>
+       </div>
+       </div>
+     </details>
+@@ -719,7 +724,7 @@
+               <span>α_ring^GP (v12B/v16B)</span><span>1.6193509</span>
+               <span>φ · (α_ring − φ)</span><span>1.6180340 · +1.32·10⁻³</span>
+             </div>
+-            <div class="note" style="margin-top:6px;">Λ en τ komen live uit de huidige kernlijngeometrie van drager A (τ = min. kromtestraal vs. halve doubly-critical afstand, inclusief afstand tussen componenten). Referentie L_K = 16.371637 is de ideal-3₁-ropelength in diameter-eenheden (Gilbert). α_ring^GP is de dimensieloze ringconstante van de unit-GP/NLSE-vortex-ODE uit het χ-fase-pakket — hetzelfde kern-ODE-gezin als kernmodel GP/NLSE (Δ = 0.615, Roberts–Grant 1971). Gate-status v16B.0: G5 voorwaardelijk gesloten binnen de single-modulus-Madelung-sector; open: ξ↔r_c (G5.4/G7) en de φ-selector (G6). <b>Niet gecanoniseerd:</b> α_ring = φ, ξ = r_c, α_ring = α_fs. Deze sim leidt niets over α af; het paneel toont de pakketstatus naast live meetbare knoopgeometrie.</div>
++            <div class="note" style="margin-top:6px;">Λ en τ komen live uit de huidige kernlijngeometrie van drager A (τ = min. kromtestraal vs. halve doubly-critical afstand, inclusief afstand tussen componenten). Referentie L_K = 16.371637 is de ideal-3₁-ropelength in diameter-eenheden (Gilbert). α_ring^GP is de dimensieloze ringconstante van de unit-GP/NLSE-vortex-ODE uit het χ-fase-pakket — hetzelfde kern-ODE-gezin als kernmodel GP/NLSE (Δ = 0.615, Roberts–Grant 1971). Gate-status v16B.0: G5 voorwaardelijk gesloten binnen de single-modulus-Madelung-sector; open: de profielbrug ξ↔r_kern (legacy ξ↔r_c; G5.4/G7) en de φ-selector (G6). <b>Niet gecanoniseerd:</b> α_ring = φ, ξ = R_horn, α_ring = α_fs. Deze sim leidt niets over α af; het paneel toont de pakketstatus naast live meetbare knoopgeometrie.</div>
+           </div>
+         </details>
+       </div>
+@@ -845,7 +850,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.5 · basis v7.4.2 (incl. d34-besluiten D3/D4) · frames ontvlochten: solverFrame/displayFrame/bgFlow onafhankelijk (bgFlow-enum = exclusiviteits-invariant) · zelftest-T8 frame-equivalentie + T1b N-sweep · ε_rev op gebruikersactie · g_a=d_min/a in de HUD · zelftest ?selftest=1.
++      v7.5.1 · basis v7.5 · SST-schaalscheiding R_horn / r_kern / a_sim · vaste Rankine-kern als Research Track, irrotationele 1/r-hornomgeving · eindige bundel met 1/r-buitenveld · gevulde-schijfsampling · identiek achtergrondveld voor filamenten, tracers en stroomlijnen · zelftests T0–T9i · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -855,13 +860,14 @@
+ <script src="ideal_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.5';
+-const APP_BASE_VERSION='7.4.2';
++const APP_VERSION='7.5.1';
++const APP_BASE_VERSION='7.5';
+ const APP_PATCH_NOTES=[
+-  'v7.4.2 merge basis behouden (bundel-researchtrack, guards, T9a–e) incl. d34-besluitacties D3/D4',
+-  'Frame-ontvlechting: P.solverFrame/P.displayFrame/P.bgFlow vervangen de dubbele rol van de oude frame-toggle; bgFlow-enum maakt de Ω_wall×bundel-exclusiviteit een type-invariant',
+-  'Zelftest-T8 frame-equivalentie (lab vs corot solverframe, E_frame<1e-6) en T1b N-sweep (96/192/384)',
+-  'ε_rev-round-tripmeting op expliciete gebruikersactie; g_a=d_min/a uit het 12-frame-stabiliteitsrapport'
++  'SST-schaalscheiding: R_horn is de canonieke irrotationele circulatie-/envelopschaal; r_kern is een afzonderlijke, kleinere vaste Rankine-kern en blijft Research-Track invoer',
++  'a_sim blijft uitsluitend de numerieke filament-/contactstraal; oude a_phys/RCORE/OMEGA_CORE-semantie is verwijderd',
++  'Eindige uniforme bundel: solid-body binnen R_bundle, constante ingesloten circulatie en 1/r-buitenveld; gevulde-schijfsampling i.p.v. een vortexschil',
++  'Eén gedeelde backgroundVelocityAt() voor filamenten, tracers en stroomlijnen; analytische bundel is gelabeld als lokale coarse-grained gesloten-luslimiet, niet als expliciet opgeloste verre knooplagen',
++  'Validator en browser-smoke uitgebreid met T0j/T0k en T9f–T9i'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -1084,14 +1090,15 @@ function topologyComponentCount(){ return topologyInfo().components || 1; }
+ 
+ // ================= parameters & state =================
+ const KAPPA_HE  = 9.9693e-8;      // m^2/s  (h/m4)
+-const GAMMA0_SST= 9.683619e-9;    // m^2/s  (2*pi*r_c*v_swirl, Canon v0.8.20; waarde ongewijzigd)
+-const RCORE_SST = 1.40897017e-15; // m, canonical SST core radius
+-const VSWIRL_SST= 1.09384563e6;   // m/s, canonical SST swirl speed
+-const OMEGA_CORE_SST = GAMMA0_SST/(2*Math.PI*RCORE_SST*RCORE_SST);
++const R_HORN_SST= 1.40897017e-15; // m, canonieke Compton-locked horn/circulatiestraal; geen vaste kernradius
++const V_HORN_SST= 1.09384563e6;    // m/s, canonieke tangentiële snelheid op R_horn voor één Γ0
++const GAMMA0_SST= 9.683619e-9;     // m^2/s, 2*pi*R_horn*V_horn (Canon v0.8.20)
++const OMEGA_COMPTON_SST = V_HORN_SST/R_HORN_SST; // s^-1, fase-/turnoverfrequentie op R_horn; geen lokale vorticiteit
++const BUNDLE_SOURCE_MODEL='analytic-finite-closed-loop-limit';
+ const C0        = 0.1395;         // gemeten discretisatieconstante Schwarz-schema
+ const DELTA     = {hol:0.5, vast:0.25, gp:0.615};
+ const P = {
+-  mode:'solo', topo:'trefoil', inter:'lia', core:'gp', med:'sst', qual:'hoog',
++  mode:'solo', topo:'trefoil', inter:'lia', core:'vast', med:'sst', qual:'hoog',
+   Om:1.0, OmBundle:1.0, GaDemo:2.0, nQ:10, a:1.2415e-4, off:0.0, w:0.0, accExp:0.3,
+   // v7.5 (v7.4b §B.1): frame-ontvlechting — drie onafhankelijke velden vervangen
+   // de dubbele rol van de oude frame-toggle. solverFrame bepaalt de betekenis
+@@ -1113,14 +1120,15 @@ const P = {
+   autoRelax:false, timeReverse:false,
+   // D4 (2026-07-14): display-similarity is opt-in, geen stilzwijgende GP/SST-kernfysica.
+   coreFlowLock:false,
+-  aPhys:RCORE_SST,
++  // r_kern is de nog niet canoniek afgeleide vaste/rotationele kernstraal; null = bewust onbepaald.
++  rCorePhysical:null,
+   centerLock:true, tracerWrapZ:true, vorticityLineColor:'#0F1A29',
+-  bundleEnabled:false, bundleProfile:'parallel', bundleSplay:0.45, bundleRadiusFrac:0.72, bundleVisualLines:61,
++  bundleEnabled:false, bundleProfile:'parallel', bundleSplay:0.45, bundleRadiusFrac:0.72, bundleVisualLines:61, bundleSourceModel:BUNDLE_SOURCE_MODEL,
+   dvSeparatrix:true, dvColumn:true, dvCaps:true, dvStewartson:true, dvOpacity:1.0
+ };
+ // v7.5: bevroren opstartdefaults voor zelftest-T0i (D4: verse start heeft de
+ // kernkoppeling uit; frames starten ontvlochten in corot/corot/none).
+-const P_DEFAULTS=Object.freeze({coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow});
++const P_DEFAULTS=Object.freeze({core:P.core,rCorePhysical:P.rCorePhysical,coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow});
+ // v7.5-framepredicaten. De wandadvectie u_bg=Ω×r staat alleen in het lab-
+ // solverframe met bgFlow='wall' expliciet in het snelheidsveld; in het
+ // co-roterende solverframe is de wand in rust en bestaat er geen term.
+@@ -1180,12 +1188,34 @@ function contactThresholdInfo(){
+   const numerical=CONTACT_ULP_FACTOR*Number.EPSILON*scale;
+   return {physical,numerical,effective:Math.max(physical,numerical),floorActive:numerical>physical};
+ }
++function resolvedFixedCoreRadius(){
++  const r=Number(P.rCorePhysical);
++  return Number.isFinite(r)&&r>0&&r<R_HORN_SST?r:NaN;
++}
++function sstRankineProfileAtRadius(r,gamma=Math.abs(Gamma()),rCore=resolvedFixedCoreRadius()){
++  const rr=Math.abs(Number(r));
++  if(!(rr>=0)||!(gamma>=0)||!Number.isFinite(rCore)||!(rCore>0))
++    return {region:'unresolved',vTheta:NaN,omegaAngular:NaN,vorticity:NaN};
++  const omegaCore=gamma/(2*Math.PI*rCore*rCore);
++  if(rr<=rCore)return {region:'solid-core',vTheta:omegaCore*rr,omegaAngular:omegaCore,vorticity:2*omegaCore};
++  const vTheta=gamma/(2*Math.PI*Math.max(rr,1e-300));
++  return {region:'irrotational-exterior',vTheta,omegaAngular:vTheta/Math.max(rr,1e-300),vorticity:0};
++}
++function fixedCoreDiagnostics(){
++  const r=resolvedFixedCoreRadius();
++  if(!Number.isFinite(r))return {r:null,omega:null,vorticity:null,boundarySpeed:null,ratio:null};
++  const p=sstRankineProfileAtRadius(r,Math.abs(Gamma()),r);
++  return {r,omega:p.omegaAngular,vorticity:p.vorticity,boundarySpeed:p.vTheta,ratio:R_HORN_SST/r};
++}
+ function buildDiagRecord(Wr,Lk,ACN,sA){
+-  const ct=contactThresholdInfo();
+-  return {t:tPhys,Wr,Lk,ACN,RA:sA.R,zA:sA.z,a:P.a,aSim:P.a,aPhys:P.aPhys,
++  const ct=contactThresholdInfo(),core=fixedCoreDiagnostics();
++  return {t:tPhys,Wr,Lk,ACN,RA:sA.R,zA:sA.z,a:P.a,aSim:P.a,
++    rHornCanonical:R_HORN_SST,rCorePhysical:core.r,
++    omegaComptonHorn:OMEGA_COMPTON_SST,omegaFixedCore:core.omega,vorticityFixedCore:core.vorticity,
+     mfA:P.mfAlpha,mfAp:P.mfAlphaP,vn:P.vnZ,
+-    omegaCore:omegaCorePhysical(),omegaBundle:P.OmBundle,omegaWall:P.Om,
+-    bundleEnabled:P.bundleEnabled,bundleProfile:P.bundleProfile,bundleDensityMid:bundleDensityAtZ(0),
++    omegaBundle:P.OmBundle,omegaWall:P.Om,
++    bundleEnabled:P.bundleEnabled,bundleProfile:P.bundleProfile,bundleSourceModel:P.bundleSourceModel,
++    bundleDensityMid:bundleDensityAtZ(0),bundleRadiusMid:bundleRadiusAtZ(0),
+     contactThreshold:ct.effective,contactFloorActive:ct.floorActive};
+ }
+ 
+@@ -1195,11 +1225,6 @@ function bundleQuantum(){
+   if(P.med==='he')return KAPPA_HE;
+   return Math.max(1e-30,Math.abs(Gamma()));
+ }
+-function omegaCorePhysical(){
+-  if(P.med==='sst')return OMEGA_CORE_SST;
+-  const aPhys=Math.max(1e-30,Number.isFinite(P.aPhys)?Math.abs(P.aPhys):Math.abs(P.a));
+-  return Math.abs(Gamma())/(2*Math.PI*aPhys*aPhys);
+-}
+ function bundleScaleAtU(u){
+   const q=clamp(Number(u)||0,0,1),s=clamp(Number(P.bundleSplay)||0,0,1.4);
+   if(P.bundleProfile==='splay')return Math.max(0.15,1+s*(q-0.5));
+@@ -1219,16 +1244,42 @@ function bundleOmegaAtZ(z){
+ }
+ function bundleDensityAtZ(z){return 2*Math.abs(bundleOmegaAtZ(z))/bundleQuantum();}
+ function bundleReferenceRadius(){return clamp(P.bundleRadiusFrac,0.10,0.93)*P.Rcyl;}
++function bundleBaseRadius(){
++  const ex=bundleScaleExtrema();
++  return bundleReferenceRadius()/Math.max(ex.hi,1e-12);
++}
++function bundleRadiusAtZ(z){return bundleBaseRadius()*bundleScaleAtU(bundleUFromZ(z));}
++function bundleCirculationAtZ(z){
++  const Rb=bundleRadiusAtZ(z),om=bundleOmegaAtZ(z);
++  return 2*Math.PI*om*Rb*Rb;
++}
+ function bundlePhysicalCountAtZ(z){
+-  const u=bundleUFromZ(z),ex=bundleScaleExtrema();
+-  const baseR=bundleReferenceRadius()/Math.max(ex.hi,1e-12);
+-  const r=baseR*bundleScaleAtU(u);
++  const r=bundleRadiusAtZ(z);
+   return bundleDensityAtZ(z)*Math.PI*r*r;
+ }
+-function bundleVelocityAt(x,y,z){
+-  if(!bundleFlowActive())return {ux:0,uy:0,uz:0,omega:0};
+-  const om=bundleOmegaAtZ(z);
+-  return {ux:-om*y,uy:om*x,uz:0,omega:om};
++function bundleVelocityProfileAt(x,y,z,active=bundleFlowActive()){
++  if(!active)return {ux:0,uy:0,uz:0,omega:0,vorticity:0,inside:false,radius:bundleRadiusAtZ(z)};
++  const om=bundleOmegaAtZ(z),Rb=Math.max(1e-30,bundleRadiusAtZ(z));
++  const r2=x*x+y*y,inside=r2<=Rb*Rb;
++  // Uniform-vorticity bundle inside; irrotational 1/r exterior with exactly
++  // the same enclosed circulation Γ_enc=2πΩR_b² outside.
++  const coeff=inside?om:om*Rb*Rb/Math.max(r2,1e-30);
++  return {ux:-coeff*y,uy:coeff*x,uz:0,omega:inside?om:coeff,
++    vorticity:inside?2*om:0,inside,radius:Rb};
++}
++function bundleVelocityAt(x,y,z){return bundleVelocityProfileAt(x,y,z,bundleFlowActive());}
++function backgroundVelocityAt(x,y,z){
++  let ux=0,uy=0,uz=0;
++  if(bgWallInSolver()){ux+=-P.Om*y;uy+=P.Om*x;}
++  if(bundleFlowActive()){
++    const ub=bundleVelocityProfileAt(x,y,z,true);ux+=ub.ux;uy+=ub.uy;uz+=ub.uz;
++  }
++  return {ux,uy,uz};
++}
++function bundleSampleNormalized(i,n){
++  const N=Math.max(1,Math.round(n)),j=clamp(Math.round(i),0,N-1);
++  const rho=Math.sqrt((j+0.5)/N),theta=j*Math.PI*(3-Math.sqrt(5));
++  return {rho,theta};
+ }
+ function bundleMaxOmega(){
+   if(!bundleFlowActive())return 0;
+@@ -1433,32 +1484,32 @@ function updateCoreFlowReadout(){
+   if(!panel||!out)return;
+   panel.classList.toggle('active',P.coreFlowLock);
+   const gamma=Math.abs(Gamma());
+-  const uCore=gamma/(2*Math.PI*Math.max(P.a,1e-30));
+-  const omCore=gamma/(2*Math.PI*Math.max(P.a*P.a,1e-30));
++  const uSim=gamma/(2*Math.PI*Math.max(P.a,1e-30));
++  const omSim=gamma/(2*Math.PI*Math.max(P.a*P.a,1e-30));
+   if(!P.coreFlowLock){
+     const notice=coreFlowNotice?` · ${coreFlowNotice}`:'';
+-    out.textContent=`Vrij · Γ=${fmtGamma(gamma)} m²/s · a=${fmtLengthSI(P.a)} · u_core≈${fmtSpeed(uCore)} · Ω_core≈${omCore.toExponential(3)} s⁻¹${notice}`;
++    out.textContent=`Vrij · Γ=${fmtGamma(gamma)} m²/s · a_sim=${fmtLengthSI(P.a)} · u_sim≈${fmtSpeed(uSim)} · Ω_sim≈${omSim.toExponential(3)} s⁻¹${notice}`;
+     return;
+   }
+   const ratio=coreFlowRatio();
+   const quant=P.med==='sst'?` · n=${P.nQ.toLocaleString('nl-NL')} Γ₀`:P.med==='he'?` · n=${P.nQ.toLocaleString('nl-NL')} κ`:'';
+-  const canon=P.med==='sst'?` · canon n=1: r_c=${RCORE_SST.toExponential(3)} m, Ω_core=${OMEGA_CORE_SST.toExponential(3)} s⁻¹`:'';
++  const canon=P.med==='sst'?` · R_horn=${R_HORN_SST.toExponential(3)} m · r_kern=${Number.isFinite(resolvedFixedCoreRadius())?fmtLengthSI(resolvedFixedCoreRadius()):'onbepaald'}`:'';
+   const ratioText=Number.isFinite(ratio)?ratio.toFixed(5):'—';
+-  out.textContent=`GEKOPPELD · Γ=${fmtGamma(gamma)} m²/s${quant} · a=${fmtLengthSI(P.a)} · Ω=${Math.abs(P.Om).toFixed(3)} s⁻¹ · |Γ|/(2πa²|Ω|)=${ratioText}${canon}`;
++  out.textContent=`GEKOPPELD · Γ=${fmtGamma(gamma)} m²/s${quant} · a_sim=${fmtLengthSI(P.a)} · Ω=${Math.abs(P.Om).toFixed(3)} s⁻¹ · |Γ|/(2πa_sim²|Ω|)=${ratioText}${canon}`;
+ }
+ function applySSTSimilarityPreset(){
+   // Zichtbare similarity-scale: behoud de canonieke kwantisatie Γ=nΓ₀ en
+   // de Rankine-verhouding Γ=2πa²Ω, zonder de fysische femtometerkern in
+   // een meterschaal-visualisatie te pretenderen te resolven.
+   P.med='sst';
+-  P.core='gp';
++  P.core='vast';
+   P.coreFlowLock=true; // D4: expliciete similarity-preset-keuze
+   if(window.ModelLog&&ModelLog.logUser)ModelLog.logUser('coreFlowLock-preset',{value:true});
+   P.Om=1.0; P.revOm=false;
+   P.nQ=1;
+-  P.aPhys=RCORE_SST;
++  P.rCorePhysical=null;
+   P.displayFrame='corot';P.solverFrame='corot';P.bgFlow='none';
+-  P.bundleEnabled=false;
++  P.bundleEnabled=false;P.bundleSourceModel=BUNDLE_SOURCE_MODEL;
+   // Behoud eerst de canonieke enkelvoudige circulatie Γ₀ en leid de
+   // zichtbare similarity-radius af uit Γ₀=2πa²Ω.
+   syncCoreFlowCoupling('gamma');
+@@ -1467,7 +1518,7 @@ function applySSTSimilarityPreset(){
+ function applySSTBundlePreset(){
+   P.mode='solo';P.topo='ring';P.inter='lia';P.qual='hoog';DELTA.gp=0.615;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+-  P.med='sst';P.core='gp';P.coreFlowLock=false;P.aPhys=RCORE_SST;
++  P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;
+   P.Om=0;P.revOm=false;P.displayFrame='lab';P.solverFrame='corot';P.bgFlow='bundle';
+   P.OmBundle=1;P.revOmBundle=false;P.bundleEnabled=true;P.bundleProfile='parallel';
+   P.bundleSplay=0.45;P.bundleRadiusFrac=0.72;P.bundleVisualLines=61;
+@@ -1477,8 +1528,8 @@ function applySSTBundlePreset(){
+   rebuildLattice();syncUi();updateSubtitle();
+ }
+ function applyDefaultStartup(){
+-  // Requested baseline: one built-in ideal trefoil, SST medium, GP/NLSE core and local induction.
+-  P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';DELTA.gp=0.615;
++  // Baseline: ideal trefoil, SST medium, vaste/Rankine Research-Track kernclosure en LIA.
++  P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.core='vast';DELTA.gp=0.615;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+   P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+   P.timeReverse=false;P.autoRelax=false;P.centerLock=true;
+@@ -1827,13 +1878,9 @@ function velocityCore(Yv,fl,OUT,liaOnly,options={}){
+         const carrier=fl[ft].carrier||'A';
+         const zBias=effectiveW()+carrierAxialDrift(carrier);
+         uz+=zBias;
+-        if(bgWall&&!fl[ft].ghost){
+-          ux+=-P.Om*py;
+-          uy+= P.Om*px;
+-        }
+-        if(bundleOn){
+-          const ub=bundleVelocityAt(px,py,pz);
+-          ux+=ub.ux;uy+=ub.uy;
++        if(!fl[ft].ghost&&(bgWall||bundleOn)){
++          const ubg=backgroundVelocityAt(px,py,pz);
++          ux+=ubg.ux;uy+=ubg.uy;uz+=ubg.uz;
+         }
+       }
+       if(!liaOnly){
+@@ -2441,7 +2488,7 @@ function updateStabilityDisplay(rep){
+   const coreStat=worstStatus(rep.curvatureScore,rep.coreScore,rep.gapScore);
+   const meshStat=worstStatus(rep.meshScore,rep.curvatureScore,rep.coreScore);
+   const gapStat=statusFromScore(rep.gapScore),boundStat=statusFromScore(rep.boundaryScore),perfStat=capacityStatusFromScore(rep.perfScore);
+-  markStabilityTarget('sA',coreStat,rep.suggestions.find(x=>x.includes('aκ')||x.includes('kernstraal')||x.includes('inductielogaritme'))||'Kernradius beïnvloedt slankheid en contactmarge.');
++  markStabilityTarget('sA',coreStat,rep.suggestions.find(x=>x.includes('aκ')||x.includes('kernstraal')||x.includes('inductielogaritme'))||'a_sim beïnvloedt de numerieke slankheid en contactmarge.');
+   markStabilityTarget('qualSeg',meshStat,rep.meshScore<75?'Verhoog kwaliteit voor gelijkmatiger segmenten en betere kromming.':'Resolutie is passend.');
+   markStabilityTarget('interSeg',statusFromScore(rep.modelScore),rep.modelScore<75?'Schakel naar Biot–Savart; LIA mist de nabije niet-lokale interactie.':'Interactiemodel past bij de huidige afstand.');
+   markStabilityTarget('sDiam',boundStat,rep.boundaryScore<75?'Vergroot de diameter of reset/centreer de knoop.':'Radiale domeinmarge is voldoende.');
+@@ -2842,19 +2889,17 @@ function rebuildLattice(){
+ function rebuildBundleLines(){
+   if(!P.bundleEnabled)return;
+   const target=clamp(Math.round(P.bundleVisualLines||61),7,121);
+-  const ex=bundleScaleExtrema();
+-  const rBase=bundleReferenceRadius()/Math.max(ex.hi,1e-12);
++  const rBase=bundleBaseRadius();
+   const segments=P.bundleProfile==='parallel'?1:40;
+   const color=new THREE.Color(P.vorticityLineColor||'#0F1A29');
+   for(let i=0;i<target;i++){
+-    const ang=2*Math.PI*i/target;
+-    const pts=[];
++    const sample=bundleSampleNormalized(i,target),pts=[];
+     for(let k=0;k<=segments;k++){
+       const u=k/segments;
+       const z=zMin()+0.01+u*Math.max(0,cylinderHeight()-0.02);
+       const lam=bundleScaleAtU(u);
+-      const r=rBase*lam;
+-      pts.push(new THREE.Vector3(r*Math.cos(ang),r*Math.sin(ang),z));
++      const r=sample.rho*rBase*lam;
++      pts.push(new THREE.Vector3(r*Math.cos(sample.theta),r*Math.sin(sample.theta),z));
+     }
+     const op=0.22+0.52*((Math.sin(i*12.9898)*43758.5453)%1+1)%1;
+     const g=new THREE.BufferGeometry().setFromPoints(pts);
+@@ -3042,8 +3087,8 @@ function stepTracers(dtSim){
+         ux+=(dl[3*j+1]*rz-dl[3*j+2]*ry)*inv;
+         uy+=(dl[3*j+2]*rx-dl[3*j]*rz)*inv;
+         uz+=(dl[3*j]*ry-dl[3*j+1]*rx)*inv;}}
+-    const omegaBgIsInVelocity=bgWallInSolver();
+-    if(omegaBgIsInVelocity){ux+=-P.Om*py;uy+=P.Om*px;}
++    const ubg=backgroundVelocityAt(px,py,pz);
++    ux+=ubg.ux;uy+=ubg.uy;uz+=ubg.uz;
+ 
+     // Orbitale tracer-hoeksnelheid rond de z-as:
+     // Ω_p,z = (r × u)_z / r_perp².
+@@ -3124,7 +3169,7 @@ function fieldVelocityAt(px,py,pz,segs){
+       uz+=(sg.dl[3*j]*ry-sg.dl[3*j+1]*rx)*inv;
+     }
+   }
+-  if(bgWallInSolver()){ux+=-P.Om*py;uy+=P.Om*px;}
++  const ubg=backgroundVelocityAt(px,py,pz);ux+=ubg.ux;uy+=ubg.uy;uz+=ubg.uz;
+   return {ux,uy,uz,speed:Math.hypot(ux,uy,uz)};
+ }
+ function insideCylinder(x,y,z){return x*x+y*y<0.9409*P.Rcyl*P.Rcyl&&z>zMin()+0.002&&z<zMax()-0.002;}
+@@ -3740,8 +3785,11 @@ function syncUi(){
+   const scRow=document.getElementById('streamlineCountRow');if(scRow)scRow.classList.toggle('hidden',!P.showStreamlines);
+   const vc=document.getElementById('sVorticityColor');if(vc)vc.value=P.vorticityLineColor||'#0F1A29';
+   const vvc=document.getElementById('vVorticityColor');if(vvc)vvc.textContent=(P.vorticityLineColor||'#0F1A29').toUpperCase();
+-  const sAP=document.getElementById('sAPhys');if(sAP)sAP.value=Number.isFinite(P.aPhys)?String(P.aPhys):'';
+-  const vAP=document.getElementById('vAPhys');if(vAP)vAP.textContent=fmtLengthSI(P.aPhys);
++  const sRH=document.getElementById('sRHorn');if(sRH)sRH.value=fmtLengthSI(R_HORN_SST);
++  const vRH=document.getElementById('vRHorn');if(vRH)vRH.textContent=fmtLengthSI(R_HORN_SST);
++  const rCore=resolvedFixedCoreRadius();
++  const sRC=document.getElementById('sRCorePhys');if(sRC)sRC.value=Number.isFinite(rCore)?fmtLengthSI(rCore):'';
++  const vRC=document.getElementById('vRCorePhys');if(vRC)vRC.textContent=Number.isFinite(rCore)?fmtLengthSI(rCore):'— (niet afgeleid)';
+   syncDiagnosticToggles();
+   const gpDeltaText=DELTA.gp.toFixed(6);
+   const gpSel=document.getElementById('gpDeltaSel');if(gpSel){gpSel.value=String(DELTA.gp);gpSel.disabled=P.core!=='gp';}
+@@ -3811,7 +3859,7 @@ function organizeStabilityControls(){
+ 
+   // MODEL · KERN
+   moveCtrl('coreSeg',core);moveCtrl('sNq',core);moveCtrl('sGa',core);moveCtrl('sA',core);
+-  moveCtrl('sAPhys',core);
++  moveCtrl('sRHorn',core);moveCtrl('sRCorePhys',core);
+   const coreFlowPanel=document.getElementById('coreFlowLinkPanel');if(coreFlowPanel)core.appendChild(coreFlowPanel);
+ 
+   // MODEL · VORTEX: drager/topologie en geometrische presentatie.
+@@ -4568,7 +4616,7 @@ const ModelLog=(()=>{
+   };
+   const userActions=[],steps=[],events=[];
+   function snapP(){
+-    return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,aPhys:P.aPhys,Om:P.Om,nQ:P.nQ,
++    return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,rHorn:R_HORN_SST,rCorePhysical:P.rCorePhysical,Om:P.Om,nQ:P.nQ,
+       solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow, // v7.5: drie framevelden apart gelogd
+       accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp};
+   }
+@@ -4638,7 +4686,7 @@ window.addEventListener('unhandledrejection',e=>runtimeFailure('unhandledrejecti
+ // P-velden worden gesnapshot en hersteld. Resultaten als JSON exporteerbaar.
+ const SelfTest=(()=>{ 
+   const PKEYS=['mode','topo','inter','core','med','qual','Om','GaDemo','nQ','a','w','vzA','vzB',
+-    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock'];
++    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical'];
+   function snap(){const o={};for(const k of PKEYS)o[k]=P[k];o.tOsc=P.taylorOsc.enabled;o.gpDelta=DELTA.gp;return o;}
+   function restore(o){for(const k of PKEYS)P[k]=o[k];P.taylorOsc.enabled=o.tOsc;DELTA.gp=o.gpDelta;syncUi();}
+   function baseline(){
+@@ -4683,11 +4731,11 @@ const SelfTest=(()=>{
+       const metaVersion=document.querySelector('meta[name="vortexlab-version"]')?.content;
+       const metaBase=document.querySelector('meta[name="vortexlab-base"]')?.content;
+       const title=document.title;
+-      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.4.2'&&title.includes('v7.5'),'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+title);
++      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.5'&&title.includes('v7.5.1'),'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+title);
+       const diag=buildDiagRecord(1,2,3,{R:4,z:5});
+       add('T0b diag-record ACN eindig',diag.ACN===3&&Object.values(diag).filter(v=>typeof v==='number').every(Number.isFinite),'ACN='+diag.ACN);
+       const parsed=parseLengthInput('1.40897017 fm');
+-      add('T0c SI-lengteparser fm',Math.abs(parsed-RCORE_SST)<1e-24,'a='+parsed.toExponential(9));
++      add('T0c SI-lengteparser fm',Math.abs(parsed-R_HORN_SST)<1e-24,'a='+parsed.toExponential(9));
+       const oldA=P.a;P.a=A_SIM_INPUT_FLOOR;const ct=contactThresholdInfo();P.a=oldA;
+       add('T0d contactvloer eindig',Number.isFinite(ct.effective)&&ct.effective>=ct.physical&&ct.effective>=ct.numerical,'d='+ct.effective.toExponential(3));
+       const oldOm=P.Om;P.Om=0;const dim0=dimensionlessDiagnostics({R:0.07},0.01);P.Om=oldOm;
+@@ -4702,9 +4750,17 @@ const SelfTest=(()=>{
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse
+-      add('T0i verse start: coreFlowLock uit, frames corot/corot/none',
+-        P_DEFAULTS.coreFlowLock===false&&P_DEFAULTS.solverFrame==='corot'&&P_DEFAULTS.displayFrame==='corot'&&P_DEFAULTS.bgFlow==='none',
++      add('T0i verse start: vaste SST-kernclosure, r_kern onbepaald, coreFlowLock uit, frames corot/corot/none',
++        P_DEFAULTS.core==='vast'&&P_DEFAULTS.rCorePhysical===null&&P_DEFAULTS.coreFlowLock===false&&P_DEFAULTS.solverFrame==='corot'&&P_DEFAULTS.displayFrame==='corot'&&P_DEFAULTS.bgFlow==='none',
+         JSON.stringify(P_DEFAULTS));
++      // T0j/k — v7.5.1: horn/core/a_sim-scheiding en Rankine-profielcontinuïteit
++      {const oldR=P.rCorePhysical;P.rCorePhysical=R_HORN_SST*1e-3;
++       const rc=resolvedFixedCoreRadius(),inside=sstRankineProfileAtRadius(rc,Math.abs(Gamma()),rc),outside=sstRankineProfileAtRadius(R_HORN_SST,Math.abs(Gamma()),rc);
++       add('T0j SST R_horn/r_kern/a_sim gescheiden',rc<R_HORN_SST&&R_HORN_SST!==P.a&&outside.region==='irrotational-exterior'&&outside.vorticity===0,
++         'R_horn='+R_HORN_SST.toExponential(3)+' r_kern='+rc.toExponential(3)+' a_sim='+P.a.toExponential(3));
++       const justOut=sstRankineProfileAtRadius(rc*(1+1e-12),Math.abs(Gamma()),rc);
++       add('T0k vaste Rankine-kern sluit continu aan op 1/r-buitenveld',Math.abs(inside.vTheta/justOut.vTheta-1)<2e-12&&Math.abs(inside.vorticity-2*inside.omegaAngular)<1e-12,
++         'v_in/v_out='+(inside.vTheta/justOut.vTheta).toPrecision(6));P.rCorePhysical=oldR;}
+       // T9a–e — SST bundel-researchtrack (merge-checks)
+       P.med='sst';P.bundleEnabled=true;P.bundleProfile='parallel';P.bundleSplay=0;P.OmBundle=1;P.revOmBundle=false;
+       {const nv=bundleDensityAtZ(0),nvExpected=2/GAMMA0_SST;
+@@ -4724,6 +4780,17 @@ const SelfTest=(()=>{
+        // beleidsregel: monotone splay => tracerWrapZ uit (zie UI handler); simuleer hier de intentie
+        const shouldDisable=true;
+        add('T9e splay waarschuwt tegen periodiek z',shouldDisable,'wrapZ(before)='+hadWrap);}
++      {P.bundleProfile='parallel';P.bundleSplay=0;P.bgFlow='bundle';P.bundleEnabled=true;
++       const Rb=bundleRadiusAtZ(0),vin=bundleVelocityProfileAt(Rb,0,0,true),vout=bundleVelocityProfileAt(2*Rb,0,0,true);
++       const circIn=2*Math.PI*Rb*Math.abs(vin.uy),circOut=2*Math.PI*(2*Rb)*Math.abs(vout.uy);
++       add('T9f eindige bundel continu + constante buiten-circulatie',Math.abs(circIn/circOut-1)<1e-12&&Math.abs(vin.uy/(2*vout.uy)-1)<1e-12,
++         'Γin/Γout='+(circIn/circOut).toPrecision(6));}
++      {P.bundleProfile='parallel';P.bgFlow='bundle';
++       const p={x:0.03,y:-0.02,z:0.0},a=backgroundVelocityAt(p.x,p.y,p.z),b=bundleVelocityProfileAt(p.x,p.y,p.z,true);
++       add('T9g gedeeld achtergrondveld voor alle transportpaden',a.ux===b.ux&&a.uy===b.uy&&a.uz===b.uz,'u='+a.ux.toExponential(2)+','+a.uy.toExponential(2));}
++      {let meanR2=0,maxR=0;const n=101;for(let i=0;i<n;i++){const s=bundleSampleNormalized(i,n);meanR2+=s.rho*s.rho;maxR=Math.max(maxR,s.rho);}meanR2/=n;
++       add('T9h gevulde-schijfsampling',Math.abs(meanR2-0.5)<1e-12&&maxR<1,'<r²>='+meanR2.toFixed(6)+' max='+maxR.toFixed(6));}
++      add('T9i bronprovenance gesloten-luslimiet',P.bundleSourceModel===BUNDLE_SOURCE_MODEL&&BUNDLE_SOURCE_MODEL==='analytic-finite-closed-loop-limit',P.bundleSourceModel);
+       // herstel naar baseline zodat T1–T6 niet door bundelguards beïnvloed worden
+       P.bundleEnabled=false;P.bgFlow='none';P.bundleProfile='parallel';P.bundleSplay=0.45;
+       // T1 — ringsnelheid vs Kelvin-formule, drie kernmodellen
+@@ -4891,20 +4958,25 @@ document.getElementById('bEpsRev')?.addEventListener('click',measureEpsRev);
+ })();
+ if(location.search.indexOf('selftest=1')>=0)setTimeout(()=>SelfTest.run(),700);
+ 
+-function bindAPhysInput(){
+-  const inp=document.getElementById('sAPhys');
++function bindRCorePhysicalInput(){
++  const inp=document.getElementById('sRCorePhys');
+   if(!inp)return;
+   const apply=()=>{
+-    const v=parseLengthInput(inp.value);
+-    if(!Number.isFinite(v)||v<0)return;
+-    P.aPhys=v;
+-    inp.value=String(P.aPhys);
+-    const vEl=document.getElementById('vAPhys');if(vEl)vEl.textContent=fmtLengthSI(P.aPhys);
++    const raw=inp.value.trim();
++    if(!raw){P.rCorePhysical=null;syncUi();ModelLog.logUser('rCorePhysical',{value:null,status:'unresolved'});return;}
++    const v=parseLengthInput(raw);
++    if(!Number.isFinite(v)||v<=0||v>=R_HORN_SST){
++      setFlag('⚠ r_kern moet eindig zijn en voldoen aan 0 < r_kern < R_horn. De waarde blijft onbepaald.',true);
++      P.rCorePhysical=null;syncUi();return;
++    }
++    P.rCorePhysical=v;
++    if(v>0.1*R_HORN_SST)setFlag('⚠ r_kern is niet veel kleiner dan R_horn; dit is toegestaan als testinvoer, maar niet de beoogde SST-schaalscheiding.',true);
++    ModelLog.logUser('rCorePhysical',{value:v,ratioHornToCore:R_HORN_SST/v});syncUi();
+   };
+   inp.addEventListener('change',apply);
+   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply();}});
+ }
+-bindAPhysInput();
++bindRCorePhysicalInput();
+ document.getElementById('cModelLog')?.addEventListener('change',e=>{ModelLog.setEnabled(e.target.checked);});
+ document.getElementById('cModelLogVerbose')?.addEventListener('change',e=>{ModelLog.setVerbose(e.target.checked);});
+ document.getElementById('bModelLogExport')?.addEventListener('click',()=>{
+@@ -4931,8 +5003,9 @@ function syncBundleUi(){
+   if(read){
+     const n0=bundleDensityAtZ(zMin()),nm=bundleDensityAtZ(0),n1=bundleDensityAtZ(zMax());
+     const N=bundlePhysicalCountAtZ(0);
++    const Rb=bundleRadiusAtZ(0),Gb=bundleCirculationAtZ(0);
+     read.textContent=P.bundleEnabled
+-      ?`n_v(zmin/mid/zmax)= ${n0.toExponential(2)} / ${nm.toExponential(2)} / ${n1.toExponential(2)} m⁻² · N_phys(mid)≈${N.toExponential(3)}`
++      ?`n_v(zmin/mid/zmax)= ${n0.toExponential(2)} / ${nm.toExponential(2)} / ${n1.toExponential(2)} m⁻² · R_bundle(mid)=${fmtLengthSI(Rb)} · Γ_enc=${Gb.toExponential(3)} m²/s · N_phys(mid)≈${N.toExponential(3)} · bron=${P.bundleSourceModel}`
+       :'uit';
+   }
+   const vob=document.getElementById('vOmBundle');
+@@ -5145,22 +5218,25 @@ function loop(now){
+       P.mfAlpha.toFixed(3)+' / '+P.mfAlphaP.toFixed(4)+' / '+fmtSpeed(P.vnZ);
+     if(!mfOn)document.getElementById('rowRdot').classList.add('hidden');
+     const km=kappaMedium();
++    const rowHC=document.getElementById('rowHornCore');
+     const rowO=document.getElementById('rowOmegas');
+     const rowB=document.getElementById('rowBundleFlux');
+     const nvLbl=document.getElementById('hNvLbl');
++    const fmtOmega=x=>!Number.isFinite(x)?'—':(Math.abs(x)>=1e4||Math.abs(x)<1e-3?x.toExponential(2):x.toFixed(2));
++    if(P.med==='sst'){
++      if(rowHC)rowHC.classList.remove('hidden');if(rowO)rowO.classList.remove('hidden');
++      const core=fixedCoreDiagnostics();
++      document.getElementById('hHornCore').textContent=fmtLengthSI(R_HORN_SST)+' · '+(core.r?fmtLengthSI(core.r):'—')+' · '+(core.r?core.ratio.toExponential(2):'—');
++      document.getElementById('hOmegas').textContent=fmtOmega(OMEGA_COMPTON_SST)+' · '+fmtOmega(core.omega)+' · '+fmtOmega(core.vorticity)+' s⁻¹';
++    }else{
++      if(rowHC)rowHC.classList.add('hidden');if(rowO)rowO.classList.add('hidden');
++    }
+     if(P.med==='sst'&&P.bundleEnabled){
+-      if(rowO)rowO.classList.remove('hidden');
+       if(rowB)rowB.classList.remove('hidden');
+-      if(nvLbl)nvLbl.textContent='n_v(bundle)=2|Ω_bundle|/κ';
+-      document.getElementById('hNv').textContent=km
+-        ?bundleDensityAtZ(0).toExponential(2).replace('e+','·10^')+' m⁻²':'— (demo)';
+-      const fmtOmega=x=>!Number.isFinite(x)?'—':(Math.abs(x)>=1e4||Math.abs(x)<1e-3?x.toExponential(2):x.toFixed(2));
+-      document.getElementById('hOmegas').textContent=
+-        fmtOmega(omegaCorePhysical())+' · '+fmtOmega(P.revOmBundle?-Math.abs(P.OmBundle):Math.abs(P.OmBundle))+' · '+fmtOmega(P.revOm?-Math.abs(P.Om):Math.abs(P.Om))+' s⁻¹';
+-      document.getElementById('hBundleFlux').textContent=
+-        bundlePhysicalCountAtZ(0).toExponential(3)+' · '+P.bundleProfile;
++      if(nvLbl)nvLbl.textContent='n_v(bundle)=2|Ω_bundle|/Γ₀';
++      document.getElementById('hNv').textContent=bundleDensityAtZ(0).toExponential(2).replace('e+','·10^')+' m⁻²';
++      document.getElementById('hBundleFlux').textContent=bundlePhysicalCountAtZ(0).toExponential(3)+' · R='+fmtLengthSI(bundleRadiusAtZ(0))+' · '+P.bundleProfile;
+     }else{
+-      if(rowO)rowO.classList.add('hidden');
+       if(rowB)rowB.classList.add('hidden');
+       if(nvLbl)nvLbl.textContent='n_v = 2Ω/κ';
+       document.getElementById('hNv').textContent=km

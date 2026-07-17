@@ -1,0 +1,414 @@
+--- /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.4/vortexring-lab-v7.6.4.html	2026-07-15 01:44:58.236850864 +0000
++++ /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.5/vortexring-lab-v7.6.5.html	2026-07-15 01:44:58.383139614 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.4 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.4">
++<title>Superfluïde vortexlab v7.6.5 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.5">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.3">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings">
++<meta name="vortexlab-parent" content="7.6.4">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -409,7 +409,25 @@
+   .vl-diagnostics-heading{min-height:38px;padding:9px 10px;display:flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.11em;color:#F0F6FC;background:rgba(18,29,54,.66);border-bottom:1px solid var(--vl-border);box-shadow:inset 3px 0 0 var(--vl-active);}
+   .vl-diagnostics-body{padding:9px;}
+   .vl-sst-diagnostics-title{margin:12px 2px 7px;padding-top:9px;border-top:1px solid rgba(38,56,88,.78);font-size:8.5px;font-weight:700;letter-spacing:.13em;color:var(--vl-active);}
+-  #chiPhasePanel,#stretchGatePanel{margin:0 0 8px!important;}
++  #chiPhasePanel,#specClockPanel,#stretchGatePanel{margin:0 0 8px!important;}
++  #specClockPanel{border-color:rgba(255,110,110,.62)!important;background:rgba(255,110,110,.025)!important;}
++  #specClockPanel[open]{box-shadow:0 0 18px rgba(255,110,110,.08);}
++  #specClockPanel>summary{color:#FFD5D5!important;}
++  #specClockPanel[open]>summary{box-shadow:inset 3px 0 0 var(--warn)!important;}
++  .spec-clock-warning{margin:0 0 8px;padding:8px 9px;border:1px solid rgba(255,110,110,.68);border-radius:7px;background:rgba(255,110,110,.075);color:#FFD2D2;font-size:9.5px;line-height:1.5;}
++  .spec-clock-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;}
++  #bSpecClockToggle{border-color:rgba(255,110,110,.72);color:#FFD7D7;background:rgba(255,110,110,.06);}
++  #bSpecClockToggle.active{border-color:var(--warn);background:rgba(255,110,110,.16);box-shadow:0 0 14px rgba(255,110,110,.12);}
++  #bSpecClockCalibrate:disabled{opacity:.42;cursor:not-allowed;}
++  .spec-clock-status{margin:7px 0;padding:7px 8px;border-left:3px solid var(--line);background:rgba(11,18,35,.52);font-size:9.5px;line-height:1.45;color:var(--dim);}
++  .spec-clock-status.good{border-color:var(--ok);color:#CFF9DF;}
++  .spec-clock-status.warn{border-color:var(--amber);color:#FFE1B4;}
++  .spec-clock-status.bad{border-color:var(--warn);color:#FFD0D0;}
++  .spec-clock-meter{display:grid;grid-template-columns:18px 1fr 78px;gap:6px;align-items:center;margin-top:5px;font-size:9px;color:var(--dim);}
++  .spec-clock-track{height:8px;border:1px solid var(--line);border-radius:5px;background:#0A1326;overflow:hidden;}
++  .spec-clock-fill{height:100%;width:0;background:linear-gradient(90deg,#55D6FF,#FFAE45,#FF6E6E);transition:width .18s ease;}
++  .spec-clock-value{text-align:right;color:#EAF2FA;font-family:"IBM Plex Mono",Consolas,monospace;font-variant-numeric:tabular-nums;}
++  @media (max-width:560px){.spec-clock-actions{grid-template-columns:1fr;}}
+   @media (max-width:1350px){
+     .vl-live-overlay{flex-basis:270px;width:min(270px,27vw);}
+     #cards.vl-cards-overlay{flex-basis:390px;width:min(430px,43vw);}
+@@ -650,6 +668,12 @@
+       <h2>χ-FASE / TRACK B <span class="tag">SST-pakket v16B.0, gepatcht</span></h2>
+       <p>Het χ-fase-pakket (v10B–v16B) volgt Track B: de kernenergie van de unit-GP/NLSE-vortex-ODE. Kernresultaten zoals meegeleverd: \(\alpha_{\rm ring}^{\rm GP}=1.619350923\) (onafhankelijk gereproduceerd sinds v12B.0), \(\beta_{\rm ring}=0.619350923\), en \(\alpha_{\rm ring}-\varphi=+1.32\times10^{-3}\) met \(\varphi=1.6180340\). De Madelung-brug (v16B) sluit gate G5 <em>voorwaardelijk</em>: uitgaand van één coherente single-modulus-envelope volgt \(A=B=C=1\) en daarmee de unit-GP-ODE; de sterkere claim dat dit al uit de bestaande SST-filamentcanon volgt is door het pakket zelf níét gevestigd. Open gates: de legacy-notatie \(\xi\leftrightarrow r_c\) uit het pakket wordt hier niet als \(\xi\leftrightarrow R_{\rm horn}\) gelezen; de nog open profielbrug is \(\xi\leftrightarrow r_{\rm kern}\) (G5.4/G7, want \(c_s=c\) is niet afgeleid uit de SST-EoS) en de structurele φ-selector (G6). Expliciet niet gecanoniseerd: \(\alpha_{\rm ring}=\varphi\), \(\xi=R_{\rm horn}\), \(\alpha_{\rm ring}=\alpha_{\rm fs}\).</p>
+       <p>Relatie tot deze simulator: het kernmodel GP/NLSE gebruikt \(\Delta=0.615\) (Roberts–Grant), afkomstig uit exact dezelfde kern-ODE-familie. Het live ropelength-paneel \(\Lambda=L/(2\tau)\) met \(\tau=\min(r_\kappa,\,d_{\rm dc}/2)\) meet hoe ver de actuele kernlijn van de ideal-geometrie (L_K = 16.371637) af staat — een geometrische diagnose, geen α-afleiding.</p>
++
++      <h2>SPECULATIVE SWIRL CLOCK A↔B <span class="tag">Research Track · niet canon</span></h2>
++      <p>Deze optionele diagnose is uitsluitend beschikbaar voor twee SST-dragers in botsingsmodus en koppelt niets terug naar de filament-ODE. De veldroute meet voor iedere drager de RMS tangentiële snelheid die uitsluitend door de andere drager wordt geïnduceerd,</p>
++      <p>\[ u_i=\left[\frac{1}{L_i}\oint_{K_i}(\mathbf u_{j\to i}\!\cdot\!\hat{\mathbf t}_i)^2\,ds\right]^{1/2}. \]</p>
++      <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele envelop \(v_i\in[|v_{\circlearrowleft}-u_i|,v_{\circlearrowleft}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een hypothesetest, geen canonieke superpositieregel.</p>
++      <p>De onafhankelijke meetroute gebruikt de gemeten body-fasefrequentie \(\Omega_{\rm body}\) ten opzichte van een door de gebruiker vastgelegde referentietoestand: \(\eta_i^{\rm phase}=|\Omega_i|/|\Omega_{i,0}|\). Kalibratie hoort bij grote onderlinge afstand te gebeuren. Een kandidaat-sluiting ontstaat pas wanneer de faseverhouding binnen de veld-envelop valt, bij toenemende resolutie convergeert, invariant is onder A↔B en niet afhangt van \(a_{\rm sim}\), displayframe of afspeelsnelheid.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+@@ -1003,6 +1027,41 @@
+             <div class="note" style="margin-top:6px;">Λ en τ komen live uit de huidige kernlijngeometrie van drager A (τ = min. kromtestraal vs. halve doubly-critical afstand, inclusief afstand tussen componenten). Referentie L_K = 16.371637 is de ideal-3₁-ropelength in diameter-eenheden (Gilbert). α_ring^GP is de dimensieloze ringconstante van de unit-GP/NLSE-vortex-ODE uit het χ-fase-pakket — hetzelfde kern-ODE-gezin als kernmodel GP/NLSE (Δ = 0.615, Roberts–Grant 1971). Gate-status v16B.0: G5 voorwaardelijk gesloten binnen de single-modulus-Madelung-sector; open: de profielbrug ξ↔r_kern (legacy ξ↔r_c; G5.4/G7) en de φ-selector (G6). <b>Niet gecanoniseerd:</b> α_ring = φ, ξ = R_horn, α_ring = α_fs. Deze sim leidt niets over α af; het paneel toont de pakketstatus naast live meetbare knoopgeometrie.</div>
+           </div>
+         </details>
++        <details class="subcoll" id="specClockPanel" style="margin-top:9px;">
++          <summary>⚠ SPECULATIVE · SWIRL CLOCK A↔B <span class="tag">NIET CANON · GEEN SOLVERKOPPELING</span></summary>
++          <div class="subcoll-body">
++            <div class="spec-clock-warning"><b>WAARSCHUWING.</b> Dit paneel test een twee-knoop-superpositie die niet door SST Canon is afgeleid. De canonieke waarde <b>v↻ = 1.09384563×10⁶ m/s</b> wordt alleen gebruikt om een formele klok-envelop te bouwen; de wederzijdse meterschaalsnelheid en Ω<sub>body</sub> zijn diagnostische proxies. De uitkomst verandert de knoopdynamica nooit.</div>
++            <div class="spec-clock-actions">
++              <button type="button" id="bSpecClockToggle">⚠ Activeer speculative clock</button>
++              <button type="button" id="bSpecClockCalibrate" disabled>◎ Kalibreer fase bij huidige afstand</button>
++            </div>
++            <div class="ctrl"><label for="sSpecClockGain">visuele lag-vergroting <span class="v" id="vSpecClockGain">1×</span></label>
++              <select id="sSpecClockGain">
++                <option value="1" selected>1× · 10 ppm volle schaal</option>
++                <option value="10">10× · alleen weergave</option>
++                <option value="1000">1000× · alleen weergave</option>
++                <option value="1000000">10⁶× · alleen weergave</option>
++              </select>
++            </div>
++            <div id="specClockStatus" class="spec-clock-status bad">UIT · activeer alleen voor SST + botsingsmodus met twee dragers.</div>
++            <div class="spec-clock-meter"><b>A</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarA"></div></div><span class="spec-clock-value" id="specClockBarValueA">—</span></div>
++            <div class="spec-clock-meter"><b>B</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarB"></div></div><span class="spec-clock-value" id="specClockBarValueB">—</span></div>
++            <div class="stab-metrics" style="grid-template-columns:1fr 1fr;margin-top:8px;">
++              <span>afstand |r<sub>B</sub>−r<sub>A</sub>|</span><span id="specClockDistance">—</span>
++              <span>u∥ RMS · B→A / A→B</span><span id="specClockMutual">—</span>
++              <span>canonieke geïsoleerde vertraging</span><span id="specClockBaseline">—</span>
++              <span>η<sub>A</sub><sup>field</sup> envelop</span><span id="specClockEtaA">—</span>
++              <span>η<sub>B</sub><sup>field</sup> envelop</span><span id="specClockEtaB">—</span>
++              <span>η<sub>A</sub><sup>phase</sup> / η<sub>B</sub><sup>phase</sup></span><span id="specClockPhaseRates">—</span>
++              <span>R<sub>AB</sub><sup>field</sup> envelop</span><span id="specClockFieldRatio">—</span>
++              <span>R<sub>AB</sub><sup>phase</sup></span><span id="specClockPhaseRatio">—</span>
++              <span>Δτ<sub>AB</sub><sup>field</sup> accumulatie</span><span id="specClockFieldLag">—</span>
++              <span>Δτ<sub>AB</sub><sup>phase</sup> accumulatie</span><span id="specClockPhaseLag">—</span>
++              <span>closure-residu ε<sub>clock</sub></span><span id="specClockResidual">—</span>
++            </div>
++            <div class="note" style="margin-top:7px;"><b>Twee routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↻±u∥-envelop → dτ/dt. Fase: |Ω<sub>body</sub>| ten opzichte van een vaste referentie bij grote scheiding. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en zonder herkalibratie per afstand.</div>
++          </div>
++        </details>
+         <details class="subcoll" id="stretchGatePanel" open style="margin-top:9px;">
+           <summary>SST · VORTEX-STRETCHING STABILITY GATE <span class="tag">Research Track · Friedlander</span></summary>
+           <div class="subcoll-body">
+@@ -1214,7 +1273,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.4 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.5 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1225,7 +1284,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.4';
++const APP_VERSION='7.6.5';
+ const APP_BASE_VERSION='7.5.3';
+ const APP_PATCH_NOTES=[
+   'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
+@@ -1242,7 +1301,8 @@
+   'Planck/String-schaalprobe is passieve a_probe-metadata, strikt gescheiden van a_sim, r_kern, R_horn, stretch-gate en BEM',
+   'Canon/provenance, diagnostische NaN-serialisatie en de volledige regressiematrix zijn aangescherpt',
+   'UI: topology/contactmeldingen staan onder de topbar; LIVE STABILITEIT, geometriekaarten en sparkline vormen permanente onderste simulatoroverlays',
+-  'UI: GEOMETRISCHE DIAGNOSTIEK is een vaste DIAG-sectie; χ-fase/Track B en de vortex-stretching gate staan eronder als zelfstandige collapsebles'
++  'UI: GEOMETRISCHE DIAGNOSTIEK is een vaste DIAG-sectie; χ-fase/Track B, speculative swirl clock A↔B en de vortex-stretching gate staan eronder als zelfstandige collapsebles',
++  'Speculative swirl clock: passieve twee-route closure-test met mutual tangential-flow envelope, fasekalibratie en expliciete NOT-CANON waarschuwing'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -1476,6 +1536,7 @@
+ const KAPPA_HE  = 9.9693e-8;      // m^2/s  (h/m4)
+ const R_HORN_SST= 1.40897017e-15; // m, canonieke Compton-locked horn/circulatiestraal; geen vaste kernradius
+ const V_HORN_SST= 1.09384563e6;    // m/s, canonieke tangentiële snelheid op R_horn voor één Γ0
++const C_LIGHT     = 2.99792458e8;   // m/s, exacte SI-waarde
+ const GAMMA0_SST= 9.68361920e-9;   // m^2/s, Canon v0.8.20
+ const OMEGA_COMPTON_SST = V_HORN_SST/R_HORN_SST; // s^-1, fase-/turnoverfrequentie op R_horn; geen lokale vorticiteit
+ const BUNDLE_SOURCE_MODEL='analytic-finite-closed-loop-limit';
+@@ -1516,7 +1577,9 @@
+   // v7.5.3 Research Track: materiële vortex-stretching gate en drie Friedlander-profielen.
+   stretchGateEnabled:true, stretchProfile:'rigid', stretchProfileApply:false, stretchProfileOnly:false,
+   stretchOmega0:1.0, stretchBeta:60.0, stretchGamma:0.02, stretchSoftening:0.020,
+-  stretchEpsilon:0.010, stretchMode:1, stretchNeutralTol:0.020, stretchFailTol:0.100
++  stretchEpsilon:0.010, stretchMode:1, stretchNeutralTol:0.020, stretchFailTol:0.100,
++  // Expliciet niet-canonieke twee-knoop klokdiagnose; nooit solvercoupling.
++  specClockEnabled:false, specClockDisplayGain:1
+ };
+ // v7.5: bevroren opstartdefaults voor zelftest-T0i (D4: verse start heeft de
+ // kernkoppeling uit; frames starten ontvlochten in corot/corot/none).
+@@ -2361,6 +2424,173 @@
+   return {R:R/n,z:cz,rWall,cx,cy,components:fs.length};
+ }
+ 
++// ================= SPECULATIVE two-knot swirl-clock diagnostic =================
++// Dit blok is strikt passief. Het verandert Y, Gamma, dt, de topology guard of
++// enige andere solverparameter niet. De combinatie V_HORN_SST +/- u_mutual is
++// uitsluitend een formele Research-Track-envelop, geen afgeleide superpositiewet.
++const SpecClock={
++  calibrated:false,sampleStride:8,stepCounter:0,dtBucket:0,
++  omegaRefA:NaN,omegaRefB:NaN,
++  tauFieldMinA:0,tauFieldMaxA:0,tauFieldMinB:0,tauFieldMaxB:0,
++  tauPhaseA:0,tauPhaseB:0,last:null,tmpV:null
++};
++function specClockEta(v){
++  const q=clamp(Math.abs(v)/C_LIGHT,0,1-1e-15);
++  return Math.sqrt(Math.max(0,1-q*q));
++}
++function specClockEnvelope(u){
++  const du=Math.max(0,Number(u)||0);
++  const vMin=Math.abs(V_HORN_SST-du);
++  const vMax=Math.min(C_LIGHT*(1-1e-15),V_HORN_SST+du);
++  const vMid=Math.min(C_LIGHT*(1-1e-15),Math.hypot(V_HORN_SST,du));
++  return {vMin,vMax,vMid,etaMin:specClockEta(vMax),etaMax:specClockEta(vMin),etaMid:specClockEta(vMid)};
++}
++function specClockPrerequisites(ignoreEnabled=false){
++  if(!ignoreEnabled&&!P.specClockEnabled)return{ok:false,reason:'UIT'};
++  if(P.mode!=='botsing')return{ok:false,reason:'vereist botsingsmodus met drager A en B'};
++  if(P.med!=='sst')return{ok:false,reason:'vereist medium SST'};
++  if(P.timeReverse)return{ok:false,reason:'gepauzeerd bij achterwaartse integratie'};
++  if(!Y||!carrierFilaments('A').length||!carrierFilaments('B').length)return{ok:false,reason:'twee dragers ontbreken'};
++  return{ok:true,reason:''};
++}
++function carrierBodyOmegaFromVelocity(which,V){
++  if(!V||!Y)return NaN;
++  const st=carrierGroupStats(which);if(!st)return NaN;
++  let num=0,den=0;
++  for(const f of carrierFilaments(which))for(let k=0;k<f.N;k++){
++    const i=f.off+3*k,rx=Y[i]-st.cx,ry=Y[i+1]-st.cy;
++    num+=rx*V[i+1]-ry*V[i];den+=rx*rx+ry*ry;
++  }
++  return den>1e-18?num/den:NaN;
++}
++function carrierMutualTangentialRms(target,source,maxSamples=48){
++  const targets=carrierFilaments(target),sources=carrierFilaments(source);
++  if(!targets.length||!sources.length||!Y)return{uRms:NaN,samples:0};
++  const total=targets.reduce((n,f)=>n+f.N,0),stride=Math.max(1,Math.ceil(total/maxSamples));
++  const a2=aSimActive()*aSimActive();let sampleIndex=0,sum=0,wSum=0,samples=0;
++  for(const ft of targets){const N=ft.N,o=ft.off;
++    for(let k=0;k<N;k++,sampleIndex++){
++      if(sampleIndex%stride)continue;
++      const km=(k-1+N)%N,kp=(k+1)%N,i=o+3*k,im=o+3*km,ip=o+3*kp;
++      let tx=Y[ip]-Y[im],ty=Y[ip+1]-Y[im+1],tz=Y[ip+2]-Y[im+2];
++      const tl=Math.hypot(tx,ty,tz)||1;tx/=tl;ty/=tl;tz/=tl;
++      const ds=.5*(Math.hypot(Y[i]-Y[im],Y[i+1]-Y[im+1],Y[i+2]-Y[im+2])+Math.hypot(Y[ip]-Y[i],Y[ip+1]-Y[i+1],Y[ip+2]-Y[i+2]));
++      let ux=0,uy=0,uz=0;
++      for(const fs of sources){const M=fs.N,os=fs.off,pref=filamentGamma(fs)/(4*Math.PI);
++        for(let j=0;j<M;j++){const j2=(j+1)%M,a=os+3*j,b=os+3*j2;
++          const dlx=Y[b]-Y[a],dly=Y[b+1]-Y[a+1],dlz=Y[b+2]-Y[a+2];
++          const mx=.5*(Y[a]+Y[b]),my=.5*(Y[a+1]+Y[b+1]),mz=.5*(Y[a+2]+Y[b+2]);
++          const rx=Y[i]-mx,ry=Y[i+1]-my,rz=Y[i+2]-mz,r2=rx*rx+ry*ry+rz*rz+a2;
++          const inv=pref/(r2*Math.sqrt(r2));
++          ux+=(dly*rz-dlz*ry)*inv;uy+=(dlz*rx-dlx*rz)*inv;uz+=(dlx*ry-dly*rx)*inv;
++        }
++      }
++      const up=ux*tx+uy*ty+uz*tz,w=Math.max(ds,1e-15);sum+=w*up*up;wSum+=w;samples++;
++    }
++  }
++  return{uRms:wSum>0?Math.sqrt(sum/wSum):NaN,samples};
++}
++function measureSpecClock(V=K4){
++  const pre=specClockPrerequisites();if(!pre.ok)return{valid:false,reason:pre.reason};
++  const a=carrierGroupStats('A'),b=carrierGroupStats('B');if(!a||!b)return{valid:false,reason:'carrierstatistiek ontbreekt'};
++  const mA=carrierMutualTangentialRms('A','B'),mB=carrierMutualTangentialRms('B','A');
++  if(!Number.isFinite(mA.uRms)||!Number.isFinite(mB.uRms))return{valid:false,reason:'wederzijdse veldmeting ongeldig'};
++  const envA=specClockEnvelope(mA.uRms),envB=specClockEnvelope(mB.uRms);
++  const omegaA=carrierBodyOmegaFromVelocity('A',V),omegaB=carrierBodyOmegaFromVelocity('B',V);
++  const etaPhaseA=SpecClock.calibrated&&SpecClock.omegaRefA>1e-15?Math.abs(omegaA)/SpecClock.omegaRefA:NaN;
++  const etaPhaseB=SpecClock.calibrated&&SpecClock.omegaRefB>1e-15?Math.abs(omegaB)/SpecClock.omegaRefB:NaN;
++  const fieldRatioMin=envA.etaMin/Math.max(envB.etaMax,1e-300);
++  const fieldRatioMax=envA.etaMax/Math.max(envB.etaMin,1e-300);
++  const phaseRatio=Number.isFinite(etaPhaseA)&&Number.isFinite(etaPhaseB)&&etaPhaseB>0?etaPhaseA/etaPhaseB:NaN;
++  const inside=Number.isFinite(phaseRatio)&&phaseRatio>=fieldRatioMin&&phaseRatio<=fieldRatioMax;
++  let residual=NaN;
++  if(Number.isFinite(phaseRatio)&&phaseRatio>0){
++    if(phaseRatio<fieldRatioMin)residual=Math.abs(Math.log(phaseRatio/fieldRatioMin));
++    else if(phaseRatio>fieldRatioMax)residual=Math.abs(Math.log(phaseRatio/fieldRatioMax));
++    else residual=0;
++  }
++  return{valid:true,distance:Math.hypot(b.cx-a.cx,b.cy-a.cy,b.z-a.z),uA:mA.uRms,uB:mB.uRms,envA,envB,
++    omegaA,omegaB,etaPhaseA,etaPhaseB,fieldRatioMin,fieldRatioMax,phaseRatio,inside,residual,samplesA:mA.samples,samplesB:mB.samples};
++}
++function updateSpecClockAcceptedStep(dt,V=K4){
++  if(!P.specClockEnabled||!(dt>0))return;
++  const pre=specClockPrerequisites();if(!pre.ok){SpecClock.last={valid:false,reason:pre.reason};return;}
++  SpecClock.stepCounter++;SpecClock.dtBucket+=dt;
++  if(SpecClock.stepCounter%SpecClock.sampleStride)return;
++  const m=measureSpecClock(V),h=SpecClock.dtBucket;SpecClock.dtBucket=0;
++  if(m.valid){
++    SpecClock.tauFieldMinA+=m.envA.etaMin*h;SpecClock.tauFieldMaxA+=m.envA.etaMax*h;
++    SpecClock.tauFieldMinB+=m.envB.etaMin*h;SpecClock.tauFieldMaxB+=m.envB.etaMax*h;
++    if(Number.isFinite(m.etaPhaseA)&&Number.isFinite(m.etaPhaseB)){
++      SpecClock.tauPhaseA+=m.etaPhaseA*h;SpecClock.tauPhaseB+=m.etaPhaseB*h;
++    }
++  }
++  SpecClock.last=m;
++}
++function resetSpecClockRuntime(reason='reset'){
++  SpecClock.calibrated=false;SpecClock.stepCounter=0;SpecClock.dtBucket=0;SpecClock.omegaRefA=NaN;SpecClock.omegaRefB=NaN;
++  SpecClock.tauFieldMinA=SpecClock.tauFieldMaxA=SpecClock.tauFieldMinB=SpecClock.tauFieldMaxB=0;
++  SpecClock.tauPhaseA=SpecClock.tauPhaseB=0;SpecClock.last={valid:false,reason};
++  updateSpecClockDisplay();
++}
++function calibrateSpecClockPhase(){
++  const pre=specClockPrerequisites();if(!pre.ok){setFlag('⚠ swirl-clockkalibratie geweigerd: '+pre.reason+'.',true);updateSpecClockDisplay();return false;}
++  if(!SpecClock.tmpV||SpecClock.tmpV.length!==Y.length)SpecClock.tmpV=new Float64Array(Y.length);
++  velAll(Y,SpecClock.tmpV);
++  const oa=Math.abs(carrierBodyOmegaFromVelocity('A',SpecClock.tmpV)),ob=Math.abs(carrierBodyOmegaFromVelocity('B',SpecClock.tmpV));
++  if(!(oa>1e-12&&ob>1e-12)){setFlag('⚠ fasekalibratie ongeldig: |Ω_body| van A of B is te klein. Kies twee roterende knoopdragers.',true);return false;}
++  SpecClock.omegaRefA=oa;SpecClock.omegaRefB=ob;SpecClock.calibrated=true;
++  SpecClock.tauFieldMinA=SpecClock.tauFieldMaxA=SpecClock.tauFieldMinB=SpecClock.tauFieldMaxB=0;
++  SpecClock.tauPhaseA=SpecClock.tauPhaseB=0;SpecClock.dtBucket=0;SpecClock.stepCounter=0;
++  SpecClock.last=measureSpecClock(SpecClock.tmpV);updateSpecClockDisplay();
++  if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-calibration',{distance:SpecClock.last&&SpecClock.last.distance,omegaRefA:oa,omegaRefB:ob});
++  return true;
++}
++function fmtClockTime(s){
++  if(!Number.isFinite(s))return '—';const a=Math.abs(s),sg=s<0?'−':'';
++  if(a<1e-15)return sg+(a*1e18).toFixed(3)+' as';
++  if(a<1e-12)return sg+(a*1e15).toFixed(3)+' fs';
++  if(a<1e-9)return sg+(a*1e12).toFixed(3)+' ps';
++  if(a<1e-6)return sg+(a*1e9).toFixed(3)+' ns';
++  if(a<1e-3)return sg+(a*1e6).toFixed(3)+' µs';
++  if(a<1)return sg+(a*1e3).toFixed(3)+' ms';
++  return s.toFixed(6)+' s';
++}
++function updateSpecClockDisplay(){
++  const btn=document.getElementById('bSpecClockToggle');if(!btn)return;
++  btn.classList.toggle('active',P.specClockEnabled);btn.textContent=P.specClockEnabled?'⏹ Deactiveer speculative clock':'⚠ Activeer speculative clock';
++  const pre=specClockPrerequisites(),cal=document.getElementById('bSpecClockCalibrate');if(cal)cal.disabled=!P.specClockEnabled||!pre.ok;
++  const gain=document.getElementById('sSpecClockGain');if(gain)gain.value=String(P.specClockDisplayGain);
++  const vg=document.getElementById('vSpecClockGain');if(vg)vg.textContent=(P.specClockDisplayGain>=1e6?'10⁶':String(P.specClockDisplayGain))+'×';
++  const eta0=specClockEta(V_HORN_SST),basePpm=(1-eta0)*1e6;
++  const base=document.getElementById('specClockBaseline');if(base)base.textContent=basePpm.toFixed(6)+' ppm · η₀='+eta0.toFixed(12);
++  const status=document.getElementById('specClockStatus');
++  const ids=['specClockDistance','specClockMutual','specClockEtaA','specClockEtaB','specClockPhaseRates','specClockFieldRatio','specClockPhaseRatio','specClockFieldLag','specClockPhaseLag','specClockResidual'];
++  const clear=()=>ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
++  if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';return;}
++  if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';return;}
++  const m=SpecClock.last;
++  if(!m||!m.valid){clear();status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';return;}
++  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
++  const envText=e=>e.etaMin.toFixed(12)+' … '+e.etaMax.toFixed(12);
++  set('specClockDistance',fmtLengthSI(m.distance));set('specClockMutual',fmtSpeed(m.uA)+' / '+fmtSpeed(m.uB));
++  set('specClockEtaA',envText(m.envA));set('specClockEtaB',envText(m.envB));
++  set('specClockFieldRatio',m.fieldRatioMin.toFixed(12)+' … '+m.fieldRatioMax.toFixed(12));
++  set('specClockPhaseRates',Number.isFinite(m.etaPhaseA)?m.etaPhaseA.toFixed(9)+' / '+m.etaPhaseB.toFixed(9):'niet gekalibreerd');
++  set('specClockPhaseRatio',Number.isFinite(m.phaseRatio)?m.phaseRatio.toFixed(12):'niet gekalibreerd');
++  const dFieldMin=SpecClock.tauFieldMinA-SpecClock.tauFieldMaxB,dFieldMax=SpecClock.tauFieldMaxA-SpecClock.tauFieldMinB;
++  set('specClockFieldLag',fmtClockTime(dFieldMin)+' … '+fmtClockTime(dFieldMax));
++  set('specClockPhaseLag',SpecClock.calibrated?fmtClockTime(SpecClock.tauPhaseA-SpecClock.tauPhaseB):'niet gekalibreerd');
++  set('specClockResidual',Number.isFinite(m.residual)?m.residual.toExponential(3):'open');
++  const ppmA=(1-m.envA.etaMid)*1e6,ppmB=(1-m.envB.etaMid)*1e6,full=10;
++  const pctA=clamp(ppmA*P.specClockDisplayGain/full*100,0,100),pctB=clamp(ppmB*P.specClockDisplayGain/full*100,0,100);
++  document.getElementById('specClockBarA').style.width=pctA+'%';document.getElementById('specClockBarB').style.width=pctB+'%';
++  document.getElementById('specClockBarValueA').textContent=ppmA.toFixed(6)+' ppm';document.getElementById('specClockBarValueB').textContent=ppmB.toFixed(6)+' ppm';
++  if(!SpecClock.calibrated){status.className='spec-clock-status warn';status.textContent='VELDROUTE ACTIEF · fase-route nog open. Kalibreer bij zo groot mogelijke A–B-afstand; herkalibreer daarna niet tijdens de afstandssweep.';}
++  else if(m.inside){status.className='spec-clock-status good';status.textContent='VOORLOPIG INGESLOTEN · R_AB^phase ligt binnen de formele veld-envelop. Dit is slechts één finite-time datapunt; canonical gates blijven open.';}
++  else{status.className='spec-clock-status bad';status.textContent='NIET INGESLOTEN · de faseproxy valt buiten de formele veld-envelop. Dit falsificeert deze parametercombinatie of de gekozen twee-knoop-superpositie/proxy.';}
++}
++
+ function translateCarrier(which,dx,dy,dz){
+   for(const f of carrierFilaments(which))for(let k=0;k<f.N;k++){
+     const i=f.off+3*k;Y[i]+=dx;Y[i+1]+=dy;Y[i+2]+=dz;
+@@ -3543,6 +3773,7 @@
+   rebuildStreamlines(true);
+   markPotentialFlowDirty();updatePotentialFlowVisual(true);
+   resetStretchGate('state-reset',true);
++  resetSpecClockRuntime('state-reset · fase-referentie opnieuw vereist');
+ }
+ function taylorOscillationApplies(){
+   return P.mode==='solo'&&!P.centerLock&&P.taylorOsc.enabled&&!!Y&&!!fils.length;
+@@ -4814,6 +5045,7 @@
+       (rel(P.scaleProbe,R_HORN_SST)<1e-9?'sst':(rel(P.scaleProbe,HE_CORE_REF)<1e-9?'helium':'custom'));
+   }
+   syncDiagnosticToggles();
++  updateSpecClockDisplay();
+   const gpDeltaText=DELTA.gp.toFixed(6);
+   const gpSel=document.getElementById('gpDeltaSel');if(gpSel){gpSel.value=String(DELTA.gp);gpSel.disabled=P.core!=='gp';}
+   const gpVal=document.getElementById('vGpDelta');if(gpVal)gpVal.textContent=gpDeltaText;
+@@ -5217,7 +5449,7 @@
+   ];
+   const rightSpecs=[
+     {key:'core',title:'MODEL · VORTEX + KERN',short:'KERN',icon:'◉',subtitle:'rechts · gecombineerd',tooltip:'Topologie, dragerconfiguratie, oriëntatie, centrum-lock, topology guard, kernmodel, circulatie, quanta en SST-schalen. Activeert FLOW + CILINDER links.',nodes:[vlNode('subVortex'),vlNode('subCore')]},
+-    {key:'diag',title:'DIAGNOSTIEK',short:'DIAG',icon:'∑',subtitle:'metingen',tooltip:'Geometrische descriptoren, SST stretch-gate en BEM/diagnostische uitlezingen. Activeert INFO links.',nodes:[vlNode('collDiagnostics'),vlNode('sstResearchDiagnostics'),vlNode('chiPhasePanel'),vlNode('stretchGatePanel')]}
++    {key:'diag',title:'DIAGNOSTIEK',short:'DIAG',icon:'∑',subtitle:'metingen',tooltip:'Geometrische descriptoren, SST Research-Track, speculative swirl clock, stretch-gate en BEM/diagnostische uitlezingen. Activeert INFO links.',nodes:[vlNode('collDiagnostics'),vlNode('sstResearchDiagnostics'),vlNode('chiPhasePanel'),vlNode('specClockPanel'),vlNode('stretchGatePanel')]}
+   ];
+   let left=null,right=null,pairing=false;
+   const fromLeft=key=>{if(pairing||!right)return;const target=key==='info'?'diag':(key==='flow'?'core':null);if(!target)return;pairing=true;right.activate(target,false,false);right.setOpen(true);pairing=false;};
+@@ -5538,6 +5770,21 @@
+   syncSignedUi('W','revW',P.w*1000,x=>fmtAxialMmPerS(x));
+ });
+ segHandler('indSeg','ind',key=>setIndFlag(key,!Flags[key]));
++document.getElementById('bSpecClockToggle').addEventListener('click',()=>{
++  if(!P.specClockEnabled){
++    const ok=window.confirm('⚠ SPECULATIVE / NIET CANON\n\nDeze diagnose combineert de canonieke SST swirl-snelheid met een meterschaal mutual-flow proxy en een body-faseproxy. Zij koppelt niets terug naar de solver en mag niet als bewezen tijdsdilatie worden geïnterpreteerd.\n\nActiveren?');
++    if(!ok)return;
++    P.specClockEnabled=true;resetSpecClockRuntime('geactiveerd · eerste veldsample nodig');
++    setFlag('⚠ SPECULATIVE SWIRL CLOCK actief: alleen passieve Research-Track-diagnostiek; geen canonieke superpositiewet en geen solvercoupling.',true);
++    if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-enabled',{enabled:true});
++  }else{
++    P.specClockEnabled=false;resetSpecClockRuntime('gedeactiveerd');
++    if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-enabled',{enabled:false});
++  }
++  syncUi();
++});
++document.getElementById('bSpecClockCalibrate').addEventListener('click',calibrateSpecClockPhase);
++document.getElementById('sSpecClockGain').addEventListener('change',e=>{P.specClockDisplayGain=Math.max(1,Number(e.target.value)||1);updateSpecClockDisplay();});
+ document.getElementById('cCcwA').addEventListener('change',e=>{P.ccwA=e.target.checked;resetState();});
+ function setGpDelta(value,{reset=true,log=true}={}){
+   const next=Number(value);
+@@ -5812,7 +6059,8 @@
+       bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMQuality:P.bundleBEMQuality,
+       topologyGuard:P.topologyGuard,accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp,
+       stretchGateEnabled:P.stretchGateEnabled,stretchProfile:P.stretchProfile,stretchProfileApply:P.stretchProfileApply,stretchProfileOnly:P.stretchProfileOnly,
+-      stretchOmega0:P.stretchOmega0,stretchBeta:P.stretchBeta,stretchGamma:P.stretchGamma,stretchSoftening:P.stretchSoftening,stretchEpsilon:P.stretchEpsilon,stretchMode:P.stretchMode};
++      stretchOmega0:P.stretchOmega0,stretchBeta:P.stretchBeta,stretchGamma:P.stretchGamma,stretchSoftening:P.stretchSoftening,stretchEpsilon:P.stretchEpsilon,stretchMode:P.stretchMode,
++      specClockEnabled:P.specClockEnabled,specClockDisplayGain:P.specClockDisplayGain};
+   }
+   function pushRing(kind,arr,item,limit){
+     arr.push(item);
+@@ -5885,7 +6133,8 @@
+     'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical','scaleProbe',
+     'bundleEnabled','bundleProfile','bundleSplay','bundleBEMEnabled','bundleBoundaryMode','bundleBEMQuality','topologyGuard',
+     'centerLock','twistProxyEnabled','ghostStewartson','Rcyl','Hcyl',
+-    'stretchGateEnabled','stretchProfile','stretchProfileApply','stretchProfileOnly','stretchOmega0','stretchBeta','stretchGamma','stretchSoftening','stretchEpsilon','stretchMode','stretchNeutralTol','stretchFailTol'];
++    'stretchGateEnabled','stretchProfile','stretchProfileApply','stretchProfileOnly','stretchOmega0','stretchBeta','stretchGamma','stretchSoftening','stretchEpsilon','stretchMode','stretchNeutralTol','stretchFailTol',
++    'specClockEnabled','specClockDisplayGain'];
+   function snap(){const o={};for(const k of PKEYS)o[k]=P[k];o.tOsc=P.taylorOsc.enabled;o.gpDelta=DELTA.gp;return o;}
+   function restore(o){for(const k of PKEYS)P[k]=o[k];P.taylorOsc.enabled=o.tOsc;DELTA.gp=o.gpDelta;syncUi();}
+   function baseline(){
+@@ -5960,6 +6209,9 @@
+       const scoreHeading=scorePanel?.querySelector(':scope > .vl-diagnostics-heading')?.textContent.trim();
+       const flatDiag=scorePanel?.tagName==='SECTION'&&!scorePanel.querySelector(':scope > summary');
+       add('T0g geometrische diagnostiek vast in DIAG',!!scorePanel&&flatDiag&&scoreHeading==='GEOMETRISCHE DIAGNOSTIEK','panel='+!!scorePanel+' flat='+flatDiag+' heading='+scoreHeading);
++      const scPanel=document.getElementById('specClockPanel'),eta0=specClockEta(V_HORN_SST),env0=specClockEnvelope(0);
++      add('T0p speculative swirl-clock duidelijk gelabeld en passief',!!scPanel&&/SPECULATIVE/.test(scPanel.textContent)&&/GEEN SOLVERKOPPELING/.test(scPanel.textContent),'panel='+!!scPanel);
++      add('T0q swirl-clock limieten',Math.abs(eta0-0.999993343558553)<1e-14&&Math.abs(env0.etaMin-eta0)<1e-14&&Math.abs(env0.etaMax-eta0)<1e-14,'eta0='+eta0.toPrecision(16));
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse
+@@ -6497,6 +6749,7 @@
+       tPhys+=dtApplied;
+       if(P.ghostStewartson) syncGhostRing();
+       updateStretchGateAcceptedStep(Ypre,Y,dtApplied);
++      updateSpecClockAcceptedStep(dtApplied,K4);
+       // v7.2 (RP1): tracers per geaccepteerde CFL-stap, met exact dezelfde
+       // tijdstap als de filamenten — framerate-onafhankelijk per constructie.
+       stepTracers(dtApplied);
+@@ -6564,6 +6817,7 @@
+     const rep=computeStabilityReport();if(rep)updateStabilityDisplay(rep);
+     updateStretchGateDisplay(computeStretchGateReport());
+     updateChiPanel();
++    updateSpecClockDisplay();
+   }
+   if(frame%3===0&&!flagged){
+     const Ga=Gamma();

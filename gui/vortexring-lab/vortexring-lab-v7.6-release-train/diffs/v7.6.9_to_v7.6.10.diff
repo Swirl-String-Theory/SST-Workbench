@@ -1,0 +1,310 @@
+--- releases/v7.6.9/vortexring-lab-v7.6.9.html
++++ releases/v7.6.10/vortexring-lab-v7.6.10.html
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.9 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.9">
++<title>Superfluïde vortexlab v7.6.10 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.10">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.8">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay">
++<meta name="vortexlab-parent" content="7.6.9">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -728,7 +728,8 @@
+             <button type="button" class="seg-btn active" data-mode="solo">Solo</button>
+           </div></div>
+         <div class="ctrl hidden" id="sepABRow"><label>initiële axiale knoopafstand Δz<sub>AB,0</sub> <span class="v" id="vSepAB">840 mm</span></label>
+-          <input type="number" id="sSepAB" min="1" max="1000" step="1" value="840">
++          <input type="number" id="sSepAB" min="1" step="1" value="840" data-slider-max="1000">
++          <div class="note" style="margin-top:3px;">Getalveld: vrije positieve afstand in mm. De slider blijft begrensd tot de actuele cilinderhoogte; een grotere afstand schakelt de periodieke z-grens automatisch uit.</div>
+           <div class="core-limit-note sep-readout warn" id="sepABReadout">Alleen botsingsmodus. A en B worden symmetrisch rond hun huidige middenvlak geplaatst; de laterale offset Δx(B) blijft onafhankelijk.</div>
+         </div>
+         <div class="ctrl"><label for="topoSelect">topologie</label>
+@@ -1067,7 +1068,7 @@
+             </div>
+             <div class="spec-clock-quick-grid">
+               <div class="ctrl"><label>Δz<sub>AB,0</sub> <span class="v" id="vSpecSepAB">—</span></label>
+-                <input type="number" id="sSpecSepAB" min="1" max="1000" step="1" value="840"></div>
++                <input type="number" id="sSpecSepAB" min="1" step="1" value="840" data-slider-max="1000"></div>
+               <div class="ctrl"><label>Δx(B) <span class="v" id="vSpecOffClone">—</span></label>
+                 <input type="number" id="sSpecOffClone" min="-1000" max="1000" step="1" value="0"></div>
+               <div class="ctrl"><label>v<sub>z</sub> drift A <span class="v" id="vSpecVzA">—</span></label>
+@@ -1079,7 +1080,7 @@
+               <button type="button" id="bSpecSetApproach">⇄ Zet v<sub>z</sub> A/B naar elkaar toe</button>
+               <button type="button" id="bSpecSetSeparate">⇆ Zet v<sub>z</sub> A/B van elkaar af</button>
+             </div>
+-            <div class="note" style="margin-top:6px;">Deze quick-controls spiegelen de hoofdinstellingen onder MODEL · VORTEX + KERN. Gebruik ze voor afstandssweeps en botsingen; alle wijzigingen worden via ModelLog mee gelogd zodra auto-log aan staat.</div>
++            <div class="note" style="margin-top:6px;">Deze quick-controls wijzigen dezelfde MODEL-toestand direct. Het afstandsgetalveld accepteert waarden boven het sliderbereik; tijdens typen wordt een actief veld niet door live diagnostiek overschreven. Alle wijzigingen worden via ModelLog gelogd zodra auto-log aan staat.</div>
+             <div class="ctrl"><label for="sSpecClockGain">visuele lag-vergroting <span class="v" id="vSpecClockGain">1×</span></label>
+               <select id="sSpecClockGain">
+                 <option value="1" selected>1× · 10 ppm volle schaal</option>
+@@ -1319,7 +1320,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.9 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.10 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1330,7 +1331,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.9';
++const APP_VERSION='7.6.10';
+ const APP_BASE_VERSION='7.5.3';
+ window.__vlBootComplete=false;
+ window.addEventListener('error',function vlEarlyBootstrapError(event){
+@@ -1362,7 +1363,9 @@
+   'UI: topology/contactmeldingen staan onder de topbar; LIVE STABILITEIT, geometriekaarten en sparkline vormen permanente onderste simulatoroverlays',
+   'UI: GEOMETRISCHE DIAGNOSTIEK is een vaste DIAG-sectie; χ-fase/Track B, speculative swirl clock A↔B en de vortex-stretching gate staan eronder als zelfstandige collapsebles',
+   'Speculative swirl clock: passieve vergelijking van twee ongemapte proxies; ruwe overlap/afwijking is expliciet geen fysische closure of falsificatie',
+-  'SPEC CLOCK-overlay wordt alleen bij een actieve diagnose getoond en incrementeel bijgewerkt zonder voortdurende DOM-reconstructie'
++  'SPEC CLOCK-overlay wordt alleen bij een actieve diagnose getoond en incrementeel bijgewerkt zonder voortdurende DOM-reconstructie',
++  'Spec-clock quick-controls zijn werkelijk tweerichtingsgebonden; actieve numerieke invoer wordt niet langer door live synchronisatie overschreven',
++  'Δz_AB,0 heeft vrije positieve numerieke invoer boven het sliderbereik; verre afstanden schakelen periodiek z automatisch uit'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -2319,7 +2322,7 @@
+   P.off=0;P.w=0;P.lockVz=false;P.vzA=+0.005;P.vzB=-0.005;P.ccwA=true;P.ccwB=false;P.mirrorB=false;
+   P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=false;P.tracerWrapZ=true;P.tracerSpawnMode='inner-column';
+   P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.specClockDisplayGain=1;P.specClockEnabled=true;
+-  setInitialAxialSeparation(Math.min(0.84,maxInitialAxialSeparation()));
++  setInitialAxialSeparation(Math.min(0.84,initialAxialSeparationSliderMax()));
+   resetSpecClockRuntime('preset');
+   syncUi();updateSubtitle();resetState();if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
+   if(window.ModelLog){window.ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;window.ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
+@@ -2402,33 +2405,62 @@
+   return 0;
+ }
+ 
++const INITIAL_AXIAL_SEPARATION_MIN=1e-3;
++const INITIAL_AXIAL_SEPARATION_MAX=1e6;
++let separationBoundaryAutoDisabled=false;
+ function initialAxialSeparation(){return Math.abs(P.zB-P.zA);}
+-function maxInitialAxialSeparation(){return Math.max(1e-3,2*Math.max(P.Hcyl,5e-4));}
++function initialAxialSeparationSliderMax(){return Math.max(INITIAL_AXIAL_SEPARATION_MIN,2*Math.max(P.Hcyl,5e-4));}
++function syncInputUnlessEditing(input,value,force=false){
++  if(!input||(!force&&document.activeElement===input))return false;
++  const next=String(value);if(input.value!==next)input.value=next;
++  const range=input.closest('.param-hybrid')?.querySelector('input.param-slider');if(range)range.value=String(hybridRangeFromInput(input));
++  return true;
++}
++function syncHybridSliderMax(input,maxValue){
++  if(!input)return;
++  input.dataset.sliderMax=String(maxValue);
++  const range=input.closest('.param-hybrid')?.querySelector('input.param-slider');
++  if(range){range.max=String(maxValue);range.value=String(hybridRangeFromInput(input));}
++}
+ function setInitialAxialSeparation(distance){
+   const mid=.5*(P.zA+P.zB);
+-  const applied=clamp(Math.abs(Number(distance)||0),1e-3,maxInitialAxialSeparation());
++  const requested=Math.abs(Number(distance));
++  if(!Number.isFinite(requested))return initialAxialSeparation();
++  const applied=clamp(requested,INITIAL_AXIAL_SEPARATION_MIN,INITIAL_AXIAL_SEPARATION_MAX);
+   P.zA=mid-.5*applied;P.zB=mid+.5*applied;
++  const period=initialAxialSeparationSliderMax();
++  if(P.mode==='botsing'&&applied>period*(1+1e-12)&&P.tracerWrapZ){
++    P.tracerWrapZ=false;separationBoundaryAutoDisabled=true;
++    const wrap=document.getElementById('cTracerWrapZ');if(wrap)wrap.checked=false;
++  }
+   return applied;
+ }
++function announceSeparationBoundaryPolicy(){
++  if(!separationBoundaryAutoDisabled)return;
++  separationBoundaryAutoDisabled=false;
++  const message='ℹ Δz_AB,0 is groter dan de cilinderhoogte; de periodieke z-grens voor knopen en deeltjes is automatisch uitgezet zodat de gekozen verre afstand behouden blijft.';
++  setFlag(message,true);
++  if(window.ModelLog)window.ModelLog.logEvent('periodic-z-auto-disabled',{reason:'initial-separation-exceeds-cell',axial:initialAxialSeparation(),cellHeight:initialAxialSeparationSliderMax()});
++}
+ function signedMmPerSFromMps(v){return (Number(v)||0)*1e3;}
+ function fmtSignedMmPerSInput(v){
+   const x=signedMmPerSFromMps(v);
+   if(!Number.isFinite(x))return '—';
+   return (Math.round(x*10000)/10000).toString().replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1')+' mm/s';
+ }
+-function syncSpecClockQuickControls(){
++function syncSpecClockQuickControls({force=false}={}){
+   const sep=document.getElementById('sSpecSepAB'),vSep=document.getElementById('vSpecSepAB');
+   const off=document.getElementById('sSpecOffClone'),vOff=document.getElementById('vSpecOffClone');
+   const vzA=document.getElementById('sSpecVzA'),vA=document.getElementById('vSpecVzA');
+   const vzB=document.getElementById('sSpecVzB'),vB=document.getElementById('vSpecVzB');
+   const cLog=document.getElementById('cSpecClockLog');
+-  if(sep){sep.max=(1000*maxInitialAxialSeparation()).toFixed(3);sep.value=(1000*initialAxialSeparation()).toFixed(3).replace(/\.?0+$/,'');}
++  if(sep){const sliderMax=(1000*initialAxialSeparationSliderMax()).toFixed(3);syncInputUnlessEditing(sep,(1000*initialAxialSeparation()).toFixed(3).replace(/\.?0+$/,''),force);syncHybridSliderMax(sep,sliderMax);}
+   if(vSep)vSep.textContent=fmtLengthSI(initialAxialSeparation());
+-  if(off)off.value=(P.off*1000).toFixed(3).replace(/\.?0+$/,'');
++  if(off)syncInputUnlessEditing(off,(P.off*1000).toFixed(3).replace(/\.?0+$/,''),force);
+   if(vOff)vOff.textContent=(P.off*1000).toFixed(1).replace(/\.0$/,'')+' mm';
+-  if(vzA)vzA.value=signedMmPerSFromMps(P.vzA).toFixed(4).replace(/\.?0+$/,'');
++  if(vzA)syncInputUnlessEditing(vzA,signedMmPerSFromMps(P.vzA).toFixed(4).replace(/\.?0+$/,''),force);
+   if(vA)vA.textContent=fmtSignedMmPerSInput(P.vzA);
+-  if(vzB){vzB.value=signedMmPerSFromMps(P.vzB).toFixed(4).replace(/\.?0+$/,'');vzB.disabled=P.mode!=='botsing';}
++  if(vzB){syncInputUnlessEditing(vzB,signedMmPerSFromMps(P.vzB).toFixed(4).replace(/\.?0+$/,''),force);vzB.disabled=P.mode!=='botsing'||P.lockVz;}
+   if(vB)vB.textContent=fmtSignedMmPerSInput(P.vzB);
+   if(cLog)cLog.checked=!!(window.ModelLog&&window.ModelLog.enabled);
+ }
+@@ -2437,8 +2469,9 @@
+   const value=document.getElementById('vSepAB'),readout=document.getElementById('sepABReadout');
+   if(!row||!input||!value||!readout)return;
+   const collision=P.mode==='botsing';row.classList.toggle('hidden',!collision);
+-  const dz0=initialAxialSeparation(),maxDz=maxInitialAxialSeparation();
+-  input.max=(1000*maxDz).toFixed(3);input.value=(1000*dz0).toFixed(3).replace(/\.?0+$/,'');
++  const dz0=initialAxialSeparation(),sliderMax=initialAxialSeparationSliderMax();
++  syncInputUnlessEditing(input,(1000*dz0).toFixed(3).replace(/\.?0+$/,''));
++  syncHybridSliderMax(input,(1000*sliderMax).toFixed(3));
+   value.textContent=fmtLengthSI(dz0);
+   if(!collision){readout.className='core-limit-note sep-readout warn';readout.textContent='Alleen actief in botsingsmodus.';return;}
+   const startCenter=Math.hypot(dz0,Math.abs(P.off));
+@@ -2449,7 +2482,9 @@
+   const safe=Number.isFinite(gap)?gap>ct.effective:null;
+   readout.className='core-limit-note sep-readout '+(safe===true?'good':(safe===false?'bad':'warn'));
+   const gapText=Number.isFinite(gap)?fmtLengthSI(gap):(P.topologyGuard?'wordt bepaald':'niet gemeten · topology guard uit');
+-  readout.innerHTML=`startcentrumafstand d<sub>AB,0</sub>=${fmtLengthSI(startCenter)} · actuele d<sub>AB</sub>=${Number.isFinite(currentCenter)?fmtLengthSI(currentCenter):'—'} · centerline-clearance=${gapText} · stopgrens=${fmtLengthSI(ct.effective)}`;
++  const far=dz0>sliderMax*(1+1e-12);
++  const boundaryText=far?` · buiten cilinderhoogte ${fmtLengthSI(sliderMax)} · periodieke z-grens ${P.tracerWrapZ?'GEBLOKKEERD':'uit'}`:'';
++  readout.innerHTML=`startcentrumafstand d<sub>AB,0</sub>=${fmtLengthSI(startCenter)} · actuele d<sub>AB</sub>=${Number.isFinite(currentCenter)?fmtLengthSI(currentCenter):'—'} · centerline-clearance=${gapText} · stopgrens=${fmtLengthSI(ct.effective)}${boundaryText}`;
+ }
+ 
+ function isRingTopo(){
+@@ -3058,6 +3093,7 @@
+ }
+ function wrapFilamentCarriersZ(){
+   if(!P.tracerWrapZ||P.centerLock||!Y||!fils.length)return;
++  if(P.mode==='botsing'&&initialAxialSeparation()>initialAxialSeparationSliderMax()*(1+1e-12))return;
+   const lo=zMin(),hi=zMax(),span=hi-lo;
+   if(!(span>1e-12))return;
+   const carriers=[...new Set(fils.filter(f=>!f.ghost).map(f=>f.carrier||'A'))];
+@@ -5132,7 +5168,7 @@
+   if(!s||!r)return;
+   r.checked=val<0;
+   P['rev'+sliderId]=val<0;
+-  s.value=Math.abs(val);
++  syncInputUnlessEditing(s,Math.abs(val));
+   if(v&&fmtVal)v.textContent=fmtVal(val);
+ }
+ function syncUi(){
+@@ -5347,7 +5383,7 @@
+     range.className='param-slider';
+     const logarithmic=input.dataset.scale==='log';
+     range.min=logarithmic?'0':(input.min||'0');
+-    range.max=logarithmic?'1000':(input.max||'100');
++    range.max=logarithmic?'1000':(input.dataset.sliderMax||input.max||'100');
+     range.step=logarithmic?'1':(input.step||'1');
+     range.value=String(hybridRangeFromInput(input));
+     range.setAttribute('aria-label',(input.id||'parameter')+' slider');
+@@ -5719,12 +5755,64 @@
+   const applied=setInitialAxialSeparation(x*1e-3);
+   if(window.ModelLog&&window.ModelLog.logUser)window.ModelLog.logUser('initial-knot-separation',{axial:applied,lateral:P.off,centerDistance:Math.hypot(applied,Math.abs(P.off))});
+   resetState();
++  announceSeparationBoundaryPolicy();
+   return applied*1e3;
+ });
++{const sepMain=document.getElementById('sSepAB');if(sepMain){sepMain.addEventListener('blur',updateInitialSeparationUi);sepMain.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sepMain.blur();}});}}
+ bindSignedRange('Off','revOff',x=>x.toFixed(0)+' mm',x=>{P.off=x*1e-3;resetState();});
+ bindSignedRange('W','revW',x=>fmtAxialMmPerS(x),x=>P.w=x*1e-3);
+ bindSignedRange('VzA','revVzA',x=>fmtAxialMmPerS(x),x=>{P.vzA=x*1e-3;if(P.lockVz){P.vzB=P.vzA;syncSignedUi('VzB','revVzB',P.vzB,y=>fmtAxialMmPerS(y));}});
+ bindSignedRange('VzB','revVzB',x=>fmtAxialMmPerS(x),x=>P.vzB=x*1e-3);
++function bindSpecClockQuickControls(){
++  const bindNumber=(id,commit)=>{
++    const input=document.getElementById(id);if(!input)return;
++    input.dataset.specBound='1';
++    input.addEventListener('input',()=>{const value=Number(input.value);if(Number.isFinite(value))commit(value);});
++    input.addEventListener('blur',()=>syncSpecClockQuickControls({force:true}));
++    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur();}});
++  };
++  bindNumber('sSpecSepAB',mm=>{
++    const applied=setInitialAxialSeparation(mm*1e-3);
++    if(window.ModelLog)window.ModelLog.logUser('spec-clock-initial-separation',{requestedMm:mm,axial:applied,lateral:P.off,centerDistance:Math.hypot(applied,Math.abs(P.off))});
++    resetState();announceSeparationBoundaryPolicy();
++  });
++  bindNumber('sSpecOffClone',mm=>{
++    P.off=mm*1e-3;syncSignedUi('Off','revOff',P.off*1000,x=>x.toFixed(0)+' mm');
++    if(window.ModelLog)window.ModelLog.logUser('spec-clock-lateral-offset',{mm,metres:P.off});
++    resetState();
++  });
++  bindNumber('sSpecVzA',mmps=>{
++    P.vzA=mmps*1e-3;if(P.lockVz)P.vzB=P.vzA;
++    syncSignedUi('VzA','revVzA',P.vzA*1000,x=>fmtAxialMmPerS(x));
++    if(P.lockVz)syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
++    if(window.ModelLog)window.ModelLog.logUser('spec-clock-drift-a',{mmPerS:mmps,metresPerSecond:P.vzA,lockVz:P.lockVz});
++  });
++  bindNumber('sSpecVzB',mmps=>{
++    P.vzB=mmps*1e-3;syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
++    if(window.ModelLog)window.ModelLog.logUser('spec-clock-drift-b',{mmPerS:mmps,metresPerSecond:P.vzB});
++  });
++  const setPairDrift=approach=>{
++    const speed=Math.max(Math.abs(P.vzA),Math.abs(P.vzB),0.005);
++    const toward=P.zA<=P.zB?1:-1;
++    P.lockVz=false;const lock=document.getElementById('cLockVz');if(lock)lock.checked=false;
++    P.vzA=(approach?toward:-toward)*speed;P.vzB=-P.vzA;
++    syncSignedUi('VzA','revVzA',P.vzA*1000,x=>fmtAxialMmPerS(x));
++    syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
++    syncSpecClockQuickControls({force:true});
++    if(window.ModelLog)window.ModelLog.logUser(approach?'spec-clock-approach':'spec-clock-separate',{vzA:P.vzA,vzB:P.vzB});
++  };
++  const approach=document.getElementById('bSpecSetApproach');if(approach){approach.dataset.specBound='1';approach.addEventListener('click',()=>setPairDrift(true));}
++  const separate=document.getElementById('bSpecSetSeparate');if(separate){separate.dataset.specBound='1';separate.addEventListener('click',()=>setPairDrift(false));}
++  const pull=document.getElementById('bSpecPullFromModel');if(pull){pull.dataset.specBound='1';pull.addEventListener('click',()=>{syncSpecClockQuickControls({force:true});setFlag('ℹ SPEC CLOCK quick-controls zijn opnieuw uit de actuele MODEL-toestand geladen.',true);});}
++  const preset=document.getElementById('bSpecClockPreset');if(preset){preset.dataset.specBound='1';preset.addEventListener('click',applySpecClockPreset);}
++  const log=document.getElementById('cSpecClockLog');if(log){log.dataset.specBound='1';log.addEventListener('change',()=>{if(window.ModelLog)window.ModelLog.setEnabled(log.checked);const main=document.getElementById('cModelLog');if(main)main.checked=log.checked;});}
++  const exportTxt=document.getElementById('bModelLogExportTxt');if(exportTxt){exportTxt.dataset.specBound='1';exportTxt.addEventListener('click',()=>{
++    if(!window.ModelLog)return;window.ModelLog.logUser('ui:click:bModelLogExportTxt',{format:'txt'});
++    const blob=new Blob([window.ModelLog.exportText()],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);
++    a.download='vortexlab-session-'+APP_VERSION.replace(/\./g,'-')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0);
++  });}
++}
++bindSpecClockQuickControls();
+ bindSignedRange('Vn','revVn',x=>fmtAxialMmPerS(x),x=>{P.vnZ=x*1e-3;});
+ bindRange('MfA',x=>x.toFixed(3),x=>{P.mfAlpha=clamp(x,0,1);});
+ bindRange('MfAp',x=>x.toFixed(4),x=>{P.mfAlphaP=clamp(x,-0.5,0.5);});
+@@ -5886,6 +5974,12 @@
+   rebuildLines();rebuildTubes(true);updateSubtitle();
+ });
+ document.getElementById('cTracerWrapZ').addEventListener('change',e=>{
++  if(e.target.checked&&P.mode==='botsing'&&initialAxialSeparation()>initialAxialSeparationSliderMax()*(1+1e-12)){
++    P.tracerWrapZ=false;e.target.checked=false;
++    setFlag('⚠ Periodieke z-grens geweigerd: Δz_AB,0 is groter dan de cilinderhoogte. Vergroot eerst de cilinderhoogte of verklein de startafstand.',true);
++    if(window.ModelLog)window.ModelLog.logEvent('periodic-z-rejected',{axial:initialAxialSeparation(),cellHeight:initialAxialSeparationSliderMax()});
++    return;
++  }
+   P.tracerWrapZ=e.target.checked;
+   if(P.tracerWrapZ){resetParticles('inner-column',{announce:false,resetCycle:true});wrapFilamentCarriersZ();}
+   updateSubtitle();
+@@ -6249,6 +6343,7 @@
+   const userActions=[],steps=[],events=[];
+   function snapP(){
+     return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,rHorn:R_HORN_SST,rCorePhysical:P.rCorePhysical,scaleProbe:P.scaleProbe,Om:P.Om,nQ:P.nQ,
++      zA:P.zA,zB:P.zB,initialAxialSeparation:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB,lockVz:P.lockVz,tracerWrapZ:P.tracerWrapZ,
+       solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,
+       bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMQuality:P.bundleBEMQuality,
+       topologyGuard:P.topologyGuard,accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp,
+@@ -6441,6 +6536,20 @@
+        const stable=!!overlay&&overlay.classList.contains('active')&&body?.firstElementChild===stableNode&&body?.dataset.specOverlayReady==='1';
+        P.specClockEnabled=false;updateSpecClockOverlay(null,{ok:false});const hidden=!overlay?.classList.contains('active')&&overlay?.getAttribute('aria-hidden')==='true';P.specClockEnabled=oldEnabled;updateSpecClockOverlay(null,{ok:true});
+        add('T0s SPEC CLOCK-overlay incrementeel en alleen actief op verzoek',stable&&hidden,'stable='+stable+' hidden='+hidden);}
++      {const old={mode:P.mode,zA:P.zA,zB:P.zB,H:P.Hcyl,wrap:P.tracerWrapZ};P.mode='botsing';P.Hcyl=.5;P.tracerWrapZ=true;
++       const applied=setInitialAxialSeparation(2.5),free=Math.abs(applied-2.5)<1e-12&&!P.tracerWrapZ;
++       P.mode=old.mode;P.zA=old.zA;P.zB=old.zB;P.Hcyl=old.H;P.tracerWrapZ=old.wrap;separationBoundaryAutoDisabled=false;
++       const wrap=document.getElementById('cTracerWrapZ');if(wrap)wrap.checked=P.tracerWrapZ;
++       add('T0t vrije afstand boven cilinderhoogte zonder periodieke terugwikkeling',free,'applied='+applied+' wrapAfterFar=false');}
++      {const input=document.getElementById('sSpecSepAB'),before=input?.value;input?.focus();if(input)input.value='2500';syncSpecClockQuickControls();
++       const preserved=document.activeElement===input&&input?.value==='2500';input?.blur();syncSpecClockQuickControls({force:true});
++       add('T0u live synchronisatie overschrijft actief quick-veld niet',preserved,'before='+before+' during='+(input&&input.value));}
++      {const ids=['sSpecSepAB','sSpecOffClone','sSpecVzA','sSpecVzB','bSpecSetApproach','bSpecSetSeparate','bSpecPullFromModel','bSpecClockPreset','cSpecClockLog','bModelLogExportTxt'];
++       const bound=ids.every(id=>document.getElementById(id)?.dataset.specBound==='1');
++       add('T0v alle SPEC CLOCK quick-controls werkelijk gebonden',bound,ids.filter(id=>document.getElementById(id)?.dataset.specBound!=='1').join(',')||'alle gebonden');}
++      {const main=document.getElementById('sSepAB'),quick=document.getElementById('sSpecSepAB');
++       const freeInputs=main&&!main.hasAttribute('max')&&quick&&!quick.hasAttribute('max')&&main.dataset.sliderMax&&quick.dataset.sliderMax;
++       add('T0w afstandsgetal vrij en slider afzonderlijk begrensd',!!freeInputs,'mainMax='+(main&&main.max)+' sliderMax='+(main&&main.dataset.sliderMax));}
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse

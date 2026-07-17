@@ -1,0 +1,153 @@
+--- /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.7/vortexring-lab-v7.6.7.html	2026-07-15 01:44:58.668829228 +0000
++++ /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.8/vortexring-lab-v7.6.8.html	2026-07-15 01:57:47.533490800 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.7 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.7">
++<title>Superfluïde vortexlab v7.6.8 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.8">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.6">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export">
++<meta name="vortexlab-parent" content="7.6.7">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -1318,7 +1318,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.7 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.8 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1329,8 +1329,21 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.7';
++const APP_VERSION='7.6.8';
+ const APP_BASE_VERSION='7.5.3';
++window.__vlBootComplete=false;
++window.addEventListener('error',function vlEarlyBootstrapError(event){
++  if(window.__vlBootComplete)return;
++  const flag=document.getElementById('flag');
++  const detail=String(event&&event.error&&event.error.message||event&&event.message||'onbekende opstartfout');
++  if(flag){flag.textContent='⛔ VortexLab kon niet starten: '+detail;flag.style.display='block';flag.classList.remove('warnonly');}
++  console.error('[VortexLab bootstrap]',event&&event.error||event&&event.message||event);
++});
++if(typeof THREE==='undefined'){
++  const flag=document.getElementById('flag');
++  if(flag){flag.textContent='⛔ THREE.js kon niet worden geladen. Controleer internet/CDN-toegang of gebruik een pakket met lokale vendorbestanden.';flag.style.display='block';flag.classList.remove('warnonly');}
++  throw new Error('THREE.js unavailable');
++}
+ const APP_PATCH_NOTES=[
+   'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
+   'Auto-relax is transactioneel: iedere regularisatiestap wordt teruggedraaid wanneer de topology guard de beschikbare tube-clearance kan verliezen',
+@@ -2239,7 +2252,7 @@
+   P.med='sst';
+   P.core='vast';
+   P.coreFlowLock=true; // D4: expliciete similarity-preset-keuze
+-  if(window.ModelLog&&ModelLog.logUser)ModelLog.logUser('coreFlowLock-preset',{value:true});
++  if(window.ModelLog&&window.ModelLog.logUser)window.ModelLog.logUser('coreFlowLock-preset',{value:true});
+   P.Om=1.0; P.revOm=false;
+   P.nQ=1;
+   P.rCorePhysical=null;
+@@ -2287,7 +2300,7 @@
+   P.mode='solo';P.topo='ring';P.inter='lia';P.qual='hoog';
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+   P.med='he';P.core='gp';P.coreFlowLock=true;P.scaleProbe=HE_CORE_REF;DELTA.gp=0.615; // D4: expliciet, preset-context
+-  if(window.ModelLog&&ModelLog.logUser)ModelLog.logUser('coreFlowLock-preset',{value:true});
++  if(window.ModelLog&&window.ModelLog.logUser)window.ModelLog.logUser('coreFlowLock-preset',{value:true});
+   P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+   P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=true;
+   P.tracerWrapZ=true;
+@@ -2307,7 +2320,7 @@
+   setInitialAxialSeparation(Math.min(0.84,maxInitialAxialSeparation()));
+   resetSpecClockRuntime('preset');
+   syncUi();updateSubtitle();resetState();if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
+-  if(typeof ModelLog!=='undefined'){ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
++  if(window.ModelLog){window.ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;window.ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
+   setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, trefoil, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit, Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe.',true);
+ }
+ function applyStretchGatePreset(){
+@@ -2415,7 +2428,7 @@
+   if(vA)vA.textContent=fmtSignedMmPerSInput(P.vzA);
+   if(vzB){vzB.value=signedMmPerSFromMps(P.vzB).toFixed(4).replace(/\.?0+$/,'');vzB.disabled=P.mode!=='botsing';}
+   if(vB)vB.textContent=fmtSignedMmPerSInput(P.vzB);
+-  if(cLog)cLog.checked=!!(typeof ModelLog!=='undefined'&&ModelLog.enabled);
++  if(cLog)cLog.checked=!!(window.ModelLog&&window.ModelLog.enabled);
+ }
+ function updateInitialSeparationUi(){
+   const row=document.getElementById('sepABRow'),input=document.getElementById('sSepAB');
+@@ -2652,7 +2665,7 @@
+   SpecClock.tauFieldMinA=SpecClock.tauFieldMaxA=SpecClock.tauFieldMinB=SpecClock.tauFieldMaxB=0;
+   SpecClock.tauPhaseA=SpecClock.tauPhaseB=0;SpecClock.dtBucket=0;SpecClock.stepCounter=0;
+   SpecClock.last=measureSpecClock(SpecClock.tmpV);updateSpecClockDisplay();
+-  if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-calibration',{distance:SpecClock.last&&SpecClock.last.distance,omegaRefA:oa,omegaRefB:ob});
++  if(window.ModelLog)window.ModelLog.logEvent('spec-clock-calibration',{distance:SpecClock.last&&SpecClock.last.distance,omegaRefA:oa,omegaRefB:ob});
+   return true;
+ }
+ function fmtClockTime(s){
+@@ -2713,7 +2726,7 @@
+   const status=(document.getElementById('specClockStatus')?.textContent||'—').replace(/</g,'&lt;');
+   const dz=fmtLengthSI(initialAxialSeparation()),dx=(P.off*1000).toFixed(1).replace(/\.0$/,'')+' mm';
+   const current=Number.isFinite(m&&m.distance)?fmtLengthSI(m.distance):'—';
+-  const logState=(typeof ModelLog!=='undefined'&&ModelLog.enabled)?'aan':'uit';
++  const logState=(window.ModelLog&&window.ModelLog.enabled)?'aan':'uit';
+   body.innerHTML=`<div class="note"><b>Quick readout.</b> Gebruik dit als compacte simulatoroverlay tijdens afstandssweeps. Belangrijkste sweep-variabelen staan ook in het speculative paneel.</div>
+     <div class="spec-overlay-grid">
+       <div class="k">modus / topologie</div><div class="v">${P.mode} · ${P.topo}</div>
+@@ -5675,7 +5688,7 @@
+ });
+ bindRange('SepAB',x=>fmtLengthSI(x*1e-3),x=>{
+   const applied=setInitialAxialSeparation(x*1e-3);
+-  if(typeof ModelLog!=='undefined'&&ModelLog.logUser)ModelLog.logUser('initial-knot-separation',{axial:applied,lateral:P.off,centerDistance:Math.hypot(applied,Math.abs(P.off))});
++  if(window.ModelLog&&window.ModelLog.logUser)window.ModelLog.logUser('initial-knot-separation',{axial:applied,lateral:P.off,centerDistance:Math.hypot(applied,Math.abs(P.off))});
+   resetState();
+   return applied*1e3;
+ });
+@@ -5927,10 +5940,10 @@
+     if(!ok)return;
+     P.specClockEnabled=true;resetSpecClockRuntime('geactiveerd · eerste veldsample nodig');
+     setFlag('⚠ SPECULATIVE SWIRL CLOCK actief: alleen passieve Research-Track-diagnostiek; geen canonieke superpositiewet en geen solvercoupling.',true);
+-    if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-enabled',{enabled:true});
++    if(window.ModelLog)window.ModelLog.logEvent('spec-clock-enabled',{enabled:true});
+   }else{
+     P.specClockEnabled=false;resetSpecClockRuntime('gedeactiveerd');
+-    if(typeof ModelLog!=='undefined')ModelLog.logEvent('spec-clock-enabled',{enabled:false});
++    if(window.ModelLog)window.ModelLog.logEvent('spec-clock-enabled',{enabled:false});
+   }
+   syncUi();
+ });
+@@ -5943,7 +5956,7 @@
+   DELTA.gp=next;
+   const sel=document.getElementById('gpDeltaSel');if(sel)sel.value=String(next);
+   const val=document.getElementById('vGpDelta');if(val)val.textContent=next.toFixed(6);
+-  if(log&&typeof ModelLog!=='undefined')ModelLog.logEvent('gp-delta-change',{value:next,provenance:next===0.615?'Roberts-Grant-1971':'SST-Track-B-v12B'});
++  if(log&&window.ModelLog)window.ModelLog.logEvent('gp-delta-change',{value:next,provenance:next===0.615?'Roberts-Grant-1971':'SST-Track-B-v12B'});
+   if(reset)resetState(); // Δ zit in de LIA-prefactor: schone run vereist
+   else syncUi();
+   return true;
+@@ -6295,6 +6308,7 @@
+   }
+   return {logUser,logEvent,logDiag,logStep,exportJson,exportText,setEnabled,setVerbose,get enabled(){return enabled;}};
+ })();
++window.ModelLog=ModelLog;
+ 
+ function runtimeFailure(kind,error){
+   const detail=String(error&&error.stack||error&&error.message||error||kind);
+@@ -6882,7 +6896,8 @@
+ updCam();
+ let lastT=performance.now(),frame=0;
+ function loop(now){
+-  requestAnimationFrame(loop);
++  window.__vlBootComplete=true;
++requestAnimationFrame(loop);
+   const dtReal=Math.min(0.05,(now-lastT)/1000);lastT=now;
+   let advThisFrame=0;
+   updateStabilityThrottle(dtReal);

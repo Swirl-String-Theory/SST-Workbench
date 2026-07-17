@@ -1,0 +1,1231 @@
+diff --git a/CURSOR-patch-instructies-v7_5_2.md b/CURSOR-patch-instructies-v7_5_2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..c9ddf506aa7decaaf33c65d20cbd9438977a53f9
+--- /dev/null
++++ b/CURSOR-patch-instructies-v7_5_2.md
+@@ -0,0 +1,84 @@
++# Cursor-instructies — v7.5.1 → v7.5.2
++
++## Doel
++
++Pas de topology-preserving Niveau-C patch toe op de actuele v7.5.1-build. De patch maakt geen reconnecties; hij verhindert numerieke centerline-doorkruising en voegt een discrete 3D Neumann-BEM/MFS toe voor de achtergrondbundel rond gesloten knooptubes.
++
++## Bestanden na toepassing
++
++- `vortexring-lab-v7_5_2.html`
++- `validate-v7_5_2.py`
++- `browser-smoke-v7_5_2.mjs`
++- `release-notes-v7_5_2.md`
++
++## Toepassen
++
++Vanuit de projectroot:
++
++```bash
++git apply --check vortexring-lab-v7_5_1-to-v7_5_2.diff
++git apply vortexring-lab-v7_5_1-to-v7_5_2.diff
++```
++
++Deze patch hernoemt de hoofd-HTML van v7.5.1 naar v7.5.2 en voegt de drie begeleidende bestanden toe.
++
++## Statische validatie
++
++```bash
++python validate-v7_5_2.py vortexring-lab-v7_5_2.html
++```
++
++Verwacht:
++
++```text
++PASS: statische v7.5.2-integriteitscheck en node --check groen
++INFO: 281 statische IDs, allemaal uniek
++```
++
++## Browser-smoke
++
++```bash
++npm i puppeteer
++node browser-smoke-v7_5_2.mjs vortexring-lab-v7_5_2.html
++```
++
++De smoke moet minimaal bevestigen:
++
++- ≥10 renderframes;
++- geen console- of pageerrors;
++- zelftest v7.5.2 volledig groen;
++- T0l, T0m, T0n en T9j–T9m aanwezig;
++- `Topology guard` standaard aan;
++- `Niveau C` standaard aan;
++- actieve BEM-readout zonder `lineaire solve mislukt` of `residu te groot`;
++- `ε_rev` eindig bij `α=0`.
++
++## Handmatige acceptatie
++
++1. Open de standaard SST-trefoil.
++2. Zet de SST-vortexbundel en de bundelveldkoppeling aan.
++3. Controleer dat de representatieve bundellijnen vóór de knooptube uiteenlopen, tangentieel langs de tube lopen en erachter weer aansluiten.
++4. Controleer in de BEM-readout dat zowel `residu u_n` als `residu ω_n` eindig zijn. Richtwaarde: ruim onder `1e-1`; de code schakelt de correctie boven `0.15` uit.
++5. Verhoog drift of simulatiesnelheid totdat zelfcontact wordt benaderd. De run moet stoppen met een topology-guardmelding; de centerline mag niet door zichzelf heen verschijnen.
++6. Herhaal met LIA. De guard moet ook daar hard stoppen, niet alleen waarschuwen.
++7. Zet Auto-relax aan nabij de contactgrens. Een onveilige regularisatiestap moet worden teruggedraaid en Auto-relax moet zichzelf uitschakelen.
++8. Schakel de centerline-overlay in om visuele buisoverlap te onderscheiden van echte centerline-doorkruising.
++
++## Fysische interpretatie
++
++De default BEM-grens is `a_sim`. Dit is de numerieke knooptube, niet automatisch `r_kern` of `R_horn`.
++
++- `r_kern` is alleen selecteerbaar wanneer die Research-Track invoer is opgegeven.
++- `R_horn` blijft een expliciete hypothese. Omdat deze femtometerschaal niet op de meterschaalmesh wordt opgelost, mag de BEM-solve die keuze weigeren wegens de geometrische resolutievloer.
++- De solve is quasi-statisch en gebruikt source-collocation/MFS; noem haar niet een exacte continuum-BEM of een opgeloste SST-kern.
++
++## Niet accepteren wanneer
++
++- `node --check` rood is;
++- dubbele statische IDs bestaan;
++- de topology guard in LIA slechts waarschuwt en verder integreert;
++- `bisectFirstHit()` bij actieve guard aan de contactzijde (`hi`) landt;
++- de BEM-correctie op de centerline zelf wordt geëvalueerd in plaats van via tube-oppervlakmonsters;
++- bent bundle lines onafhankelijk van de knoop worden geroteerd;
++- `R_horn` stilzwijgend naar een grotere numerieke radius wordt geklemd;
++- de browserzelftest of BEM-readout rood is.
+diff --git a/browser-smoke-v7_5_2.mjs b/browser-smoke-v7_5_2.mjs
+new file mode 100755
+index 0000000000000000000000000000000000000000..7c7f71f43e954f65c4439a20c34579fdfd2db60f
+--- /dev/null
++++ b/browser-smoke-v7_5_2.mjs
+@@ -0,0 +1,75 @@
++#!/usr/bin/env node
++// Local runtime/WebGL smoke for vortexring-lab v7.5.2.
++// Usage: npm i puppeteer && node browser-smoke-v7_5_2.mjs [html]
++import puppeteer from 'puppeteer';
++import path from 'node:path';
++import process from 'node:process';
++
++const file = path.resolve(process.argv[2] || 'vortexring-lab-v7_5_2.html');
++const url = 'file://' + file + '?selftest=1';
++const errors = [];
++let pass = true;
++const check = (name, ok, detail = '') => {
++  console.log((ok ? 'PASS  ' : 'FAIL  ') + name + (detail ? '  — ' + detail : ''));
++  if (!ok) pass = false;
++};
++
++const browser = await puppeteer.launch({
++  headless: 'new',
++  args: ['--allow-file-access-from-files', '--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
++});
++const page = await browser.newPage();
++page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
++page.on('pageerror', e => errors.push(String(e)));
++await page.goto(url, { waitUntil: 'networkidle0', timeout: 90000 });
++
++const frames = await page.evaluate(() => new Promise(res => {
++  let n = 0; const tick = () => (++n >= 12 ? res(n) : requestAnimationFrame(tick));
++  requestAnimationFrame(tick);
++}));
++check('≥10 gerenderde frames', frames >= 10, frames + ' frames');
++check('geen console-/pageerrors', errors.length === 0, errors.slice(0, 4).join(' | ') || 'schoon');
++
++await page.waitForSelector('#selftestOverlay', { timeout: 60000 });
++const st = await page.$eval('#selftestOverlay', el => el.innerText);
++check('zelftest zonder ❌', !st.includes('❌'), st.split('\n')[0]);
++for (const t of ['T0l', 'T0m', 'T0n', 'T9j', 'T9k', 'T9l', 'T9m'])
++  check('zelftest bevat ' + t, st.includes(t));
++check('zelftestkop meldt v7.5.2 GESLAAGD', st.includes('ZELFTEST 7.5.2') && st.includes('GESLAAGD'));
++
++for (const id of ['cBundleBEM', 'sBundleBoundaryMode', 'sBundleBEMQuality', 'bundleBEMReadout', 'cTopologyGuard'])
++  check('nieuw UI-element #' + id, await page.$('#' + id) !== null);
++check('topology guard standaard aan', await page.$eval('#cTopologyGuard', el => el.checked));
++check('Niveau-C BEM standaard aan', await page.$eval('#cBundleBEM', el => el.checked));
++
++// Activate the SST bundle and its dynamical coupling, then allow the BEM cache
++// and bent representative lines to rebuild.
++await page.evaluate(() => {
++  const toggle = (id, value) => {
++    const el = document.getElementById(id);
++    if (el && el.checked !== value) { el.checked = value; el.dispatchEvent(new Event('change', { bubbles: true })); }
++  };
++  toggle('cSSTBundle', true);
++  toggle('cBundleBEM', true);
++  toggle('cBundleFlow', true);
++});
++await new Promise(r => setTimeout(r, 1800));
++const bemText = await page.$eval('#bundleBEMReadout', el => el.textContent.trim());
++check('BEM-readout rapporteert actieve solve', /BEM \d+ panelen/.test(bemText) && !/mislukt|residu te groot/i.test(bemText), bemText);
++
++const lineCount = await page.evaluate(() => {
++  // latticeGrp is lexical, not window-bound; count rendered THREE line objects
++  // indirectly through the canvas state is unavailable, so verify readout + no runtime error.
++  return document.getElementById('vBundleLines')?.textContent || '';
++});
++check('representatieve bundellijnen geconfigureerd', Number(lineCount) >= 7, String(lineCount));
++
++// Existing on-demand reversibility diagnostic must remain operational.
++await page.click('#bEpsRev');
++await new Promise(r => setTimeout(r, 700));
++const eps = await page.$eval('#hEpsRev', el => el.textContent.trim());
++check('ε_rev geeft eindige meting bij α=0', /e[-+]\d+/i.test(eps), 'hEpsRev=' + eps);
++
++await browser.close();
++console.log(pass ? '\nBROWSER-SMOKE GROEN' : '\nBROWSER-SMOKE ROOD');
++process.exit(pass ? 0 : 1);
+diff --git a/release-notes-v7_5_2.md b/release-notes-v7_5_2.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..aeb2978953615a69d76366ba3eabfb2395d35757
+--- /dev/null
++++ b/release-notes-v7_5_2.md
+@@ -0,0 +1,107 @@
++# Release notes — vortexring-lab v7.5.2
++
++**Basis:** v7.5.1. **Doel:** topologiebehoud afdwingen en Niveau C uit de review implementeren als een discrete driedimensionale exterior-field closure rond de volledige gesloten knooptube.
++
++## Waarom een knoop in v7.5.1 toch kon lijken te breken
++
++De datastructuur verwijderde geen segmenten: ieder filament bleef een cyclische polygonale centerline. Toch waren er drie routes waardoor een breuk of topologieverandering zichtbaar kon worden:
++
++1. Contact werd na een volledige RK4-stap gecontroleerd. Twee segmenten konden elkaar binnen de stap kruisen en aan het einde alweer uit elkaar liggen. Zo'n transient crossing werd niet door een endpoint-test gezien.
++2. In LIA-modus was contact slechts een kwalitatieve waarschuwing. De run kon daarom verdergaan terwijl de niet-lokale zelfinteractie ontbrak.
++3. Auto-relax muteerde de geometrie buiten de RK4/contact-bisectie om. Een kleine maar ongunstige smoothing- of redistributiestap kon tube-clearance verliezen.
++
++Daarnaast gebruikt de buisrendering een zichtbare minimumradius die groter kan zijn dan `a_sim`. Visueel overlappende buizen zijn daarom niet automatisch een geopende centerline.
++
++## Topology guard
++
++De nieuwe default is `P.topologyGuard=true`.
++
++- De contact-CFL begrenst de tijdstap met de resterende exacte segment-clearance.
++- Iedere geaccepteerde stap wordt op exact segmentcontact gecontroleerd.
++- Bij tunnelingrisico wordt de RK4-stap op twaalf tussentijden opnieuw opgebouwd.
++- De eerste transient contacttijd wordt gebisecteerd.
++- De solver landt aan de **veilige** zijde van de contactgrens, niet net eroverheen.
++- De guard is ook actief in LIA-modus. LIA mag geen numerieke topologieverandering meer laten passeren.
++- Auto-relax is transactioneel: de volledige toestand wordt gesnapshot en teruggezet wanneer de mutatie contact bereikt of een te groot deel van de beschikbare clearance gebruikt.
++
++Er is nog steeds geen reconnectiemodel. Een run stopt vóór een mogelijke doorsnijding; de knoop wordt niet doorgeknipt, herschikt of ontknoopt.
++
++## Niveau C — discrete 3D Neumann-BEM/MFS
++
++De implementatie is een **regularized source-collocation boundary method**, oftewel een kleine method-of-fundamental-solutions/BEM-hybride. Zij benadert de volledige gesloten knooptube in drie dimensies; het is geen reeks losse 2D-doublets.
++
++Voor collocatiepunten \(\mathbf x_i\) met buitenwaartse normaal \(\mathbf n_i\) en fictieve bronnen \(\mathbf s_j\) binnen de uitgesloten tube wordt opgelost:
++
++\[
++\mathbf n_i\cdot\left[
++\mathbf u_0(\mathbf x_i)
+++\sum_j q_j^{(u)}\nabla G(\mathbf x_i,\mathbf s_j)
++\right]=0,
++\qquad
++G=\frac{1}{4\pi|\mathbf x-\mathbf s|}.
++\]
++
++Een tweede solve gebruikt hetzelfde Neumannprobleem voor het coarse-grained vorticiteitsveld:
++
++\[
++\mathbf n_i\cdot\left[
++\boldsymbol\omega_0(\mathbf x_i)
+++\sum_j q_j^{(\omega)}\nabla G(\mathbf x_i,\mathbf s_j)
++\right]=0.
++\]
++
++Daarmee worden twee zaken van elkaar onderscheiden:
++
++- de harmonische velocity-correctie die `u·n=0` op de uitsluitingsbuis benadert;
++- het tangentieel geprojecteerde, divergentievrije vorticiteitsveld waarlangs de zichtbare swirl strings worden geïntegreerd.
++
++De compatibiliteitsconstraint \(\sum_jq_j=0\) verwijdert een kunstmatige monopool in het verre veld. De UI toont afzonderlijk het maximale relatieve residu van de velocity- en vorticiteits-Neumannvoorwaarden. Bij een residu groter dan 0.15 wordt de correctie uitgeschakeld.
++
++## Welke tube wordt uitgesloten?
++
++De keuzelijst maakt de status expliciet:
++
++- `a_sim` — default en numeriek oplosbare knooptube;
++- `r_kern` — alleen wanneer een geldige vaste kernradius is ingevoerd;
++- `R_horn` — uitsluitend als expliciete Research-Track boundary hypothesis.
++
++`R_horn` is niet stilzwijgend tot materiële wand verklaard. Op de meterschaal ligt deze femtometerradius gewoonlijk onder de geometrische BEM-resolutievloer; de solve wordt dan eerlijk geweigerd in plaats van de radius stilzwijgend op te blazen.
++
++## Koppeling aan de filamentdynamica
++
++De exterior BEM-oplossing is niet geldig op de centerline, omdat die binnen de uitgesloten tube ligt. Daarom wordt de bundeladvectie van een filamentpunt bepaald uit het gemiddelde van vier gecorrigeerde buitenveldmonsters op de lokale tube-omtrek. Tracers en stroomlijnen gebruiken de exterior-oplossing rechtstreeks. De BEM-geometrie wordt quasi-statisch iedere acht geaccepteerde stappen vernieuwd.
++
++Dit is een Research-Track closure. Niet inbegrepen:
++
++- een moving-boundary Neumannvoorwaarde met de volledige lokale tube-snelheid;
++- pressure/BEM-krachten of added mass;
++- een opgeloste microscopische SST-kern;
++- reconnectie of GP-doorsteekdynamica;
++- bewijs dat `R_horn` zelf een materiële separatrix is.
++
++## Nieuwe zelftests
++
++- **T0l:** topology guard staat standaard aan.
++- **T0m:** Niveau-C BEM staat standaard aan met `a_sim` als grens.
++- **T0n:** het BEM-bronmodel is geversioneerd.
++- **T9j:** uniforme velocity op een gesloten testsfeer wordt tot `u·n≈0` geprojecteerd.
++- **T9k:** dezelfde test voor het vorticiteitsveld.
++- **T9l:** de compatibiliteitsconstraint geeft `Σq≈0`.
++- **T9m:** het transient-contact-risicopredicaat reageert correct.
++
++## Validatie
++
++```text
++PASS: statische v7.5.2-integriteitscheck en node --check groen
++INFO: 281 statische IDs, allemaal uniek
++```
++
++Verplicht lokaal:
++
++```bash
++python validate-v7_5_2.py vortexring-lab-v7_5_2.html
++npm i puppeteer
++node browser-smoke-v7_5_2.mjs vortexring-lab-v7_5_2.html
++```
++
++De browser-smoke vereist T0–T9m groen, geen console-/pageerrors, een actieve BEM-readout en een eindige `ε_rev`-meting.
+diff --git a/validate-v7_5_2.py b/validate-v7_5_2.py
+new file mode 100755
+index 0000000000000000000000000000000000000000..c2582e7274f0dae719c406ed65562840f2faa918
+--- /dev/null
++++ b/validate-v7_5_2.py
+@@ -0,0 +1,130 @@
++#!/usr/bin/env python3
++"""Static integrity validator for vortexring-lab v7.5.2.
++
++Checks provenance, v7.5.1 SST-scale separation, the v7.5.2 topology guard,
++Level-C discrete Neumann source-panel BEM/MFS, self-test markers, unique static
++DOM IDs, and JavaScript syntax via node --check.
++"""
++from __future__ import annotations
++
++import argparse
++import collections
++import pathlib
++import re
++import subprocess
++import sys
++import tempfile
++
++
++def fail(msg: str) -> None:
++    print(f"FAIL: {msg}")
++    raise SystemExit(1)
++
++
++def main() -> None:
++    ap = argparse.ArgumentParser()
++    ap.add_argument("html", nargs="?", default="vortexring-lab-v7_5_2.html")
++    args = ap.parse_args()
++    path = pathlib.Path(args.html)
++    if not path.is_file():
++        fail(f"bestand niet gevonden: {path}")
++    text = path.read_text(encoding="utf-8")
++
++    required = {
++        "meta version": '<meta name="vortexlab-version" content="7.5.2">',
++        "meta base": '<meta name="vortexlab-base" content="7.5.1">',
++        "runtime version": "const APP_VERSION='7.5.2';",
++        "runtime base": "const APP_BASE_VERSION='7.5.1';",
++        "BEM model id": "const BEM_SOURCE_MODEL='neumann-source-panel-mfs-v1';",
++        "topology guard default": "autoRelax:false, timeReverse:false, topologyGuard:true,",
++        "BEM defaults": "bundleBEMEnabled:true, bundleBoundaryMode:'asim', bundleBEMQuality:'mid',",
++        "BEM UI": 'id="cBundleBEM" checked',
++        "boundary selector": 'id="sBundleBoundaryMode"',
++        "quality selector": 'id="sBundleBEMQuality"',
++        "topology UI": 'id="cTopologyGuard" checked',
++        "Neumann solve": "function solveBundleNeumann(nodes,fieldFn,radius)",
++        "dense pivot solve": "function solveDensePivot(A,b,n)",
++        "full tube nodes": "function buildBundleBEMNodes(radius,target=bundleBEMTargetCount())",
++        "velocity correction": "function bundleExteriorVelocityAt(x,y,z,projectInside=true)",
++        "filament surface average": "function backgroundVelocityForFilamentPoint(px,py,pz,tx,ty,tz)",
++        "vorticity correction": "function bundleVorticityAt(x,y,z)",
++        "bent lines": "function traceBundleVorticityLine(sample,steps=96)",
++        "topology clearance": "function topologyClearance()",
++        "transient contact": "function transientContactWithinStep(signedDtFull,lia)",
++        "safe-side landing": "const land=P.topologyGuard?lo:hi;",
++        "contact CFL": "0.12*Math.max(margin,0.05*dc)",
++        "auto-relax rollback": "topology guard heeft een auto-relax-mutatie teruggedraaid",
++        "selftest T0l": "T0l topology guard standaard actief",
++        "selftest T0m": "T0m Niveau-C BEM standaard actief op a_sim",
++        "selftest T0n": "T0n BEM-bronmodel geversioneerd",
++        "selftest T9j": "T9j Neumann-BEM dwingt u·n≈0",
++        "selftest T9k": "T9k vorticiteits-Neumannprojectie",
++        "selftest T9l": "T9l BEM compatibiliteitsconstraint Σq=0",
++        "selftest T9m": "T9m transient-contact risicopredicaat",
++        "ACN early declaration": "const ACN=ACNpass; // direct na de exacte passage",
++        "ModelLog schema": "schema:'vortexlab-model-log/0.2'",
++        "SST horn constant": "const R_HORN_SST= 1.40897017e-15;",
++    }
++    for name, marker in required.items():
++        if marker not in text:
++            fail(f"marker ontbreekt: {name}")
++
++    forbidden = {
++        "old runtime version": "const APP_VERSION='7.5.1';",
++        "old base": "const APP_BASE_VERSION='7.5';",
++        "old ontknot claim": "hier zou de knoop ontknopen",
++        "old RCORE symbol": "RCORE_SST",
++        "old physical a alias": "aPhys",
++        "BEL byte": "\x07",
++        "replacement char": "\ufffd",
++    }
++    for name, marker in forbidden.items():
++        if marker in text:
++            fail(f"verboden marker aanwezig: {name}")
++
++    # Structural ordering: BEM helpers must exist before runtime loop use.
++    order = [
++        "function solveBundleNeumann",
++        "function ensureBundleBEM",
++        "function velocityCore",
++        "function loop(now)",
++    ]
++    positions = [text.find(x) for x in order]
++    if any(p < 0 for p in positions) or positions != sorted(positions):
++        fail(f"ongeldige BEM/runtime-volgorde: {list(zip(order, positions))}")
++
++    # Only count static markup IDs. Inline templates are not live duplicate nodes.
++    markup = text.split("<script", 1)[0]
++    ids = re.findall(r'\bid=["\']([^"\']+)["\']', markup)
++    dup = [k for k, v in collections.Counter(ids).items() if v > 1]
++    if dup:
++        fail(f"dubbele statische IDs: {dup}")
++
++    scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", text, re.S)
++    if not scripts:
++        fail("geen inline script gevonden")
++    js = scripts[-1]
++    with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as f:
++        f.write(js)
++        js_path = pathlib.Path(f.name)
++    try:
++        proc = subprocess.run(["node", "--check", str(js_path)], text=True, capture_output=True)
++    except FileNotFoundError:
++        fail("Node.js ontbreekt; voer node --check handmatig uit")
++    finally:
++        try:
++            js_path.unlink()
++        except OSError:
++            pass
++    if proc.returncode:
++        print(proc.stdout)
++        print(proc.stderr, file=sys.stderr)
++        fail("JavaScript-syntaxis ongeldig")
++
++    print("PASS: statische v7.5.2-integriteitscheck en node --check groen")
++    print(f"INFO: {len(ids)} statische IDs, allemaal uniek")
++    print("LET OP: voer browser-smoke-v7_5_2.mjs uit voor runtime/WebGL/T0–T9m.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/vortexring-lab-v7_5_1.html b/vortexring-lab-v7_5_2.html
+similarity index 90%
+rename from vortexring-lab-v7_5_1.html
+rename to vortexring-lab-v7_5_2.html
+index d7bf189a15ab62d6c0bd2034b8d815b12a51179d..71778a0f6763c6a0c2f750b548ee5f386473e0a2 100644
+--- a/vortexring-lab-v7_5_1.html
++++ b/vortexring-lab-v7_5_2.html
+@@ -3,10 +3,10 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.5.1 — SST horn/core-scheiding · eindige vortexbundel</title>
+-<meta name="vortexlab-version" content="7.5.1">
+-<meta name="vortexlab-base" content="7.5">
+-<meta name="vortexlab-patch" content="sst-horn-solid-core-separation,finite-bundle-field,filled-disk-sampling,bundle-tracer-streamline-parity,canon-v0.8.20-labels,v7.5.1-validator">
++<title>Superfluïde vortexlab v7.5.2 — topology guard · 3D Neumann-BEM om knooptubes</title>
++<meta name="vortexlab-version" content="7.5.2">
++<meta name="vortexlab-base" content="7.5.1">
++<meta name="vortexlab-patch" content="topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,bent-vorticity-lines,bem-flow-exclusion,continuous-contact-bracketing,v7.5.2-validator">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -637,7 +637,21 @@
+             <div class="ctrl"><label>zichtbare representatieve lijnen <span class="v" id="vBundleLines">61</span></label>
+               <input type="number" id="sBundleLines" min="7" max="121" step="1" value="61"></div>
+             <label class="chk"><input type="checkbox" id="cBundleFlow"> koppel eindig coarse-grained bundelveld aan filamenten, tracers en stroomlijnen</label>
+-            <div class="note" id="bundleSourceNote" style="margin-top:2px;">Bronclosure: analytische lokale limiet van zeer lange <b>gesloten</b> vortexlussen met retourpaden ver buiten het domein. Verre knooplagen worden niet expliciet door Biot–Savart opgelost en open vortexlijnen worden niet verondersteld.</div>
++            <label class="chk"><input type="checkbox" id="cBundleBEM" checked> Niveau C · 3D Neumann-BEM om de gesloten knooptube</label>
++            <div class="ctrl"><label>BEM-uitsluitingsoppervlak</label>
++              <select id="sBundleBoundaryMode">
++                <option value="asim" selected>a_sim · numerieke knooptube</option>
++                <option value="rcore">r_kern · vaste fysieke kern (indien opgegeven)</option>
++                <option value="rhorn">R_horn · expliciete Research-Track hypothese</option>
++              </select></div>
++            <div class="ctrl"><label>BEM-resolutie</label>
++              <select id="sBundleBEMQuality">
++                <option value="low">laag · 24 collocatiepunten</option>
++                <option value="mid" selected>midden · 40 collocatiepunten</option>
++                <option value="high">hoog · 64 collocatiepunten</option>
++              </select></div>
++            <div class="bundle-readout" id="bundleBEMReadout">BEM wacht op een actieve bundel en knoopgeometrie.</div>
++            <div class="note" id="bundleSourceNote" style="margin-top:2px;">Bronclosure: analytische lokale limiet van zeer lange <b>gesloten</b> vortexlussen met retourpaden ver buiten het domein. Niveau C gebruikt een discrete 3D Neumann source-panel BEM/MFS om de achtergrondstroming én de representatieve bundelvorticiteit tangentieel langs de volledige knooptube te leiden. Dit is een Research-Track exterior-field closure, geen opgeloste microscopische SST-kern.</div>
+           </div>
+           <div class="bundle-readout" id="bundleReadout">—</div>
+           <div class="note" style="margin-top:5px;">De lijnen vormen een gevulde-schijfsampling van de bundeldoorsnede, niet miljoenen afzonderlijke SST-kernen. Binnen R_bundle geldt u_θ=Ω(z)r; erbuiten behoudt het 1/r-profiel de ingesloten circulatie. Voor splay gebruikt de kinematische ansatz Ω(z)=Ω_ref/λ(z)², zodat n_v(z)A(z) constant blijft. Dit is geen bewezen stationaire Euler/SST-evenwichtstoestand.</div>
+@@ -648,7 +662,7 @@
+             <button type="button" class="seg-btn active" data-frame="rotating">Rotating</button>
+           </div>
+           <input type="checkbox" id="cCoRot" checked hidden>
+-          <div class="frame-note">Puur weergave (v7.5.1: P.displayFrame). Absolute: de flowcilinder en interne vorticiteitslijnen draaien in het lab-frame; de buitenreferentie is verborgen. Rotating: de flowcilinder staat stil en een grotere, fictieve inertiaalcilinder met alleen verticale lijnen beweegt tegengesteld met Ω. Deze keuze raakt de dynamica niet — identieke ModelLog-diag-reeksen in beide standen.</div>
++          <div class="frame-note">Puur weergave (v7.5.2: P.displayFrame). Absolute: de flowcilinder en interne vorticiteitslijnen draaien in het lab-frame; de buitenreferentie is verborgen. Rotating: de flowcilinder staat stil en een grotere, fictieve inertiaalcilinder met alleen verticale lijnen beweegt tegengesteld met Ω. Deze keuze raakt de dynamica niet — identieke ModelLog-diag-reeksen in beide standen.</div>
+         </div>
+         <div class="ctrl" id="vorticityColorRow"><label>kleur verticale vorticiteitslijnen</label>
+           <div class="color-row"><span class="note" id="vVorticityColor">#0F1A29</span><input type="color" id="sVorticityColor" value="#0F1A29" aria-label="Kleur vorticiteitslijnen"></div>
+@@ -685,7 +699,7 @@
+         <label class="chk hidden" id="mirrorRow"><input type="checkbox" id="cMirror"> Mirror B</label>
+         <label class="chk hidden" id="lockVzRow"><input type="checkbox" id="cLockVz" checked> v_z A = B</label>
+         <label class="chk" style="margin-top:6px;"><input type="checkbox" id="cBgOmega"> Achtergrond Ω koppelen</label>
+-        <div class="note" style="margin-top:4px;">Integreer in het lab-solverframe \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) (v7.5.1: solverFrame='lab', bgFlow='wall') i.p.v. frame-splitsing (solverFrame='corot') — fysisch identiek voor deze achtergrond (zelftest-T8), maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking. Het displayframe staat hier los van.</div>
++        <div class="note" style="margin-top:4px;">Integreer in het lab-solverframe \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) (v7.5.2: solverFrame='lab', bgFlow='wall') i.p.v. frame-splitsing (solverFrame='corot') — fysisch identiek voor deze achtergrond (zelftest-T8), maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking. Het displayframe staat hier los van.</div>
+       </div>
+       </div>
+     </details>
+@@ -811,10 +825,14 @@
+         <div class="auto-relax-row">
+           <div>
+             <label class="chk"><input type="checkbox" id="cAutoRelax"> Auto-relax geometrie</label>
+-            <div class="note" style="margin-top:3px;">Niet-Hamiltoniaanse numerieke regularisatie tijdens het afspelen: uniforme herparametrisatie, zwakke normale krommingsgladstrijking en korte-afstandsrepulsie. Behoudt per drager centrum en RMS-grootte; dit is geen bewijs van een fysisch Biot–Savart-evenwicht.</div>
++            <div class="note" style="margin-top:3px;">Niet-Hamiltoniaanse numerieke regularisatie tijdens het afspelen: uniforme herparametrisatie, zwakke normale krommingsgladstrijking en korte-afstandsrepulsie. v7.5.2 voert dit transactioneel uit en draait de mutatie terug zodra de topology guard tube-clearance kan verliezen.</div>
+           </div>
+           <span class="auto-relax-badge" id="autoRelaxBadge">UIT</span>
+         </div>
++        <div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--line);">
++          <label class="chk"><input type="checkbox" id="cTopologyGuard" checked> Topology guard · geen doorsnijding/reconnectie</label>
++          <div class="note" id="topologyGuardReadout" style="margin-top:3px;">Contact-CFL, transient-contact sampling en first-hit landing aan de veilige zijde van max(3a_sim, numerieke vloer). De centerline blijft gesloten; een run stopt vóór topologieverandering.</div>
++        </div>
+       </div>
+     </details>
+ 
+@@ -850,7 +868,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.5.1 · basis v7.5 · SST-schaalscheiding R_horn / r_kern / a_sim · vaste Rankine-kern als Research Track, irrotationele 1/r-hornomgeving · eindige bundel met 1/r-buitenveld · gevulde-schijfsampling · identiek achtergrondveld voor filamenten, tracers en stroomlijnen · zelftests T0–T9i · ?selftest=1.
++      v7.5.2 · basis v7.5.1 · topology guard zonder numerieke reconnectie · Niveau-C discrete 3D Neumann-BEM/MFS rond de gesloten knooptube · tangentieel geprojecteerde bundelvorticiteit · transactionele auto-relax · zelftests T0–T9m · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -860,18 +878,22 @@
+ <script src="ideal_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.5.1';
+-const APP_BASE_VERSION='7.5';
++const APP_VERSION='7.5.2';
++const APP_BASE_VERSION='7.5.1';
+ const APP_PATCH_NOTES=[
+-  'SST-schaalscheiding: R_horn is de canonieke irrotationele circulatie-/envelopschaal; r_kern is een afzonderlijke, kleinere vaste Rankine-kern en blijft Research-Track invoer',
+-  'a_sim blijft uitsluitend de numerieke filament-/contactstraal; oude a_phys/RCORE/OMEGA_CORE-semantie is verwijderd',
+-  'Eindige uniforme bundel: solid-body binnen R_bundle, constante ingesloten circulatie en 1/r-buitenveld; gevulde-schijfsampling i.p.v. een vortexschil',
+-  'Eén gedeelde backgroundVelocityAt() voor filamenten, tracers en stroomlijnen; analytische bundel is gelabeld als lokale coarse-grained gesloten-luslimiet, niet als expliciet opgeloste verre knooplagen',
+-  'Validator en browser-smoke uitgebreid met T0j/T0k en T9f–T9i'
++  'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
++  'Auto-relax is transactioneel: iedere regularisatiestap wordt teruggedraaid wanneer de topology guard de beschikbare tube-clearance kan verliezen',
++  'Niveau-C Research Track: discrete 3D Neumann source-panel BEM/MFS rond de volledige gesloten knooptube; harmonische correctie dwingt u·n=0 op de gekozen uitsluitingsbuis',
++  'Een tweede Neumann-oplossing projecteert het coarse-grained vorticiteitsveld tangentieel aan de knooptube; representatieve swirl strings worden langs dit 3D veld geïntegreerd',
++  'R_horn, r_kern en a_sim blijven strikt gescheiden; de BEM-grens is standaard a_sim en R_horn is alleen een expliciete, numeriek doorgaans onoplosbare Research-Track hypothese',
++  'Validator en browser-smoke uitgebreid met T0l–T0n en T9j–T9m'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+ const CONTACT_ULP_FACTOR=64;
++const BEM_SOURCE_MODEL='neumann-source-panel-mfs-v1';
++const BEM_REBUILD_STEPS=8;
++const TOPOLOGY_SWEEP_SAMPLES=12;
+ // ================= dataset: ideal trefoil 3:1:1 (Gilbert, 183 modi) =================
+ const IDEAL_TREFOIL_3_1_1 = {
+   knotId: "3:1:1",
+@@ -1117,18 +1139,19 @@ const P = {
+   wAl:1, wBe:1, wGa:1, showTracers:true, showStreamlines:false, tracerCount:600, streamlineCount:28, particleSize:0.003, vortexOpacity:0.58, tracerSpawnMode:'column',
+   linkDH:false, linkVolumeRef:2*Math.PI*0.25*0.25*0.5, linkRefR:0.25, linkRefH:0.5,
+   mfTemp:'0', mfAlpha:0, mfAlphaP:0, vnZ:0, revVn:false,
+-  autoRelax:false, timeReverse:false,
++  autoRelax:false, timeReverse:false, topologyGuard:true,
+   // D4 (2026-07-14): display-similarity is opt-in, geen stilzwijgende GP/SST-kernfysica.
+   coreFlowLock:false,
+   // r_kern is de nog niet canoniek afgeleide vaste/rotationele kernstraal; null = bewust onbepaald.
+   rCorePhysical:null,
+   centerLock:true, tracerWrapZ:true, vorticityLineColor:'#0F1A29',
+   bundleEnabled:false, bundleProfile:'parallel', bundleSplay:0.45, bundleRadiusFrac:0.72, bundleVisualLines:61, bundleSourceModel:BUNDLE_SOURCE_MODEL,
++  bundleBEMEnabled:true, bundleBoundaryMode:'asim', bundleBEMQuality:'mid',
+   dvSeparatrix:true, dvColumn:true, dvCaps:true, dvStewartson:true, dvOpacity:1.0
+ };
+ // v7.5: bevroren opstartdefaults voor zelftest-T0i (D4: verse start heeft de
+ // kernkoppeling uit; frames starten ontvlochten in corot/corot/none).
+-const P_DEFAULTS=Object.freeze({core:P.core,rCorePhysical:P.rCorePhysical,coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow});
++const P_DEFAULTS=Object.freeze({core:P.core,rCorePhysical:P.rCorePhysical,coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,topologyGuard:P.topologyGuard,bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode});
+ // v7.5-framepredicaten. De wandadvectie u_bg=Ω×r staat alleen in het lab-
+ // solverframe met bgFlow='wall' expliciet in het snelheidsveld; in het
+ // co-roterende solverframe is de wand in rust en bestaat er geen term.
+@@ -1216,6 +1239,9 @@ function buildDiagRecord(Wr,Lk,ACN,sA){
+     omegaBundle:P.OmBundle,omegaWall:P.Om,
+     bundleEnabled:P.bundleEnabled,bundleProfile:P.bundleProfile,bundleSourceModel:P.bundleSourceModel,
+     bundleDensityMid:bundleDensityAtZ(0),bundleRadiusMid:bundleRadiusAtZ(0),
++    bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMValid:bundleBEMCache.valid,
++    bundleBEMRadius:bundleBEMCache.radius,bundleBEMResidualVelocity:bundleBEMCache.residualVelocity,bundleBEMResidualVorticity:bundleBEMCache.residualVorticity,
++    topologyGuard:P.topologyGuard,topologyGap:lastTopologyGap,
+     contactThreshold:ct.effective,contactFloorActive:ct.floorActive};
+ }
+ 
+@@ -1268,19 +1294,186 @@ function bundleVelocityProfileAt(x,y,z,active=bundleFlowActive()){
+     vorticity:inside?2*om:0,inside,radius:Rb};
+ }
+ function bundleVelocityAt(x,y,z){return bundleVelocityProfileAt(x,y,z,bundleFlowActive());}
++function bundleExteriorVelocityAt(x,y,z,projectInside=true){
++  let ex=x,ey=y,ez=z;
++  if(projectInside&&P.bundleBEMEnabled&&bundleBEMCache.valid){
++    const ni=nearestKnotTubeInfo(ex,ey,ez),R=1.002*bundleBEMCache.radius;
++    if(ni.distance<R&&ni.distance>1e-14*R){const d=R-ni.distance;ex+=d*ni.nx;ey+=d*ni.ny;ez+=d*ni.nz;}
++  }
++  const ub=bundleVelocityProfileAt(ex,ey,ez,true);let ux=ub.ux,uy=ub.uy,uz=ub.uz;
++  if(P.bundleBEMEnabled&&bundleBEMCache.valid){const c=evalBundleBEMGradient(ex,ey,ez,bundleBEMCache.qVelocity);ux+=c[0];uy+=c[1];uz+=c[2];}
++  return {ux,uy,uz};
++}
+ function backgroundVelocityAt(x,y,z){
+   let ux=0,uy=0,uz=0;
+   if(bgWallInSolver()){ux+=-P.Om*y;uy+=P.Om*x;}
+   if(bundleFlowActive()){
+-    const ub=bundleVelocityProfileAt(x,y,z,true);ux+=ub.ux;uy+=ub.uy;uz+=ub.uz;
++    const ub=bundleExteriorVelocityAt(x,y,z);ux+=ub.ux;uy+=ub.uy;uz+=ub.uz;
+   }
+   return {ux,uy,uz};
+ }
++function backgroundVelocityForFilamentPoint(px,py,pz,tx,ty,tz){
++  let ux=0,uy=0,uz=0;
++  if(bgWallInSolver()){ux+=-P.Om*py;uy+=P.Om*px;}
++  if(!bundleFlowActive())return {ux,uy,uz};
++  if(!(P.bundleBEMEnabled&&bundleBEMCache.valid)){
++    const b=bundleVelocityProfileAt(px,py,pz,true);return {ux:ux+b.ux,uy:uy+b.uy,uz:uz+b.uz};
++  }
++  const t=normalize3(tx,ty,tz),ref=Math.abs(t[2])<0.85?[0,0,1]:[1,0,0];
++  const n1=normalize3(t[1]*ref[2]-t[2]*ref[1],t[2]*ref[0]-t[0]*ref[2],t[0]*ref[1]-t[1]*ref[0]);
++  const n2=normalize3(t[1]*n1[2]-t[2]*n1[1],t[2]*n1[0]-t[0]*n1[2],t[0]*n1[1]-t[1]*n1[0]);
++  const R=1.002*bundleBEMCache.radius;let sx=0,sy=0,sz=0;
++  for(let q=0;q<4;q++){const th=q*Math.PI/2,nx=Math.cos(th)*n1[0]+Math.sin(th)*n2[0],ny=Math.cos(th)*n1[1]+Math.sin(th)*n2[1],nz=Math.cos(th)*n1[2]+Math.sin(th)*n2[2];
++    const b=bundleExteriorVelocityAt(px+R*nx,py+R*ny,pz+R*nz,false);sx+=b.ux;sy+=b.uy;sz+=b.uz;}
++  return {ux:ux+sx/4,uy:uy+sy/4,uz:uz+sz/4};
++}
+ function bundleSampleNormalized(i,n){
+   const N=Math.max(1,Math.round(n)),j=clamp(Math.round(i),0,N-1);
+   const rho=Math.sqrt((j+0.5)/N),theta=j*Math.PI*(3-Math.sqrt(5));
+   return {rho,theta};
+ }
++
++// ================= v7.5.2 Niveau-C 3D Neumann source-panel BEM/MFS =================
++// De basisbundel mag vorticaal zijn. Een harmonische gradientcorrectie
++// verandert haar curl niet, maar dwingt de normale snelheid op de gesloten
++// knooptube naar nul. Een tweede, onafhankelijke Neumann-oplossing wordt op
++// het coarse-grained vorticiteitsveld toegepast; daardoor zijn de getekende
++// swirl strings divergentievrij in het buitendomein en tangentieel aan de
++// uitsluitingsbuis. Dit is een discrete Research-Track exterior closure.
++function bundleOmegaDerivativeAtZ(z){
++  const h=Math.max(1e-6,1e-4*cylinderHeight());
++  return (bundleOmegaAtZ(z+h)-bundleOmegaAtZ(z-h))/(2*h);
++}
++function bundleVorticityProfileAt(x,y,z,active=bundleFlowActive()){
++  if(!active)return {wx:0,wy:0,wz:0,inside:false,radius:bundleRadiusAtZ(z)};
++  const Rb=Math.max(1e-30,bundleRadiusAtZ(z)),r2=x*x+y*y;
++  if(r2>Rb*Rb)return {wx:0,wy:0,wz:0,inside:false,radius:Rb};
++  const om=bundleOmegaAtZ(z),dop=bundleOmegaDerivativeAtZ(z);
++  return {wx:-x*dop,wy:-y*dop,wz:2*om,inside:true,radius:Rb};
++}
++function bundleBEMTargetCount(){return P.bundleBEMQuality==='high'?64:(P.bundleBEMQuality==='low'?24:40);}
++function bundleBEMBoundaryInfo(){
++  let requested=P.a,label='a_sim';
++  if(P.bundleBoundaryMode==='rcore'){
++    requested=resolvedFixedCoreRadius();label='r_kern';
++    if(!Number.isFinite(requested))return {valid:false,requested:NaN,floor:NaN,label,reason:'r_kern is onbepaald'};
++  }else if(P.bundleBoundaryMode==='rhorn'){
++    requested=R_HORN_SST;label='R_horn';
++  }
++  const lm=Y&&fils.length?lminAll():Math.max(P.R0,1e-3);
++  const Lref=Math.max(P.Rcyl,P.Hcyl,P.R0,1e-3);
++  const floor=Math.max(128*Number.EPSILON*Lref,1e-4*lm);
++  if(!(Number.isFinite(requested)&&requested>0))return {valid:false,requested,floor,label,reason:'ongeldige radius'};
++  if(requested<floor)return {valid:false,requested,floor,label,reason:`${label} ligt onder de geometrische BEM-resolutievloer`};
++  return {valid:true,requested,floor,label,reason:''};
++}
++function normalize3(x,y,z){const m=Math.hypot(x,y,z)||1;return [x/m,y/m,z/m];}
++function buildBundleBEMNodes(radius,target=bundleBEMTargetCount()){
++  const active=fils.filter(f=>!f.ghost),nodes=[];
++  if(!Y||!active.length)return nodes;
++  const ringCount=4;
++  const totalN=active.reduce((a,f)=>a+f.N,0)||1;
++  for(const f of active){
++    const along=Math.max(2,Math.round((target/ringCount)*f.N/totalN));
++    for(let a=0;a<along;a++){
++      const i=Math.floor((a+0.5)*f.N/along)%f.N,im=(i-1+f.N)%f.N,ip=(i+1)%f.N,o=f.off;
++      const cx=Y[o+3*i],cy=Y[o+3*i+1],cz=Y[o+3*i+2];
++      const t=normalize3(Y[o+3*ip]-Y[o+3*im],Y[o+3*ip+1]-Y[o+3*im+1],Y[o+3*ip+2]-Y[o+3*im+2]);
++      const ref=Math.abs(t[2])<0.85?[0,0,1]:[1,0,0];
++      const n1=normalize3(t[1]*ref[2]-t[2]*ref[1],t[2]*ref[0]-t[0]*ref[2],t[0]*ref[1]-t[1]*ref[0]);
++      const n2=normalize3(t[1]*n1[2]-t[2]*n1[1],t[2]*n1[0]-t[0]*n1[2],t[0]*n1[1]-t[1]*n1[0]);
++      for(let q=0;q<ringCount&&nodes.length<target;q++){
++        const th=2*Math.PI*q/ringCount,co=Math.cos(th),si=Math.sin(th);
++        const nx=co*n1[0]+si*n2[0],ny=co*n1[1]+si*n2[1],nz=co*n1[2]+si*n2[2];
++        nodes.push({x:cx+radius*nx,y:cy+radius*ny,z:cz+radius*nz,nx,ny,nz,
++          sx:cx+0.35*radius*nx,sy:cy+0.35*radius*ny,sz:cz+0.35*radius*nz});
++      }
++    }
++  }
++  return nodes;
++}
++function solveDensePivot(A,b,n){
++  const M=new Float64Array(A),x=new Float64Array(b);
++  for(let k=0;k<n;k++){
++    let piv=k,best=Math.abs(M[k*n+k]);
++    for(let i=k+1;i<n;i++){const v=Math.abs(M[i*n+k]);if(v>best){best=v;piv=i;}}
++    if(!(best>1e-20)||!Number.isFinite(best))return null;
++    if(piv!==k){for(let j=k;j<n;j++){const t=M[k*n+j];M[k*n+j]=M[piv*n+j];M[piv*n+j]=t;}const tb=x[k];x[k]=x[piv];x[piv]=tb;}
++    const d=M[k*n+k];
++    for(let i=k+1;i<n;i++){
++      const f=M[i*n+k]/d;if(!f)continue;M[i*n+k]=0;
++      for(let j=k+1;j<n;j++)M[i*n+j]-=f*M[k*n+j];x[i]-=f*x[k];
++    }
++  }
++  const out=new Float64Array(n);
++  for(let i=n-1;i>=0;i--){let v=x[i];for(let j=i+1;j<n;j++)v-=M[i*n+j]*out[j];out[i]=v/M[i*n+i];}
++  return out;
++}
++function bemKernelGradient(x,y,z,node){
++  const rx=x-node.sx,ry=y-node.sy,rz=z-node.sz,r2=rx*rx+ry*ry+rz*rz;
++  const inv=-1/(4*Math.PI*Math.max(r2,1e-60)*Math.sqrt(Math.max(r2,1e-60)));
++  return [rx*inv,ry*inv,rz*inv];
++}
++function solveBundleNeumann(nodes,fieldFn,radius){
++  const N=nodes.length,n=N+1,A=new Float64Array(n*n),b=new Float64Array(n);
++  const reg=1e-9/Math.max(radius*radius,1e-60);
++  for(let i=0;i<N;i++){
++    const ni=nodes[i],f=fieldFn(ni.x,ni.y,ni.z);
++    b[i]=-(ni.nx*f[0]+ni.ny*f[1]+ni.nz*f[2]);
++    for(let j=0;j<N;j++){
++      const g=bemKernelGradient(ni.x,ni.y,ni.z,nodes[j]);
++      A[i*n+j]=ni.nx*g[0]+ni.ny*g[1]+ni.nz*g[2]+(i===j?reg:0);
++    }
++    A[i*n+N]=1;A[N*n+i]=1;
++  }
++  const sol=solveDensePivot(A,b,n);if(!sol)return null;
++  const q=sol.slice(0,N);let maxR=0,maxB=0;
++  for(let i=0;i<N;i++){
++    let normal=-b[i];
++    for(let j=0;j<N;j++){const g=bemKernelGradient(nodes[i].x,nodes[i].y,nodes[i].z,nodes[j]);normal+=q[j]*(nodes[i].nx*g[0]+nodes[i].ny*g[1]+nodes[i].nz*g[2]);}
++    maxR=Math.max(maxR,Math.abs(normal));maxB=Math.max(maxB,Math.abs(b[i]));
++  }
++  return {q,residual:maxR/Math.max(maxB,1e-30)};
++}
++let bundleBEMCache={valid:false,nodes:[],qVelocity:null,qVorticity:null,radius:NaN,residualVelocity:NaN,residualVorticity:NaN,status:'uit',builtStep:-1};
++let bundleBEMDirty=true,bundleBEMStepCounter=0;
++function invalidateBundleBEM(reason='geometry'){bundleBEMDirty=true;bundleBEMCache.status='wacht: '+reason;}
++function ensureBundleBEM(force=false){
++  if(!(P.bundleBEMEnabled&&P.bundleEnabled&&Y&&fils.some(f=>!f.ghost))){bundleBEMCache.valid=false;bundleBEMCache.status='uit of geen actieve bundel';return false;}
++  if(!force&&!bundleBEMDirty&&(bundleBEMStepCounter-bundleBEMCache.builtStep)<BEM_REBUILD_STEPS)return bundleBEMCache.valid;
++  const bi=bundleBEMBoundaryInfo();
++  if(!bi.valid){bundleBEMCache.valid=false;bundleBEMCache.status=bi.reason;bundleBEMCache.radius=bi.requested;bundleBEMDirty=false;return false;}
++  const nodes=buildBundleBEMNodes(bi.requested,bundleBEMTargetCount());
++  if(nodes.length<8){bundleBEMCache.valid=false;bundleBEMCache.status='te weinig collocatiepunten';bundleBEMDirty=false;return false;}
++  const sv=solveBundleNeumann(nodes,(x,y,z)=>{const u=bundleVelocityProfileAt(x,y,z,true);return [u.ux,u.uy,u.uz];},bi.requested);
++  const sw=solveBundleNeumann(nodes,(x,y,z)=>{const w=bundleVorticityProfileAt(x,y,z,true);return [w.wx,w.wy,w.wz];},bi.requested);
++  const valid=!!(sv&&sw&&sv.residual<0.15&&sw.residual<0.15);
++  bundleBEMCache={valid,nodes,qVelocity:sv&&sv.q,qVorticity:sw&&sw.q,radius:bi.requested,
++    residualVelocity:sv?sv.residual:Infinity,residualVorticity:sw?sw.residual:Infinity,
++    status:!sv||!sw?'lineaire solve mislukt':(valid?'actief':'residu te groot; correctie uitgeschakeld'),builtStep:bundleBEMStepCounter};
++  bundleBEMDirty=false;return bundleBEMCache.valid;
++}
++function evalBundleBEMGradient(x,y,z,q){
++  if(!bundleBEMCache.valid||!q)return [0,0,0];let gx=0,gy=0,gz=0;
++  for(let j=0;j<bundleBEMCache.nodes.length;j++){const g=bemKernelGradient(x,y,z,bundleBEMCache.nodes[j]),a=q[j];gx+=a*g[0];gy+=a*g[1];gz+=a*g[2];}
++  return [gx,gy,gz];
++}
++function bundleVorticityAt(x,y,z){
++  const w=bundleVorticityProfileAt(x,y,z,P.bundleEnabled);
++  if(P.bundleBEMEnabled&&bundleBEMCache.valid){const c=evalBundleBEMGradient(x,y,z,bundleBEMCache.qVorticity);w.wx+=c[0];w.wy+=c[1];w.wz+=c[2];}
++  return w;
++}
++function nearestKnotTubeInfo(x,y,z){
++  let best2=Infinity,bx=0,by=0,bz=0;
++  for(const f of fils){if(f.ghost)continue;const o=f.off;
++    for(let i=0;i<f.N;i++){const j=(i+1)%f.N,ax=Y[o+3*i],ay=Y[o+3*i+1],az=Y[o+3*i+2],dx=Y[o+3*j]-ax,dy=Y[o+3*j+1]-ay,dz=Y[o+3*j+2]-az;
++      const l2=dx*dx+dy*dy+dz*dz,t=clamp(((x-ax)*dx+(y-ay)*dy+(z-az)*dz)/Math.max(l2,1e-30),0,1);
++      const qx=ax+t*dx,qy=ay+t*dy,qz=az+t*dz,rx=x-qx,ry=y-qy,rz=z-qz,d2=rx*rx+ry*ry+rz*rz;
++      if(d2<best2){best2=d2;bx=rx;by=ry;bz=rz;}
++    }
++  }
++  const d=Math.sqrt(best2),n=normalize3(bx,by,bz);return {distance:d,nx:n[0],ny:n[1],nz:n[2]};
++}
+ function bundleMaxOmega(){
+   if(!bundleFlowActive())return 0;
+   let m=0;for(let i=0;i<=64;i++)m=Math.max(m,Math.abs(bundleOmegaAtZ(zMin()+cylinderHeight()*i/64)));
+@@ -1522,8 +1715,9 @@ function applySSTBundlePreset(){
+   P.Om=0;P.revOm=false;P.displayFrame='lab';P.solverFrame='corot';P.bgFlow='bundle';
+   P.OmBundle=1;P.revOmBundle=false;P.bundleEnabled=true;P.bundleProfile='parallel';
+   P.bundleSplay=0.45;P.bundleRadiusFrac=0.72;P.bundleVisualLines=61;
++  P.bundleBEMEnabled=true;P.bundleBoundaryMode='asim';P.bundleBEMQuality='mid';P.topologyGuard=true;
+   P.nQ=1;P.a=1.2415e-4;P.R0=0.05;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+-  P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.autoRelax=false;P.timeReverse=false;
++  P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.autoRelax=false;P.timeReverse=false;P.topologyGuard=true;
+   P.centerLock=true;P.tracerWrapZ=false;P.tracerSpawnMode='column';
+   rebuildLattice();syncUi();updateSubtitle();
+ }
+@@ -1532,7 +1726,7 @@ function applyDefaultStartup(){
+   P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.core='vast';DELTA.gp=0.615;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+   P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+-  P.timeReverse=false;P.autoRelax=false;P.centerLock=true;
++  P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=true;
+   P.tracerWrapZ=true;P.tracerSpawnMode='column';
+   P.ccwA=true;P.ccwB=false;P.mirrorB=false;
+   applySSTSimilarityPreset();
+@@ -1549,7 +1743,7 @@ function applyFrictionPreset(){
+   P.med='he';P.core='gp';P.coreFlowLock=true;DELTA.gp=0.615; // D4: expliciet, preset-context
+   if(window.ModelLog&&ModelLog.logUser)ModelLog.logUser('coreFlowLock-preset',{value:true});
+   P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+-  P.timeReverse=false;P.autoRelax=false;P.centerLock=true;
++  P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=true;
+   P.tracerWrapZ=true;
+   P.nQ=10;
+   applyMfTemp('1.90');P.vnZ=0;P.revVn=false;
+@@ -1879,7 +2073,7 @@ function velocityCore(Yv,fl,OUT,liaOnly,options={}){
+         const zBias=effectiveW()+carrierAxialDrift(carrier);
+         uz+=zBias;
+         if(!fl[ft].ghost&&(bgWall||bundleOn)){
+-          const ubg=backgroundVelocityAt(px,py,pz);
++          const ubg=backgroundVelocityForFilamentPoint(px,py,pz,dmx+dpx,dmy+dpy,dmz+dpz);
+           ux+=ubg.ux;uy+=ubg.uy;uz+=ubg.uz;
+         }
+       }
+@@ -1982,6 +2176,11 @@ function dtCFL(){
+   if(bgWallInSolver()&&Math.abs(P.Om)>1e-9)dt=Math.min(dt,0.2/Math.abs(P.Om));
+   const ob=bundleMaxOmega();
+   if(ob>1e-9)dt=Math.min(dt,0.2/ob);
++  if(P.topologyGuard&&Y&&fils.length){
++    const gap=Number.isFinite(lastTopologyGap)?lastTopologyGap:topologyClearance();
++    const dc=contactThresholdInfo().effective,margin=Math.max(0,gap-dc);
++    if(Number.isFinite(margin))dt=Math.min(dt,0.12*Math.max(margin,0.05*dc)/Math.max(2*lastUmax,1e-12));
++  }
+   return dt;
+ }
+ function evalsPerStep(){
+@@ -2562,6 +2761,8 @@ function applyShortRangeRepulsion(group,amount){
+ }
+ function autoRelaxGeometry(dtReal){
+   if(!P.autoRelax||P.timeReverse||!Y||!fils.length||flagged)return;
++  const guardSnapshot=P.topologyGuard?Y.slice():null;
++  const guardGap=P.topologyGuard?topologyClearance():Infinity;
+   const alpha=clamp(0.55*dtReal,0,0.012),groups=carrierRelaxGroups();
+   for(const group of groups){
+     const before=groupCentroidRms(group),updates=[];
+@@ -2586,6 +2787,19 @@ function autoRelaxGeometry(dtReal){
+       const i=f.off+3*k;Y[i]=before.cx+(Y[i]-after.cx)*scale;Y[i+1]=before.cy+(Y[i+1]-after.cy)*scale;Y[i+2]=before.cz+(Y[i+2]-after.cz)*scale;
+     }});
+   }
++  if(guardSnapshot){
++    const postGap=topologyClearance(),dmax=maxStateDisplacement(guardSnapshot,Y),dc=contactThresholdInfo().effective;
++    const budget=0.20*Math.max(guardGap-dc,dc);
++    if(postGap<=dc||dmax>budget){
++      Y.set(guardSnapshot);P.autoRelax=false;
++      const cb=document.getElementById('cAutoRelax');if(cb)cb.checked=false;
++      const badge=document.getElementById('autoRelaxBadge');if(badge){badge.textContent='UIT';badge.classList.remove('on');}
++      setFlag('⚠ topology guard heeft een auto-relax-mutatie teruggedraaid: de regularisatie gebruikte te veel tube-clearance. Auto-relax is uitgezet.',true);
++      return;
++    }
++    lastTopologyGap=postGap;
++  }
++  invalidateBundleBEM('auto-relax');
+   autoRelaxFrame++;
+ }
+ 
+@@ -2672,6 +2886,9 @@ function resetState(){
+   initTwistProxy();
+   syncGhostRing();
+   updateCoreRadiusLimit(true);
++  lastTopologyGap=topologyClearance();
++  bundleBEMStepCounter=0;invalidateBundleBEM('reset');ensureBundleBEM(true);
++  rebuildLattice();
+   rebuildStreamlines(true);
+ }
+ function applyTaylorOscillation(){
+@@ -2886,21 +3103,40 @@ function rebuildLattice(){
+   }
+ }
+ 
++function traceBundleVorticityLine(sample,steps=96){
++  const pts=[],rBase=bundleBaseRadius(),sgn=Math.sign(bundleOmegaAtZ(0))||1;
++  let x=sample.rho*rBase*Math.cos(sample.theta),y=sample.rho*rBase*Math.sin(sample.theta),z=sgn>0?zMin()+0.01:zMax()-0.01;
++  const ds=Math.max(5e-4,cylinderHeight()/steps);
++  for(let k=0;k<=steps*2;k++){
++    if(z<zMin()-0.02||z>zMax()+0.02||x*x+y*y>P.Rcyl*P.Rcyl)break;
++    if(P.bundleBEMEnabled&&bundleBEMCache.valid){
++      const ni=nearestKnotTubeInfo(x,y,z),R=bundleBEMCache.radius*1.002;
++      if(ni.distance<R){const push=R-ni.distance;x+=push*ni.nx;y+=push*ni.ny;z+=push*ni.nz;}
++    }
++    pts.push(new THREE.Vector3(x,y,z));
++    const w1=bundleVorticityAt(x,y,z),m1=Math.hypot(w1.wx,w1.wy,w1.wz);if(m1<1e-12)break;
++    const hx=sgn*ds*w1.wx/m1,hy=sgn*ds*w1.wy/m1,hz=sgn*ds*w1.wz/m1;
++    const wm=bundleVorticityAt(x+0.5*hx,y+0.5*hy,z+0.5*hz),mm=Math.hypot(wm.wx,wm.wy,wm.wz);if(mm<1e-12)break;
++    x+=sgn*ds*wm.wx/mm;y+=sgn*ds*wm.wy/mm;z+=sgn*ds*wm.wz/mm;
++    if((sgn>0&&z>=zMax()-0.005)||(sgn<0&&z<=zMin()+0.005)){pts.push(new THREE.Vector3(x,y,z));break;}
++  }
++  return pts;
++}
+ function rebuildBundleLines(){
+   if(!P.bundleEnabled)return;
++  if(P.bundleBEMEnabled&&P.bundleEnabled)ensureBundleBEM();
+   const target=clamp(Math.round(P.bundleVisualLines||61),7,121);
+-  const rBase=bundleBaseRadius();
+-  const segments=P.bundleProfile==='parallel'?1:40;
+   const color=new THREE.Color(P.vorticityLineColor||'#0F1A29');
+   for(let i=0;i<target;i++){
+-    const sample=bundleSampleNormalized(i,target),pts=[];
+-    for(let k=0;k<=segments;k++){
+-      const u=k/segments;
+-      const z=zMin()+0.01+u*Math.max(0,cylinderHeight()-0.02);
+-      const lam=bundleScaleAtU(u);
+-      const r=sample.rho*rBase*lam;
+-      pts.push(new THREE.Vector3(r*Math.cos(sample.theta),r*Math.sin(sample.theta),z));
++    const sample=bundleSampleNormalized(i,target);
++    let pts;
++    if(P.bundleBEMEnabled&&bundleBEMCache.valid){
++      pts=traceBundleVorticityLine(sample,96);
++    }else{
++      pts=[];const segments=P.bundleProfile==='parallel'?1:40,rBase=bundleBaseRadius();
++      for(let k=0;k<=segments;k++){const u=k/segments,z=zMin()+0.01+u*Math.max(0,cylinderHeight()-0.02),lam=bundleScaleAtU(u),r=sample.rho*rBase*lam;pts.push(new THREE.Vector3(r*Math.cos(sample.theta),r*Math.sin(sample.theta),z));}
+     }
++    if(pts.length<2)continue;
+     const op=0.22+0.52*((Math.sin(i*12.9898)*43758.5453)%1+1)%1;
+     const g=new THREE.BufferGeometry().setFromPoints(pts);
+     latticeGrp.add(new THREE.Line(g,new THREE.LineBasicMaterial({color,transparent:true,opacity:op})));
+@@ -3758,6 +3994,10 @@ function syncUi(){
+   document.getElementById('cChiArrow').checked=P.showChiArrow;
+   document.getElementById('cTwProxy').checked=P.twistProxyEnabled;
+   document.getElementById('cAutoRelax').checked=P.autoRelax;
++  const tg=document.getElementById('cTopologyGuard');if(tg)tg.checked=P.topologyGuard;
++  const tgr=document.getElementById('topologyGuardReadout');if(tgr){const dc=contactThresholdInfo().effective,g=lastTopologyGap;tgr.textContent=P.topologyGuard
++    ?`ACTIEF · minimale centerline-clearance=${Number.isFinite(g)?fmtLengthSI(g):'wordt bepaald'} · stopgrens=${fmtLengthSI(dc)} · contact-CFL + ${TOPOLOGY_SWEEP_SAMPLES}-punts transient scan`
++    :'UIT · centerlines kunnen numeriek door elkaar tunnelen; alleen gebruiken voor expliciete reconnectie-experimenten.';}
+   document.getElementById('cCoreFlowLock').checked=P.coreFlowLock;
+   document.getElementById('cCenterLock').checked=P.centerLock;
+   document.getElementById('cTracerWrapZ').checked=P.tracerWrapZ;
+@@ -4199,6 +4439,8 @@ bindRange('A',x=>fmtLengthSI(x*1e-3),x=>{
+   updateCoreRadiusLimit(false);
+   updateCoreFlowReadout();
+   const lock=document.getElementById('cCoreFlowLock');if(lock)lock.checked=P.coreFlowLock;
++  invalidateBundleBEM('a_sim');ensureBundleBEM(true);rebuildLattice();
++  lastTopologyGap=P.topologyGuard?topologyClearance():Infinity;
+   rebuildTubes(true);
+   return null; // updateCoreRadiusLimit beheert het samengestelde label inclusief max/floorstatus
+ });
+@@ -4369,6 +4611,7 @@ document.getElementById('cAutoRelax').addEventListener('change',e=>{
+   badge.classList.toggle('on',P.autoRelax&&!P.timeReverse);
+   if(stabilityLast)updateStabilityDisplay(stabilityLast);
+ });
++document.getElementById('cTopologyGuard')?.addEventListener('change',e=>{P.topologyGuard=e.target.checked;lastTopologyGap=P.topologyGuard?topologyClearance():Infinity;ModelLog.logUser('topologyGuard',{value:P.topologyGuard});syncUi();});
+ document.getElementById('cTimeReverse').addEventListener('change',e=>{
+   P.timeReverse=e.target.checked;
+   // v7.5 (v7.4b §B.3): momentopname van ε_rev bij het inschakelen van
+@@ -4541,6 +4784,43 @@ initDiagnosticToggles();renderFormula();
+   console.log('[Spin] sanity OK, Kelvin U≈',uk.toFixed(4),'m/s');
+ })();
+ 
++// v7.5.2: topologie kan alleen veranderen wanneer niet-aanliggende
++// centerlines elkaar doorsnijden. De guard bewaakt daarom de minimale exacte
++// segmentafstand, begrenst dt op de resterende tube-clearance en zoekt bij
++// mogelijke tunneling expliciet naar een tijdelijk contact binnen de RK4-stap.
++let lastTopologyGap=Infinity;
++function topologyClearance(){
++  const active=fils.filter(f=>!f.ghost);let g=Infinity;
++  for(const f of active)g=Math.min(g,dminSelf(f));
++  for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++)
++    g=Math.min(g,Math.sqrt(pairGapExact2(active[i],active[j],g*g)));
++  return g;
++}
++function maxStateDisplacement(A,B){let d=0;for(let i=0;i<Math.min(A.length,B.length);i+=3)d=Math.max(d,Math.hypot(B[i]-A[i],B[i+1]-A[i+1],B[i+2]-A[i+2]));return d;}
++function topologyStepMayTunnel(g0,g1,dmax){
++  const d=contactThresholdInfo().effective;
++  return Number.isFinite(g0)&&Number.isFinite(g1)&&Math.min(g0,g1)<=d+2.25*dmax;
++}
++function transientContactWithinStep(signedDtFull,lia){
++  if(!P.topologyGuard||!Ypre)return null;
++  const fullState=Y.slice(),sgn=Math.sign(signedDtFull)||1,full=Math.abs(signedDtFull);
++  const oldTw=P.twistProxyEnabled;P.twistProxyEnabled=false;
++  let lo=0,hi=NaN,event=null;
++  try{
++    for(let k=1;k<=TOPOLOGY_SWEEP_SAMPLES;k++){
++      const f=k/TOPOLOGY_SWEEP_SAMPLES;Y.set(Ypre);rk4Step(sgn*full*f);
++      const e=contactEvent(false);if(e&&!e.warn){hi=f;lo=(k-1)/TOPOLOGY_SWEEP_SAMPLES;event=e;break;}
++    }
++    if(!event){Y.set(fullState);return null;}
++    for(let it=0;it<18&&(hi-lo)>1e-6;it++){
++      const mid=.5*(lo+hi);Y.set(Ypre);rk4Step(sgn*full*mid);
++      const e=contactEvent(false);if(e&&!e.warn){hi=mid;event=e;}else lo=mid;
++    }
++    Y.set(Ypre);lastUmax=rk4Step(sgn*full*lo);
++    return {dt:sgn*full*lo,event:Object.assign({},event,{msg:'⛔ topology guard: tijdelijk contact binnen de RK4-stap gevonden; gestopt aan de veilige zijde. Geen doorsnijding of reconnectie toegepast.'})};
++  }finally{P.twistProxyEnabled=oldTw;}
++}
++
+ // v7.2: contactdetectie op exacte segment-segmentafstand, aangeroepen na
+ // iedere geaccepteerde RK4-stap. Pure functie: retourneert het eerste event
+ // (warn = LIA-kwalitatief, anders hard stop) zonder zelf flags te zetten,
+@@ -4551,16 +4831,16 @@ function contactEvent(lia){
+   const ct=contactThresholdInfo(),dContact=ct.effective,d2Contact=dContact*dContact;
+   const suffix=ct.floorActive?' (numerieke afstandsvloer actief)':'';
+   if(P.mode==='botsing'&&minGapCross()<dContact){
+-    if(lia)return{warn:true,msg:'⚠ dragers binnen contactdrempel: LIA negeert de onderlinge interactie — resultaat vanaf hier kwalitatief.'+suffix};
+-    return{warn:false,msg:'⚠ dragers binnen contactdrempel — reconnectieregime; filamentmodel niet langer geldig. Reset om opnieuw te draaien.'+suffix};
++    if(lia&&!P.topologyGuard)return{warn:true,msg:'⚠ dragers binnen contactdrempel: LIA negeert de onderlinge interactie — resultaat vanaf hier kwalitatief.'+suffix};
++    return{warn:false,msg:'⛔ dragers bereiken de topologische contactdrempel; de run stopt vóór doorsnijding. Reconnectie is niet gemodelleerd.'+suffix};
+   }
+   for(const f of fils){
+     if(f.ghost)continue;
+     if(f.N>RING_N||P.topo==='trefoil'||P.knotKey||P.knotIdx>=0){
+       const ds=dminSelf(f);
+       if(ds<dContact){
+-        if(lia)return{warn:true,msg:'⚠ strengen binnen contactdrempel: LIA negeert deze interactie — resultaat vanaf hier kwalitatief.'+suffix};
+-        return{warn:false,msg:'⚠ strengen binnen contactdrempel — zelfreconnectieregime: hier zou de knoop ontknopen (Kleckner–Irvine); niet gemodelleerd.'+suffix};
++        if(lia&&!P.topologyGuard)return{warn:true,msg:'⚠ strengen binnen contactdrempel: LIA negeert deze interactie — resultaat vanaf hier kwalitatief.'+suffix};
++        return{warn:false,msg:'⛔ zelfcontactdrempel bereikt; de topology guard stopt vóór een mogelijke topologieverandering. De knoop wordt niet doorgeknipt of ontknoopt.'+suffix};
+       }
+     }
+   }
+@@ -4568,8 +4848,8 @@ function contactEvent(lia){
+     if(fils[ii].ghost||fils[jj].ghost)continue;
+     if((fils[ii].carrier||'A')!==(fils[jj].carrier||'A'))continue;
+     if(pairGapExact2(fils[ii],fils[jj],Infinity)<d2Contact){
+-      if(lia)return{warn:true,msg:'⚠ componenten binnen contactdrempel: LIA negeert deze interactie — resultaat vanaf hier kwalitatief.'+suffix};
+-      return{warn:false,msg:'⚠ componenten binnen contactdrempel — reconnectieregime binnen de drager; niet gemodelleerd.'+suffix};
++      if(lia&&!P.topologyGuard)return{warn:true,msg:'⚠ componenten binnen contactdrempel: LIA negeert deze interactie — resultaat vanaf hier kwalitatief.'+suffix};
++      return{warn:false,msg:'⛔ componentcontact bereikt; gestopt vóór doorsnijding. Geen reconnectie toegepast.'+suffix};
+     }
+   }
+   return null;
+@@ -4589,8 +4869,9 @@ function bisectFirstHit(signedDtFull,lia){
+     const c=contactEvent(lia);
+     (c&&!c.warn)?hi=mid:lo=mid;
+   }
+-  Y.set(Ypre);lastUmax=rk4Step(sgn*hi);
+-  return sgn*hi;
++  const land=P.topologyGuard?lo:hi;
++  Y.set(Ypre);lastUmax=rk4Step(sgn*land);
++  return sgn*land;
+ }
+ function setFlag(msg,warnOnly){
+   const f=document.getElementById('flag');
+@@ -4617,8 +4898,9 @@ const ModelLog=(()=>{
+   const userActions=[],steps=[],events=[];
+   function snapP(){
+     return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,rHorn:R_HORN_SST,rCorePhysical:P.rCorePhysical,Om:P.Om,nQ:P.nQ,
+-      solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow, // v7.5: drie framevelden apart gelogd
+-      accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp};
++      solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,
++      bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMQuality:P.bundleBEMQuality,
++      topologyGuard:P.topologyGuard,accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp};
+   }
+   function pushRing(kind,arr,item,limit){
+     arr.push(item);
+@@ -4685,14 +4967,16 @@ window.addEventListener('unhandledrejection',e=>runtimeFailure('unhandledrejecti
+ // Puur lokaal: bouwt eigen toestandsarrays, raakt globale Y/fils niet aan;
+ // P-velden worden gesnapshot en hersteld. Resultaten als JSON exporteerbaar.
+ const SelfTest=(()=>{ 
+-  const PKEYS=['mode','topo','inter','core','med','qual','Om','GaDemo','nQ','a','w','vzA','vzB',
+-    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical'];
++  const PKEYS=['mode','topo','inter','core','med','qual','Om','OmBundle','GaDemo','nQ','a','w','vzA','vzB',
++    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical',
++    'bundleEnabled','bundleProfile','bundleSplay','bundleBEMEnabled','bundleBoundaryMode','bundleBEMQuality','topologyGuard'];
+   function snap(){const o={};for(const k of PKEYS)o[k]=P[k];o.tOsc=P.taylorOsc.enabled;o.gpDelta=DELTA.gp;return o;}
+   function restore(o){for(const k of PKEYS)P[k]=o[k];P.taylorOsc.enabled=o.tOsc;DELTA.gp=o.gpDelta;syncUi();}
+   function baseline(){
+     P.mode='solo';P.topo='ring';P.med='he';P.nQ=10;P.a=1.2415e-4;P.core='gp';
+     P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;P.solverFrame='corot';P.displayFrame='corot';P.bgFlow='none';
+     P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.timeReverse=false;P.taylorOsc.enabled=false;DELTA.gp=0.615;
++    P.bundleEnabled=false;P.bundleProfile='parallel';P.bundleSplay=0;P.bundleBEMEnabled=true;P.bundleBoundaryMode='asim';P.bundleBEMQuality='mid';P.topologyGuard=true;
+   }
+   function ring(N,R,eps,m){const A=new Float64Array(3*N);
+     for(let k=0;k<N;k++){const t=2*Math.PI*k/N;const r=R*(1+(eps||0)*Math.cos((m||0)*t));
+@@ -4731,7 +5015,7 @@ const SelfTest=(()=>{
+       const metaVersion=document.querySelector('meta[name="vortexlab-version"]')?.content;
+       const metaBase=document.querySelector('meta[name="vortexlab-base"]')?.content;
+       const title=document.title;
+-      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.5'&&title.includes('v7.5.1'),'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+title);
++      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.5.1'&&title.includes('v7.5.2'),'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+title);
+       const diag=buildDiagRecord(1,2,3,{R:4,z:5});
+       add('T0b diag-record ACN eindig',diag.ACN===3&&Object.values(diag).filter(v=>typeof v==='number').every(Number.isFinite),'ACN='+diag.ACN);
+       const parsed=parseLengthInput('1.40897017 fm');
+@@ -4753,6 +5037,9 @@ const SelfTest=(()=>{
+       add('T0i verse start: vaste SST-kernclosure, r_kern onbepaald, coreFlowLock uit, frames corot/corot/none',
+         P_DEFAULTS.core==='vast'&&P_DEFAULTS.rCorePhysical===null&&P_DEFAULTS.coreFlowLock===false&&P_DEFAULTS.solverFrame==='corot'&&P_DEFAULTS.displayFrame==='corot'&&P_DEFAULTS.bgFlow==='none',
+         JSON.stringify(P_DEFAULTS));
++      add('T0l topology guard standaard actief',P_DEFAULTS.topologyGuard===true,'topologyGuard='+P_DEFAULTS.topologyGuard);
++      add('T0m Niveau-C BEM standaard actief op a_sim',P_DEFAULTS.bundleBEMEnabled===true&&P_DEFAULTS.bundleBoundaryMode==='asim',JSON.stringify(P_DEFAULTS));
++      add('T0n BEM-bronmodel geversioneerd',BEM_SOURCE_MODEL==='neumann-source-panel-mfs-v1',BEM_SOURCE_MODEL);
+       // T0j/k — v7.5.1: horn/core/a_sim-scheiding en Rankine-profielcontinuïteit
+       {const oldR=P.rCorePhysical;P.rCorePhysical=R_HORN_SST*1e-3;
+        const rc=resolvedFixedCoreRadius(),inside=sstRankineProfileAtRadius(rc,Math.abs(Gamma()),rc),outside=sstRankineProfileAtRadius(R_HORN_SST,Math.abs(Gamma()),rc);
+@@ -4785,12 +5072,21 @@ const SelfTest=(()=>{
+        const circIn=2*Math.PI*Rb*Math.abs(vin.uy),circOut=2*Math.PI*(2*Rb)*Math.abs(vout.uy);
+        add('T9f eindige bundel continu + constante buiten-circulatie',Math.abs(circIn/circOut-1)<1e-12&&Math.abs(vin.uy/(2*vout.uy)-1)<1e-12,
+          'Γin/Γout='+(circIn/circOut).toPrecision(6));}
+-      {P.bundleProfile='parallel';P.bgFlow='bundle';
++      {P.bundleProfile='parallel';P.bgFlow='bundle';const oldBem=P.bundleBEMEnabled;P.bundleBEMEnabled=false;
+        const p={x:0.03,y:-0.02,z:0.0},a=backgroundVelocityAt(p.x,p.y,p.z),b=bundleVelocityProfileAt(p.x,p.y,p.z,true);
+-       add('T9g gedeeld achtergrondveld voor alle transportpaden',a.ux===b.ux&&a.uy===b.uy&&a.uz===b.uz,'u='+a.ux.toExponential(2)+','+a.uy.toExponential(2));}
++       add('T9g gedeeld achtergrondveld voor alle transportpaden',a.ux===b.ux&&a.uy===b.uy&&a.uz===b.uz,'u='+a.ux.toExponential(2)+','+a.uy.toExponential(2));P.bundleBEMEnabled=oldBem;}
+       {let meanR2=0,maxR=0;const n=101;for(let i=0;i<n;i++){const s=bundleSampleNormalized(i,n);meanR2+=s.rho*s.rho;maxR=Math.max(maxR,s.rho);}meanR2/=n;
+        add('T9h gevulde-schijfsampling',Math.abs(meanR2-0.5)<1e-12&&maxR<1,'<r²>='+meanR2.toFixed(6)+' max='+maxR.toFixed(6));}
+       add('T9i bronprovenance gesloten-luslimiet',P.bundleSourceModel===BUNDLE_SOURCE_MODEL&&BUNDLE_SOURCE_MODEL==='analytic-finite-closed-loop-limit',P.bundleSourceModel);
++      {const nodes=[],N=32,R=1;
++       for(let i=0;i<N;i++){const z=1-2*(i+0.5)/N,r=Math.sqrt(Math.max(0,1-z*z)),th=i*Math.PI*(3-Math.sqrt(5)),nx=r*Math.cos(th),ny=r*Math.sin(th),nz=z;
++         nodes.push({x:R*nx,y:R*ny,z:R*nz,nx,ny,nz,sx:0.35*R*nx,sy:0.35*R*ny,sz:0.35*R*nz});}
++       const su=solveBundleNeumann(nodes,()=>[0,0,1],R),sw=solveBundleNeumann(nodes,()=>[0,0,2],R);
++       add('T9j Neumann-BEM dwingt u·n≈0 op gesloten oppervlak',!!su&&su.residual<5e-3,'res='+String(su&&su.residual));
++       add('T9k vorticiteits-Neumannprojectie dwingt ω·n≈0',!!sw&&sw.residual<5e-3,'res='+String(sw&&sw.residual));
++       const sum=su?Array.from(su.q).reduce((a,b)=>a+b,0):Infinity;
++       add('T9l BEM compatibiliteitsconstraint Σq=0',Math.abs(sum)<1e-8,'Σq='+sum.toExponential(3));}
++      add('T9m transient-contact risicopredicaat',topologyStepMayTunnel(1,1,0.6)===true&&topologyStepMayTunnel(10,10,0.1)===false,'sweep samples='+TOPOLOGY_SWEEP_SAMPLES);
+       // herstel naar baseline zodat T1–T6 niet door bundelguards beïnvloed worden
+       P.bundleEnabled=false;P.bgFlow='none';P.bundleProfile='parallel';P.bundleSplay=0.45;
+       // T1 — ringsnelheid vs Kelvin-formule, drie kernmodellen
+@@ -4963,7 +5259,7 @@ function bindRCorePhysicalInput(){
+   if(!inp)return;
+   const apply=()=>{
+     const raw=inp.value.trim();
+-    if(!raw){P.rCorePhysical=null;syncUi();ModelLog.logUser('rCorePhysical',{value:null,status:'unresolved'});return;}
++    if(!raw){P.rCorePhysical=null;invalidateBundleBEM('r_kern');ensureBundleBEM(true);rebuildLattice();syncUi();ModelLog.logUser('rCorePhysical',{value:null,status:'unresolved'});return;}
+     const v=parseLengthInput(raw);
+     if(!Number.isFinite(v)||v<=0||v>=R_HORN_SST){
+       setFlag('⚠ r_kern moet eindig zijn en voldoen aan 0 < r_kern < R_horn. De waarde blijft onbepaald.',true);
+@@ -4971,7 +5267,7 @@ function bindRCorePhysicalInput(){
+     }
+     P.rCorePhysical=v;
+     if(v>0.1*R_HORN_SST)setFlag('⚠ r_kern is niet veel kleiner dan R_horn; dit is toegestaan als testinvoer, maar niet de beoogde SST-schaalscheiding.',true);
+-    ModelLog.logUser('rCorePhysical',{value:v,ratioHornToCore:R_HORN_SST/v});syncUi();
++    invalidateBundleBEM('r_kern');ensureBundleBEM(true);rebuildLattice();ModelLog.logUser('rCorePhysical',{value:v,ratioHornToCore:R_HORN_SST/v});syncUi();
+   };
+   inp.addEventListener('change',apply);
+   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply();}});
+@@ -4991,6 +5287,9 @@ function syncBundleUi(){
+   const panel=document.getElementById('sstBundlePanel');if(panel)panel.classList.toggle('hidden',P.med!=='sst');
+   const c=document.getElementById('cSSTBundle');if(c)c.checked=!!P.bundleEnabled;
+   const cf=document.getElementById('cBundleFlow');if(cf)cf.checked=P.bgFlow==='bundle';
++  const cbem=document.getElementById('cBundleBEM');if(cbem)cbem.checked=!!P.bundleBEMEnabled;
++  const bm=document.getElementById('sBundleBoundaryMode');if(bm)bm.value=P.bundleBoundaryMode;
++  const bq=document.getElementById('sBundleBEMQuality');if(bq)bq.value=P.bundleBEMQuality;
+   const prof=document.getElementById('sBundleProfile');if(prof)prof.value=P.bundleProfile;
+   const ss=document.getElementById('sBundleSplay');if(ss)ss.value=String(P.bundleSplay);
+   const vs=document.getElementById('vBundleSplay');if(vs)vs.textContent=P.bundleSplay.toFixed(2);
+@@ -5008,6 +5307,13 @@ function syncBundleUi(){
+       ?`n_v(zmin/mid/zmax)= ${n0.toExponential(2)} / ${nm.toExponential(2)} / ${n1.toExponential(2)} m⁻² · R_bundle(mid)=${fmtLengthSI(Rb)} · Γ_enc=${Gb.toExponential(3)} m²/s · N_phys(mid)≈${N.toExponential(3)} · bron=${P.bundleSourceModel}`
+       :'uit';
+   }
++  const br=document.getElementById('bundleBEMReadout');
++  if(br){
++    const bi=bundleBEMBoundaryInfo(),c=bundleBEMCache;
++    br.textContent=!P.bundleBEMEnabled?'Niveau C uit'
++      :(!bi.valid?`BEM niet actief: ${bi.reason} · gevraagd=${Number.isFinite(bi.requested)?fmtLengthSI(bi.requested):'—'} · vloer=${Number.isFinite(bi.floor)?fmtLengthSI(bi.floor):'—'}`
++      :(c.valid?`BEM ${c.nodes.length} panelen · grens=${bi.label}=${fmtLengthSI(c.radius)} · residu u_n=${c.residualVelocity.toExponential(2)} · residu ω_n=${c.residualVorticity.toExponential(2)} · ${BEM_SOURCE_MODEL}`:`BEM ${c.status}`));
++  }
+   const vob=document.getElementById('vOmBundle');
+   if(vob)vob.textContent=Math.abs(P.OmBundle).toFixed(2)+' s⁻¹ · '+(P.revOmBundle?'CW':'CCW');
+   // Wrijving×bundel: zolang geen definitie van v_n in bundelveld bestaat, blokkeren.
+@@ -5018,7 +5324,10 @@ function syncBundleUi(){
+   }
+ }
+ 
+-document.getElementById('cSSTBundle')?.addEventListener('change',e=>{P.bundleEnabled=e.target.checked;rebuildLattice();syncBundleUi();});
++document.getElementById('cSSTBundle')?.addEventListener('change',e=>{P.bundleEnabled=e.target.checked;invalidateBundleBEM('bundle-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
++document.getElementById('cBundleBEM')?.addEventListener('change',e=>{P.bundleBEMEnabled=e.target.checked;invalidateBundleBEM('bem-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
++document.getElementById('sBundleBoundaryMode')?.addEventListener('change',e=>{P.bundleBoundaryMode=e.target.value;invalidateBundleBEM('boundary-mode');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
++document.getElementById('sBundleBEMQuality')?.addEventListener('change',e=>{P.bundleBEMQuality=e.target.value;invalidateBundleBEM('quality');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
+ document.getElementById('cBundleFlow')?.addEventListener('change',e=>{
+   if(e.target.checked){
+     if(P.bgFlow==='wall'){
+@@ -5033,7 +5342,7 @@ document.getElementById('cBundleFlow')?.addEventListener('change',e=>{
+   }
+   if(P.bgFlow==='bundle'&&P.bundleProfile!=='parallel')
+     setFlag('⚠ splay-koppeling gebruikt een kinematische Ω(z)-ansatz; geen bewezen stationair Euler/SST-evenwicht.',true);
+-  syncBundleUi();
++  invalidateBundleBEM('flow-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();
+ });
+ document.getElementById('sBundleProfile')?.addEventListener('change',e=>{
+   P.bundleProfile=e.target.value;
+@@ -5047,13 +5356,13 @@ document.getElementById('sBundleProfile')?.addEventListener('change',e=>{
+     const z=document.getElementById('cTracerWrapZ');if(z)z.checked=false;
+     setFlag('⚠ monotone splay is niet periodiek in z; periodieke z-grens is daarom uitgezet.',true);
+   }
+-  rebuildLattice();syncBundleUi();
++  invalidateBundleBEM('profile');ensureBundleBEM(true);rebuildLattice();syncBundleUi();
+ });
+-document.getElementById('sBundleSplay')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleSplay=clamp(x,0,1.4);rebuildLattice();syncBundleUi();}});
+-document.getElementById('sBundleRadiusFrac')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleRadiusFrac=clamp(x,0.10,0.93);rebuildLattice();syncBundleUi();}});
++document.getElementById('sBundleSplay')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleSplay=clamp(x,0,1.4);invalidateBundleBEM('splay');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
++document.getElementById('sBundleRadiusFrac')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleRadiusFrac=clamp(x,0.10,0.93);invalidateBundleBEM('bundle-radius');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
+ document.getElementById('sBundleLines')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleVisualLines=clamp(Math.round(x),7,121);rebuildLattice();syncBundleUi();}});
+-document.getElementById('sOmBundle')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.OmBundle=x;syncBundleUi();}});
+-document.getElementById('revOmBundle')?.addEventListener('change',e=>{P.revOmBundle=e.target.checked;syncBundleUi();});
++document.getElementById('sOmBundle')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.OmBundle=x;invalidateBundleBEM('omega');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
++document.getElementById('revOmBundle')?.addEventListener('change',e=>{P.revOmBundle=e.target.checked;invalidateBundleBEM('omega-sign');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
+ function uiControlKey(el){
+   if(!el)return 'unknown';
+   if(el.id)return el.id;
+@@ -5103,13 +5412,26 @@ function loop(now){
+     if(Y&&(!Ypre||Ypre.length!==Y.length))Ypre=new Float64Array(Y.length);
+     while(stepDebt>=dtNext&&evals<EVAL_BUDGET){
+       const signedDt=timeDir*dtNext;
+-      Ypre.set(Y); // v7.2: snapshot voor first-hit-bisectie
++      if(P.bundleBEMEnabled&&bundleFlowActive())ensureBundleBEM();
++      const gapBefore=P.topologyGuard?(Number.isFinite(lastTopologyGap)?lastTopologyGap:topologyClearance()):Infinity;
++      Ypre.set(Y); // snapshot voor first-hit en transient-contact guard
+       lastUmax=rk4Step(signedDt);
+       let dtApplied=signedDt;
+-      // v7.2: contactdetectie (exacte segmentafstand) na iedere geaccepteerde
+-      // stap; bij hard contact wordt de 3a-passage binnen de stap gebisecteerd.
+-      const cev=contactEvent(lia);
+-      if(cev&&!cev.warn)dtApplied=bisectFirstHit(signedDt,lia);
++      // v7.5.2: eindcontact én tijdelijke doorsnijding binnen een verder
++      // contactvrije stap worden onderschept. Bij hard contact landt de guard
++      // aan de veilige zijde van de d_contact-grens.
++      let cev=contactEvent(lia),gapAfter=Infinity,geometryRelanded=false;
++      if(cev&&!cev.warn){
++        dtApplied=bisectFirstHit(signedDt,lia);geometryRelanded=true;
++      }else if(P.topologyGuard){
++        gapAfter=topologyClearance();const dmax=maxStateDisplacement(Ypre,Y);
++        if(topologyStepMayTunnel(gapBefore,gapAfter,dmax)){
++          const transient=transientContactWithinStep(signedDt,lia);
++          if(transient){dtApplied=transient.dt;cev=transient.event;geometryRelanded=true;}
++        }
++      }
++      lastTopologyGap=P.topologyGuard?(geometryRelanded?topologyClearance():gapAfter):Infinity;
++      bundleBEMStepCounter++;
+       phi+=P.Om*dtApplied;
+       if(P.bundleEnabled)bundlePhi+=P.OmBundle*dtApplied;
+       tPhys+=dtApplied;
+@@ -5145,6 +5467,9 @@ function loop(now){
+     }
+   }
+   if(!paused)autoRelaxGeometry(dtReal);
++  if(P.bundleBEMEnabled&&P.bundleEnabled&&(frame%24===0)){
++    ensureBundleBEM();rebuildLattice();syncBundleUi();
++  }
+   // weergave — v7.5: displayFrame kiest de kijkrichting, solverFrame bepaalt de
+   // betekenis van de opgeslagen filamentcoördinaten (lab = R(+φ)·corot).
+   worldGrp.rotation.z=P.displayFrame==='corot'?0:phi;
+@@ -5153,11 +5478,16 @@ function loop(now){
+   // tegengestelde fase. In het absolute displayframe is hij volledig verborgen.
+   frameBackdropGrp.visible=P.displayFrame==='corot';
+   frameBackdropGrp.rotation.z=P.displayFrame==='corot'?-phi:0;
+-  // latticeGrp is child van worldGrp: compensatie houdt Ω_bundle onafhankelijk van Ω_wall.
+-  latticeGrp.rotation.z=(P.bundleEnabled&&P.bundleProfile==='parallel'?bundlePhi:0)-phi;
+-  filGrp.rotation.z=P.displayFrame==='corot'
++  const filDisplayRotation=P.displayFrame==='corot'
+     ?(P.solverFrame==='lab'?-phi:0)
+     :(P.solverFrame==='corot'?phi:0);
++  filGrp.rotation.z=filDisplayRotation;
++  // Een BEM-vervormde bundel is geometrisch aan de actuele knooptube
++  // gekoppeld en moet exact dezelfde solver→display-transformatie volgen.
++  // Alleen de ongestoorde axisymmetrische lijnweergave gebruikt bundlePhi.
++  latticeGrp.rotation.z=(P.bundleBEMEnabled&&bundleBEMCache.valid)
++    ?filDisplayRotation-worldGrp.rotation.z
++    :(P.bundleEnabled&&P.bundleProfile==='parallel'?bundlePhi:0)-phi;
+   pushLines();
+   stepTracers(0); // v7.2 (RP1): integratie zit nu ín de CFL-loop (per stap);
+                   // deze aanroep onderhoudt alleen nog de zichtbaarheidstoggle.

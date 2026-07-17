@@ -1,0 +1,141 @@
+--- /mnt/data/vortexring-lab-v7.6.14.html	2026-07-15 04:43:40.678953269 +0000
++++ /mnt/data/vortexring-lab-v7.6.15.html	2026-07-15 04:45:47.750291856 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.14 · independent four-panel UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.14">
++<title>Superfluïde vortexlab v7.6.15 · benchmark verdict persistence · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.15">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.13">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator,external-drift-cfl-bound,accepted-step-time-cap,playback-debt-reset,spec-clock-calibrate-autostart,spec-clock-safe-speed-preset,independent-four-panel-docks,run-header-dropdown,independent-panel-persistence,dual-overlay-offsets">
++<meta name="vortexlab-parent" content="7.6.14">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator,external-drift-cfl-bound,accepted-step-time-cap,playback-debt-reset,spec-clock-calibrate-autostart,spec-clock-safe-speed-preset,independent-four-panel-docks,run-header-dropdown,independent-panel-persistence,dual-overlay-offsets,benchmark-verdict-persistence,benchmark-restore-status">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -722,6 +722,7 @@
+       <p>Vanaf v7.6.11 gebruikt de tweede route geen kale verhouding van twee globale body-frequenties meer. Op exact dezelfde actuele geometrie worden per drager twee snelheidsvelden geëvalueerd: het volledige veld en een geïsoleerd veld met alleen de eigen drager plus dezelfde achtergrondvoorwaarden. De directe wederzijdse fase-nullproxy is \(\delta_i=(\Omega_i^{\rm full}-\Omega_i^{\rm iso})/|\Omega_i^{\rm iso}|\). Eén verre kalibratie legt \(\delta_{i,0}\) vast, waarna \(\eta_i^{\rm phase-null}=1+\delta_i-\delta_{i,0}\). De referentie wordt daarna vergrendeld tot een geometrische reset. Dit onderdrukt gemeenschappelijke achtergrondrotatie en zelfgeïnduceerde vormdrift, maar maakt de proxy nog niet canoniek: een SST-interne fase-observable en overdrachtswet ontbreken nog steeds. De veldbracket wordt bovendien in \(\ln\eta\)-ruimte berekend en de lag wordt differentieel geïntegreerd, zodat sub-ulp verschillen nabij één niet door floating-point-cancellatie verdwijnen.</p>
+       <p><b>v7.6.13 integrator- en benchmarkbootstrap.</b> Voorgeschreven axiale drift begrenst de CFL-stap vanaf het eerste frame. Daarnaast geldt een playback-onafhankelijke bovengrens van 0.05 s zolang SPEC CLOCK actief is. De preset en iedere geometrische Reset zetten de klokrun op 1× en pauzeren bij \(t=0\); de eerste fase-nullkalibratie start de sweep automatisch. Een wijziging van snelheid, pauzestatus of drift wist alleen onafgewerkt playback-debet en kan daardoor geen achterstallige reuzenstap meer vrijgeven.</p>
+       <p><b>v7.6.14 onafhankelijke vierpaneel-layout.</b> INFO, FLOW, KERN en DIAG kunnen nu ieder afzonderlijk worden geopend en gesloten. FLOW en KERN bezetten de binnenste posities richting canvas; zodra INFO of DIAG erbij wordt geopend, schuiven die respectievelijk buiten FLOW en buiten KERN. Daardoor zijn nul tot vier panelen tegelijk mogelijk. SCENARIO &amp; RUN staat als afzonderlijke RUN-dropdown in de header naast VIEW.</p>
++      <p><b>v7.6.15 benchmark-verdictpersistentie.</b> Na de automatische SPEC CLOCK-benchmark wordt de oorspronkelijke configuratie nog steeds veilig naar \(t=0\) teruggezet en de handmatige fase-nullreferentie gewist. De SPEC CLOCK-status toont daarna echter eerst het voltooide ENGINE- en RESEARCH-PROXY-verdict, met een expliciete melding dat alleen de herstelde handmatige sessie opnieuw moet worden gekalibreerd. Daardoor kan een correcte benchmarkuitslag niet meer worden overschreven door de generieke tekst “wacht op deterministische veldsample”.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+@@ -1376,7 +1377,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.14 · basis v7.5.3 · onafhankelijke INFO/FLOW/KERN/DIAG-panelen · RUN-dropdown in header · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · geautomatiseerde 10-run SPEC CLOCK-benchmark · Rcyl/Hcyl-logging · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.15 · basis v7.5.3 · onafhankelijke INFO/FLOW/KERN/DIAG-panelen · RUN-dropdown in header · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · geautomatiseerde 10-run SPEC CLOCK-benchmark · Rcyl/Hcyl-logging · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1387,7 +1388,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.14';
++const APP_VERSION='7.6.15';
+ const APP_BASE_VERSION='7.5.3';
+ window.__vlBootComplete=false;
+ window.addEventListener('error',function vlEarlyBootstrapError(event){
+@@ -2688,6 +2689,17 @@
+   lagFieldMin:0,lagFieldMax:0,lagPhase:0,
+   last:null,tmpV:null,tmpIsoA:null,tmpIsoB:null,autoStartAfterCalibration:false
+ };
++let LastSpecClockBenchmarkSummary=null;
++function specClockBenchmarkRestoreStatus(){
++  const b=LastSpecClockBenchmarkSummary;
++  if(!b)return null;
++  if(b.state==='completed'){
++    const cls=b.engine==='PASS'?(b.research==='PASS'?'good':'warn'):'bad';
++    return {cls,text:`BENCHMARK VOLTOOID · ENGINE ${b.engine} · RESEARCH PROXY ${b.research} · de benchmarkresultaten blijven geldig. Alleen de teruggezette handmatige sessie staat op t=0 en vereist een nieuwe fase-nullkalibratie.`};
++  }
++  if(b.state==='aborted')return {cls:'warn',text:`BENCHMARK AFGEBROKEN · ${b.completedRuns}/${b.totalRuns} runs voltooid · de oorspronkelijke sessie is teruggezet naar t=0 en vereist zo nodig herkalibratie.`};
++  return null;
++}
+ function specClockLogEta(v){
+   const q=clamp(Math.abs(v)/C_LIGHT,0,1-1e-15);
+   return 0.5*Math.log1p(-q*q);
+@@ -2895,7 +2907,13 @@
+   if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';finish(null);return;}
+   if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';finish(null);return;}
+   const m=SpecClock.last;
+-  if(!m||!m.valid){clear();status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';finish(m);return;}
++  if(!m||!m.valid){
++    clear();
++    const benchStatus=specClockBenchmarkRestoreStatus();
++    if(benchStatus){status.className='spec-clock-status '+benchStatus.cls;status.textContent=benchStatus.text;}
++    else{status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';}
++    finish(m);return;
++  }
+   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+   const envText=e=>e.etaMin.toFixed(12)+' … '+e.etaMax.toFixed(12);
+   set('specClockDistance',fmtLengthSI(m.distance));set('specClockMutual',fmtSpeed(m.uA)+' / '+fmtSpeed(m.uB));
+@@ -2964,7 +2982,7 @@
+ }
+ 
+ 
+-// ================= v7.6.13 geautomatiseerde SPEC CLOCK benchmark =================
++// ================= v7.6.15 geautomatiseerde SPEC CLOCK benchmark + verdictpersistentie =================
+ const SpecClockBenchmark=(()=>{
+   const SCHEMA='vortexlab-spec-clock-benchmark/1.0';
+   const scenarios=[
+@@ -3119,15 +3137,19 @@
+     const preset=el('presetSelect');if(preset&&snapshot.presetValue)preset.value=snapshot.presetValue;
+   }
+   function complete(){
+-    active=false;current=null;pending=false;completedAt=new Date().toISOString();evaluate();restoreConfiguration();
++    active=false;current=null;pending=false;completedAt=new Date().toISOString();evaluate();
+     const engine=worst(gates.filter(g=>g.group==='ENGINE').map(g=>g.status));
+     const research=worst(gates.filter(g=>g.group==='RESEARCH').map(g=>g.status));
+-    setStatus(`VOLTOOID · ENGINE ${engine} · RESEARCH PROXY ${research} · configuratie teruggezet naar t=0.`,engine==='PASS'?(research==='PASS'?'good':'warn'):'bad');
++    LastSpecClockBenchmarkSummary={state:'completed',engine,research,completedAt,runCount:results.length};
++    restoreConfiguration();
++    setStatus(`VOLTOOID · ENGINE ${engine} · RESEARCH PROXY ${research} · configuratie teruggezet naar t=0; alleen een nieuwe handmatige sweep vereist herkalibratie.`,engine==='PASS'?(research==='PASS'?'good':'warn'):'bad');
++    setFlag(`🧪 SPEC CLOCK-benchmark voltooid: ENGINE ${engine} · RESEARCH PROXY ${research}. De huidige handmatige sessie is teruggezet naar t=0.`,true);
+     if(window.ModelLog)window.ModelLog.logEvent('spec-benchmark-complete',{engine,research,report:reportObject()});
+-    render();
++    updateSpecClockDisplay();render();
+   }
+   function start(){
+     if(active)return;
++    LastSpecClockBenchmarkSummary=null;updateSpecClockDisplay();
+     clearTimeout(timer);snapshot={P:clone(P),paused,presetValue:el('presetSelect')?.value||''};
+     results=[];gates=[];index=-1;current=null;pending=false;aborted=false;active=true;startedAt=new Date().toISOString();completedAt=null;
+     if(window.ModelLog){window.ModelLog.setEnabled(true);window.ModelLog.logEvent('spec-benchmark-start',{schema:SCHEMA,scenarioCount:scenarios.length});}
+@@ -3136,10 +3158,11 @@
+   function stop(reason='gebruiker'){
+     if(!active)return;
+     clearTimeout(timer);aborted=true;active=false;pending=false;current=null;completedAt=new Date().toISOString();setPausedState(true,'spec-benchmark-stop');
++    LastSpecClockBenchmarkSummary={state:'aborted',completedRuns:results.length,totalRuns:scenarios.length,completedAt};
+     restoreConfiguration();
+     gates=[{group:'ENGINE',id:'aborted',label:'Benchmark afgebroken',status:'WARN',metrics:{completedRuns:results.length,totalRuns:scenarios.length},explanation:String(reason)}];
+     setStatus(`AFGEBROKEN · ${results.length}/${scenarios.length} runs voltooid · configuratie teruggezet naar t=0.`,'warn');
+-    if(window.ModelLog)window.ModelLog.logEvent('spec-benchmark-aborted',{reason,completedRuns:results.length});render();
++    if(window.ModelLog)window.ModelLog.logEvent('spec-benchmark-aborted',{reason,completedRuns:results.length});updateSpecClockDisplay();render();
+   }
+   function reportObject(){
+     const engine=worst(gates.filter(g=>g.group==='ENGINE').map(g=>g.status));
+@@ -3159,7 +3182,7 @@
+     el('bSpecBenchmarkStart')?.addEventListener('click',start);el('bSpecBenchmarkStop')?.addEventListener('click',()=>stop('handmatig gestopt'));
+     el('bSpecBenchmarkExportTxt')?.addEventListener('click',()=>download('txt'));el('bSpecBenchmarkExportJson')?.addEventListener('click',()=>download('json'));render();
+   }
+-  return {start,stop,bind,render,frameTick,capAcceptedDt,afterAcceptedStep,reportObject,get active(){return active;}};
++  return {start,stop,bind,render,frameTick,capAcceptedDt,afterAcceptedStep,reportObject,get lastSummary(){return LastSpecClockBenchmarkSummary;},get active(){return active;}};
+ })();
+ 
+ function translateCarrier(which,dx,dy,dz){
+@@ -6997,6 +7020,9 @@
+        if(layout){layout.left.setOpen('info',before.info);layout.left.setOpen('flow',before.flow);layout.right.setOpen('core',before.core);layout.right.setOpen('diag',before.diag);}
+        const structure=toggles.every(Boolean)&&!document.querySelector('.vl-dock-tab[data-key="run"]')&&!!runMenu&&!!viewMenu&&runMenu!==viewMenu;
+        add('T0ab vier panelen onafhankelijk + RUN/VIEW afzonderlijk in header',structure&&independent,'structure='+structure+' independent='+independent);}
++      {const oldSummary=LastSpecClockBenchmarkSummary;LastSpecClockBenchmarkSummary={state:'completed',engine:'PASS',research:'FAIL'};
++       const restored=specClockBenchmarkRestoreStatus();LastSpecClockBenchmarkSummary=oldSummary;
++       add('T0ac benchmarkverdict overleeft veilige sessierestore',restored?.cls==='warn'&&/ENGINE PASS/.test(restored.text)&&/RESEARCH PROXY FAIL/.test(restored.text)&&/handmatige sessie/.test(restored.text),restored?.text||'geen status');}
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse
