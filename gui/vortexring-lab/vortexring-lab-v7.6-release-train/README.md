@@ -2,23 +2,23 @@
 
 ## Aanbevolen versie
 
-Open `latest/vortexring-lab-v7.6.10.html`. Houd `ideal_knots_data.js` en `fourier_knots_data.js` in dezelfde map.
+Open in de projectroot: `../vortexring-lab-v7.6.25b.html`.
+
+Houd `ideal_knots_data.js`, `fourier_knots_data.js` en `knotplot_knots_data.js` in de projectroot (naast die HTML).
 
 ## Inhoud
 
-- `releases/`: alle cumulatieve snapshots v7.6.0–v7.6.10.
+- `releases/`: cumulatieve snapshots v7.6.0–v7.6.25a (per-versie mappen).
 - `diffs/`: unified diffs tussen opeenvolgende releases.
-- `latest/`: de actuele geconsolideerde release.
-- `sources/`: oorspronkelijke Gilbert- en `.fseries`-bronnen plus gegenereerde JavaScriptcatalogi.
+- `latest/`: historische pointer (v7.6.8–10); zie `latest/README.md` voor de actuele build.
+- `sources/`: Gilbert- / `.fseries`-bronnen plus gegenereerde catalogi.
 - `docs/`: swirl-clock- en afstandssweepprotocollen.
-- `CHANGELOG.md`: volledige releasegeschiedenis.
+- `CHANGELOG.md`: releasegeschiedenis t/m v7.6.10 (oudere train).
 - `MIGRATION_FROM_7_5_4.md`: mapping van oude conflicterende bestandsnamen.
-- `SHA256SUMS.txt`: integriteitscontrole.
+- `SHA256SUMS.txt`: integriteitscontrole (v7.6.0–10).
 
 ## Status
 
-De speculative swirl-clock blijft duidelijk **Research Track / niet canon / zonder solverkoppeling**.
+De speculative swirl-clock blijft **Research Track / niet canon / zonder solverkoppeling**.
 
-## Belangrijke hotfixes
-
-`v7.6.7` bevatte een JavaScript bootstrapregressie (zwart canvas met alleen HUD); dit is sinds `v7.6.8` hersteld. `v7.6.9` corrigeert de te sterke falsificatieclaim en de flikkerende quick-overlay. `v7.6.10` herstelt de ontbrekende quick-controlbindings, vrije afstandsinvoer en correcte periodieke-z-behandeling voor verre kalibraties.
+Actieve trunk: **v7.6.25b** (projectroot). Deze train archiveert alles t/m v7.6.25a.

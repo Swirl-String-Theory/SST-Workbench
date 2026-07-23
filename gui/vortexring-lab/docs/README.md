@@ -2,35 +2,37 @@
 
 ## Actieve builds
 
-| Versie | HTML | Validator / smoke |
-|---|---|---|
-| **v7.5.4** (primair) | [`../vortexring-lab-v7_5_4.html`](../vortexring-lab-v7_5_4.html) | [`../validate-v7_5_4.py`](../validate-v7_5_4.py), [`../browser-smoke-v7_5_4.mjs`](../browser-smoke-v7_5_4.mjs) |
-| v7.4.2 (baseline) | [`../vortexring-lab-v7.4.2.html`](../vortexring-lab-v7.4.2.html) | [`../validate-v7.4.2.py`](../validate-v7.4.2.py), [`../browser-smoke-v7.4.2.mjs`](../browser-smoke-v7.4.2.mjs) |
-| v6.1 modulair | [`../vortexring-lab-v6.1.html`](../vortexring-lab-v6.1.html) | `npm test` |
+| Versie | Bestand |
+|---|---|
+| v7.6.25b (primair) | [`../vortexring-lab-v7.6.25b.html`](../vortexring-lab-v7.6.25b.html) |
+| v6.1 modulair | [`../vortexring-lab-v6.1.html`](../vortexring-lab-v6.1.html) |
 
-Rollback v7.5.x: [`../archive/v7/`](../archive/v7/) (v7.5 … v7.5.3).
+Release notes actieve build: [`releases/vortexring-lab-v7.6.25b-changelog.md`](releases/vortexring-lab-v7.6.25b-changelog.md).
 
 ## Planning
 
-Roadmaps en stappenplannen (v7.x):
+- [`planning/VortexLab-roadmap-v7.6.25-v7.7.0.md`](planning/VortexLab-roadmap-v7.6.25-v7.7.0.md)
+- [`planning/VortexLab-v7.6.22-hoge-resolutie-resultaatsanalyse-en-herziene-roadmap.md`](planning/VortexLab-v7.6.22-hoge-resolutie-resultaatsanalyse-en-herziene-roadmap.md)
+- [`planning/vortexring-lab-v7.6.16-proxy-decomposition-plan.md`](planning/vortexring-lab-v7.6.16-proxy-decomposition-plan.md)
+- [`planning/stappenplan-vortexring-lab-v7x-v4.md`](planning/stappenplan-vortexring-lab-v7x-v4.md) … [`v6`](planning/stappenplan-vortexring-lab-v7x-v6.md)
 
-- [`planning/stappenplan-vortexring-lab-v7x-v4.md`](planning/stappenplan-vortexring-lab-v7x-v4.md) — na v7.4a
-- [`planning/stappenplan-vortexring-lab-v7x-v5.md`](planning/stappenplan-vortexring-lab-v7x-v5.md) — na v7.4.1
-- [`planning/stappenplan-vortexring-lab-v7x-v6.md`](planning/stappenplan-vortexring-lab-v7x-v6.md) — route naar v7.5 (actueel)
+## Releases & protocollen
 
-## Release notes
+- [`releases/`](releases/) — o.a. v7.3–v7.5 release notes, swirl-clock protocollen, v7.6.25b changelog
+- [`releases/v7.6/`](releases/v7.6/) — reserved voor extra v7.6-docs
+- Per-versie changelogs/notities voor v7.6.11–25a: [`../vortexring-lab-v7.6-release-train/releases/`](../vortexring-lab-v7.6-release-train/releases/)
 
-- [`releases/release-notes-v7.3.1.md`](releases/release-notes-v7.3.1.md)
-- [`releases/release-notes-v7.4.md`](releases/release-notes-v7.4.md)
-- [`releases/release-notes-v7.4.2.md`](releases/release-notes-v7.4.2.md)
-- [`releases/release-notes-v7_5.md`](releases/release-notes-v7_5.md)
-- [`releases/release-notes-v7_5_1.md`](releases/release-notes-v7_5_1.md)
-- [`releases/release-notes-v7_5_4.md`](releases/release-notes-v7_5_4.md)
+## Catalogi
 
-## Patches en diffs
+- [`KNOTPLOT_KNOTS_DATA_README.md`](KNOTPLOT_KNOTS_DATA_README.md)
+- [`KNOTPLOT_KNOTS_DATA_README-v2.md`](KNOTPLOT_KNOTS_DATA_README-v2.md)
 
-- [`patches/CURSOR-patch-instructies-v7.4.1.md`](patches/CURSOR-patch-instructies-v7.4.1.md)
-- [`patches/CURSOR-patch-instructies-v7_5_1.md`](patches/CURSOR-patch-instructies-v7_5_1.md)
-- [`patches/vortexring-lab-v7_5_3_to_v7_5_4_stretch_gate-complete-fixes.diff`](patches/vortexring-lab-v7_5_3_to_v7_5_4_stretch_gate-complete-fixes.diff)
+## Patches
 
-Gearchiveerde HTML-builds: [`../archive/README.md`](../archive/README.md).
+Zie [`patches/`](patches/) (v7.3–v7.5 diffs en instructies, plus v7.5.4 experimentele diffs).
+
+v7.6 diffs: [`../vortexring-lab-v7.6-release-train/diffs/`](../vortexring-lab-v7.6-release-train/diffs/).
+
+## Archief
+
+Pre-v7.6 monoliths: [`../archive/README.md`](../archive/README.md).
