@@ -1,0 +1,69 @@
+SST Fermat pybind research v0.4.0 — build and audit validation
+================================================================
+
+Validation environment
+----------------------
+Python: 3.13.5
+NumPy: 2.3.5
+C++ compiler: g++ 14.2.0
+pybind11 in artifact environment: unavailable
+
+Validated in this artifact environment
+---------------------------------------
+1. Python syntax compilation for all package and CLI modules: PASS
+2. Existing ideal-knot catalog regression: PASS
+3. v0.3 radial/softening regression tests: PASS
+4. v0.4 Python analytic-Jacobian finite-difference test: PASS
+5. v0.4 stationary-root solver control test on 0_1: PASS
+6. v0.4 approximate reach diagnostic control on 0_1: PASS
+7. v0.4 rigid-motion/orientation/mirror symmetry test: PASS
+8. Standalone C++17 kernel compilation: PASS
+9. Standalone C++ analytic-Jacobian finite-difference test: PASS
+10. Python-fallback run_all_checks.py audit: PASS
+11. Smoke execution of candidate, convergence, bifurcation, scale, and symmetry CLIs: PASS
+
+Python fallback audit summary
+-----------------------------
+overall_status = PYTHON_FALLBACK_VALIDATED_NATIVE_NOT_CERTIFIED
+external analytic x_star error = 2.258523229548004e-14
+analytic Jacobian finite-difference Linf error = 1.5851025381152795e-08
+0_1 control local minimum found = true
+0_1 approximate reach error from unity < 1 percent = true
+symmetry beta Linf error < 1e-11 = true
+symmetry Jacobian Linf error < 1e-9 = true
+
+Standalone C++ test
+-------------------
+external Fermat residual = -1.11022e-16
+K_hat = -7.51155e4
+analytic Jacobian finite-difference check = PASS
+
+Native pybind11 status
+----------------------
+The artifact environment does not contain pybind11, so the actual Python
+extension could not be built here. The C++ kernel itself compiled and passed.
+The native Windows release gate must be run on the target machine:
+
+  python -m pip install -r requirements.txt
+  python -m fermat_ext.build_ext_if_needed --force --strict
+  python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+
+The required target-machine audit gates are:
+
+  field native/Python parity Linf < 1e-12
+  Jacobian native/Python parity Linf < 1e-10
+  radial native/Python parity < 1e-10
+
+Important rebuild note
+----------------------
+v0.4.0 adds the pybind function biot_savart_batch_with_jacobian. A v0.3
+.pyd is ABI/API-incomplete for this release and must not be reused.
+
+Epistemic status
+----------------
+The package certifies numerical radial stationary candidates and convergence
+diagnostics only. It does not certify a global closed Fermat geodesic, a
+physical photon sphere, or a QSM pole. All generated results preserve:
+
+  global_closed_orbit_certified = false
+  qsm_certified = false

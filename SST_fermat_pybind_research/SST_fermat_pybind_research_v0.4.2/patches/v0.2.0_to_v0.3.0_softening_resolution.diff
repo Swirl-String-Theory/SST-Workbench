@@ -1,0 +1,2248 @@
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/.gitignore work_v030/SST_fermat_pybind_research_v0.3.0/.gitignore
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/.gitignore	2026-07-28 14:36:41.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/.gitignore	2026-07-28 18:18:22.340214331 +0000
+@@ -9,3 +9,8 @@
+ *.egg-info/
+ audit_out_native/
+ knot_matrix_*/
++
++softening_*
++resolution_*
++profile_matrix_*
++validation_*
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/CHANGELOG.md work_v030/SST_fermat_pybind_research_v0.3.0/CHANGELOG.md
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/CHANGELOG.md	2026-07-28 14:35:21.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/CHANGELOG.md	2026-07-28 18:18:06.236214331 +0000
+@@ -1,13 +1,23 @@
+ # Changelog
+ 
++## v0.3.0
++
++- Added adaptive per-knot centerline resolution using a target `mean(Delta s)/epsilon` ratio.
++- Added explicit selected/capped/underresolved resolution-plan classifications.
++- Added exact straight-reference Rosenhead horizon and critical softening thresholds.
++- Added `run_softening_matrix.py` across `0_1`, `3_1`, `4_1`, and `5_2`.
++- Added `full`, `spot`, and `none` native/Python parity modes for softening scans.
++- Added `run_resolution_ladder.py` with fixed physical probes across centerline resolutions.
++- Added `run_profile_matrix.py` for one-dimensional Rankine, Rosenhead, and Lamb--Oseen comparisons.
++- Added ray diagnostics separating interior, lower-boundary, upper-boundary, and invalid minima.
++- Added explicit `rosenhead_midpoint` kernel-model metadata to Python and C++ calls.
++- Added Rosenhead threshold and adaptive-resolution checks to `run_all_checks.py`.
++- Preserved all local-candidate, global-orbit, and QSM epistemic guards.
++- No SSTcore dependency or SSTcore source modification.
++
+ ## v0.2.0
+ 
+ - Added exact uploaded ideal-Fourier centerlines for `0_1`, `3_1`, `4_1`, and `5_2`.
+ - Added uniform-arclength resampling and centerline source-length validation.
+ - Added discrete Bishop/parallel-transport normal frames.
+-- Generalized the local Fermat scan from generated torus knots to catalog knots.
+-- Added `run_knot_matrix.py` with smoke, standard, and high presets.
+-- Added native/Python parity checks for every probe vector on all four knots.
+-- Updated `run_all_checks.py` to avoid false native certification when only the Python fallback is available.
+-- Retained generated `T(p,q)` scans for backward comparison.
+-- No SSTcore dependency or SSTcore source modification.
++- Added four-knot native/Python field parity.
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/README.md work_v030/SST_fermat_pybind_research_v0.3.0/README.md
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/README.md	2026-07-28 14:35:21.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/README.md	2026-07-28 18:18:06.228214331 +0000
+@@ -1,167 +1,319 @@
+-# SST Fermat pybind research v0.2.0
++# SST Fermat pybind research v0.3.0
+ 
+-Standalone Python + C++17/pybind11 research harness. It does **not** import or modify SSTcore.
++Standalone Python + C++17/pybind11 research harness. It does **not** import, modify, or patch SSTcore.
+ 
+-## Scope added in v0.2.0
++This release upgrades the four-knot matrix
+ 
+-The same local transverse Fermat diagnostic is now applied from the start to four uploaded ideal-knot centerlines:
++\[
++0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2
++\]
++
++with explicit softening studies and centerline-resolution diagnostics. It is a Research-Track numerical package, not a CANON claim.
++
++## Main additions in v0.3.0
++
++1. Adaptive centerline point counts based on
++
++   \[
++   \frac{\langle\Delta s\rangle}{\epsilon}
++   \leq \eta_{\rm target},
++   \qquad
++   N_{\rm req}
++   =
++   \left\lceil
++   \frac{L_K}{\epsilon\eta_{\rm target}}
++   \right\rceil.
++   \]
++
++2. A Rosenhead-softening matrix over all four knot classes.
++3. A fixed-probe resolution ladder for direct field-convergence checks.
++4. A one-dimensional Rankine/Rosenhead/Lamb--Oseen profile matrix.
++5. Exact straight-filament Rosenhead threshold diagnostics.
++6. Ray-boundary diagnostics distinguishing interior minima from scan-boundary minima.
++7. Native/Python full or spot parity modes.
++8. Explicit under-resolution reporting when a point cap prevents the requested \(\Delta s/\epsilon\) target.
++
++## Kernel scope
++
++The full three-dimensional knot field currently uses only the regularized midpoint Rosenhead kernel
++
++\[
++\boldsymbol\beta(\mathbf x)
++=
++\frac{\beta_0}{2}
++\sum_i
++\frac{
++\Delta\boldsymbol\ell_i\times
++(\mathbf x-\mathbf x_{i+1/2})
++}{
++\left(\lVert\mathbf x-\mathbf x_{i+1/2}\rVert^2+\epsilon^2\right)^{3/2}
++}.
++\]
++
++Its implementation name is:
++
++```text
++rosenhead_midpoint
++```
+ 
+-| Knot | Catalog source ID | Role in the comparison | Fourier modes |
+-|---|---:|---|---:|
+-| `0_1` | `0:1:1` | unknotted circular control | 1 |
+-| `3_1` | `3:1:1` | trefoil, first non-trivial chiral knot | 183 |
+-| `4_1` | `4:1:1` | achiral figure-eight control | 220 |
+-| `5_2` | `5:1:2` | chiral twist-knot comparison | 241 |
++The Rankine and Lamb--Oseen models are presently implemented only in the **one-dimensional radial profile solver**. They are not silently substituted into the full knot-field kernel.
+ 
+-The coefficients are extracted from the uploaded `ideal_favorites.txt` database and bundled in `fermat_ext/data/ideal_knots_subset.json`. The source convention is
++## Straight Rosenhead reference thresholds
++
++For the infinite straight reference profile
+ 
+ \[
+-\boldsymbol\gamma(t)
++\beta(\rho)
+ =
+-\sum_i\left[\mathbf A_i\cos(it)+\mathbf B_i\sin(it)\right],
+-\qquad 0\le t<2\pi.
++\beta_0\frac{\rho}{\rho^2+\epsilon^2},
++\]
++
++the maximum speed is
++
++\[
++\beta_{\max}=\frac{\beta_0}{2\epsilon}.
++\]
++
++Clock degeneracy is avoided when
++
++\[
++\epsilon>rac{\beta_0}{2}
++=1.8243381393\times10^{-3}.
++\]
++
++A radial Fermat-critical point can exist only when
++
++\[
++\epsilon
++\leq
++\sqrt{\frac{8}{27}}\,\beta_0
++=1.9860878042\times10^{-3}.
++\]
++
++Hence the straight-reference horizon-free critical window is narrow:
++
++\[
++1.8243381393\times10^{-3}
++<
++\frac{\epsilon}{r_c}
++\leq
++1.9860878042\times10^{-3}.
+ \]
+ 
+-The curves are uniformly resampled in arclength before the Biot--Savart calculation. Their source normalization has `D=1`; `--scale-over-rc` applies only a uniform coordinate scale and does not identify `D` with a physical SST core diameter.
++These thresholds are exact only for the infinite straight reference. Curvature and non-local knot contributions can shift a full-knot result.
+ 
+-## Scientific status
++## Scientific guard
+ 
+-The implemented scan evaluates the regularized filament field at probes in transported normal planes and searches for local minima of
++The local scan evaluates
+ 
+ \[
+ R_F(\rho;s,\theta)
+ =
+-\frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}},
+-\qquad
+-\boldsymbol\beta=\frac{\mathbf u}{c}.
++\frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}}
+ \]
+ 
+-Every detected minimum is labelled only
++along transported normal rays. A detected minimum is labelled only:
+ 
+ ```text
+ LOCAL_TRANSVERSE_MINIMUM_CANDIDATE
+ ```
+ 
+-It is **not** a certification of a global closed Fermat geodesic, light ring, or QSM pole. All JSON outputs retain:
++It is not a certification of a closed Fermat geodesic, a photon sphere, a light ring, or a QSM pole. Every output retains:
+ 
+ ```json
+ "global_closed_orbit_certified": false,
+ "qsm_certified": false
+ ```
+ 
+-## Build the native extension
++## Build native pybind11 module
+ 
+-From the project root in the activated virtual environment:
++From the project root in an activated virtual environment:
+ 
+ ```bat
+ python -m pip install -r requirements.txt
+ python -m fermat_ext.build_ext_if_needed --force --strict
+ ```
+ 
+-A successful Windows/Python 3.14 build typically creates:
++After upgrading from v0.2.0, rebuild the extension because the C++ binding signature now includes the explicit kernel-model argument.
+ 
+-```text
+-fermat_ext\_fermat_native.cp314-win_amd64.pyd
++## Full audit
++
++```bat
++python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+ ```
+ 
+-## Run all four knots
++The audit checks:
++
++- external analytic critical-radius accuracy;
++- native/Python radial parity;
++- Rankine parity;
++- the Rosenhead \(\epsilon=0.0019\) critical case;
++- the Rosenhead \(\epsilon=0.0020\) blocked case;
++- all four ideal-knot centerlines;
++- native/Python full-field parity for the four-knot smoke matrix;
++- adaptive resolution-plan generation;
++- a minimal four-knot softening-pipeline smoke test;
++- preservation of all epistemic guards.
++
++## 1. Four-knot matrix with adaptive resolution
++
++At the previously used \(\epsilon/r_c=0.0045\), target
+ 
+-### Fast audit preset
++\[
++\langle\Delta s\rangle/\epsilon\lesssim1
++\]
++
++requires approximately:
++
++| Knot | Selected centerline points |
++|---|---:|
++| `0_1` | 1408 |
++| `3_1` | 3648 |
++| `4_1` | 4688 |
++| `5_2` | 5504 |
++
++Run:
+ 
+ ```bat
+-python run_knot_matrix.py --preset smoke --out-dir knot_matrix_smoke
++python run_knot_matrix.py ^
++  --preset smoke ^
++  --adaptive-resolution ^
++  --target-ds-over-epsilon 1.0 ^
++  --max-centerline-points 8192 ^
++  --epsilon 0.0045 ^
++  --no-auto-build ^
++  --require-native ^
++  --out-dir knot_matrix_adaptive
+ ```
+ 
+-### Standard comparison
++The probe preset and centerline resolution are independent: adaptive mode changes the centerline point count per knot while preserving the selected probe grid.
++
++## 2. Softening matrix
++
++### Fast first run
+ 
+ ```bat
+-python run_knot_matrix.py --preset standard --out-dir knot_matrix_standard
++python run_softening_matrix.py ^
++  --preset smoke ^
++  --epsilon-values 0.0015 0.0019 0.0020 0.0025 0.0045 ^
++  --parity-mode spot ^
++  --no-auto-build ^
++  --require-native ^
++  --out-dir softening_smoke
+ ```
+ 
+-### High-resolution comparison
++### Full default threshold scan
+ 
+ ```bat
+-python run_knot_matrix.py --preset high --out-dir knot_matrix_high
++python run_softening_matrix.py ^
++  --preset standard ^
++  --parity-mode spot ^
++  --no-auto-build ^
++  --require-native ^
++  --out-dir softening_standard
+ ```
+ 
+-The matrix runner evaluates both the native C++ backend and the independent Python fallback, then reports the maximum componentwise field discrepancy for each knot.
+-
+-Expected native status:
++Default epsilon values are:
+ 
+-```json
+-"native_available_for_all_knots": true,
+-"native_python_parity_certified_for_all_knots": true
++```text
++0.0010 0.0015 0.0018 0.00185 0.0019 0.00195 0.0020 0.0025 0.0035 0.0045
+ ```
+ 
+-## Scan one knot
++Parity modes:
+ 
+-```bat
+-python run_knot_scan.py --knot-id 0_1 --summary-only
+-python run_knot_scan.py --knot-id 3_1 --summary-only
+-python run_knot_scan.py --knot-id 4_1 --summary-only
+-python run_knot_scan.py --knot-id 5_2 --summary-only
+-```
++- `full`: Python and C++ evaluate the complete scan grid;
++- `spot`: complete native scan plus a deterministic reduced Python/C++ parity grid;
++- `none`: primary backend only.
+ 
+-The old generated torus parametrization remains available only as a comparison route:
++For large adaptive point counts, `spot` is the recommended default.
++
++## 3. Resolution ladder
++
++The convergence ladder fixes the physical probe locations using the highest-resolution centerline. Lower-resolution centerlines are evaluated at exactly those same probes.
+ 
+ ```bat
+-python run_knot_scan.py --generated-torus --p 2 --q 3 --summary-only
++python run_resolution_ladder.py ^
++  --epsilon 0.0045 ^
++  --point-counts 1024 2048 4096 8192 ^
++  --no-auto-build ^
++  --require-native ^
++  --out-dir resolution_0045
+ ```
+ 
+-## Full audit battery
++For the critical window, a higher cap may be necessary:
+ 
+ ```bat
+-python run_all_checks.py --out-dir audit_out_native --require-native
++python run_resolution_ladder.py ^
++  --epsilon 0.0019 ^
++  --point-counts 2048 4096 8192 16384 ^
++  --no-auto-build ^
++  --require-native ^
++  --out-dir resolution_0019
+ ```
+ 
+-This validates:
++The largest point count is a finite-resolution reference, not an independent continuum proof.
+ 
+-- the analytic external-profile critical radius;
+-- Python/C++ radial-profile parity;
+-- Python/C++ Rankine-sweep parity;
+-- exact presence of `0_1`, `3_1`, `4_1`, and `5_2`;
+-- reconstruction of the uploaded source lengths;
+-- native/Python Biot--Savart parity for all four knots;
+-- preservation of the epistemic guards.
+-
+-Use `--no-auto-build` only after the `.pyd` has already been built:
++## 4. Radial profile matrix
+ 
+ ```bat
+-python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
++python run_profile_matrix.py ^
++  --profiles rankine rosenhead lamb_oseen ^
++  --no-auto-build ^
++  --out-dir profile_matrix
+ ```
+ 
+-## Resolution presets
++This separates core-profile dependence from knot geometry before any full-knot kernel generalization is attempted.
+ 
+-| Preset | Centerline | Stations | Angles | Radial samples | Probes per knot |
++## Resolution presets for the softening matrix
++
++| Preset | Stations | Angles | Radial samples | Target \(\Delta s/\epsilon\) | Point cap |
+ |---|---:|---:|---:|---:|---:|
+-| `smoke` | 128 | 4 | 8 | 48 | 1,536 |
+-| `standard` | 512 | 16 | 24 | 160 | 61,440 |
+-| `high` | 1024 | 32 | 48 | 320 | 491,520 |
++| `smoke` | 2 | 6 | 48 | 2.0 | 4096 |
++| `standard` | 4 | 12 | 96 | 1.0 | 8192 |
++| `high` | 8 | 24 | 192 | 0.5 | 16384 |
++
++When the cap is reached, outputs explicitly report:
++
++```text
++CAPPED_UNDERRESOLVED_BY_PLAN
++```
+ 
+-The high preset is computationally substantial because every probe is evaluated against every centerline segment.
++A candidate detected in an under-resolved row must not be promoted until it survives a resolution ladder.
+ 
+-## Output files
++## Output overview
+ 
+-`run_knot_matrix.py` writes:
++`run_softening_matrix.py` writes:
+ 
+ ```text
+-knot_matrix.json
+-knot_matrix.csv
+-0_1_primary.json / 0_1_python.json
+-3_1_primary.json / 3_1_python.json
+-4_1_primary.json / 4_1_python.json
+-5_2_primary.json / 5_2_python.json
+-```
+-
+-The principal cross-knot observables available in v0.2.0 are:
+-
+-- local candidate count and locations;
+-- invalid-clock probe count;
+-- minimum, maximum, mean and RMS \(\lVert\boldsymbol\beta\rVert\);
+-- transported-frame closure mismatch diagnostic;
+-- source-length reconstruction error;
+-- native/Python field parity.
++softening_matrix.json
++softening_matrix.csv
++epsilon_*/0_1_primary.json
++epsilon_*/3_1_primary.json
++epsilon_*/4_1_primary.json
++epsilon_*/5_2_primary.json
++epsilon_*/*_parity.json
++```
++
++Cross-knot fields include:
++
++- epsilon regime relative to the straight Rosenhead thresholds;
++- selected centerline point count;
++- mean and maximum \(\Delta s/\epsilon\);
++- target-met or capped-underresolved status;
++- local candidate count;
++- invalid-clock count;
++- maximum \(\lVert\boldsymbol\beta\rVert\);
++- interior versus scan-boundary minimum counts;
++- native/Python parity status.
+ 
+ ## Next research gate
+ 
+-The next non-local stage is a Hamiltonian Fermat-geodesic shooting solver with monodromy/Floquet analysis. The current local normal-plane scan is deliberately retained as a cheaper precursor and regression test.
++After softening and discretization robustness are established, the next non-local stage remains:
++
++\[
++\text{Hamiltonian Fermat-geodesic shooting}
++\rightarrow
++\text{monodromy/Floquet analysis}
++\rightarrow
++\text{open-wave QSM solver}.
++\]
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/cpp/fermat_kernel.hpp work_v030/SST_fermat_pybind_research_v0.3.0/cpp/fermat_kernel.hpp
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/cpp/fermat_kernel.hpp	2026-07-28 10:29:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/cpp/fermat_kernel.hpp	2026-07-28 18:11:29.768214331 +0000
+@@ -183,9 +183,13 @@
+     const std::vector<Vec3>& centerline,
+     const std::vector<Vec3>& probes,
+     double coefficient,
+-    double epsilon) {
++    double epsilon,
++    const std::string& kernel_model = "rosenhead_midpoint") {
+     if (centerline.size() < 3) throw std::invalid_argument("centerline needs >=3 points");
+     if (!(epsilon > 0.0)) throw std::invalid_argument("epsilon must be positive");
++    if (kernel_model != "rosenhead_midpoint") {
++        throw std::invalid_argument("unknown kernel_model: " + kernel_model);
++    }
+     std::vector<Vec3> out(probes.size());
+     const double eps2 = epsilon * epsilon;
+     for (std::size_t j = 0; j < probes.size(); ++j) {
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/cpp/native.cpp work_v030/SST_fermat_pybind_research_v0.3.0/cpp/native.cpp
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/cpp/native.cpp	2026-07-28 10:28:59.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/cpp/native.cpp	2026-07-28 18:11:29.768214331 +0000
+@@ -76,13 +76,14 @@
+     const std::vector<std::array<double, 3>>& centerline,
+     const std::vector<std::array<double, 3>>& probes,
+     double coefficient,
+-    double epsilon) {
++    double epsilon,
++    const std::string& kernel_model) {
+     std::vector<Vec3> c, p;
+     c.reserve(centerline.size());
+     p.reserve(probes.size());
+     for (const auto& v : centerline) c.push_back({v[0], v[1], v[2]});
+     for (const auto& v : probes) p.push_back({v[0], v[1], v[2]});
+-    const auto u = biot_savart_batch(c, p, coefficient, epsilon);
++    const auto u = biot_savart_batch(c, p, coefficient, epsilon, kernel_model);
+     std::vector<std::array<double, 3>> out;
+     out.reserve(u.size());
+     for (const auto& v : u) out.push_back({v.x, v.y, v.z});
+@@ -98,5 +99,6 @@
+           py::arg("profile"), py::arg("beta0"), py::arg("a_core_over_rc"),
+           py::arg("x_min"), py::arg("x_max"), py::arg("samples") = 4000);
+     m.def("biot_savart_batch", &biot_wrapper,
+-          py::arg("centerline"), py::arg("probes"), py::arg("coefficient"), py::arg("epsilon"));
++          py::arg("centerline"), py::arg("probes"), py::arg("coefficient"), py::arg("epsilon"),
++          py::arg("kernel_model") = "rosenhead_midpoint");
+ }
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/examples/full_commands.txt work_v030/SST_fermat_pybind_research_v0.3.0/examples/full_commands.txt
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/examples/full_commands.txt	2026-07-28 14:35:21.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/examples/full_commands.txt	2026-07-28 18:18:06.256214331 +0000
+@@ -1,9 +1,12 @@
+ python -m pip install -r requirements.txt
+ python -m fermat_ext.build_ext_if_needed --force --strict
+-python run_profile.py --profile external --summary-only --no-auto-build
++
+ python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+-python run_knot_matrix.py --preset standard --no-auto-build --out-dir knot_matrix_standard
+-python run_knot_scan.py --knot-id 0_1 --no-auto-build --summary-only
+-python run_knot_scan.py --knot-id 3_1 --no-auto-build --summary-only
+-python run_knot_scan.py --knot-id 4_1 --no-auto-build --summary-only
+-python run_knot_scan.py --knot-id 5_2 --no-auto-build --summary-only
++
++python run_profile_matrix.py --profiles rankine rosenhead lamb_oseen --no-auto-build --out-dir profile_matrix
++
++python run_knot_matrix.py --preset smoke --adaptive-resolution --target-ds-over-epsilon 1.0 --max-centerline-points 8192 --epsilon 0.0045 --no-auto-build --require-native --out-dir knot_matrix_adaptive
++
++python run_softening_matrix.py --preset standard --parity-mode spot --no-auto-build --require-native --out-dir softening_standard
++
++python run_resolution_ladder.py --epsilon 0.0019 --point-counts 2048 4096 8192 16384 --no-auto-build --require-native --out-dir resolution_0019
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/examples/minimal_commands.txt work_v030/SST_fermat_pybind_research_v0.3.0/examples/minimal_commands.txt
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/examples/minimal_commands.txt	2026-07-28 14:35:21.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/examples/minimal_commands.txt	2026-07-28 18:18:06.244214331 +0000
+@@ -1,4 +1,4 @@
+-python -m pip install -r requirements.txt
+ python -m fermat_ext.build_ext_if_needed --force --strict
+-python run_all_checks.py --out-dir audit_out_native --require-native
+-python run_knot_matrix.py --preset smoke --out-dir knot_matrix_smoke
++python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
++python run_softening_matrix.py --preset smoke --epsilon-values 0.0015 0.0019 0.0020 0.0045 --no-auto-build --require-native --out-dir softening_smoke
++python run_resolution_ladder.py --epsilon 0.0045 --point-counts 1024 2048 4096 8192 --no-auto-build --require-native --out-dir resolution_0045
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/__init__.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/__init__.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/__init__.py	2026-07-28 14:32:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/__init__.py	2026-07-28 18:18:22.340214331 +0000
+@@ -2,7 +2,15 @@
+ 
+ from .core import analyze_profile, sweep_profiles, write_csv, write_json
+ from .knot_catalog import DEFAULT_KNOT_IDS, available_knots, sample_ideal_knot
+-from .knot_scan import scan_catalog_knot, scan_catalog_matrix, scan_torus_knot, torus_knot
++from .knot_scan import (
++    field_convergence_ladder,
++    scan_catalog_knot,
++    scan_catalog_matrix,
++    scan_softening_matrix,
++    scan_torus_knot,
++    torus_knot,
++)
++from .resolution import resolution_plan
+ 
+ __all__ = [
+     "analyze_profile",
+@@ -10,6 +18,9 @@
+     "scan_catalog_knot",
+     "scan_catalog_matrix",
+     "scan_torus_knot",
++    "scan_softening_matrix",
++    "field_convergence_ladder",
++    "resolution_plan",
+     "torus_knot",
+     "sample_ideal_knot",
+     "available_knots",
+@@ -17,4 +28,4 @@
+     "write_json",
+     "write_csv",
+ ]
+-__version__ = "0.2.0"
++__version__ = "0.3.0"
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/_config.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/_config.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/_config.py	2026-07-28 14:32:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/_config.py	2026-07-28 18:11:27.800214331 +0000
+@@ -7,4 +7,4 @@
+ CPP_DIR_REL = Path("cpp")
+ STAMP_BASENAME = "fermat_native.stamp.json"
+ LOG_PREFIX = "[sst-fermat]"
+-RESULT_SCHEMA = "sst.fermat.audit.v0.2"
++RESULT_SCHEMA = "sst.fermat.audit.v0.3"
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/build_ext_if_needed.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/build_ext_if_needed.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/build_ext_if_needed.py	2026-07-28 14:34:19.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/build_ext_if_needed.py	2026-07-28 18:11:27.800214331 +0000
+@@ -67,7 +67,7 @@
+         "        for ext in self.extensions:\n"
+         "            ext.extra_compile_args = ['/O2','/std:c++17'] if self.compiler.compiler_type == 'msvc' else ['-O3','-std=c++17']\n"
+         "        super().build_extensions()\n"
+-        f"setup(name='{PACKAGE_NAME}_ext', version='0.2.0', "
++        f"setup(name='{PACKAGE_NAME}_ext', version='0.3.0', "
+         f"packages=['{PACKAGE_NAME}'], package_dir={{'{PACKAGE_NAME}': '{PACKAGE_NAME}'}}, py_modules=[], "
+         f"ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
+         "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'], language='c++')], "
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/constants.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/constants.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/constants.py	2026-07-28 10:28:59.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/constants.py	2026-07-28 18:11:05.832214331 +0000
+@@ -9,6 +9,8 @@
+ GAMMA_0 = 2.0 * math.pi * R_C * V_SWIRL
+ FORMAL_X_HORIZON = BETA_0
+ FORMAL_X_STAR = math.sqrt(2.0) * BETA_0
++ROSENHEAD_HORIZON_THRESHOLD = 0.5 * BETA_0
++ROSENHEAD_CRITICAL_THRESHOLD = math.sqrt(8.0 / 27.0) * BETA_0
+ 
+ 
+ def as_dict() -> dict[str, float]:
+@@ -22,4 +24,8 @@
+         "formal_x_star": FORMAL_X_STAR,
+         "formal_r_horizon_m": FORMAL_X_HORIZON * R_C,
+         "formal_r_star_m": FORMAL_X_STAR * R_C,
++        "rosenhead_horizon_threshold_epsilon_over_rc": ROSENHEAD_HORIZON_THRESHOLD,
++        "rosenhead_critical_threshold_epsilon_over_rc": ROSENHEAD_CRITICAL_THRESHOLD,
++        "rosenhead_horizon_threshold_m": ROSENHEAD_HORIZON_THRESHOLD * R_C,
++        "rosenhead_critical_threshold_m": ROSENHEAD_CRITICAL_THRESHOLD * R_C,
+     }
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/core.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/core.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/core.py	2026-07-28 14:32:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/core.py	2026-07-28 18:11:27.800214331 +0000
+@@ -10,7 +10,7 @@
+ from . import constants
+ from ._config import EXT_BASENAME, PACKAGE_NAME, RESULT_SCHEMA
+ 
+-PACKAGE_VERSION = "0.2.0"
++PACKAGE_VERSION = "0.3.0"
+ 
+ 
+ def write_json(path: str | Path, data: Any) -> None:
+@@ -165,7 +165,20 @@
+     return rows
+ 
+ 
+-def backend_biot_savart(centerline, probes, *, epsilon: float, force_python: bool = False, auto_build: bool = True):
+-    mod, backend = _backend(force_python=force_python, auto_build=auto_build, force_build=False, build_verbose=False)
++def backend_biot_savart(
++    centerline,
++    probes,
++    *,
++    epsilon: float,
++    kernel_model: str = "rosenhead_midpoint",
++    force_python: bool = False,
++    auto_build: bool = True,
++):
++    mod, backend = _backend(
++        force_python=force_python, auto_build=auto_build, force_build=False, build_verbose=False
++    )
+     coefficient = constants.BETA_0 / 2.0
+-    return mod.biot_savart_batch(centerline, probes, coefficient, epsilon), backend
++    return (
++        mod.biot_savart_batch(centerline, probes, coefficient, epsilon, kernel_model),
++        backend,
++    )
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/fallback.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/fallback.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/fallback.py	2026-07-28 10:29:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/fallback.py	2026-07-28 18:11:27.800214331 +0000
+@@ -129,7 +129,7 @@
+     }
+ 
+ 
+-def biot_savart_batch(centerline, probes, coefficient: float, epsilon: float):
++def biot_savart_batch(centerline, probes, coefficient: float, epsilon: float, kernel_model: str = "rosenhead_midpoint"):
+     c = np.asarray(centerline, dtype=float)
+     p = np.asarray(probes, dtype=float)
+     if c.ndim != 2 or c.shape[1] != 3 or len(c) < 3:
+@@ -138,6 +138,8 @@
+         raise ValueError("probes must have shape (M,3)")
+     if epsilon <= 0:
+         raise ValueError("epsilon must be positive")
++    if kernel_model != "rosenhead_midpoint":
++        raise ValueError(f"unknown kernel_model: {kernel_model}")
+     a = c
+     b = np.roll(c, -1, axis=0)
+     dl = b-a
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/knot_scan.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/knot_scan.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/knot_scan.py	2026-07-28 14:32:20.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/knot_scan.py	2026-07-28 18:19:33.528214331 +0000
+@@ -1,7 +1,7 @@
+ from __future__ import annotations
+ 
+ import math
+-from typing import Any, Iterable
++from typing import Any, Iterable, Sequence
+ 
+ import numpy as np
+ 
+@@ -15,6 +15,9 @@
+     sample_ideal_knot,
+     validate_knot_ids,
+ )
++from .resolution import resolution_plan
++
++KERNEL_MODELS = ("rosenhead_midpoint",)
+ 
+ 
+ def torus_knot(p: int, q: int, n: int, major_radius: float, minor_radius: float) -> np.ndarray:
+@@ -48,7 +51,10 @@
+     """Construct a discrete Bishop-like frame along a closed sampled centerline."""
+     curve = np.asarray(curve, dtype=float)
+     tangents = np.roll(curve, -1, axis=0) - np.roll(curve, 1, axis=0)
+-    tangents = tangents / np.linalg.norm(tangents, axis=1)[:, None]
++    tangent_norms = np.linalg.norm(tangents, axis=1)
++    if np.any(tangent_norms <= 1e-15):
++        raise ValueError("degenerate centerline tangent")
++    tangents = tangents / tangent_norms[:, None]
+ 
+     axes = np.eye(3)
+     axis0 = axes[int(np.argmin(np.abs(axes @ tangents[0])))]
+@@ -72,8 +78,6 @@
+         n1[i] = _unit(candidate)
+         n2[i] = _unit(np.cross(t1, n1[i]))
+ 
+-    # A diagnostic only: this is the residual frame mismatch after traversing
+-    # the discrete loop, not a physical twist assignment.
+     closure_dot = float(np.clip(np.dot(n1[-1], n1[0]), -1.0, 1.0))
+     frame_closure_mismatch = math.acos(closure_dot)
+     return tangents, n1, n2, frame_closure_mismatch
+@@ -91,19 +95,42 @@
+     return x, float(np.polyval(coeff, x))
+ 
+ 
+-def _scan_curve_raw(
+-    *,
++def rosenhead_reference_regime(epsilon: float) -> dict[str, Any]:
++    if epsilon <= 0.0:
++        raise ValueError("epsilon must be positive")
++    horizon_threshold = constants.ROSENHEAD_HORIZON_THRESHOLD
++    critical_threshold = constants.ROSENHEAD_CRITICAL_THRESHOLD
++    beta_max = constants.BETA_0 / (2.0 * epsilon)
++    if epsilon <= horizon_threshold:
++        classification = "STRAIGHT_REFERENCE_CLOCK_DEGENERACY_POSSIBLE"
++    elif epsilon <= critical_threshold:
++        classification = "STRAIGHT_REFERENCE_HORIZON_FREE_CRITICAL_WINDOW"
++    else:
++        classification = "STRAIGHT_REFERENCE_NO_FERMAT_CRITICAL_RADIUS"
++    return {
++        "kernel_model": "rosenhead_midpoint",
++        "epsilon_over_rc": epsilon,
++        "straight_reference_beta_max": beta_max,
++        "horizon_threshold_epsilon_over_rc": horizon_threshold,
++        "critical_threshold_epsilon_over_rc": critical_threshold,
++        "epsilon_over_critical_threshold": epsilon / critical_threshold,
++        "classification": classification,
++        "scope_guard": (
++            "This threshold is exact for the infinite straight Rosenhead reference profile; "
++            "curvature and non-local knot contributions can shift the full-knot result."
++        ),
++    }
++
++
++def _build_probe_geometry(
+     curve: np.ndarray,
+-    knot_info: dict[str, Any],
++    *,
+     stations: int,
+     angles: int,
+     rho_min: float,
+     rho_max: float,
+     radial_samples: int,
+-    epsilon: float,
+-    force_python: bool,
+-    auto_build: bool,
+-) -> tuple[dict[str, Any], np.ndarray]:
++) -> dict[str, Any]:
+     if stations < 1 or angles < 3 or radial_samples < 5:
+         raise ValueError("stations>=1, angles>=3, radial_samples>=5 required")
+     if not (0.0 < rho_min < rho_max):
+@@ -114,7 +141,7 @@
+     rhos = np.geomspace(rho_min, rho_max, radial_samples)
+ 
+     descriptors: list[tuple[int, int, float, float]] = []
+-    probes: list[list[float]] = []
++    probes: list[np.ndarray] = []
+     for si, idx in enumerate(station_indices):
+         n1, n2 = frame_n1[int(idx)], frame_n2[int(idx)]
+         origin = curve[int(idx)]
+@@ -122,16 +149,59 @@
+             theta = 2.0 * math.pi * ai / angles
+             direction = math.cos(theta) * n1 + math.sin(theta) * n2
+             for rho in rhos:
+-                probes.append((origin + rho * direction).tolist())
++                probes.append(origin + rho * direction)
+                 descriptors.append((si, ai, float(theta), float(rho)))
++    return {
++        "station_indices": station_indices,
++        "rhos": rhos,
++        "descriptors": descriptors,
++        "probes": np.asarray(probes, dtype=float),
++        "frame_mismatch": frame_mismatch,
++    }
++
++
++def _resolution_metrics(curve: np.ndarray, epsilon: float, target: float | None) -> dict[str, Any]:
++    edges = np.linalg.norm(np.roll(curve, -1, axis=0) - curve, axis=1)
++    mean_ratio = float(edges.mean() / epsilon)
++    max_ratio = float(edges.max() / epsilon)
++    target_met = None if target is None else mean_ratio <= target
++    max_target_met = None if target is None else max_ratio <= target
++    classification = "NOT_ASSESSED"
++    if target is not None:
++        classification = "TARGET_MET" if target_met else "UNDERRESOLVED_AGAINST_TARGET"
++    return {
++        "epsilon_over_rc": epsilon,
++        "edge_length_mean_over_rc": float(edges.mean()),
++        "edge_length_max_over_rc": float(edges.max()),
++        "mean_ds_over_epsilon": mean_ratio,
++        "max_ds_over_epsilon": max_ratio,
++        "target_ds_over_epsilon": target,
++        "target_met": target_met,
++        "max_edge_target_met": max_target_met,
++        "classification": classification,
++        "guard": "A segment/softening ratio target is a discretization gate, not a proof of continuum convergence.",
++    }
+ 
+-    beta_vectors, backend = backend_biot_savart(
+-        curve.tolist(), probes, epsilon=epsilon,
+-        force_python=force_python, auto_build=auto_build,
+-    )
+-    beta_vectors_arr = np.asarray(beta_vectors, dtype=float)
+-    beta_mag = np.linalg.norm(beta_vectors_arr, axis=1)
+ 
++def _analyze_probe_field(
++    *,
++    curve: np.ndarray,
++    knot_info: dict[str, Any],
++    geometry: dict[str, Any],
++    beta_vectors_arr: np.ndarray,
++    backend: dict[str, Any],
++    epsilon: float,
++    kernel_model: str,
++    stations: int,
++    angles: int,
++    rho_min: float,
++    rho_max: float,
++    radial_samples: int,
++    resolution_target: float | None,
++) -> dict[str, Any]:
++    descriptors = geometry["descriptors"]
++    station_indices = geometry["station_indices"]
++    beta_mag = np.linalg.norm(beta_vectors_arr, axis=1)
+     per_ray: dict[tuple[int, int], list[tuple[float, float, float]]] = {}
+     invalid_clock = 0
+     for desc, beta in zip(descriptors, beta_mag):
+@@ -144,10 +214,28 @@
+         per_ray.setdefault((si, ai), []).append((rho, rf, float(beta)))
+ 
+     candidates: list[dict[str, Any]] = []
++    ray_diag = {
++        "ray_count": len(per_ray),
++        "interior_minimum_ray_count": 0,
++        "lower_boundary_minimum_ray_count": 0,
++        "upper_boundary_minimum_ray_count": 0,
++        "all_invalid_ray_count": 0,
++    }
+     for (si, ai), values in per_ray.items():
+         arr = np.asarray(values, dtype=float)
+         xs, ys, bs = arr[:, 0], arr[:, 1], arr[:, 2]
+         finite = np.isfinite(ys)
++        if not np.any(finite):
++            ray_diag["all_invalid_ray_count"] += 1
++            continue
++        finite_indices = np.flatnonzero(finite)
++        min_index = int(finite_indices[np.argmin(ys[finite])])
++        if min_index == 0:
++            ray_diag["lower_boundary_minimum_ray_count"] += 1
++        elif min_index == len(xs) - 1:
++            ray_diag["upper_boundary_minimum_ray_count"] += 1
++        else:
++            ray_diag["interior_minimum_ray_count"] += 1
+         for i in range(1, len(xs) - 1):
+             if finite[i - 1] and finite[i] and finite[i + 1] and ys[i] < ys[i - 1] and ys[i] < ys[i + 1]:
+                 x_min, y_min = _quadratic_minimum(xs, ys, i)
+@@ -164,10 +252,15 @@
+ 
+     candidates.sort(key=lambda row: (row["station"], row["angle_index"], row["rho_over_rc"]))
+     summary = centerline_summary(
+-        curve, knot_info.get("knot_id")
+-        if knot_info.get("centerline_source") == "uploaded_ideal_fourier_catalog" else None
++        curve,
++        knot_info.get("knot_id")
++        if knot_info.get("centerline_source") == "uploaded_ideal_fourier_catalog"
++        else None,
+     )
+-    result = {
++    beta_max_i = int(np.argmax(beta_mag)) if len(beta_mag) else 0
++    beta_max_desc = descriptors[beta_max_i] if descriptors else (0, 0, 0.0, 0.0)
++    resolution = _resolution_metrics(curve, epsilon, resolution_target)
++    return {
+         "schema": RESULT_SCHEMA,
+         "package_version": PACKAGE_VERSION,
+         "audit_name": "SST standalone local Fermat scan around an uploaded ideal-knot filament",
+@@ -184,10 +277,13 @@
+             "rho_max_over_rc": rho_max,
+             "radial_samples": radial_samples,
+             "biot_savart_softening_over_rc": epsilon,
++            "kernel_model": kernel_model,
+         },
++        "kernel_reference": rosenhead_reference_regime(epsilon),
++        "centerline_resolution": resolution,
+         "frame_transport": {
+             "method": "discrete_Bishop_parallel_transport",
+-            "closure_mismatch_rad": frame_mismatch,
++            "closure_mismatch_rad": geometry["frame_mismatch"],
+             "physical_twist_certified": False,
+         },
+         "field_summary": {
+@@ -196,11 +292,18 @@
+             "beta_mean": float(beta_mag.mean()) if len(beta_mag) else None,
+             "beta_rms": float(math.sqrt(float(np.mean(beta_mag * beta_mag)))) if len(beta_mag) else None,
+             "vector_component_sums": beta_vectors_arr.sum(axis=0).tolist() if len(beta_mag) else [0.0, 0.0, 0.0],
++            "beta_max_probe": {
++                "station": int(beta_max_desc[0]),
++                "angle_index": int(beta_max_desc[1]),
++                "theta_rad": float(beta_max_desc[2]),
++                "rho_over_rc": float(beta_max_desc[3]),
++            } if len(beta_mag) else None,
+         },
++        "ray_diagnostics": ray_diag,
+         "candidate_count": len(candidates),
+         "candidates": candidates,
+         "invalid_clock_probe_count": invalid_clock,
+-        "probe_count": len(probes),
++        "probe_count": int(len(geometry["probes"])),
+         "global_closed_orbit_certified": False,
+         "qsm_certified": False,
+         "guard": (
+@@ -208,6 +311,58 @@
+             "closed Fermat geodesics in the full non-axisymmetric metric."
+         ),
+     }
++
++
++def _scan_curve_raw(
++    *,
++    curve: np.ndarray,
++    knot_info: dict[str, Any],
++    stations: int,
++    angles: int,
++    rho_min: float,
++    rho_max: float,
++    radial_samples: int,
++    epsilon: float,
++    kernel_model: str,
++    force_python: bool,
++    auto_build: bool,
++    resolution_target: float | None = None,
++) -> tuple[dict[str, Any], np.ndarray]:
++    if kernel_model not in KERNEL_MODELS:
++        raise ValueError(f"unknown kernel_model={kernel_model}; available={KERNEL_MODELS}")
++    curve = np.asarray(curve, dtype=float)
++    geometry = _build_probe_geometry(
++        curve,
++        stations=stations,
++        angles=angles,
++        rho_min=rho_min,
++        rho_max=rho_max,
++        radial_samples=radial_samples,
++    )
++    beta_vectors, backend = backend_biot_savart(
++        curve.tolist(),
++        geometry["probes"].tolist(),
++        epsilon=epsilon,
++        kernel_model=kernel_model,
++        force_python=force_python,
++        auto_build=auto_build,
++    )
++    beta_vectors_arr = np.asarray(beta_vectors, dtype=float)
++    result = _analyze_probe_field(
++        curve=curve,
++        knot_info=knot_info,
++        geometry=geometry,
++        beta_vectors_arr=beta_vectors_arr,
++        backend=backend,
++        epsilon=epsilon,
++        kernel_model=kernel_model,
++        stations=stations,
++        angles=angles,
++        rho_min=rho_min,
++        rho_max=rho_max,
++        radial_samples=radial_samples,
++        resolution_target=resolution_target,
++    )
+     return result, beta_vectors_arr
+ 
+ 
+@@ -222,6 +377,8 @@
+     rho_max: float = 0.05,
+     radial_samples: int = 160,
+     epsilon: float = 0.0045,
++    kernel_model: str = "rosenhead_midpoint",
++    resolution_target: float | None = None,
+     force_python: bool = False,
+     auto_build: bool = True,
+ ) -> dict[str, Any]:
+@@ -233,9 +390,18 @@
+         "uniform_arclength_resampled": True,
+     })
+     result, _ = _scan_curve_raw(
+-        curve=curve, knot_info=info, stations=stations, angles=angles,
+-        rho_min=rho_min, rho_max=rho_max, radial_samples=radial_samples,
+-        epsilon=epsilon, force_python=force_python, auto_build=auto_build,
++        curve=curve,
++        knot_info=info,
++        stations=stations,
++        angles=angles,
++        rho_min=rho_min,
++        rho_max=rho_max,
++        radial_samples=radial_samples,
++        epsilon=epsilon,
++        kernel_model=kernel_model,
++        force_python=force_python,
++        auto_build=auto_build,
++        resolution_target=resolution_target,
+     )
+     return result
+ 
+@@ -253,6 +419,7 @@
+     rho_max: float = 0.05,
+     radial_samples: int = 120,
+     epsilon: float = 0.0045,
++    kernel_model: str = "rosenhead_midpoint",
+     force_python: bool = False,
+     auto_build: bool = True,
+ ) -> dict[str, Any]:
+@@ -267,9 +434,15 @@
+             "major_radius_over_rc": major_radius,
+             "minor_radius_over_rc": minor_radius,
+         },
+-        stations=stations, angles=angles, rho_min=rho_min, rho_max=rho_max,
+-        radial_samples=radial_samples, epsilon=epsilon,
+-        force_python=force_python, auto_build=auto_build,
++        stations=stations,
++        angles=angles,
++        rho_min=rho_min,
++        rho_max=rho_max,
++        radial_samples=radial_samples,
++        epsilon=epsilon,
++        kernel_model=kernel_model,
++        force_python=force_python,
++        auto_build=auto_build,
+     )
+     return result
+ 
+@@ -291,10 +464,59 @@
+     return max(diffs)
+ 
+ 
++def _parity_metrics(
++    primary_result: dict[str, Any],
++    primary_beta: np.ndarray,
++    python_result: dict[str, Any],
++    python_beta: np.ndarray,
++) -> dict[str, Any]:
++    vector_linf = float(np.max(np.abs(primary_beta - python_beta))) if len(primary_beta) else 0.0
++    magnitude_linf = float(
++        np.max(np.abs(np.linalg.norm(primary_beta, axis=1) - np.linalg.norm(python_beta, axis=1)))
++    ) if len(primary_beta) else 0.0
++    candidate_rho_error = _candidate_rho_parity(primary_result, python_result)
++    native = primary_result["backend"]["backend"] == "cpp"
++    parity_ok = (
++        native
++        and vector_linf < 1e-10
++        and magnitude_linf < 1e-10
++        and primary_result["candidate_count"] == python_result["candidate_count"]
++        and primary_result["invalid_clock_probe_count"] == python_result["invalid_clock_probe_count"]
++        and candidate_rho_error is not None
++        and candidate_rho_error < 1e-10
++    )
++    return {
++        "primary_backend": primary_result["backend"]["backend"],
++        "native_available": native,
++        "beta_vector_linf_error": vector_linf,
++        "beta_magnitude_linf_error": magnitude_linf,
++        "candidate_rho_linf_error": candidate_rho_error,
++        "candidate_count_match": primary_result["candidate_count"] == python_result["candidate_count"],
++        "invalid_clock_count_match": (
++            primary_result["invalid_clock_probe_count"] == python_result["invalid_clock_probe_count"]
++        ),
++        "native_python_parity_ok": parity_ok,
++    }
++
++
++def _catalog_info(knot_id: str, scale_over_rc: float) -> dict[str, Any]:
++    info = knot_metadata(knot_id)
++    info.update({
++        "centerline_source": "uploaded_ideal_fourier_catalog",
++        "scale_over_rc": scale_over_rc,
++        "uniform_arclength_resampled": True,
++    })
++    return info
++
++
+ def scan_catalog_matrix(
+     knot_ids: Iterable[str] = DEFAULT_KNOT_IDS,
+     *,
+-    centerline_points: int = 256,
++    centerline_points: int | None = 256,
++    adaptive_resolution: bool = False,
++    target_ds_over_epsilon: float = 1.0,
++    min_centerline_points: int = 128,
++    max_centerline_points: int = 8192,
+     scale_over_rc: float = 1.0,
+     stations: int = 8,
+     angles: int = 12,
+@@ -302,83 +524,105 @@
+     rho_max: float = 0.05,
+     radial_samples: int = 80,
+     epsilon: float = 0.0045,
++    kernel_model: str = "rosenhead_midpoint",
+     auto_build: bool = True,
+-    force_build_first: bool = False,
+ ) -> dict[str, Any]:
+     ids = validate_knot_ids(knot_ids)
+     rows: list[dict[str, Any]] = []
+     results: dict[str, dict[str, Any]] = {}
+ 
+     for index, knot_id in enumerate(ids):
+-        curve = sample_ideal_knot(knot_id, centerline_points, scale_over_rc=scale_over_rc)
+-        info = knot_metadata(knot_id)
+-        info.update({
+-            "centerline_source": "uploaded_ideal_fourier_catalog",
+-            "scale_over_rc": scale_over_rc,
+-            "uniform_arclength_resampled": True,
+-        })
++        plan = None
++        if adaptive_resolution:
++            plan = resolution_plan(
++                knot_id,
++                epsilon=epsilon,
++                scale_over_rc=scale_over_rc,
++                target_ds_over_epsilon=target_ds_over_epsilon,
++                min_points=min_centerline_points,
++                max_points=max_centerline_points,
++            )
++            n_points = int(plan["selected_points"])
++        else:
++            if centerline_points is None:
++                raise ValueError("centerline_points is required when adaptive_resolution is false")
++            n_points = int(centerline_points)
++        curve = sample_ideal_knot(knot_id, n_points, scale_over_rc=scale_over_rc)
++        info = _catalog_info(knot_id, scale_over_rc)
+         py_result, py_beta = _scan_curve_raw(
+-            curve=curve, knot_info=info, stations=stations, angles=angles,
+-            rho_min=rho_min, rho_max=rho_max, radial_samples=radial_samples,
+-            epsilon=epsilon, force_python=True, auto_build=False,
++            curve=curve,
++            knot_info=info,
++            stations=stations,
++            angles=angles,
++            rho_min=rho_min,
++            rho_max=rho_max,
++            radial_samples=radial_samples,
++            epsilon=epsilon,
++            kernel_model=kernel_model,
++            force_python=True,
++            auto_build=False,
++            resolution_target=target_ds_over_epsilon if adaptive_resolution else None,
+         )
+         primary_result, primary_beta = _scan_curve_raw(
+-            curve=curve, knot_info=info, stations=stations, angles=angles,
+-            rho_min=rho_min, rho_max=rho_max, radial_samples=radial_samples,
+-            epsilon=epsilon, force_python=False,
++            curve=curve,
++            knot_info=info,
++            stations=stations,
++            angles=angles,
++            rho_min=rho_min,
++            rho_max=rho_max,
++            radial_samples=radial_samples,
++            epsilon=epsilon,
++            kernel_model=kernel_model,
++            force_python=False,
+             auto_build=auto_build if index == 0 else False,
++            resolution_target=target_ds_over_epsilon if adaptive_resolution else None,
+         )
+-        vector_linf = float(np.max(np.abs(primary_beta - py_beta)))
+-        magnitude_linf = float(
+-            np.max(
+-                np.abs(
+-                    np.linalg.norm(primary_beta, axis=1) - np.linalg.norm(py_beta, axis=1)
+-                )
+-            )
+-        )
+-        candidate_rho_error = _candidate_rho_parity(primary_result, py_result)
+-        native = primary_result["backend"]["backend"] == "cpp"
+-        parity_ok = (
+-            native
+-            and vector_linf < 1e-10
+-            and magnitude_linf < 1e-10
+-            and primary_result["candidate_count"] == py_result["candidate_count"]
+-            and primary_result["invalid_clock_probe_count"] == py_result["invalid_clock_probe_count"]
+-            and candidate_rho_error is not None
+-            and candidate_rho_error < 1e-10
+-        )
++        parity = _parity_metrics(primary_result, primary_beta, py_result, py_beta)
+         row = {
+             "knot_id": knot_id,
+             "source_id": info["source_id"],
+             "source_length_L": info["source_length_L"],
+             "coefficient_count": info["coefficient_count"],
+-            "primary_backend": primary_result["backend"]["backend"],
+-            "native_available": native,
++            "epsilon_over_rc": epsilon,
++            "kernel_model": kernel_model,
++            "centerline_points": n_points,
++            "adaptive_resolution": adaptive_resolution,
++            "resolution_plan_classification": plan["classification"] if plan else "FIXED_POINT_COUNT",
++            "mean_ds_over_epsilon": primary_result["centerline_resolution"]["mean_ds_over_epsilon"],
++            "max_ds_over_epsilon": primary_result["centerline_resolution"]["max_ds_over_epsilon"],
++            "resolution_target_met": primary_result["centerline_resolution"]["target_met"],
+             "probe_count": primary_result["probe_count"],
+             "candidate_count_primary": primary_result["candidate_count"],
+             "candidate_count_python": py_result["candidate_count"],
+             "invalid_clock_primary": primary_result["invalid_clock_probe_count"],
+             "invalid_clock_python": py_result["invalid_clock_probe_count"],
+-            "beta_vector_linf_error": vector_linf,
+-            "beta_magnitude_linf_error": magnitude_linf,
+-            "candidate_rho_linf_error": candidate_rho_error,
++            "beta_max_primary": primary_result["field_summary"]["beta_max"],
+             "source_length_relative_error": primary_result["centerline"]["source_length_relative_error"],
+-            "native_python_parity_ok": parity_ok,
++            **parity,
+             "global_closed_orbit_certified": False,
+             "qsm_certified": False,
+         }
+         rows.append(row)
+-        results[knot_id] = {"primary": primary_result, "python": py_result, "parity": row}
++        results[knot_id] = {
++            "resolution_plan": plan,
++            "primary": primary_result,
++            "python": py_result,
++            "parity": parity,
++        }
+ 
+     native_all = all(row["native_available"] for row in rows)
+     parity_all = native_all and all(row["native_python_parity_ok"] for row in rows)
+     return {
+-        "schema": "sst.fermat.knot-matrix.v0.2",
++        "schema": "sst.fermat.knot-matrix.v0.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+         "settings": {
+             "centerline_points": centerline_points,
++            "adaptive_resolution": adaptive_resolution,
++            "target_ds_over_epsilon": target_ds_over_epsilon,
++            "min_centerline_points": min_centerline_points,
++            "max_centerline_points": max_centerline_points,
+             "scale_over_rc": scale_over_rc,
+             "stations": stations,
+             "angles": angles,
+@@ -386,11 +630,318 @@
+             "rho_max_over_rc": rho_max,
+             "radial_samples": radial_samples,
+             "biot_savart_softening_over_rc": epsilon,
++            "kernel_model": kernel_model,
+         },
++        "kernel_reference": rosenhead_reference_regime(epsilon),
+         "rows": rows,
+         "results": results,
+         "native_available_for_all_knots": native_all,
+         "native_python_parity_certified_for_all_knots": parity_all,
++        "resolution_target_met_for_all_knots": (
++            all(row["resolution_target_met"] is True for row in rows) if adaptive_resolution else None
++        ),
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++    }
++
++
++def scan_softening_matrix(
++    knot_ids: Iterable[str] = DEFAULT_KNOT_IDS,
++    *,
++    epsilon_values: Sequence[float],
++    target_ds_over_epsilon: float = 1.0,
++    min_centerline_points: int = 128,
++    max_centerline_points: int = 8192,
++    scale_over_rc: float = 1.0,
++    stations: int = 4,
++    angles: int = 12,
++    rho_min: float = 0.0005,
++    rho_max: float = 0.03,
++    radial_samples: int = 96,
++    kernel_model: str = "rosenhead_midpoint",
++    parity_mode: str = "spot",
++    parity_stations: int = 2,
++    parity_angles: int = 4,
++    parity_radial_samples: int = 24,
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    ids = validate_knot_ids(knot_ids)
++    eps_values = [float(v) for v in epsilon_values]
++    if not eps_values or any(v <= 0.0 for v in eps_values):
++        raise ValueError("epsilon_values must contain positive values")
++    if parity_mode not in {"full", "spot", "none"}:
++        raise ValueError("parity_mode must be full, spot, or none")
++
++    rows: list[dict[str, Any]] = []
++    results: dict[str, Any] = {}
++    first_primary = True
++    for epsilon in eps_values:
++        eps_key = f"{epsilon:.10g}"
++        results[eps_key] = {}
++        for knot_id in ids:
++            plan = resolution_plan(
++                knot_id,
++                epsilon=epsilon,
++                scale_over_rc=scale_over_rc,
++                target_ds_over_epsilon=target_ds_over_epsilon,
++                min_points=min_centerline_points,
++                max_points=max_centerline_points,
++            )
++            n_points = int(plan["selected_points"])
++            curve = sample_ideal_knot(knot_id, n_points, scale_over_rc=scale_over_rc)
++            info = _catalog_info(knot_id, scale_over_rc)
++            primary_result, primary_beta = _scan_curve_raw(
++                curve=curve,
++                knot_info=info,
++                stations=stations,
++                angles=angles,
++                rho_min=rho_min,
++                rho_max=rho_max,
++                radial_samples=radial_samples,
++                epsilon=epsilon,
++                kernel_model=kernel_model,
++                force_python=False,
++                auto_build=auto_build if first_primary else False,
++                resolution_target=target_ds_over_epsilon,
++            )
++            first_primary = False
++            parity: dict[str, Any] = {
++                "mode": parity_mode,
++                "native_available": primary_result["backend"]["backend"] == "cpp",
++                "native_python_parity_ok": None,
++            }
++            python_result = None
++            if parity_mode == "full":
++                python_result, python_beta = _scan_curve_raw(
++                    curve=curve,
++                    knot_info=info,
++                    stations=stations,
++                    angles=angles,
++                    rho_min=rho_min,
++                    rho_max=rho_max,
++                    radial_samples=radial_samples,
++                    epsilon=epsilon,
++                    kernel_model=kernel_model,
++                    force_python=True,
++                    auto_build=False,
++                    resolution_target=target_ds_over_epsilon,
++                )
++                parity.update(_parity_metrics(primary_result, primary_beta, python_result, python_beta))
++            elif parity_mode == "spot":
++                spot_primary, spot_primary_beta = _scan_curve_raw(
++                    curve=curve,
++                    knot_info=info,
++                    stations=parity_stations,
++                    angles=parity_angles,
++                    rho_min=rho_min,
++                    rho_max=rho_max,
++                    radial_samples=parity_radial_samples,
++                    epsilon=epsilon,
++                    kernel_model=kernel_model,
++                    force_python=False,
++                    auto_build=False,
++                    resolution_target=target_ds_over_epsilon,
++                )
++                spot_python, spot_python_beta = _scan_curve_raw(
++                    curve=curve,
++                    knot_info=info,
++                    stations=parity_stations,
++                    angles=parity_angles,
++                    rho_min=rho_min,
++                    rho_max=rho_max,
++                    radial_samples=parity_radial_samples,
++                    epsilon=epsilon,
++                    kernel_model=kernel_model,
++                    force_python=True,
++                    auto_build=False,
++                    resolution_target=target_ds_over_epsilon,
++                )
++                parity.update(_parity_metrics(spot_primary, spot_primary_beta, spot_python, spot_python_beta))
++                parity["spot_probe_count"] = spot_primary["probe_count"]
++            row = {
++                "epsilon_over_rc": epsilon,
++                "epsilon_regime": primary_result["kernel_reference"]["classification"],
++                "knot_id": knot_id,
++                "centerline_points": n_points,
++                "resolution_plan_classification": plan["classification"],
++                "mean_ds_over_epsilon": primary_result["centerline_resolution"]["mean_ds_over_epsilon"],
++                "max_ds_over_epsilon": primary_result["centerline_resolution"]["max_ds_over_epsilon"],
++                "resolution_target_met": primary_result["centerline_resolution"]["target_met"],
++                "primary_backend": primary_result["backend"]["backend"],
++                "native_available": primary_result["backend"]["backend"] == "cpp",
++                "probe_count": primary_result["probe_count"],
++                "candidate_count": primary_result["candidate_count"],
++                "invalid_clock_probe_count": primary_result["invalid_clock_probe_count"],
++                "beta_max": primary_result["field_summary"]["beta_max"],
++                "lower_boundary_minimum_rays": primary_result["ray_diagnostics"]["lower_boundary_minimum_ray_count"],
++                "interior_minimum_rays": primary_result["ray_diagnostics"]["interior_minimum_ray_count"],
++                "parity_mode": parity_mode,
++                "native_python_parity_ok": parity.get("native_python_parity_ok"),
++                "beta_vector_linf_error": parity.get("beta_vector_linf_error"),
++                "global_closed_orbit_certified": False,
++                "qsm_certified": False,
++            }
++            rows.append(row)
++            results[eps_key][knot_id] = {
++                "resolution_plan": plan,
++                "primary": primary_result,
++                "python": python_result,
++                "parity": parity,
++            }
++
++    native_all = all(row["native_available"] for row in rows)
++    parity_rows = [row for row in rows if row["native_python_parity_ok"] is not None]
++    parity_all = bool(parity_rows) and native_all and all(row["native_python_parity_ok"] for row in parity_rows)
++    return {
++        "schema": "sst.fermat.softening-matrix.v0.3",
++        "package_version": PACKAGE_VERSION,
++        "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
++        "knot_ids": list(ids),
++        "epsilon_values_over_rc": eps_values,
++        "settings": {
++            "target_ds_over_epsilon": target_ds_over_epsilon,
++            "min_centerline_points": min_centerline_points,
++            "max_centerline_points": max_centerline_points,
++            "scale_over_rc": scale_over_rc,
++            "stations": stations,
++            "angles": angles,
++            "rho_min_over_rc": rho_min,
++            "rho_max_over_rc": rho_max,
++            "radial_samples": radial_samples,
++            "kernel_model": kernel_model,
++            "parity_mode": parity_mode,
++        },
++        "straight_reference_thresholds": {
++            "horizon_threshold_epsilon_over_rc": constants.ROSENHEAD_HORIZON_THRESHOLD,
++            "critical_threshold_epsilon_over_rc": constants.ROSENHEAD_CRITICAL_THRESHOLD,
++        },
++        "rows": rows,
++        "results": results,
++        "native_available_for_all_rows": native_all,
++        "native_python_parity_certified_for_checked_rows": parity_all if parity_mode != "none" else None,
++        "resolution_target_met_for_all_rows": all(row["resolution_target_met"] is True for row in rows),
+         "global_closed_orbit_certified": False,
+         "qsm_certified": False,
+     }
++
++
++def field_convergence_ladder(
++    knot_ids: Iterable[str] = DEFAULT_KNOT_IDS,
++    *,
++    epsilon: float,
++    point_counts: Sequence[int],
++    scale_over_rc: float = 1.0,
++    stations: int = 2,
++    angles: int = 8,
++    rho_min: float = 0.001,
++    rho_max: float = 0.02,
++    radial_samples: int = 32,
++    kernel_model: str = "rosenhead_midpoint",
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    ids = validate_knot_ids(knot_ids)
++    counts = sorted(set(int(v) for v in point_counts))
++    if not counts or counts[0] < 16:
++        raise ValueError("point_counts must contain integers >=16")
++    rows: list[dict[str, Any]] = []
++    results: dict[str, Any] = {}
++    first_primary = True
++
++    for knot_id in ids:
++        reference_n = counts[-1]
++        reference_curve = sample_ideal_knot(knot_id, reference_n, scale_over_rc=scale_over_rc)
++        geometry = _build_probe_geometry(
++            reference_curve,
++            stations=stations,
++            angles=angles,
++            rho_min=rho_min,
++            rho_max=rho_max,
++            radial_samples=radial_samples,
++        )
++        probes = geometry["probes"].tolist()
++        vectors_by_n: dict[int, np.ndarray] = {}
++        backend_by_n: dict[int, dict[str, Any]] = {}
++        for n_points in counts:
++            curve = sample_ideal_knot(knot_id, n_points, scale_over_rc=scale_over_rc)
++            vectors, backend = backend_biot_savart(
++                curve.tolist(),
++                probes,
++                epsilon=epsilon,
++                kernel_model=kernel_model,
++                force_python=False,
++                auto_build=auto_build if first_primary else False,
++            )
++            first_primary = False
++            vectors_by_n[n_points] = np.asarray(vectors, dtype=float)
++            backend_by_n[n_points] = backend
++        reference = vectors_by_n[reference_n]
++        py_reference, _ = backend_biot_savart(
++            reference_curve.tolist(),
++            probes,
++            epsilon=epsilon,
++            kernel_model=kernel_model,
++            force_python=True,
++            auto_build=False,
++        )
++        py_reference_arr = np.asarray(py_reference, dtype=float)
++        native_reference = backend_by_n[reference_n]["backend"] == "cpp"
++        parity_error = float(np.max(np.abs(reference - py_reference_arr)))
++        knot_rows: list[dict[str, Any]] = []
++        for n_points in counts:
++            curve = sample_ideal_knot(knot_id, n_points, scale_over_rc=scale_over_rc)
++            resolution = _resolution_metrics(curve, epsilon, None)
++            vectors = vectors_by_n[n_points]
++            vector_linf = float(np.max(np.abs(vectors - reference)))
++            magnitude_linf = float(
++                np.max(np.abs(np.linalg.norm(vectors, axis=1) - np.linalg.norm(reference, axis=1)))
++            )
++            row = {
++                "knot_id": knot_id,
++                "epsilon_over_rc": epsilon,
++                "centerline_points": n_points,
++                "reference_centerline_points": reference_n,
++                "primary_backend": backend_by_n[n_points]["backend"],
++                "mean_ds_over_epsilon": resolution["mean_ds_over_epsilon"],
++                "max_ds_over_epsilon": resolution["max_ds_over_epsilon"],
++                "beta_vector_linf_vs_reference": vector_linf,
++                "beta_magnitude_linf_vs_reference": magnitude_linf,
++                "is_reference_row": n_points == reference_n,
++            }
++            rows.append(row)
++            knot_rows.append(row)
++        results[knot_id] = {
++            "reference_probe_count": len(probes),
++            "reference_frame_mismatch_rad": geometry["frame_mismatch"],
++            "reference_native_available": native_reference,
++            "reference_native_python_linf_error": parity_error,
++            "reference_native_python_parity_ok": native_reference and parity_error < 1e-10,
++            "rows": knot_rows,
++        }
++
++    return {
++        "schema": "sst.fermat.field-convergence.v0.3",
++        "package_version": PACKAGE_VERSION,
++        "status": "RESEARCH_TRACK_NUMERICAL_CONVERGENCE",
++        "knot_ids": list(ids),
++        "settings": {
++            "epsilon_over_rc": epsilon,
++            "point_counts": counts,
++            "scale_over_rc": scale_over_rc,
++            "stations": stations,
++            "angles": angles,
++            "rho_min_over_rc": rho_min,
++            "rho_max_over_rc": rho_max,
++            "radial_samples": radial_samples,
++            "kernel_model": kernel_model,
++        },
++        "rows": rows,
++        "results": results,
++        "native_python_parity_certified_for_all_references": all(
++            result["reference_native_python_parity_ok"] for result in results.values()
++        ),
++        "continuum_convergence_certified": False,
++        "guard": (
++            "The highest point count is used as a finite-resolution reference. "
++            "Agreement with it is not an independent continuum proof."
++        ),
++    }
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/resolution.py work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/resolution.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/fermat_ext/resolution.py	1970-01-01 00:00:00.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/fermat_ext/resolution.py	2026-07-28 18:11:04.228214331 +0000
+@@ -0,0 +1,60 @@
++from __future__ import annotations
++
++import math
++from typing import Any
++
++from .knot_catalog import knot_metadata
++
++
++def _round_up(value: int, multiple: int) -> int:
++    if multiple <= 0:
++        raise ValueError("multiple must be positive")
++    return int(math.ceil(value / multiple) * multiple)
++
++
++def resolution_plan(
++    knot_id: str,
++    *,
++    epsilon: float,
++    scale_over_rc: float = 1.0,
++    target_ds_over_epsilon: float = 1.0,
++    min_points: int = 128,
++    max_points: int = 8192,
++    round_to: int = 16,
++) -> dict[str, Any]:
++    """Plan centerline resolution from the source length and softening scale.
++
++    The target is a discretization diagnostic, not a proof of convergence:
++
++        mean(Delta s) / epsilon <= target_ds_over_epsilon.
++    """
++    if epsilon <= 0.0:
++        raise ValueError("epsilon must be positive")
++    if scale_over_rc <= 0.0:
++        raise ValueError("scale_over_rc must be positive")
++    if target_ds_over_epsilon <= 0.0:
++        raise ValueError("target_ds_over_epsilon must be positive")
++    if min_points < 16 or max_points < min_points:
++        raise ValueError("require 16<=min_points<=max_points")
++
++    meta = knot_metadata(knot_id)
++    expected_length = float(meta["source_length_L"]) * scale_over_rc
++    required_raw = int(math.ceil(expected_length / (epsilon * target_ds_over_epsilon)))
++    required_rounded = max(min_points, _round_up(required_raw, round_to))
++    selected = min(required_rounded, max_points)
++    expected_ratio = expected_length / (selected * epsilon)
++    target_met = selected >= required_rounded
++
++    return {
++        "knot_id": knot_id,
++        "source_length_expected_over_rc": expected_length,
++        "epsilon_over_rc": epsilon,
++        "target_ds_over_epsilon": target_ds_over_epsilon,
++        "required_points_uncapped": required_raw,
++        "required_points_rounded": required_rounded,
++        "selected_points": selected,
++        "max_points": max_points,
++        "expected_mean_ds_over_epsilon": expected_ratio,
++        "target_met_by_plan": target_met,
++        "classification": "TARGET_MET_BY_PLAN" if target_met else "CAPPED_UNDERRESOLVED_BY_PLAN",
++    }
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/pyproject.toml work_v030/SST_fermat_pybind_research_v0.3.0/pyproject.toml
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/pyproject.toml	2026-07-28 14:32:35.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/pyproject.toml	2026-07-28 18:11:27.800214331 +0000
+@@ -4,8 +4,8 @@
+ 
+ [project]
+ name = "sst-fermat-pybind-research"
+-version = "0.2.0"
+-description = "Standalone Python+C++ pybind11 research harness for SST Fermat-critical diagnostics across 0_1, 3_1, 4_1, and 5_2"
++version = "0.3.0"
++description = "Standalone Python+C++ pybind11 research harness for SST Fermat-critical diagnostics with adaptive softening/resolution studies across 0_1, 3_1, 4_1, and 5_2"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=1.24"]
+ 
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_all_checks.py work_v030/SST_fermat_pybind_research_v0.3.0/run_all_checks.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_all_checks.py	2026-07-28 14:33:21.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_all_checks.py	2026-07-28 18:15:52.424214331 +0000
+@@ -7,13 +7,14 @@
+ from pathlib import Path
+ 
+ from fermat_ext import constants
+-from fermat_ext.core import analyze_profile, sweep_profiles, write_csv, write_json
++from fermat_ext.core import PACKAGE_VERSION, analyze_profile, sweep_profiles, write_csv, write_json
+ from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, available_knots, centerline_summary, sample_ideal_knot
+-from fermat_ext.knot_scan import scan_catalog_matrix
++from fermat_ext.knot_scan import scan_catalog_matrix, scan_softening_matrix
++from fermat_ext.resolution import resolution_plan
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.2 audit battery.")
++    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.3 audit battery.")
+     p.add_argument("--out-dir", default="audit_out")
+     p.add_argument("--force-build", action="store_true")
+     p.add_argument("--no-auto-build", action="store_true")
+@@ -23,10 +24,7 @@
+     out = Path(args.out_dir)
+     out.mkdir(parents=True, exist_ok=True)
+ 
+-    ext_py = analyze_profile(
+-        "external", 0.0045, 1e-5, 0.1, 6000,
+-        force_python=True, auto_build=False,
+-    )
++    ext_py = analyze_profile("external", 0.0045, 1e-5, 0.1, 6000, force_python=True, auto_build=False)
+     ext_primary = analyze_profile(
+         "external", 0.0045, 1e-5, 0.1, 6000,
+         auto_build=not args.no_auto_build,
+@@ -40,17 +38,12 @@
+     analytic_error = abs(x_py - constants.FORMAL_X_STAR)
+     native_available = ext_primary["backend"]["backend"] == "cpp"
+     radial_parity_error = abs(x_primary - x_py) if native_available else None
+-    radial_native_parity_ok = (
+-        native_available and radial_parity_error is not None and radial_parity_error < 1e-10
+-    )
++    radial_native_parity_ok = native_available and radial_parity_error is not None and radial_parity_error < 1e-10
+ 
+-    rankine_python = sweep_profiles(
+-        "rankine", [0.0038, 0.0042, 0.0048, 0.0052, 0.0060],
+-        force_python=True, auto_build=False,
+-    )
++    a_values = [0.0038, 0.0042, 0.0048, 0.0052, 0.0060]
++    rankine_python = sweep_profiles("rankine", a_values, force_python=True, auto_build=False)
+     rankine_primary = sweep_profiles(
+-        "rankine", [0.0038, 0.0042, 0.0048, 0.0052, 0.0060],
+-        force_python=False, auto_build=not args.no_auto_build,
++        "rankine", a_values, force_python=False, auto_build=not args.no_auto_build
+     )
+     write_json(out / "rankine_sweep_python.json", rankine_python)
+     write_csv(out / "rankine_sweep_python.csv", rankine_python)
+@@ -74,6 +67,15 @@
+         and rankine_parity_linf < 1e-10
+     )
+ 
++    rosenhead_critical = analyze_profile(
++        "rosenhead", 0.0019, 1e-5, 0.05, 8000, force_python=True, auto_build=False
++    )
++    rosenhead_blocked = analyze_profile(
++        "rosenhead", 0.0020, 1e-5, 0.05, 8000, force_python=True, auto_build=False
++    )
++    write_json(out / "rosenhead_0p0019_python.json", rosenhead_critical)
++    write_json(out / "rosenhead_0p0020_python.json", rosenhead_blocked)
++
+     knot_settings = (
+         dict(centerline_points=128, stations=4, angles=8, radial_samples=48)
+         if args.knot_preset == "smoke"
+@@ -94,13 +96,32 @@
+         write_json(out / f"{knot_id}_primary.json", pair["primary"])
+         write_json(out / f"{knot_id}_python.json", pair["python"])
+ 
++    softening_smoke = scan_softening_matrix(
++        DEFAULT_KNOT_IDS,
++        epsilon_values=[0.0019, 0.0020, 0.0045],
++        target_ds_over_epsilon=4.0,
++        min_centerline_points=64,
++        max_centerline_points=256,
++        stations=1,
++        angles=3,
++        rho_min=0.0005,
++        rho_max=0.02,
++        radial_samples=12,
++        parity_mode="none",
++        auto_build=not args.no_auto_build,
++    )
++    write_json(out / "softening_matrix_smoke.json", softening_smoke)
++    write_csv(out / "softening_matrix_smoke.csv", softening_smoke["rows"])
++
+     catalog_rows = []
++    plans = []
+     for knot_id in DEFAULT_KNOT_IDS:
+         curve = sample_ideal_knot(knot_id, n=1024, scale_over_rc=1.0)
+-        row = {"knot_id": knot_id, **centerline_summary(curve, knot_id)}
+-        catalog_rows.append(row)
++        catalog_rows.append({"knot_id": knot_id, **centerline_summary(curve, knot_id)})
++        plans.append(resolution_plan(knot_id, epsilon=0.0045, target_ds_over_epsilon=1.0, max_points=8192))
+     write_json(out / "catalog_geometry_validation.json", catalog_rows)
+     write_csv(out / "catalog_geometry_validation.csv", catalog_rows)
++    write_json(out / "adaptive_resolution_plans.json", plans)
+ 
+     catalog_ids_ok = tuple(available_knots()) == tuple(DEFAULT_KNOT_IDS)
+     catalog_lengths_ok = all(row["source_length_relative_error"] < 2e-4 for row in catalog_rows)
+@@ -113,10 +134,20 @@
+         "external_root_found": math.isfinite(x_py),
+         "external_analytic_error_lt_1e-10": analytic_error < 1e-10,
+         "rankine_sweep_has_five_rows": len(rankine_python) == 5,
++        "rosenhead_0p0019_has_horizon_free_critical_root": (
++            len(rosenhead_critical["critical_roots"]) >= 1
++            and "WITH_EXTERNAL_CLOCK_DEGENERACY" not in rosenhead_critical["classification"]
++        ),
++        "rosenhead_0p0020_has_no_critical_root": len(rosenhead_blocked["critical_roots"]) == 0,
++        "rosenhead_threshold_ordering": (
++            constants.ROSENHEAD_HORIZON_THRESHOLD < constants.ROSENHEAD_CRITICAL_THRESHOLD
++        ),
+         "catalog_contains_exact_requested_knots": catalog_ids_ok,
+         "catalog_source_lengths_reproduced_lt_2e-4": catalog_lengths_ok,
+         "all_four_knot_guards_preserved": guards_ok,
+         "all_four_knot_scans_completed": set(knot_matrix["knot_ids"]) == set(DEFAULT_KNOT_IDS),
++        "adaptive_plans_cover_all_knots": len(plans) == 4 and all(p["selected_points"] >= 128 for p in plans),
++        "softening_smoke_has_twelve_rows": len(softening_smoke["rows"]) == 12,
+     }
+     python_checks_ok = all(python_checks.values())
+     native_checks = {
+@@ -138,9 +169,9 @@
+ 
+     ok = python_checks_ok and (native_parity_certified if args.require_native else True)
+     summary = {
+-        "schema": "sst.fermat.audit.v0.2",
+-        "package_version": "0.2.0",
+-        "audit_name": "SST Fermat Python+C++ audit battery with 0_1, 3_1, 4_1, 5_2",
++        "schema": "sst.fermat.audit.v0.3",
++        "package_version": PACKAGE_VERSION,
++        "audit_name": "SST Fermat Python+C++ audit battery with adaptive softening diagnostics",
+         "overall_status": overall_status,
+         "primary_backend": ext_primary["backend"],
+         "analytic_external_x_star": constants.FORMAL_X_STAR,
+@@ -149,6 +180,8 @@
+         "analytic_error": analytic_error,
+         "radial_parity_error": radial_parity_error,
+         "rankine_parity_linf_error": rankine_parity_linf,
++        "rosenhead_horizon_threshold_epsilon_over_rc": constants.ROSENHEAD_HORIZON_THRESHOLD,
++        "rosenhead_critical_threshold_epsilon_over_rc": constants.ROSENHEAD_CRITICAL_THRESHOLD,
+         "knot_ids": list(DEFAULT_KNOT_IDS),
+         "python_checks": python_checks,
+         "python_checks_ok": python_checks_ok,
+@@ -157,7 +190,7 @@
+         "require_native": args.require_native,
+         "ok": ok,
+         "epistemic_guard": (
+-            "The four knot scans certify numerical field parity and local transverse diagnostics only; "
++            "The profile, softening, and four-knot scans certify numerical diagnostics only; "
+             "they do not certify global closed Fermat geodesics or QSM poles."
+         ),
+     }
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_knot_matrix.py work_v030/SST_fermat_pybind_research_v0.3.0/run_knot_matrix.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_knot_matrix.py	2026-07-28 14:32:20.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_knot_matrix.py	2026-07-28 18:14:49.716214331 +0000
+@@ -7,7 +7,7 @@
+ 
+ from fermat_ext.core import write_csv, write_json
+ from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, available_knots
+-from fermat_ext.knot_scan import scan_catalog_matrix
++from fermat_ext.knot_scan import KERNEL_MODELS, scan_catalog_matrix
+ 
+ PRESETS = {
+     "smoke": dict(centerline_points=128, stations=4, angles=8, radial_samples=48),
+@@ -18,11 +18,15 @@
+ 
+ def main() -> int:
+     p = argparse.ArgumentParser(
+-        description="Run the 0_1, 3_1, 4_1, 5_2 ideal-knot Fermat matrix with native/Python parity."
++        description="Run the 0_1, 3_1, 4_1, 5_2 Fermat matrix with optional adaptive centerline resolution."
+     )
+     p.add_argument("--knot-ids", nargs="+", choices=available_knots(), default=list(DEFAULT_KNOT_IDS))
+     p.add_argument("--preset", choices=PRESETS, default="standard")
+     p.add_argument("--centerline-points", type=int)
++    p.add_argument("--adaptive-resolution", action="store_true")
++    p.add_argument("--target-ds-over-epsilon", type=float, default=1.0)
++    p.add_argument("--min-centerline-points", type=int, default=128)
++    p.add_argument("--max-centerline-points", type=int, default=8192)
+     p.add_argument("--stations", type=int)
+     p.add_argument("--angles", type=int)
+     p.add_argument("--radial-samples", type=int)
+@@ -30,7 +34,9 @@
+     p.add_argument("--rho-min", type=float, default=0.002)
+     p.add_argument("--rho-max", type=float, default=0.05)
+     p.add_argument("--epsilon", type=float, default=0.0045)
++    p.add_argument("--kernel-model", choices=KERNEL_MODELS, default="rosenhead_midpoint")
+     p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--require-native", action="store_true")
+     p.add_argument("--out-dir", default="knot_matrix_out")
+     args = p.parse_args()
+ 
+@@ -42,11 +48,19 @@
+ 
+     result = scan_catalog_matrix(
+         args.knot_ids,
+-        **settings,
++        centerline_points=settings["centerline_points"],
++        adaptive_resolution=args.adaptive_resolution,
++        target_ds_over_epsilon=args.target_ds_over_epsilon,
++        min_centerline_points=args.min_centerline_points,
++        max_centerline_points=args.max_centerline_points,
++        stations=settings["stations"],
++        angles=settings["angles"],
++        radial_samples=settings["radial_samples"],
+         scale_over_rc=args.scale_over_rc,
+         rho_min=args.rho_min,
+         rho_max=args.rho_max,
+         epsilon=args.epsilon,
++        kernel_model=args.kernel_model,
+         auto_build=not args.no_auto_build,
+     )
+     out = Path(args.out_dir)
+@@ -61,10 +75,13 @@
+         "knot_ids": result["knot_ids"],
+         "native_available_for_all_knots": result["native_available_for_all_knots"],
+         "native_python_parity_certified_for_all_knots": result["native_python_parity_certified_for_all_knots"],
++        "resolution_target_met_for_all_knots": result["resolution_target_met_for_all_knots"],
+         "rows": result["rows"],
+     }
+     print(json.dumps(summary, indent=2))
+-    return 0 if result["native_python_parity_certified_for_all_knots"] else 2
++    if args.require_native and not result["native_python_parity_certified_for_all_knots"]:
++        return 2
++    return 0
+ 
+ 
+ if __name__ == "__main__":
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_knot_scan.py work_v030/SST_fermat_pybind_research_v0.3.0/run_knot_scan.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_knot_scan.py	2026-07-28 14:32:20.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_knot_scan.py	2026-07-28 18:15:52.432214331 +0000
+@@ -6,18 +6,20 @@
+ 
+ from fermat_ext.core import write_json
+ from fermat_ext.knot_catalog import available_knots
+-from fermat_ext.knot_scan import scan_catalog_knot, scan_torus_knot
++from fermat_ext.knot_scan import KERNEL_MODELS, scan_catalog_knot, scan_torus_knot
++from fermat_ext.resolution import resolution_plan
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(
+-        description="Local transverse Fermat scan around an uploaded ideal knot or generated torus knot."
+-    )
++    p = argparse.ArgumentParser(description="Local transverse Fermat scan around an ideal knot or generated torus knot.")
+     p.add_argument("--knot-id", choices=available_knots(), default="3_1")
+-    p.add_argument("--generated-torus", action="store_true", help="Use legacy generated T(p,q) instead of the uploaded ideal catalog.")
++    p.add_argument("--generated-torus", action="store_true")
+     p.add_argument("--p", type=int, default=2)
+     p.add_argument("--q", type=int, default=3)
+     p.add_argument("--centerline-points", type=int, default=512)
++    p.add_argument("--adaptive-resolution", action="store_true")
++    p.add_argument("--target-ds-over-epsilon", type=float, default=1.0)
++    p.add_argument("--max-centerline-points", type=int, default=8192)
+     p.add_argument("--scale-over-rc", type=float, default=1.0)
+     p.add_argument("--major-radius", type=float, default=1.0)
+     p.add_argument("--minor-radius", type=float, default=0.35)
+@@ -27,30 +29,57 @@
+     p.add_argument("--rho-max", type=float, default=0.05)
+     p.add_argument("--radial-samples", type=int, default=160)
+     p.add_argument("--epsilon", type=float, default=0.0045)
++    p.add_argument("--kernel-model", choices=KERNEL_MODELS, default="rosenhead_midpoint")
+     p.add_argument("--force-python", action="store_true")
+     p.add_argument("--no-auto-build", action="store_true")
+     p.add_argument("--out", default=None)
+     p.add_argument("--summary-only", action="store_true")
+     args = p.parse_args()
+ 
++    n_points = args.centerline_points
++    if args.adaptive_resolution and not args.generated_torus:
++        plan = resolution_plan(
++            args.knot_id,
++            epsilon=args.epsilon,
++            scale_over_rc=args.scale_over_rc,
++            target_ds_over_epsilon=args.target_ds_over_epsilon,
++            max_points=args.max_centerline_points,
++        )
++        n_points = int(plan["selected_points"])
++
+     if args.generated_torus:
+         result = scan_torus_knot(
+-            p=args.p, q=args.q, centerline_points=args.centerline_points,
+-            major_radius=args.major_radius, minor_radius=args.minor_radius,
+-            stations=args.stations, angles=args.angles,
+-            rho_min=args.rho_min, rho_max=args.rho_max,
+-            radial_samples=args.radial_samples, epsilon=args.epsilon,
+-            force_python=args.force_python, auto_build=not args.no_auto_build,
++            p=args.p,
++            q=args.q,
++            centerline_points=n_points,
++            major_radius=args.major_radius,
++            minor_radius=args.minor_radius,
++            stations=args.stations,
++            angles=args.angles,
++            rho_min=args.rho_min,
++            rho_max=args.rho_max,
++            radial_samples=args.radial_samples,
++            epsilon=args.epsilon,
++            kernel_model=args.kernel_model,
++            force_python=args.force_python,
++            auto_build=not args.no_auto_build,
+         )
+         default_name = f"torus_{args.p}_{args.q}_local_fermat_scan.json"
+     else:
+         result = scan_catalog_knot(
+-            knot_id=args.knot_id, centerline_points=args.centerline_points,
++            knot_id=args.knot_id,
++            centerline_points=n_points,
+             scale_over_rc=args.scale_over_rc,
+-            stations=args.stations, angles=args.angles,
+-            rho_min=args.rho_min, rho_max=args.rho_max,
+-            radial_samples=args.radial_samples, epsilon=args.epsilon,
+-            force_python=args.force_python, auto_build=not args.no_auto_build,
++            stations=args.stations,
++            angles=args.angles,
++            rho_min=args.rho_min,
++            rho_max=args.rho_max,
++            radial_samples=args.radial_samples,
++            epsilon=args.epsilon,
++            kernel_model=args.kernel_model,
++            resolution_target=args.target_ds_over_epsilon if args.adaptive_resolution else None,
++            force_python=args.force_python,
++            auto_build=not args.no_auto_build,
+         )
+         default_name = f"{args.knot_id}_local_fermat_scan.json"
+ 
+@@ -58,10 +87,9 @@
+     write_json(out, result)
+     if args.summary_only:
+         print(
+-            f"[LOCAL_SCAN] knot={result['knot']['knot_id']} "
+-            f"backend={result['backend']['backend']} "
+-            f"candidates={result['candidate_count']} "
+-            f"invalid_clock={result['invalid_clock_probe_count']} "
++            f"[LOCAL_SCAN] knot={result['knot']['knot_id']} backend={result['backend']['backend']} "
++            f"N={result['input']['centerline_points']} ds/eps={result['centerline_resolution']['mean_ds_over_epsilon']:.6g} "
++            f"candidates={result['candidate_count']} invalid_clock={result['invalid_clock_probe_count']} "
+             f"probes={result['probe_count']}"
+         )
+     else:
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_profile_matrix.py work_v030/SST_fermat_pybind_research_v0.3.0/run_profile_matrix.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_profile_matrix.py	1970-01-01 00:00:00.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_profile_matrix.py	2026-07-28 18:19:33.528214331 +0000
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++from fermat_ext.core import PACKAGE_VERSION, sweep_profiles, write_csv, write_json
++
++DEFAULT_PROFILES = ["rankine", "rosenhead", "lamb_oseen"]
++DEFAULT_A_VALUES = [0.0010, 0.0015, 0.0018, 0.00185, 0.0019, 0.00195, 0.0020, 0.0025, 0.0035, 0.0045, 0.0060]
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(description="Compare the one-dimensional Rankine, Rosenhead, and Lamb-Oseen Fermat profiles.")
++    p.add_argument("--profiles", nargs="+", choices=DEFAULT_PROFILES, default=DEFAULT_PROFILES)
++    p.add_argument("--a-values", nargs="+", type=float, default=DEFAULT_A_VALUES)
++    p.add_argument("--x-min", type=float, default=1e-5)
++    p.add_argument("--x-max", type=float, default=0.1)
++    p.add_argument("--samples", type=int, default=8000)
++    p.add_argument("--force-python", action="store_true")
++    p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--out-dir", default="profile_matrix_out")
++    args = p.parse_args()
++
++    rows = []
++    for i, profile in enumerate(args.profiles):
++        profile_rows = sweep_profiles(
++            profile,
++            args.a_values,
++            x_min=args.x_min,
++            x_max=args.x_max,
++            samples=args.samples,
++            force_python=args.force_python,
++            auto_build=(not args.no_auto_build) if i == 0 else False,
++        )
++        rows.extend(profile_rows)
++    result = {
++        "schema": "sst.fermat.profile-matrix.v0.3",
++        "package_version": PACKAGE_VERSION,
++        "status": "RESEARCH_TRACK_RADIAL_PROFILE_COMPARISON",
++        "profiles": args.profiles,
++        "a_values_over_rc": args.a_values,
++        "rows": rows,
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++    }
++    out = Path(args.out_dir)
++    out.mkdir(parents=True, exist_ok=True)
++    write_json(out / "profile_matrix.json", result)
++    write_csv(out / "profile_matrix.csv", rows)
++    print(json.dumps({"row_count": len(rows), "profiles": args.profiles}, indent=2))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_resolution_ladder.py work_v030/SST_fermat_pybind_research_v0.3.0/run_resolution_ladder.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_resolution_ladder.py	1970-01-01 00:00:00.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_resolution_ladder.py	2026-07-28 18:14:49.740214331 +0000
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++from fermat_ext.core import write_csv, write_json
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, available_knots
++from fermat_ext.knot_scan import KERNEL_MODELS, field_convergence_ladder
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(description="Fixed-probe centerline-resolution ladder for all four knot classes.")
++    p.add_argument("--knot-ids", nargs="+", choices=available_knots(), default=list(DEFAULT_KNOT_IDS))
++    p.add_argument("--epsilon", type=float, default=0.0045)
++    p.add_argument("--point-counts", nargs="+", type=int, default=[512, 1024, 2048, 4096, 8192])
++    p.add_argument("--scale-over-rc", type=float, default=1.0)
++    p.add_argument("--stations", type=int, default=2)
++    p.add_argument("--angles", type=int, default=8)
++    p.add_argument("--rho-min", type=float, default=0.001)
++    p.add_argument("--rho-max", type=float, default=0.02)
++    p.add_argument("--radial-samples", type=int, default=32)
++    p.add_argument("--kernel-model", choices=KERNEL_MODELS, default="rosenhead_midpoint")
++    p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--require-native", action="store_true")
++    p.add_argument("--out-dir", default="resolution_ladder_out")
++    args = p.parse_args()
++
++    result = field_convergence_ladder(
++        args.knot_ids,
++        epsilon=args.epsilon,
++        point_counts=args.point_counts,
++        scale_over_rc=args.scale_over_rc,
++        stations=args.stations,
++        angles=args.angles,
++        rho_min=args.rho_min,
++        rho_max=args.rho_max,
++        radial_samples=args.radial_samples,
++        kernel_model=args.kernel_model,
++        auto_build=not args.no_auto_build,
++    )
++    out = Path(args.out_dir)
++    out.mkdir(parents=True, exist_ok=True)
++    write_json(out / "resolution_ladder.json", result)
++    write_csv(out / "resolution_ladder.csv", result["rows"])
++    print(json.dumps({
++        "native_python_parity_certified_for_all_references": result["native_python_parity_certified_for_all_references"],
++        "row_count": len(result["rows"]),
++    }, indent=2))
++    if args.require_native and not result["native_python_parity_certified_for_all_references"]:
++        return 2
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_softening_matrix.py work_v030/SST_fermat_pybind_research_v0.3.0/run_softening_matrix.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/run_softening_matrix.py	1970-01-01 00:00:00.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/run_softening_matrix.py	2026-07-28 18:19:33.528214331 +0000
+@@ -0,0 +1,89 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++from fermat_ext.core import write_csv, write_json
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, available_knots
++from fermat_ext.knot_scan import KERNEL_MODELS, scan_softening_matrix
++
++DEFAULT_EPSILONS = [0.0010, 0.0015, 0.0018, 0.00185, 0.0019, 0.00195, 0.0020, 0.0025, 0.0035, 0.0045]
++PRESETS = {
++    "smoke": dict(stations=2, angles=6, radial_samples=48, target=2.0, max_points=4096),
++    "standard": dict(stations=4, angles=12, radial_samples=96, target=1.0, max_points=8192),
++    "high": dict(stations=8, angles=24, radial_samples=192, target=0.5, max_points=16384),
++}
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(
++        description="Adaptive Rosenhead-softening scan over 0_1, 3_1, 4_1, and 5_2."
++    )
++    p.add_argument("--knot-ids", nargs="+", choices=available_knots(), default=list(DEFAULT_KNOT_IDS))
++    p.add_argument("--preset", choices=PRESETS, default="smoke")
++    p.add_argument("--epsilon-values", nargs="+", type=float, default=DEFAULT_EPSILONS)
++    p.add_argument("--target-ds-over-epsilon", type=float)
++    p.add_argument("--min-centerline-points", type=int, default=128)
++    p.add_argument("--max-centerline-points", type=int)
++    p.add_argument("--stations", type=int)
++    p.add_argument("--angles", type=int)
++    p.add_argument("--radial-samples", type=int)
++    p.add_argument("--scale-over-rc", type=float, default=1.0)
++    p.add_argument("--rho-min", type=float, default=0.0005)
++    p.add_argument("--rho-max", type=float, default=0.03)
++    p.add_argument("--kernel-model", choices=KERNEL_MODELS, default="rosenhead_midpoint")
++    p.add_argument("--parity-mode", choices=("full", "spot", "none"), default="spot")
++    p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--require-native", action="store_true")
++    p.add_argument("--out-dir", default="softening_matrix_out")
++    args = p.parse_args()
++
++    preset = PRESETS[args.preset]
++    result = scan_softening_matrix(
++        args.knot_ids,
++        epsilon_values=args.epsilon_values,
++        target_ds_over_epsilon=args.target_ds_over_epsilon or preset["target"],
++        min_centerline_points=args.min_centerline_points,
++        max_centerline_points=args.max_centerline_points or preset["max_points"],
++        scale_over_rc=args.scale_over_rc,
++        stations=args.stations or preset["stations"],
++        angles=args.angles or preset["angles"],
++        rho_min=args.rho_min,
++        rho_max=args.rho_max,
++        radial_samples=args.radial_samples or preset["radial_samples"],
++        kernel_model=args.kernel_model,
++        parity_mode=args.parity_mode,
++        auto_build=not args.no_auto_build,
++    )
++    out = Path(args.out_dir)
++    out.mkdir(parents=True, exist_ok=True)
++    write_json(out / "softening_matrix.json", result)
++    write_csv(out / "softening_matrix.csv", result["rows"])
++    for epsilon_key, knot_results in result["results"].items():
++        eps_dir = out / f"epsilon_{epsilon_key.replace('.', 'p')}"
++        eps_dir.mkdir(exist_ok=True)
++        for knot_id, payload in knot_results.items():
++            write_json(eps_dir / f"{knot_id}_primary.json", payload["primary"])
++            write_json(eps_dir / f"{knot_id}_parity.json", payload["parity"])
++            if payload["python"] is not None:
++                write_json(eps_dir / f"{knot_id}_python.json", payload["python"])
++
++    summary = {
++        "native_available_for_all_rows": result["native_available_for_all_rows"],
++        "native_python_parity_certified_for_checked_rows": result["native_python_parity_certified_for_checked_rows"],
++        "resolution_target_met_for_all_rows": result["resolution_target_met_for_all_rows"],
++        "row_count": len(result["rows"]),
++    }
++    print(json.dumps(summary, indent=2))
++    if args.require_native:
++        if not result["native_available_for_all_rows"]:
++            return 2
++        if args.parity_mode != "none" and not result["native_python_parity_certified_for_checked_rows"]:
++            return 2
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=audit_out' '--exclude=validation_out' '--exclude=patches' '--exclude=BUILD_VALIDATION.txt' '--exclude=__pycache__' work_v020_clean/SST_fermat_pybind_research_v0.2.0/tests/test_v030.py work_v030/SST_fermat_pybind_research_v0.3.0/tests/test_v030.py
+--- work_v020_clean/SST_fermat_pybind_research_v0.2.0/tests/test_v030.py	1970-01-01 00:00:00.000000000 +0000
++++ work_v030/SST_fermat_pybind_research_v0.3.0/tests/test_v030.py	2026-07-28 18:16:47.400214331 +0000
+@@ -0,0 +1,41 @@
++from __future__ import annotations
++
++import math
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from fermat_ext import constants
++from fermat_ext.core import analyze_profile
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS
++from fermat_ext.knot_scan import rosenhead_reference_regime
++from fermat_ext.resolution import resolution_plan
++
++
++def main() -> int:
++    assert constants.ROSENHEAD_HORIZON_THRESHOLD < constants.ROSENHEAD_CRITICAL_THRESHOLD
++    expected = math.sqrt(8.0 / 27.0) * constants.BETA_0
++    assert abs(constants.ROSENHEAD_CRITICAL_THRESHOLD - expected) < 1e-16
++
++    critical = analyze_profile("rosenhead", 0.0019, 1e-5, 0.05, 8000, force_python=True, auto_build=False)
++    blocked = analyze_profile("rosenhead", 0.0020, 1e-5, 0.05, 8000, force_python=True, auto_build=False)
++    assert critical["critical_roots"]
++    assert not critical["horizon_roots"]
++    assert not blocked["critical_roots"]
++
++    assert rosenhead_reference_regime(0.0019)["classification"] == "STRAIGHT_REFERENCE_HORIZON_FREE_CRITICAL_WINDOW"
++    assert rosenhead_reference_regime(0.0045)["classification"] == "STRAIGHT_REFERENCE_NO_FERMAT_CRITICAL_RADIUS"
++
++    selected = []
++    for knot_id in DEFAULT_KNOT_IDS:
++        plan = resolution_plan(knot_id, epsilon=0.0045, target_ds_over_epsilon=1.0, max_points=8192)
++        selected.append(plan["selected_points"])
++        assert plan["selected_points"] >= 128
++    assert selected == sorted(selected)
++    print("v0.3 tests: ok")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

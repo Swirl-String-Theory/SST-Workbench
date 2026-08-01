@@ -1,0 +1,174 @@
+--- vortexring-lab-v7.6.24f.html
++++ vortexring-lab-v7.6.24f1.html
+@@ -3,8 +3,8 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.24f · KnotPlot Tlink benchmark</title>
+-<meta name="vortexlab-version" content="7.6.24f">
++<title>Superfluïde vortexlab v7.6.24f1 · draggable bottom HUD hotfix</title>
++<meta name="vortexlab-version" content="7.6.24f1">
+ <meta name="vortexlab-base" content="7.5.3">
+ <meta name="vortexlab-parent" content="7.6.22">
+ <meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator,external-drift-cfl-bound,accepted-step-time-cap,playback-debt-reset,spec-clock-calibrate-autostart,spec-clock-safe-speed-preset,independent-four-panel-docks,run-header-dropdown,independent-panel-persistence,dual-overlay-offsets,benchmark-verdict-persistence,benchmark-restore-status,proxy-decomposition-snapshots,weighted-rigid-fit,counterfactual-shapley-attribution,direct-mutual-linearity,proxy-decomposition-exports,zero-safe-shapley-gate,cyclic-mutual-normalization,resolution-ladder-128-384,rot-mutual-interaction-export,proxy-decomposition-schema-1.1,normalization-benchmark,iso-full-mutual-reference-scales,circulation-length-scale,rms-arclength-scale,core-circulation-scale,normalization-parity-gate,normalization-resolution-gate,proxy-decomposition-schema-1.2,transfer-law-benchmark,dimensionless-transfer-registry,no-fit-transfer-gate,transfer-parity-null-resolution,transfer-field-ranking,proxy-decomposition-schema-1.3,canonical-vchar-notation,legacy-speed-symbol-removal,proxy-decomposition-schema-1.4,length-identification-benchmark,canonical-resolved-loop-length,calibrated-field-delta-comparison,absolute-vs-calibrated-route,ideal-ropelength-length-candidates,asim-length-negative-control,proxy-decomposition-schema-1.5,compact-spec-clock-sidebar,collapsible-spec-benchmarks,geom-kappa-benchmark,resolution-ladder-128-768,ideal-knot-radius-diameter-audit,proxy-decomposition-schema-1.6,continuum-audit,corrected-r6-six-point-gate,high-resolution-kappa-admissibility,reach-convergence-blocker,cross-knot-holdouts,timestamped-auto-exports,proxy-decomposition-schema-1.7,resizable-clock-sidebar,intrinsic-rigid-rotation-vector,canonical-holdout-embeddings,embedding-pair-audit,applicable-finite-kappa-aggregation,roadmap-panel,proxy-decomposition-schema-1.8,benchmark-gate-stabilization,mixed-tolerance-linearity,intrinsic-cyclic-index-gate,applicable-normalization-match,topology-specific-r22,benchmark-tracer-suppression,selectable-knot-holdouts,split-benchmark-runners,direct-cyclic-permutation,seven-one-holdout,proxy-decomposition-schema-2.0,knotplot-candidate-catalog,tlink-6-9-holdout,multisource-holdout-selector">
+@@ -639,7 +639,7 @@
+     @media(max-width:760px){.spec-knot-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ 
+ 
+-  /* v7.6.24f · KnotPlot catalog + Tlink_6_9 holdout; v7.6.24e1 UI base */
++  /* v7.6.24f1 · draggable/collapsible bottom HUD + spark closed-state fix; v7.6.24f data base */
+   .vl-global-run-strip{
+     position:fixed;top:var(--vl-topbar-h);left:8px;right:8px;z-index:10020;
+     min-height:48px;padding:7px 10px;border:1px solid rgba(85,214,255,.68);border-radius:0 0 9px 9px;
+@@ -686,7 +686,16 @@
+   .vl-bottom-widget>summary::after{content:"inklappen";margin-left:auto;color:var(--dim);font-size:7px;font-weight:500;letter-spacing:0;}
+   .vl-bottom-widget:not([open])>summary::after{content:"uitklappen"}
+   .vl-bottom-widget>.vl-overlay-surface{order:1;margin:0 0 5px!important;width:100%!important;max-width:none!important;overflow:visible!important;}
++  /* Author-level rules must not override the native closed <details> state. */
++  .vl-bottom-widget:not([open])>.vl-overlay-surface{display:none!important;}
+   .vl-bottom-widget:not([open]){flex:0 0 auto!important;width:auto!important;}
++  .vl-bottom-widget>summary{cursor:grab;user-select:none;touch-action:none;}
++  .vl-bottom-widget>summary:active{cursor:grabbing;}
++  .vl-bottom-drag-grip{color:#6EDCFF;font-size:11px;line-height:1;letter-spacing:-.08em;opacity:.9;}
++  .vl-bottom-widget-title{pointer-events:none;}
++  .vl-bottom-widget-undocked{position:fixed!important;right:auto!important;bottom:auto!important;z-index:10010!important;flex:none!important;max-width:min(720px,calc(100vw - 16px));}
++  .vl-bottom-widget-undocked>summary{box-shadow:0 10px 30px rgba(0,0,0,.48);}
++  .vl-bottom-widget-undocked.vl-bottom-widget-dragging{opacity:.94;}
+   .vl-bottom-widget-live{flex:0 1 310px;width:min(310px,27vw)}
+   .vl-bottom-widget-spec{flex:0 1 330px;width:min(330px,31vw)}
+   .vl-bottom-widget-stats{flex:1 1 500px;width:min(530px,44vw)}
+@@ -849,7 +858,7 @@
+       <p><b>v7.6.18 gevalideerde normalisatie-uitkomst.</b> De browserexport gaf opnieuw ENGINE PASS en RESEARCH FAIL. De keuze tussen actuele of bevroren body-\(\Omega\) veranderde de baseline slechts op relatieve schaal \(3.2\times10^{-9}\). Geen van de zeven normalisaties sloot met de formele veldschaal: de minst verre kandidaat was \(\Gamma_{\rm eff}/a_{\rm sim}^2\), maar die bleef bij \(N=128\) nog \(7.68\times10^8\) en bij \(N=384\) circa \(4.52\times10^8\) maal te groot. De niet-singuliere normalisaties veranderden tussen \(N=256\) en \(N=384\) nog ongeveer 9.8%; \(|\Omega_{\rm mutual,0}|\) convergeerde beter maar produceerde door de kleine noemer een orde-éénuitkomst. De mismatch wordt daarom niet opgelost door alleen de denominator te vervangen; de ontbrekende stap is een onafhankelijk afgeleide overdrachtswet van directe mutual-\(\Delta\Omega\) naar \(\Delta\ln R\).</p>
+       <p><b>v7.6.19 transfer-law benchmark.</b> De passieve snapshotpipeline evalueert een vooraf bevroren register van dimensieloze wetten voor \(\Delta\ln R=\mathcal T(\Delta\Omega_{\rm mutual},\Gamma,a,L,d,v_{\!\boldsymbol{\circlearrowleft}}^{\ast},r_c)\). Het register gebruikt uitsluitend coefficient 1 en bevat advectieve tijden \(a/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},L/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},d/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},r_c/v_{\!\boldsymbol{\circlearrowleft}}^{\ast}\), circulatietijden \(a^2/\Gamma,L^2/\Gamma,d^2/\Gamma\), twee geometrisch gedempte varianten en één expliciete Buckingham-monomiaal met alle zeven invoervariabelen. Iedere wet krijgt een dimensie-identiteit, nuldriftlek, A/B-pariteit, N=128–384-convergentie en veldschaalratio. Geen vrije gain wordt berekend of toegepast; een kandidaat moet alle vooraf vastgelegde gates tegelijk halen.</p>
+       <p><b>v7.6.20 canonieke notatie-audit.</b> Canon v0.8.20 reserveert \(v_{\!\boldsymbol{\circlearrowleft}}^{\ast}=\lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert\) voor de gekalibreerde scalaire karakteristieke swirl-snelheid en \(\mathbf u_{\!\boldsymbol{\circlearrowleft}}(\mathbf x,t)\) voor het lokale snelheidsveld. De benchmark gebruikt daarom uitsluitend de machine-key <code>vChar</code>, de interne constante <code>V_CHAR_SST</code> en de zichtbare notatie <code>v↺*</code>. De legacy snelheidsletter en de bijbehorende JSON-/exponent-key zijn volledig verwijderd; er is bewust geen alias of backwards-compatibilityveld toegevoegd. De numerieke kandidaatwetten en toleranties zijn ongewijzigd.</p>
+-      <p><b>v7.6.24f KnotPlot-uitbreiding.</b> Een derde externe catalogusbron <code>knotplot_knots_data.js</code> is beschikbaar in CONFIGURATIE en in de Swirl-Clock-holdoutselector. De eerste kandidaat is <b>Tlink_6_9</b>: een D1/40k KnotPlot-relaxatie van de driecomponenten-toruslink T(6,9), met drie trefoilcomponenten en afgeronde paarsgewijze linking |Lk|=6. Dit is een relaxed candidate, niet een gecertificeerde globale ideal/tight embedding. De holdout gebruikt alle drie componenten per drager, N=128 per component en a_sim=0.1 mm zodat de topology-guard niet al bij t=0 door de dunne D1-linkgeometrie wordt geactiveerd. <b>v7.6.24e1 startup-hotfix.</b> De globale runstrip bindt zijn lokale DOM-nodes nu veilig voordat de UI-shell aan document.body wordt gekoppeld. De overige reporting- en run-UI-wijzigingen van v7.6.24e blijven ongewijzigd. <b>v7.6.24e reporting- en run-UI-hotfix.</b> D14 bewaart nu het visuele snapshotbewijs in ieder analyseresultaat. Een globale status/progressbalk zweeft onder de header. Swirl-Clock-runners staan bovenaan bijeen, ongebruikte test- en resultaatsecties klappen bij start in, resultaatsecties markeren ongeziene wijzigingen, interne resultatentabellen hebben geen verticale scrollbars, en de onderste LIVE/SPEC/STATS/SPARK-HUD is per onderdeel naar de benedenrand inklapbaar.</p>
++      <p><b>v7.6.24f1 HUD-hotfix.</b> LIVE STABILITEIT, SPEC CLOCK, STATS en SPARK zijn afzonderlijke sleepbare vensters. De samenvatting is de drag-handle; dubbelklik zet een venster terug in de onderste dock. Positie en open/dicht-status worden lokaal bewaard. Een expliciete closed-state voorkomt dat <code>#spark</code> door een oudere <code>display:block!important</code>-regel zichtbaar blijft wanneer het venster is ingeklapt. <b>v7.6.24f KnotPlot-uitbreiding.</b> Een derde externe catalogusbron <code>knotplot_knots_data.js</code> is beschikbaar in CONFIGURATIE en in de Swirl-Clock-holdoutselector. De eerste kandidaat is <b>Tlink_6_9</b>: een D1/40k KnotPlot-relaxatie van de driecomponenten-toruslink T(6,9), met drie trefoilcomponenten en afgeronde paarsgewijze linking |Lk|=6. Dit is een relaxed candidate, niet een gecertificeerde globale ideal/tight embedding. De holdout gebruikt alle drie componenten per drager, N=128 per component en a_sim=0.1 mm zodat de topology-guard niet al bij t=0 door de dunne D1-linkgeometrie wordt geactiveerd. <b>v7.6.24e1 startup-hotfix.</b> De globale runstrip bindt zijn lokale DOM-nodes nu veilig voordat de UI-shell aan document.body wordt gekoppeld. De overige reporting- en run-UI-wijzigingen van v7.6.24e blijven ongewijzigd. <b>v7.6.24e reporting- en run-UI-hotfix.</b> D14 bewaart nu het visuele snapshotbewijs in ieder analyseresultaat. Een globale status/progressbalk zweeft onder de header. Swirl-Clock-runners staan bovenaan bijeen, ongebruikte test- en resultaatsecties klappen bij start in, resultaatsecties markeren ongeziene wijzigingen, interne resultatentabellen hebben geen verticale scrollbars, en de onderste LIVE/SPEC/STATS/SPARK-HUD is per onderdeel naar de benedenrand inklapbaar.</p>
+       <p><b>v7.6.24c stabilisatie.</b> D2, D4 en D6 gebruiken zero-safe mixed tolerances en beoordelen uitsluitend toepasselijke observabelen. R22 is opgesplitst in trefoil-resolutie, topology-specifieke ideal-metadata en Fourier-provenance. Automatische benchmarks schakelen passieve tracers, stroomlijnen en potential-flowweergave tijdelijk uit en herstellen de oorspronkelijke visuele toestand bij complete, stop en fout. <b>v7.6.24b hotfix.</b> Cross-knotholdouts behandelen een nulprojectie van de legacy lab-z-faseproxy als geldig maar niet-informatief, zodat intrinsieke Ω-metingen kunnen doorlopen. De passieve Rosetta-probe biedt ℓ_P/2, ℓ_P en 2ℓ_P als expliciete radius/diameter-auditpresets. De dubbele browser-hovertekst “Toelichting” is bij alle info-iconen verwijderd. <b>v7.6.24a hotfix.</b> De proxy-decompositie initialiseert intrinsieke Ω-kinematica vóór digestberekening, logt setup/checkpointfouten expliciet en voert een echte analyse-smoketest uit. <b>v7.6.24 intrinsieke cross-knotbenchmark.</b> R24–R26 aggregeren uitsluitend toepasselijke eindige kandidaten. Cross-knotmetingen gebruiken een deterministisch gecanonicaliseerde embedding en exporteren de volledige rigid-rotationvector, de intrinsieke carrier-as, Ω<sub>∥</sub>, |Ω| en |Ω<sub>⊥</sub>|. Vijf topology/embeddingparen — 3₁, 4₁, 5₁, 5₂ en 6₁ — vergelijken Fourier- en Gilbert-idealbronnen zonder kandidaatfactoren te trainen. De CLOCK-sidebar is horizontaal resizebaar en bewaart zijn breedte.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+@@ -1637,7 +1646,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.24f · basis v7.5.3 · KnotPlot Tlink_6_9 catalogus + holdout · D14 reporting fix · floating run strip · runner hub · collapsible results/HUD · selectable knot suites · split runners · exact cyclic D4 · 7₁ holdout · corrected D2/D6/R22 · benchmark tracers off + restore · decomposition-start hotfix · runtime smoke · expliciete error/abort logging · intrinsieke Ω-vector · canonical embedding pairs · R24–R26 finite filtering · resizebare CLOCK · roadmap · timestamped auto-export · onafhankelijke INFO/FLOW/KERN/CLOCK/DIAG-panelen · RUN-dropdown in header · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · geautomatiseerde 10-run SPEC CLOCK-benchmark · passieve 5-kanaals proxy-decompositie · zero-safe D3 · mutual-genormaliseerde D4 · resolutieladder N=128–768 · expliciete ROT×MUTUAL-export · zeven-schaals normalisatiebenchmark · transfer-law register zonder fitfactor · canonieke L/v↺*-lengte-identificatie · κ_geom no-fit benchmark · Gilbert radius/diameter-audit · absolute/gekalibreerde veldroutes · dimensionale, nul-, pariteits- en convergentiegates · TXT/JSON/CSV-export · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.24f1 · basis v7.5.3 · draggable/persistent bottom HUD + spark closed-state fix · KnotPlot Tlink_6_9 catalogus + holdout · D14 reporting fix · floating run strip · runner hub · collapsible results/HUD · selectable knot suites · split runners · exact cyclic D4 · 7₁ holdout · corrected D2/D6/R22 · benchmark tracers off + restore · decomposition-start hotfix · runtime smoke · expliciete error/abort logging · intrinsieke Ω-vector · canonical embedding pairs · R24–R26 finite filtering · resizebare CLOCK · roadmap · timestamped auto-export · onafhankelijke INFO/FLOW/KERN/CLOCK/DIAG-panelen · RUN-dropdown in header · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · geautomatiseerde 10-run SPEC CLOCK-benchmark · passieve 5-kanaals proxy-decompositie · zero-safe D3 · mutual-genormaliseerde D4 · resolutieladder N=128–768 · expliciete ROT×MUTUAL-export · zeven-schaals normalisatiebenchmark · transfer-law register zonder fitfactor · canonieke L/v↺*-lengte-identificatie · κ_geom no-fit benchmark · Gilbert radius/diameter-audit · absolute/gekalibreerde veldroutes · dimensionale, nul-, pariteits- en convergentiegates · TXT/JSON/CSV-export · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1649,7 +1658,7 @@
+ <script src="./knotplot_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.24f';
++const APP_VERSION='7.6.24f1';
+ const APP_BASE_VERSION='7.5.3';
+ window.__vlBootComplete=false;
+ window.addEventListener('error',function vlEarlyBootstrapError(event){
+@@ -1700,6 +1709,7 @@
+   'v7.6.24: volledige rigid-rotationvector en intrinsieke Ω_parallel/Ω_perp-projecties geëxporteerd',
+   'v7.6.24: canonicalized embeddingparen voor fseries/ideal 3_1, 4_1, 5_1, 5_2 en 6_1',
+   'v7.6.24: ingebouwd roadmapblok voor v7.6.25–v7.7.0',
++  'v7.6.24f1: onderste LIVE/SPEC/STATS/SPARK-widgets sleepbaar, inklapbaar en persistent; expliciete gesloten-state voor #spark',
+   'v7.6.24f: KnotPlot-catalogusbron + Tlink_6_9 driecomponenten-holdout',
+   'v7.6.24e1: startup-safe lokale binding voor globale runstrip in detached UI-shell',
+   'v7.6.24e: D14 bewaart visualPolicyAtCapture en classificeert tracerisolatie correct',
+@@ -3336,7 +3346,7 @@
+   triggerTextDownload(window.ModelLog.exportText(),'text/plain;charset=utf-8',`vortexlab-session-${APP_VERSION.replace(/\./g,'-')}-${context}-${stamp}.txt`);
+ }
+ 
+-// ================= v7.6.24f KnotPlot catalog + v7.6.24e1 startup-safe UI =================
++// ================= v7.6.24f1 draggable bottom HUD + v7.6.24f KnotPlot catalog =================
+ // v7.6.24a: intrinsic Ω before digest + runtime smoke + explicit abort logging
+ function benchmarkVisualSnapshot(){
+   return {tracerCount:P.tracerCount,showTracers:P.showTracers,showStreamlines:P.showStreamlines,showPotentialFlow:P.showPotentialFlow};
+@@ -4168,7 +4178,7 @@
+ })();
+ 
+ 
+-// ================= v7.6.24f / v7.6.24e1 geautomatiseerde SPEC CLOCK benchmark =================
++// ================= v7.6.24f1 / v7.6.24f geautomatiseerde SPEC CLOCK benchmark =================
+ const SpecClockBenchmark=(()=>{
+   const SCHEMA='vortexlab-spec-clock-benchmark/1.0';
+   const scenarios=[
+@@ -7319,9 +7329,57 @@
+   const specs=[['bSpecBenchmarkStart','spec','SPEC CLOCK · 10-run'],['bProxyDecompStart','decomposition','Proxy-decompositie'],['bContinuumStart','continuum','Continuüm N=128–768'],['bHoldoutStart','holdout','Geselecteerde holdouts'],['bGeomKappaStart','full-suite','Volledige confirmatoire suite'],['bSpecBenchmarkStop','spec','Stop SPEC CLOCK'],['bProxyDecompStop','decomposition','Stop diagnose']];
+   for(const [id,mode,label] of specs){const b=vlNode(id);if(!b)continue;b.textContent=(id.includes('Stop')?'■ ':'▶ ')+label;if(id.includes('Stop'))b.classList.add('runner-stop');b.addEventListener('click',()=>vlFocusClockRunner(mode));grid.appendChild(b);}
+ }
++const VL_BOTTOM_WIDGET_STORAGE='vortexlab.bottomWidgets.v1';
++function vlReadBottomWidgetState(){try{return JSON.parse(localStorage.getItem(VL_BOTTOM_WIDGET_STORAGE)||'{}')||{};}catch(_){return {};}}
++function vlWriteBottomWidgetState(all){try{localStorage.setItem(VL_BOTTOM_WIDGET_STORAGE,JSON.stringify(all));}catch(_){}}
++function vlStoreBottomWidget(widget,patch={}){
++  if(!widget?.dataset?.kind)return;const all=vlReadBottomWidgetState(),kind=widget.dataset.kind,current=all[kind]||{};
++  all[kind]={...current,open:widget.open,...patch};vlWriteBottomWidgetState(all);
++}
++function vlClampBottomWidget(widget,left,top){
++  const rect=widget.getBoundingClientRect(),margin=8,topbar=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vl-topbar-h'))||58;
++  const maxLeft=Math.max(margin,window.innerWidth-rect.width-margin),maxTop=Math.max(topbar+margin,window.innerHeight-Math.max(30,rect.height)-margin);
++  return {left:Math.min(maxLeft,Math.max(margin,left)),top:Math.min(maxTop,Math.max(topbar+margin,top))};
++}
++function vlDockBottomWidget(widget,{persist=true}={}){
++  if(!widget)return;widget.classList.remove('vl-bottom-widget-undocked','vl-bottom-widget-dragging');
++  for(const p of ['left','top','width'])widget.style.removeProperty(p);
++  if(persist)vlStoreBottomWidget(widget,{undocked:false,left:null,top:null,width:null});
++}
++function vlApplyBottomWidgetState(widget){
++  const state=vlReadBottomWidgetState()[widget.dataset.kind];if(!state)return;
++  if(typeof state.open==='boolean')widget.open=state.open;
++  if(state.undocked&&Number.isFinite(state.left)&&Number.isFinite(state.top)){
++    widget.classList.add('vl-bottom-widget-undocked');if(Number.isFinite(state.width))widget.style.width=Math.max(150,state.width)+'px';
++    const p=vlClampBottomWidget(widget,state.left,state.top);widget.style.left=p.left+'px';widget.style.top=p.top+'px';
++  }
++}
++function vlEnableBottomWidgetDrag(widget){
++  const summary=widget?.querySelector(':scope > summary');if(!summary||summary.dataset.vlDragBound==='1')return;summary.dataset.vlDragBound='1';
++  let drag=null,suppressClick=false;
++  summary.title='Sleep om dit venster te verplaatsen · klik om in/uit te klappen · dubbelklik om terug te docken';
++  const end=e=>{if(!drag)return;try{summary.releasePointerCapture(e.pointerId);}catch(_){}
++    if(drag.moved){const rect=widget.getBoundingClientRect();vlStoreBottomWidget(widget,{undocked:true,left:rect.left,top:rect.top,width:rect.width});suppressClick=true;}
++    widget.classList.remove('vl-bottom-widget-dragging');drag=null;
++  };
++  summary.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button,a,input,select'))return;const rect=widget.getBoundingClientRect();drag={pointerId:e.pointerId,x:e.clientX,y:e.clientY,left:rect.left,top:rect.top,width:rect.width,moved:false};try{summary.setPointerCapture(e.pointerId);}catch(_){}},true);
++  summary.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.moved&&Math.hypot(dx,dy)<4)return;
++    if(!drag.moved){drag.moved=true;widget.classList.add('vl-bottom-widget-undocked','vl-bottom-widget-dragging');widget.style.width=Math.max(150,drag.width)+'px';}
++    const p=vlClampBottomWidget(widget,drag.left+dx,drag.top+dy);widget.style.left=p.left+'px';widget.style.top=p.top+'px';e.preventDefault();
++  },{passive:false});
++  summary.addEventListener('pointerup',end,true);summary.addEventListener('pointercancel',end,true);
++  summary.addEventListener('click',e=>{if(!suppressClick)return;suppressClick=false;e.preventDefault();e.stopImmediatePropagation();},true);
++  summary.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();vlDockBottomWidget(widget);},true);
++  widget.addEventListener('toggle',()=>vlStoreBottomWidget(widget));
++  vlApplyBottomWidgetState(widget);
++}
++function vlInitBottomWidgetInteractions(container){
++  if(!container)return;for(const widget of container.querySelectorAll(':scope > .vl-bottom-widget'))vlEnableBottomWidgetDrag(widget);
++  let resizeTimer=0;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{for(const widget of container.querySelectorAll('.vl-bottom-widget-undocked')){const r=widget.getBoundingClientRect(),p=vlClampBottomWidget(widget,r.left,r.top);widget.style.left=p.left+'px';widget.style.top=p.top+'px';vlStoreBottomWidget(widget,{undocked:true,left:p.left,top:p.top,width:r.width});}},80);});
++}
+ function vlWrapBottomWidget(node,title,kind,open=true){
+   if(!node)return null;const d=document.createElement('details');d.className='vl-bottom-widget vl-bottom-widget-'+kind;d.open=!!open;d.dataset.kind=kind;
+-  const s=document.createElement('summary');s.textContent=title;d.append(s,node);return d;
++  const s=document.createElement('summary'),grip=document.createElement('span'),label=document.createElement('span');grip.className='vl-bottom-drag-grip';grip.textContent='⋮⋮';grip.setAttribute('aria-hidden','true');label.className='vl-bottom-widget-title';label.textContent=title;s.append(grip,label);d.append(s,node);return d;
+ }
+ function initGlobalRunStrip(shell){
+   if(vlNode('vlGlobalRunStrip')||shell?.querySelector?.('#vlGlobalRunStrip'))return;
+@@ -7431,7 +7489,7 @@
+     document.documentElement.style.setProperty('--vl-overlay-right','calc(var(--vl-rail-w) + '+rightWidth+' + 12px)');
+   };
+   window.vlUpdateOverlayOffsets();
+-  shell.append(left.dock,right.dock);document.body.appendChild(shell);
++  shell.append(left.dock,right.dock);document.body.appendChild(shell);vlInitBottomWidgetInteractions(bottomOverlays);
+   document.addEventListener('keydown',e=>{if(e.key==='Escape'){left.closeAll();right.closeAll();}});
+ 
+   // Oude structuur en alle oorspronkelijke teksten blijven in de DOM als bron/provenance.
+@@ -8309,9 +8367,12 @@
+       const proxyMismatch=specClockProxyAssessment(1.01,0.999999,1.000001);
+       add('T0r ongemapte proxy-afwijking is geen fysische falsificatie',proxyMismatch.state==='unmapped-mismatch'&&proxyMismatch.rawOverlap===false&&proxyMismatch.falsified===false,JSON.stringify(proxyMismatch));
+       {const strip=document.getElementById('vlGlobalRunStrip'),hub=document.getElementById('vlClockRunnerHub'),resultDetails=document.querySelectorAll('details.vl-result-accordion').length,bottomWidgets=document.querySelectorAll('.vl-bottom-widget').length;
+-       add('T0e24 runstrip, runner-hub en inklapbare HUD aanwezig',!!strip&&!!hub&&resultDetails>=2&&bottomWidgets>=3,'strip='+!!strip+' hub='+!!hub+' results='+resultDetails+' bottom='+bottomWidgets);}
++       add('T0e24 runstrip, runner-hub en inklapbare HUD aanwezig',!!strip&&!!hub&&resultDetails>=2&&bottomWidgets>=4,'strip='+!!strip+' hub='+!!hub+' results='+resultDetails+' bottom='+bottomWidgets);}
+       {const strip=document.getElementById('vlGlobalRunStrip'),close=document.getElementById('vlGlobalRunClose');if(strip){strip.classList.add('active');document.body.classList.add('vl-run-strip-active');}close?.click();
+        add('T0e24b runstrip-close is startup-safe gebonden',!!strip&&!!close&&!strip.classList.contains('active')&&!document.body.classList.contains('vl-run-strip-active'),'strip='+!!strip+' close='+!!close);}
++      {const sparkWidget=document.querySelector('.vl-bottom-widget-spark'),spark=document.getElementById('spark'),dragBound=[...document.querySelectorAll('.vl-bottom-widget>summary')].every(x=>x.dataset.vlDragBound==='1');
++       const wasOpen=sparkWidget?.open;if(sparkWidget)sparkWidget.open=false;const closedHidden=!!sparkWidget&&!!spark&&getComputedStyle(spark).display==='none';if(sparkWidget)sparkWidget.open=!!wasOpen;
++       add('T0e24c SPARK en alle onderste HUD-widgets drag/collapse-ready',dragBound&&closedHidden,'dragBound='+dragBound+' sparkClosedHidden='+closedHidden);}
+       {const sample={parameters:{tracerCount:0,showTracers:false,showStreamlines:false,showPotentialFlow:false}},proof={tracerCount:0,showTracers:false,showStreamlines:false,showPotentialFlow:false};
+        add('T0e25 D14 bewijsveld semantiek',Object.keys(proof).every(k=>sample.parameters[k]===proof[k]),JSON.stringify(proof));}
+       {const overlay=document.getElementById('specClockOverlay'),body=document.getElementById('specClockOverlayBody'),oldEnabled=P.specClockEnabled;

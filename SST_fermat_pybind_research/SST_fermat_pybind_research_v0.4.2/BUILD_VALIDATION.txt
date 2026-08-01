@@ -1,0 +1,65 @@
+SST Fermat pybind research v0.4.2 — build and audit validation
+================================================================
+
+Validation environment
+----------------------
+- Linux x86_64
+- Python 3.13
+- NumPy available
+- pybind11 Python package unavailable in the artifact environment
+
+Completed Python validations
+----------------------------
+[PASS] tests/test_catalog.py
+       - exact catalog set: 0_1, 3_1, 4_1, 5_2
+       - uniform-arclength reconstruction
+       - source-length relative error below 2e-4
+
+[PASS] tests/test_v030.py
+       - legacy radial profile and Rosenhead-threshold regression
+       - adaptive resolution-plan regression
+
+[PASS] tests/test_v042.py
+       - analytic Python Jacobian versus centered finite differences
+       - resolved 0_1 local minima at epsilon/r_c = 0.0019
+       - invalid-clock probes and CLOCK_BOUNDARY_BRACKET handling at epsilon/r_c = 0.0010
+       - no complex-number clock-domain failure
+       - approximate circle-reach diagnostic within 1 percent
+
+[PASS] run_all_checks.py --no-auto-build
+       overall_status = PYTHON_FALLBACK_AND_CLOCK_DOMAIN_HOTFIX_VALIDATED
+       analytic external-root error = 2.258523229548004e-14
+       Jacobian finite-difference L_inf error = 2.8772063842552598e-08
+       all Python checks = true
+
+Completed standalone C++ validations
+------------------------------------
+[PASS] tests/test_kernel.cpp compiled with g++ -O2 -std=c++17
+       legacy radial kernel regression
+
+[PASS] tests/test_kernel_v042.cpp compiled with g++ -O2 -std=c++17
+       exact C++ field/Jacobian kernel versus centered field finite differences
+
+Native pybind11 status
+----------------------
+The artifact environment cannot import pybind11, so the Python extension was
+not built here. The standalone C++17 kernel compiled and passed. The full
+Python/C++ pybind parity gate must be rerun on the target Windows machine:
+
+    python -m fermat_ext.build_ext_if_needed --force --strict
+    python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+
+Expected target status:
+
+    NATIVE_CPP_PYTHON_FIELD_AND_JACOBIAN_PARITY_CERTIFIED
+
+v0.4.2 hotfix status
+--------------------
+The bifurcation path was smoke-tested across epsilon/r_c = 0.00180 and 0.00185.
+The run completed without the v0.4.1 TypeError. Invalid-clock samples are gated
+before fractional powers and valid/invalid transitions are recorded separately.
+
+Epistemic boundary
+------------------
+No validation in this package certifies a globally closed Fermat geodesic or a
+QSM pole. Outputs retain both guards as false.

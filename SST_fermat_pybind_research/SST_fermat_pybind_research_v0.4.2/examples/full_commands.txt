@@ -1,0 +1,12 @@
+python -m pip install -r requirements.txt
+python -m fermat_ext.build_ext_if_needed --force --strict
+
+python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+
+python run_profile_matrix.py --profiles rankine rosenhead lamb_oseen --no-auto-build --out-dir profile_matrix
+
+python run_knot_matrix.py --preset smoke --adaptive-resolution --target-ds-over-epsilon 1.0 --max-centerline-points 8192 --epsilon 0.0045 --no-auto-build --require-native --out-dir knot_matrix_adaptive
+
+python run_softening_matrix.py --preset standard --parity-mode spot --no-auto-build --require-native --out-dir softening_standard
+
+python run_resolution_ladder.py --epsilon 0.0019 --point-counts 2048 4096 8192 16384 --no-auto-build --require-native --out-dir resolution_0019

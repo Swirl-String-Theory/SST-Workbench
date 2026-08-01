@@ -1,0 +1,60 @@
+SST Fermat pybind research v0.2.0 — build and audit validation
+================================================================
+Validation environment: Linux x86_64, Python fallback; C++17 kernel compiled with g++.
+Date: 2026-07-28
+
+Validated source scope
+----------------------
+- No SSTcore import or SSTcore source modification.
+- Bundled exact Fourier coefficient subsets for:
+  0_1 -> source Id 0:1:1
+  3_1 -> source Id 3:1:1
+  4_1 -> source Id 4:1:1
+  5_2 -> source Id 5:1:2
+- Uniform-arclength resampling and source-length checks pass.
+- All four local knot scans complete in the Python fallback.
+- Global closed orbit and QSM guards remain false.
+
+Commands executed
+-----------------
+python -m compileall -q fermat_ext *.py
+python tests/test_catalog.py
+g++ -std=c++17 -O2 tests/test_kernel.cpp -o build/test_kernel
+./build/test_kernel
+python run_all_checks.py --out-dir audit_out --no-auto-build
+python run_profile.py --profile external --summary-only --no-auto-build
+
+Observed results
+----------------
+catalog tests: ok
+PASS residual=-1.11022e-16 K_hat=-75115.5
+[RADIAL_FERMAT_CRITICAL_CANDIDATE] backend=python roots=1 horizons=1
+
+Audit summary
+-------------
+overall_status = PYTHON_FALLBACK_VALIDATED_NATIVE_NOT_CERTIFIED
+python_checks_ok = true
+catalog_contains_exact_requested_knots = true
+catalog_source_lengths_reproduced_lt_2e-4 = true
+all_four_knot_scans_completed = true
+all_four_knot_guards_preserved = true
+
+Source-length relative errors at 1024 points
+--------------------------------------------
+0_1: 1.52e-6
+3_1: 3.77e-5
+4_1: 5.82e-5
+5_2: 8.17e-5
+
+Native target validation still required
+---------------------------------------
+The pybind11 module cannot be compiled in this container because pybind11 is not installed.
+The C++ kernel itself compiles and passes. On the target Windows environment, run:
+
+python -m fermat_ext.build_ext_if_needed --force --strict
+python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+python run_knot_matrix.py --preset smoke --no-auto-build --out-dir knot_matrix_smoke
+
+Required target result:
+native_parity_certified = true
+native_python_parity_certified_for_all_knots = true

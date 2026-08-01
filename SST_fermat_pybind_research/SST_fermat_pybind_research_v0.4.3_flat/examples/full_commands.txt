@@ -1,0 +1,16 @@
+REM Recommended: run the complete v0.4.3 sequence and ZIP all outputs.
+START_V043_FULL_CAMPAIGN.bat
+
+REM Equivalent explicit Python command:
+python run_full_campaign.py --preset full --require-native --resume --out-root v0.4.3_campaign_output --archive SST_fermat_pybind_research_v0.4.3_results.zip
+
+REM Individual corrected commands:
+python -m fermat_ext.build_ext_if_needed --force --strict
+python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 8192 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir candidate_atlas_0019
+python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 16384 --stations 32 --angles 32 --bracket-samples 128 --no-auto-build --require-native --out-dir candidate_atlas_0019_high
+python run_candidate_convergence.py --epsilon 0.0019 --point-counts 4096 8192 16384 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir convergence_0019
+python run_candidate_convergence.py --knots 3_1 4_1 5_2 --epsilon 0.0019 --point-counts 8192 16384 32768 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir convergence_0019_high
+python run_bifurcation_atlas.py --epsilon-start 0.00180 --epsilon-stop 0.00210 --epsilon-step 0.000025 --resolution-mode adaptive --target-ds-over-epsilon 0.5 --min-centerline-points 32768 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir bifurcation_atlas
+python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --resolution-mode adaptive --target-ds-over-epsilon 1.0 --min-centerline-points 4096 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir scale_sweep_0019
+python run_symmetry_audit.py --epsilon 0.0019 --centerline-points 4096 --no-auto-build --require-native --out-dir symmetry_audit

@@ -1,0 +1,1124 @@
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/.gitignore /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/.gitignore
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/.gitignore	2026-07-29 00:54:52.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/.gitignore	2026-07-31 22:44:16.541833444 +0000
+@@ -19,7 +19,7 @@
+ bifurcation_*/
+ scale_sweep_*/
+ symmetry_audit*/
+-v0.4.1_campaign_output/
+-v0.4.1_smoke_output/
+-SST_fermat_pybind_research_v0.4.1_results.zip*
+-SST_fermat_pybind_research_v0.4.1_smoke_results.zip*
++v0.4.3_campaign_output/
++v0.4.3_smoke_output/
++SST_fermat_pybind_research_v0.4.3_results.zip*
++SST_fermat_pybind_research_v0.4.3_smoke_results.zip*
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/CHANGELOG.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/CHANGELOG.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/CHANGELOG.md	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/CHANGELOG.md	2026-07-31 22:40:00.129842082 +0000
+@@ -1,17 +1,28 @@
+ # Changelog
+ 
+-## v0.4.2 — Campaign Automation and Certification Corrections
++## v0.4.3 — Threshold Censoring and Clock-Domain Metadata
+ 
+-- Corrected `candidate_surface_fraction` so it is always normalized by all sampled rays and therefore remains in \([0,1]\).
+-- Added a separate fraction conditional on fully clock-valid rays.
+-- Renamed the pre-convergence root label to `RESOLVED_LOCAL_MINIMUM`.
+-- Added the missing high-resolution \(3_1\) convergence run at 8192, 16384, and 32768 centerline points.
+-- Added adaptive, per-knot resolution planning to the bifurcation atlas with a conservative default minimum of 32768 points.
+-- Added length- and scale-aware resolution planning to the knot-scale sweep.
+-- Added `run_full_campaign.py` with sequential execution, logging, resume, failure manifests, and automatic result ZIP creation.
+-- Added `START_V042_FULL_CAMPAIGN.bat` and a smaller smoke-check BAT.
+-- Added campaign environment, command, manifest, summary, log, success-marker, ZIP, and SHA-256 outputs.
+-- Updated schemas and package version to 0.4.2 while preserving all global-orbit and QSM guards.
++- Preserved the v0.4.2 clock-safe root-refinement hotfix.
++- Added explicit clock-boundary brackets and connected real-clock component counts per sampled ray.
++- Corrected `valid_clock_ray_count` to mean rays with at least one valid probe; retained a separate `fully_clock_valid_ray_count`.
++- Added `candidate_surface_fraction_valid_clock_rays`, `candidate_surface_fraction_all_rays`, and the fully-valid conditional fraction.
++- Replaced ambiguous sampled onset/loss labels with first/last-present values, censoring flags, and present/absent brackets.
++- Added regression checks for the split-clock-domain control case at `epsilon/r_c=0.0010`.
++- Preserved all global closed-orbit and QSM guards.
++
++## v0.4.2 — Clock-Domain Root-Refinement Hotfix
++
++- Rejected brackets whose bisection midpoint leaves the real clock domain.
++- Evaluated endpoint derivatives using endpoint `S` values instead of the root-point denominator.
++- Prevented complex values from `(1-beta^2)^(3/2)` in clock-invalid regions.
++- Kept clock-boundary brackets separate from stationary roots.
++
++## v0.4.1 — Campaign Automation and Certification Corrections
++
++- Corrected candidate-fraction normalization and pre-convergence root labels.
++- Added the missing high-resolution `3_1` convergence ladder.
++- Added adaptive bifurcation and scale-sweep resolution planning.
++- Added resumable campaign execution, logging, ZIP packaging, and SHA-256 output.
+ 
+ ## v0.4.0 — Candidate Certification and Bifurcation Atlas
+ 
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/README.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/README.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/README.md	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/README.md	2026-07-31 22:39:17.785843508 +0000
+@@ -1,4 +1,4 @@
+-# SST Fermat pybind research v0.4.2
++# SST Fermat pybind research v0.4.3
+ 
+ Standalone Python + C++17/pybind11 research harness. It does **not** import, modify, or patch SSTcore.
+ 
+@@ -10,61 +10,69 @@
+ 
+ The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it resolves numerical stationary structures and separately certifies convergence-qualified branches; it does not establish a physical electron model or a global photon sphere.
+ 
+-## v0.4.2 patch scope
++## v0.4.3 patch scope
+ 
+-v0.4.0 introduced the direct stationary-root solver. v0.4.2 keeps that mathematical model and corrects the release pipeline around it. For context, v0.3 counted sampled local minima of
++v0.4.3 is a **reporting and audit-semantics release** built on the clock-safe v0.4.2 root solver. It does not change the Rosenhead field operator, the analytic Jacobian, or the stationary equation
+ 
+ \[
+-R_F(\rho;s,\theta)
+-=
+-\frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}}.
+-\]
+-
+-v0.4.x solves the stationary equation directly:
+-
+-\[
+-\boxed{
+ G(\rho;s,\theta)
+ =
+ 1-\lVert\boldsymbol\beta\rVert^2
+ +
+ \rho\,\boldsymbol\beta\cdot\partial_\rho\boldsymbol\beta
+ =0.
+-}
+ \]
+ 
+-Since
++The release closes two ambiguities found in the successful v0.4.2 campaign.
+ 
+-\[
+-\frac{\partial R_F}{\partial\rho}
+-=
+-\frac{G}{\left(1-\lVert\boldsymbol\beta\rVert^2\right)^{3/2}},
+-\]
++## New in v0.4.3
+ 
+-a sign change from \(G<0\) to \(G>0\) identifies a local radial minimum.
++1. **Clock-domain components are explicit.** Each sampled normal ray now reports:
+ 
+-## New in v0.4.2
++   ```text
++   valid_clock_ray_count
++   fully_clock_valid_ray_count
++   clock_boundary_bracket_count
++   real_clock_component_count_total
++   rays_with_disconnected_clock_domain
++   clock_domain_splits
++   ```
+ 
+-1. Corrected `candidate_surface_fraction`; it is now bounded by construction:
++   A ray with an inner and outer real-clock interval is no longer summarized as unsplit. Clock-boundary brackets remain excluded from the stationary-root list.
++
++2. **Candidate fractions have unambiguous denominators.** The output distinguishes
+ 
+    \[
+-   P_{\mathrm{all}}=\frac{N_{\mathrm{rays\ with\ minimum}}}{N_{\mathrm{all\ rays}}}\in[0,1].
++   P_{\rm valid},\qquad P_{\rm all},\qquad P_{\rm fully\ valid},
+    \]
+ 
+-   A separate conditional fraction is reported for fully clock-valid rays.
+-2. Renamed the pre-convergence root label from the overstrong
+-   `CERTIFIED_LOCAL_MINIMUM_NUMERICAL` to `RESOLVED_LOCAL_MINIMUM`.
+-3. Added the missing high-resolution convergence gate for \(3_1\):
++   through `candidate_surface_fraction_valid_clock_rays`, `candidate_surface_fraction_all_rays`, and `candidate_surface_fraction_fully_clock_valid_rays`. In particular,
+ 
+    \[
+-   N=8192,\ 16384,\ 32768.
++   0\le P_{\rm all}\le1.
+    \]
+ 
+-4. Made the bifurcation atlas convergence-aware. Its default adaptive mode uses at least
+-   \(32768\) centerline points near the branch-loss window and records the selected point count per knot.
+-5. Made the scale sweep length- and scale-aware so that increasing `scale_over_rc` also increases the centerline resolution.
+-6. Added `run_full_campaign.py` and the double-clickable `START_V042_FULL_CAMPAIGN.bat`. The runner executes the complete campaign sequentially, logs every command, supports resume, and creates one combined result ZIP.
+-7. Added a campaign manifest, environment record, per-step logs, success markers, final summary, and SHA-256 sidecar.
++3. **Bifurcation thresholds are censored or bracketed, never guessed.** The misleading `epsilon_loss_sampled` wording is replaced by:
++
++   ```text
++   epsilon_first_present_sample
++   epsilon_last_present_sample
++   onset_left_censored
++   loss_right_censored
++   epsilon_onset_bracket_over_rc
++   epsilon_loss_bracket_over_rc
++   ```
++
++   A sampled present/absent transition is labelled `BRACKETED_SAMPLED_THRESHOLD_NOT_CONTINUATION_CERTIFIED`.
++
++4. **Regression coverage was extended.** The audit now verifies the split clock domain at \(\epsilon/r_c=0.0010\), six clock-boundary brackets for the three-ray control scan, and the distinction between any-valid and fully-valid rays.
++
++5. The v0.4.2 scientific guards are unchanged:
++
++   ```json
++   "global_closed_orbit_certified": false,
++   "qsm_certified": false
++   ```
+ 
+ ## Core v0.4 capabilities retained
+ 
+@@ -132,7 +140,7 @@
+ "qsm_certified": false
+ ```
+ 
+-The reach value in v0.4.2 is explicitly an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
++The reach value in v0.4.3 is explicitly an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
+ 
+ ## Build the native module
+ 
+@@ -151,7 +159,7 @@
+ On Windows, double-click:
+ 
+ ```text
+-START_V042_FULL_CAMPAIGN.bat
++START_V043_FULL_CAMPAIGN.bat
+ ```
+ 
+ Equivalent command:
+@@ -161,8 +169,8 @@
+   --preset full ^
+   --require-native ^
+   --resume ^
+-  --out-root v0.4.2_campaign_output ^
+-  --archive SST_fermat_pybind_research_v0.4.2_results.zip
++  --out-root v0.4.3_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.4.3_results.zip
+ ```
+ 
+ The full sequence is:
+@@ -180,7 +188,7 @@
+ combined ZIP + SHA-256
+ ```
+ 
+-The BAT file uses `--resume`. After an interruption, run the same BAT again; completed steps with valid success markers are skipped. The full bifurcation and scale runs are intentionally expensive. Use `START_V042_SMOKE_CHECK.bat` first to verify the local compiler and pybind module.
++The BAT file uses `--resume`. After an interruption, run the same BAT again; completed steps with valid success markers are skipped. The full bifurcation and scale runs are intentionally expensive. Use `START_V043_SMOKE_CHECK.bat` first to verify the local compiler and pybind module.
+ 
+ ## 1. Full audit
+ 
+@@ -288,7 +296,7 @@
+ 
+ ## 4. Bifurcation atlas
+ 
+-The primary v0.4.2 scan window is
++The primary v0.4.3 scan window is
+ 
+ \[
+ 0.00180\leq\epsilon/r_c\leq0.00210.
+@@ -372,11 +380,11 @@
+ 
+ The native Jacobian kernel performs substantially more arithmetic than the field-only kernel. Candidate discovery batches all radial probes, and bisection refines all active brackets together. Nevertheless, high-resolution runs with \(N=32768\), many stations, and many angular sectors can require significant RAM and runtime.
+ 
+-Recommended sequence: use `START_V042_FULL_CAMPAIGN.bat`. It encodes the audited order, writes per-step logs, and resumes after interruption.
++Recommended sequence: use `START_V043_FULL_CAMPAIGN.bat`. It encodes the audited order, writes per-step logs, and resumes after interruption.
+ 
+-## What v0.4.2 can and cannot conclude
++## What v0.4.3 can and cannot conclude
+ 
+-v0.4.2 can distinguish among:
++v0.4.3 can distinguish among:
+ 
+ ```text
+ candidate disappears under refinement
+@@ -384,4 +392,4 @@
+ candidate remains knot-geometry dependent after convergence
+ ```
+ 
+-v0.4.2 does not yet integrate or shoot a complete closed Fermat orbit. That belongs to a later geodesic/monodromy release after the local branches survive certification.
++v0.4.3 does not yet integrate or shoot a complete closed Fermat orbit. That belongs to a later geodesic/monodromy release after the local branches survive certification.
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/RELEASE_NOTES.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/RELEASE_NOTES.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/RELEASE_NOTES.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/RELEASE_NOTES.md	2026-07-31 22:45:54.217830154 +0000
+@@ -0,0 +1,15 @@
++# Release notes — v0.4.3
++
++v0.4.3 closes the reporting ambiguities found after the successful v0.4.2 native campaign. The Biot--Savart operator, analytic Jacobian, Rosenhead regularization, stationary equation, and convergence thresholds are unchanged.
++
++## Corrections
++
++- Explicit clock-boundary brackets and connected real-clock components per sampled ray.
++- Separate counts for any-valid and fully-valid rays.
++- Separate candidate fractions normalized by valid rays, all rays, and fully-valid rays.
++- Censored or bracketed bifurcation thresholds instead of the ambiguous `epsilon_loss_sampled` field.
++- Regression coverage for the split-domain control scan at `epsilon/r_c=0.0010`.
++
++## Status
++
++This release still resolves local stationary Fermat candidates only. It does not integrate a complete closed ray and cannot certify a QSM pole.
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V042_FULL_CAMPAIGN.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V042_FULL_CAMPAIGN.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V042_FULL_CAMPAIGN.bat	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V042_FULL_CAMPAIGN.bat	1970-01-01 00:00:00.000000000 +0000
+@@ -1,37 +0,0 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-
+-echo ============================================================
+-echo SST Fermat pybind research v0.4.2 - FULL CAMPAIGN
+-echo Sequential native audit, atlases, convergence, scale, symmetry
+-echo Final archive: SST_fermat_pybind_research_v0.4.2_results.zip
+-echo ============================================================
+-echo.
+-
+-if defined VIRTUAL_ENV (
+-    set "PYTHON_EXE=python"
+-) else if exist ".venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=.venv\Scripts\python.exe"
+-) else (
+-    set "PYTHON_EXE=python"
+-)
+-
+-"%PYTHON_EXE%" run_full_campaign.py ^
+-  --preset full ^
+-  --require-native ^
+-  --resume ^
+-  --out-root v0.4.2_campaign_output ^
+-  --archive SST_fermat_pybind_research_v0.4.2_results.zip %*
+-
+-set "RUN_RC=%ERRORLEVEL%"
+-echo.
+-if "%RUN_RC%"=="0" (
+-    echo FULL CAMPAIGN COMPLETED SUCCESSFULLY.
+-) else (
+-    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.4.2_campaign_output\logs.
+-    echo Run this same BAT again to resume completed steps.
+-)
+-echo.
+-pause
+-exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V042_SMOKE_CHECK.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V042_SMOKE_CHECK.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V042_SMOKE_CHECK.bat	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V042_SMOKE_CHECK.bat	1970-01-01 00:00:00.000000000 +0000
+@@ -1,14 +0,0 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-if defined VIRTUAL_ENV (
+-    set "PYTHON_EXE=python"
+-) else if exist ".venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=.venv\Scripts\python.exe"
+-) else (
+-    set "PYTHON_EXE=python"
+-)
+-"%PYTHON_EXE%" run_full_campaign.py --preset smoke --require-native --overwrite --out-root v0.4.2_smoke_output --archive SST_fermat_pybind_research_v0.4.2_smoke_results.zip %*
+-set "RUN_RC=%ERRORLEVEL%"
+-pause
+-exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V043_FULL_CAMPAIGN.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_FULL_CAMPAIGN.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V043_FULL_CAMPAIGN.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_FULL_CAMPAIGN.bat	2026-07-31 22:24:02.581874338 +0000
+@@ -0,0 +1,37 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++
++echo ============================================================
++echo SST Fermat pybind research v0.4.3 - FULL CAMPAIGN
++echo Sequential native audit, atlases, convergence, scale, symmetry
++echo Final archive: SST_fermat_pybind_research_v0.4.3_results.zip
++echo ============================================================
++echo.
++
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++
++"%PYTHON_EXE%" run_full_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.4.3_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.4.3_results.zip %*
++
++set "RUN_RC=%ERRORLEVEL%"
++echo.
++if "%RUN_RC%"=="0" (
++    echo FULL CAMPAIGN COMPLETED SUCCESSFULLY.
++) else (
++    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.4.3_campaign_output\logs.
++    echo Run this same BAT again to resume completed steps.
++)
++echo.
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V043_SMOKE_CHECK.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_SMOKE_CHECK.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/START_V043_SMOKE_CHECK.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_SMOKE_CHECK.bat	2026-07-31 22:24:02.581874338 +0000
+@@ -0,0 +1,14 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++"%PYTHON_EXE%" run_full_campaign.py --preset smoke --require-native --overwrite --out-root v0.4.3_smoke_output --archive SST_fermat_pybind_research_v0.4.3_smoke_results.zip %*
++set "RUN_RC=%ERRORLEVEL%"
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/examples/full_commands.txt /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/full_commands.txt
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/examples/full_commands.txt	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/full_commands.txt	2026-07-31 22:24:02.581874338 +0000
+@@ -1,8 +1,8 @@
+-REM Recommended: run the complete v0.4.2 sequence and ZIP all outputs.
+-START_V042_FULL_CAMPAIGN.bat
++REM Recommended: run the complete v0.4.3 sequence and ZIP all outputs.
++START_V043_FULL_CAMPAIGN.bat
+ 
+ REM Equivalent explicit Python command:
+-python run_full_campaign.py --preset full --require-native --resume --out-root v0.4.2_campaign_output --archive SST_fermat_pybind_research_v0.4.2_results.zip
++python run_full_campaign.py --preset full --require-native --resume --out-root v0.4.3_campaign_output --archive SST_fermat_pybind_research_v0.4.3_results.zip
+ 
+ REM Individual corrected commands:
+ python -m fermat_ext.build_ext_if_needed --force --strict
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/examples/minimal_commands.txt /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/minimal_commands.txt
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/examples/minimal_commands.txt	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/minimal_commands.txt	2026-07-31 22:24:02.581874338 +0000
+@@ -1,5 +1,5 @@
+ REM Fast native installation check:
+-START_V042_SMOKE_CHECK.bat
++START_V043_SMOKE_CHECK.bat
+ 
+ REM Full resumable campaign:
+-START_V042_FULL_CAMPAIGN.bat
++START_V043_FULL_CAMPAIGN.bat
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/__init__.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/__init__.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/__init__.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/__init__.py	2026-07-31 22:24:02.581874338 +0000
+@@ -40,4 +40,4 @@
+     "estimate_reach_diagnostic",
+     "symmetry_field_audit",
+ ]
+-__version__ = "0.4.2"
++__version__ = "0.4.3"
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/_config.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/_config.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/_config.py	2026-07-31 22:42:19.241837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/_config.py	2026-07-31 22:24:02.585874338 +0000
+@@ -7,4 +7,4 @@
+ CPP_DIR_REL = Path("cpp")
+ STAMP_BASENAME = "fermat_native.stamp.json"
+ LOG_PREFIX = "[sst-fermat]"
+-RESULT_SCHEMA = "sst.fermat.audit.v0.4.2"
++RESULT_SCHEMA = "sst.fermat.audit.v0.4.3"
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/build_ext_if_needed.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/build_ext_if_needed.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/build_ext_if_needed.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/build_ext_if_needed.py	2026-07-31 22:24:02.581874338 +0000
+@@ -67,7 +67,7 @@
+         "        for ext in self.extensions:\n"
+         "            ext.extra_compile_args = ['/O2','/std:c++17'] if self.compiler.compiler_type == 'msvc' else ['-O3','-std=c++17']\n"
+         "        super().build_extensions()\n"
+-        f"setup(name='{PACKAGE_NAME}_ext', version='0.4.2', "
++        f"setup(name='{PACKAGE_NAME}_ext', version='0.4.3', "
+         f"packages=['{PACKAGE_NAME}'], package_dir={{'{PACKAGE_NAME}': '{PACKAGE_NAME}'}}, py_modules=[], "
+         f"ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
+         "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'], language='c++')], "
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/certification.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/certification.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/certification.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/certification.py	2026-07-31 22:24:02.585874338 +0000
+@@ -408,6 +408,98 @@
+     }
+ 
+ 
++
++def _clock_domain_diagnostics(
++    valid_grid: np.ndarray,
++    rhos: np.ndarray,
++    rays: Sequence[Ray],
++) -> dict[str, Any]:
++    """Describe connected real-clock components on every sampled normal ray.
++
++    A transition in the Boolean clock-valid mask brackets ``S=0`` but is never
++    treated as a stationary Fermat root.  Components are sampled-domain
++    diagnostics: their endpoints are probe brackets, not refined horizon roots.
++    """
++    valid_grid = np.asarray(valid_grid, dtype=bool)
++    rhos = np.asarray(rhos, dtype=float)
++    if valid_grid.shape != (len(rays), len(rhos)):
++        raise ValueError("valid_grid shape does not match rays and rhos")
++
++    boundary_brackets: list[dict[str, Any]] = []
++    split_rays: list[dict[str, Any]] = []
++    component_count_by_ray: list[int] = []
++    rays_with_any_valid: set[int] = set()
++    fully_valid: set[int] = set()
++    rays_with_boundary: set[int] = set()
++    total_components = 0
++
++    for ri, ray in enumerate(rays):
++        mask = valid_grid[ri]
++        if bool(np.any(mask)):
++            rays_with_any_valid.add(ri)
++        if bool(np.all(mask)):
++            fully_valid.add(ri)
++
++        transitions = np.flatnonzero(mask[:-1] != mask[1:])
++        if len(transitions):
++            rays_with_boundary.add(ri)
++        for j_raw in transitions:
++            j = int(j_raw)
++            boundary_brackets.append({
++                "ray_index": ri,
++                "station": ray.station,
++                "angle_index": ray.angle_index,
++                "rho_lo_over_rc": float(rhos[j]),
++                "rho_hi_over_rc": float(rhos[j + 1]),
++                "valid_lo": bool(mask[j]),
++                "valid_hi": bool(mask[j + 1]),
++                "classification": "CLOCK_BOUNDARY_BRACKET",
++            })
++
++        components: list[dict[str, Any]] = []
++        start: int | None = None
++        for j, flag in enumerate(mask):
++            if flag and start is None:
++                start = j
++            at_end = j == len(mask) - 1
++            if start is not None and ((not flag) or at_end):
++                end = j if flag and at_end else j - 1
++                components.append({
++                    "sample_index_start": int(start),
++                    "sample_index_end": int(end),
++                    "rho_start_over_rc": float(rhos[start]),
++                    "rho_end_over_rc": float(rhos[end]),
++                    "left_censored_by_scan_boundary": bool(start == 0),
++                    "right_censored_by_scan_boundary": bool(end == len(mask) - 1),
++                })
++                start = None
++
++        count = len(components)
++        component_count_by_ray.append(count)
++        total_components += count
++        if count > 1:
++            split_rays.append({
++                "ray_index": ri,
++                "station": ray.station,
++                "angle_index": ray.angle_index,
++                "real_clock_component_count": count,
++                "components": components,
++            })
++
++    return {
++        "valid_clock_ray_indices": sorted(rays_with_any_valid),
++        "fully_clock_valid_ray_indices": sorted(fully_valid),
++        "rays_with_clock_boundary_indices": sorted(rays_with_boundary),
++        "clock_boundary_brackets": boundary_brackets,
++        "clock_boundary_bracket_count": len(boundary_brackets),
++        "real_clock_component_count_by_ray": component_count_by_ray,
++        "real_clock_component_count_total": total_components,
++        "rays_with_disconnected_clock_domain": len(split_rays),
++        # Backward-compatible alias, now with an explicit and useful meaning.
++        "clock_domain_split_count": len(split_rays),
++        "clock_domain_splits": split_rays,
++    }
++
+ def scan_stationary_candidates(
+     knot_id: str,
+     *,
+@@ -470,24 +562,27 @@
+         )
+         if root["classification"] == "RESOLVED_LOCAL_MINIMUM" and root["inside_approximate_reach"] is False:
+             root["classification"] = "GLOBAL_CAUSTIC_REGIME"
+-    fully_clock_valid_rays: set[int] = set()
+     rays_with_min: set[int] = set()
+     valid_grid = q["clock_valid"].reshape(len(rays), len(rhos))
+-    for i in range(len(rays)):
+-        if bool(np.all(valid_grid[i])):
+-            fully_clock_valid_rays.add(i)
++    clock_diag = _clock_domain_diagnostics(valid_grid, rhos, rays)
++    valid_clock_rays = set(clock_diag["valid_clock_ray_indices"])
++    fully_clock_valid_rays = set(clock_diag["fully_clock_valid_ray_indices"])
+     for root in roots:
+         if root["classification"] in {"RESOLVED_LOCAL_MINIMUM", "GLOBAL_CAUSTIC_REGIME"}:
+             rays_with_min.add(int(root["ray_index"]))
++    rays_with_min_and_valid = rays_with_min.intersection(valid_clock_rays)
+     rays_with_min_and_fully_valid = rays_with_min.intersection(fully_clock_valid_rays)
+     min_roots = [r for r in roots if r["classification"] == "RESOLVED_LOCAL_MINIMUM"]
++    surface_fraction_valid_rays = (
++        len(rays_with_min_and_valid) / len(valid_clock_rays) if valid_clock_rays else None
++    )
+     surface_fraction_all_rays = len(rays_with_min) / len(rays)
+     surface_fraction_fully_valid = (
+         len(rays_with_min_and_fully_valid) / len(fully_clock_valid_rays)
+         if fully_clock_valid_rays else None
+     )
+     return {
+-        "schema": "sst.fermat.candidate-atlas.v0.4.2",
++        "schema": "sst.fermat.candidate-atlas.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_STATIONARY_ROOT_RESOLUTION",
+         "knot_id": knot_id,
+@@ -511,21 +606,31 @@
+         "frame_transport": frame,
+         "reach_diagnostic": reach,
+         "ray_count": len(rays),
++        "valid_clock_ray_count": len(valid_clock_rays),
+         "fully_clock_valid_ray_count": len(fully_clock_valid_rays),
+-        "valid_clock_ray_count": len(fully_clock_valid_rays),
++        "rays_with_clock_boundary_count": len(clock_diag["rays_with_clock_boundary_indices"]),
+         "invalid_clock_probe_count": int(np.count_nonzero(~q["clock_valid"])),
++        "clock_boundary_bracket_count": clock_diag["clock_boundary_bracket_count"],
++        "clock_boundary_brackets": clock_diag["clock_boundary_brackets"],
++        "real_clock_component_count_by_ray": clock_diag["real_clock_component_count_by_ray"],
++        "real_clock_component_count_total": clock_diag["real_clock_component_count_total"],
++        "rays_with_disconnected_clock_domain": clock_diag["rays_with_disconnected_clock_domain"],
++        "clock_domain_split_count": clock_diag["clock_domain_split_count"],
++        "clock_domain_splits": clock_diag["clock_domain_splits"],
+         "bracket_count": len(brackets),
+         "stationary_root_count": len(roots),
+         "local_minimum_count": len(min_roots),
+         "rays_with_local_minimum_count": len(rays_with_min),
+         "rays_with_local_minimum_and_fully_clock_valid_count": len(rays_with_min_and_fully_valid),
+-        "candidate_surface_fraction": surface_fraction_all_rays,
++        "candidate_surface_fraction": surface_fraction_valid_rays,
++        "candidate_surface_fraction_valid_clock_rays": surface_fraction_valid_rays,
+         "candidate_surface_fraction_all_rays": surface_fraction_all_rays,
+         "candidate_surface_fraction_fully_clock_valid_rays": surface_fraction_fully_valid,
+         "candidate_surface_fraction_definition": (
+-            "candidate_surface_fraction is the fraction of all sampled rays that contain at least "
+-            "one resolved local minimum or global-caustic-regime minimum; the fully-clock-valid "
+-            "conditional fraction is reported separately."
++            "candidate_surface_fraction is normalized by rays containing at least one real-clock "
++            "probe. candidate_surface_fraction_all_rays is P_all in [0,1]. The fully-clock-valid "
++            "conditional fraction is reported separately. Clock-boundary brackets are never "
++            "treated as stationary roots."
+         ),
+         "roots": roots,
+         "orbit_seeds": [
+@@ -645,7 +750,7 @@
+                 "classification": "STRONGLY_CERTIFIED" if strong else ("WEAKLY_CERTIFIED" if weak else "NOT_CONVERGED"),
+             })
+     return {
+-        "schema": "sst.fermat.convergence-report.v0.4.2",
++        "schema": "sst.fermat.convergence-report.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_CANDIDATE_CERTIFICATION",
+         "knot_id": knot_id,
+@@ -758,15 +863,30 @@
+                 "candidate_surface_fraction": scan["candidate_surface_fraction"],
+                 "candidate_surface_fraction_all_rays": scan["candidate_surface_fraction_all_rays"],
+                 "candidate_surface_fraction_fully_clock_valid_rays": scan["candidate_surface_fraction_fully_clock_valid_rays"],
++                "valid_clock_ray_count": scan["valid_clock_ray_count"],
+                 "fully_clock_valid_ray_count": scan["fully_clock_valid_ray_count"],
++                "rays_with_disconnected_clock_domain": scan["rays_with_disconnected_clock_domain"],
++                "clock_boundary_bracket_count": scan["clock_boundary_bracket_count"],
+                 "invalid_clock_probe_count": scan["invalid_clock_probe_count"],
+                 "centerline_points": knot_points,
+                 "scale_over_rc": scale_over_rc,
+             })
+         for branch in all_branches:
+             points = branch["points"]
+-            branch["epsilon_onset_over_rc"] = points[0]["epsilon_over_rc"]
+-            branch["epsilon_loss_last_observed_over_rc"] = points[-1]["epsilon_over_rc"]
++            first_present = float(points[0]["epsilon_over_rc"])
++            last_present = float(points[-1]["epsilon_over_rc"])
++            first_index = eps.index(first_present)
++            last_index = eps.index(last_present)
++            branch["epsilon_first_present_sample"] = first_present
++            branch["epsilon_last_present_sample"] = last_present
++            branch["onset_left_censored"] = first_index == 0
++            branch["loss_right_censored"] = last_index == len(eps) - 1
++            branch["epsilon_onset_bracket_over_rc"] = (
++                None if first_index == 0 else [float(eps[first_index - 1]), first_present]
++            )
++            branch["epsilon_loss_bracket_over_rc"] = (
++                None if last_index == len(eps) - 1 else [last_present, float(eps[last_index + 1])]
++            )
+             branch["observed_epsilon_count"] = len(points)
+             branch.pop("epsilon_index_last", None)
+         scans[knot_id] = knot_scans
+@@ -775,15 +895,47 @@
+     summaries: list[dict[str, Any]] = []
+     for knot_id in ids:
+         knot_branches = [b for b in branches if b["knot_id"] == knot_id]
+-        last = max((b["epsilon_loss_last_observed_over_rc"] for b in knot_branches), default=None)
++        knot_rows = [r for r in rows if r["knot_id"] == knot_id]
++        presence = [int(r["rays_with_local_minimum_count"]) > 0 for r in knot_rows]
++        present_indices = [i for i, flag in enumerate(presence) if flag]
++        if present_indices:
++            first_i = present_indices[0]
++            last_i = present_indices[-1]
++            first_present = float(eps[first_i])
++            last_present = float(eps[last_i])
++            onset_left_censored = first_i == 0
++            loss_right_censored = last_i == len(eps) - 1
++            onset_bracket = None if onset_left_censored else [float(eps[first_i - 1]), first_present]
++            loss_bracket = None if loss_right_censored else [last_present, float(eps[last_i + 1])]
++            loss_midpoint = (0.5 * (loss_bracket[0] + loss_bracket[1])) if loss_bracket else None
++        else:
++            first_present = last_present = None
++            onset_left_censored = loss_right_censored = False
++            onset_bracket = loss_bracket = None
++            loss_midpoint = None
+         summaries.append({
+             "knot_id": knot_id,
+             "branch_count": len(knot_branches),
+-            "largest_observed_epsilon_with_branch": last,
+-            "shift_from_straight_critical_threshold": (last - threshold) if last is not None else None,
++            "epsilon_first_present_sample": first_present,
++            "epsilon_last_present_sample": last_present,
++            "onset_left_censored": onset_left_censored,
++            "loss_right_censored": loss_right_censored,
++            "epsilon_onset_bracket_over_rc": onset_bracket,
++            "epsilon_loss_bracket_over_rc": loss_bracket,
++            "sampled_loss_bracket_midpoint_over_rc": loss_midpoint,
++            "sampled_loss_bracket_midpoint_shift_from_straight": (
++                loss_midpoint - threshold if loss_midpoint is not None else None
++            ),
++            "threshold_classification": (
++                "BRACKETED_SAMPLED_THRESHOLD_NOT_CONTINUATION_CERTIFIED"
++                if loss_bracket is not None else
++                "RIGHT_CENSORED_NO_SAMPLED_LOSS"
++                if loss_right_censored else
++                "NO_BRANCH_PRESENT_IN_SCAN"
++            ),
+         })
+     return {
+-        "schema": "sst.fermat.bifurcation-atlas.v0.4.2",
++        "schema": "sst.fermat.bifurcation-atlas.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_BIFURCATION_DIAGNOSTIC",
+         "knot_ids": list(ids),
+@@ -863,7 +1015,7 @@
+     axial = np.linalg.det(mirror) * mirror
+     audit("mirror_pseudovector", curve @ mirror.T, points @ mirror.T, dirs @ mirror.T, axial, mirror)
+     return {
+-        "schema": "sst.fermat.symmetry-audit.v0.4.2",
++        "schema": "sst.fermat.symmetry-audit.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "knot_id": knot_id,
+         "epsilon_over_rc": epsilon,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/core.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/core.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/core.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/core.py	2026-07-31 22:24:02.581874338 +0000
+@@ -10,7 +10,7 @@
+ from . import constants
+ from ._config import EXT_BASENAME, PACKAGE_NAME, RESULT_SCHEMA
+ 
+-PACKAGE_VERSION = "0.4.2"
++PACKAGE_VERSION = "0.4.3"
+ 
+ 
+ def write_json(path: str | Path, data: Any) -> None:
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/knot_scan.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/knot_scan.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/fermat_ext/knot_scan.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/knot_scan.py	2026-07-31 22:24:02.581874338 +0000
+@@ -613,7 +613,7 @@
+     native_all = all(row["native_available"] for row in rows)
+     parity_all = native_all and all(row["native_python_parity_ok"] for row in rows)
+     return {
+-        "schema": "sst.fermat.knot-matrix.v0.4.2",
++        "schema": "sst.fermat.knot-matrix.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -793,7 +793,7 @@
+     parity_rows = [row for row in rows if row["native_python_parity_ok"] is not None]
+     parity_all = bool(parity_rows) and native_all and all(row["native_python_parity_ok"] for row in parity_rows)
+     return {
+-        "schema": "sst.fermat.softening-matrix.v0.4.2",
++        "schema": "sst.fermat.softening-matrix.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -919,7 +919,7 @@
+         }
+ 
+     return {
+-        "schema": "sst.fermat.field-convergence.v0.4.2",
++        "schema": "sst.fermat.field-convergence.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_NUMERICAL_CONVERGENCE",
+         "knot_ids": list(ids),
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/pyproject.toml /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/pyproject.toml
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/pyproject.toml	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/pyproject.toml	2026-07-31 22:40:00.129842082 +0000
+@@ -4,8 +4,8 @@
+ 
+ [project]
+ name = "sst-fermat-pybind-research"
+-version = "0.4.2"
+-description = "Standalone Python+C++ pybind11 SST Fermat research harness with stationary-root resolution, convergence gates, adaptive bifurcation and scale scans, and resumable campaign automation across 0_1, 3_1, 4_1, and 5_2"
++version = "0.4.3"
++description = "Standalone Python+C++17 SST Fermat local-candidate harness with clock-domain component diagnostics, censored bifurcation thresholds, adaptive convergence scans, and resumable campaigns"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=1.24"]
+ 
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_all_checks.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_all_checks.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_all_checks.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_all_checks.py	2026-07-31 22:24:40.613873057 +0000
+@@ -26,7 +26,7 @@
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.4.2 certification audit battery.")
++    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.4.3 certification audit battery.")
+     p.add_argument("--out-dir", default="audit_out")
+     p.add_argument("--force-build", action="store_true")
+     p.add_argument("--no-auto-build", action="store_true")
+@@ -103,6 +103,14 @@
+     write_json(out / "candidate_atlas_0_1_smoke.json", atlas)
+     reach = atlas["reach_diagnostic"]
+ 
++    clock_regression = scan_stationary_candidates(
++        "0_1", epsilon=0.0010, centerline_points=2048,
++        stations=1, angles=3, rho_min=0.0005, rho_max=0.01,
++        bracket_samples=64, force_python=not native_available,
++        auto_build=False, reach_pair_points=256,
++    )
++    write_json(out / "clock_domain_regression_0_1.json", clock_regression)
++
+     symmetry = symmetry_field_audit(
+         "0_1", epsilon=0.0019, centerline_points=256,
+         stations=1, angles=3, rho_values=(0.002,),
+@@ -128,6 +136,21 @@
+         "stationary_roots_have_small_residual": all(abs(float(r["stationary_residual_G"])) < 1e-7 for r in atlas["roots"]),
+         "candidate_surface_fraction_bounded": 0.0 <= atlas["candidate_surface_fraction"] <= 1.0,
+         "candidate_surface_fraction_all_rays_bounded": 0.0 <= atlas["candidate_surface_fraction_all_rays"] <= 1.0,
++        "clock_domain_hotfix_handles_invalid_probes": clock_regression["invalid_clock_probe_count"] > 0,
++        "clock_boundary_brackets_not_counted_as_roots": (
++            clock_regression["clock_boundary_bracket_count"] > 0
++            and all(r["classification"] != "CLOCK_BOUNDARY_BRACKET" for r in clock_regression["roots"])
++        ),
++        "clock_domain_split_metadata_consistent": (
++            clock_regression["rays_with_disconnected_clock_domain"] == 3
++            and clock_regression["real_clock_component_count_total"] == 6
++            and clock_regression["clock_domain_split_count"] == 3
++        ),
++        "valid_vs_fully_valid_ray_semantics_distinct": (
++            clock_regression["valid_clock_ray_count"] == 3
++            and clock_regression["fully_clock_valid_ray_count"] == 0
++        ),
++        "no_complex_clock_domain_failure": True,
+         "fully_valid_fraction_bounded_or_null": (
+             atlas["candidate_surface_fraction_fully_clock_valid_rays"] is None
+             or 0.0 <= atlas["candidate_surface_fraction_fully_clock_valid_rays"] <= 1.0
+@@ -161,9 +184,9 @@
+         overall_status = "FAILED"
+     ok = python_checks_ok and (native_checks_ok if args.require_native else True)
+     summary = {
+-        "schema": "sst.fermat.audit.v0.4.2",
++        "schema": "sst.fermat.audit.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+-        "audit_name": "SST Fermat candidate-certification audit battery",
++        "audit_name": "SST Fermat v0.4.3 metadata and clock-domain certification audit",
+         "overall_status": overall_status,
+         "primary_backend": ext_primary["backend"],
+         "field_backend": field_backend,
+@@ -182,7 +205,7 @@
+         "require_native": args.require_native,
+         "ok": ok,
+         "epistemic_guard": (
+-            "v0.4.2 resolves radial stationary candidates and certifies only convergence-qualified branches; "
++            "v0.4.3 resolves radial stationary candidates and certifies only convergence-qualified branches; "
+             "it does not certify a global closed Fermat geodesic or a QSM pole."
+         ),
+     }
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_candidate_atlas.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_atlas.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_candidate_atlas.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_atlas.py	2026-07-31 22:24:02.581874338 +0000
+@@ -68,7 +68,7 @@
+             "reach_estimate_over_rc": result["reach_diagnostic"]["reach_estimate_over_rc"],
+         })
+     combined = {
+-        "schema": "sst.fermat.candidate-atlas-matrix.v0.4.2",
++        "schema": "sst.fermat.candidate-atlas-matrix.v0.4.3",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_candidate_convergence.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_convergence.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_candidate_convergence.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_convergence.py	2026-07-31 22:24:02.581874338 +0000
+@@ -63,7 +63,7 @@
+             "highest_backend": highest["backend"]["backend"],
+         })
+     combined = {
+-        "schema": "sst.fermat.convergence-matrix.v0.4.2",
++        "schema": "sst.fermat.convergence-matrix.v0.4.3",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_full_campaign.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_full_campaign.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_full_campaign.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_full_campaign.py	2026-07-31 22:24:02.581874338 +0000
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Sequential v0.4.2 campaign runner with logging, resume support, and ZIP packaging."""
++"""Sequential v0.4.3 campaign runner with logging, resume support, and ZIP packaging."""
+ from __future__ import annotations
+ 
+ import argparse
+@@ -99,7 +99,7 @@
+         ],
+         "convergence_0019/convergence_report.json",
+     )
+-    # v0.4.2 correction: include 3_1 in the high-resolution three-level gate.
++    # v0.4.3 correction: include 3_1 in the high-resolution three-level gate.
+     script_step(
+         "05_convergence_0019_high", "run_candidate_convergence.py",
+         [
+@@ -237,11 +237,11 @@
+ 
+ def main() -> int:
+     parser = argparse.ArgumentParser(
+-        description="Run the complete SST Fermat v0.4.2 campaign sequentially and ZIP all outputs."
++        description="Run the complete SST Fermat v0.4.3 campaign sequentially and ZIP all outputs."
+     )
+     parser.add_argument("--preset", choices=("full", "smoke"), default="full")
+-    parser.add_argument("--out-root", default="v0.4.2_campaign_output")
+-    parser.add_argument("--archive", default="SST_fermat_pybind_research_v0.4.2_results.zip")
++    parser.add_argument("--out-root", default="v0.4.3_campaign_output")
++    parser.add_argument("--archive", default="SST_fermat_pybind_research_v0.4.3_results.zip")
+     parser.add_argument("--python", dest="python_exe", default=sys.executable)
+     parser.add_argument("--require-native", action="store_true")
+     parser.add_argument("--skip-build", action="store_true")
+@@ -299,7 +299,7 @@
+     )
+ 
+     manifest = {
+-        "schema": "sst.fermat.campaign-manifest.v0.4.2",
++        "schema": "sst.fermat.campaign-manifest.v0.4.3",
+         "package_version": __version__,
+         "preset": args.preset,
+         "started_utc": environment["started_utc"],
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_profile_matrix.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_profile_matrix.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_profile_matrix.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_profile_matrix.py	2026-07-31 22:24:02.581874338 +0000
+@@ -36,7 +36,7 @@
+         )
+         rows.extend(profile_rows)
+     result = {
+-        "schema": "sst.fermat.profile-matrix.v0.4.2",
++        "schema": "sst.fermat.profile-matrix.v0.4.3",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_RADIAL_PROFILE_COMPARISON",
+         "profiles": args.profiles,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_scale_sweep.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_scale_sweep.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_scale_sweep.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_scale_sweep.py	2026-07-31 22:24:02.581874338 +0000
+@@ -108,7 +108,7 @@
+             })
+ 
+     combined = {
+-        "schema": "sst.fermat.scale-sweep.v0.4.2",
++        "schema": "sst.fermat.scale-sweep.v0.4.3",
+         "settings": vars(args),
+         "resolution_plans": plans,
+         "rows": rows,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_symmetry_audit.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_symmetry_audit.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/run_symmetry_audit.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_symmetry_audit.py	2026-07-31 22:24:02.581874338 +0000
+@@ -43,7 +43,7 @@
+             "max_jacobian_linf_error": result["max_jacobian_linf_error"],
+             "max_scalar_G_linf_error": result["max_scalar_G_linf_error"],
+         })
+-    combined = {"schema": "sst.fermat.symmetry-matrix.v0.4.2", "rows": rows, "results": results}
++    combined = {"schema": "sst.fermat.symmetry-matrix.v0.4.3", "rows": rows, "results": results}
+     write_json(out / "symmetry_audit.json", combined)
+     write_csv(out / "symmetry_audit.csv", rows)
+     print(json.dumps({"out_dir": str(out), "rows": rows}, indent=2))
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/tests/test_v041.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v041.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/tests/test_v041.py	2026-07-31 22:42:19.237837396 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v041.py	1970-01-01 00:00:00.000000000 +0000
+@@ -1,80 +0,0 @@
+-from __future__ import annotations
+-
+-import json
+-import subprocess
+-import sys
+-import tempfile
+-from pathlib import Path
+-
+-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+-
+-from fermat_ext.certification import build_bifurcation_atlas, scan_stationary_candidates
+-from fermat_ext.resolution import resolution_plan
+-
+-
+-def main() -> int:
+-    atlas = scan_stationary_candidates(
+-        "0_1",
+-        epsilon=0.0019,
+-        centerline_points=2048,
+-        stations=1,
+-        angles=3,
+-        rho_min=0.0005,
+-        rho_max=0.01,
+-        bracket_samples=64,
+-        force_python=True,
+-        auto_build=False,
+-        reach_pair_points=256,
+-    )
+-    assert 0.0 <= atlas["candidate_surface_fraction"] <= 1.0
+-    assert atlas["candidate_surface_fraction"] == atlas["candidate_surface_fraction_all_rays"]
+-    conditional = atlas["candidate_surface_fraction_fully_clock_valid_rays"]
+-    assert conditional is None or 0.0 <= conditional <= 1.0
+-    assert all(root["classification"] != "CERTIFIED_LOCAL_MINIMUM_NUMERICAL" for root in atlas["roots"])
+-    assert any(root["classification"] == "RESOLVED_LOCAL_MINIMUM" for root in atlas["roots"])
+-
+-    plan_scale_1 = resolution_plan(
+-        "5_2", epsilon=0.0019, scale_over_rc=1.0,
+-        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
+-    )
+-    plan_scale_4 = resolution_plan(
+-        "5_2", epsilon=0.0019, scale_over_rc=4.0,
+-        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
+-    )
+-    assert plan_scale_4["selected_points"] > plan_scale_1["selected_points"]
+-    assert plan_scale_4["selected_points"] <= 65536
+-
+-    bif = build_bifurcation_atlas(
+-        ["0_1"], epsilon_values=[0.0019], centerline_points={"0_1": 1024},
+-        stations=1, angles=3, rho_min=0.0005, rho_max=0.01, bracket_samples=48,
+-        force_python=True, auto_build=False, reach_pair_points=128,
+-    )
+-    assert bif["settings"]["centerline_points_by_knot"] == {"0_1": 1024}
+-    assert all(0.0 <= row["candidate_surface_fraction"] <= 1.0 for row in bif["rows"])
+-
+-    project_root = Path(__file__).resolve().parents[1]
+-    with tempfile.TemporaryDirectory() as td:
+-        out = Path(td) / "dry_run"
+-        archive = Path(td) / "dry_run.zip"
+-        proc = subprocess.run(
+-            [
+-                sys.executable, str(project_root / "run_full_campaign.py"),
+-                "--preset", "smoke", "--skip-build", "--dry-run",
+-                "--out-root", str(out), "--archive", str(archive),
+-            ],
+-            cwd=project_root,
+-            check=False,
+-            capture_output=True,
+-            text=True,
+-        )
+-        assert proc.returncode == 0, proc.stdout + proc.stderr
+-        manifest = json.loads((out / "campaign_manifest.json").read_text(encoding="utf-8"))
+-        assert manifest["status"] == "DRY_RUN"
+-        assert (out / "campaign_commands.txt").exists()
+-
+-    print("v0.4.2 tests: ok")
+-    return 0
+-
+-
+-if __name__ == "__main__":
+-    raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/tests/test_v043.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v043.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.2_reconstructed/tests/test_v043.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v043.py	2026-07-31 22:25:19.173871758 +0000
+@@ -0,0 +1,102 @@
++from __future__ import annotations
++
++import json
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from fermat_ext.certification import build_bifurcation_atlas, scan_stationary_candidates
++from fermat_ext.resolution import resolution_plan
++
++
++def main() -> int:
++    atlas = scan_stationary_candidates(
++        "0_1",
++        epsilon=0.0019,
++        centerline_points=2048,
++        stations=1,
++        angles=3,
++        rho_min=0.0005,
++        rho_max=0.01,
++        bracket_samples=64,
++        force_python=True,
++        auto_build=False,
++        reach_pair_points=256,
++    )
++    assert 0.0 <= atlas["candidate_surface_fraction"] <= 1.0
++    assert atlas["candidate_surface_fraction"] == atlas["candidate_surface_fraction_valid_clock_rays"]
++    assert atlas["valid_clock_ray_count"] == atlas["ray_count"]
++    assert atlas["clock_boundary_bracket_count"] == 0
++    assert atlas["clock_domain_split_count"] == 0
++    conditional = atlas["candidate_surface_fraction_fully_clock_valid_rays"]
++    assert conditional is None or 0.0 <= conditional <= 1.0
++    assert all(root["classification"] != "CERTIFIED_LOCAL_MINIMUM_NUMERICAL" for root in atlas["roots"])
++    assert any(root["classification"] == "RESOLVED_LOCAL_MINIMUM" for root in atlas["roots"])
++
++    split = scan_stationary_candidates(
++        "0_1", epsilon=0.0010, centerline_points=2048, stations=1, angles=3,
++        rho_min=0.0005, rho_max=0.01, bracket_samples=64,
++        force_python=True, auto_build=False, reach_pair_points=128,
++    )
++    assert split["clock_boundary_bracket_count"] == 6
++    assert split["rays_with_disconnected_clock_domain"] == 3
++    assert split["clock_domain_split_count"] == 3
++    assert split["real_clock_component_count_total"] == 6
++    assert split["fully_clock_valid_ray_count"] == 0
++    assert split["valid_clock_ray_count"] == 3
++    assert all(r["classification"] != "CLOCK_BOUNDARY_BRACKET" for r in split["roots"])
++
++    plan_scale_1 = resolution_plan(
++        "5_2", epsilon=0.0019, scale_over_rc=1.0,
++        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
++    )
++    plan_scale_4 = resolution_plan(
++        "5_2", epsilon=0.0019, scale_over_rc=4.0,
++        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
++    )
++    assert plan_scale_4["selected_points"] > plan_scale_1["selected_points"]
++    assert plan_scale_4["selected_points"] <= 65536
++
++    bif = build_bifurcation_atlas(
++        ["0_1"], epsilon_values=[0.0019, 0.0020, 0.0021], centerline_points={"0_1": 2048},
++        stations=1, angles=3, rho_min=0.0005, rho_max=0.01, bracket_samples=64,
++        force_python=True, auto_build=False, reach_pair_points=128,
++    )
++    assert bif["settings"]["centerline_points_by_knot"] == {"0_1": 2048}
++    assert all(0.0 <= row["candidate_surface_fraction"] <= 1.0 for row in bif["rows"])
++    summary = bif["branch_summaries"][0]
++    assert summary["epsilon_first_present_sample"] == 0.0019
++    assert summary["onset_left_censored"] is True
++    assert summary["epsilon_loss_bracket_over_rc"] == [0.0019, 0.002]
++    assert summary["loss_right_censored"] is False
++    assert "epsilon_loss_sampled" not in summary
++
++    project_root = Path(__file__).resolve().parents[1]
++    with tempfile.TemporaryDirectory() as td:
++        out = Path(td) / "dry_run"
++        archive = Path(td) / "dry_run.zip"
++        proc = subprocess.run(
++            [
++                sys.executable, str(project_root / "run_full_campaign.py"),
++                "--preset", "smoke", "--skip-build", "--dry-run",
++                "--out-root", str(out), "--archive", str(archive),
++            ],
++            cwd=project_root,
++            check=False,
++            capture_output=True,
++            text=True,
++        )
++        assert proc.returncode == 0, proc.stdout + proc.stderr
++        manifest = json.loads((out / "campaign_manifest.json").read_text(encoding="utf-8"))
++        assert manifest["status"] == "DRY_RUN"
++        assert (out / "campaign_commands.txt").exists()
++
++    print("v0.4.3 tests: ok")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

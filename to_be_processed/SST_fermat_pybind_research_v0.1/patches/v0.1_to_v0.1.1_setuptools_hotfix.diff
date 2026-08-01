@@ -1,0 +1,49 @@
+--- /mnt/data/_inspect_fermat/SST_fermat_pybind_research_v0.1/fermat_ext/build_ext_if_needed.py	2026-07-28 10:28:59.000000000 +0000
++++ /mnt/data/SST_fermat_pybind_research_v0.1.1/fermat_ext/build_ext_if_needed.py	2026-07-28 12:01:18.071573853 +0000
+@@ -67,8 +67,11 @@
+         "        for ext in self.extensions:\n"
+         "            ext.extra_compile_args = ['/O2','/std:c++17'] if self.compiler.compiler_type == 'msvc' else ['-O3','-std=c++17']\n"
+         "        super().build_extensions()\n"
+-        f"setup(name='{PACKAGE_NAME}_ext', ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
+-        "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'])], cmdclass={'build_ext': BuildExt})\n",
++        f"setup(name='{PACKAGE_NAME}_ext', version='0.1.1', "
++        f"packages=['{PACKAGE_NAME}'], package_dir={{'{PACKAGE_NAME}': '{PACKAGE_NAME}'}}, py_modules=[], "
++        f"ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
++        "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'], language='c++')], "
++        "cmdclass={'build_ext': BuildExt})\n",
+         encoding="utf-8",
+     )
+     ok, log = _run([sys.executable, str(setup_py), "build_ext", "--inplace"], ROOT, verbose)
+--- /mnt/data/_inspect_fermat/SST_fermat_pybind_research_v0.1/pyproject.toml	2026-07-28 10:28:59.000000000 +0000
++++ /mnt/data/SST_fermat_pybind_research_v0.1.1/pyproject.toml	2026-07-28 12:01:18.071573853 +0000
+@@ -4,7 +4,10 @@
+ 
+ [project]
+ name = "sst-fermat-pybind-research"
+-version = "0.1.0"
++version = "0.1.1"
+ description = "Standalone Python+C++ pybind11 research harness for SST Fermat-critical and knot-tube diagnostics"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=1.24"]
++
++[tool.setuptools]
++packages = ["fermat_ext"]
+--- /mnt/data/_inspect_fermat/SST_fermat_pybind_research_v0.1/fermat_ext/__init__.py	2026-07-28 10:28:59.000000000 +0000
++++ /mnt/data/SST_fermat_pybind_research_v0.1.1/fermat_ext/__init__.py	2026-07-28 12:02:12.215575789 +0000
+@@ -4,4 +4,4 @@
+ from .knot_scan import scan_torus_knot, torus_knot
+ 
+ __all__ = ["analyze_profile", "sweep_profiles", "scan_torus_knot", "torus_knot", "write_json", "write_csv"]
+-__version__ = "0.1.0"
++__version__ = "0.1.1"
+--- /mnt/data/_inspect_fermat/SST_fermat_pybind_research_v0.1/fermat_ext/core.py	2026-07-28 10:29:35.000000000 +0000
++++ /mnt/data/SST_fermat_pybind_research_v0.1.1/fermat_ext/core.py	2026-07-28 12:02:12.215575789 +0000
+@@ -10,7 +10,7 @@
+ from . import constants
+ from ._config import EXT_BASENAME, PACKAGE_NAME, RESULT_SCHEMA
+ 
+-PACKAGE_VERSION = "0.1.0"
++PACKAGE_VERSION = "0.1.1"
+ 
+ 
+ def write_json(path: str | Path, data: Any) -> None:

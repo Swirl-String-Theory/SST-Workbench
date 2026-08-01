@@ -1,0 +1,152 @@
+--- vortexring-lab-v7_5_4_zflow_separate-fseries_speculative-swirl-clock.html
++++ vortexring-lab-v7_5_4_zflow_separate-fseries_speculative-swirl-clock-distance-control.html
+@@ -6,7 +6,7 @@
+ <title>Superfluïde vortexlab v7.5.4 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+ <meta name="vortexlab-version" content="7.5.4">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -149,6 +149,10 @@
+   .seg-btn.on-beta{border-color:var(--amber)!important; color:#EAF2FA!important; background:rgba(255,174,69,.12)!important;}
+   .seg-btn.on-gamma{border-color:#A855F7!important; color:#EAF2FA!important; background:rgba(168,85,247,.12)!important;}
+   .seg-btn.on-sep{border-color:#fff!important; color:#EAF2FA!important; background:rgba(255,255,255,.1)!important;}
++  .sep-readout{margin-top:5px;padding:6px 7px;border:1px solid var(--line);border-radius:6px;background:rgba(11,16,32,.38);}
++  .sep-readout.good{border-color:rgba(123,232,168,.58);color:var(--ok);}
++  .sep-readout.warn{border-color:rgba(255,174,69,.72);color:var(--amber);}
++  .sep-readout.bad{border-color:rgba(255,110,110,.78);color:var(--warn);}
+   .diagnostic-help{font-size:10px; color:var(--dim); line-height:1.45; margin:6px 0;}
+   /* Step 4: compacte, samenhangende bedieningsgroepen */
+   #ui-right details.coll{background:rgba(11,16,32,.48);}
+@@ -672,7 +676,7 @@
+       <p>Deze optionele diagnose is uitsluitend beschikbaar voor twee SST-dragers in botsingsmodus en koppelt niets terug naar de filament-ODE. De veldroute meet voor iedere drager de RMS tangentiële snelheid die uitsluitend door de andere drager wordt geïnduceerd,</p>
+       <p>\[ u_i=\left[\frac{1}{L_i}\oint_{K_i}(\mathbf u_{j\to i}\!\cdot\!\hat{\mathbf t}_i)^2\,ds\right]^{1/2}. \]</p>
+       <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele envelop \(v_i\in[|v_{\circlearrowleft}-u_i|,v_{\circlearrowleft}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een hypothesetest, geen canonieke superpositieregel.</p>
+-      <p>De onafhankelijke meetroute gebruikt de gemeten body-fasefrequentie \(\Omega_{\rm body}\) ten opzichte van een door de gebruiker vastgelegde referentietoestand: \(\eta_i^{\rm phase}=|\Omega_i|/|\Omega_{i,0}|\). Kalibratie hoort bij grote onderlinge afstand te gebeuren. Een kandidaat-sluiting ontstaat pas wanneer de faseverhouding binnen de veld-envelop valt, bij toenemende resolutie convergeert, invariant is onder A↔B en niet afhangt van \(a_{\rm sim}\), displayframe of afspeelsnelheid.</p>
++      <p>De onafhankelijke meetroute gebruikt de gemeten body-fasefrequentie \(\Omega_{\rm body}\) ten opzichte van een door de gebruiker vastgelegde referentietoestand: \(\eta_i^{\rm phase}=|\Omega_i|/|\Omega_{i,0}|\). Kalibratie hoort bij grote onderlinge afstand te gebeuren; stel die startafstand in met Δz_AB,0 onder MODEL · VORTEX + KERN. Een kandidaat-sluiting ontstaat pas wanneer de faseverhouding binnen de veld-envelop valt, bij toenemende resolutie convergeert, invariant is onder A↔B en niet afhangt van \(a_{\rm sim}\), displayframe of afspeelsnelheid.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+@@ -706,6 +710,10 @@
+             <button type="button" class="seg-btn" data-mode="botsing">Botsing (2)</button>
+             <button type="button" class="seg-btn active" data-mode="solo">Solo</button>
+           </div></div>
++        <div class="ctrl hidden" id="sepABRow"><label>initiële axiale knoopafstand Δz<sub>AB,0</sub> <span class="v" id="vSepAB">840 mm</span></label>
++          <input type="number" id="sSepAB" min="1" max="1000" step="1" value="840">
++          <div class="core-limit-note sep-readout warn" id="sepABReadout">Alleen botsingsmodus. A en B worden symmetrisch rond hun huidige middenvlak geplaatst; de laterale offset Δx(B) blijft onafhankelijk.</div>
++        </div>
+         <div class="ctrl"><label for="topoSelect">topologie</label>
+           <select id="topoSelect" aria-label="Topologie">
+             <option value="ring">Ring (0₁)</option>
+@@ -1058,7 +1066,7 @@
+               <span>Δτ<sub>AB</sub><sup>phase</sup> accumulatie</span><span id="specClockPhaseLag">—</span>
+               <span>closure-residu ε<sub>clock</sub></span><span id="specClockResidual">—</span>
+             </div>
+-            <div class="note" style="margin-top:7px;"><b>Twee routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↻±u∥-envelop → dτ/dt. Fase: |Ω<sub>body</sub>| ten opzichte van een vaste referentie bij grote scheiding. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en zonder herkalibratie per afstand.</div>
++            <div class="note" style="margin-top:7px;"><b>Twee routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↻±u∥-envelop → dτ/dt. Fase: |Ω<sub>body</sub>| ten opzichte van een vaste referentie bij grote scheiding. De initiële axiale afstand Δz<sub>AB,0</sub> staat onder VORTEX; wijziging daarvan reset de geometrie en wist bewust de fasekalibratie. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en zonder herkalibratie per afstand.</div>
+           </div>
+         </details>
+         <details class="subcoll" id="stretchGatePanel" open style="margin-top:9px;">
+@@ -2327,6 +2335,34 @@
+   return 0;
+ }
+ 
++function initialAxialSeparation(){return Math.abs(P.zB-P.zA);}
++function maxInitialAxialSeparation(){return Math.max(1e-3,2*Math.max(P.Hcyl,5e-4));}
++function setInitialAxialSeparation(distance){
++  const mid=.5*(P.zA+P.zB);
++  const applied=clamp(Math.abs(Number(distance)||0),1e-3,maxInitialAxialSeparation());
++  P.zA=mid-.5*applied;P.zB=mid+.5*applied;
++  return applied;
++}
++function updateInitialSeparationUi(){
++  const row=document.getElementById('sepABRow'),input=document.getElementById('sSepAB');
++  const value=document.getElementById('vSepAB'),readout=document.getElementById('sepABReadout');
++  if(!row||!input||!value||!readout)return;
++  const collision=P.mode==='botsing';row.classList.toggle('hidden',!collision);
++  const dz0=initialAxialSeparation(),maxDz=maxInitialAxialSeparation();
++  input.max=(1000*maxDz).toFixed(3);input.value=(1000*dz0).toFixed(3).replace(/\.?0+$/,'');
++  value.textContent=fmtLengthSI(dz0);
++  if(!collision){readout.className='core-limit-note sep-readout warn';readout.textContent='Alleen actief in botsingsmodus.';return;}
++  const startCenter=Math.hypot(dz0,Math.abs(P.off));
++  const a=Y&&fils.length?carrierGroupStats('A'):null,b=Y&&fils.length?carrierGroupStats('B'):null;
++  const currentCenter=a&&b?Math.hypot(b.cx-a.cx,b.cy-a.cy,b.z-a.z):NaN;
++  const ct=contactThresholdInfo();
++  const gap=Number.isFinite(lastTopologyGap)?lastTopologyGap:NaN;
++  const safe=Number.isFinite(gap)?gap>ct.effective:null;
++  readout.className='core-limit-note sep-readout '+(safe===true?'good':(safe===false?'bad':'warn'));
++  const gapText=Number.isFinite(gap)?fmtLengthSI(gap):(P.topologyGuard?'wordt bepaald':'niet gemeten · topology guard uit');
++  readout.innerHTML=`startcentrumafstand d<sub>AB,0</sub>=${fmtLengthSI(startCenter)} · actuele d<sub>AB</sub>=${Number.isFinite(currentCenter)?fmtLengthSI(currentCenter):'—'} · centerline-clearance=${gapText} · stopgrens=${fmtLengthSI(ct.effective)}`;
++}
++
+ function isRingTopo(){
+   return P.topo==='ring'&&P.knotIdx<0&&!P.knotKey;
+ }
+@@ -3520,7 +3556,7 @@
+   if(gapRatioEffective<3||boundary<0||minLogArg<=1)score=Math.min(score,18);
+   const suggestions=[];
+   if(meshScore<75)suggestions.push('verhoog kwaliteit of zet Auto-relax aan om de puntverdeling gelijkmatiger te maken');
+-  if(gapScore<75)suggestions.push('vergroot de vrije afstand: verlaag kernstraal a, verminder drift/botsingssnelheid, vergroot offset of reset');
++  if(gapScore<75)suggestions.push('vergroot de vrije afstand: verlaag kernstraal a, verminder drift/botsingssnelheid, vergroot Δz_AB,0/offset of reset');
+   if(curvatureScore<75)suggestions.push('max aκ is hoog: verlaag a, verhoog resolutie of gebruik Auto-relax');
+   if(coreScore<75)suggestions.push('de lokale inductielogaritme is slecht opgelost: verlaag a of verhoog kwaliteit');
+   if(boundaryScore<75)suggestions.push('vergroot cilinderdiameter/hoogte of centreer/reset de drager');
+@@ -3568,7 +3604,8 @@
+   markStabilityTarget('interSeg',statusFromScore(rep.modelScore),rep.modelScore<75?'Schakel naar Biot–Savart; LIA mist de nabije niet-lokale interactie.':'Interactiemodel past bij de huidige afstand.');
+   markStabilityTarget('sDiam',boundStat,rep.boundaryScore<75?'Vergroot de diameter of reset/centreer de knoop.':'Radiale domeinmarge is voldoende.');
+   markStabilityTarget('sHeight',boundStat,rep.boundaryScore<75?'Vergroot de halve hoogte of reset/centreer de knoop.':'Axiale domeinmarge is voldoende.');
+-  markStabilityTarget('sOff',gapStat,rep.gapScore<75?'Pas de offset aan om near-contact te vermijden.':'Onderlinge vrije afstand is voldoende.');
++  markStabilityTarget('sSepAB',gapStat,rep.gapScore<75?'Vergroot de initiële knoopafstand voor de volgende reset/sweep.':'De ingestelde startafstand ligt binnen de huidige contactmarge.');
++  markStabilityTarget('sOff',gapStat,rep.gapScore<75?'Pas de laterale offset aan om near-contact te vermijden.':'Onderlinge vrije afstand is voldoende.');
+   ['sW','sVzA','sVzB'].forEach(id=>markStabilityTarget(id,worstStatus(gapStat,boundStat),rep.gapScore<75?'Verminder de opgelegde drift; strengen naderen het reconnectieregime.':'Drift is binnen de huidige marge.'));
+   ['sGa','sNq','sOm','sAcc','sTracerCount','sStreamlineCount'].forEach(id=>markStabilityTarget(id,perfStat,rep.perfWarming?'Capaciteitsmeting warmt 0,9 s op na de laatste snelheidswijziging.':(rep.perfScore<60?'Computer-capaciteitslimiet: verlaag belasting of afspeeltempo; dit is geen numerieke instabiliteit.':'Rekenlast is beheersbaar.')));
+   const emissive=rep.status==='good'?0x123d29:(rep.status==='warn'?0x4a2f0d:0x4a1018);
+@@ -3773,6 +3810,7 @@
+   markPotentialFlowDirty();updatePotentialFlowVisual(true);
+   resetStretchGate('state-reset',true);
+   resetSpecClockRuntime('state-reset · fase-referentie opnieuw vereist');
++  updateInitialSeparationUi();
+ }
+ function taylorOscillationApplies(){
+   return P.mode==='solo'&&!P.centerLock&&P.taylorOsc.enabled&&!!Y&&!!fils.length;
+@@ -4965,6 +5003,7 @@
+   syncSeg('frameSeg','frame',P.displayFrame==='corot'?'rotating':'absolute');
+   document.getElementById('interRow').classList.remove('hidden');
+   document.getElementById('offRow').classList.remove('hidden');
++  updateInitialSeparationUi();
+   document.getElementById('wRow').classList.toggle('hidden',P.mode!=='solo');   // v7.1 (B1)
+   document.getElementById('vzARow').classList.toggle('hidden',P.mode!=='botsing'); // v7.1 (B1)
+   document.getElementById('vzBRow').classList.toggle('hidden',P.mode!=='botsing'||P.lockVz);
+@@ -5121,7 +5160,7 @@
+   const bgNote=document.querySelector('#collParams > .coll-body > .btns .note');if(bgNote)flowFlags.appendChild(bgNote);
+ 
+   // RECHTS · VORTEX
+-  vlMoveControl('modeSeg',vortex);vlMoveControl('topoSelect',vortex);
++  vlMoveControl('modeSeg',vortex);vlMoveControl('sSepAB',vortex);vlMoveControl('topoSelect',vortex);
+   ['knotRow','fseriesRow','idealComponentModeRow','compRow','bResetIdealKnot','idealKnotInfo'].forEach(id=>{const el=document.getElementById(id);if(el)vortex.appendChild(el);});
+   const paramFlags=document.querySelector('#collParams > .coll-body > .btns');
+   if(paramFlags){
+@@ -5527,6 +5566,12 @@
+   rebuildTubes(true);
+   return null; // updateCoreRadiusLimit beheert het samengestelde label inclusief max/floorstatus
+ });
++bindRange('SepAB',x=>fmtLengthSI(x*1e-3),x=>{
++  const applied=setInitialAxialSeparation(x*1e-3);
++  if(typeof ModelLog!=='undefined'&&ModelLog.logUser)ModelLog.logUser('initial-knot-separation',{axial:applied,lateral:P.off,centerDistance:Math.hypot(applied,Math.abs(P.off))});
++  resetState();
++  return applied*1e3;
++});
+ bindSignedRange('Off','revOff',x=>x.toFixed(0)+' mm',x=>{P.off=x*1e-3;resetState();});
+ bindSignedRange('W','revW',x=>fmtAxialMmPerS(x),x=>P.w=x*1e-3);
+ bindSignedRange('VzA','revVzA',x=>fmtAxialMmPerS(x),x=>{P.vzA=x*1e-3;if(P.lockVz){P.vzB=P.vzA;syncSignedUi('VzB','revVzB',P.vzB,y=>fmtAxialMmPerS(y));}});
+@@ -6128,7 +6173,7 @@
+ // Puur lokaal: bouwt eigen toestandsarrays, raakt globale Y/fils niet aan;
+ // P-velden worden gesnapshot en hersteld. Resultaten als JSON exporteerbaar.
+ const SelfTest=(()=>{ 
+-  const PKEYS=['mode','topo','inter','core','med','qual','Om','OmBundle','GaDemo','nQ','a','w','vzA','vzB',
++  const PKEYS=['mode','topo','inter','core','med','qual','Om','OmBundle','GaDemo','nQ','a','off','zA','zB','zSolo','w','vzA','vzB',
+     'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical','scaleProbe',
+     'bundleEnabled','bundleProfile','bundleSplay','bundleBEMEnabled','bundleBoundaryMode','bundleBEMQuality','topologyGuard',
+     'centerLock','twistProxyEnabled','ghostStewartson','Rcyl','Hcyl',

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superfluïde vortexlab v7.6.25b · KnotPlot-catalogusmigratie · modular M1</title>
+<meta name="vortexlab-version" content="7.6.25b">
+<meta name="vortexlab-base" content="7.5.3">
+<meta name="vortexlab-parent" content="7.6.25">
+<meta name="vortexlab-architecture" content="modular-m1">
+<meta name="vortexlab-source-version" content="7.6.25b">
+<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator,external-drift-cfl-bound,accepted-step-time-cap,playback-debt-reset,spec-clock-calibrate-autostart,spec-clock-safe-speed-preset,independent-four-panel-docks,run-header-dropdown,independent-panel-persistence,dual-overlay-offsets,benchmark-verdict-persistence,benchmark-restore-status,proxy-decomposition-snapshots,weighted-rigid-fit,counterfactual-shapley-attribution,direct-mutual-linearity,proxy-decomposition-exports,zero-safe-shapley-gate,cyclic-mutual-normalization,resolution-ladder-128-384,rot-mutual-interaction-export,proxy-decomposition-schema-1.1,normalization-benchmark,iso-full-mutual-reference-scales,circulation-length-scale,rms-arclength-scale,core-circulation-scale,normalization-parity-gate,normalization-resolution-gate,proxy-decomposition-schema-1.2,transfer-law-benchmark,dimensionless-transfer-registry,no-fit-transfer-gate,transfer-parity-null-resolution,transfer-field-ranking,proxy-decomposition-schema-1.3,canonical-vchar-notation,legacy-speed-symbol-removal,proxy-decomposition-schema-1.4,length-identification-benchmark,canonical-resolved-loop-length,calibrated-field-delta-comparison,absolute-vs-calibrated-route,ideal-ropelength-length-candidates,asim-length-negative-control,proxy-decomposition-schema-1.5,compact-spec-clock-sidebar,collapsible-spec-benchmarks,geom-kappa-benchmark,resolution-ladder-128-768,ideal-knot-radius-diameter-audit,proxy-decomposition-schema-1.6,continuum-audit,corrected-r6-six-point-gate,high-resolution-kappa-admissibility,reach-convergence-blocker,cross-knot-holdouts,timestamped-auto-exports,proxy-decomposition-schema-1.7,resizable-clock-sidebar,intrinsic-rigid-rotation-vector,canonical-holdout-embeddings,embedding-pair-audit,applicable-finite-kappa-aggregation,roadmap-panel,proxy-decomposition-schema-1.8,benchmark-gate-stabilization,mixed-tolerance-linearity,intrinsic-cyclic-index-gate,applicable-normalization-match,topology-specific-r22,benchmark-tracer-suppression,selectable-knot-holdouts,split-benchmark-runners,direct-cyclic-permutation,seven-one-holdout,proxy-decomposition-schema-2.0,knotplot-candidate-catalog,tlink-6-9-holdout,multisource-holdout-selector,continuous-periodic-spline,continuous-curvature-reach,continuous-self-dcsd,continuous-intercomponent-reach,reach-limiter-provenance,reach-resolution-audit,reach-source-selection-fix,damped-least-squares-dcsd-polish,nonvacuous-catalog-gates,spark-wrapper-recovery,selftest-schema-2.1,knotplot-uniform-n300-catalog,knotplot-native-polygon-sampling,torus-6-9-id-migration,knotplot-catalog-holdouts,knotplot-reach-provenance">
+<link rel="stylesheet" href="./vendor/katex.min.css">
+<link rel="stylesheet" href="./styles/vortexlab.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="c3d"></canvas>
+
+  <div id="ui-left">
+    <div id="hTitle">SUPERFLUÏDE VORTEXLAB · cilinder 1.0 m × Ø50 cm · Ω = <span id="hOm">1.00</span> rad·s⁻¹</div>
+    <div class="sub" id="hSub">—</div>
+    <div id="eFormula"></div>
+    <div class="hdr-btns">
+      <button id="bPhys" type="button">ⓘ Fysica</button>
+    </div>
+
+    <div id="hud">
+      <div class="lbl">CENTERLINE-HELICITEIT H / Γ²</div>
+      <div class="big" id="hHel">0.000</div>
+      <div class="row"><span class="lbl" id="hWrLbl">Wr(<span class="kA">A</span>)+Wr(<span class="kB">B</span>)</span><span class="val" id="hWr">0.000</span></div>
+      <div class="row" id="rowLk"><span class="lbl" id="hLkLbl">Lk(A,B)</span><span class="val" id="hLk">0.000</span></div>
+      <div class="row hidden" id="rowDWr"><span class="lbl">ΔWr sinds t=0</span><span class="val" id="hDWr">0.000</span></div>
+      <div class="row hidden" id="rowOmBodyA"><span class="lbl">Ω_body A</span><span class="val" id="hOmBodyA">—</span></div>
+      <div class="row hidden" id="rowOmBodyB"><span class="lbl">Ω_body B</span><span class="val" id="hOmBodyB">—</span></div>
+      <div class="row hidden" id="rowChi"><span class="lbl">χ̂ (xy)</span><span class="val" id="hChi">—</span></div>
+      <div class="row hidden" id="rowTw"><span class="lbl">⟨∫u·t̂ dt⟩_L (transport-proxy, m)</span><span class="val" id="hTw">—</span></div>
+      <div class="row"><span class="lbl" id="hWrelLbl">ω_rel achtergrond</span><span class="val" id="hWrel">2.00 s⁻¹ ẑ</span></div>
+      <div class="row"><span class="lbl">tracer ΔΩ₉₀ / kleurschaal</span><span class="val" id="hTracerOmega">—</span></div>
+      <div class="row hidden" id="rowRcap"><span class="lbl">r_cap / 2h_col</span><span class="val" id="hRcap">—</span></div>
+      <div class="row hidden" id="rowGfil"><span class="lbl">Γ filament</span><span class="val" id="hGfil">—</span></div>
+      <div class="row hidden" id="rowGsheet"><span class="lbl">Stewartson/Rossby-proxy q_S</span><span class="val" id="hGsheet">—</span></div>
+      <div class="row hidden" id="rowHornCore"><span class="lbl">R_horn · r_kern · R_horn/r_kern</span><span class="val" id="hHornCore">—</span></div>
+      <div class="row hidden" id="rowOmegas"><span class="lbl">ω_c(horn) · Ω_kern · ζ_kern</span><span class="val" id="hOmegas">—</span></div>
+      <div class="row"><span class="lbl" id="hNvLbl">n_v = 2Ω/κ</span><span class="val" id="hNv">—</span></div>
+      <div class="row hidden" id="rowBundleFlux"><span class="lbl">N_phys(bundle) · profiel</span><span class="val" id="hBundleFlux">—</span></div>
+      <div class="row"><span class="lbl" id="hRLbl">R̄ A / B</span><span class="val" id="hR">—</span></div>
+      <div class="row" id="rowDz"><span class="lbl">Δz kernen</span><span class="val" id="hDz">—</span></div>
+      <div class="row"><span class="lbl" id="hVLbl">naderingssnelheid</span><span class="val" id="hV">—</span></div>
+      <div class="row" id="rowUth"><span class="lbl">U gem. / Kelvin</span><span class="val" id="hUth">—</span></div>
+      <div class="row" id="rowDimless"><span class="lbl">|χ_Ω| · Ro_z · a/R</span><span class="val" id="hDimless">—</span></div>
+      <div class="row" id="rowGa"><span class="lbl">g_a = d_min/a</span><span class="val" id="hGa">—</span></div>
+      <div class="row" id="rowEpsRev"><span class="lbl">ε_rev round-trip <button type="button" id="bEpsRev" title="Meet de achterwaartse round-tripfout op de huidige toestand: 16 CFL-stappen heen + terug op een kopie — expliciet 2× rekenwerk, raakt de simulatie niet." style="font-size:9px;padding:0 5px;margin-left:5px;background:#13233A;color:#CFE8FF;border:1px solid #2E4B6B;border-radius:5px;cursor:pointer;vertical-align:middle;">meet</button></span><span class="val" id="hEpsRev">—</span></div>
+      <div class="row hidden" id="rowGprod"><span class="lbl">relatieve oriëntatie s_A·s_B</span><span class="val" id="hGprod">—</span></div>
+      <div class="row hidden" id="rowMF"><span class="lbl">wrijving α / α′ / v_n</span><span class="val" id="hMF">—</span></div>
+      <div class="row hidden" id="rowRdot"><span class="lbl">Ṙ meting / α(v_n∥−U_K)</span><span class="val" id="hRdot">—</span></div>
+      <div class="row"><span class="lbl">t (fysisch)</span><span class="val" id="hT">0.0 s</span></div>
+      <div class="row"><span class="lbl">effectieve versnelling</span><span class="val" id="hAcc">—</span></div>
+    </div>
+
+    <div id="spark"><canvas id="cspark" width="230" height="76"></canvas></div>
+  </div>
+
+  <div id="topRightActions">
+    <button id="bReset" type="button" title="Herstel de huidige configuratie naar de beginpositie">↺ Reset</button>
+    <div id="quickControlsDock" class="quick-controls-dock" aria-label="Overzicht">
+      <div class="quick-controls-title">OVERZICHT</div>
+    </div>
+  </div>
+
+  <div id="flag"></div>
+  <div id="stabilityDock" aria-label="Live stabiliteitsdiagnose">
+    <div class="stability-dock-title">LIVE STABILITEIT</div>
+  </div>
+
+  <div id="cards">
+    <div class="mcard"><div class="ml">C(K) · ACN</div><div class="mv" id="cardC" style="color:#FF6E6E">—</div><div class="ms">gem. kruisingsgetal</div></div>
+    <div class="mcard"><div class="ml">L̂ = L/L₀</div><div class="mv" id="cardL" style="color:#FFAE45">—</div><div class="ms">reklengte</div></div>
+    <div class="mcard"><div class="ml">Ĥ = H/Γ²</div><div class="mv" id="cardH" style="color:#A855F7">—</div><div class="ms">Wr + 2Lk</div></div>
+    <div class="mcard"><div class="ml">geo-score Ŝ</div><div class="mv" id="cardE" style="color:#55D6FF">—</div><div class="ms">αC + βL̂ + γĤ · geen energie</div></div>
+    <div class="mcard"><div class="ml">Γ</div><div class="mv" id="cardGam" style="color:#EAF2FA;font-size:14px">—</div><div class="ms">circulatie</div></div>
+  </div>
+
+  <div id="physOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Fysica-uitleg">
+      <button id="bPhysClose" type="button" aria-label="Sluit fysica-uitleg" onclick="event.preventDefault();event.stopPropagation();const o=this.closest('#physOverlay');o.classList.remove('open');o.setAttribute('aria-hidden','true');document.getElementById('bPhys')?.focus();">Sluit ✕</button>
+      <h2>BEWEGINGSMODEL</h2>
+      <p>Schwarz-splitsing op kernlijnen: lokale (LIA-)term plus niet-lokale Biot–Savart-som,</p>
+      <p>\[ \mathbf u(\mathbf x_i) \;=\; \underbrace{\frac{\Gamma}{4\pi}\Big[\ln\!\frac{2\sqrt{\ell_+\ell_-}}{e^{\Delta}\,a}+c_0\Big]\;\mathbf s'\!\times\mathbf s''}_{\text{lokaal}} \;+\; \underbrace{\frac{\Gamma}{4\pi}\sum_{j\notin\{i-1,\,i\}} \frac{d\boldsymbol\ell_j\times\mathbf r_{ij}}{\left(|\mathbf r_{ij}|^2+\delta\,a^2\right)^{3/2}}}_{\text{niet-lokaal}} \;+\; w\,\hat{\mathbf z}\;\text{(solo)}, \]</p>
+      <p>De axiale superstroming \(w\,\hat{\mathbf z}\) geldt uitsluitend in <b>solo-modus</b> (één knoop). In botsing-modus gebruik je per-drager <em>v_z-drift</em> sliders i.p.v. \(w\).</p>
+      <p>met \(\delta=0\) op het eigen filament (de kernfysica zit volledig in de lokale term) en \(\delta=1\) voor de kruisterm tussen dragers. De constante \(c_0=0.1395\) is een <em>gemeten</em> discretisatieconstante van dit schema, geverifieerd universeel over \(R\in[4,10]\,\mathrm{cm}\), \(a\in[0.5,3]\,\mathrm{mm}\), \(N\in[48,256]\) en alle drie kernmodellen. Integratie: RK4 met Kelvin-golf-CFL \(\omega_{\max}\,\Delta t\le 0.5\), \(\omega=\nu k^2\), \(\nu=\tfrac{\Gamma}{4\pi}\Lambda\). RK2 is hier principieel ongeschikt: Kelvin-golven zijn zuiver dispersief en RK2 heeft geen stabiliteit op de imaginaire as.</p>
+      <p><b>Validatie:</b> ringsnelheid vs. Kelvin-formule, gemeten over alle drie kernmodellen met de huidige kalibratie: maximale relatieve fout circa \(0.070\%\) bij \(N=48\), \(0.014\%\) bij \(N=96\), en \(<0.01\%\) voor \(N\ge144\). De fout is dus klein maar aantoonbaar resolutie-afhankelijk. In het co-roterende solverframe wordt de uniforme wandrotatie analytisch door de frametransformatie behandeld; alleen met \(\boldsymbol\Omega\times\mathbf r\) expliciet in het lab-solverframe geldt de extra limiet \(\Delta t\le0.2/|\Omega|\).</p>
+
+      <p><b>Deterministische stepper (v6):</b> de integrator zet uitsluitend volledige CFL-stappen \(\Delta t=\Delta t_{\rm CFL}(\text{toestand})\); de <em>simulatiesnelheid</em> bepaalt via een stap-debet-accumulator alleen hoeveel van die stappen per frame worden afgespeeld. Het traject is daardoor bit-voor-bit onafhankelijk van afspeelsnelheid, framerate en veiligheidsrem. In eerdere versies werd de laatste substap op het tijdbudget afgekapt, waardoor de snelheidsknop het resultaat wél kon beïnvloeden. Uitzondering: auto-relax regulariseert per weergaveframe en verbreekt deze onafhankelijkheid; dat staat bij de knop vermeld. <b>v7.1:</b> de laatste bekende framegekoppelde toestandsmutatie (kernstraal-klem vanuit de stabiliteitsdiagnose) is verwijderd — de diagnose is nu puur. <b>v7.2:</b> contactdetectie gebruikt exacte segment-segmentafstanden (geklemde closest-point, met boog-venster \(6a\) tegen valse zelf-treffers) ná iedere geaccepteerde RK4-stap, en bij harde 3a-overschrijding wordt de first-hit binnen de stap gebisecteerd in plaats van met een volle CFL-stap gepasseerd. Tracers integreren per geaccepteerde stap met exact dezelfde tijdstap als de filamenten. Wandmarges rekenen met de búisrand (\(r+a\), \(z\pm a\)), niet de centerline. Regressieharnas: open met <code>?selftest=1</code> of de 🧪-knop; resultaten als JSON exporteerbaar.</p>
+      <h2>KERNMODELLEN</h2>
+      <p>De translatiesnelheid van een dunne ring hangt via één constante af van de kernstructuur:</p>
+      <p>\[ U \;=\; \frac{\Gamma}{4\pi R}\Big[\ln\frac{8R}{a}-\Delta\Big], \qquad \Delta=\begin{cases}\tfrac12 & \text{holle kern (klassiek He-II hollow-core)}\\[2pt] \tfrac14 & \text{vaste kern / Rankine (Kelvin 1867)}\\[2pt] 0.615 & \text{GP/NLSE-kern, } a\to\xi \text{ (Roberts–Grant 1971)}\end{cases} \]</p>
+      <p>Deze drie Δ-keuzes zijn dun-filamentclosures. Voor de SST-Research-Track default wordt de vaste/Rankine-keuze gebruikt: een rotationele kern r_kern met continu aangesloten irrotationeel 1/r-buitenveld. De radiale kernstructuur wordt niet opgelost; GP/NLSE blijft een conditionele alternatieve kalibratie. Niet gemodelleerd: kernvolume-verandering, kern-twist en een variatie-afleiding van r_kern.</p>
+
+      <h2>HELICITEIT &amp; TOPOLOGIE</h2>
+      <p>\[ H=\int \mathbf u\cdot\boldsymbol\omega\,dV \;=\; \Gamma^2\Big(\textstyle\sum_i \mathrm{Wr}_i + 2\!\!\sum_{i<j}\!\mathrm{Lk}_{ij}\Big) \quad\text{(centerline-benadering)}, \]</p>
+      <p>met Wr en Lk via discrete Gauss-integralen \(\frac{1}{4\pi}\oint\!\oint \frac{(d\mathbf x_1\times d\mathbf x_2)\cdot(\mathbf x_1-\mathbf x_2)}{|\mathbf x_1-\mathbf x_2|^3}\). Let op: twist \(\mathrm{Tw}\) is in een filamentmodel niet gerepresenteerd; de behouden combinatie is \(\mathrm{Wr}+\mathrm{Tw}\) — en dat behoud geldt alleen bij \(T=0\): met wederzijdse wrijving (\(\alpha\neq0\)) is ook \(\mathrm{Wr}+\mathrm{Tw}\) niet langer beschermd. De ΔWr-uitlezing toont dus expliciet het ontbrekende twist-kanaal — drift in Wr is géén numerieke fout maar een modelgrens.</p>
+      <p>De frontale configuratie (twee coaxiale dragers, gelijk \(|\Gamma|\), antiparallelle oriëntatie) heeft \(H\equiv 0\) — symmetrie-beschermd. <b>Empirisch resultaat uit deze code:</b> ook mét laterale offset (getest: \(\Delta x=30\) mm, tot aan de reconnectiedrempel bij \(\Delta z\approx 7\) cm) blijft \(H=0.0000\). Offset breekt de axisymmetrie — de ringen kantelen en precesseren — maar een quasi-vlakke gekantelde kromme heeft nog steeds \(\mathrm{Wr}=0\), en \(\mathrm{Lk}\neq0\) vereist reconnectie. Heliciteit ontstaat in gladde filamentdynamica dus niet spontaan; de heliciteitsdrager in dit lab is de <em>trefoil</em>, met \(H/\Gamma^2=\mathrm{Wr}\approx-3.41\) vanaf \(t=0\).</p>
+      <p><b>v7.2 — exacte polygonale \(\mathrm{Wr}/\mathrm{Lk}/\mathrm{ACN}\)</b> via paarsgewijze solid angles (Klenin–Langowski 1a); de eerdere vaste \(N/24\)-truncatie van de nabij-diagonaal is verwijderd. Meetresultaat voor de ideal trefoil \(3_1\) (Gilbert-Fourier, 183 modi): exact \(|\mathrm{Wr}|=3.4036,\,3.4139,\,3.4171,\,3.4180\) bij \(N=96,192,384,768\) — convergent, en hoogstens \(\sim0.01\) boven de oude afgeknotte waarde. De discrepantie met de literatuurwaarde \(\approx3.51\) voor de ropelength-strakke \(3_1\) zit dus <em>niet</em> in de Gauss-som maar in de Fourier-gladde reconstructie van de kromme zelf; die eerdere hypothese is hiermee gemeten in plaats van aangenomen. Numeriek voorbehoud: bij exact coplanaire segmentparen (vlakke ring) is de asin-formulering slecht geconditioneerd en resteert ruis van orde \(10^{-7}\) op \(\mathrm{Wr}=0\); Hopf-\(\mathrm{Lk}\) komt op \(\pm1\) binnen \(10^{-11}\).</p>
+
+      <h2>VOLUME-REK</h2>
+      <p>Met <b>D↔H · V constant</b> blijft het cilindervolume \(V=2\pi R^2h\) vast. De absolute oorsprong ligt in het cilindermidden en de eindvlakken liggen op \(z=\pm h\). De geometrische schaalfactoren voldoen dan aan \(\lambda_r^2\lambda_z=1\). Alleen het volume-kader en de passieve tracers worden anisotroop meegeschaald. De vortexknopen blijven in hun fysieke coördinaten onvervormd; werkelijke vortexrek mag uitsluitend uit de filamentdynamica ontstaan. De kernstraal \(a\) blijft voorlopig een onafhankelijke fysische parameter; koppeling van \(a\) aan rek/circulatie behoort tot een afzonderlijke constitutieve stap.</p>
+
+      <h2>ROTATIE &amp; ROOSTER</h2>
+      <p>Een superfluïde kan niet als star lichaam roteren; de rotatie wordt gedragen door een rooster van gekwantiseerde vortexlijnen met Feynman-dichtheid</p>
+      <p>\[ n_v=\frac{2\Omega}{\kappa}\;:\qquad \text{He-II bij }\Omega=1\ \mathrm{rad/s}:\ 2.0\times10^{7}\ \mathrm{m^{-2}},\qquad \text{SST}:\ 2.1\times10^{8}\ \mathrm{m^{-2}}. \]</p>
+      <p>Het getoonde rooster is representatief (aantal ∝ Ω), niet op ware dichtheid. De achtergrond is coarse-grained solid-body met \(\boldsymbol\omega_{\mathrm{rel}}=2\Omega\,\hat{\mathbf z}\). Coaxiale dragers zijn invariant onder deze rotatie; alleen bij offset zie je precessie (in het lab-frame).</p>
+
+      <h2>SST-SIMILARITEIT EN KERNKOPPELING</h2>
+      <p>De optionele koppeling gebruikt uitsluitend de <em>numerieke Rankine display-similarity</em> \[|\Gamma|=2\pi a_{\rm sim}^2|\Omega|,\qquad u_{\rm sim}=|\Gamma|/(2\pi a_{\rm sim}).\] In SST-modus blijft bovendien \(\Gamma=n\Gamma_0\). Deze relationele visualisatieschaal is niet de fysieke vaste kern. De SST-schaalarchitectuur is: \(r_{\rm kern}\) = veel kleinere vaste/rotationele vortexkern, \(R_{\rm horn}\) = canonieke irrotationele circulatie-/envelopschaal, en \(a_{\rm sim}\) = numerieke filament- en contactstraal. Geen van deze drie wordt stilzwijgend gelijkgesteld.</p>
+      <p>Centrum-lock verwijdert na iedere RK4-stap uitsluitend de centroidtranslatie van een drager. De lokale vervorming, rotatie en Biot--Savart-interactie blijven behouden. Met de periodieke z-grens worden passieve tracers exact modulo \(2h\) doorgezet. Een vrij bewegende knoopdrager wordt als één geheel naar de tegenoverliggende zijde vertaald zodra zijn centroid \(z=+h\) of \(z=-h\) passeert; daardoor blijven de gesloten curve en haar topologie intact. Centrum-lock heft alleen de knooptranslatie op, niet de particle-wrap.</p>
+
+      <h2>MEDIA</h2>
+      <div class="card"><div class="ct kB">HELIUM-II</div>
+        <p>\(\kappa = h/m_4 = 9.969\times10^{-8}\ \mathrm{m^2\,s^{-1}}\); kernstraal \(a_0\sim 1\ \text{Å}\); \(\rho_s\approx 145\ \mathrm{kg\,m^{-3}}\) (\(T\to0\)). Historisch kernmodel: hol (Rayfield–Reif); modern: GP-achtig.</p></div>
+      <div class="card"><div class="ct kA">SST <span class="tag">CANON v0.8.20 + RESEARCH TRACK</span></div>
+        <p>\(\Gamma_0 = 2\pi R_{\rm horn}v_{\!\boldsymbol{\circlearrowleft}}^{\ast} = 9.68362\times10^{-9}\ \mathrm{m^2\,s^{-1}}\); \(R_{\rm horn}=1.40897017\times10^{-15}\ \mathrm m\); \(v_{\!\boldsymbol{\circlearrowleft}}^{\ast}=1.09384563\times10^{6}\ \mathrm{m\,s^{-1}}\). Canon v0.8.20 identificeert \(R_{\rm horn}\) als horn/circulatieschaal, niet als opgeloste buisdikte. In deze Research-Track interpretatie ligt een veel kleinere vaste Rankine-kern \(r_{\rm kern}\) binnen een irrotationele buitenstroming \(v_\theta=\Gamma/(2\pi r)\) voor \(r>r_{\rm kern}\); daar is de klassieke vorticiteit nul. De huidige simulator lost dat radiale profiel niet op: hij gebruikt een centerline-filament met een gekozen \(\Delta\)-closure. GP/NLSE blijft een conditionele alternatieve closure, niet “het kernmodel per Canon”.</p></div>
+      <div class="card"><div class="ct" style="color:#D8B4FE">STRING-THEORIE PROBE <span class="tag">PASSIEVE SCHAALTEST</span></div>
+        <p>Deze optie zet uitsluitend de afzonderlijke Rosetta-schaal \(a_{\rm probe}\) op de Plancklengte \(\ell_P\). De dynamica blijft dezelfde filament-ODE met vrije demo-circulatie. \(a_{\rm probe}\) is niet \(a_{\rm sim}\), \(r_{\rm kern}\), \(R_{\rm horn}\) of de BEM-grens en activeert geen snaaractie, compactificatie of extra dimensies. Resultaten zijn dus numerieke schaal- en interfaceproeven, geen stringtheorievoorspellingen.</p></div>
+      <p><b>Schaalmodel-eerlijkheid.</b> In de sim staat \(a_{\rm sim}\) op een numeriek resolveerbare schaal; de He-II-kern ligt rond Å, terwijl SST Canon \(R_{\rm horn}\) op fm-schaal vastlegt en de kleinere \(r_{\rm kern}\) nog niet onafhankelijk afleidt. Geen van deze schalen wordt stilzwijgend gelijkgesteld. \(U\) schaalt \(\propto\Gamma\) en slechts logaritmisch met \(a_{\rm sim}\); de topologische diagnostiek (Wr, Lk, \(H/\Gamma^2\)) is schaal-invariant.</p>
+
+      <h2>TAYLOR-KOLOM &amp; STEWARTSON (Research Track)</h2>
+      <p><b>Geometrie van ∂V:</b> de lokale separatrix rond de drager heeft straal \(r_{\rm cap}\), terwijl de geïdealiseerde Taylor-kolom axiaal doorloopt van \(z=-h\) tot \(z=+h\). De absolute oorsprong \((0,0,0)\) ligt in het cilindermidden en de kolomlengte is \(2h\), zodat de axiale reikwijdte veel groter kan zijn dan \(r_{\rm cap}\). De eindcaps zijn alleen fysische eindlagen wanneer de cilinder werkelijke begrenzende eindvlakken voorstelt; in het huidige volume-kader zijn ze een didactische domeinaanduiding.</p>
+      <p><b>Statuscorrectie (v7.1):</b> de eerder gebruikte uitdrukking \(u_\theta=-w/(2\Omega r_{\rm cap})\) is dimensieloos, geen snelheid; de daaruit afgeleide \(\Gamma_{\rm sheet}=2\pi r_{\rm cap}u_\theta\) heeft dimensie m in plaats van m²/s. Alle sheet-uitlezingen zijn daarom gedegradeerd tot expliciet gelabelde <em>proxy's zonder SI-eenheid</em> en de ghostring is uit de dynamica gehaald. <b>Besluit D3 (2026-07-14, definitief):</b> Stewartson is in dit filamentlab uitsluitend geometrische visualisatie; de dimensieloze \(q_S\)-proxy blijft, maar er worden géén kwantitatieve laag-, kracht- of circulatieclaims aan verbonden. Een fysische sluiting (Ekman-getal \(E=\nu/(\Omega L^2)\), viskeus of HVBK) hoort bij een latere continuumimplementatie (v7.5.4), niet bij dit model. Referentie achtergrond blijft \(\Gamma_{\rm bg}=2\Omega\pi r_{\rm cap}^2\) (wél dimensioneel correct). <b>v7.2:</b> ook \(\Gamma_{\rm sheet}\) en \(\Gamma_{\rm rel}\) zijn geheel verwijderd — de subtractie m − m²/s was niet gedefinieerd en een proxy-label maakt een ongeldige bewerking niet geldig. Alleen de dimensieloze \(q_S=-w/(2\Omega r_{\rm cap})\) (getekende \(\Omega\)) blijft als Stewartson/Rossby-proxy zichtbaar, en de ghostring telt niet langer mee in \(\ell_{\min}\) of het evaluatiebudget: aan/uit verandert de stapreeks niet meer.</p>
+      <p><b>Lab-displayframe:</b> \(\omega_b=2\Omega\,\hat z\). <b>Co-roterend displayframe:</b> bulk \(\omega_{\rm rel}\approx 0\); Stewartson-laag blijft lokaal zichtbaar via \(w\)-gradient. Sinds v7.5 zijn solverframe, displayframe en achtergrondstroming drie onafhankelijke toestandsvelden; deze knop wisselt uitsluitend het displayframe.</p>
+
+      <h2>FILAMENT-SPIN &amp; ACHTERGROND-Ω</h2>
+      <p><b>Body-frame:</b> \(\Omega_{\rm body}\) uit least-squares fit van punt-snelheden in het xy-vlak; \(\hat\chi\) = chiraliteitsrichting (trefoil/knoop). Ring: \(\mathrm{Wr}=0\), geen macroscopische spin.</p>
+      <p><b>Achtergrond Omega koppelen</b> (optioneel, default uit) is een solverkeuze: in het lab-solverframe wordt \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) expliciet geïntegreerd; in het co-roterende solverframe is de wand in rust. Dit staat los van Absolute/Rotating als puur weergaveframe.</p>
+      <p><b>Transport-proxy</b> (v7.1, voorheen "Tw_proxy"): geïntegreerde tangentiële verplaatsing \(\int \mathbf u\cdot\hat{\mathbf t}\,dt\), dimensie <em>lengte</em>. Dit is géén twist: echte \(\mathrm{Tw}\) is dimensieloos en vereist een ribbon-framing of parallel-getransporteerd materiaalframe, dat een kale centerline niet bezit. De proxy mag daarom niet bij \(\mathrm{Wr}\) worden opgeteld; het twist-kanaal blijft in dit lab expliciet niet gerepresenteerd. <b>v7.2:</b> de uitlezing is nu het booglengte-gewogen gemiddelde \(\langle\int\mathbf u\cdot\hat{\mathbf t}\,dt\rangle_L\) — de oude kale knooppuntsom schaalde \(\propto N\) (zelfde knoop, dubbele resolutie, dubbele waarde) en deelde bovendien door \(2\pi\), een restant van de twist-claim.</p>
+
+      <h2>STABILITEIT &amp; AUTO-RELAX</h2>
+      <p>De stabiliteitsmeter is een <b>numerieke geldigheidsdiagnose</b>, geen Lyapunov-exponent en geen bewijs van een fysisch stabiele vortexknoop. De score combineert segmentuniformiteit \(\ell_{\max}/\ell_{\min}\), vrije niet-lokale afstand in eenheden van de kernstraal, maximale dimensieloze kromming \(a\kappa\), afstand tot het volume-kader en lengtedrift. De werkelijk behaalde rekenfactor wordt afzonderlijk als computer-capaciteitsmeting getoond en verlaagt de numerieke stabiliteitsscore niet.</p>
+      <p>Auto-relax voegt buiten de Hamiltoniaanse Biot--Savart-evolutie een zwakke geometrische regularisatie toe: uniforme arclength-herparametrisatie, normale krommingsgladstrijking en korte-afstandsrepulsie. Per drager blijven centrum en RMS-grootte behouden. Het doel is mesh- en near-contact-stabilisatie; de resulterende vorm is niet automatisch een stationaire Euler-, GP- of SST-oplossing.</p>
+      <p>De veiligheidsrem koppelt de <em>effectieve</em> tijdversnelling uitsluitend aan de numerieke stabiliteitsscore. Bij score 75--100 blijft de handmatig ingestelde versnelling volledig actief; bij afnemende score wordt zij vloeiend afgeremd en bij score 0 naar nul gebracht. Een paarse rand rond de simulatiesnelheid betekent alleen dat het gevraagde afspeeltempo de actuele rekencapaciteit overschrijdt; de CFL-stap en het traject blijven ongewijzigd. Achterwaarts integreren gebruikt dezelfde filament-ODE met een negatieve stap. Auto-relax wordt daarbij gepauzeerd, omdat dissipatieve regularisatie niet tijdomkeerbaar is.</p>
+
+      <h2>KNOOP--KNOOP-INTERACTIE &amp; KERNREACH</h2>
+      <p>In botsingsmodus wordt de translatierichting van iedere complete knoop nu bepaald uit haar werkelijk berekende zelfgeïnduceerde Biot--Savart-centroidsnelheid. Daardoor worden ook niet-planaire trefoils naar elkaar gericht; een geprojecteerd CCW/CW-teken alleen is daarvoor onvoldoende. De niet-lokale som gebruikt bovendien de circulatie van het <em>bronfilament</em>, zodat verschillende componenten correct koppelen. De Stewartson-ghostring is sinds v7.1 volledig uit de dynamica gehaald (geen bron, geen eigen beweging): zijn eerdere \(\Gamma_{\rm sheet}\)-terugkoppeling was dimensioneel niet gesloten.</p>
+      <p>De maximaal instelbare kernstraal wordt dynamisch geschat uit de lokale minimale kromtestraal en de doubly-critical zelfafstand. Voor een cirkelring reduceert dit tot de horn-torusgrens \(a_{\max}\approx R\). Deze geometrische zelfcontactgrens is geen geldigheidsgrens van de slanke filamenttheorie: de stabiliteitsmeter hoort al veel eerder oranje of rood te worden.</p>
+
+      <h2>χ-FASE / TRACK B <span class="tag">SST-pakket v16B.0, gepatcht</span></h2>
+      <p>Het χ-fase-pakket (v10B–v16B) volgt Track B: de kernenergie van de unit-GP/NLSE-vortex-ODE. Kernresultaten zoals meegeleverd: \(\alpha_{\rm ring}^{\rm GP}=1.619350923\) (onafhankelijk gereproduceerd sinds v12B.0), \(\beta_{\rm ring}=0.619350923\), en \(\alpha_{\rm ring}-\varphi=+1.32\times10^{-3}\) met \(\varphi=1.6180340\). De Madelung-brug (v16B) sluit gate G5 <em>voorwaardelijk</em>: uitgaand van één coherente single-modulus-envelope volgt \(A=B=C=1\) en daarmee de unit-GP-ODE; de sterkere claim dat dit al uit de bestaande SST-filamentcanon volgt is door het pakket zelf níét gevestigd. Open gates: de legacy-notatie \(\xi\leftrightarrow r_c\) uit het pakket wordt hier niet als \(\xi\leftrightarrow R_{\rm horn}\) gelezen; de nog open profielbrug is \(\xi\leftrightarrow r_{\rm kern}\) (G5.4/G7, want \(c_s=c\) is niet afgeleid uit de SST-EoS) en de structurele φ-selector (G6). Expliciet niet gecanoniseerd: \(\alpha_{\rm ring}=\varphi\), \(\xi=R_{\rm horn}\), \(\alpha_{\rm ring}=\alpha_{\rm fs}\).</p>
+      <p>Relatie tot deze simulator: het kernmodel GP/NLSE gebruikt \(\Delta=0.615\) (Roberts–Grant), afkomstig uit exact dezelfde kern-ODE-familie. Het live ropelength-paneel \(\Lambda=L/(2\tau)\) met \(\tau=\min(r_\kappa,\,d_{\rm dc}/2)\) meet hoe ver de actuele kernlijn van de ideal-geometrie (L_K = 16.371637) af staat — een geometrische diagnose, geen α-afleiding.</p>
+
+      <h2>SPECULATIVE SWIRL CLOCK A↔B <span class="tag">Research Track · niet canon</span></h2>
+      <p>Deze optionele diagnose is uitsluitend beschikbaar voor twee SST-dragers in botsingsmodus en koppelt niets terug naar de filament-ODE. De veldroute meet voor iedere drager de RMS tangentiële snelheid die uitsluitend door de andere drager wordt geïnduceerd,</p>
+      <p>\[ u_i=\left[\frac{1}{L_i}\oint_{K_i}(\mathbf u_{j\to i}\!\cdot\!\hat{\mathbf t}_i)^2\,ds\right]^{1/2}. \]</p>
+      <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele bracket \(v_i\in[|v_{\!\boldsymbol{\circlearrowleft}}^{\ast}-u_i|,v_{\!\boldsymbol{\circlearrowleft}}^{\ast}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een ongemapte Research-Track-diagnose, geen canonieke superpositieregel.</p>
+      <p>Vanaf v7.6.11 gebruikt de tweede route geen kale verhouding van twee globale body-frequenties meer. Op exact dezelfde actuele geometrie worden per drager twee snelheidsvelden geëvalueerd: het volledige veld en een geïsoleerd veld met alleen de eigen drager plus dezelfde achtergrondvoorwaarden. De directe wederzijdse fase-nullproxy is \(\delta_i=(\Omega_i^{\rm full}-\Omega_i^{\rm iso})/|\Omega_i^{\rm iso}|\). Eén verre kalibratie legt \(\delta_{i,0}\) vast, waarna \(\eta_i^{\rm phase-null}=1+\delta_i-\delta_{i,0}\). De referentie wordt daarna vergrendeld tot een geometrische reset. Dit onderdrukt gemeenschappelijke achtergrondrotatie en zelfgeïnduceerde vormdrift, maar maakt de proxy nog niet canoniek: een SST-interne fase-observable en overdrachtswet ontbreken nog steeds. De veldbracket wordt bovendien in \(\ln\eta\)-ruimte berekend en de lag wordt differentieel geïntegreerd, zodat sub-ulp verschillen nabij één niet door floating-point-cancellatie verdwijnen.</p>
+      <p><b>v7.6.13 integrator- en benchmarkbootstrap.</b> Voorgeschreven axiale drift begrenst de CFL-stap vanaf het eerste frame. Daarnaast geldt een playback-onafhankelijke bovengrens van 0.05 s zolang SPEC CLOCK actief is. De preset en iedere geometrische Reset zetten de klokrun op 1× en pauzeren bij \(t=0\); de eerste fase-nullkalibratie start de sweep automatisch. Een wijziging van snelheid, pauzestatus of drift wist alleen onafgewerkt playback-debet en kan daardoor geen achterstallige reuzenstap meer vrijgeven.</p>
+      <p><b>v7.6.14 onafhankelijke vierpaneel-layout.</b> INFO, FLOW, KERN en DIAG kunnen nu ieder afzonderlijk worden geopend en gesloten. FLOW en KERN bezetten de binnenste posities richting canvas; zodra INFO of DIAG erbij wordt geopend, schuiven die respectievelijk buiten FLOW en buiten KERN. Daardoor zijn nul tot vier panelen tegelijk mogelijk. SCENARIO &amp; RUN staat als afzonderlijke RUN-dropdown in de header naast VIEW.</p>
+      <p><b>v7.6.15 benchmark-verdictpersistentie.</b> Na de automatische SPEC CLOCK-benchmark wordt de oorspronkelijke configuratie nog steeds veilig naar \(t=0\) teruggezet en de handmatige fase-nullreferentie gewist. De SPEC CLOCK-status toont daarna echter eerst het voltooide ENGINE- en RESEARCH-PROXY-verdict, met een expliciete melding dat alleen de herstelde handmatige sessie opnieuw moet worden gekalibreerd. Daardoor kan een correcte benchmarkuitslag niet meer worden overschreven door de generieke tekst “wacht op deterministische veldsample”.</p>
+      <p><b>v7.6.15 gevalideerde benchmarkconclusie.</b> Twee onafhankelijke exports geven bit-voor-bit dezelfde tien scenarioresultaten. De ENGINE-laag slaagt volledig: alle runs kalibreren bij \(t=0\), de eerste geaccepteerde stap is maximaal 0.05 s, 1×/4×/16× zijn exact afspeelinvariant, een cilinderhoogte van 1 m of 5 m geeft exact dezelfde filament- en klokdiagnostiek bij \(\mathbf u_{\rm bg}=0\), en een inactieve BEM lekt niet in de dynamica wanneer de bundel uitstaat. Ook de interne researchcontroles voor nuldrift, A/B-tekenomslag en de driftsweep zijn reproduceerbaar. De formele closure faalt echter structureel: \(\Delta\ln R_{AB}^{\rm phase-null}=-1.6000277198\times10^{-9}\), terwijl de stabiele veldbracket slechts ongeveer \(\pm2.22\times10^{-22}\) bedraagt, een schaalverhouding van \(7.1950733781\times10^{12}\). Dit is geen integrator-, playback-, cilinder- of BEM-fout en mag niet door parameterfitting worden weggewerkt. Het resultaat verwerpt uitsluitend de huidige ongemapte body-\(\Omega\)-faseproxy als directe representant van de formele SST-veldroute.</p>
+      <p><b>v7.6.16 proxy-decompositiebenchmark.</b> Een nieuwe strikt passieve runner bevriest de solver op \(t=0,0.5,1,2,3\,\mathrm{s}\) voor baseline, nuldrift, A/B-traversal-swap en een vaste resolutiepaar-run. Per snapshot worden actuele en geïsoleerde snelheden, het directe wederzijdse Biot–Savartveld, arclengthgrids en een gewogen rigid-motion-fit gekopieerd. Vervolgens worden alle \(2^5=32\) counterfactuals geëvalueerd voor GEOM, PARAM, ROT, TRANS en MUTUAL_BS en via Shapley-attributie gereconstrueerd. De analyse bevat harde ENGINE-gates voor snapshot-purity, snelheidsreconstructie, mutual-linearity, Shapley-reconstructie, cyclic-index-invariantie en deterministische herhaling. De all-on-toestand reproduceert de bestaande phase-nullproxy; binnen iedere GEOM/PARAM-tak blijft de all-on geïsoleerde \(|\Omega|\)-normalisatie bevroren om singuliere ROT/TRANS-ablaties te voorkomen. De runner verandert geen solverstap, topology guard, calibratie of filamentstate en voegt geen fitfactor toe om de bekende veldclosure-mismatch te verkleinen.</p>
+      <p><b>v7.6.16 gevalideerde decompositierun.</b> De eerste echte browserexport bevatte alle 20 geplande snapshots en bevestigde snapshot-purity, snelheidsreconstructie, directe mutual-linearity, all-on-proxymatch en deterministische herhaling. De gerapporteerde D3-ENGINE-FAIL was echter een beoordelingsfout: bij \(t=0\) zijn zowel de te reconstrueren uitkomst als de absolute Shapley-rest praktisch nul, maar de oude gate deelde door \(10^{-300}\) en rapporteerde daardoor een betekenisloze relatieve waarde van orde \(10^{263}\). De grootste absolute rest over de volledige run was slechts \(2.07\times10^{-25}\). In de baseline op \(t=3\,\mathrm{s}\) kwam de proxy vrijwel volledig uit de niet-lineaire combinatie ROT–MUTUAL_BS: Shapley wees circa 50.001% aan ROT en 49.924% aan MUTUAL_BS toe, terwijl PARAM, GEOM en TRANS klein of verwaarloosbaar waren. De expliciete tweekanaalsinteractie \(I_{R,M}=v(R+M)-v(R)-v(M)+v(0)\) bedroeg \(-1.60009\times10^{-9}\), vrijwel de volledige proxy. Tegelijk daalde de totale proxy tussen \(N=128\) en \(N=192\) met circa 25.5%, zodat de amplitude niet resolutiegeconvergeerd was. De formele veldclosure bleef negatief: zelfs de mutual-only counterfactual lag nog ongeveer \(1.36\times10^{10}\) boven de veldbracket. Deze uitkomst verwerpt de huidige faseproxyrealisatie, niet de passieve decompositie of SST.</p>
+      <p><b>v7.6.17 benchmarkupgrade.</b> D3 gebruikt nu een gemengde absolute-plus-relatieve reconstructietolerantie en kan bij een exact nuldoel geen kunstmatige oneindige relatieve fout meer genereren. D4 rapporteert afzonderlijk de cyclische-indexfout van het grote geïsoleerde body-\(\Omega\)-veld en van de kleine mutual-\(\Omega\)-increment; de mutual-route wordt dus niet langer uitsluitend tegen de veel grotere zelfrotatie genormaliseerd. De resolutietest is uitgebreid tot een ladder \(N=128,192,256,384\), waarbij de hoge-resolutieruns alleen de noodzakelijke checkpoints \(t=0\) en \(t=3\,\mathrm{s}\) analyseren. De export bevat voortaan expliciet \(v(R)\), \(v(M)\), \(v(R+M)\), de ROT×MUTUAL-interactie en de all-on-uitkomst, plus een convergentietabel voor totaal, ROT, MUTUAL_BS en de interactieterm. De veldschaalgate toont zowel de Shapley-MUTUAL-attributie als de mutual-only counterfactual, zodat een gedeelde niet-lineaire interactie niet ten onrechte als zuiver direct veldsignaal wordt geïnterpreteerd.</p>
+      <p><b>v7.6.17 gevalideerde benchmarkuitkomst.</b> Zowel de gewone tien-runbenchmark als de 21-snapshotdecompositie geven ENGINE PASS. D3 sluit met een maximale absolute Shapley-rest van \(2.07\times10^{-25}\), D4 sluit afzonderlijk voor iso- en mutual-\(\Omega\), en alle snapshots zijn puur en deterministisch. De researchproxy blijft negatief: de expliciete ROT×MUTUAL-interactie is praktisch gelijk aan het totale fasesignaal, de veldschaalverhouding blijft \(3.59\times10^{12}\) voor de Shapley-MUTUAL-term en \(1.36\times10^{10}\) voor mutual-only. De resolutieladder daalt wel ordelijk, maar verandert tussen \(N=256\) en \(N=384\) nog circa 9.86%, zodat R6 terecht WARN blijft. PARAM convergeert weg en TRANS is verwaarloosbaar; zij verklaren de closure-mismatch niet.</p>
+      <p><b>v7.6.18 normalisatiebenchmark.</b> Dezelfde passieve snapshots worden nu aanvullend doorgemeten met zeven vooraf vastgelegde schalen zonder fitfactor: dynamische \(|\Omega_{\rm iso}(t)|\), vaste \(|\Omega_{\rm iso,0}|\), vaste \(|\Omega_{\rm full,0}|\), vaste \(|\Omega_{\rm mutual,0}|\), de hydrodynamische frequentieschaal \(\Gamma_{\rm eff}/L_0^2\), de kinematische arclengthschaal \(u_{\rm iso,rms,0}/L_0\) en de kernschaal \(\Gamma_{\rm eff}/a_{\rm sim}^2\). Per drager worden lineaire, \({\rm asinh}\)- en \({\rm log1p}\)-uitkomsten geëxporteerd, samen met noemers, veldschaalratio, A/B-pariteit en resolutieconvergentie. ISO_DYNAMIC moet als ENGINE-identiteit de bestaande phase-nullproxy reproduceren. Geen kandidaat wordt door nabijheid tot de veldbracket gecanoniseerd: een overdrachtswet en onafhankelijke normalisatiekeuze blijven vereist.</p>
+      <p><b>v7.6.18 gevalideerde normalisatie-uitkomst.</b> De browserexport gaf opnieuw ENGINE PASS en RESEARCH FAIL. De keuze tussen actuele of bevroren body-\(\Omega\) veranderde de baseline slechts op relatieve schaal \(3.2\times10^{-9}\). Geen van de zeven normalisaties sloot met de formele veldschaal: de minst verre kandidaat was \(\Gamma_{\rm eff}/a_{\rm sim}^2\), maar die bleef bij \(N=128\) nog \(7.68\times10^8\) en bij \(N=384\) circa \(4.52\times10^8\) maal te groot. De niet-singuliere normalisaties veranderden tussen \(N=256\) en \(N=384\) nog ongeveer 9.8%; \(|\Omega_{\rm mutual,0}|\) convergeerde beter maar produceerde door de kleine noemer een orde-éénuitkomst. De mismatch wordt daarom niet opgelost door alleen de denominator te vervangen; de ontbrekende stap is een onafhankelijk afgeleide overdrachtswet van directe mutual-\(\Delta\Omega\) naar \(\Delta\ln R\).</p>
+      <p><b>v7.6.19 transfer-law benchmark.</b> De passieve snapshotpipeline evalueert een vooraf bevroren register van dimensieloze wetten voor \(\Delta\ln R=\mathcal T(\Delta\Omega_{\rm mutual},\Gamma,a,L,d,v_{\!\boldsymbol{\circlearrowleft}}^{\ast},r_c)\). Het register gebruikt uitsluitend coefficient 1 en bevat advectieve tijden \(a/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},L/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},d/v_{\!\boldsymbol{\circlearrowleft}}^{\ast},r_c/v_{\!\boldsymbol{\circlearrowleft}}^{\ast}\), circulatietijden \(a^2/\Gamma,L^2/\Gamma,d^2/\Gamma\), twee geometrisch gedempte varianten en één expliciete Buckingham-monomiaal met alle zeven invoervariabelen. Iedere wet krijgt een dimensie-identiteit, nuldriftlek, A/B-pariteit, N=128–384-convergentie en veldschaalratio. Geen vrije gain wordt berekend of toegepast; een kandidaat moet alle vooraf vastgelegde gates tegelijk halen.</p>
+      <p><b>v7.6.20 canonieke notatie-audit.</b> Canon v0.8.20 reserveert \(v_{\!\boldsymbol{\circlearrowleft}}^{\ast}=\lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert\) voor de gekalibreerde scalaire karakteristieke swirl-snelheid en \(\mathbf u_{\!\boldsymbol{\circlearrowleft}}(\mathbf x,t)\) voor het lokale snelheidsveld. De benchmark gebruikt daarom uitsluitend de machine-key <code>vChar</code>, de interne constante <code>V_CHAR_SST</code> en de zichtbare notatie <code>v↺*</code>. De legacy snelheidsletter en de bijbehorende JSON-/exponent-key zijn volledig verwijderd; er is bewust geen alias of backwards-compatibilityveld toegevoegd. De numerieke kandidaatwetten en toleranties zijn ongewijzigd.</p>
+      <p><b>v7.6.25b KnotPlot-catalogusmigratie.</b> De volledige uniform-N300-catalogus bevat nu zes klassieke knopen, drie 6³-linkvarianten en de toruslinks T(3,3) en T(6,9). De oude test-ID <code>Tlink_6_9</code> migreert naar <code>torus_6.9</code>. KnotPlot-coëfficiënten worden voor dynamische holdouts teruggebracht naar hun native polygonale N300-bron en op booglengte geresampled; de reachaudit gebruikt een periodieke C²-spline over die native discrete centerline, niet de afgeleiden van de full-spectrum interpolant. D=1 blijft bronnormalisatie van de Ridgerunner-polishaudit en is geen zelfstandige ideal/tight-certificatie. <b>v7.6.25a reach/DCSD-validatiecorrectie.</b> De reachrunner leest nu dezelfde Ideal/Fseries/KnotPlot-selectie als de holdoutrunner, gebruikt gedempte least-squares bij rank-deficiënte DCSD-manifolds, herstelt ontbrekende SPARK/HUD-wrappers en rapporteert G4/R41 nooit meer vacuüm. <b>v7.6.25 continue reach/DCSD-solver.</b> Een passieve periodieke C²-spline meet afzonderlijk de kromtelimiet, continue self-DCSD en inter-componentafstand. Iedere oplossing exporteert orthogonaliteitsresiduen, limiterprovenance en resolutieconvergentie tot optioneel N=1536. De nieuwe geometrische reach wordt niet naar de filamentintegrator, topology guard of a_sim teruggekoppeld. <b>v7.6.24f3 HUD-interactiehotfix.</b> Ingeklapte tabs zijn weer volledig klikbaar om te openen; slepen start daar alleen via de ⋮⋮-grip of de vensterrand. Uitgeklapte titelbalken blijven volledig sleepbaar en reageren op dubbelklik om in te klappen. <b>v7.6.24f2 workflow/HUD-hotfix.</b> De runnerhub gebruikt responsieve flexknoppen, iedere runner heeft één Start/Stop-toggle en de ENGINE-volgorde SPEC → decompositie → holdouts → continuüm → reach/DCSD → volledige Swirl-Clocksuite wordt met zichtbare locks afgedwongen. Onderste HUD-vensters zijn via titelbalk én rand te slepen; dubbelklik op titel of rand klapt in, Shift+dubbelklik dockt terug. <b>v7.6.24f1 HUD-hotfix.</b> LIVE STABILITEIT, SPEC CLOCK, STATS en SPARK zijn afzonderlijke sleepbare vensters. De samenvatting is de drag-handle; dubbelklik zet een venster terug in de onderste dock. Positie en open/dicht-status worden lokaal bewaard. Een expliciete closed-state voorkomt dat <code>#spark</code> door een oudere <code>display:block!important</code>-regel zichtbaar blijft wanneer het venster is ingeklapt. <b>v7.6.24f KnotPlot-uitbreiding.</b> Een derde externe catalogusbron <code>knotplot_knots_data.js</code> is beschikbaar in CONFIGURATIE en in de Swirl-Clock-holdoutselector. De huidige catalogus gebruikt <b>torus_6.9</b> voor de driecomponenten-toruslink T(6,9), met drie T(2,3)-componenten en afgeronde paarsgewijze linking |Lk|=6. De bron is een Ridgerunner-polish die naar een uniforme N300-centerline is geresampled; status en D=1 blijven provenance, geen zelfstandige globale ideal/tight-certificatie. De benchmark gebruikt de normale a_sim=1.0 mm; na canonicalisatie blijft 3a_sim ruim onder de D=1-bronschaal. <b>v7.6.24e1 startup-hotfix.</b> De globale runstrip bindt zijn lokale DOM-nodes nu veilig voordat de UI-shell aan document.body wordt gekoppeld. De overige reporting- en run-UI-wijzigingen van v7.6.24e blijven ongewijzigd. <b>v7.6.24e reporting- en run-UI-hotfix.</b> D14 bewaart nu het visuele snapshotbewijs in ieder analyseresultaat. Een globale status/progressbalk zweeft onder de header. Swirl-Clock-runners staan bovenaan bijeen, ongebruikte test- en resultaatsecties klappen bij start in, resultaatsecties markeren ongeziene wijzigingen, interne resultatentabellen hebben geen verticale scrollbars, en de onderste LIVE/SPEC/STATS/SPARK-HUD is per onderdeel naar de benedenrand inklapbaar.</p>
+      <p><b>v7.6.24c stabilisatie.</b> D2, D4 en D6 gebruiken zero-safe mixed tolerances en beoordelen uitsluitend toepasselijke observabelen. R22 is opgesplitst in trefoil-resolutie, topology-specifieke ideal-metadata en Fourier-provenance. Automatische benchmarks schakelen passieve tracers, stroomlijnen en potential-flowweergave tijdelijk uit en herstellen de oorspronkelijke visuele toestand bij complete, stop en fout. <b>v7.6.24b hotfix.</b> Cross-knotholdouts behandelen een nulprojectie van de legacy lab-z-faseproxy als geldig maar niet-informatief, zodat intrinsieke Ω-metingen kunnen doorlopen. De passieve Rosetta-probe biedt ℓ_P/2, ℓ_P en 2ℓ_P als expliciete radius/diameter-auditpresets. De dubbele browser-hovertekst “Toelichting” is bij alle info-iconen verwijderd. <b>v7.6.24a hotfix.</b> De proxy-decompositie initialiseert intrinsieke Ω-kinematica vóór digestberekening, logt setup/checkpointfouten expliciet en voert een echte analyse-smoketest uit. <b>v7.6.24 intrinsieke cross-knotbenchmark.</b> R24–R26 aggregeren uitsluitend toepasselijke eindige kandidaten. Cross-knotmetingen gebruiken een deterministisch gecanonicaliseerde embedding en exporteren de volledige rigid-rotationvector, de intrinsieke carrier-as, Ω<sub>∥</sub>, |Ω| en |Ω<sub>⊥</sub>|. Vijf topology/embeddingparen — 3₁, 4₁, 5₁, 5₂ en 6₁ — vergelijken Fourier- en Gilbert-idealbronnen zonder kandidaatfactoren te trainen. De CLOCK-sidebar is horizontaal resizebaar en bewaart zijn breedte.</p>
+      <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+      <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+      <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+      <p>met \(\mathbf v_s\) de <em>totale</em> lokale superfluïde snelheid (LIA + niet-lokale Biot–Savart + opgelegde drift; in het lab-frame met achtergrond-Ω-koppeling ook \(\boldsymbol\Omega\times\mathbf r\)) en \(\mathbf v_n\) de opgelegde normale-vloeistofsnelheid: uniform axiaal \(v_n\hat{\mathbf z}\), plus \(\boldsymbol\Omega\times\mathbf r\) wanneer de achtergrondrotatie in het lab-frame staat (de normale component co-roteert in evenwicht, zodat de azimutale \(\mathbf v_{ns}\)-bijdrage wegvalt). De wrijvingsterm zit ín de RHS van de ODE en dus binnen alle vier RK4-evaluaties; de deterministische stepper blijft bit-voor-bit afspeelsnelheid-onafhankelijk.</p>
+      <p><b>Orthodoxe consequenties</b> (LIA-exact voor een cirkelring, live geverifieerd in de HUD): in rustende normale vloeistof krimpt een ring met \(\dot R=-\alpha U\) en transleert met \((1-\alpha')U\); met tegenstroom groeit hij zodra \(v_{n\parallel}>U\) (Donnelly–Glaberson). Kelvin-golven worden gedempt met rate \(\sim\alpha\,\omega_{\rm KW}\). Bij \(\alpha\neq0\) vervalt het Kelvin-circulatietheorema op de bewegende kernlijn: energie, \(H/\Gamma^2\) en \(\mathrm{Wr}+\mathrm{Tw}\) zijn <em>niet langer</em> behouden — drift daarin is nu fysica, geen modelgrens.</p>
+      <p><b>Coëfficiënten:</b> \(\alpha(T),\alpha'(T)\) voor He-II bij SVP (T90) uit de Donnelly-compilatie van Barenghi–Donnelly–Vinen, <i>J. Low Temp. Phys.</i> <b>52</b>, 189 (1983), tabelbereik 1.30–2.10 K; \(\alpha'\) wisselt van teken tussen 2.06 en 2.08 K. Onder 1.30 K en boven 2.10 K geen tabelwaarden — gebruik "aangepast". <b>Eerlijkheidsgrens:</b> in SST-, demo- en string-probe-medium zijn \(\alpha,\alpha'\) zuiver fenomenologische knoppen; er bestaat geen SST- of string-canonwaarde voor wederzijdse wrijving en de He-II-temperatuurlabels claimen daar niets. De koppeling is één-richting: \(\mathbf v_n\) is voorgeschreven, er is geen terugreactie op de normale component en dus geen zelfconsistente twee-vloeistof-(HVBK-)dynamica. Achterwaarts integreren met \(\alpha\neq0\) integreert een anti-dissipatieve ODE en is geen fysische omkering; de sim waarschuwt hiervoor.</p>
+
+      <h2>SST VORTEX-STRETCHING STABILITY GATE <span class="tag">v7.5.4 · Research Track</span></h2>
+      <p>Voor een materiële vortexlijn is de lokale tangentiële rek</p>
+      <p>\[ \sigma_{\parallel}=\hat{\mathbf t}^{\mathsf T}\mathbf S\hat{\mathbf t},\qquad \mathbf S=\tfrac12\big(\nabla\mathbf u+\nabla\mathbf u^{\mathsf T}\big). \]</p>
+      <p>De implementatie meet dit zonder extra eindige-differentie-evaluaties uit de segmentlengten vóór en na iedere geaccepteerde CFL-stap: \(\sigma_i\approx\Delta t^{-1}\ln(\ell_i^{n+1}/\ell_i^n)\). Voor de volledige gesloten drager volgt exact op discretisatieniveau</p>
+      <p>\[ \mathcal G_K(t)=\ln\!\frac{L(t)}{L_0},\qquad \Lambda_K(t)=\frac{\mathcal G_K(t)}{t-t_0},\qquad \frac{a_{\rm pred}(t)}{a_0}=e^{-\mathcal G_K/2}, \]</p>
+      <p>waar de laatste relatie uitsluitend de incompressibele tube-volumehypothese gebruikt. De gate beoordeelt \(\Lambda^*=\tau_{\rm ref}\Lambda_K\), met \(\tau_{\rm ref}^{-1}\) de grootste actuele karakteristieke rate uit zelfinductie en het eventueel gekoppelde profiel. Groen betekent finite-time stretch-neutraliteit binnen de ingestelde Research-Track-tolerantie; dit is geen bewijs van asymptotische stabiliteit.</p>
+      <p>Drie Friedlander-profielen zijn beschikbaar: \(A_1=\Omega_0\), \(A_2=\Omega_0+\beta r^2\), en \(A_3=\Gamma_p/[2\pi(r^2+a_p^2)]\). Met een geadvecteerde axiale modus \(W=\varepsilon q(r)\sin[m(\theta-tA(r))]\) en \(q(r)=(r/R_{\rm cyl})^m\) blijft de oplossing as-regulier. Op een probe-traject is de zuivere shearversterking</p>
+      <p>\[ \frac{|\boldsymbol\omega_h(t)|}{|\boldsymbol\omega_h(0)|}=\sqrt{1+\big[r_ptA'(r_p)\big]^2}. \]</p>
+      <p>Daarom geeft \(A_1'(r)=0\) geen Friedlander-sheargroei, terwijl \(A_2' = 2\beta r\) en \(A_3'=-\Gamma_pr/[\pi(r^2+a_p^2)^2]\) een groeiend horizontaal-vorticiteitskanaal openen. Profiel-only schakelt filamentzelfinductie uit en vormt de gereduceerde benchmark; superpositie met Biot–Savart is alleen een gecontroleerde perturbatietest.</p>
+
+      <h2>NIET GEMODELLEERD</h2>
+      <p>Reconnecties en lokale GP-reconnectiebruggen (de topology guard stopt vóór doorsnijding) · cilinderwandbeelden/-BEM en vortex-pinning (de Niveau-C BEM geldt uitsluitend rond de gekozen knooptube) · fysische Taylor/Stewartson-continuumdynamica · kern-twist · normale-vloeistof-terugreactie (\(\mathbf v_n\) is opgelegd; geen zelfconsistente twee-vloeistof-/HVBK-dynamica) · kernvolume bij rek · echte roosterdynamica (Tkachenko-modi) · snaardynamica of andere stringtheorie-veldvergelijkingen.</p>
+      <p class="note" style="max-width:820px;">Ingebouwd: ring 0₁, Hopf-link 2₂, ideal trefoil 3₁, figure-eight 4₁, cinquefoil 5₁ en three-twist 5₂. Leg <code>ideal_knots_data.js</code> naast dit bestand voor Brian Gilberts tight/ideal catalogus, <code>fourier_knots_data.js</code> voor compacte <code>.fseries</code>-curven en <code>knotplot_knots_data.js</code> voor KnotPlot-relaxatiekandidaten. Fseries-curven zijn geometrische Fourierbronnen. KnotPlot uniform-N300-items zijn discrete centerlines uit Ridgerunner-polishruns; de full-spectrum coëfficiënten reproduceren de bronknopen maar gelden niet als zelfstandige C²-/reachcertificatie of globaal ideal/tight bewijs.</p>
+    </div>
+</div>
+
+<div id="ui-right">
+    <details class="coll" id="collConfig" open>
+      <summary>CONFIGURATIE</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>modus</label>
+          <div class="seg" id="modeSeg">
+            <button type="button" class="seg-btn" data-mode="botsing">Botsing (2)</button>
+            <button type="button" class="seg-btn active" data-mode="solo">Solo</button>
+          </div></div>
+        <div class="ctrl hidden" id="sepABRow"><label>initiële axiale knoopafstand Δz<sub>AB,0</sub> <span class="v" id="vSepAB">840 mm</span></label>
+          <input type="number" id="sSepAB" min="1" step="1" value="840" data-slider-max="1000">
+          <div class="note" style="margin-top:3px;">Getalveld: vrije positieve afstand in mm. De slider blijft begrensd tot de actuele cilinderhoogte; een grotere afstand schakelt de periodieke z-grens automatisch uit.</div>
+          <div class="core-limit-note sep-readout warn" id="sepABReadout">Alleen botsingsmodus. A en B worden symmetrisch rond hun huidige middenvlak geplaatst; de laterale offset Δx(B) blijft onafhankelijk.</div>
+        </div>
+        <div class="ctrl"><label for="topoSelect">topologie</label>
+          <select id="topoSelect" aria-label="Topologie">
+            <option value="ring">Ring (0₁)</option>
+            <option value="hopf">Hopf-link (2₂ / 2²₁)</option>
+            <option value="trefoil" selected>Trefoil (3₁ · ideal Gilbert)</option>
+            <option value="figure8">Figure-eight (4₁)</option>
+            <option value="cinquefoil">Cinquefoil (5₁ · T(2,5))</option>
+            <option value="twist52">Three-twist (5₂)</option>
+          </select></div>
+        <div class="ctrl" id="interRow"><label>interactie</label>
+          <div class="seg" id="interSeg">
+            <button type="button" class="seg-btn" data-inter="bs">Biot–Savart</button>
+            <button type="button" class="seg-btn active" data-inter="lia">LIA (lokaal)</button>
+          </div></div>
+        <div class="ctrl" id="knotRow"><label for="knotSelect">Gilbert ideal/tight</label>
+          <select id="knotSelect" aria-label="Gilbert ideal/tight catalogus"><option value="builtin|">— geen Gilbert-catalogus —</option></select></div>
+        <div class="ctrl" id="fseriesRow"><label for="fseriesSelect">.fseries geometrie</label>
+          <select id="fseriesSelect" aria-label="Fseries-geometrie"><option value="">— geen .fseries —</option></select></div>
+        <div class="ctrl" id="knotplotRow"><label for="knotplotSelect">KnotPlot relaxed candidates</label>
+          <select id="knotplotSelect" aria-label="KnotPlot-relaxatiekandidaten"><option value="">— geen KnotPlot-candidate —</option></select></div>
+        <div class="ctrl hidden" id="compRow">
+          <label>componenten</label>
+          <div class="ctrls" style="grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+            <div><label style="font-size:10px;">comp A</label><select id="compA"></select></div>
+            <div><label style="font-size:10px;">comp B</label><select id="compB"></select></div>
+          </div>
+        </div>
+        <div class="ctrl hidden" id="idealComponentModeRow">
+          <label for="idealComponentMode">cataloguscomponenten</label>
+          <select id="idealComponentMode">
+            <option value="all" selected>Volledig catalogusobject</option>
+            <option value="single">Eén component isoleren</option>
+          </select>
+        </div>
+        <button type="button" id="bResetIdealKnot" class="hidden" title="Herstel uitsluitend de geselecteerde catalogusgeometrie">↺ Catalogusvorm</button>
+        <div class="note" id="idealKnotInfo">Gilbert ideal/tight-objecten en compacte .fseries-curven hebben afzonderlijke keuzelijsten. Slechts één externe catalogusbron is tegelijk actief; de gekozen filamentdynamica mag de beginvorm daarna vervormen.</div>
+        <div class="ctrl" id="qualRow"><label>kwaliteit</label>
+          <div class="seg" id="qualSeg">
+            <button type="button" class="seg-btn active" data-qual="laag">Laag</button>
+            <button type="button" class="seg-btn" data-qual="mid">Mid</button>
+            <button type="button" class="seg-btn" data-qual="hoog">Hoog</button>
+          </div></div>
+      </div>
+      </div>
+    </details>
+
+    <details class="coll" id="collStabilityParams" open>
+      <summary>STABILITEITSPARAMETERS</summary>
+      <div class="coll-body">
+        <div class="note" style="margin-top:0;">Alle instellingen die de numerieke geldigheid, contactmarge of filamentdynamica direct beïnvloeden staan hier gegroepeerd. Groen/oranje/rood blijft gekoppeld aan de live stabiliteitsdiagnose.</div>
+        <details class="subcoll" id="subCylinder" open>
+          <summary>CILINDER · MINI-BLOCK</summary>
+          <div class="subcoll-body"><div class="ctrls" id="stabGroupCylinder"></div></div>
+        </details>
+        <details class="subcoll" id="subCore" open>
+          <summary>VORTEXKERN</summary>
+          <div class="subcoll-body"><div class="ctrls" id="stabGroupCore"></div>
+            <div class="core-limit-note" id="coreLimitNote">Geometrische bovengrens wordt uit kromming en doubly-critical zelfafstand geschat. De filamentbenadering wordt al vóór die grens numeriek rood.</div>
+            <div class="core-flow-link" id="gpDeltaPanel">
+              <div class="quick-controls-title" style="margin-bottom:5px;">GP-RINGCONSTANTE Δ · PROVENANCE</div>
+              <div class="ctrl"><label>Δ (kernmodel GP) <span class="v" id="vGpDelta">0.615000</span></label>
+                <select id="gpDeltaSel">
+                  <option value="0.615" selected>Roberts–Grant 1971 · 0.615 (literatuur, default)</option>
+                  <option value="0.619350923">SST Track B v12B.0 · 0.6193509 (in-house, conditioneel)</option>
+                </select></div>
+              <div class="note" style="margin-top:4px;">Provenance-keuze, géén gelijkwaardige alternatieven: 0.615 is de gepubliceerde GP-ringconstante; 0.6193509 is de eigen Track-B-waarde en blijft conditioneel op de open a↔ξ-radiusconventiecheck. De keuze geldt alleen voor kernmodel GP, wordt in ModelLog vastgelegd en triggert een schone reset.</div>
+            </div>
+          </div>
+        </details>
+        <details class="subcoll" id="subFlow" open>
+          <summary>FLOW</summary>
+          <div class="subcoll-body"><div class="ctrls" id="stabGroupFlow"></div><div id="stabGroupFlowFlags"></div></div>
+        </details>
+        <details class="subcoll" id="subVortex" open>
+          <summary>VORTEX</summary>
+          <div class="subcoll-body"><div class="ctrls" id="stabGroupVortex"></div><div id="stabGroupVortexFlags"></div></div>
+        </details>
+      </div>
+    </details>
+
+    <details class="coll" id="collMedium">
+      <summary>MEDIUM &amp; KERN</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>medium</label>
+          <div class="seg" id="medSeg">
+            <button type="button" class="seg-btn" data-med="demo">Demo</button>
+            <button type="button" class="seg-btn" data-med="he">He-II</button>
+            <button type="button" class="seg-btn active" data-med="sst">SST</button>
+            <button type="button" class="seg-btn" data-med="string">String-probe</button>
+          </div></div>
+        <div class="ctrl"><label>kernmodel <span class="v" id="vCore">Δ = ½</span></label>
+          <div class="seg" id="coreSeg">
+            <button type="button" class="seg-btn" data-core="hol">Hol</button>
+            <button type="button" class="seg-btn" data-core="vast">Vast</button>
+            <button type="button" class="seg-btn active" data-core="gp">GP/NLSE</button>
+          </div></div>
+        <div class="ctrl" id="gaRow"><label>Γ circulatie <span class="v" id="vGa">2.0·10⁻³ m²/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revGa"> rev</label>
+            <input type="number" id="sGa" min="0" max="1000000" step="0.001" value="2">
+          </div></div>
+        <div class="ctrl hidden" id="nqRow"><label>n (quanta) <span class="v" id="vNq">10 → Γ = 10Γ₀</span></label>
+          <input type="number" id="sNq" min="1" max="1000000000" step="1" value="10" title="Default-startwaarde: 10 quanta"></div>
+        <div class="ctrl" id="coreRadiusRow"><label>numerieke buisstraal a_sim <span class="v" id="vA">1.500 mm</span></label>
+          <input type="number" id="sA" min="1e-15" max="70" step="any" value="1.500"></div>
+        <div class="ctrl" id="hornRadiusRow"><label>horn/circulatiestraal R_horn <span class="v" id="vRHorn">1.409 fm</span></label>
+          <input type="text" id="sRHorn" value="1.40897017 fm" readonly aria-label="Canonieke SST horn- en circulatiestraal">
+          <div class="note" style="margin-top:3px;">Canon v0.8.20: vaste Compton-locked irrotationele circulatie-/envelopschaal; niet de vaste vortexkern.</div></div>
+        <div class="ctrl" id="coreRadiusPhysRow"><label>vaste vortexkern r_kern <span class="v" id="vRCorePhys">— (niet afgeleid)</span></label>
+          <input type="text" id="sRCorePhys" inputmode="decimal" value="" placeholder="bijv. 0.001 fm; vereist 0 < r_kern < R_horn" autocomplete="off" aria-label="Research-Track straal van de vaste rotationele vortexkern">
+          <div class="note" style="margin-top:3px;">Research-Track profielinvoer; moet kleiner zijn dan R_horn en stuurt de filamentintegrator niet. Zonder onafhankelijke afleiding blijft deze waarde bewust leeg.</div></div>
+        <div class="ctrl" id="scaleProbeRow"><label>passieve Rosetta-schaal a_probe <span class="v" id="vScaleProbe">1.409 fm</span></label>
+          <input type="text" id="sScaleProbe" inputmode="decimal" value="1.40897017 fm" autocomplete="off" aria-label="Passieve fysieke schaalprobe in meters">
+          <input type="range" id="sScaleProbeLog" min="-36" max="-9" step="0.01" value="-14.851" aria-label="Logaritme van de passieve schaalprobe in meters">
+          <select id="scaleProbePreset" aria-label="Preset voor passieve schaalprobe">
+            <option value="custom">Vrije invoer</option>
+            <option value="planck-half">Planck · ℓ_P/2 (radius-audit)</option>
+            <option value="planck">Planck · ℓ_P</option>
+            <option value="planck-double">Planck · 2ℓ_P (diameter-audit)</option>
+            <option value="sst" selected>SST R_horn</option>
+            <option value="helium">He-II · 1 Å</option>
+          </select>
+          <div class="note" style="margin-top:3px;">Metadata-only: gebruik ℓ_P/2, ℓ_P en 2ℓ_P als expliciete radius/diameter-audit; SST R_horn blijft een afzonderlijke canonieke circulatie-/envelopschaal. Vrije invoer accepteert o.a. <code>planck</code>, <code>1.4 fm</code> en SI-notatie. a_probe stuurt nooit a_sim, r_kern, R_horn, BEM, contactdetectie of de filamentintegrator.</div></div>
+        <div class="core-flow-link" id="coreFlowLinkPanel">
+          <label class="chk"><input type="checkbox" id="cCoreFlowLock"> Koppel a_sim, circulatie en Ω <span style="opacity:.65">(numerieke Rankine display-similarity)</span></label>
+          <div class="core-flow-readout" id="coreFlowReadout">Vrij: a, Γ en Ω zijn onafhankelijk.</div>
+          <div class="note" style="margin-top:4px;">Bij invoer onder de minimale n=1-similarity-radius wordt de koppeling expliciet ontgrendeld. Koppeling gebruikt de Rankine-identiteit \( |\Gamma|=2\pi a^2|\Omega| \). Voor He-II/SST blijft \(\Gamma=n\kappa\) respectievelijk \(n\Gamma_0\), zodat n automatisch wordt afgerond. Dit koppelt alleen a_sim aan Γ en Ω. Het is geen identificatie van a_sim met r_kern of R_horn en geen claim dat de cilinderrotatie gelijk is aan de fysieke kernrotatie.</div>
+        </div>
+      </div>
+      </div>
+    </details>
+
+
+    <details class="coll" id="collFriction">
+      <summary>WEDERZIJDSE WRIJVING (T &gt; 0)</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>temperatuur <span class="v" id="vMfT">T = 0 (uit)</span></label>
+          <select id="mfTemp" aria-label="Temperatuur voor wederzijdse wrijving">
+            <option value="0" selected>T = 0 (uit)</option>
+            <option value="1.30">1.30 K</option><option value="1.35">1.35 K</option>
+            <option value="1.40">1.40 K</option><option value="1.45">1.45 K</option>
+            <option value="1.50">1.50 K</option><option value="1.55">1.55 K</option>
+            <option value="1.60">1.60 K</option><option value="1.65">1.65 K</option>
+            <option value="1.70">1.70 K</option><option value="1.75">1.75 K</option>
+            <option value="1.80">1.80 K</option><option value="1.85">1.85 K</option>
+            <option value="1.90">1.90 K</option><option value="2.00">2.00 K</option>
+            <option value="2.02">2.02 K</option><option value="2.04">2.04 K</option>
+            <option value="2.06">2.06 K</option><option value="2.08">2.08 K (α′&lt;0)</option>
+            <option value="2.10">2.10 K (α′&lt;0)</option>
+            <option value="custom">aangepast (α, α′ vrij)</option>
+          </select></div>
+        <div class="ctrl"><label>α <span class="v" id="vMfA">0.000</span></label>
+          <input type="number" id="sMfA" min="0" max="1" step="0.001" value="0" disabled></div>
+        <div class="ctrl"><label>α′ <span class="v" id="vMfAp">0.0000</span></label>
+          <input type="number" id="sMfAp" min="-0.5" max="0.5" step="0.0001" value="0" disabled></div>
+        <div class="ctrl"><label>v_n axiaal <span class="v" id="vVn">0.0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revVn"> rev</label>
+            <input type="number" id="sVn" min="0" max="2000" step="0.0001" value="0" data-scale="log" data-log-min="0.0001">
+          </div></div>
+      </div>
+      <div class="note" style="margin-top:4px;">Schwarz-wrijving op de kernlijn: \(\dot{\mathbf s}=\mathbf v_s+\alpha\,\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)-\alpha'\,\hat{\mathbf s}'\!\times[\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)]\). Tabelwaarden: He-II bij SVP (T90), Donnelly-compilatie van Barenghi–Donnelly–Vinen (1983); onder 1.30 K geen tabelwaarden. In SST-, demo- en string-probe-medium zijn α en α′ zuiver fenomenologisch — er bestaat géén SST- of string-canonwaarde voor wederzijdse wrijving. \(v_n\) is opgelegd en uniform (één-richtingskoppeling, geen normale-vloeistof-terugreactie). Bij \(\alpha\neq0\) vervallen energie- en heliciteitsbehoud: verwacht ringkrimp \(\dot R=\alpha(v_{n\parallel}-U)\), Kelvin-golfdemping, en ringgroei zodra \(v_{n\parallel}>U\) (Donnelly–Glaberson). Achterwaarts integreren is met \(\alpha\neq0\) anti-dissipatief, geen fysische omkering.</div>
+      </div>
+    </details>
+
+    <details class="coll" id="collVolume">
+      <summary>VOLUME</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>Ø cilinder <span class="v" id="vDiam">50 cm</span></label>
+          <input type="number" id="sDiam" min="5" max="200" step="1" value="50"></div>
+        <div class="ctrl"><label>halve hoogte h <span class="v" id="vHeight">50 cm</span></label>
+          <input type="number" id="sHeight" min="2.5" max="250" step="0.5" value="50"></div>
+        <button type="button" id="bLinkDH" class="link-toggle" aria-pressed="false"
+          title="Koppel diameter en hoogte bij constant cilindervolume; alleen het kader en de tracers schalen mee">⛓ D / H los</button>
+        <div class="stretch-readout" id="vStretch">onafhankelijke radiale en axiale schaal</div>
+        <div class="note" style="margin-top:4px;">De oorsprong ligt vast op \((0,0,0)\); de eindvlakken liggen op \(z=-h\) en \(z=+h\), zodat de totale hoogte \(2h\) is. Bij koppeling blijft \(2\pi R^2h\) constant. De tracerwolk volgt de rek; vortexknopen behouden hun absolute coördinaten. Met de periodieke z-grens wordt een volledige knoopdrager na het passeren van \(+h\) als geheel bij \(-h\) voortgezet, en omgekeerd. Zo blijven vorm en topologie intact.</div>
+      </div>
+      </div>
+    </details>
+
+    <details class="coll" id="collParams">
+      <summary>PARAMETERS</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl" id="cylinderOmegaRow"><label>cilinderrotatie Ω <span class="v" id="vOm">1.00 rad/s · CCW</span></label>
+          <div class="signed-row">
+            <label class="rev-chk" title="Uit = CCW, aan = CW"><input type="checkbox" id="revOm"> CW</label>
+            <input type="number" id="sOm" min="0" max="1000" step="0.01" value="1">
+          </div>
+          <div class="note" style="margin-top:3px;">Stuurt de cilinder en het representatieve interne z-as-rooster. Uit = CCW, aangevinkt = CW.</div>
+        </div>
+        <div class="bundle-config hidden" id="sstBundlePanel">
+          <div class="bundle-head">SST VORTEXBUNDEL · RESEARCH TRACK</div>
+          <div class="ctrls">
+            <label class="chk"><input type="checkbox" id="cSSTBundle"> toon coarse-grained vortexbundel</label>
+            <div class="ctrl"><label>bundelrotatie Ω_bundle <span class="v" id="vOmBundle">1.00 s⁻¹ · CCW</span></label>
+              <div class="signed-row">
+                <label class="rev-chk" title="Uit = +z/CCW, aan = −z/CW"><input type="checkbox" id="revOmBundle"> CW</label>
+                <input type="number" id="sOmBundle" min="0" max="1000" step="0.01" value="1">
+              </div></div>
+            <div class="ctrl"><label>lijnprofiel</label>
+              <select id="sBundleProfile">
+                <option value="parallel" selected>parallel · constante dichtheid</option>
+                <option value="splay">splay naar +z · open eindvlakken</option>
+                <option value="periodic">periodieke bulge · divergeert en convergeert</option>
+              </select></div>
+            <div class="ctrl" id="bundleSplayRow"><label>splaysterkte <span class="v" id="vBundleSplay">0.45</span></label>
+              <input type="range" id="sBundleSplay" min="0" max="1.4" step="0.05" value="0.45"></div>
+            <div class="ctrl"><label>max. bundelstraal <span class="v" id="vBundleRadiusFrac">72% R_cyl</span></label>
+              <input type="range" id="sBundleRadiusFrac" min="0.10" max="0.93" step="0.01" value="0.72"></div>
+            <div class="ctrl"><label>zichtbare representatieve lijnen <span class="v" id="vBundleLines">61</span></label>
+              <input type="number" id="sBundleLines" min="7" max="121" step="1" value="61"></div>
+            <label class="chk"><input type="checkbox" id="cBundleFlow"> koppel eindig coarse-grained bundelveld aan filamenten, tracers en stroomlijnen</label>
+            <label class="chk"><input type="checkbox" id="cBundleBEM" checked> Niveau C · 3D Neumann-BEM om de gesloten knooptube</label>
+            <div class="ctrl"><label>BEM-uitsluitingsoppervlak</label>
+              <select id="sBundleBoundaryMode">
+                <option value="asim" selected>a_sim · numerieke knooptube</option>
+                <option value="rcore">r_kern · vaste fysieke kern (indien opgegeven)</option>
+                <option value="rhorn">R_horn · expliciete Research-Track hypothese</option>
+              </select></div>
+            <div class="ctrl"><label>BEM-resolutie</label>
+              <select id="sBundleBEMQuality">
+                <option value="low">laag · 24 collocatiepunten</option>
+                <option value="mid" selected>midden · 40 collocatiepunten</option>
+                <option value="high">hoog · 64 collocatiepunten</option>
+              </select></div>
+            <div class="bundle-readout" id="bundleBEMReadout">BEM wacht op een actieve bundel en knoopgeometrie.</div>
+            <div class="note" id="bundleSourceNote" style="margin-top:2px;">Bronclosure: analytische lokale limiet van zeer lange <b>gesloten</b> vortexlussen met retourpaden ver buiten het domein. Niveau C gebruikt een discrete 3D Neumann source-panel BEM/MFS om de achtergrondstroming én de representatieve bundelvorticiteit tangentieel langs de volledige knooptube te leiden. Dit is een Research-Track exterior-field closure, geen opgeloste microscopische SST-kern.</div>
+          </div>
+          <div class="bundle-readout" id="bundleReadout">—</div>
+          <div class="note" style="margin-top:5px;">De lijnen vormen een gevulde-schijfsampling van de bundeldoorsnede, niet miljoenen afzonderlijke SST-kernen. Binnen R_bundle geldt u_θ=Ω(z)r; erbuiten behoudt het 1/r-profiel de ingesloten circulatie. Voor splay gebruikt de kinematische ansatz Ω(z)=Ω_ref/λ(z)², zodat n_v(z)A(z) constant blijft. Dit is geen bewezen stationaire Euler/SST-evenwichtstoestand.</div>
+        </div>
+        <div class="ctrl" id="frameRefRow"><label>frame of reference <span class="v" id="vFrameRef">Rotating</span></label>
+          <div class="seg" id="frameSeg">
+            <button type="button" class="seg-btn" data-frame="absolute">Absolute</button>
+            <button type="button" class="seg-btn active" data-frame="rotating">Rotating</button>
+          </div>
+          <input type="checkbox" id="cCoRot" checked hidden>
+          <div class="frame-note">Puur weergave (v7.5.2: P.displayFrame). Absolute: de flowcilinder en interne vorticiteitslijnen draaien in het lab-frame; de buitenreferentie is verborgen. Rotating: de flowcilinder staat stil en een grotere, fictieve inertiaalcilinder met alleen verticale lijnen beweegt tegengesteld met Ω. Deze keuze raakt de dynamica niet — identieke ModelLog-diag-reeksen in beide standen.</div>
+        </div>
+        <div class="ctrl" id="vorticityColorRow"><label>kleur verticale vorticiteitslijnen</label>
+          <div class="color-row"><span class="note" id="vVorticityColor">#0F1A29</span><input type="color" id="sVorticityColor" value="#0F1A29" aria-label="Kleur vorticiteitslijnen"></div>
+        </div>
+        <div class="ctrl" id="offRow"><label>offset Δx (B) <span class="v" id="vOff">0 mm</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revOff"> rev</label>
+            <input type="number" id="sOff" min="0" max="100" step="1" value="0">
+          </div></div>
+        <div class="ctrl hidden" id="wRow"><label>superstroming w <span class="v" id="vW">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revW"> −z</label>
+            <input type="number" id="sW" min="0" max="2000" step="0.0001" value="0" data-scale="log" data-log-min="0.0001">
+          </div>
+          <div class="note" style="margin-top:3px;">Logaritmische slider: 0.0001–2000 mm/s; het getalveld blijft lineair en nauwkeurig.</div>
+        </div>
+        <div class="ctrl hidden" id="vzARow"><label>v_z drift A <span class="v" id="vVzA">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revVzA"> −z</label>
+            <input type="number" id="sVzA" min="0" max="2000" step="0.0001" value="0" data-scale="log" data-log-min="0.0001">
+          </div></div>
+        <div class="ctrl hidden" id="vzBRow"><label>v_z drift B <span class="v" id="vVzB">0 mm/s</span></label>
+          <div class="signed-row">
+            <label class="rev-chk"><input type="checkbox" id="revVzB"> −z</label>
+            <input type="number" id="sVzB" min="0" max="2000" step="0.0001" value="0" data-scale="log" data-log-min="0.0001">
+          </div></div>
+        <div class="ctrl"><label>simulatiesnelheid <span class="v" id="vAcc">2.0×</span></label>
+          <input type="number" id="sAcc" min="0" max="7" step="0.05" value="0.3">
+          <div class="note" id="accCapacityNote" style="margin-top:3px;">Alleen afspeeltempo (10^waarde ×). De integrator zet altijd volledige CFL-stappen; het traject is exact onafhankelijk van deze knop, de framerate en de veiligheidsrem. <b>Paars</b> betekent computer-capaciteitslimiet, niet numerieke instabiliteit. Na een wijziging krijgt de meting 0,9 s opwarmtijd. Uitzondering: met auto-relax aan wordt per weergaveframe geregulariseerd en vervalt die onafhankelijkheid.</div></div>
+      </div>
+      <div class="btns" style="margin-top:8px;">
+        <label class="chk hidden" id="ccwARow"><input type="checkbox" id="cCcwA" checked> A CCW</label>
+        <label class="chk hidden" id="ccwBRow"><input type="checkbox" id="cCcwB"> B CCW</label>
+        <label class="chk hidden" id="mirrorRow"><input type="checkbox" id="cMirror"> Mirror B</label>
+        <label class="chk hidden" id="lockVzRow"><input type="checkbox" id="cLockVz" checked> v_z A = B</label>
+        <label class="chk" style="margin-top:6px;"><input type="checkbox" id="cBgOmega"> Achtergrond Ω koppelen</label>
+        <div class="note" style="margin-top:4px;">Integreer in het lab-solverframe \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) (v7.5.3: solverFrame='lab', bgFlow='wall') i.p.v. frame-splitsing (solverFrame='corot') — fysisch identiek voor deze achtergrond (zelftest-T8), maar stijver (dt ≤ 0.2/Ω); didactisch ter vergelijking. Het displayframe staat hier los van.</div>
+      </div>
+      </div>
+    </details>
+
+    <section class="vl-diagnostics-section" id="collDiagnostics" aria-labelledby="collDiagnosticsTitle">
+      <div class="vl-diagnostics-heading" id="collDiagnosticsTitle">GEOMETRISCHE DIAGNOSTIEK</div>
+      <div class="vl-diagnostics-body">
+        <p class="diagnostic-help">Geometrische descriptoren en onafhankelijke visualisatie-overlays. De score Ŝ gebruikt alleen C, L̂ en Ĥ; ∂V is uitsluitend een domeinvisualisatie en wordt niet bij de score opgeteld.</p>
+        <div class="seg ind-seg" id="indSeg">
+          <button type="button" class="seg-btn" data-ind="alpha" title="α C(K) — ACN / geometrische kruisingscomplexiteit">α C</button>
+          <button type="button" class="seg-btn" data-ind="beta" title="β L̂(K) — genormaliseerde centerlinelengte">β L̂</button>
+          <button type="button" class="seg-btn" data-ind="gamma" title="γ Ĥ(K) — getekende centerline-heliciteitsdescriptor">γ Ĥ</button>
+          <button type="button" class="seg-btn" data-ind="sep" title="∂V-overlay — Taylor-kolom + eindcaps + Stewartson-zijlaag">∂V</button>
+        </div>
+        <div class="wgrid">
+          <div class="ctrl"><label>α <span class="v" id="vWAl">1.0</span></label>
+            <input type="number" id="sWAl" min="0" max="3" step="0.1" value="1"></div>
+          <div class="ctrl"><label>β <span class="v" id="vWBe">1.0</span></label>
+            <input type="number" id="sWBe" min="0" max="3" step="0.1" value="1"></div>
+          <div class="ctrl"><label>γ <span class="v" id="vWGa">1.0</span></label>
+            <input type="number" id="sWGa" min="0" max="3" step="0.1" value="1"></div>
+        </div>
+        <div class="note" style="margin-top:4px;">Kaarten onderaan: C = ACN (Gauss-|integraal|), L̂ = L/L₀, Ĥ = Wr+2Lk. Ŝ = αC+βL̂+γĤ is een <b>geometrische diagnostische score</b> met vrije gewichten — geen fysische energie en geen canon-grootheid (v7.4.1 terminologie-audit). Let op: de lineaire γĤ-term is <b>tekengevoelig</b> — spiegelknopen (Ĥ→−Ĥ) krijgen een verschillende score zonder dat het model een pariteitsbrekend mechanisme bevat. Wie chiraliteits-neutraal wil rangschikken gebruikt γ|Ĥ|; de getekende vorm is een bewuste, gedocumenteerde keuze, geen fysica.</div>
+        <label class="chk" style="margin-top:8px;"><input type="checkbox" id="cCenterline"> Kernlijn</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cGhostRing"> Ghost Stewartson ring</label>
+        <label class="chk hidden" id="oscRow" style="margin-top:4px;"><input type="checkbox" id="cTaylorOsc"> w(t) oscillatie (Taylor)</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTwProxy"> transport-proxy ∫u·t̂ dt (ex-Tw_proxy)</label>
+      </div>
+    </section>
+
+    <div class="vl-sst-diagnostics-title" id="sstResearchDiagnostics">SST RESEARCH-TRACK DIAGNOSTIEK</div>
+    <details class="subcoll" id="chiPhasePanel" open>
+          <summary>SST · χ-FASE / TRACK B <span class="tag">pakket v16B.0</span></summary>
+          <div class="subcoll-body">
+            <div class="stab-metrics" style="grid-template-columns:1fr 1fr;margin-top:6px;">
+              <span>ropelength Λ = L/(2τ) · drager A</span><span id="chiRope">—</span>
+              <span>ideal 3₁ referentie L_K</span><span>16.3716</span>
+              <span>Λ / L_K</span><span id="chiRopeRatio">—</span>
+              <span>τ = min(r_κ, d_dc/2)</span><span id="chiThick">—</span>
+              <span>α_ring^GP (v12B/v16B)</span><span>1.6193509</span>
+              <span>φ · (α_ring − φ)</span><span>1.6180340 · +1.32·10⁻³</span>
+            </div>
+            <div class="note" style="margin-top:6px;">Λ en τ komen live uit de huidige kernlijngeometrie van drager A (τ = min. kromtestraal vs. halve doubly-critical afstand, inclusief afstand tussen componenten). Referentie L_K = 16.371637 is de ideal-3₁-ropelength in diameter-eenheden (Gilbert). α_ring^GP is de dimensieloze ringconstante van de unit-GP/NLSE-vortex-ODE uit het χ-fase-pakket — hetzelfde kern-ODE-gezin als kernmodel GP/NLSE (Δ = 0.615, Roberts–Grant 1971). Gate-status v16B.0: G5 voorwaardelijk gesloten binnen de single-modulus-Madelung-sector; open: de profielbrug ξ↔r_kern (legacy ξ↔r_c; G5.4/G7) en de φ-selector (G6). <b>Niet gecanoniseerd:</b> α_ring = φ, ξ = R_horn, α_ring = α_fs. Deze sim leidt niets over α af; het paneel toont de pakketstatus naast live meetbare knoopgeometrie.</div>
+          </div>
+        </details>
+        <details class="subcoll" id="specClockPanel" style="margin-top:9px;">
+          <summary>⚠ SPECULATIVE · SWIRL CLOCK A↔B <span class="tag">NIET CANON · GEEN SOLVERKOPPELING</span></summary>
+          <div class="subcoll-body">
+
+            <div class="spec-knot-selector" id="specKnotSelector">
+              <div class="spec-knot-selector-head"><span>🪢 TESTKNOOPSELECTIE</span><span class="tag">holdouts</span></div>
+              <div class="spec-knot-source-row">
+                <label><input type="checkbox" id="cSpecHoldoutIdeal" checked> ideal</label>
+                <label><input type="checkbox" id="cSpecHoldoutFseries" checked> fseries</label>
+                <label><input type="checkbox" id="cSpecHoldoutKnotplot" checked> KnotPlot</label>
+              </div>
+              <details class="spec-knot-dropdown" id="specKnotDropdown">
+                <summary id="specKnotDropdownSummary">Knopen · 3₁, 4₁, 5₂</summary>
+                <div class="spec-knot-options">
+                  <label><input type="checkbox" data-spec-knot="3_1" checked> 3₁ · trefoil · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="4_1" checked> 4₁ · figure-eight · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="5_1"> 5₁ · cinquefoil · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="5_2" checked> 5₂ · twist · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="6_1"> 6₁ · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="7_1"> 7₁ · torus · Ideal/Fseries/KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="link_6.3.1"> link_6.3.1 · 3 componenten · KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="link_6.3.2"> link_6.3.2 · 3 componenten · KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="link_6.3.3"> link_6.3.3 · 3 componenten · KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="torus_3.3"> T(3,3) · 3-componenten toruslink · KnotPlot</label>
+                  <label><input type="checkbox" data-spec-knot="torus_6.9"> T(6,9) · 3 trefoilcomponenten · KnotPlot</label>
+                </div>
+              </details>
+              <div class="spec-knot-preset-row">
+                <button type="button" id="bSpecKnotsQuick">Snel · 3₁</button>
+                <button type="button" id="bSpecKnotsCore">Kernset · 3₁/4₁/5₂</button>
+                <button type="button" id="bSpecKnotsFull">Volledig · knopen + links</button>
+                <button type="button" id="bSpecKnotsTorus69">Torus · T(6,9)</button>
+              </div>
+              <div class="spec-knot-summary" id="specKnotSelectionSummary">—</div>
+            </div>
+            <div class="spec-clock-warning"><b>WAARSCHUWING.</b> Dit paneel vergelijkt twee ongemapte proxies voor een twee-knoop-superpositie die niet door SST Canon is afgeleid. De canonieke waarde <b>v↺* = 1.09384563×10⁶ m/s</b> wordt alleen gebruikt voor een formele veldbracket. De fase-nullroute trekt op dezelfde actuele geometrie de geïsoleerde zelf- en achtergrondrotatie af; dit is een numerieke nulmeting, geen afgeleide SST-klokobservable. Ruwe overlap of afwijking is daarom geen fysische bevestiging of falsificatie. De uitkomst verandert de knoopdynamica nooit.</div>
+            <div class="spec-clock-actions">
+              <button type="button" id="bSpecClockToggle">⚠ Activeer speculative clock</button>
+              <button type="button" id="bSpecClockCalibrate" disabled>◎ Kalibreer fase-nullreferentie bij huidige afstand</button>
+            </div>
+            <div class="spec-clock-tools">
+              <button type="button" id="bSpecClockPreset">⏱ Pas swirl-clock sweep-preset toe</button>
+              <label class="chk"><input type="checkbox" id="cSpecClockLog"> auto-log instellingen en events</label>
+              <label class="chk"><input type="checkbox" id="cSpecAutoExport" checked> auto-export tests met tijdstempel</label>
+              <button type="button" id="bModelLogExportTxt" disabled>Download log.txt</button>
+              <button type="button" id="bSpecPullFromModel">↺ Lees MODEL-waarden in</button>
+            </div>
+            <div class="spec-benchmark-box" id="specBenchmarkBox">
+              <div class="spec-benchmark-head">
+                <b>GEAUTOMATISEERDE SPEC CLOCK BENCHMARK</b>
+                <div class="spec-benchmark-actions">
+                  <button type="button" id="bSpecBenchmarkStart">▶ Run volledige benchmark</button>
+                  <button type="button" id="bSpecBenchmarkStop" disabled>■ Stop</button>
+                  <button type="button" id="bSpecBenchmarkExportTxt" disabled>TXT</button>
+                  <button type="button" id="bSpecBenchmarkExportJson" disabled>JSON</button>
+                </div>
+              </div>
+              <div class="note" style="margin-top:5px;">Voert tien schone, afzonderlijk gekalibreerde runs uit: bootstrap/CFL, nuldrift, 1×–4×–16× afspeelinvariantie, standaard versus extra hoge cilinder, drie naderingssnelheden, A/B-oriëntatiesymmetrie en BEM-negatieve controle. Iedere tijdrun landt exact op zijn doeltijd. De actuele configuratie wordt daarna teruggezet naar t=0; een lopende run wordt dus vervangen.</div>
+              <div id="specBenchmarkStatus" class="spec-benchmark-status warn">GEREED · start vanuit iedere toestand; de benchmark gebruikt vaste reproduceerbare instellingen.</div>
+              <div class="spec-benchmark-progress"><span id="specBenchmarkProgress"></span></div>
+              <div id="specBenchmarkSummary" class="spec-benchmark-summary"></div>
+              <div class="spec-benchmark-table-wrap">
+                <table class="spec-benchmark-table">
+                  <thead><tr><th>run</th><th>t [s]</th><th>d [m]</th><th>ΔlnR phase</th><th>veld max</th><th>Δτ phase</th><th>dt₁</th></tr></thead>
+                  <tbody id="specBenchmarkRows"><tr><td colspan="7" style="text-align:left;color:var(--muted);">Nog geen benchmarkresultaten.</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="spec-benchmark-box proxy-decomp-box" id="proxyDecompBox">
+              <div class="spec-benchmark-head proxy-decomp-head">
+                <b>🧬 SPEC CLOCK PROXY-DECOMPOSITIE + NORMALISATIE + TRANSFER-LAW + L/v↺*</b>
+                <div class="spec-benchmark-actions">
+                  <button type="button" id="bProxyDecompStart">▶ Proxy-decompositie</button>
+                  <button type="button" id="bProxyDecompStop" disabled>■ Stop</button>
+                  <button type="button" id="bProxyDecompExportTxt" disabled>TXT</button>
+                  <button type="button" id="bProxyDecompExportJson" disabled>JSON</button>
+                  <button type="button" id="bProxyDecompExportCsv" disabled>CSV</button>
+                </div>
+              </div>
+              <div class="proxy-decomp-boundary"><b>PASSIEVE DECOMPOSITIE.</b> Geen solverfeedback en geen canonieke fase-observable. Dominantie van GEOM, PARAM, ROT, TRANS of MUTUAL_BS leidt op zichzelf geen SST-klokwet af.</div>
+              <div class="note" style="margin-top:6px;">De runners zijn gescheiden: proxy-decompositie gebruikt baseline, nuldrift, A/B-swap en twee a_sim-controles; continuüm gebruikt alleen N=128–192–256–384–512–768; holdouts gebruiken uitsluitend de bovenaan geselecteerde Ideal/Fseries/KnotPlot-geometrieën; de confirmatoire suite combineert deze onderdelen. De catalogus bevat ook ideal 7:1:1, fseries 7_1 en — wanneer <code>knotplot_knots_data.js</code> naast de HTML staat — de volledige KnotPlot uniform-N300-catalogus, inclusief <code>torus_6.9</code> met drie T(2,3)-componenten en |Lk|=6. Baseline, nuldrift en A/B-swap gebruiken vijf exacte checkpoints; resolutie-, regularisatie- en holdoutruns analyseren t=0 en t=3 s. Iedere snapshot wordt buiten de solverstate ontleed met een arclength-gewogen rigid fit, directe mutual-Biot–Savartmeting, alle 32 Shapley-counterfactuals en zeven vooraf vastgelegde normalisatieschalen. De actuele configuratie wordt na afloop veilig teruggezet naar t=0. Voltooide identieke scenario’s worden binnen dezelfde browsersessie uit een geheugen-cache hergebruikt.</div>
+              <div id="proxyDecompStatus" class="spec-benchmark-status warn">GEREED · start vanuit iedere toestand; de runner vervangt tijdelijk de actuele run.</div>
+              <div class="spec-benchmark-progress"><span id="proxyDecompProgress"></span></div>
+              <div class="proxy-decomp-toolbar"><label for="proxyDecompMetric">weergave</label><select id="proxyDecompMetric"><option value="phaseLog" selected>ΔlnR phase</option><option value="deltaFrac">deltaFrac A−B</option><option value="rawOmega">raw mutual Ω A−B</option></select></div>
+              <div id="proxyDecompSummary" class="spec-benchmark-summary"></div>
+              <div class="spec-benchmark-table-wrap">
+                <table class="spec-benchmark-table"><thead><tr><th>kanaal</th><th>A</th><th>B</th><th>netto</th><th>% |totaal|</th></tr></thead><tbody id="proxyDecompRows"><tr><td colspan="5" style="text-align:left;color:var(--muted);">Nog geen decompositieresultaten.</td></tr></tbody></table>
+              </div>
+              <div id="proxyDecompWaterfall" class="proxy-decomp-waterfall"></div>
+              <div class="spec-benchmark-table-wrap">
+                <table class="spec-benchmark-table"><thead><tr><th>ROT×MUTUAL-diagnose</th><th>waarde</th></tr></thead><tbody id="proxyDecompInteractionRows"><tr><td colspan="2">—</td></tr></tbody></table>
+              </div>
+              <div class="spec-benchmark-table-wrap">
+                <table class="spec-benchmark-table"><thead><tr><th>N</th><th>ΔlnR</th><th>ROT</th><th>MUTUAL</th><th>I<sub>R,M</sub></th><th>Δ vorige</th></tr></thead><tbody id="proxyDecompResolutionRows"><tr><td colspan="6">—</td></tr></tbody></table>
+              </div>
+              <div class="spec-benchmark-table-wrap">
+                <table class="spec-benchmark-table"><thead><tr><th>scenario</th><th>t</th><th>N</th><th>ΔlnR</th><th>I<sub>R,M</sub></th><th>cyc μ rel</th><th>purity</th></tr></thead><tbody id="proxyDecompSnapshots"><tr><td colspan="7">—</td></tr></tbody></table>
+              </div>
+              <div class="proxy-norm-section" id="proxyNormSection">
+                <div class="proxy-norm-title">NORMALISATIEBENCHMARK · DEZELFDE BEVROREN SNAPSHOTS</div>
+                <div class="proxy-norm-note">Vergelijkt de mutual-Ω-verandering zonder fitfactor met dynamische en vaste body-Ω-referenties, Γ/L², u<sub>rms</sub>/L en Γ/a². Een kleine schaalratio is alleen diagnostisch en vormt geen afgeleide klokwet.</div>
+                <div class="proxy-decomp-toolbar"><label for="proxyNormMetric">normalisatie-uitvoer</label><select id="proxyNormMetric"><option value="netLog" selected>log1p-netto</option><option value="netLinear">lineaire nettofractie</option><option value="netAsinh">asinh-netto</option></select></div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>normalisatie</th><th>D<sub>A</sub></th><th>D<sub>B</sub></th><th>netto</th><th>/ veld</th><th>status</th></tr></thead><tbody id="proxyNormRows"><tr><td colspan="6">—</td></tr></tbody></table>
+                </div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>normalisatie</th><th>N128</th><th>N192</th><th>N256</th><th>N384</th><th>N512</th><th>N768</th><th>Δ 512→768</th></tr></thead><tbody id="proxyNormResolutionRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+              </div>
+              <div class="proxy-transfer-section" id="proxyTransferSection">
+                <div class="proxy-transfer-title">TRANSFER-LAW BENCHMARK · GEEN FITFACTOR</div>
+                <div class="proxy-norm-note">Test vooraf vastgelegde dimensieloze kandidaatwetten voor <b>ΔlnR = 𝒯(ΔΩ<sub>mutual</sub>, Γ, a, L, d, v↺*, r<sub>c</sub>)</b>. Iedere monomiaal heeft coefficient exact 1. Een schaalmatch wordt alleen kandidaat wanneer ook nuldrift, A/B-pariteit en resolutieconvergentie slagen.</div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>wet</th><th>formule</th><th>netto</th><th>/ veld</th><th>null</th><th>Δ 512→768</th><th>besluit</th></tr></thead><tbody id="proxyTransferRows"><tr><td colspan="7">—</td></tr></tbody></table>
+                </div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>wet</th><th>N128</th><th>N192</th><th>N256</th><th>N384</th><th>N512</th><th>N768</th><th>dim</th></tr></thead><tbody id="proxyTransferResolutionRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+              <div class="proxy-transfer-section proxy-length-section" id="proxyLengthSection">
+                <div class="proxy-transfer-title">L/v↺* LENGTE-IDENTIFICATIE · CANONIEKE SEMANTIE + NUMERIEKE CLOSURE</div>
+                <div class="proxy-norm-note">CANON: τ<sub>circ</sub>(K)=L<sub>K</sub>/v↺*, met L<sub>K</sub> de opgeloste gesloten carrierlengte. Voor een ideal-tube representative geldt L<sub>K</sub>=Rop<sub>diam</sub>(K)·2a<sub>core</sub>; voor de trefoil is Rop<sub>diam</sub>=16.371637. De tabel houdt semantische geldigheid en numerieke schaalmatch strikt gescheiden. De gekalibreerde route vergelijkt ΔΩ<sub>mutual</sub>L/v↺* uitsluitend met Δ(field bracket); de absolute route vergelijkt Ω<sub>mutual</sub>L/v↺* met de absolute veldbracket.</div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>L-kandidaat</th><th>klasse</th><th>L<sub>A</sub></th><th>Δ-route</th><th>/ Δveld</th><th>ratio-spread</th><th>besluit</th></tr></thead><tbody id="proxyLengthRows"><tr><td colspan="7">—</td></tr></tbody></table>
+                </div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>L-kandidaat</th><th>abs / veld</th><th>N128</th><th>N192</th><th>N256</th><th>N384</th><th>N512</th><th>N768</th><th>a<sub>sim</sub>-sens.</th></tr></thead><tbody id="proxyLengthResolutionRows"><tr><td colspan="9">—</td></tr></tbody></table>
+                </div>
+              </div>
+              <div class="proxy-transfer-section proxy-geom-kappa-section" id="proxyGeomKappaSection">
+                <div class="proxy-transfer-title">κ_GEOM BENCHMARK · CANONIEKE L_K · GEEN ACHTERAF-FIT</div>
+                <div class="proxy-norm-note">Gerichte test van <b>δlnR<sub>field</sub> = κ<sub>geom</sub> · δ(Ω<sub>mutual</sub>L<sub>K</sub>/v↺*)</b>. Amplitude-admissibility gebruikt N=768 en de continuumlimiet; N=128 is alleen historisch/coarse. Reach-afhankelijke kandidaten zijn ongeldig zolang de live reach/DCSD-route niet convergeert. Cross-knotmetingen zijn holdouts en selecteren geen factor.</div>
+                <div class="spec-benchmark-actions" style="margin:6px 0 7px;flex-wrap:wrap;">
+                  <button type="button" id="bContinuumStart">▶ Continuüm N=128–768</button>
+                  <button type="button" id="bHoldoutStart">▶ Geselecteerde holdouts</button>
+                  <button type="button" id="bGeomKappaStart">▶ Volledige confirmatoire suite</button>
+                </div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>κ-kandidaat</th><th>formule</th><th>κ</th><th>voorspelling</th><th>doel</th><th>ratio</th><th>residu</th><th>besluit</th></tr></thead><tbody id="proxyGeomKappaRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>κ-kandidaat</th><th>N128</th><th>N192</th><th>N256</th><th>N384</th><th>N512</th><th>N768</th><th>Δ 512→768</th></tr></thead><tbody id="proxyGeomKappaResolutionRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+                <div class="proxy-transfer-title" style="margin-top:10px;">CONTINUUM-AUDIT · X(N)=X∞+A·N<sup>−p</sup></div>
+                <div class="proxy-norm-note">Rapporteert de continuümlimiet, effectieve orde en leave-one-resolution-out-spreiding. Een bijna constante reeks wordt als constant model behandeld.</div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>observable</th><th>model</th><th>X∞</th><th>p</th><th>rel. RMS</th><th>LOO-span X∞</th><th>status</th></tr></thead><tbody id="proxyContinuumRows"><tr><td colspan="7">—</td></tr></tbody></table>
+                </div>
+                <div class="proxy-transfer-title" style="margin-top:10px;">CROSS-KNOT HOLDOUTS · GEEN FACTORTRAINING</div>
+                <div class="proxy-norm-note">Dezelfde passieve route wordt uitgevoerd op andere brongeometrieën. Holdouts trainen of selecteren geen factor; zij kunnen uitsluitend een vooraf geregistreerde universele κ-kandidaat bevestigen of verwerpen.</div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>topologie</th><th>embedding</th><th>N</th><th>L<sub>K</sub></th><th>δQ<sub>∥</sub></th><th>δveld</th><th>κ<sub>∥</sub></th><th>status</th></tr></thead><tbody id="proxyCrossKnotRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+                <div class="proxy-transfer-title" style="margin-top:10px;">IDEAL-KNOTDATA · RADIUS/DIAMETERCONVENTIE</div>
+                <div class="proxy-norm-note">Audit van de geladen Gilbert-bron. Voor niet-triviale ankerknopen moet metadata <b>D</b> overeenkomen met <b>2·reach</b>; dan is L/D de diameterconventie en L/reach exact de dubbele radiusconventie.</div>
+                <div class="spec-benchmark-table-wrap">
+                  <table class="spec-benchmark-table"><thead><tr><th>knoop</th><th>L metadata</th><th>D</th><th>L sample</th><th>2·reach</th><th>Rop<sub>diam</sub></th><th>Rop<sub>rad</sub></th><th>audit</th></tr></thead><tbody id="idealConventionAuditRows"><tr><td colspan="8">—</td></tr></tbody></table>
+                </div>
+                <div class="reach-audit-section" id="reachAuditSection">
+                  <div class="proxy-transfer-title">CONTINUE REACH/DCSD · v7.6.25b</div>
+                  <div class="proxy-norm-note"><b>Passieve geometriesolver.</b> Periodieke C²-spline, continue kromtemaximalisatie, doubly-critical self-distance en inter-componentminimum. De gemeten reach verandert <b>niet</b> a_sim, de topology guard, Biot–Savart of de Swirl-Clocksolver.</div>
+                  <div class="reach-audit-controls">
+                    <label for="reachAuditProfile">resolutieprofiel</label>
+                    <select id="reachAuditProfile"><option value="quick">Snel · 128/256/512</option><option value="standard" selected>Standaard · 128–768</option><option value="confirmatory">Confirmatoir · 256–1536</option></select>
+                    <button type="button" id="bReachAuditStart">▶ Continue reach/DCSD-audit</button>
+                    <button type="button" id="bReachAuditExportTxt" disabled>TXT</button>
+                    <button type="button" id="bReachAuditExportJson" disabled>JSON</button>
+                  </div>
+                  <div id="reachAuditStatus" class="spec-benchmark-status warn">GEREED · analytische ankers plus de bovenaan geselecteerde geometrieën.</div>
+                  <div class="spec-benchmark-progress"><span id="reachAuditProgress"></span></div>
+                  <div id="reachAuditSummary" class="reach-audit-summary"></div>
+                  <div class="spec-benchmark-table-wrap"><table class="spec-benchmark-table"><thead><tr><th>bron</th><th>geometrie</th><th>N/comp</th><th>a<sub>κ</sub></th><th>½d<sub>self</sub></th><th>½d<sub>inter</sub></th><th>reach</th><th>limiter</th><th>ε⊥</th></tr></thead><tbody id="reachAuditRows"><tr><td colspan="9">—</td></tr></tbody></table></div>
+                  <div class="spec-benchmark-table-wrap"><table class="spec-benchmark-table"><thead><tr><th>geometrie</th><th>laatste N</th><th>Δ laatste paar</th><th>ideal D-fout</th><th>limiter stabiel</th><th>besluit</th></tr></thead><tbody id="reachConvergenceRows"><tr><td colspan="6">—</td></tr></tbody></table></div>
+                </div>
+              </div>
+              </div>
+            </div>
+            <div class="spec-clock-quick-grid">
+              <div class="ctrl"><label>Δz<sub>AB,0</sub> <span class="v" id="vSpecSepAB">—</span></label>
+                <input type="number" id="sSpecSepAB" min="1" step="1" value="840" data-slider-max="1000"></div>
+              <div class="ctrl"><label>Δx(B) <span class="v" id="vSpecOffClone">—</span></label>
+                <input type="number" id="sSpecOffClone" min="-1000" max="1000" step="1" value="0"></div>
+              <div class="ctrl"><label>v<sub>z</sub> drift A <span class="v" id="vSpecVzA">—</span></label>
+                <input type="number" id="sSpecVzA" min="-2000" max="2000" step="0.0001" value="0"></div>
+              <div class="ctrl"><label>v<sub>z</sub> drift B <span class="v" id="vSpecVzB">—</span></label>
+                <input type="number" id="sSpecVzB" min="-2000" max="2000" step="0.0001" value="0"></div>
+            </div>
+            <div class="spec-clock-mini-actions">
+              <button type="button" id="bSpecSetApproach">⇄ Zet v<sub>z</sub> A/B naar elkaar toe</button>
+              <button type="button" id="bSpecSetSeparate">⇆ Zet v<sub>z</sub> A/B van elkaar af</button>
+            </div>
+            <div class="note" style="margin-top:6px;">Deze quick-controls wijzigen dezelfde MODEL-toestand direct. Het afstandsgetalveld accepteert waarden boven het sliderbereik; tijdens typen wordt een actief veld niet door live diagnostiek overschreven. Alle wijzigingen worden via ModelLog gelogd zodra auto-log aan staat.</div>
+            <div class="ctrl"><label for="sSpecClockGain">visuele lag-vergroting <span class="v" id="vSpecClockGain">1×</span></label>
+              <select id="sSpecClockGain">
+                <option value="1" selected>1× · 10 ppm volle schaal</option>
+                <option value="10">10× · alleen weergave</option>
+                <option value="1000">1000× · alleen weergave</option>
+                <option value="1000000">10⁶× · alleen weergave</option>
+              </select>
+            </div>
+            <div id="specClockStatus" class="spec-clock-status bad">UIT · activeer alleen voor SST + botsingsmodus met twee dragers.</div>
+            <div class="spec-clock-meter"><b>A</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarA"></div></div><span class="spec-clock-value" id="specClockBarValueA">—</span></div>
+            <div class="spec-clock-meter"><b>B</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarB"></div></div><span class="spec-clock-value" id="specClockBarValueB">—</span></div>
+            <div class="stab-metrics" style="grid-template-columns:1fr 1fr;margin-top:8px;">
+              <span>afstand |r<sub>B</sub>−r<sub>A</sub>|</span><span id="specClockDistance">—</span>
+              <span>u∥ RMS · B→A / A→B</span><span id="specClockMutual">—</span>
+              <span>canonieke geïsoleerde vertraging</span><span id="specClockBaseline">—</span>
+              <span>η<sub>A</sub><sup>field</sup> formele bracket</span><span id="specClockEtaA">—</span>
+              <span>η<sub>B</sub><sup>field</sup> formele bracket</span><span id="specClockEtaB">—</span>
+              <span>Ω<sup>full</sup> A/B</span><span id="specClockOmegaFull">—</span>
+              <span>Ω<sup>iso</sup> A/B</span><span id="specClockOmegaIso">—</span>
+              <span>δΩ<sup>mutual</sup> A/B</span><span id="specClockDeltaOmega">—</span>
+              <span>η<sub>A</sub><sup>phase-null</sup> / η<sub>B</sub><sup>phase-null</sup></span><span id="specClockPhaseRates">—</span>
+              <span>R<sub>AB</sub><sup>field</sup> formele bracket</span><span id="specClockFieldRatio">—</span>
+              <span>Δln R<sub>AB</sub><sup>field</sup> stabiele bracket</span><span id="specClockFieldLogRatio">—</span>
+              <span>R<sub>AB</sub><sup>phase-null</sup></span><span id="specClockPhaseRatio">—</span>
+              <span>Δln R<sub>AB</sub><sup>phase-null</sup></span><span id="specClockPhaseLogRatio">—</span>
+              <span>fase-nullreferentie</span><span id="specClockCalibration">—</span>
+              <span>Δτ<sub>AB</sub><sup>field</sup> accumulatie</span><span id="specClockFieldLag">—</span>
+              <span>Δτ<sub>AB</sub><sup>phase</sup> accumulatie</span><span id="specClockPhaseLag">—</span>
+              <span>ruwe proxyafstand ε<sub>proxy</sub></span><span id="specClockResidual">—</span>
+            </div>
+            <div class="note" style="margin-top:7px;"><b>Twee ongemapte routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↺*±u∥-bracket → dτ/dt, numeriek geëvalueerd via Δlnη. Fase-null: Ω<sup>full</sup> minus Ω<sup>iso</sup> op dezelfde actuele geometrie, genormaliseerd aan Ω<sup>iso</sup> en eenmaal bij grote scheiding geijkt. Na kalibratie wordt de referentie vergrendeld; alleen een geometrische reset maakt een nieuwe kalibratie mogelijk. Zonder afgeleide interne fase-observable en overdrachtswet is de vergelijking uitsluitend een nul-, schaal- en consistentiediagnose. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en onafhankelijkheid van achtergrondbundel, displayframe en afspeelsnelheid.</div>
+          </div>
+        </details>
+        <details class="subcoll" id="stretchGatePanel" open style="margin-top:9px;">
+          <summary>SST · VORTEX-STRETCHING STABILITY GATE <span class="tag">Research Track · Friedlander</span></summary>
+          <div class="subcoll-body">
+            <label class="chk"><input type="checkbox" id="cStretchGate" checked> actieve materiaal-lijn gate</label>
+            <div class="ctrl" style="margin-top:7px;"><label for="sStretchProfile">analytisch profiel</label>
+              <select id="sStretchProfile">
+                <option value="rigid" selected>A₁(r)=Ω₀ · starre rotatie</option>
+                <option value="differential">A₂(r)=Ω₀+βr² · differentiële rotatie</option>
+                <option value="regularized">A₃(r)=Γₚ/[2π(r²+aₚ²)] · geregulariseerd 1/r</option>
+              </select></div>
+            <div class="ctrls" style="grid-template-columns:1fr 1fr;gap:7px 10px;margin-top:7px;">
+              <div class="ctrl"><label>Ω₀ <span class="v" id="vStretchOmega">1.000 s⁻¹</span></label>
+                <input type="number" id="sStretchOmega" min="-1000" max="1000" step="0.05" value="1"></div>
+              <div class="ctrl" id="stretchBetaRow"><label>β <span class="v" id="vStretchBeta">60.0 m⁻² s⁻¹</span></label>
+                <input type="number" id="sStretchBeta" min="-100000" max="100000" step="1" value="60"></div>
+              <div class="ctrl" id="stretchGammaRow"><label>Γₚ <span class="v" id="vStretchGamma">0.0200 m²/s</span></label>
+                <input type="number" id="sStretchGamma" min="-10" max="10" step="0.001" value="0.02"></div>
+              <div class="ctrl" id="stretchSoftRow"><label>aₚ <span class="v" id="vStretchSoft">20.0 mm</span></label>
+                <input type="number" id="sStretchSoftMm" min="0.001" max="500" step="0.5" value="20"></div>
+              <div class="ctrl"><label>ε axiaal <span class="v" id="vStretchEps">10.0 mm/s</span></label>
+                <input type="number" id="sStretchEpsMm" min="0" max="5000" step="0.5" value="10"></div>
+              <div class="ctrl"><label>azimutale modus m <span class="v" id="vStretchMode">1</span></label>
+                <input type="number" id="sStretchMode" min="1" max="12" step="1" value="1"></div>
+              <div class="ctrl"><label>neutrale grens |Λ*| <span class="v" id="vStretchNeutral">0.020</span></label>
+                <input type="number" id="sStretchNeutralTol" min="0.0001" max="1" step="0.001" value="0.02"></div>
+              <div class="ctrl"><label>faalgrens |Λ*| <span class="v" id="vStretchFail">0.100</span></label>
+                <input type="number" id="sStretchFailTol" min="0.001" max="5" step="0.005" value="0.10"></div>
+            </div>
+            <label class="chk" style="margin-top:7px;"><input type="checkbox" id="cStretchApply"> koppel geselecteerd profiel als extern snelheidsveld</label>
+            <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cStretchOnly"> exact benchmarktransport: profiel-only, zonder zelfinductie/Biot–Savart</label>
+            <button type="button" id="bStretchReset" style="margin-top:7px;width:100%;">↺ Reset gate en profielklok</button>
+            <div class="stretch-gate-box gate-warming" id="stretchGateBox">
+              <div class="stretch-gate-head"><span class="stretch-gate-verdict" id="stretchGateStatus">OPWARMEN</span><span class="stretch-gate-scope" id="stretchGateScope">carrier A</span></div>
+              <div class="stab-metrics" style="grid-template-columns:1fr 1fr;margin-top:0;">
+                <span>instantaan ⟨σ∥⟩</span><span id="stretchSigmaMean">—</span>
+                <span>lokaal σ∥ min / max</span><span id="stretchSigmaRange">—</span>
+                <span>G_K = ln(L/L₀)</span><span id="stretchG">0.0000</span>
+                <span>Λ_K</span><span id="stretchLambda">—</span>
+                <span>Λ* = τ_ref Λ_K</span><span id="stretchLambdaStar">—</span>
+                <span>L/L₀ · a_pred/a₀</span><span id="stretchRatios">1.0000 · 1.0000</span>
+                <span>profiel |r t A′(r)|</span><span id="stretchProfileShear">0.0000</span>
+                <span>analytische |ω_h|/|ω_h(0)|</span><span id="stretchProfileGain">1.0000</span>
+                <span>observatie / τ_ref</span><span id="stretchObservation">0.00</span>
+                <span>lengte-integratie residu</span><span id="stretchConsistency">0.00e+0</span>
+              </div>
+              <div class="stretch-profile-note" id="stretchGateAdvice">De gate meet per geaccepteerde CFL-stap de materiële rek van de gesloten vortexdrager.</div>
+            </div>
+            <div class="note" style="margin-top:7px;">Definitie: \(\sigma_{\parallel}=\hat{\mathbf t}^{\mathsf T}\mathbf S\hat{\mathbf t}\), \(\mathcal G_K=\int\langle\sigma_{\parallel}\rangle_Ldt=\ln[L(t)/L_0]\), \(\Lambda_K=\mathcal G_K/\Delta t\). De dimensieloze gate gebruikt \(\Lambda^*=\tau_{\rm ref}\Lambda_K\); een stationaire of periodiek begrensde SST-drager vereist asymptotisch \(\Lambda^*\to0\). De analytische profielreferentie gebruikt \(|\omega_h(t)|/|\omega_h(0)|=\sqrt{1+[r_ptA'(r_p)]^2}\). De axiale modus is as-regulier gemaakt met \(q(r)=(r/R_{\rm cyl})^m\), wat de exacte geadvecteerde vorm \(W=q(r)F[\theta-tA(r)]\) behoudt. Profielkoppeling bovenop Biot–Savart is een perturbatietest; alleen profiel-only is de gereduceerde exacte benchmark.</div>
+          </div>
+        </details>
+
+    <details class="coll" id="collVis">
+      <summary>VISUALISATIE</summary>
+      <div class="coll-body">
+      <div class="ctrls">
+        <div class="ctrl"><label>weergave</label>
+          <div class="seg" id="visSeg">
+            <button type="button" class="seg-btn" data-vis="tube">Buis</button>
+            <button type="button" class="seg-btn active" data-vis="line">Lijn</button>
+          </div></div>
+        <div class="ctrl"><label>buismateriaal</label>
+          <div class="seg" id="tubeSeg">
+            <button type="button" class="seg-btn active" data-tube="solid">Vast</button>
+            <button type="button" class="seg-btn" data-tube="hol">Hol</button>
+          </div></div>
+        <label class="chk" style="margin-top:8px;"><input type="checkbox" id="cChiArrow"> Chiraliteitspijl (χ̂)</label>
+        <div class="ctrl" style="margin-top:7px;"><label>vortex-doorzichtigheid <span class="v" id="vVortexOpacity">58%</span></label>
+          <input type="number" id="sVortexOpacity" min="5" max="100" step="5" value="58"></div>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTracers" checked> Flow-visualisatie tonen</label>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cStreamlines"> Stroomlijnen i.p.v. deeltjes</label>
+        <div class="ctrl" id="tracerCountRow" style="margin-top:7px;">
+          <label>hoeveelheid deeltjes <span class="v" id="vTracerCount">5000</span></label>
+          <input type="number" id="sTracerCount" min="0" max="20000" step="100" value="5000" inputmode="numeric">
+        </div>
+        <div class="ctrl hidden" id="streamlineCountRow" style="margin-top:7px;">
+          <label>hoeveelheid stroomlijnen <span class="v" id="vStreamlineCount">28</span></label>
+          <input type="number" id="sStreamlineCount" min="4" max="120" step="4" value="28" inputmode="numeric">
+        </div>
+        <div class="ctrl" id="particleSizeRow" style="margin-top:7px;">
+          <label>particle-grootte <span class="v" id="vParticleSize">3.0 mm</span></label>
+          <input type="number" id="sParticleSize" min="0.5" max="12" step="0.5" value="3.0" inputmode="decimal">
+        </div>
+        <button type="button" id="bResetParticles" style="margin-top:7px; width:100%;"
+          title="Cyclische reset: 1) binnenste knoopkolom, 2) Taylor-kolom met knoopstraal, 3) volledige cilinder">↺ Reset deeltjes · 3 standen</button>
+        <div class="transport-options">
+          <label class="chk"><input type="checkbox" id="cCenterLock" checked> Knoopcentrum vastzetten</label>
+          <label class="chk"><input type="checkbox" id="cTracerWrapZ" checked> Periodieke z-grens: knopen + deeltjes</label>
+          <div class="note" style="margin-top:0;">Centrum-lock verwijdert alleen de translatie van iedere drager; vervorming, rotatie en onderlinge inductie blijven actief. Uitsluitend actief in solo-modus: in botsing zou het de nadering onderdrukken.</div>
+        </div>
+        <div class="note" style="margin-top:3px;">0–20000 tracers. De particles zijn kleine vierkante point-sprites; hun grootte is instelbaar. De resetknop doorloopt drie verdelingen zonder de vortex te wijzigen: (1) de binnenste vrije knoopkolom, (2) een Taylor-kolom met dezelfde representatieve straal als de knoop, en (3) vrijwel de volledige cilinderdoorsnede. Daarna begint de cyclus opnieuw. Alle drie vullen \(z\in[-h,+h]\). Met z-wrap blijft axiaal transport continu zichtbaar. Deeltjeskleur vergelijkt de lokale lab-frame-hoeksnelheid met de cilinder: groen = lager/tegenroterend, cyaan = ongeveer gelijk, paars = hoger. In stroomlijnmodus worden instantane snelheidsstroomlijnen getoond; de lijnkleur gebruikt een Bernoulli-drukproxy \(p_B^*=p_0-\tfrac12\rho|\mathbf u|^2\): cyaan = relatief hogere druk/langzamer, magenta-oranje = relatief lagere druk/sneller. Stroomlijnen volgen dus het werkelijke 3D-snelheidsveld. De afzonderlijke potential-flowlaag is een passieve analytische 2D-referentie en wordt niet aan de filament-ODE teruggekoppeld.</div>
+        <div class="dv-geometry">
+          <div class="dv-title">∂V-GEOMETRIE · LOSSE LAGEN</div>
+          <div class="dv-grid">
+            <label class="chk"><input type="checkbox" id="cDvSeparatrix" checked> Separatrix</label>
+            <label class="chk"><input type="checkbox" id="cDvColumn" checked> Taylor-kolom</label>
+            <label class="chk"><input type="checkbox" id="cDvCaps" checked> Eindcaps</label>
+            <label class="chk"><input type="checkbox" id="cDvStewartson" checked> Stewartson-zijlaag</label>
+          </div>
+          <div class="ctrl" style="margin-top:7px;"><label>∂V opacity <span class="v" id="vDvOpacity">100%</span></label>
+            <input type="number" id="sDvOpacity" min="0" max="100" step="5" value="100"></div>
+          <div class="note" style="margin-top:4px;">De ∂V-knop blijft de hoofdschakelaar. De vier vakjes bepalen welke geometrische laag zichtbaar is; opacity schaalt alle lagen gezamenlijk.</div>
+        </div>
+      </div>
+      </div>
+    </details>
+
+    <details class="subcoll" id="potentialFlowPanel" open>
+      <summary>POTENTIAL FLOW · STROOMFUNCTIE &amp; DRUK <span class="tag">analytische x-z-laag · vrije stroming ∥ z</span></summary>
+      <div class="subcoll-body">
+        <label class="chk"><input type="checkbox" id="cPotentialFlow"> potential-flowlaag tonen</label>
+        <div class="ctrl" style="margin-top:7px;"><label for="sPotentialMode">weergave</label>
+          <select id="sPotentialMode">
+            <option value="stream" selected>Alleen stroomlijnen</option>
+            <option value="both">Stroomlijnen + Cₚ-druk</option>
+            <option value="pressure">Alleen Cₚ-druk</option>
+          </select></div>
+        <div class="ctrl" style="margin-top:7px;"><label for="sPotentialRadiusSource">cirkelstraal</label>
+          <select id="sPotentialRadiusSource">
+            <option value="taylor" selected>Taylor-kolom r_cap</option>
+            <option value="knot">Knoopstraal R̄</option>
+            <option value="particles">Actuele particle-regio</option>
+            <option value="manual">Handmatig</option>
+          </select></div>
+        <div class="ctrl" id="potentialRadiusRow" style="margin-top:7px;">
+          <label>handmatige straal <span class="v" id="vPotentialRadius">8.0 cm</span></label>
+          <input type="number" id="sPotentialRadiusCm" min="0.5" max="100" step="0.5" value="8">
+        </div>
+        <div class="ctrl" style="margin-top:7px;">
+          <label>referentiesnelheid U <span class="v" id="vPotentialU">0.100 m/s</span></label>
+          <input type="number" id="sPotentialU" min="0.001" max="100" step="0.01" value="0.10">
+        </div>
+        <div class="ctrl" style="margin-top:7px;">
+          <label>vlak-opacity <span class="v" id="vPotentialOpacity">58%</span></label>
+          <input type="number" id="sPotentialOpacity" min="5" max="95" step="5" value="58">
+        </div>
+        <div class="potential-flow-readout" id="potentialFlowReadout"><strong>Cₚ</strong> wordt opgebouwd.</div>
+        <div class="note">Analytische doorsnede van een uniforme, incompressibele en irrotationele stroming plus een doublet rond een cirkel: \(\phi=U(r+R^2/r)\cos\theta\), \(\psi=U(r-R^2/r)\sin\theta\), \(C_p=1-|\mathbf v|^2/U^2\). Buiten de gemaskeerde cirkel geldt \(\nabla\times\mathbf u=0\) en \(\nabla^2\phi=0\). De druklaag reproduceert de symmetrische stroomlijnen en constante-\(C_p\)-contouren uit de potential-flowreferentie; zij is uitsluitend een passieve 2D-visualisatie en verandert geen filament, particle, CFL-stap of topology-guardstatus.</div>
+      </div>
+    </details>
+
+    <details class="coll" id="collStability" open>
+      <summary>STABILITEIT &amp; AUTO-RELAX</summary>
+      <div class="coll-body">
+        <div class="stability-panel stab-warn" id="stabilityPanel">
+          <div class="stability-gauge" id="stabilityGauge" style="--score-angle:180deg;--stab-color:#FFAE45">
+            <div class="sg-value" id="stabilityScore">50</div>
+            <div class="sg-unit">/ 100</div>
+          </div>
+          <div>
+            <div class="stab-title" id="stabilityTitle">diagnose wordt opgebouwd</div>
+            <div class="stab-summary" id="stabilitySummary">Mesh, kern/slankheid, niet-lokale afstand, domeinmarge en lengtedrift; rekencapaciteit staat apart.</div>
+            <div class="stab-metrics">
+              <span>mesh ℓmax/ℓmin</span><span id="stabMesh">—</span>
+              <span>g_a = d_min/a_sim</span><span id="stabGap">—</span>
+              <span>max aκ</span><span id="stabCurv">—</span>
+              <span>domeinmarge</span><span id="stabBoundary">—</span>
+              <span>lengtedrift</span><span id="stabLength">—</span>
+              <span>haalbaar tempo</span><span id="stabPerf">—</span>
+              <span>veiligheidsrem tijd</span><span id="stabThrottle">100%</span>
+            </div>
+          </div>
+        </div>
+        <div class="stab-advice" id="stabilityAdvice">Start de simulatie; numerieke criteria krijgen groen/oranje/rood, terwijl paars uitsluitend een computer-capaciteitslimiet aangeeft.</div>
+        <div class="auto-relax-row">
+          <div>
+            <label class="chk"><input type="checkbox" id="cAutoRelax"> Auto-relax geometrie</label>
+            <div class="note" style="margin-top:3px;">Niet-Hamiltoniaanse numerieke regularisatie tijdens het afspelen: uniforme herparametrisatie, zwakke normale krommingsgladstrijking en korte-afstandsrepulsie. v7.5.3 voert dit transactioneel uit en draait de mutatie terug zodra de topology guard tube-clearance kan verliezen.</div>
+          </div>
+          <span class="auto-relax-badge" id="autoRelaxBadge">UIT</span>
+        </div>
+        <div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--line);">
+          <label class="chk"><input type="checkbox" id="cTopologyGuard" checked> Topology guard · geen doorsnijding/reconnectie</label>
+          <div class="note" id="topologyGuardReadout" style="margin-top:3px;">Contact-CFL, transient-contact sampling en first-hit landing aan de veilige zijde van max(3a_sim, numerieke vloer). De centerline blijft gesloten; een run stopt vóór topologieverandering.</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="coll" id="collRun" open>
+      <summary>SCENARIO &amp; RUN</summary>
+      <div class="coll-body">
+        <div class="ctrls run-setup-top" id="runSetupTop"></div>
+        <div class="ctrl preset-select">
+          <label>preset</label>
+          <select id="presetSelect" aria-label="Kies simulatiepreset">
+            <option value="default" selected>★ Default · SST trefoil · laag</option>
+            <option value="superfluid">🪣 Supervloeistof</option>
+            <option value="taylor">Taylor-kolom</option>
+            <option value="pistol">Pistool (solo)</option>
+            <option value="sst">⚛ SST proportioneel</option>
+            <option value="sstBundle">🧵 SST passieve cilinder · vortexbundel</option>
+            <option value="stretchGate">🧭 SST stretch-gate · 3-profielenbenchmark</option>
+            <option value="string">🧵 String-theorie schaalprobe · ℓ_P</option>
+            <option value="friction">🌡 T &gt; 0 · ringverval (He-II 1.90 K)</option>
+            <option value="specClock">⏱ SST speculative swirl-clock sweep</option>
+            <option value="specClockBenchmark">🧪 SST CLOCK · automatische benchmark</option>
+            <option value="specClockProxyDecomposition">🧬 SST CLOCK · proxy-decompositie</option>
+            <option value="specClockContinuumBenchmark">📈 SST CLOCK · continuüm N128–N768</option>
+            <option value="specClockHoldoutBenchmark">🪢 SST CLOCK · geselecteerde knoopholdouts</option>
+            <option value="specClockNormalizationBenchmark">🧪 SST CLOCK · normalisatiebenchmark</option>
+            <option value="specClockTransferLawBenchmark">🧭 SST CLOCK · transfer-law benchmark</option>
+            <option value="specClockLengthBenchmark">📏 SST CLOCK · L/v↺* lengtebenchmark</option>
+            <option value="specClockGeomKappaBenchmark">🧩 SST CLOCK · volledige confirmatoire suite</option>
+          </select>
+        </div>
+        <div class="run-row">
+          <button id="bPause" type="button">Pauzeer</button>
+          <label class="chk" id="timeReverseRow"><input type="checkbox" id="cTimeReverse"> achterwaarts integreren</label>
+        </div>
+        <div class="note" style="margin-top:6px;">Achterwaarts integreren gebruikt een negatieve RK4-stap voor filamenten en tracers. Auto-relax wordt daarbij gepauzeerd; respawn, contactstops en numerieke afronding maken dit geen exacte fysieke tijdomkering.</div>
+        <div class="model-log-panel" id="modelLogPanel" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line);">
+          <div class="quick-controls-title" style="margin-bottom:5px;">MODEL LOGGING</div>
+          <label class="chk"><input type="checkbox" id="cModelLog"> Model logging</label>
+          <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cModelLogVerbose"> Verbose stappen (CFL)</label>
+          <div class="note" id="modelLogStats" style="margin-top:4px;">uit · 0 acties · 0 stappen · 0 events</div>
+          <div class="note" style="margin-top:3px;">Begrensde ringbuffer. JSON-export bevat drop-tellers; diagnostiek wordt maximaal 5×/s gelogd.</div>
+          <button type="button" id="bModelLogExport" style="margin-top:6px;width:100%;" disabled>Download log JSON</button>
+        </div>
+      </div>
+    </details>
+    <div class="note" id="footNote">
+      v7.6.25b · basis v7.5.3 · uniform-N300 KnotPlot-catalogus + torus_6.9-ID-migratie + native-polygon sampling + catalogusbrede holdout/reachprovenance · reachbronselectie + gedempte least-squares DCSD-polish + niet-vacuüm G4/R41 + SPARK/HUD-herstel + zelftestcorrecties · continue C²-spline reach/DCSD/inter-component audit + limiterprovenance + N≤1536 + responsive runner-flex + start/stop toggles + workflow locks + border/title drag + double-click collapse · KnotPlot uniform-N300 catalogus + torus_6.9 holdout · D14 reporting fix · floating run strip · runner hub · collapsible results/HUD · selectable knot suites · split runners · exact cyclic D4 · 7₁ holdout · corrected D2/D6/R22 · benchmark tracers off + restore · decomposition-start hotfix · runtime smoke · expliciete error/abort logging · intrinsieke Ω-vector · canonical embedding pairs · R24–R26 finite filtering · resizebare CLOCK · roadmap · timestamped auto-export · onafhankelijke INFO/FLOW/KERN/CLOCK/DIAG-panelen · RUN-dropdown in header · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · geautomatiseerde 10-run SPEC CLOCK-benchmark · passieve 5-kanaals proxy-decompositie · zero-safe D3 · mutual-genormaliseerde D4 · resolutieladder N=128–768 · expliciete ROT×MUTUAL-export · zeven-schaals normalisatiebenchmark · transfer-law register zonder fitfactor · canonieke L/v↺*-lengte-identificatie · κ_geom no-fit benchmark · Gilbert radius/diameter-audit · absolute/gekalibreerde veldroutes · dimensionale, nul-, pariteits- en convergentiegates · TXT/JSON/CSV-export · uitgebreide zelftests T0–T13 · ?selftest=1.
+    </div>
+</div>
+
+<script src="./vendor/three.min.js"></script>
+<script src="./vendor/katex.min.js"></script>
+<script src="./vendor/auto-render.min.js"></script>
+<script src="./data/ideal_knots_data.js" onerror="void 0"></script>
+<script src="./data/fourier_knots_data.js" onerror="void 0"></script>
+<script src="./data/knotplot_knots_data.js" onerror="void 0"></script>
+<script src="./src/legacy/vortexlab-runtime.js"></script>
+</body>
+</html>

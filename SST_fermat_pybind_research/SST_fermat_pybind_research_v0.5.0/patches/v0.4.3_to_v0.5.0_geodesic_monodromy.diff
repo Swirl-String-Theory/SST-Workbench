@@ -1,0 +1,2156 @@
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/.gitignore /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/.gitignore
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/.gitignore	2026-07-31 22:44:16.541833444 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/.gitignore	2026-07-31 22:44:16.541833444 +0000
+@@ -19,7 +19,10 @@
+ bifurcation_*/
+ scale_sweep_*/
+ symmetry_audit*/
+-v0.4.3_campaign_output/
+-v0.4.3_smoke_output/
+-SST_fermat_pybind_research_v0.4.3_results.zip*
+-SST_fermat_pybind_research_v0.4.3_smoke_results.zip*
++v0.5.0_campaign_output/
++v0.5.0_smoke_output/
++v0.5.0_global_orbit_output/
++v0.5.0_global_orbit_smoke_output/
++SST_fermat_pybind_research_v0.5.0_results.zip*
++SST_fermat_pybind_research_v0.5.0_global_orbit_results.zip*
++SST_fermat_pybind_research_v0.5.0_global_orbit_smoke_results.zip*
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/CHANGELOG.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/CHANGELOG.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/CHANGELOG.md	2026-07-31 22:40:00.129842082 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/CHANGELOG.md	2026-07-31 22:40:00.129842082 +0000
+@@ -1,28 +1,30 @@
+ # Changelog
+ 
++## v0.5.0 — Global Fermat Geodesic Shooting and Monodromy
++
++- Added the full three-dimensional ray equation for the conformal Fermat metric `g_F=S^-2 delta`.
++- Added RK4 ray integration with real-clock-domain termination, optical-length accumulation, and tangent normalization diagnostics.
++- Added five-variable damped Gauss--Newton closed-orbit shooting from local radial-minimum seeds.
++- Added integration-step convergence and a second centerline-resolution convergence gate.
++- Added a reduced four-dimensional finite-difference monodromy map with eigenvalue and reciprocal-pair diagnostics.
++- Added perturbation-scale convergence for monodromy; certification requires a globally certified orbit.
++- Added `run_geodesic_shooting.py`, `run_orbit_convergence.py`, `run_monodromy.py`, and the global campaign runner.
++- Added separate smoke and full Windows launchers.
++- Preserved `qsm_certified=false`; no complex-frequency wave solver is included.
++
+ ## v0.4.3 — Threshold Censoring and Clock-Domain Metadata
+ 
+-- Preserved the v0.4.2 clock-safe root-refinement hotfix.
+-- Added explicit clock-boundary brackets and connected real-clock component counts per sampled ray.
+-- Corrected `valid_clock_ray_count` to mean rays with at least one valid probe; retained a separate `fully_clock_valid_ray_count`.
+-- Added `candidate_surface_fraction_valid_clock_rays`, `candidate_surface_fraction_all_rays`, and the fully-valid conditional fraction.
+-- Replaced ambiguous sampled onset/loss labels with first/last-present values, censoring flags, and present/absent brackets.
+-- Added regression checks for the split-clock-domain control case at `epsilon/r_c=0.0010`.
+-- Preserved all global closed-orbit and QSM guards.
++- Added explicit connected real-clock component metadata and clock-boundary brackets.
++- Corrected valid-ray versus fully-valid-ray semantics.
++- Replaced ambiguous threshold labels with censoring and present/absent brackets.
+ 
+ ## v0.4.2 — Clock-Domain Root-Refinement Hotfix
+ 
+-- Rejected brackets whose bisection midpoint leaves the real clock domain.
+-- Evaluated endpoint derivatives using endpoint `S` values instead of the root-point denominator.
+-- Prevented complex values from `(1-beta^2)^(3/2)` in clock-invalid regions.
+-- Kept clock-boundary brackets separate from stationary roots.
++- Rejected clock-invalid bisection intervals and prevented complex clock-domain arithmetic.
+ 
+ ## v0.4.1 — Campaign Automation and Certification Corrections
+ 
+-- Corrected candidate-fraction normalization and pre-convergence root labels.
+-- Added the missing high-resolution `3_1` convergence ladder.
+-- Added adaptive bifurcation and scale-sweep resolution planning.
+-- Added resumable campaign execution, logging, ZIP packaging, and SHA-256 output.
++- Added adaptive campaign, convergence, scale, logging, resume, and ZIP automation.
+ 
+ ## v0.4.0 — Candidate Certification and Bifurcation Atlas
+ 
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/README.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/README.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/README.md	2026-07-31 22:39:17.785843508 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/README.md	2026-07-31 22:44:37.997832722 +0000
+@@ -1,4 +1,4 @@
+-# SST Fermat pybind research v0.4.3
++# SST Fermat pybind research v0.5.0
+ 
+ Standalone Python + C++17/pybind11 research harness. It does **not** import, modify, or patch SSTcore.
+ 
+@@ -10,69 +10,96 @@
+ 
+ The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it resolves numerical stationary structures and separately certifies convergence-qualified branches; it does not establish a physical electron model or a global photon sphere.
+ 
+-## v0.4.3 patch scope
++## v0.5.0 scope: full Fermat rays and monodromy
+ 
+-v0.4.3 is a **reporting and audit-semantics release** built on the clock-safe v0.4.2 root solver. It does not change the Rosenhead field operator, the analytic Jacobian, or the stationary equation
++v0.5.0 is the first release that advances beyond local radial candidates. It integrates complete rays in the full three-dimensional, non-axisymmetric Fermat metric generated by the same regularized Biot--Savart field used by v0.4.x.
++
++For the clock-only ansatz,
+ 
+ \[
+-G(\rho;s,\theta)
+-=
+-1-\lVert\boldsymbol\beta\rVert^2
+-+
+-\rho\,\boldsymbol\beta\cdot\partial_\rho\boldsymbol\beta
+-=0.
++g^{F}_{ij}(\mathbf x)=S(\mathbf x)^{-2}\delta_{ij},
++\qquad
++S(\mathbf x)=\sqrt{1-\lVert\boldsymbol\beta(\mathbf x)\rVert^2},
++\]
++
++and, using Euclidean arclength \(\ell\) with unit tangent \(\mathbf t\), the ray system is
++
++\[
++\frac{d\mathbf x}{d\ell}=\mathbf t,
++\qquad
++\frac{d\mathbf t}{d\ell}
++=-\frac{(I-\mathbf t\mathbf t^{\mathsf T})\nabla S}{S}.
+ \]
+ 
+-The release closes two ambiguities found in the successful v0.4.2 campaign.
++The analytic Biot--Savart Jacobian supplies
++
++\[
++\nabla S=-\frac{J_{\beta}^{\mathsf T}\boldsymbol\beta}{S}.
++\]
+ 
+-## New in v0.4.3
++## New in v0.5.0
+ 
+-1. **Clock-domain components are explicit.** Each sampled normal ray now reports:
++1. **Full 3-D Fermat ray integration** in `fermat_ext/geodesic.py`, using fixed-step RK4, tangent renormalization, optical-length accumulation, real-clock-domain termination, and backend provenance.
+ 
+-   ```text
+-   valid_clock_ray_count
+-   fully_clock_valid_ray_count
+-   clock_boundary_bracket_count
+-   real_clock_component_count_total
+-   rays_with_disconnected_clock_domain
+-   clock_domain_splits
++2. **Five-variable closed-orbit shooting.** A local `RESOLVED_LOCAL_MINIMUM` seed is promoted to a full ray seed. The solver varies two transverse starting-position coordinates, two direction tilts, and the orbit period using damped Gauss--Newton iteration.
++
++3. **Two-axis orbit convergence.** `certify_global_closed_orbit` requires:
++
++   - a three-level ray-step ladder at each centerline discretization; and
++   - agreement across a three-level centerline ladder.
++
++   A single successful shot is only `RESOLVED_CLOSED_ORBIT`. The stronger flag
++
++   ```json
++   "global_closed_orbit_certified": true
+    ```
+ 
+-   A ray with an inner and outer real-clock interval is no longer summarized as unsplit. Clock-boundary brackets remain excluded from the stationary-root list.
++   is emitted only after both convergence axes pass.
+ 
+-2. **Candidate fractions have unambiguous denominators.** The output distinguishes
++4. **Reduced monodromy diagnostics.** A centered finite-difference flow map is projected onto a four-dimensional transverse basis. The output includes the reduced matrix, eigenvalues, spectral radius, determinant, unit-circle deviation, and reciprocal-pairing residual.
+ 
+-   \[
+-   P_{\rm valid},\qquad P_{\rm all},\qquad P_{\rm fully\ valid},
+-   \]
++5. **Perturbation-convergence gate for monodromy.** The map is recomputed at three finite-difference scales. `monodromy_certified` additionally requires a globally certified orbit.
+ 
+-   through `candidate_surface_fraction_valid_clock_rays`, `candidate_surface_fraction_all_rays`, and `candidate_surface_fraction_fully_clock_valid_rays`. In particular,
++6. **New command-line tools:**
+ 
+-   \[
+-   0\le P_{\rm all}\le1.
+-   \]
++   ```text
++   run_geodesic_shooting.py
++   run_orbit_convergence.py
++   run_monodromy.py
++   run_monodromy_smoke.py
++   run_global_orbit_campaign.py
++   ```
+ 
+-3. **Bifurcation thresholds are censored or bracketed, never guessed.** The misleading `epsilon_loss_sampled` wording is replaced by:
++7. **New Windows launchers:**
+ 
+    ```text
+-   epsilon_first_present_sample
+-   epsilon_last_present_sample
+-   onset_left_censored
+-   loss_right_censored
+-   epsilon_onset_bracket_over_rc
+-   epsilon_loss_bracket_over_rc
++   START_V050_GLOBAL_ORBIT_SMOKE.bat
++   START_V050_GLOBAL_ORBIT_CAMPAIGN.bat
+    ```
+ 
+-   A sampled present/absent transition is labelled `BRACKETED_SAMPLED_THRESHOLD_NOT_CONTINUATION_CERTIFIED`.
++   The previous local-candidate campaign remains available as `START_V050_LOCAL_CAMPAIGN.bat`.
+ 
+-4. **Regression coverage was extended.** The audit now verifies the split clock domain at \(\epsilon/r_c=0.0010\), six clock-boundary brackets for the three-ray control scan, and the distinction between any-valid and fully-valid rays.
++## Scientific gates
+ 
+-5. The v0.4.2 scientific guards are unchanged:
++The hierarchy in v0.5.0 is deliberately strict:
+ 
+-   ```json
+-   "global_closed_orbit_certified": false,
+-   "qsm_certified": false
+-   ```
++\[
++\text{local radial minimum}
++\not\Rightarrow
++\text{resolved closed ray}
++\not\Rightarrow
++\text{convergence-certified orbit}
++\not\Rightarrow
++\text{QSM pole}.
++\]
++
++The package may therefore complete successfully while reporting zero certified closed orbits. That is a valid negative result, not a software failure. Every v0.5.0 output keeps
++
++```json
++"qsm_certified": false
++```
++
++because complex-frequency wave resonances are outside this release.
+ 
+ ## Core v0.4 capabilities retained
+ 
+@@ -133,14 +160,14 @@
+ 
+ `RESOLVED_LOCAL_MINIMUM` means that a stationary radial minimum was solved numerically in one transported normal plane. It does **not** mean that a closed Fermat geodesic exists in the full non-axisymmetric metric.
+ 
+-Every result preserves:
++Local-candidate outputs preserve:
+ 
+ ```json
+ "global_closed_orbit_certified": false,
+ "qsm_certified": false
+ ```
+ 
+-The reach value in v0.4.3 is explicitly an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
++Only the two-axis global convergence gate may set `global_closed_orbit_certified=true`. All v0.5.0 outputs keep `qsm_certified=false`. The reach value remains an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
+ 
+ ## Build the native module
+ 
+@@ -154,12 +181,39 @@
+ The native API includes `biot_savart_batch_with_jacobian`; rebuild the `.pyd` when upgrading from v0.3 or an older v0.4 development build.
+ 
+ 
+-## One-command full campaign
++## One-command global-orbit campaign
++
++Run the fast native pipeline check first:
++
++```text
++START_V050_GLOBAL_ORBIT_SMOKE.bat
++```
++
++Then run the complete four-knot shooting and monodromy campaign:
++
++```text
++START_V050_GLOBAL_ORBIT_CAMPAIGN.bat
++```
++
++Equivalent command:
++
++```bat
++python run_global_orbit_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.5.0_global_orbit_output ^
++  --archive SST_fermat_pybind_research_v0.5.0_global_orbit_results.zip
++```
++
++This runs the local audit, seed shots, two-axis orbit convergence, monodromy convergence, per-step logs, a manifest, and a combined ZIP with SHA-256 sidecar. A successful campaign exit code means that the requested computations completed; it does not imply that an orbit or monodromy gate passed.
++
++## One-command retained local-candidate campaign
+ 
+ On Windows, double-click:
+ 
+ ```text
+-START_V043_FULL_CAMPAIGN.bat
++START_V050_LOCAL_CAMPAIGN.bat
+ ```
+ 
+ Equivalent command:
+@@ -169,8 +223,8 @@
+   --preset full ^
+   --require-native ^
+   --resume ^
+-  --out-root v0.4.3_campaign_output ^
+-  --archive SST_fermat_pybind_research_v0.4.3_results.zip
++  --out-root v0.5.0_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.5.0_results.zip
+ ```
+ 
+ The full sequence is:
+@@ -188,7 +242,7 @@
+ combined ZIP + SHA-256
+ ```
+ 
+-The BAT file uses `--resume`. After an interruption, run the same BAT again; completed steps with valid success markers are skipped. The full bifurcation and scale runs are intentionally expensive. Use `START_V043_SMOKE_CHECK.bat` first to verify the local compiler and pybind module.
++The BAT file uses `--resume`. After an interruption, run the same BAT again; completed steps with valid success markers are skipped. The full bifurcation and scale runs are intentionally expensive. Use `START_V050_LOCAL_SMOKE_CHECK.bat` first to verify the local compiler and pybind module.
+ 
+ ## 1. Full audit
+ 
+@@ -296,7 +350,7 @@
+ 
+ ## 4. Bifurcation atlas
+ 
+-The primary v0.4.3 scan window is
++The primary v0.5.0 scan window is
+ 
+ \[
+ 0.00180\leq\epsilon/r_c\leq0.00210.
+@@ -380,16 +434,18 @@
+ 
+ The native Jacobian kernel performs substantially more arithmetic than the field-only kernel. Candidate discovery batches all radial probes, and bisection refines all active brackets together. Nevertheless, high-resolution runs with \(N=32768\), many stations, and many angular sectors can require significant RAM and runtime.
+ 
+-Recommended sequence: use `START_V043_FULL_CAMPAIGN.bat`. It encodes the audited order, writes per-step logs, and resumes after interruption.
++Recommended sequence: use `START_V050_LOCAL_CAMPAIGN.bat`. It encodes the audited order, writes per-step logs, and resumes after interruption.
+ 
+-## What v0.4.3 can and cannot conclude
++## What v0.5.0 can and cannot conclude
+ 
+-v0.4.3 can distinguish among:
++v0.5.0 can distinguish among:
+ 
+ ```text
+-candidate disappears under refinement
+-candidate is a universal core-profile feature
+-candidate remains knot-geometry dependent after convergence
++local radial seed does not produce a closed full ray
++single-resolution closed ray resolves but fails convergence
++closed ray passes integration and centerline convergence
++monodromy remains perturbation-sensitive
++reduced monodromy passes its finite-difference gate
+ ```
+ 
+-v0.4.3 does not yet integrate or shoot a complete closed Fermat orbit. That belongs to a later geodesic/monodromy release after the local branches survive certification.
++It still cannot establish a quasinormal swirl mode. That requires a wave or complex-frequency boundary-value solver and a stable complex pole under absorber, domain, and resolution variation.
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/RELEASE_NOTES.md /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/RELEASE_NOTES.md
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/RELEASE_NOTES.md	2026-07-31 22:45:54.217830154 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/RELEASE_NOTES.md	2026-07-31 22:45:54.225830154 +0000
+@@ -1,15 +1,21 @@
+-# Release notes — v0.4.3
++# Release notes — v0.5.0
+ 
+-v0.4.3 closes the reporting ambiguities found after the successful v0.4.2 native campaign. The Biot--Savart operator, analytic Jacobian, Rosenhead regularization, stationary equation, and convergence thresholds are unchanged.
++v0.5.0 adds full three-dimensional Fermat ray integration, closed-orbit shooting, two-axis orbit convergence, and reduced monodromy diagnostics on top of the v0.4.3 local-candidate harness.
+ 
+-## Corrections
++## New research modules
+ 
+-- Explicit clock-boundary brackets and connected real-clock components per sampled ray.
+-- Separate counts for any-valid and fully-valid rays.
+-- Separate candidate fractions normalized by valid rays, all rays, and fully-valid rays.
+-- Censored or bracketed bifurcation thresholds instead of the ambiguous `epsilon_loss_sampled` field.
+-- Regression coverage for the split-domain control scan at `epsilon/r_c=0.0010`.
++- `fermat_ext/geodesic.py`
++- `run_geodesic_shooting.py`
++- `run_orbit_convergence.py`
++- `run_monodromy.py`
++- `run_global_orbit_campaign.py`
+ 
+-## Status
++## Certification hierarchy
+ 
+-This release still resolves local stationary Fermat candidates only. It does not integrate a complete closed ray and cannot certify a QSM pole.
++A single shooting solution is not called globally certified. The global flag requires both ray-step convergence and centerline-resolution convergence. Monodromy certification additionally requires perturbation-scale convergence and a globally certified orbit.
++
++`qsm_certified` remains `false`: no wave or complex-frequency pole solver is included.
++
++## Local validation result
++
++The Python-fallback smoke campaign completed all four pipeline stages. Its low-resolution `0_1` seed did not resolve a closed orbit, which is a valid scientific result and confirms that campaign success is separated from positive orbit certification. Native Windows certification must be performed with `START_V050_GLOBAL_ORBIT_SMOKE.bat` and then the full campaign.
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_FULL_CAMPAIGN.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V043_FULL_CAMPAIGN.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_FULL_CAMPAIGN.bat	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V043_FULL_CAMPAIGN.bat	1970-01-01 00:00:00.000000000 +0000
+@@ -1,37 +0,0 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-
+-echo ============================================================
+-echo SST Fermat pybind research v0.4.3 - FULL CAMPAIGN
+-echo Sequential native audit, atlases, convergence, scale, symmetry
+-echo Final archive: SST_fermat_pybind_research_v0.4.3_results.zip
+-echo ============================================================
+-echo.
+-
+-if defined VIRTUAL_ENV (
+-    set "PYTHON_EXE=python"
+-) else if exist ".venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=.venv\Scripts\python.exe"
+-) else (
+-    set "PYTHON_EXE=python"
+-)
+-
+-"%PYTHON_EXE%" run_full_campaign.py ^
+-  --preset full ^
+-  --require-native ^
+-  --resume ^
+-  --out-root v0.4.3_campaign_output ^
+-  --archive SST_fermat_pybind_research_v0.4.3_results.zip %*
+-
+-set "RUN_RC=%ERRORLEVEL%"
+-echo.
+-if "%RUN_RC%"=="0" (
+-    echo FULL CAMPAIGN COMPLETED SUCCESSFULLY.
+-) else (
+-    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.4.3_campaign_output\logs.
+-    echo Run this same BAT again to resume completed steps.
+-)
+-echo.
+-pause
+-exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_SMOKE_CHECK.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V043_SMOKE_CHECK.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V043_SMOKE_CHECK.bat	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V043_SMOKE_CHECK.bat	1970-01-01 00:00:00.000000000 +0000
+@@ -1,14 +0,0 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-if defined VIRTUAL_ENV (
+-    set "PYTHON_EXE=python"
+-) else if exist ".venv\Scripts\python.exe" (
+-    set "PYTHON_EXE=.venv\Scripts\python.exe"
+-) else (
+-    set "PYTHON_EXE=python"
+-)
+-"%PYTHON_EXE%" run_full_campaign.py --preset smoke --require-native --overwrite --out-root v0.4.3_smoke_output --archive SST_fermat_pybind_research_v0.4.3_smoke_results.zip %*
+-set "RUN_RC=%ERRORLEVEL%"
+-pause
+-exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_GLOBAL_ORBIT_CAMPAIGN.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_GLOBAL_ORBIT_CAMPAIGN.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_GLOBAL_ORBIT_CAMPAIGN.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_GLOBAL_ORBIT_CAMPAIGN.bat	2026-07-31 22:46:42.825828517 +0000
+@@ -0,0 +1,31 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    echo ERROR: no active virtual environment and .venv\Scripts\python.exe was not found.
++    pause
++    exit /b 1
++)
++
++"%PYTHON_EXE%" run_global_orbit_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.5.0_global_orbit_output ^
++  --archive SST_fermat_pybind_research_v0.5.0_global_orbit_results.zip %*
++set "RUN_RC=%ERRORLEVEL%"
++echo.
++if "%RUN_RC%"=="0" (
++    echo GLOBAL ORBIT CAMPAIGN COMPUTATION COMPLETED.
++    echo Inspect campaign_summary.json for the scientific certification flags.
++) else (
++    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.5.0_global_orbit_output\logs.
++    echo Run this BAT again to resume completed steps.
++)
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_GLOBAL_ORBIT_SMOKE.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_GLOBAL_ORBIT_SMOKE.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_GLOBAL_ORBIT_SMOKE.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_GLOBAL_ORBIT_SMOKE.bat	2026-07-31 22:46:42.829828517 +0000
+@@ -0,0 +1,29 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    echo ERROR: no active virtual environment and .venv\Scripts\python.exe was not found.
++    pause
++    exit /b 1
++)
++
++"%PYTHON_EXE%" run_global_orbit_campaign.py ^
++  --preset smoke ^
++  --require-native ^
++  --resume ^
++  --out-root v0.5.0_global_orbit_smoke_output ^
++  --archive SST_fermat_pybind_research_v0.5.0_global_orbit_smoke_results.zip %*
++set "RUN_RC=%ERRORLEVEL%"
++echo.
++if "%RUN_RC%"=="0" (
++    echo GLOBAL ORBIT SMOKE PIPELINE COMPLETED.
++) else (
++    echo SMOKE PIPELINE FAILED. Inspect v0.5.0_global_orbit_smoke_output\logs.
++)
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_LOCAL_CAMPAIGN.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_LOCAL_CAMPAIGN.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_LOCAL_CAMPAIGN.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_LOCAL_CAMPAIGN.bat	2026-07-31 22:26:17.549869791 +0000
+@@ -0,0 +1,37 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++
++echo ============================================================
++echo SST Fermat pybind research v0.5.0 - FULL CAMPAIGN
++echo Sequential native audit, atlases, convergence, scale, symmetry
++echo Final archive: SST_fermat_pybind_research_v0.5.0_results.zip
++echo ============================================================
++echo.
++
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++
++"%PYTHON_EXE%" run_full_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.5.0_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.5.0_results.zip %*
++
++set "RUN_RC=%ERRORLEVEL%"
++echo.
++if "%RUN_RC%"=="0" (
++    echo FULL CAMPAIGN COMPLETED SUCCESSFULLY.
++) else (
++    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.5.0_campaign_output\logs.
++    echo Run this same BAT again to resume completed steps.
++)
++echo.
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_LOCAL_SMOKE_CHECK.bat /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_LOCAL_SMOKE_CHECK.bat
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/START_V050_LOCAL_SMOKE_CHECK.bat	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/START_V050_LOCAL_SMOKE_CHECK.bat	2026-07-31 22:26:17.549869791 +0000
+@@ -0,0 +1,14 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++"%PYTHON_EXE%" run_full_campaign.py --preset smoke --require-native --overwrite --out-root v0.5.0_smoke_output --archive SST_fermat_pybind_research_v0.5.0_smoke_results.zip %*
++set "RUN_RC=%ERRORLEVEL%"
++pause
++exit /b %RUN_RC%
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/full_commands.txt /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/examples/full_commands.txt
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/full_commands.txt	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/examples/full_commands.txt	2026-07-31 22:44:16.541833444 +0000
+@@ -1,8 +1,8 @@
+-REM Recommended: run the complete v0.4.3 sequence and ZIP all outputs.
+-START_V043_FULL_CAMPAIGN.bat
++REM Recommended: run the complete v0.5.0 sequence and ZIP all outputs.
++START_V050_LOCAL_CAMPAIGN.bat
+ 
+ REM Equivalent explicit Python command:
+-python run_full_campaign.py --preset full --require-native --resume --out-root v0.4.3_campaign_output --archive SST_fermat_pybind_research_v0.4.3_results.zip
++python run_full_campaign.py --preset full --require-native --resume --out-root v0.5.0_campaign_output --archive SST_fermat_pybind_research_v0.5.0_results.zip
+ 
+ REM Individual corrected commands:
+ python -m fermat_ext.build_ext_if_needed --force --strict
+@@ -14,3 +14,6 @@
+ python run_bifurcation_atlas.py --epsilon-start 0.00180 --epsilon-stop 0.00210 --epsilon-step 0.000025 --resolution-mode adaptive --target-ds-over-epsilon 0.5 --min-centerline-points 32768 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir bifurcation_atlas
+ python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --resolution-mode adaptive --target-ds-over-epsilon 1.0 --min-centerline-points 4096 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir scale_sweep_0019
+ python run_symmetry_audit.py --epsilon 0.0019 --centerline-points 4096 --no-auto-build --require-native --out-dir symmetry_audit
++
++REM Full global ray shooting and monodromy campaign
++START_V050_GLOBAL_ORBIT_CAMPAIGN.bat
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/minimal_commands.txt /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/examples/minimal_commands.txt
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/examples/minimal_commands.txt	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/examples/minimal_commands.txt	2026-07-31 22:44:55.937832117 +0000
+@@ -1,5 +1,8 @@
+ REM Fast native installation check:
+-START_V043_SMOKE_CHECK.bat
++START_V050_LOCAL_SMOKE_CHECK.bat
+ 
+ REM Full resumable campaign:
+-START_V043_FULL_CAMPAIGN.bat
++START_V050_LOCAL_CAMPAIGN.bat
++
++REM Global ray/monodromy smoke
++START_V050_GLOBAL_ORBIT_SMOKE.bat
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/__init__.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/__init__.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/__init__.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/__init__.py	2026-07-31 22:30:58.569860325 +0000
+@@ -11,6 +11,16 @@
+     torus_knot,
+ )
+ from .resolution import resolution_plan
++from .geodesic import (
++    ClockDomainError,
++    certify_closed_orbit_convergence,
++    certify_global_closed_orbit,
++    certify_monodromy_convergence,
++    compute_reduced_monodromy,
++    integrate_ray,
++    make_clock_evaluator,
++    shoot_closed_orbit,
++)
+ from .certification import (
+     build_bifurcation_atlas,
+     certify_candidate_convergence,
+@@ -39,5 +49,13 @@
+     "build_bifurcation_atlas",
+     "estimate_reach_diagnostic",
+     "symmetry_field_audit",
++    "ClockDomainError",
++    "make_clock_evaluator",
++    "integrate_ray",
++    "shoot_closed_orbit",
++    "certify_closed_orbit_convergence",
++    "certify_global_closed_orbit",
++    "certify_monodromy_convergence",
++    "compute_reduced_monodromy",
+ ]
+-__version__ = "0.4.3"
++__version__ = "0.5.0"
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/_config.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/_config.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/_config.py	2026-07-31 22:24:02.585874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/_config.py	2026-07-31 22:26:17.549869791 +0000
+@@ -7,4 +7,4 @@
+ CPP_DIR_REL = Path("cpp")
+ STAMP_BASENAME = "fermat_native.stamp.json"
+ LOG_PREFIX = "[sst-fermat]"
+-RESULT_SCHEMA = "sst.fermat.audit.v0.4.3"
++RESULT_SCHEMA = "sst.fermat.audit.v0.5.0"
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/build_ext_if_needed.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/build_ext_if_needed.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/build_ext_if_needed.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/build_ext_if_needed.py	2026-07-31 22:26:17.549869791 +0000
+@@ -67,7 +67,7 @@
+         "        for ext in self.extensions:\n"
+         "            ext.extra_compile_args = ['/O2','/std:c++17'] if self.compiler.compiler_type == 'msvc' else ['-O3','-std=c++17']\n"
+         "        super().build_extensions()\n"
+-        f"setup(name='{PACKAGE_NAME}_ext', version='0.4.3', "
++        f"setup(name='{PACKAGE_NAME}_ext', version='0.5.0', "
+         f"packages=['{PACKAGE_NAME}'], package_dir={{'{PACKAGE_NAME}': '{PACKAGE_NAME}'}}, py_modules=[], "
+         f"ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
+         "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'], language='c++')], "
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/certification.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/certification.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/certification.py	2026-07-31 22:24:02.585874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/certification.py	2026-07-31 22:26:17.549869791 +0000
+@@ -582,7 +582,7 @@
+         if fully_clock_valid_rays else None
+     )
+     return {
+-        "schema": "sst.fermat.candidate-atlas.v0.4.3",
++        "schema": "sst.fermat.candidate-atlas.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_STATIONARY_ROOT_RESOLUTION",
+         "knot_id": knot_id,
+@@ -750,7 +750,7 @@
+                 "classification": "STRONGLY_CERTIFIED" if strong else ("WEAKLY_CERTIFIED" if weak else "NOT_CONVERGED"),
+             })
+     return {
+-        "schema": "sst.fermat.convergence-report.v0.4.3",
++        "schema": "sst.fermat.convergence-report.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_CANDIDATE_CERTIFICATION",
+         "knot_id": knot_id,
+@@ -935,7 +935,7 @@
+             ),
+         })
+     return {
+-        "schema": "sst.fermat.bifurcation-atlas.v0.4.3",
++        "schema": "sst.fermat.bifurcation-atlas.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_BIFURCATION_DIAGNOSTIC",
+         "knot_ids": list(ids),
+@@ -1015,7 +1015,7 @@
+     axial = np.linalg.det(mirror) * mirror
+     audit("mirror_pseudovector", curve @ mirror.T, points @ mirror.T, dirs @ mirror.T, axial, mirror)
+     return {
+-        "schema": "sst.fermat.symmetry-audit.v0.4.3",
++        "schema": "sst.fermat.symmetry-audit.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "knot_id": knot_id,
+         "epsilon_over_rc": epsilon,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/core.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/core.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/core.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/core.py	2026-07-31 22:26:17.549869791 +0000
+@@ -10,7 +10,7 @@
+ from . import constants
+ from ._config import EXT_BASENAME, PACKAGE_NAME, RESULT_SCHEMA
+ 
+-PACKAGE_VERSION = "0.4.3"
++PACKAGE_VERSION = "0.5.0"
+ 
+ 
+ def write_json(path: str | Path, data: Any) -> None:
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/geodesic.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/geodesic.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/geodesic.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/geodesic.py	2026-07-31 22:41:52.065838311 +0000
+@@ -0,0 +1,709 @@
++from __future__ import annotations
++
++import itertools
++import math
++from dataclasses import dataclass
++from typing import Any, Callable, Sequence
++
++import numpy as np
++
++from .core import PACKAGE_VERSION, backend_biot_savart_with_jacobian
++
++
++class ClockDomainError(RuntimeError):
++    """Raised when a ray integration leaves the real clock domain S^2>0."""
++
++
++@dataclass(frozen=True)
++class RayState:
++    position: np.ndarray
++    direction: np.ndarray
++
++
++ClockEvaluator = Callable[[np.ndarray], tuple[float, np.ndarray, dict[str, Any]]]
++
++
++def _unit(v: np.ndarray, *, name: str = "vector") -> np.ndarray:
++    a = np.asarray(v, dtype=float)
++    n = float(np.linalg.norm(a))
++    if not math.isfinite(n) or n <= 0.0:
++        raise ValueError(f"{name} must have nonzero finite norm")
++    return a / n
++
++
++def make_clock_evaluator(
++    curve: np.ndarray,
++    *,
++    epsilon: float,
++    kernel_model: str = "rosenhead_midpoint",
++    force_python: bool = False,
++    auto_build: bool = True,
++    minimum_s2: float = 1e-14,
++) -> ClockEvaluator:
++    """Create S and grad(S) evaluator for the full non-axisymmetric knot field.
++
++    The Fermat metric used by this release is conformally Euclidean,
++    ``g_F = S^{-2} delta`` with ``S=sqrt(1-|beta|^2)``.  The returned
++    evaluator preserves the backend metadata from the first field call.
++    """
++    c = np.asarray(curve, dtype=float)
++    if c.ndim != 2 or c.shape[1] != 3 or len(c) < 3:
++        raise ValueError("curve must have shape (N,3), N>=3")
++    if epsilon <= 0:
++        raise ValueError("epsilon must be positive")
++    backend_cache: dict[str, Any] | None = None
++
++    def evaluate(point: np.ndarray) -> tuple[float, np.ndarray, dict[str, Any]]:
++        nonlocal backend_cache
++        p = np.asarray(point, dtype=float).reshape(1, 3)
++        beta, jac, backend = backend_biot_savart_with_jacobian(
++            c.tolist(), p.tolist(), epsilon=epsilon, kernel_model=kernel_model,
++            force_python=force_python, auto_build=auto_build if backend_cache is None else False,
++        )
++        if backend_cache is None:
++            backend_cache = backend
++        b = np.asarray(beta, dtype=float)[0]
++        j = np.asarray(jac, dtype=float)[0]
++        s2 = 1.0 - float(np.dot(b, b))
++        if not math.isfinite(s2) or s2 <= minimum_s2:
++            raise ClockDomainError(f"real clock domain violated: S^2={s2!r}")
++        s = math.sqrt(s2)
++        grad_s = -(j.T @ b) / s
++        meta = {
++            "backend": backend_cache,
++            "beta": b,
++            "jacobian": j,
++            "S2": s2,
++            "S": s,
++            "grad_S": grad_s,
++        }
++        return s, grad_s, meta
++
++    return evaluate
++
++
++def ray_rhs(state: np.ndarray, clock_evaluator: ClockEvaluator) -> tuple[np.ndarray, dict[str, Any]]:
++    """Euclidean-arclength ray equation for n=1/S.
++
++    With unit tangent t and Euclidean arclength ell,
++
++        dx/dell = t,
++        dt/dell = -(I-t t^T) grad(S)/S.
++    """
++    y = np.asarray(state, dtype=float)
++    x = y[:3]
++    t = _unit(y[3:], name="ray direction")
++    s, grad_s, meta = clock_evaluator(x)
++    projector = np.eye(3) - np.outer(t, t)
++    acceleration = -(projector @ grad_s) / s
++    return np.concatenate([t, acceleration]), meta
++
++
++def integrate_ray(
++    initial_position: Sequence[float],
++    initial_direction: Sequence[float],
++    *,
++    path_length: float,
++    step_count: int,
++    clock_evaluator: ClockEvaluator,
++    record_stride: int = 1,
++) -> dict[str, Any]:
++    """Integrate a full 3-D Fermat ray with fixed-step RK4.
++
++    Coordinates and path length are dimensionless in units of r_c.  The tangent
++    is renormalized after each step; the accumulated norm correction is reported.
++    """
++    if path_length <= 0 or not math.isfinite(path_length):
++        raise ValueError("path_length must be positive and finite")
++    if step_count < 4:
++        raise ValueError("step_count>=4 required")
++    if record_stride < 1:
++        raise ValueError("record_stride>=1 required")
++    y = np.concatenate([
++        np.asarray(initial_position, dtype=float),
++        _unit(np.asarray(initial_direction, dtype=float), name="initial direction"),
++    ])
++    h = float(path_length) / int(step_count)
++    trajectory: list[list[float]] = [y.tolist()]
++    optical_length = 0.0
++    max_tangent_norm_error = 0.0
++    min_s = math.inf
++    max_beta = 0.0
++    backend: dict[str, Any] | None = None
++
++    try:
++        for i in range(step_count):
++            k1, m1 = ray_rhs(y, clock_evaluator)
++            k2, m2 = ray_rhs(y + 0.5 * h * k1, clock_evaluator)
++            k3, m3 = ray_rhs(y + 0.5 * h * k2, clock_evaluator)
++            k4, m4 = ray_rhs(y + h * k3, clock_evaluator)
++            y_new = y + (h / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
++            tangent_norm = float(np.linalg.norm(y_new[3:]))
++            max_tangent_norm_error = max(max_tangent_norm_error, abs(tangent_norm - 1.0))
++            y_new[3:] = _unit(y_new[3:], name="integrated direction")
++            optical_length += (h / 6.0) * (
++                1.0 / float(m1["S"]) + 2.0 / float(m2["S"])
++                + 2.0 / float(m3["S"]) + 1.0 / float(m4["S"])
++            )
++            for meta in (m1, m2, m3, m4):
++                min_s = min(min_s, float(meta["S"]))
++                max_beta = max(max_beta, float(np.linalg.norm(meta["beta"])))
++                if backend is None:
++                    backend = meta.get("backend")
++            y = y_new
++            if (i + 1) % record_stride == 0 or i + 1 == step_count:
++                trajectory.append(y.tolist())
++    except ClockDomainError as exc:
++        return {
++            "schema": "sst.fermat.ray-integration.v0.5.0",
++            "package_version": PACKAGE_VERSION,
++            "status": "CLOCK_DOMAIN_EXIT",
++            "message": str(exc),
++            "completed_steps": i if 'i' in locals() else 0,
++            "requested_steps": step_count,
++            "path_length_over_rc": path_length,
++            "trajectory": trajectory,
++            "global_closed_orbit_certified": False,
++            "qsm_certified": False,
++        }
++
++    return {
++        "schema": "sst.fermat.ray-integration.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "status": "COMPLETED",
++        "backend": backend,
++        "initial_position_over_rc": np.asarray(initial_position, dtype=float).tolist(),
++        "initial_direction": _unit(np.asarray(initial_direction, dtype=float)).tolist(),
++        "final_position_over_rc": y[:3].tolist(),
++        "final_direction": y[3:].tolist(),
++        "path_length_over_rc": path_length,
++        "optical_length_over_rc": optical_length,
++        "step_count": step_count,
++        "step_size_over_rc": h,
++        "minimum_S": min_s,
++        "maximum_beta_magnitude": max_beta,
++        "max_tangent_norm_correction": max_tangent_norm_error,
++        "trajectory": trajectory,
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++    }
++
++
++def _shooting_basis(radial_direction: Sequence[float], tangent_seed: Sequence[float]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
++    t0 = _unit(np.asarray(tangent_seed, dtype=float), name="azimuthal seed")
++    e1_raw = np.asarray(radial_direction, dtype=float)
++    e1_raw = e1_raw - float(np.dot(e1_raw, t0)) * t0
++    e1 = _unit(e1_raw, name="radial shooting basis")
++    e2 = _unit(np.cross(t0, e1), name="axial shooting basis")
++    return t0, e1, e2
++
++
++def _state_from_parameters(
++    base_position: np.ndarray,
++    base_direction: np.ndarray,
++    e1: np.ndarray,
++    e2: np.ndarray,
++    base_period: float,
++    params: np.ndarray,
++) -> tuple[np.ndarray, np.ndarray, float]:
++    x0 = base_position + params[0] * e1 + params[1] * e2
++    t0 = _unit(base_direction + params[2] * e1 + params[3] * e2, name="shot direction")
++    period = base_period * math.exp(float(params[4]))
++    return x0, t0, period
++
++
++def shoot_closed_orbit(
++    curve: np.ndarray,
++    seed: dict[str, Any],
++    *,
++    epsilon: float,
++    step_count: int = 512,
++    max_iterations: int = 10,
++    position_tolerance_over_rc: float = 1e-7,
++    direction_tolerance: float = 1e-7,
++    force_python: bool = False,
++    auto_build: bool = True,
++    initial_parameters: Sequence[float] | None = None,
++    finite_difference_scale: float = 2e-4,
++    damping: float = 1e-4,
++) -> dict[str, Any]:
++    """Damped Gauss--Newton shooting from a local radial-minimum orbit seed.
++
++    The five shooting variables are two transverse starting-position shifts, two
++    direction tilts, and log(period/base_period).  The closure residual contains
++    three position components and two transverse direction components.
++    """
++    c = np.asarray(curve, dtype=float)
++    base_x = np.asarray(seed["position_over_rc"], dtype=float)
++    radial = np.asarray(seed["radial_direction"], dtype=float)
++    direction_values = seed.get("directions")
++    base_t_raw = direction_values[0] if direction_values else seed["azimuthal_seed_direction"]
++    base_t, e1, e2 = _shooting_basis(radial, base_t_raw)
++    rho = float(seed["rho_over_rc"])
++    base_period = 2.0 * math.pi * rho
++    clock = make_clock_evaluator(
++        c, epsilon=epsilon, force_python=force_python, auto_build=auto_build,
++    )
++    params = np.zeros(5, dtype=float) if initial_parameters is None else np.asarray(initial_parameters, dtype=float).copy()
++    if params.shape != (5,):
++        raise ValueError("initial_parameters must contain five values")
++    fd = np.asarray([
++        finite_difference_scale * max(rho, 1e-6),
++        finite_difference_scale * max(rho, 1e-6),
++        finite_difference_scale,
++        finite_difference_scale,
++        finite_difference_scale,
++    ])
++    history: list[dict[str, Any]] = []
++    best: dict[str, Any] | None = None
++
++    def evaluate(z: np.ndarray, *, keep_trajectory: bool = False) -> tuple[np.ndarray | None, dict[str, Any]]:
++        x0, t0, period = _state_from_parameters(base_x, base_t, e1, e2, base_period, z)
++        integ = integrate_ray(
++            x0, t0, path_length=period, step_count=step_count,
++            clock_evaluator=clock,
++            record_stride=max(1, step_count // 256) if keep_trajectory else step_count,
++        )
++        if integ["status"] != "COMPLETED":
++            return None, {"integration": integ, "parameters": z.tolist()}
++        xf = np.asarray(integ["final_position_over_rc"], dtype=float)
++        tf = np.asarray(integ["final_direction"], dtype=float)
++        dx = xf - x0
++        dt = tf - t0
++        residual = np.asarray([
++            dx[0] / max(rho, 1e-12),
++            dx[1] / max(rho, 1e-12),
++            dx[2] / max(rho, 1e-12),
++            float(np.dot(dt, e1)),
++            float(np.dot(dt, e2)),
++        ])
++        info = {
++            "parameters": z.tolist(),
++            "initial_position_over_rc": x0.tolist(),
++            "initial_direction": t0.tolist(),
++            "period_over_rc": period,
++            "position_closure_vector_over_rc": dx.tolist(),
++            "position_closure_norm_over_rc": float(np.linalg.norm(dx)),
++            "direction_closure_norm": float(np.linalg.norm(dt)),
++            "normalized_residual": residual.tolist(),
++            "normalized_residual_norm": float(np.linalg.norm(residual)),
++            "integration": integ,
++        }
++        return residual, info
++
++    for iteration in range(max_iterations + 1):
++        residual, info = evaluate(params, keep_trajectory=False)
++        if residual is None:
++            history.append({"iteration": iteration, "status": "CLOCK_DOMAIN_EXIT", **info})
++            break
++        record = {"iteration": iteration, "status": "EVALUATED", **{k: v for k, v in info.items() if k != "integration"}}
++        history.append(record)
++        if best is None or info["normalized_residual_norm"] < best["normalized_residual_norm"]:
++            best = info
++        if (
++            info["position_closure_norm_over_rc"] <= position_tolerance_over_rc
++            and info["direction_closure_norm"] <= direction_tolerance
++        ):
++            break
++        if iteration == max_iterations:
++            break
++
++        jac = np.empty((5, 5), dtype=float)
++        jac_ok = True
++        for j in range(5):
++            z = params.copy(); z[j] += fd[j]
++            rj, _ = evaluate(z, keep_trajectory=False)
++            if rj is None:
++                jac_ok = False
++                break
++            jac[:, j] = (rj - residual) / fd[j]
++        if not jac_ok or not np.all(np.isfinite(jac)):
++            history[-1]["status"] = "JACOBIAN_EVALUATION_FAILED"
++            break
++        lhs = jac.T @ jac + damping * np.eye(5)
++        rhs = -(jac.T @ residual)
++        try:
++            delta = np.linalg.solve(lhs, rhs)
++        except np.linalg.LinAlgError:
++            delta = np.linalg.lstsq(lhs, rhs, rcond=None)[0]
++        # Conservative trust limits protect the local-seed interpretation.
++        delta[0:2] = np.clip(delta[0:2], -0.25 * rho, 0.25 * rho)
++        delta[2:4] = np.clip(delta[2:4], -0.25, 0.25)
++        delta[4] = float(np.clip(delta[4], -0.25, 0.25))
++        accepted = False
++        for factor in (1.0, 0.5, 0.25, 0.125, 0.0625):
++            trial = params + factor * delta
++            rr, trial_info = evaluate(trial, keep_trajectory=False)
++            if rr is not None and trial_info["normalized_residual_norm"] < info["normalized_residual_norm"]:
++                params = trial
++                history[-1]["accepted_step_factor"] = factor
++                accepted = True
++                break
++        if not accepted:
++            history[-1]["status"] = "NO_DESCENT_STEP"
++            break
++
++    if best is None:
++        return {
++            "schema": "sst.fermat.closed-orbit-shot.v0.5.0",
++            "package_version": PACKAGE_VERSION,
++            "status": "UNRESOLVED_CLOCK_DOMAIN_EXIT",
++            "seed": seed,
++            "history": history,
++            "resolved_closed_orbit": False,
++            "global_closed_orbit_certified": False,
++            "qsm_certified": False,
++        }
++
++    _, final_info = evaluate(np.asarray(best["parameters"], dtype=float), keep_trajectory=True)
++    resolved = (
++        final_info["position_closure_norm_over_rc"] <= position_tolerance_over_rc
++        and final_info["direction_closure_norm"] <= direction_tolerance
++    )
++    return {
++        "schema": "sst.fermat.closed-orbit-shot.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "status": "RESOLVED_CLOSED_ORBIT" if resolved else "UNRESOLVED_SHOOTING_RESIDUAL",
++        "seed": seed,
++        "epsilon_over_rc": epsilon,
++        "step_count": step_count,
++        "base_period_over_rc": base_period,
++        "shooting_basis": {"tangent": base_t.tolist(), "e1": e1.tolist(), "e2": e2.tolist()},
++        "position_tolerance_over_rc": position_tolerance_over_rc,
++        "direction_tolerance": direction_tolerance,
++        "best": final_info,
++        "history": history,
++        "resolved_closed_orbit": resolved,
++        # A single-resolution shot is deliberately not called certified.
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++        "guard": (
++            "RESOLVED_CLOSED_ORBIT is a single-discretization shooting result. "
++            "Global certification requires the three-level orbit convergence gate."
++        ),
++    }
++
++
++def certify_closed_orbit_convergence(
++    curve: np.ndarray,
++    seed: dict[str, Any],
++    *,
++    epsilon: float,
++    step_counts: Sequence[int] = (256, 512, 1024),
++    max_iterations: int = 10,
++    position_tolerance_over_rc: float = 2e-7,
++    direction_tolerance: float = 2e-7,
++    parameter_relative_tolerance: float = 2e-3,
++    force_python: bool = False,
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    counts = sorted(set(int(v) for v in step_counts))
++    if len(counts) < 3 or counts[0] < 32:
++        raise ValueError("step_counts must contain at least three values >=32")
++    levels: list[dict[str, Any]] = []
++    params: Sequence[float] | None = None
++    for i, count in enumerate(counts):
++        shot = shoot_closed_orbit(
++            curve, seed, epsilon=epsilon, step_count=count, max_iterations=max_iterations,
++            position_tolerance_over_rc=position_tolerance_over_rc,
++            direction_tolerance=direction_tolerance,
++            force_python=force_python, auto_build=auto_build if i == 0 else False,
++            initial_parameters=params,
++        )
++        levels.append(shot)
++        if "best" in shot:
++            params = shot["best"]["parameters"]
++    last_two = levels[-2:]
++    both_resolved = all(bool(v.get("resolved_closed_orbit")) for v in last_two)
++    if all("best" in v for v in last_two):
++        p0 = np.asarray(last_two[0]["best"]["parameters"], dtype=float)
++        p1 = np.asarray(last_two[1]["best"]["parameters"], dtype=float)
++        parameter_drift = float(np.linalg.norm(p1 - p0) / max(np.linalg.norm(p1), 1.0))
++        period_drift = abs(float(last_two[1]["best"]["period_over_rc"]) - float(last_two[0]["best"]["period_over_rc"])) / max(abs(float(last_two[1]["best"]["period_over_rc"])), 1e-30)
++    else:
++        parameter_drift = period_drift = math.inf
++    certified = both_resolved and parameter_drift <= parameter_relative_tolerance and period_drift <= parameter_relative_tolerance
++    return {
++        "schema": "sst.fermat.closed-orbit-integration-convergence.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "status": "INTEGRATION_CONVERGENCE_RESOLVED_CLOSED_ORBIT" if certified else "UNRESOLVED_OR_NOT_INTEGRATION_CONVERGED",
++        "epsilon_over_rc": epsilon,
++        "step_counts": counts,
++        "levels": levels,
++        "last_two_parameter_relative_drift": parameter_drift if math.isfinite(parameter_drift) else None,
++        "last_two_period_relative_drift": period_drift if math.isfinite(period_drift) else None,
++        "parameter_relative_tolerance": parameter_relative_tolerance,
++        "integration_convergence_certified": certified,
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++        "guard": (
++            "This gate resolves integration-step convergence at one fixed centerline discretization. "
++            "Global orbit certification additionally requires centerline-resolution convergence."
++        ),
++    }
++
++
++def certify_global_closed_orbit(
++    knot_id: str,
++    *,
++    epsilon: float,
++    centerline_point_counts: Sequence[int] = (2048, 4096, 8192),
++    step_counts: Sequence[int] = (256, 512, 1024),
++    candidate_angles: int = 8,
++    candidate_angle_index: int = 0,
++    max_iterations: int = 10,
++    centerline_relative_tolerance: float = 2e-3,
++    force_python: bool = False,
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    """Two-axis gate: ray-step convergence at three centerline resolutions."""
++    from .certification import scan_stationary_candidates
++    from .knot_catalog import sample_ideal_knot
++
++    counts = sorted(set(int(v) for v in centerline_point_counts))
++    if len(counts) < 3 or counts[0] < 256:
++        raise ValueError("centerline_point_counts must contain at least three values >=256")
++    levels: list[dict[str, Any]] = []
++    for i, n in enumerate(counts):
++        atlas = scan_stationary_candidates(
++            knot_id, epsilon=epsilon, centerline_points=n, stations=1, angles=candidate_angles,
++            rho_min=0.0005, rho_max=0.01, bracket_samples=96,
++            force_python=force_python, auto_build=auto_build if i == 0 else False,
++            reach_pair_points=min(1024, max(128, n // 4)),
++        )
++        roots = [
++            r for r in atlas["roots"]
++            if r["classification"] == "RESOLVED_LOCAL_MINIMUM"
++            and r["station"] == 0 and r["angle_index"] == candidate_angle_index
++        ]
++        if not roots:
++            levels.append({
++                "centerline_points": n, "candidate_atlas": atlas,
++                "status": "NO_RESOLVED_LOCAL_MINIMUM_SEED",
++                "integration_convergence": None,
++            })
++            continue
++        root = roots[0]
++        seed = {
++            **root,
++            "directions": [root["azimuthal_seed_direction"], [-v for v in root["azimuthal_seed_direction"]]],
++        }
++        curve = sample_ideal_knot(knot_id, n)
++        integ = certify_closed_orbit_convergence(
++            curve, seed, epsilon=epsilon, step_counts=step_counts,
++            max_iterations=max_iterations, force_python=force_python, auto_build=False,
++        )
++        levels.append({
++            "centerline_points": n, "candidate_atlas": atlas, "seed": seed,
++            "status": integ["status"], "integration_convergence": integ,
++        })
++
++    resolved_levels = [v for v in levels if v.get("integration_convergence") and v["integration_convergence"].get("integration_convergence_certified")]
++    highest_two = levels[-2:]
++    highest_two_resolved = (
++        len(highest_two) == 2
++        and all(v.get("integration_convergence") and v["integration_convergence"].get("integration_convergence_certified") for v in highest_two)
++    )
++    all_levels_integration_certified = all(
++        v.get("integration_convergence") and v["integration_convergence"].get("integration_convergence_certified")
++        for v in levels
++    )
++    if highest_two_resolved:
++        a, b = highest_two[0], highest_two[1]
++        shot_a = a["integration_convergence"]["levels"][-1]
++        shot_b = b["integration_convergence"]["levels"][-1]
++        period_a = float(shot_a["best"]["period_over_rc"]); period_b = float(shot_b["best"]["period_over_rc"])
++        rho_a = float(a["seed"]["rho_over_rc"]); rho_b = float(b["seed"]["rho_over_rc"])
++        x_a = np.asarray(shot_a["best"]["initial_position_over_rc"], dtype=float)
++        x_b = np.asarray(shot_b["best"]["initial_position_over_rc"], dtype=float)
++        period_drift = abs(period_b - period_a) / max(abs(period_b), 1e-30)
++        seed_rho_drift = abs(rho_b - rho_a) / max(abs(rho_b), 1e-30)
++        start_position_drift = float(np.linalg.norm(x_b - x_a) / max(np.linalg.norm(x_b), 1.0))
++        centerline_converged = max(period_drift, seed_rho_drift, start_position_drift) <= centerline_relative_tolerance
++    else:
++        period_drift = seed_rho_drift = start_position_drift = math.inf
++        centerline_converged = False
++    certified = all_levels_integration_certified and highest_two_resolved and centerline_converged
++    available_levels = [
++        v for v in levels
++        if v.get("integration_convergence")
++        and v["integration_convergence"].get("levels")
++        and "best" in v["integration_convergence"]["levels"][-1]
++    ]
++    highest_shot = None
++    if available_levels:
++        highest_shot = dict(available_levels[-1]["integration_convergence"]["levels"][-1])
++        highest_shot["global_closed_orbit_certified"] = certified
++    return {
++        "schema": "sst.fermat.global-closed-orbit-convergence.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "knot_id": knot_id,
++        "epsilon_over_rc": epsilon,
++        "centerline_point_counts": counts,
++        "step_counts": sorted(set(int(v) for v in step_counts)),
++        "levels": levels,
++        "integration_certified_centerline_level_count": len(resolved_levels),
++        "all_centerline_levels_integration_certified": all_levels_integration_certified,
++        "last_two_period_relative_drift": period_drift if math.isfinite(period_drift) else None,
++        "last_two_seed_rho_relative_drift": seed_rho_drift if math.isfinite(seed_rho_drift) else None,
++        "last_two_start_position_relative_drift": start_position_drift if math.isfinite(start_position_drift) else None,
++        "centerline_relative_tolerance": centerline_relative_tolerance,
++        "highest_resolution_shot": highest_shot,
++        "status": "GLOBAL_CLOSED_ORBIT_CERTIFIED" if certified else "GLOBAL_ORBIT_UNRESOLVED_OR_NOT_CONVERGED",
++        "global_closed_orbit_certified": certified,
++        "qsm_certified": False,
++        "guard": "Closed-orbit certification is numerical and model-conditional; it does not certify a QSM pole.",
++    }
++
++
++def _reciprocal_pairing_residual(values: np.ndarray) -> float:
++    vals = list(complex(v) for v in values)
++    best = math.inf
++    for perm in itertools.permutations(range(4)):
++        # pair (0,1) and (2,3); duplicate permutations are harmless for four values.
++        r = abs(vals[perm[0]] * vals[perm[1]] - 1.0) + abs(vals[perm[2]] * vals[perm[3]] - 1.0)
++        best = min(best, float(r))
++    return best
++
++
++def compute_reduced_monodromy(
++    curve: np.ndarray,
++    orbit_shot: dict[str, Any],
++    *,
++    epsilon: float,
++    position_perturbation_fraction: float = 2e-5,
++    direction_perturbation: float = 2e-5,
++    force_python: bool = False,
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    if "best" not in orbit_shot:
++        raise ValueError("orbit_shot has no resolved shooting state")
++    best = orbit_shot["best"]
++    x0 = np.asarray(best["initial_position_over_rc"], dtype=float)
++    t0 = _unit(np.asarray(best["initial_direction"], dtype=float))
++    period = float(best["period_over_rc"])
++    step_count = int(orbit_shot["step_count"])
++    basis = orbit_shot["shooting_basis"]
++    e1 = _unit(np.asarray(basis["e1"], dtype=float))
++    e2 = _unit(np.asarray(basis["e2"], dtype=float))
++    rho = float(orbit_shot["seed"]["rho_over_rc"])
++    pos_eps = position_perturbation_fraction * max(rho, 1e-8)
++    dir_eps = direction_perturbation
++    clock = make_clock_evaluator(curve, epsilon=epsilon, force_python=force_python, auto_build=auto_build)
++
++    nominal = integrate_ray(x0, t0, path_length=period, step_count=step_count, clock_evaluator=clock, record_stride=step_count)
++    if nominal["status"] != "COMPLETED":
++        raise ClockDomainError("nominal orbit exits real clock domain during monodromy evaluation")
++    x_nom = np.asarray(nominal["final_position_over_rc"], dtype=float)
++    t_nom = np.asarray(nominal["final_direction"], dtype=float)
++
++    columns: list[np.ndarray] = []
++    perturbations = [
++        (pos_eps * e1, np.zeros(3), pos_eps, "position_e1"),
++        (pos_eps * e2, np.zeros(3), pos_eps, "position_e2"),
++        (np.zeros(3), dir_eps * e1, dir_eps, "direction_e1"),
++        (np.zeros(3), dir_eps * e2, dir_eps, "direction_e2"),
++    ]
++    column_meta: list[dict[str, Any]] = []
++    for dx, dt, eps_value, name in perturbations:
++        outputs = []
++        for sign in (+1.0, -1.0):
++            xi = x0 + sign * dx
++            ti = _unit(t0 + sign * dt)
++            flow = integrate_ray(xi, ti, path_length=period, step_count=step_count, clock_evaluator=clock, record_stride=step_count)
++            if flow["status"] != "COMPLETED":
++                raise ClockDomainError(f"perturbed orbit {name} exits real clock domain")
++            xf = np.asarray(flow["final_position_over_rc"], dtype=float)
++            tf = np.asarray(flow["final_direction"], dtype=float)
++            outputs.append((xf, tf))
++        dxf = (outputs[0][0] - outputs[1][0]) / (2.0 * eps_value)
++        dtf = (outputs[0][1] - outputs[1][1]) / (2.0 * eps_value)
++        if name.startswith("position"):
++            dxf = dxf * max(rho, 1e-8)  # map normalized input position coordinate to normalized output
++        column = np.asarray([
++            float(np.dot(dxf, e1)) / max(rho, 1e-8),
++            float(np.dot(dxf, e2)) / max(rho, 1e-8),
++            float(np.dot(dtf, e1)),
++            float(np.dot(dtf, e2)),
++        ])
++        columns.append(column)
++        column_meta.append({"name": name, "perturbation": eps_value})
++    matrix = np.column_stack(columns)
++    eigenvalues = np.linalg.eigvals(matrix)
++    moduli = np.abs(eigenvalues)
++    spectral_radius = float(np.max(moduli))
++    unit_circle_deviation = float(np.max(np.abs(moduli - 1.0)))
++    reciprocal_residual = _reciprocal_pairing_residual(eigenvalues)
++    if spectral_radius > 1.0 + 1e-2:
++        classification = "HYPERBOLIC_OR_MIXED_DIAGNOSTIC"
++    elif unit_circle_deviation < 1e-2:
++        classification = "ELLIPTIC_OR_NEUTRAL_DIAGNOSTIC"
++    else:
++        classification = "MARGINAL_OR_UNRESOLVED_DIAGNOSTIC"
++    return {
++        "schema": "sst.fermat.reduced-monodromy.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "status": "RESEARCH_TRACK_MONODROMY_DIAGNOSTIC",
++        "orbit_resolved_single_level": bool(orbit_shot.get("resolved_closed_orbit")),
++        "orbit_globally_certified": bool(orbit_shot.get("global_closed_orbit_certified")),
++        "matrix": matrix.tolist(),
++        "eigenvalues": [{"real": float(v.real), "imag": float(v.imag), "modulus": float(abs(v))} for v in eigenvalues],
++        "determinant": float(np.linalg.det(matrix)),
++        "spectral_radius": spectral_radius,
++        "maximum_unit_circle_deviation": unit_circle_deviation,
++        "reciprocal_pairing_residual": reciprocal_residual,
++        "classification": classification,
++        "column_metadata": column_meta,
++        "nominal_flow_closure_position_over_rc": float(np.linalg.norm(x_nom - x0)),
++        "nominal_flow_closure_direction": float(np.linalg.norm(t_nom - t0)),
++        "monodromy_certified": False,
++        "qsm_certified": False,
++        "guard": (
++            "The reduced 4x4 map is a fixed-period finite-difference diagnostic. "
++            "Floquet certification requires perturbation and step-size convergence."
++        ),
++    }
++
++
++def certify_monodromy_convergence(
++    curve: np.ndarray,
++    orbit_shot: dict[str, Any],
++    *,
++    epsilon: float,
++    perturbation_scales: Sequence[float] = (4e-5, 2e-5, 1e-5),
++    matrix_relative_tolerance: float = 5e-2,
++    force_python: bool = False,
++    auto_build: bool = True,
++) -> dict[str, Any]:
++    """Finite-difference perturbation convergence gate for the reduced map."""
++    scales = sorted(set(float(v) for v in perturbation_scales), reverse=True)
++    if len(scales) < 3 or any(v <= 0 for v in scales):
++        raise ValueError("perturbation_scales must contain at least three positive values")
++    levels = []
++    for i, scale in enumerate(scales):
++        result = compute_reduced_monodromy(
++            curve, orbit_shot, epsilon=epsilon,
++            position_perturbation_fraction=scale,
++            direction_perturbation=scale,
++            force_python=force_python,
++            auto_build=auto_build if i == 0 else False,
++        )
++        levels.append(result)
++    m0 = np.asarray(levels[-2]["matrix"], dtype=float)
++    m1 = np.asarray(levels[-1]["matrix"], dtype=float)
++    matrix_drift = float(np.linalg.norm(m1 - m0) / max(np.linalg.norm(m1), 1e-30))
++    orbit_certified = bool(orbit_shot.get("global_closed_orbit_certified"))
++    certified = orbit_certified and matrix_drift <= matrix_relative_tolerance
++    return {
++        "schema": "sst.fermat.monodromy-convergence.v0.5.0",
++        "package_version": PACKAGE_VERSION,
++        "status": "MONODROMY_CONVERGENCE_CERTIFIED" if certified else "MONODROMY_DIAGNOSTIC_NOT_CERTIFIED",
++        "perturbation_scales": scales,
++        "levels": levels,
++        "last_two_matrix_relative_drift": matrix_drift,
++        "matrix_relative_tolerance": matrix_relative_tolerance,
++        "orbit_globally_certified": orbit_certified,
++        "monodromy_certified": certified,
++        "qsm_certified": False,
++        "guard": "A certified monodromy map still does not constitute a complex-frequency QSM pole.",
++    }
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/knot_scan.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/knot_scan.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/fermat_ext/knot_scan.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/fermat_ext/knot_scan.py	2026-07-31 22:26:17.549869791 +0000
+@@ -613,7 +613,7 @@
+     native_all = all(row["native_available"] for row in rows)
+     parity_all = native_all and all(row["native_python_parity_ok"] for row in rows)
+     return {
+-        "schema": "sst.fermat.knot-matrix.v0.4.3",
++        "schema": "sst.fermat.knot-matrix.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -793,7 +793,7 @@
+     parity_rows = [row for row in rows if row["native_python_parity_ok"] is not None]
+     parity_all = bool(parity_rows) and native_all and all(row["native_python_parity_ok"] for row in parity_rows)
+     return {
+-        "schema": "sst.fermat.softening-matrix.v0.4.3",
++        "schema": "sst.fermat.softening-matrix.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -919,7 +919,7 @@
+         }
+ 
+     return {
+-        "schema": "sst.fermat.field-convergence.v0.4.3",
++        "schema": "sst.fermat.field-convergence.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_NUMERICAL_CONVERGENCE",
+         "knot_ids": list(ids),
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/pyproject.toml /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/pyproject.toml
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/pyproject.toml	2026-07-31 22:40:00.129842082 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/pyproject.toml	2026-07-31 22:40:00.129842082 +0000
+@@ -4,8 +4,8 @@
+ 
+ [project]
+ name = "sst-fermat-pybind-research"
+-version = "0.4.3"
+-description = "Standalone Python+C++17 SST Fermat local-candidate harness with clock-domain component diagnostics, censored bifurcation thresholds, adaptive convergence scans, and resumable campaigns"
++version = "0.5.0"
++description = "Standalone Python+C++17 SST Fermat research harness with local-candidate certification, full 3-D ray shooting, two-axis closed-orbit convergence, and reduced monodromy diagnostics"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=1.24"]
+ 
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_all_checks.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_all_checks.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_all_checks.py	2026-07-31 22:24:40.613873057 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_all_checks.py	2026-07-31 22:26:17.549869791 +0000
+@@ -26,7 +26,7 @@
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.4.3 certification audit battery.")
++    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.5.0 certification audit battery.")
+     p.add_argument("--out-dir", default="audit_out")
+     p.add_argument("--force-build", action="store_true")
+     p.add_argument("--no-auto-build", action="store_true")
+@@ -184,9 +184,9 @@
+         overall_status = "FAILED"
+     ok = python_checks_ok and (native_checks_ok if args.require_native else True)
+     summary = {
+-        "schema": "sst.fermat.audit.v0.4.3",
++        "schema": "sst.fermat.audit.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+-        "audit_name": "SST Fermat v0.4.3 metadata and clock-domain certification audit",
++        "audit_name": "SST Fermat v0.5.0 metadata and clock-domain certification audit",
+         "overall_status": overall_status,
+         "primary_backend": ext_primary["backend"],
+         "field_backend": field_backend,
+@@ -205,7 +205,7 @@
+         "require_native": args.require_native,
+         "ok": ok,
+         "epistemic_guard": (
+-            "v0.4.3 resolves radial stationary candidates and certifies only convergence-qualified branches; "
++            "v0.5.0 resolves radial stationary candidates and certifies only convergence-qualified branches; "
+             "it does not certify a global closed Fermat geodesic or a QSM pole."
+         ),
+     }
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_atlas.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_candidate_atlas.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_atlas.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_candidate_atlas.py	2026-07-31 22:26:17.545869791 +0000
+@@ -68,7 +68,7 @@
+             "reach_estimate_over_rc": result["reach_diagnostic"]["reach_estimate_over_rc"],
+         })
+     combined = {
+-        "schema": "sst.fermat.candidate-atlas-matrix.v0.4.3",
++        "schema": "sst.fermat.candidate-atlas-matrix.v0.5.0",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_convergence.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_candidate_convergence.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_candidate_convergence.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_candidate_convergence.py	2026-07-31 22:26:17.545869791 +0000
+@@ -63,7 +63,7 @@
+             "highest_backend": highest["backend"]["backend"],
+         })
+     combined = {
+-        "schema": "sst.fermat.convergence-matrix.v0.4.3",
++        "schema": "sst.fermat.convergence-matrix.v0.5.0",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_full_campaign.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_full_campaign.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_full_campaign.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_full_campaign.py	2026-07-31 22:26:17.545869791 +0000
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Sequential v0.4.3 campaign runner with logging, resume support, and ZIP packaging."""
++"""Sequential v0.5.0 campaign runner with logging, resume support, and ZIP packaging."""
+ from __future__ import annotations
+ 
+ import argparse
+@@ -99,7 +99,7 @@
+         ],
+         "convergence_0019/convergence_report.json",
+     )
+-    # v0.4.3 correction: include 3_1 in the high-resolution three-level gate.
++    # v0.5.0 correction: include 3_1 in the high-resolution three-level gate.
+     script_step(
+         "05_convergence_0019_high", "run_candidate_convergence.py",
+         [
+@@ -237,11 +237,11 @@
+ 
+ def main() -> int:
+     parser = argparse.ArgumentParser(
+-        description="Run the complete SST Fermat v0.4.3 campaign sequentially and ZIP all outputs."
++        description="Run the complete SST Fermat v0.5.0 campaign sequentially and ZIP all outputs."
+     )
+     parser.add_argument("--preset", choices=("full", "smoke"), default="full")
+-    parser.add_argument("--out-root", default="v0.4.3_campaign_output")
+-    parser.add_argument("--archive", default="SST_fermat_pybind_research_v0.4.3_results.zip")
++    parser.add_argument("--out-root", default="v0.5.0_campaign_output")
++    parser.add_argument("--archive", default="SST_fermat_pybind_research_v0.5.0_results.zip")
+     parser.add_argument("--python", dest="python_exe", default=sys.executable)
+     parser.add_argument("--require-native", action="store_true")
+     parser.add_argument("--skip-build", action="store_true")
+@@ -299,7 +299,7 @@
+     )
+ 
+     manifest = {
+-        "schema": "sst.fermat.campaign-manifest.v0.4.3",
++        "schema": "sst.fermat.campaign-manifest.v0.5.0",
+         "package_version": __version__,
+         "preset": args.preset,
+         "started_utc": environment["started_utc"],
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_geodesic_shooting.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_geodesic_shooting.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_geodesic_shooting.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_geodesic_shooting.py	2026-07-31 22:28:43.245864883 +0000
+@@ -0,0 +1,35 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import argparse, json
++from pathlib import Path
++from fermat_ext.certification import scan_stationary_candidates
++from fermat_ext.core import write_json
++from fermat_ext.geodesic import shoot_closed_orbit
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, sample_ideal_knot
++
++def main() -> int:
++    p=argparse.ArgumentParser(description='Shoot full 3-D Fermat rays from resolved local-minimum seeds.')
++    p.add_argument('--knots',nargs='+',default=list(DEFAULT_KNOT_IDS)); p.add_argument('--epsilon',type=float,default=0.0019)
++    p.add_argument('--centerline-points',type=int,default=4096); p.add_argument('--station',type=int,default=0); p.add_argument('--angle-index',type=int,default=0)
++    p.add_argument('--candidate-angles',type=int,default=8); p.add_argument('--steps',type=int,default=512); p.add_argument('--max-iterations',type=int,default=10)
++    p.add_argument('--position-tol',type=float,default=1e-7); p.add_argument('--direction-tol',type=float,default=1e-7)
++    p.add_argument('--force-python',action='store_true'); p.add_argument('--no-auto-build',action='store_true'); p.add_argument('--require-native',action='store_true')
++    p.add_argument('--out-dir',default='geodesic_shooting')
++    a=p.parse_args(); out=Path(a.out_dir); out.mkdir(parents=True,exist_ok=True)
++    results={}; rows=[]
++    for i,k in enumerate(a.knots):
++        atlas=scan_stationary_candidates(k,epsilon=a.epsilon,centerline_points=a.centerline_points,stations=max(1,a.station+1),angles=a.candidate_angles,
++            rho_min=0.0005,rho_max=0.01,bracket_samples=96,force_python=a.force_python,auto_build=(not a.no_auto_build) if i==0 else False,reach_pair_points=512)
++        roots=[r for r in atlas['roots'] if r['classification']=='RESOLVED_LOCAL_MINIMUM' and r['station']==a.station and r['angle_index']==a.angle_index]
++        if not roots: raise SystemExit(f'no resolved seed for {k} station={a.station} angle={a.angle_index}')
++        seed={**roots[0], 'directions':[roots[0]['azimuthal_seed_direction'],[-v for v in roots[0]['azimuthal_seed_direction']]]}
++        curve=sample_ideal_knot(k,a.centerline_points)
++        shot=shoot_closed_orbit(curve,seed,epsilon=a.epsilon,step_count=a.steps,max_iterations=a.max_iterations,
++            position_tolerance_over_rc=a.position_tol,direction_tolerance=a.direction_tol,force_python=a.force_python,auto_build=False)
++        if a.require_native and shot.get('best',{}).get('integration',{}).get('backend',{}).get('backend')!='cpp': raise SystemExit('native backend required')
++        results[k]={'candidate_atlas':atlas,'shot':shot}; write_json(out/f'{k}.json',results[k])
++        rows.append({'knot_id':k,'status':shot['status'],'resolved_closed_orbit':shot.get('resolved_closed_orbit',False),
++            'position_closure_norm_over_rc':shot.get('best',{}).get('position_closure_norm_over_rc'),'direction_closure_norm':shot.get('best',{}).get('direction_closure_norm')})
++    combined={'schema':'sst.fermat.geodesic-shooting-matrix.v0.5.0','rows':rows,'results':results,'global_closed_orbit_certified':False,'qsm_certified':False}
++    write_json(out/'geodesic_shooting.json',combined); print(json.dumps(rows,indent=2)); return 0
++if __name__=='__main__': raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_global_orbit_campaign.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_global_orbit_campaign.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_global_orbit_campaign.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_global_orbit_campaign.py	2026-07-31 22:35:32.089851111 +0000
+@@ -0,0 +1,248 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import platform
++import shlex
++import shutil
++import subprocess
++import sys
++import time
++import zipfile
++from dataclasses import dataclass
++from datetime import datetime, timezone
++from pathlib import Path
++
++from fermat_ext import __version__
++from fermat_ext.core import write_json
++
++
++@dataclass(frozen=True)
++class Step:
++    name: str
++    arguments: tuple[str, ...]
++    expected_relative_output: str
++
++
++def utc_now() -> str:
++    return datetime.now(timezone.utc).isoformat()
++
++
++def command_text(arguments: tuple[str, ...]) -> str:
++    return subprocess.list2cmdline(list(arguments)) if sys.platform == "win32" else shlex.join(arguments)
++
++
++def sha256_file(path: Path) -> str:
++    h = hashlib.sha256()
++    with path.open("rb") as fh:
++        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def add_backend_flags(arguments: list[str], require_native: bool, skip_build: bool) -> None:
++    if skip_build:
++        arguments.append("--no-auto-build")
++    if require_native:
++        arguments.append("--require-native")
++
++
++def campaign_steps(python_exe: str, out_root: Path, *, preset: str, require_native: bool, skip_build: bool) -> list[Step]:
++    steps: list[Step] = []
++
++    def add(name: str, script: str, args: list[str], expected: str, *, native_flags: bool = True) -> None:
++        if native_flags:
++            add_backend_flags(args, require_native, skip_build)
++        steps.append(Step(name, tuple([python_exe, script, *args]), expected))
++
++    add("01_local_audit", "run_all_checks.py", ["--out-dir", str(out_root / "local_audit")], "local_audit/audit_summary.json")
++
++    if preset == "smoke":
++        knots = ["0_1"]
++        centerlines = [2048, 2304, 2560]
++        ray_steps = [32, 48, 64]
++        iterations = 0
++        perturbations = [8e-5, 4e-5, 2e-5]
++    else:
++        knots = ["0_1", "3_1", "4_1", "5_2"]
++        centerlines = [2048, 4096, 8192]
++        ray_steps = [256, 512, 1024]
++        iterations = 10
++        perturbations = [4e-5, 2e-5, 1e-5]
++
++    add(
++        "02_geodesic_seed_shots",
++        "run_geodesic_shooting.py",
++        [
++            "--knots", *knots,
++            "--epsilon", "0.0019",
++            "--centerline-points", str(centerlines[-1]),
++            "--steps", str(ray_steps[-1]),
++            "--max-iterations", str(iterations),
++            "--candidate-angles", "8",
++            "--out-dir", str(out_root / "geodesic_shooting"),
++        ],
++        "geodesic_shooting/geodesic_shooting.json",
++    )
++    add(
++        "03_global_orbit_convergence",
++        "run_orbit_convergence.py",
++        [
++            "--knots", *knots,
++            "--epsilon", "0.0019",
++            "--centerline-point-counts", *[str(v) for v in centerlines],
++            "--step-counts", *[str(v) for v in ray_steps],
++            "--max-iterations", str(iterations),
++            "--candidate-angles", "8",
++            "--out-dir", str(out_root / "orbit_convergence"),
++        ],
++        "orbit_convergence/orbit_convergence.json",
++    )
++    if preset == "smoke":
++        add(
++            "04_monodromy_smoke",
++            "run_monodromy_smoke.py",
++            ["--out-dir", str(out_root / "monodromy_smoke")],
++            "monodromy_smoke/monodromy_smoke.json",
++        )
++    else:
++        add(
++            "04_monodromy_convergence",
++            "run_monodromy.py",
++            [
++                "--knots", *knots,
++                "--epsilon", "0.0019",
++                "--centerline-point-counts", *[str(v) for v in centerlines],
++                "--step-counts", *[str(v) for v in ray_steps],
++                "--perturbation-scales", *[str(v) for v in perturbations],
++                "--max-iterations", str(iterations),
++                "--candidate-angles", "8",
++                "--out-dir", str(out_root / "monodromy"),
++            ],
++            "monodromy/monodromy.json",
++        )
++    return steps
++
++
++def run_step(step: Step, *, cwd: Path, log_path: Path) -> tuple[int, float]:
++    start = time.perf_counter()
++    log_path.parent.mkdir(parents=True, exist_ok=True)
++    with log_path.open("w", encoding="utf-8", errors="replace") as log:
++        header = f"[{utc_now()}] COMMAND: {command_text(step.arguments)}\n"
++        print(header.rstrip()); log.write(header); log.flush()
++        process = subprocess.Popen(
++            list(step.arguments), cwd=str(cwd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
++            text=True, encoding="utf-8", errors="replace", bufsize=1,
++        )
++        assert process.stdout is not None
++        for line in process.stdout:
++            print(line, end=""); log.write(line)
++        rc = process.wait()
++        duration = time.perf_counter() - start
++        footer = f"\n[{utc_now()}] EXIT_CODE={rc} DURATION_SECONDS={duration:.3f}\n"
++        print(footer.rstrip()); log.write(footer)
++    return rc, duration
++
++
++def create_archive(out_root: Path, archive_path: Path) -> None:
++    archive_path.parent.mkdir(parents=True, exist_ok=True)
++    temp = archive_path.with_suffix(archive_path.suffix + ".tmp")
++    temp.unlink(missing_ok=True); archive_path.unlink(missing_ok=True)
++    with zipfile.ZipFile(temp, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
++        for path in sorted(out_root.rglob("*")):
++            if path.is_file():
++                zf.write(path, (Path(out_root.name) / path.relative_to(out_root)).as_posix())
++    temp.replace(archive_path)
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(description="Run the v0.5.0 global Fermat shooting and monodromy campaign.")
++    p.add_argument("--preset", choices=("full", "smoke"), default="full")
++    p.add_argument("--out-root", default="v0.5.0_global_orbit_output")
++    p.add_argument("--archive", default="SST_fermat_pybind_research_v0.5.0_global_orbit_results.zip")
++    p.add_argument("--python", dest="python_exe", default=sys.executable)
++    p.add_argument("--require-native", action="store_true")
++    p.add_argument("--skip-build", action="store_true")
++    p.add_argument("--resume", action="store_true")
++    p.add_argument("--overwrite", action="store_true")
++    p.add_argument("--keep-going", action="store_true")
++    p.add_argument("--no-zip", action="store_true")
++    p.add_argument("--dry-run", action="store_true")
++    a = p.parse_args()
++
++    root = Path(__file__).resolve().parent
++    out = Path(a.out_root); out = out if out.is_absolute() else (root / out).resolve()
++    archive = Path(a.archive); archive = archive if archive.is_absolute() else (root / archive).resolve()
++    if a.overwrite:
++        shutil.rmtree(out, ignore_errors=True); archive.unlink(missing_ok=True)
++    elif out.exists() and any(out.iterdir()) and not a.resume:
++        raise SystemExit(f"output root already contains files: {out}\nUse --resume or --overwrite.")
++    out.mkdir(parents=True, exist_ok=True); logs = out / "logs"; logs.mkdir(exist_ok=True)
++    steps = campaign_steps(a.python_exe, out, preset=a.preset, require_native=a.require_native, skip_build=a.skip_build)
++    env = {
++        "package_version": __version__, "preset": a.preset, "project_root": str(root),
++        "output_root": str(out), "archive": str(archive), "python_executable": a.python_exe,
++        "python_version": sys.version, "platform": platform.platform(), "require_native": a.require_native,
++        "started_utc": utc_now(),
++    }
++    write_json(out / "environment.json", env)
++    (out / "campaign_commands.txt").write_text("\n".join(command_text(s.arguments) for s in steps) + "\n", encoding="utf-8")
++    manifest = {
++        "schema": "sst.fermat.global-orbit-campaign-manifest.v0.5.0",
++        "package_version": __version__, "preset": a.preset, "started_utc": env["started_utc"],
++        "completed_utc": None, "status": "RUNNING", "steps": [],
++        "global_closed_orbit_certified": False, "monodromy_certified": False, "qsm_certified": False,
++    }
++    write_json(out / "campaign_manifest.json", manifest)
++    if a.dry_run:
++        for s in steps: print(f"{s.name}: {command_text(s.arguments)}")
++        manifest["status"] = "DRY_RUN"; manifest["completed_utc"] = utc_now(); write_json(out / "campaign_manifest.json", manifest); return 0
++
++    failed = False
++    for step in steps:
++        marker = logs / f"{step.name}.success.json"
++        expected = out / step.expected_relative_output
++        if a.resume and marker.exists() and expected.exists():
++            record = json.loads(marker.read_text(encoding="utf-8")); record["resume_action"] = "SKIPPED_ALREADY_SUCCESSFUL"
++            manifest["steps"].append(record); write_json(out / "campaign_manifest.json", manifest); print(f"[resume] {step.name}: skipped"); continue
++        rc, duration = run_step(step, cwd=root, log_path=logs / f"{step.name}.log")
++        success = rc == 0 and expected.exists()
++        record = {
++            "name": step.name, "command": list(step.arguments), "command_text": command_text(step.arguments),
++            "completed_utc": utc_now(), "duration_seconds": duration, "exit_code": rc,
++            "expected_output": str(expected), "expected_output_exists": expected.exists(),
++            "status": "SUCCESS" if success else "FAILED", "log": str(logs / f"{step.name}.log"),
++        }
++        manifest["steps"].append(record); write_json(out / "campaign_manifest.json", manifest)
++        if success: write_json(marker, record)
++        else:
++            failed = True
++            if not a.keep_going: break
++
++    manifest["completed_utc"] = utc_now(); manifest["status"] = "FAILED_OR_PARTIAL" if failed else "SUCCESS"
++    # Read final scientific gates without converting a successful computation into a positive physics result.
++    orbit_file = out / "orbit_convergence" / "orbit_convergence.json"
++    mono_file = (out / "monodromy" / "monodromy.json") if a.preset == "full" else (out / "monodromy_smoke" / "monodromy_smoke.json")
++    if orbit_file.exists():
++        data = json.loads(orbit_file.read_text(encoding="utf-8")); manifest["global_closed_orbit_certified"] = bool(data.get("all_requested_knots_certified"))
++    if mono_file.exists():
++        data = json.loads(mono_file.read_text(encoding="utf-8")); manifest["monodromy_certified"] = bool(data.get("all_requested_monodromies_certified", data.get("monodromy_certified", False)))
++    write_json(out / "campaign_manifest.json", manifest)
++    write_json(out / "campaign_summary.json", {
++        "package_version": __version__, "preset": a.preset, "status": manifest["status"],
++        "successful_step_count": sum(r["status"] == "SUCCESS" for r in manifest["steps"]),
++        "failed_step_count": sum(r["status"] == "FAILED" for r in manifest["steps"]),
++        "global_closed_orbit_certified": manifest["global_closed_orbit_certified"],
++        "monodromy_certified": manifest["monodromy_certified"], "qsm_certified": False,
++    })
++    if not a.no_zip:
++        print(f"Creating results archive: {archive}"); create_archive(out, archive)
++        digest = sha256_file(archive); archive.with_suffix(archive.suffix + ".sha256").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
++        print(f"Archive SHA-256: {digest}")
++    return 1 if failed else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_monodromy.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_monodromy.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_monodromy.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_monodromy.py	2026-07-31 22:31:34.341859120 +0000
+@@ -0,0 +1,78 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import argparse, json
++from pathlib import Path
++from fermat_ext.core import write_json
++from fermat_ext.geodesic import certify_global_closed_orbit, certify_monodromy_convergence
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, sample_ideal_knot
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(description="Global-orbit-gated reduced monodromy convergence scan.")
++    p.add_argument("--knots", nargs="+", default=list(DEFAULT_KNOT_IDS))
++    p.add_argument("--epsilon", type=float, default=0.0019)
++    p.add_argument("--centerline-point-counts", nargs="+", type=int, default=[2048, 4096, 8192])
++    p.add_argument("--step-counts", nargs="+", type=int, default=[256, 512, 1024])
++    p.add_argument("--perturbation-scales", nargs="+", type=float, default=[4e-5, 2e-5, 1e-5])
++    p.add_argument("--candidate-angles", type=int, default=8)
++    p.add_argument("--angle-index", type=int, default=0)
++    p.add_argument("--max-iterations", type=int, default=10)
++    p.add_argument("--force-python", action="store_true")
++    p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--require-native", action="store_true")
++    p.add_argument("--out-dir", default="monodromy")
++    a = p.parse_args()
++    out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
++    results = {}; rows = []
++    for i, knot_id in enumerate(a.knots):
++        orbit = certify_global_closed_orbit(
++            knot_id, epsilon=a.epsilon,
++            centerline_point_counts=a.centerline_point_counts,
++            step_counts=a.step_counts,
++            candidate_angles=a.candidate_angles,
++            candidate_angle_index=a.angle_index,
++            max_iterations=a.max_iterations,
++            force_python=a.force_python,
++            auto_build=(not a.no_auto_build) if i == 0 else False,
++        )
++        shot = orbit.get("highest_resolution_shot")
++        if shot is None:
++            monodromy = None
++        else:
++            curve = sample_ideal_knot(knot_id, max(a.centerline_point_counts))
++            monodromy = certify_monodromy_convergence(
++                curve, shot, epsilon=a.epsilon,
++                perturbation_scales=a.perturbation_scales,
++                force_python=a.force_python, auto_build=False,
++            )
++        if a.require_native and shot is not None:
++            backend = shot.get("best", {}).get("integration", {}).get("backend", {}).get("backend")
++            if backend != "cpp":
++                raise SystemExit("native backend required")
++        result = {"orbit": orbit, "monodromy": monodromy}
++        results[knot_id] = result
++        write_json(out / f"{knot_id}.json", result)
++        rows.append({
++            "knot_id": knot_id,
++            "orbit_status": orbit["status"],
++            "global_closed_orbit_certified": orbit["global_closed_orbit_certified"],
++            "monodromy_status": monodromy["status"] if monodromy else None,
++            "monodromy_certified": monodromy["monodromy_certified"] if monodromy else False,
++            "spectral_radius": monodromy["levels"][-1]["spectral_radius"] if monodromy else None,
++        })
++    combined = {
++        "schema": "sst.fermat.monodromy-convergence-matrix.v0.5.0",
++        "rows": rows,
++        "results": results,
++        "all_requested_monodromies_certified": all(
++            r["monodromy"] is not None and r["monodromy"]["monodromy_certified"] for r in results.values()
++        ),
++        "qsm_certified": False,
++    }
++    write_json(out / "monodromy.json", combined)
++    print(json.dumps(rows, indent=2))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_monodromy_smoke.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_monodromy_smoke.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_monodromy_smoke.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_monodromy_smoke.py	2026-07-31 22:35:31.305851137 +0000
+@@ -0,0 +1,25 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import argparse, json
++from pathlib import Path
++from fermat_ext.certification import scan_stationary_candidates
++from fermat_ext.core import write_json
++from fermat_ext.geodesic import shoot_closed_orbit, compute_reduced_monodromy
++from fermat_ext.knot_catalog import sample_ideal_knot
++
++
++def main() -> int:
++    p=argparse.ArgumentParser(description='Fast single-level monodromy pipeline smoke test.')
++    p.add_argument('--force-python',action='store_true'); p.add_argument('--no-auto-build',action='store_true'); p.add_argument('--require-native',action='store_true')
++    p.add_argument('--out-dir',default='monodromy_smoke'); a=p.parse_args(); out=Path(a.out_dir); out.mkdir(parents=True,exist_ok=True)
++    atlas=scan_stationary_candidates('0_1',epsilon=.0019,centerline_points=2048,stations=1,angles=3,rho_min=.0005,rho_max=.01,bracket_samples=48,force_python=a.force_python,auto_build=not a.no_auto_build,reach_pair_points=128)
++    roots=[r for r in atlas['roots'] if r['classification']=='RESOLVED_LOCAL_MINIMUM']
++    if not roots: raise SystemExit('no 0_1 smoke seed')
++    r=roots[0]; seed={**r,'directions':[r['azimuthal_seed_direction'],[-v for v in r['azimuthal_seed_direction']]]}; curve=sample_ideal_knot('0_1',2048)
++    shot=shoot_closed_orbit(curve,seed,epsilon=.0019,step_count=32,max_iterations=0,force_python=a.force_python,auto_build=False)
++    monodromy=compute_reduced_monodromy(curve,shot,epsilon=.0019,position_perturbation_fraction=1e-5,direction_perturbation=1e-5,force_python=a.force_python,auto_build=False)
++    backend=shot.get('best',{}).get('integration',{}).get('backend',{}).get('backend')
++    if a.require_native and backend!='cpp': raise SystemExit('native backend required')
++    result={'schema':'sst.fermat.monodromy-smoke.v0.5.0','shot':shot,'monodromy':monodromy,'pipeline_ok':True,'global_closed_orbit_certified':False,'monodromy_certified':False,'qsm_certified':False}
++    write_json(out/'monodromy_smoke.json',result); print(json.dumps({'pipeline_ok':True,'shot_status':shot['status'],'classification':monodromy['classification']},indent=2)); return 0
++if __name__=='__main__': raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_orbit_convergence.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_orbit_convergence.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_orbit_convergence.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_orbit_convergence.py	2026-07-31 22:31:34.337859120 +0000
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++from __future__ import annotations
++import argparse, json
++from pathlib import Path
++from fermat_ext.core import write_json
++from fermat_ext.geodesic import certify_global_closed_orbit
++from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS
++
++
++def main() -> int:
++    p = argparse.ArgumentParser(description="Two-axis global Fermat closed-orbit convergence gate.")
++    p.add_argument("--knots", nargs="+", default=list(DEFAULT_KNOT_IDS))
++    p.add_argument("--epsilon", type=float, default=0.0019)
++    p.add_argument("--centerline-point-counts", nargs="+", type=int, default=[2048, 4096, 8192])
++    p.add_argument("--step-counts", nargs="+", type=int, default=[256, 512, 1024])
++    p.add_argument("--candidate-angles", type=int, default=8)
++    p.add_argument("--angle-index", type=int, default=0)
++    p.add_argument("--max-iterations", type=int, default=10)
++    p.add_argument("--centerline-relative-tol", type=float, default=2e-3)
++    p.add_argument("--force-python", action="store_true")
++    p.add_argument("--no-auto-build", action="store_true")
++    p.add_argument("--require-native", action="store_true")
++    p.add_argument("--out-dir", default="orbit_convergence")
++    a = p.parse_args()
++    out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
++    results = {}; rows = []
++    for i, knot_id in enumerate(a.knots):
++        result = certify_global_closed_orbit(
++            knot_id, epsilon=a.epsilon,
++            centerline_point_counts=a.centerline_point_counts,
++            step_counts=a.step_counts,
++            candidate_angles=a.candidate_angles,
++            candidate_angle_index=a.angle_index,
++            max_iterations=a.max_iterations,
++            centerline_relative_tolerance=a.centerline_relative_tol,
++            force_python=a.force_python,
++            auto_build=(not a.no_auto_build) if i == 0 else False,
++        )
++        if a.require_native:
++            backends = []
++            for level in result["levels"]:
++                integ = level.get("integration_convergence")
++                if not integ:
++                    continue
++                for shot in integ["levels"]:
++                    backend = shot.get("best", {}).get("integration", {}).get("backend", {}).get("backend")
++                    if backend:
++                        backends.append(backend)
++            if not backends or any(v != "cpp" for v in backends):
++                raise SystemExit("native backend required but at least one orbit level was not C++")
++        results[knot_id] = result
++        write_json(out / f"{knot_id}.json", result)
++        rows.append({
++            "knot_id": knot_id,
++            "status": result["status"],
++            "global_closed_orbit_certified": result["global_closed_orbit_certified"],
++            "period_relative_drift": result["last_two_period_relative_drift"],
++            "seed_rho_relative_drift": result["last_two_seed_rho_relative_drift"],
++            "start_position_relative_drift": result["last_two_start_position_relative_drift"],
++        })
++    combined = {
++        "schema": "sst.fermat.global-closed-orbit-matrix.v0.5.0",
++        "rows": rows,
++        "results": results,
++        "all_requested_knots_certified": all(r["global_closed_orbit_certified"] for r in results.values()),
++        "qsm_certified": False,
++    }
++    write_json(out / "orbit_convergence.json", combined)
++    print(json.dumps(rows, indent=2))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_profile_matrix.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_profile_matrix.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_profile_matrix.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_profile_matrix.py	2026-07-31 22:26:17.545869791 +0000
+@@ -36,7 +36,7 @@
+         )
+         rows.extend(profile_rows)
+     result = {
+-        "schema": "sst.fermat.profile-matrix.v0.4.3",
++        "schema": "sst.fermat.profile-matrix.v0.5.0",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_RADIAL_PROFILE_COMPARISON",
+         "profiles": args.profiles,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_scale_sweep.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_scale_sweep.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_scale_sweep.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_scale_sweep.py	2026-07-31 22:26:17.545869791 +0000
+@@ -108,7 +108,7 @@
+             })
+ 
+     combined = {
+-        "schema": "sst.fermat.scale-sweep.v0.4.3",
++        "schema": "sst.fermat.scale-sweep.v0.5.0",
+         "settings": vars(args),
+         "resolution_plans": plans,
+         "rows": rows,
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_symmetry_audit.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_symmetry_audit.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/run_symmetry_audit.py	2026-07-31 22:24:02.581874338 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/run_symmetry_audit.py	2026-07-31 22:26:17.549869791 +0000
+@@ -43,7 +43,7 @@
+             "max_jacobian_linf_error": result["max_jacobian_linf_error"],
+             "max_scalar_G_linf_error": result["max_scalar_G_linf_error"],
+         })
+-    combined = {"schema": "sst.fermat.symmetry-matrix.v0.4.3", "rows": rows, "results": results}
++    combined = {"schema": "sst.fermat.symmetry-matrix.v0.5.0", "rows": rows, "results": results}
+     write_json(out / "symmetry_audit.json", combined)
+     write_csv(out / "symmetry_audit.csv", rows)
+     print(json.dumps({"out_dir": str(out), "rows": rows}, indent=2))
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v043.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/tests/test_v043.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v043.py	2026-07-31 22:25:19.173871758 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/tests/test_v043.py	2026-07-31 22:44:16.541833444 +0000
+@@ -94,7 +94,7 @@
+         assert manifest["status"] == "DRY_RUN"
+         assert (out / "campaign_commands.txt").exists()
+ 
+-    print("v0.4.3 tests: ok")
++    print("v0.4.3 regression tests under v0.5.0: ok")
+     return 0
+ 
+ 
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' '--exclude=BUILD_VALIDATION.txt' '--exclude=patches' '--exclude=validation_samples' /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v050.py /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/tests/test_v050.py
+--- /mnt/data/build_ferm/SST_fermat_pybind_research_v0.4.3/tests/test_v050.py	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/build_ferm/SST_fermat_pybind_research_v0.5.0/tests/test_v050.py	2026-07-31 22:29:33.773863181 +0000
+@@ -0,0 +1,75 @@
++from __future__ import annotations
++
++import sys
++from pathlib import Path
++
++import numpy as np
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from fermat_ext.certification import scan_stationary_candidates
++from fermat_ext.geodesic import compute_reduced_monodromy, integrate_ray, shoot_closed_orbit
++from fermat_ext.knot_catalog import sample_ideal_knot
++
++
++def constant_clock(point: np.ndarray):
++    return 1.0, np.zeros(3), {
++        "backend": {"backend": "analytic-test"},
++        "beta": np.zeros(3),
++        "S": 1.0,
++    }
++
++
++def main() -> int:
++    straight = integrate_ray(
++        [0.0, 0.0, 0.0], [1.0, 0.0, 0.0],
++        path_length=2.0, step_count=32, clock_evaluator=constant_clock,
++        record_stride=32,
++    )
++    assert straight["status"] == "COMPLETED"
++    assert np.linalg.norm(np.asarray(straight["final_position_over_rc"]) - np.asarray([2.0, 0.0, 0.0])) < 1e-12
++    assert np.linalg.norm(np.asarray(straight["final_direction"]) - np.asarray([1.0, 0.0, 0.0])) < 1e-12
++    assert abs(straight["optical_length_over_rc"] - 2.0) < 1e-12
++
++    atlas = scan_stationary_candidates(
++        "0_1", epsilon=0.0019, centerline_points=2048,
++        stations=1, angles=3, rho_min=0.0005, rho_max=0.01,
++        bracket_samples=48, force_python=True, auto_build=False,
++        reach_pair_points=128,
++    )
++    roots = [r for r in atlas["roots"] if r["classification"] == "RESOLVED_LOCAL_MINIMUM"]
++    assert roots
++    root = roots[0]
++    seed = {
++        **root,
++        "directions": [root["azimuthal_seed_direction"], [-v for v in root["azimuthal_seed_direction"]]],
++    }
++    curve = sample_ideal_knot("0_1", 2048)
++    shot = shoot_closed_orbit(
++        curve, seed, epsilon=0.0019, step_count=32, max_iterations=0,
++        force_python=True, auto_build=False,
++        position_tolerance_over_rc=1e-6, direction_tolerance=1e-6,
++    )
++    assert shot["schema"] == "sst.fermat.closed-orbit-shot.v0.5.0"
++    assert shot["global_closed_orbit_certified"] is False
++    assert shot["qsm_certified"] is False
++    assert "best" in shot
++
++    monodromy = compute_reduced_monodromy(
++        curve, shot, epsilon=0.0019,
++        position_perturbation_fraction=1e-5,
++        direction_perturbation=1e-5,
++        force_python=True, auto_build=False,
++    )
++    matrix = np.asarray(monodromy["matrix"], dtype=float)
++    assert matrix.shape == (4, 4)
++    assert np.all(np.isfinite(matrix))
++    assert monodromy["monodromy_certified"] is False
++    assert monodromy["qsm_certified"] is False
++
++    print("v0.5.0 tests: ok")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

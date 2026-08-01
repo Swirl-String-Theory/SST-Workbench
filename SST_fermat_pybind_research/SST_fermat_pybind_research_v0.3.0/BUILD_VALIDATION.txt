@@ -1,0 +1,44 @@
+SST Fermat pybind research v0.3.0 — build and audit validation
+Date: 2026-07-28
+
+Validated in the artifact environment
+-------------------------------------
+PASS  Python syntax compilation for package modules and CLI scripts.
+PASS  tests/test_catalog.py.
+PASS  tests/test_v030.py.
+PASS  Pure C++17 kernel compile and execution:
+      g++ -O2 -std=c++17 -Icpp tests/test_kernel.cpp
+      output: PASS residual=-1.11022e-16 K_hat=-75115.5
+PASS  External analytic benchmark, Python fallback:
+      |x_num-x_exact| = 2.258523229548004e-14.
+PASS  Rosenhead radial threshold regression:
+      epsilon=0.0019 -> horizon-free critical roots present.
+      epsilon=0.0020 -> no critical root.
+PASS  Four-knot Python-fallback audit battery.
+PASS  Softening-pipeline smoke test across 0_1, 3_1, 4_1, 5_2 and
+      epsilon={0.0019,0.0020,0.0045}; 12 rows generated.
+PASS  Adaptive resolution plans generated for all four knots.
+PASS  Fixed-probe resolution-ladder smoke test.
+PASS  All global closed-orbit and QSM certification flags remain false.
+
+Reference constants produced by v0.3.0
+--------------------------------------
+Rosenhead straight-reference clock-degeneracy threshold:
+  epsilon_H/r_c = beta_0/2
+                = 0.001824338139287013
+
+Rosenhead straight-reference Fermat-critical threshold:
+  epsilon_crit/r_c = sqrt(8/27) beta_0
+                   = 0.0019860878042451944
+
+Environment limitation
+----------------------
+The artifact environment does not contain pybind11, so the v0.3.0 native
+Python extension was not built here. The independent C++17 kernel and the
+Python fallback were validated. Rebuild the changed binding on Windows:
+
+  python -m fermat_ext.build_ext_if_needed --force --strict
+  python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+
+A v0.2.0 .pyd must not be reused because v0.3.0 adds the explicit
+kernel_model binding argument.

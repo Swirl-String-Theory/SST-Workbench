@@ -1,0 +1,1626 @@
+diff --git a/.gitignore b/.gitignore
+index 071433f..80b6168 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -19,3 +19,7 @@ convergence_*/
+ bifurcation_*/
+ scale_sweep_*/
+ symmetry_audit*/
++v0.4.1_campaign_output/
++v0.4.1_smoke_output/
++SST_fermat_pybind_research_v0.4.1_results.zip*
++SST_fermat_pybind_research_v0.4.1_smoke_results.zip*
+diff --git a/BUILD_VALIDATION.txt b/BUILD_VALIDATION.txt
+index 0b32d81..e3caaae 100644
+--- a/BUILD_VALIDATION.txt
++++ b/BUILD_VALIDATION.txt
+@@ -1,4 +1,4 @@
+-SST Fermat pybind research v0.4.0 — build and audit validation
++SST Fermat pybind research v0.4.1 — build and audit validation
+ ================================================================
+ 
+ Validation environment
+@@ -6,28 +6,40 @@ Validation environment
+ Python: 3.13.5
+ NumPy: 2.3.5
+ C++ compiler: g++ 14.2.0
+-pybind11 in artifact environment: unavailable
++pybind11 extension build in artifact environment: not performed
+ 
+ Validated in this artifact environment
+ ---------------------------------------
+ 1. Python syntax compilation for all package and CLI modules: PASS
+-2. Existing ideal-knot catalog regression: PASS
+-3. v0.3 radial/softening regression tests: PASS
+-4. v0.4 Python analytic-Jacobian finite-difference test: PASS
+-5. v0.4 stationary-root solver control test on 0_1: PASS
+-6. v0.4 approximate reach diagnostic control on 0_1: PASS
+-7. v0.4 rigid-motion/orientation/mirror symmetry test: PASS
+-8. Standalone C++17 kernel compilation: PASS
+-9. Standalone C++ analytic-Jacobian finite-difference test: PASS
+-10. Python-fallback run_all_checks.py audit: PASS
+-11. Smoke execution of candidate, convergence, bifurcation, scale, and symmetry CLIs: PASS
++2. Ideal-knot catalog regression: PASS
++3. v0.3 regression tests: PASS
++4. v0.4 analytic-Jacobian, stationary-root, reach, and symmetry tests: PASS
++5. v0.4.1 fraction-normalization and root-label tests: PASS
++6. v0.4.1 adaptive resolution-planning tests: PASS
++7. v0.4.1 per-knot bifurcation point-map test: PASS
++8. v0.4.1 campaign dry-run manifest test: PASS
++9. Standalone C++17 kernel compilation: PASS
++10. Standalone C++ analytic-Jacobian finite-difference test: PASS
++11. Python-fallback run_all_checks.py audit: PASS
++12. Sequential smoke campaign including result ZIP and SHA-256 creation: PASS
++
++Executed test commands
++----------------------
++  python -m compileall -q .
++  python tests/test_catalog.py
++  python tests/test_v030.py
++  python tests/test_v040.py
++  python tests/test_v041.py
++  g++ -std=c++17 -O2 -Icpp tests/test_kernel.cpp -o test_kernel
++  ./test_kernel
+ 
+ Python fallback audit summary
+ -----------------------------
+ overall_status = PYTHON_FALLBACK_VALIDATED_NATIVE_NOT_CERTIFIED
+ external analytic x_star error = 2.258523229548004e-14
+ analytic Jacobian finite-difference Linf error = 1.5851025381152795e-08
+-0_1 control local minimum found = true
++candidate_surface_fraction bounded in [0,1] = true
++pre-convergence minimum label is RESOLVED_LOCAL_MINIMUM = true
+ 0_1 approximate reach error from unity < 1 percent = true
+ symmetry beta Linf error < 1e-11 = true
+ symmetry Jacobian Linf error < 1e-9 = true
+@@ -38,32 +50,46 @@ external Fermat residual = -1.11022e-16
+ K_hat = -7.51155e4
+ analytic Jacobian finite-difference check = PASS
+ 
++Campaign smoke validation
++-------------------------
++The smoke preset completed all sequential stages and created:
++
++  campaign_manifest.json
++  campaign_summary.json
++  environment.json
++  campaign_commands.txt
++  logs/*.log
++  logs/*.success.json
++  combined results ZIP
++  ZIP SHA-256 sidecar
++
++The smoke preset is a software/build check. Its deliberately low resolutions are
++not scientific convergence settings. The full BAT uses the corrected high-resolution
++campaign defined in run_full_campaign.py.
++
+ Native pybind11 status
+ ----------------------
+-The artifact environment does not contain pybind11, so the actual Python
+-extension could not be built here. The C++ kernel itself compiled and passed.
+-The native Windows release gate must be run on the target machine:
++The actual Windows .pyd for v0.4.1 must be rebuilt and certified on the target machine:
+ 
+   python -m pip install -r requirements.txt
+   python -m fermat_ext.build_ext_if_needed --force --strict
+   python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+ 
+-The required target-machine audit gates are:
++The required target-machine gates are:
+ 
+   field native/Python parity Linf < 1e-12
+   Jacobian native/Python parity Linf < 1e-10
+   radial native/Python parity < 1e-10
+ 
+-Important rebuild note
+-----------------------
+-v0.4.0 adds the pybind function biot_savart_batch_with_jacobian. A v0.3
+-.pyd is ABI/API-incomplete for this release and must not be reused.
++The native API was introduced in v0.4.0. A v0.3 .pyd is API-incomplete and must
++not be reused. Rebuilding is also recommended when replacing any v0.4.x source tree.
+ 
+ Epistemic status
+ ----------------
+-The package certifies numerical radial stationary candidates and convergence
+-diagnostics only. It does not certify a global closed Fermat geodesic, a
+-physical photon sphere, or a QSM pole. All generated results preserve:
++Raw stationary roots are labelled RESOLVED_LOCAL_MINIMUM, not certified. Only
++branches passing the explicit multi-resolution convergence gates receive weak or
++strong certification labels. The package does not certify a global closed Fermat
++geodesic, a physical photon sphere, or a QSM pole. All generated results preserve:
+ 
+   global_closed_orbit_certified = false
+   qsm_certified = false
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 752cd94..45128aa 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,5 +1,18 @@
+ # Changelog
+ 
++## v0.4.1 — Campaign Automation and Certification Corrections
++
++- Corrected `candidate_surface_fraction` so it is always normalized by all sampled rays and therefore remains in \([0,1]\).
++- Added a separate fraction conditional on fully clock-valid rays.
++- Renamed the pre-convergence root label to `RESOLVED_LOCAL_MINIMUM`.
++- Added the missing high-resolution \(3_1\) convergence run at 8192, 16384, and 32768 centerline points.
++- Added adaptive, per-knot resolution planning to the bifurcation atlas with a conservative default minimum of 32768 points.
++- Added length- and scale-aware resolution planning to the knot-scale sweep.
++- Added `run_full_campaign.py` with sequential execution, logging, resume, failure manifests, and automatic result ZIP creation.
++- Added `START_V041_FULL_CAMPAIGN.bat` and a smaller smoke-check BAT.
++- Added campaign environment, command, manifest, summary, log, success-marker, ZIP, and SHA-256 outputs.
++- Updated schemas and package version to 0.4.1 while preserving all global-orbit and QSM guards.
++
+ ## v0.4.0 — Candidate Certification and Bifurcation Atlas
+ 
+ - Added analytic regularized Biot--Savart field Jacobians in C++ and Python.
+diff --git a/MANIFEST.in b/MANIFEST.in
+index 475eb95..d53fd8b 100644
+--- a/MANIFEST.in
++++ b/MANIFEST.in
+@@ -1,2 +1,11 @@
++include README.md
++include CHANGELOG.md
++include BUILD_VALIDATION.txt
++include requirements.txt
++include *.py
++include *.bat
+ recursive-include fermat_ext/data *.json
+ recursive-include cpp *.cpp *.hpp *.h
++recursive-include examples *.txt
++recursive-include tests *.py *.cpp
++recursive-include patches *.diff
+diff --git a/README.md b/README.md
+index 7144db9..6601697 100644
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-# SST Fermat pybind research v0.4.0
++# SST Fermat pybind research v0.4.1
+ 
+ Standalone Python + C++17/pybind11 research harness. It does **not** import, modify, or patch SSTcore.
+ 
+@@ -8,11 +8,11 @@ This release turns the v0.3 softening scan into a candidate-certification pipeli
+ 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2.
+ \]
+ 
+-The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it certifies numerical stationary structures and convergence diagnostics, not a physical electron model or a global photon sphere.
++The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it resolves numerical stationary structures and separately certifies convergence-qualified branches; it does not establish a physical electron model or a global photon sphere.
+ 
+-## Why v0.4.0 is a major release
++## v0.4.1 patch scope
+ 
+-v0.3 counted sampled local minima of
++v0.4.0 introduced the direct stationary-root solver. v0.4.1 keeps that mathematical model and corrects the release pipeline around it. For context, v0.3 counted sampled local minima of
+ 
+ \[
+ R_F(\rho;s,\theta)
+@@ -20,7 +20,7 @@ R_F(\rho;s,\theta)
+ \frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}}.
+ \]
+ 
+-v0.4 instead solves the stationary equation directly:
++v0.4.x solves the stationary equation directly:
+ 
+ \[
+ \boxed{
+@@ -43,23 +43,39 @@ Since
+ 
+ a sign change from \(G<0\) to \(G>0\) identifies a local radial minimum.
+ 
+-## New in v0.4.0
++## New in v0.4.1
+ 
+-1. **Analytic Biot--Savart field Jacobian** in C++ and Python:
++1. Corrected `candidate_surface_fraction`; it is now bounded by construction:
+ 
+    \[
+-   J_{ij}=\frac{\partial\beta_i}{\partial x_j}.
++   P_{\mathrm{all}}=\frac{N_{\mathrm{rays\ with\ minimum}}}{N_{\mathrm{all\ rays}}}\in[0,1].
+    \]
+ 
+-2. **Bracketed stationary-root solver** using a coarse radial discovery grid followed by batched bisection.
+-3. **Candidate convergence certification** across at least three centerline resolutions \(N,2N,4N\).
+-4. **Bifurcation atlas** across \(\epsilon/r_c\), with branch IDs and onset/loss tracking.
+-5. **Independent knot-scale sweep** through `scale_over_rc`.
+-6. **Approximate reach diagnostic** from curvature and subsampled doubly-critical chord candidates.
+-7. **Symmetry/covariance audit** for translation, proper rotation, orientation reversal, cyclic reindexing, and mirror reflection.
+-8. **Orbit-seed catalog** generated from converged local minima; no global orbit claim is made.
+-9. Native/Python parity gates for both the field and its analytic Jacobian.
+-10. Existing v0.3 profile, softening, and resolution tools remain available as regression diagnostics.
++   A separate conditional fraction is reported for fully clock-valid rays.
++2. Renamed the pre-convergence root label from the overstrong
++   `CERTIFIED_LOCAL_MINIMUM_NUMERICAL` to `RESOLVED_LOCAL_MINIMUM`.
++3. Added the missing high-resolution convergence gate for \(3_1\):
++
++   \[
++   N=8192,\ 16384,\ 32768.
++   \]
++
++4. Made the bifurcation atlas convergence-aware. Its default adaptive mode uses at least
++   \(32768\) centerline points near the branch-loss window and records the selected point count per knot.
++5. Made the scale sweep length- and scale-aware so that increasing `scale_over_rc` also increases the centerline resolution.
++6. Added `run_full_campaign.py` and the double-clickable `START_V041_FULL_CAMPAIGN.bat`. The runner executes the complete campaign sequentially, logs every command, supports resume, and creates one combined result ZIP.
++7. Added a campaign manifest, environment record, per-step logs, success markers, final summary, and SHA-256 sidecar.
++
++## Core v0.4 capabilities retained
++
++- analytic Biot--Savart field Jacobians in C++ and Python;
++- batched bracket discovery and stationary-root refinement;
++- three-level candidate convergence reports;
++- softening bifurcation branch tracking;
++- independent ideal-knot scale sweeps;
++- approximate curvature/DCSD reach diagnostics;
++- rigid-motion, orientation, reindexing, and mirror covariance audits;
++- orbit-seed output with the global-orbit and QSM guards preserved.
+ 
+ ## Kernel scope
+ 
+@@ -100,14 +116,14 @@ Rankine and Lamb--Oseen remain one-dimensional comparison profiles only; they ar
+ A root can be labelled:
+ 
+ ```text
+-CERTIFIED_LOCAL_MINIMUM_NUMERICAL
++RESOLVED_LOCAL_MINIMUM
+ LOCAL_MAXIMUM
+ DEGENERATE_STATIONARY_POINT
+ GLOBAL_CAUSTIC_REGIME
+ NOT_CONVERGED
+ ```
+ 
+-`CERTIFIED_LOCAL_MINIMUM_NUMERICAL` means that a stationary radial minimum was solved numerically in one transported normal plane. It does **not** mean that a closed Fermat geodesic exists in the full non-axisymmetric metric.
++`RESOLVED_LOCAL_MINIMUM` means that a stationary radial minimum was solved numerically in one transported normal plane. It does **not** mean that a closed Fermat geodesic exists in the full non-axisymmetric metric.
+ 
+ Every result preserves:
+ 
+@@ -116,7 +132,7 @@ Every result preserves:
+ "qsm_certified": false
+ ```
+ 
+-The reach value in v0.4 is explicitly an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
++The reach value in v0.4.1 is explicitly an approximate diagnostic, not a rigorous Ridgerunner/reach certificate.
+ 
+ ## Build the native module
+ 
+@@ -127,7 +143,44 @@ python -m pip install -r requirements.txt
+ python -m fermat_ext.build_ext_if_needed --force --strict
+ ```
+ 
+-v0.4 changes the native binding by adding `biot_savart_batch_with_jacobian`; rebuild the `.pyd` even when v0.3 was already compiled.
++The native API includes `biot_savart_batch_with_jacobian`; rebuild the `.pyd` when upgrading from v0.3 or an older v0.4 development build.
++
++
++## One-command full campaign
++
++On Windows, double-click:
++
++```text
++START_V041_FULL_CAMPAIGN.bat
++```
++
++Equivalent command:
++
++```bat
++python run_full_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.4.1_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.4.1_results.zip
++```
++
++The full sequence is:
++
++```text
++native build
++audit_out_native
++candidate_atlas_0019
++candidate_atlas_0019_high
++convergence_0019
++convergence_0019_high (3_1, 4_1, 5_2)
++bifurcation_atlas (adaptive, min N=32768)
++scale_sweep_0019 (adaptive resolution)
++symmetry_audit
++combined ZIP + SHA-256
++```
++
++The BAT file uses `--resume`. After an interruption, run the same BAT again; completed steps with valid success markers are skipped. The full bifurcation and scale runs are intentionally expensive. Use `START_V041_SMOKE_CHECK.bat` first to verify the local compiler and pybind module.
+ 
+ ## 1. Full audit
+ 
+@@ -156,7 +209,10 @@ A first native run:
+ ```bat
+ python run_candidate_atlas.py ^
+   --epsilon 0.0019 ^
+-  --centerline-points 8192 ^
++  --resolution-mode adaptive ^
++  --target-ds-over-epsilon 1.0 ^
++  --min-centerline-points 4096 ^
++  --max-centerline-points 65536 ^
+   --stations 8 ^
+   --angles 16 ^
+   --bracket-samples 96 ^
+@@ -206,11 +262,11 @@ python run_candidate_convergence.py ^
+   --out-dir convergence_0019
+ ```
+ 
+-For the more demanding \(4_1\) and \(5_2\) cases:
++For the non-trivial knots at the corrected high-resolution gate:
+ 
+ ```bat
+ python run_candidate_convergence.py ^
+-  --knots 4_1 5_2 ^
++  --knots 3_1 4_1 5_2 ^
+   --epsilon 0.0019 ^
+   --point-counts 8192 16384 32768 ^
+   --stations 8 ^
+@@ -232,7 +288,7 @@ Strong certification uses \(10^{-4}\).
+ 
+ ## 4. Bifurcation atlas
+ 
+-The primary v0.4 scan window is
++The primary v0.4.1 scan window is
+ 
+ \[
+ 0.00180\leq\epsilon/r_c\leq0.00210.
+@@ -243,7 +299,10 @@ python run_bifurcation_atlas.py ^
+   --epsilon-start 0.00180 ^
+   --epsilon-stop 0.00210 ^
+   --epsilon-step 0.000025 ^
+-  --centerline-points 8192 ^
++  --resolution-mode adaptive ^
++  --target-ds-over-epsilon 0.5 ^
++  --min-centerline-points 32768 ^
++  --max-centerline-points 65536 ^
+   --stations 8 ^
+   --angles 16 ^
+   --no-auto-build ^
+@@ -261,7 +320,10 @@ The Fourier source normalization \(D=1\) is not a physical identification with \
+ python run_scale_sweep.py ^
+   --scales 0.5 1.0 2.0 4.0 ^
+   --epsilon 0.0019 ^
+-  --centerline-points 8192 ^
++  --resolution-mode adaptive ^
++  --target-ds-over-epsilon 1.0 ^
++  --min-centerline-points 4096 ^
++  --max-centerline-points 65536 ^
+   --stations 8 ^
+   --angles 16 ^
+   --no-auto-build ^
+@@ -304,23 +366,17 @@ run_softening_matrix.py
+ run_resolution_ladder.py
+ ```
+ 
+-They are useful for reproducing v0.3 outputs, but the new v0.4 root solver should be used for candidate claims.
++They are useful for reproducing v0.3 outputs, but the v0.4.x root solver should be used for candidate claims.
+ 
+ ## Performance notes
+ 
+ The native Jacobian kernel performs substantially more arithmetic than the field-only kernel. Candidate discovery batches all radial probes, and bisection refines all active brackets together. Nevertheless, high-resolution runs with \(N=32768\), many stations, and many angular sectors can require significant RAM and runtime.
+ 
+-Recommended sequence:
+-
+-1. audit;
+-2. candidate atlas at \(N=8192\);
+-3. convergence only for knots/softenings where roots were found;
+-4. bifurcation atlas;
+-5. scale and symmetry audits.
++Recommended sequence: use `START_V041_FULL_CAMPAIGN.bat`. It encodes the audited order, writes per-step logs, and resumes after interruption.
+ 
+-## What v0.4 can and cannot conclude
++## What v0.4.1 can and cannot conclude
+ 
+-v0.4 can distinguish among:
++v0.4.1 can distinguish among:
+ 
+ ```text
+ candidate disappears under refinement
+@@ -328,4 +384,4 @@ candidate is a universal core-profile feature
+ candidate remains knot-geometry dependent after convergence
+ ```
+ 
+-v0.4 does not yet integrate or shoot a complete closed Fermat orbit. That belongs to a later geodesic/monodromy release after the local branches survive certification.
++v0.4.1 does not yet integrate or shoot a complete closed Fermat orbit. That belongs to a later geodesic/monodromy release after the local branches survive certification.
+diff --git a/START_V041_FULL_CAMPAIGN.bat b/START_V041_FULL_CAMPAIGN.bat
+new file mode 100644
+index 0000000..a1ac420
+--- /dev/null
++++ b/START_V041_FULL_CAMPAIGN.bat
+@@ -0,0 +1,37 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++
++echo ============================================================
++echo SST Fermat pybind research v0.4.1 - FULL CAMPAIGN
++echo Sequential native audit, atlases, convergence, scale, symmetry
++echo Final archive: SST_fermat_pybind_research_v0.4.1_results.zip
++echo ============================================================
++echo.
++
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++
++"%PYTHON_EXE%" run_full_campaign.py ^
++  --preset full ^
++  --require-native ^
++  --resume ^
++  --out-root v0.4.1_campaign_output ^
++  --archive SST_fermat_pybind_research_v0.4.1_results.zip %*
++
++set "RUN_RC=%ERRORLEVEL%"
++echo.
++if "%RUN_RC%"=="0" (
++    echo FULL CAMPAIGN COMPLETED SUCCESSFULLY.
++) else (
++    echo CAMPAIGN STOPPED OR FAILED. Inspect v0.4.1_campaign_output\logs.
++    echo Run this same BAT again to resume completed steps.
++)
++echo.
++pause
++exit /b %RUN_RC%
+diff --git a/START_V041_SMOKE_CHECK.bat b/START_V041_SMOKE_CHECK.bat
+new file mode 100644
+index 0000000..a03b131
+--- /dev/null
++++ b/START_V041_SMOKE_CHECK.bat
+@@ -0,0 +1,14 @@
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++if defined VIRTUAL_ENV (
++    set "PYTHON_EXE=python"
++) else if exist ".venv\Scripts\python.exe" (
++    set "PYTHON_EXE=.venv\Scripts\python.exe"
++) else (
++    set "PYTHON_EXE=python"
++)
++"%PYTHON_EXE%" run_full_campaign.py --preset smoke --require-native --overwrite --out-root v0.4.1_smoke_output --archive SST_fermat_pybind_research_v0.4.1_smoke_results.zip %*
++set "RUN_RC=%ERRORLEVEL%"
++pause
++exit /b %RUN_RC%
+diff --git a/examples/full_commands.txt b/examples/full_commands.txt
+index 2509f32..ea76318 100644
+--- a/examples/full_commands.txt
++++ b/examples/full_commands.txt
+@@ -1,7 +1,16 @@
++REM Recommended: run the complete v0.4.1 sequence and ZIP all outputs.
++START_V041_FULL_CAMPAIGN.bat
++
++REM Equivalent explicit Python command:
++python run_full_campaign.py --preset full --require-native --resume --out-root v0.4.1_campaign_output --archive SST_fermat_pybind_research_v0.4.1_results.zip
++
++REM Individual corrected commands:
+ python -m fermat_ext.build_ext_if_needed --force --strict
+ python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+ python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 8192 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir candidate_atlas_0019
+-python run_candidate_convergence.py --epsilon 0.0019 --point-counts 4096 8192 16384 --stations 8 --angles 16 --no-auto-build --require-native --out-dir convergence_0019
+-python run_bifurcation_atlas.py --epsilon-start 0.00180 --epsilon-stop 0.00210 --epsilon-step 0.000025 --centerline-points 8192 --stations 8 --angles 16 --no-auto-build --require-native --out-dir bifurcation_atlas
+-python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --centerline-points 8192 --no-auto-build --require-native --out-dir scale_sweep_0019
++python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 16384 --stations 32 --angles 32 --bracket-samples 128 --no-auto-build --require-native --out-dir candidate_atlas_0019_high
++python run_candidate_convergence.py --epsilon 0.0019 --point-counts 4096 8192 16384 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir convergence_0019
++python run_candidate_convergence.py --knots 3_1 4_1 5_2 --epsilon 0.0019 --point-counts 8192 16384 32768 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir convergence_0019_high
++python run_bifurcation_atlas.py --epsilon-start 0.00180 --epsilon-stop 0.00210 --epsilon-step 0.000025 --resolution-mode adaptive --target-ds-over-epsilon 0.5 --min-centerline-points 32768 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir bifurcation_atlas
++python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --resolution-mode adaptive --target-ds-over-epsilon 1.0 --min-centerline-points 4096 --max-centerline-points 65536 --stations 8 --angles 16 --bracket-samples 96 --no-auto-build --require-native --out-dir scale_sweep_0019
+ python run_symmetry_audit.py --epsilon 0.0019 --centerline-points 4096 --no-auto-build --require-native --out-dir symmetry_audit
+diff --git a/examples/minimal_commands.txt b/examples/minimal_commands.txt
+index 790b1ee..a8c01a6 100644
+--- a/examples/minimal_commands.txt
++++ b/examples/minimal_commands.txt
+@@ -1,5 +1,5 @@
+-python -m pip install -r requirements.txt
+-python -m fermat_ext.build_ext_if_needed --force --strict
+-python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-native
+-python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 8192 --no-auto-build --require-native --out-dir candidate_atlas_0019
+-python run_candidate_convergence.py --epsilon 0.0019 --point-counts 4096 8192 16384 --no-auto-build --require-native --out-dir convergence_0019
++REM Fast native installation check:
++START_V041_SMOKE_CHECK.bat
++
++REM Full resumable campaign:
++START_V041_FULL_CAMPAIGN.bat
+diff --git a/fermat_ext/__init__.py b/fermat_ext/__init__.py
+index 0a0b65c..10daa3b 100644
+--- a/fermat_ext/__init__.py
++++ b/fermat_ext/__init__.py
+@@ -40,4 +40,4 @@ __all__ = [
+     "estimate_reach_diagnostic",
+     "symmetry_field_audit",
+ ]
+-__version__ = "0.4.0"
++__version__ = "0.4.1"
+diff --git a/fermat_ext/_config.py b/fermat_ext/_config.py
+index 9f6aea4..1d6a187 100644
+--- a/fermat_ext/_config.py
++++ b/fermat_ext/_config.py
+@@ -7,4 +7,4 @@ EXT_BASENAME = "_fermat_native"
+ CPP_DIR_REL = Path("cpp")
+ STAMP_BASENAME = "fermat_native.stamp.json"
+ LOG_PREFIX = "[sst-fermat]"
+-RESULT_SCHEMA = "sst.fermat.audit.v0.4"
++RESULT_SCHEMA = "sst.fermat.audit.v0.4.1"
+diff --git a/fermat_ext/build_ext_if_needed.py b/fermat_ext/build_ext_if_needed.py
+index 798fce3..b509915 100644
+--- a/fermat_ext/build_ext_if_needed.py
++++ b/fermat_ext/build_ext_if_needed.py
+@@ -67,7 +67,7 @@ def _build_with_setuptools(verbose: bool) -> tuple[bool, str]:
+         "        for ext in self.extensions:\n"
+         "            ext.extra_compile_args = ['/O2','/std:c++17'] if self.compiler.compiler_type == 'msvc' else ['-O3','-std=c++17']\n"
+         "        super().build_extensions()\n"
+-        f"setup(name='{PACKAGE_NAME}_ext', version='0.4.0', "
++        f"setup(name='{PACKAGE_NAME}_ext', version='0.4.1', "
+         f"packages=['{PACKAGE_NAME}'], package_dir={{'{PACKAGE_NAME}': '{PACKAGE_NAME}'}}, py_modules=[], "
+         f"ext_modules=[Extension('{PACKAGE_NAME}.{EXT_BASENAME}', "
+         "['cpp/native.cpp'], include_dirs=[pybind11.get_include(), 'cpp'], language='c++')], "
+diff --git a/fermat_ext/certification.py b/fermat_ext/certification.py
+index 8a0d1f4..4a6f03d 100644
+--- a/fermat_ext/certification.py
++++ b/fermat_ext/certification.py
+@@ -243,7 +243,7 @@ def _refine_brackets_batch(
+         ray = rays[int(b["ray_index"])]
+         gl, gh = float(b["g_lo"]), float(b["g_hi"])
+         if gl < 0.0 < gh:
+-            classification = "CERTIFIED_LOCAL_MINIMUM_NUMERICAL"
++            classification = "RESOLVED_LOCAL_MINIMUM"
+         elif gl > 0.0 > gh:
+             classification = "LOCAL_MAXIMUM"
+         else:
+@@ -418,22 +418,28 @@ def scan_stationary_candidates(
+         root["inside_approximate_reach"] = (
+             bool(root["rho_over_rc"] < reach_value) if reach_value is not None else None
+         )
+-        if root["classification"] == "CERTIFIED_LOCAL_MINIMUM_NUMERICAL" and root["inside_approximate_reach"] is False:
++        if root["classification"] == "RESOLVED_LOCAL_MINIMUM" and root["inside_approximate_reach"] is False:
+             root["classification"] = "GLOBAL_CAUSTIC_REGIME"
+-    valid_ray_count = 0
++    fully_clock_valid_rays: set[int] = set()
+     rays_with_min: set[int] = set()
+     valid_grid = q["clock_valid"].reshape(len(rays), len(rhos))
+     for i in range(len(rays)):
+         if bool(np.all(valid_grid[i])):
+-            valid_ray_count += 1
++            fully_clock_valid_rays.add(i)
+     for root in roots:
+-        if root["classification"] in {"CERTIFIED_LOCAL_MINIMUM_NUMERICAL", "GLOBAL_CAUSTIC_REGIME"}:
++        if root["classification"] in {"RESOLVED_LOCAL_MINIMUM", "GLOBAL_CAUSTIC_REGIME"}:
+             rays_with_min.add(int(root["ray_index"]))
+-    min_roots = [r for r in roots if r["classification"] == "CERTIFIED_LOCAL_MINIMUM_NUMERICAL"]
++    rays_with_min_and_fully_valid = rays_with_min.intersection(fully_clock_valid_rays)
++    min_roots = [r for r in roots if r["classification"] == "RESOLVED_LOCAL_MINIMUM"]
++    surface_fraction_all_rays = len(rays_with_min) / len(rays)
++    surface_fraction_fully_valid = (
++        len(rays_with_min_and_fully_valid) / len(fully_clock_valid_rays)
++        if fully_clock_valid_rays else None
++    )
+     return {
+-        "schema": "sst.fermat.candidate-atlas.v0.4",
++        "schema": "sst.fermat.candidate-atlas.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+-        "status": "RESEARCH_TRACK_CANDIDATE_CERTIFICATION",
++        "status": "RESEARCH_TRACK_STATIONARY_ROOT_RESOLUTION",
+         "knot_id": knot_id,
+         "source": knot_metadata(knot_id),
+         "backend": backend,
+@@ -455,13 +461,22 @@ def scan_stationary_candidates(
+         "frame_transport": frame,
+         "reach_diagnostic": reach,
+         "ray_count": len(rays),
+-        "valid_clock_ray_count": valid_ray_count,
++        "fully_clock_valid_ray_count": len(fully_clock_valid_rays),
++        "valid_clock_ray_count": len(fully_clock_valid_rays),
+         "invalid_clock_probe_count": int(np.count_nonzero(~q["clock_valid"])),
+         "bracket_count": len(brackets),
+         "stationary_root_count": len(roots),
+         "local_minimum_count": len(min_roots),
+         "rays_with_local_minimum_count": len(rays_with_min),
+-        "candidate_surface_fraction": len(rays_with_min) / max(valid_ray_count, 1),
++        "rays_with_local_minimum_and_fully_clock_valid_count": len(rays_with_min_and_fully_valid),
++        "candidate_surface_fraction": surface_fraction_all_rays,
++        "candidate_surface_fraction_all_rays": surface_fraction_all_rays,
++        "candidate_surface_fraction_fully_clock_valid_rays": surface_fraction_fully_valid,
++        "candidate_surface_fraction_definition": (
++            "candidate_surface_fraction is the fraction of all sampled rays that contain at least "
++            "one resolved local minimum or global-caustic-regime minimum; the fully-clock-valid "
++            "conditional fraction is reported separately."
++        ),
+         "roots": roots,
+         "orbit_seeds": [
+             {
+@@ -533,7 +548,7 @@ def certify_candidate_convergence(
+             auto_build=auto_build if i == 0 else False,
+             reach_pair_points=reach_pair_points,
+         )
+-    classifications = {"CERTIFIED_LOCAL_MINIMUM_NUMERICAL", "GLOBAL_CAUSTIC_REGIME"}
++    classifications = {"RESOLVED_LOCAL_MINIMUM", "GLOBAL_CAUSTIC_REGIME"}
+     maps = {n: _roots_by_ray(levels[n], classifications) for n in counts}
+     high_n = counts[-1]
+     high_roots = maps[high_n]
+@@ -565,7 +580,7 @@ def certify_candidate_convergence(
+             weak = (
+                 len(matched) >= 3
+                 and all(v is not None and v < relative_tolerance for v in errors.values())
+-                and matched[-1][1]["classification"] == "CERTIFIED_LOCAL_MINIMUM_NUMERICAL"
++                and matched[-1][1]["classification"] == "RESOLVED_LOCAL_MINIMUM"
+                 and matched[-1][1]["inside_approximate_reach"] is not False
+             )
+             strong = weak and all(v is not None and v < strong_relative_tolerance for v in errors.values())
+@@ -580,7 +595,7 @@ def certify_candidate_convergence(
+                 "classification": "STRONGLY_CERTIFIED" if strong else ("WEAKLY_CERTIFIED" if weak else "NOT_CONVERGED"),
+             })
+     return {
+-        "schema": "sst.fermat.convergence-report.v0.4",
++        "schema": "sst.fermat.convergence-report.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_CANDIDATE_CERTIFICATION",
+         "knot_id": knot_id,
+@@ -601,7 +616,7 @@ def build_bifurcation_atlas(
+     knot_ids: Iterable[str] = DEFAULT_KNOT_IDS,
+     *,
+     epsilon_values: Sequence[float],
+-    centerline_points: int,
++    centerline_points: int | dict[str, int],
+     scale_over_rc: float = 1.0,
+     stations: int = 8,
+     angles: int = 16,
+@@ -616,11 +631,18 @@ def build_bifurcation_atlas(
+     eps = sorted(set(float(v) for v in epsilon_values))
+     if not eps or any(v <= 0 for v in eps):
+         raise ValueError("positive epsilon_values required")
++    if isinstance(centerline_points, dict):
++        point_map = {k: int(centerline_points[k]) for k in ids}
++    else:
++        point_map = {k: int(centerline_points) for k in ids}
++    if any(n < 16 for n in point_map.values()):
++        raise ValueError("all centerline point counts must be >=16")
+     scans: dict[str, dict[str, Any]] = {}
+     rows: list[dict[str, Any]] = []
+     branches: list[dict[str, Any]] = []
+     first = True
+     for knot_id in ids:
++        knot_points = point_map[knot_id]
+         knot_scans: dict[str, Any] = {}
+         active: dict[tuple[int, int], list[dict[str, Any]]] = {}
+         all_branches: list[dict[str, Any]] = []
+@@ -630,7 +652,7 @@ def build_bifurcation_atlas(
+             scan = scan_stationary_candidates(
+                 knot_id,
+                 epsilon=epsilon,
+-                centerline_points=centerline_points,
++                centerline_points=knot_points,
+                 scale_over_rc=scale_over_rc,
+                 stations=stations,
+                 angles=angles,
+@@ -646,7 +668,7 @@ def build_bifurcation_atlas(
+             if cached_reach is None:
+                 cached_reach = scan["reach_diagnostic"]
+             knot_scans[f"{epsilon:.10g}"] = scan
+-            roots = _roots_by_ray(scan, {"CERTIFIED_LOCAL_MINIMUM_NUMERICAL", "GLOBAL_CAUSTIC_REGIME"})
++            roots = _roots_by_ray(scan, {"RESOLVED_LOCAL_MINIMUM", "GLOBAL_CAUSTIC_REGIME"})
+             seen_branch_ids: set[str] = set()
+             for ray_key, ray_roots in roots.items():
+                 existing = active.setdefault(ray_key, [])
+@@ -684,8 +706,11 @@ def build_bifurcation_atlas(
+                 "local_minimum_count": scan["local_minimum_count"],
+                 "rays_with_local_minimum_count": scan["rays_with_local_minimum_count"],
+                 "candidate_surface_fraction": scan["candidate_surface_fraction"],
++                "candidate_surface_fraction_all_rays": scan["candidate_surface_fraction_all_rays"],
++                "candidate_surface_fraction_fully_clock_valid_rays": scan["candidate_surface_fraction_fully_clock_valid_rays"],
++                "fully_clock_valid_ray_count": scan["fully_clock_valid_ray_count"],
+                 "invalid_clock_probe_count": scan["invalid_clock_probe_count"],
+-                "centerline_points": centerline_points,
++                "centerline_points": knot_points,
+                 "scale_over_rc": scale_over_rc,
+             })
+         for branch in all_branches:
+@@ -708,13 +733,13 @@ def build_bifurcation_atlas(
+             "shift_from_straight_critical_threshold": (last - threshold) if last is not None else None,
+         })
+     return {
+-        "schema": "sst.fermat.bifurcation-atlas.v0.4",
++        "schema": "sst.fermat.bifurcation-atlas.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_BIFURCATION_DIAGNOSTIC",
+         "knot_ids": list(ids),
+         "epsilon_values_over_rc": eps,
+         "settings": {
+-            "centerline_points": centerline_points,
++            "centerline_points_by_knot": point_map,
+             "scale_over_rc": scale_over_rc,
+             "stations": stations,
+             "angles": angles,
+@@ -788,7 +813,7 @@ def symmetry_field_audit(
+     axial = np.linalg.det(mirror) * mirror
+     audit("mirror_pseudovector", curve @ mirror.T, points @ mirror.T, dirs @ mirror.T, axial, mirror)
+     return {
+-        "schema": "sst.fermat.symmetry-audit.v0.4",
++        "schema": "sst.fermat.symmetry-audit.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "knot_id": knot_id,
+         "epsilon_over_rc": epsilon,
+diff --git a/fermat_ext/core.py b/fermat_ext/core.py
+index 5456618..5b9e601 100644
+--- a/fermat_ext/core.py
++++ b/fermat_ext/core.py
+@@ -10,7 +10,7 @@ from typing import Any
+ from . import constants
+ from ._config import EXT_BASENAME, PACKAGE_NAME, RESULT_SCHEMA
+ 
+-PACKAGE_VERSION = "0.4.0"
++PACKAGE_VERSION = "0.4.1"
+ 
+ 
+ def write_json(path: str | Path, data: Any) -> None:
+diff --git a/fermat_ext/knot_scan.py b/fermat_ext/knot_scan.py
+index 19a8506..92a2fd5 100644
+--- a/fermat_ext/knot_scan.py
++++ b/fermat_ext/knot_scan.py
+@@ -613,7 +613,7 @@ def scan_catalog_matrix(
+     native_all = all(row["native_available"] for row in rows)
+     parity_all = native_all and all(row["native_python_parity_ok"] for row in rows)
+     return {
+-        "schema": "sst.fermat.knot-matrix.v0.4",
++        "schema": "sst.fermat.knot-matrix.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -793,7 +793,7 @@ def scan_softening_matrix(
+     parity_rows = [row for row in rows if row["native_python_parity_ok"] is not None]
+     parity_all = bool(parity_rows) and native_all and all(row["native_python_parity_ok"] for row in parity_rows)
+     return {
+-        "schema": "sst.fermat.softening-matrix.v0.4",
++        "schema": "sst.fermat.softening-matrix.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_DIAGNOSTIC_ONLY",
+         "knot_ids": list(ids),
+@@ -919,7 +919,7 @@ def field_convergence_ladder(
+         }
+ 
+     return {
+-        "schema": "sst.fermat.field-convergence.v0.4",
++        "schema": "sst.fermat.field-convergence.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_NUMERICAL_CONVERGENCE",
+         "knot_ids": list(ids),
+diff --git a/pyproject.toml b/pyproject.toml
+index 247808f..7a69cb8 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "sst-fermat-pybind-research"
+-version = "0.4.0"
+-description = "Standalone Python+C++ pybind11 research harness for SST Fermat-critical diagnostics with candidate certification, analytic Jacobians, bifurcation tracking, reach diagnostics, and symmetry audits across 0_1, 3_1, 4_1, and 5_2"
++version = "0.4.1"
++description = "Standalone Python+C++ pybind11 SST Fermat research harness with stationary-root resolution, convergence gates, adaptive bifurcation and scale scans, and resumable campaign automation across 0_1, 3_1, 4_1, and 5_2"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=1.24"]
+ 
+diff --git a/run_all_checks.py b/run_all_checks.py
+index 2f97cc8..e65ec72 100755
+--- a/run_all_checks.py
++++ b/run_all_checks.py
+@@ -26,7 +26,7 @@ from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS, available_knots, centerlin
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.4 certification audit battery.")
++    p = argparse.ArgumentParser(description="Run the SST Fermat standalone v0.4.1 certification audit battery.")
+     p.add_argument("--out-dir", default="audit_out")
+     p.add_argument("--force-build", action="store_true")
+     p.add_argument("--no-auto-build", action="store_true")
+@@ -126,6 +126,15 @@ def main() -> int:
+         "analytic_jacobian_fd_error_lt_1e-7": jacobian_fd_error < 1e-7,
+         "stationary_root_solver_finds_control_minimum": atlas["local_minimum_count"] >= 1,
+         "stationary_roots_have_small_residual": all(abs(float(r["stationary_residual_G"])) < 1e-7 for r in atlas["roots"]),
++        "candidate_surface_fraction_bounded": 0.0 <= atlas["candidate_surface_fraction"] <= 1.0,
++        "candidate_surface_fraction_all_rays_bounded": 0.0 <= atlas["candidate_surface_fraction_all_rays"] <= 1.0,
++        "fully_valid_fraction_bounded_or_null": (
++            atlas["candidate_surface_fraction_fully_clock_valid_rays"] is None
++            or 0.0 <= atlas["candidate_surface_fraction_fully_clock_valid_rays"] <= 1.0
++        ),
++        "preconvergence_minimum_label_is_resolved_not_certified": all(
++            r["classification"] != "CERTIFIED_LOCAL_MINIMUM_NUMERICAL" for r in atlas["roots"]
++        ),
+         "reach_is_diagnostic_not_claimed_rigorous": reach["rigorous_certificate"] is False,
+         "circle_reach_diagnostic_within_1_percent": abs(float(reach["reach_estimate_over_rc"]) - 1.0) < 0.01,
+         "symmetry_beta_error_lt_1e-11": symmetry["max_beta_vector_linf_error"] < 1e-11,
+@@ -152,7 +161,7 @@ def main() -> int:
+         overall_status = "FAILED"
+     ok = python_checks_ok and (native_checks_ok if args.require_native else True)
+     summary = {
+-        "schema": "sst.fermat.audit.v0.4",
++        "schema": "sst.fermat.audit.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "audit_name": "SST Fermat candidate-certification audit battery",
+         "overall_status": overall_status,
+@@ -173,7 +182,7 @@ def main() -> int:
+         "require_native": args.require_native,
+         "ok": ok,
+         "epistemic_guard": (
+-            "v0.4 certifies numerical radial stationary candidates and convergence diagnostics only; "
++            "v0.4.1 resolves radial stationary candidates and certifies only convergence-qualified branches; "
+             "it does not certify a global closed Fermat geodesic or a QSM pole."
+         ),
+     }
+diff --git a/run_bifurcation_atlas.py b/run_bifurcation_atlas.py
+index fb87ced..f3ea30b 100755
+--- a/run_bifurcation_atlas.py
++++ b/run_bifurcation_atlas.py
+@@ -10,16 +10,58 @@ import numpy as np
+ from fermat_ext.certification import build_bifurcation_atlas
+ from fermat_ext.core import write_csv, write_json
+ from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS
++from fermat_ext.resolution import resolution_plan
++
++
++def _point_plan(args: argparse.Namespace, eps: list[float]) -> tuple[dict[str, int], dict[str, dict]]:
++    if args.resolution_mode == "fixed":
++        point_map = {k: int(args.centerline_points) for k in args.knots}
++        plans = {
++            k: {
++                "knot_id": k,
++                "mode": "fixed",
++                "selected_points": int(args.centerline_points),
++                "minimum_epsilon_over_rc": min(eps),
++            }
++            for k in args.knots
++        }
++        return point_map, plans
++
++    plans: dict[str, dict] = {}
++    point_map: dict[str, int] = {}
++    minimum_epsilon = min(eps)
++    for knot_id in args.knots:
++        plan = resolution_plan(
++            knot_id,
++            epsilon=minimum_epsilon,
++            scale_over_rc=args.scale_over_rc,
++            target_ds_over_epsilon=args.target_ds_over_epsilon,
++            min_points=args.min_centerline_points,
++            max_points=args.max_centerline_points,
++            round_to=args.round_centerline_points_to,
++        )
++        plan["mode"] = "adaptive_conservative_at_minimum_epsilon"
++        plans[knot_id] = plan
++        point_map[knot_id] = int(plan["selected_points"])
++    return point_map, plans
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Track Fermat candidate branches across the softening parameter.")
++    p = argparse.ArgumentParser(
++        description="Track Fermat candidate branches across softening with fixed or convergence-aware resolution."
++    )
+     p.add_argument("--knots", nargs="+", default=list(DEFAULT_KNOT_IDS))
+     p.add_argument("--epsilon-values", nargs="+", type=float)
+     p.add_argument("--epsilon-start", type=float, default=0.00180)
+     p.add_argument("--epsilon-stop", type=float, default=0.00210)
+     p.add_argument("--epsilon-step", type=float, default=0.000025)
+-    p.add_argument("--centerline-points", type=int, default=8192)
++    p.add_argument("--resolution-mode", choices=("fixed", "adaptive"), default="adaptive")
++    p.add_argument("--centerline-points", type=int, default=8192,
++                   help="Used only when --resolution-mode fixed.")
++    p.add_argument("--target-ds-over-epsilon", type=float, default=0.5)
++    p.add_argument("--min-centerline-points", type=int, default=32768)
++    p.add_argument("--max-centerline-points", type=int, default=65536)
++    p.add_argument("--round-centerline-points-to", type=int, default=1024)
+     p.add_argument("--scale-over-rc", type=float, default=1.0)
+     p.add_argument("--stations", type=int, default=8)
+     p.add_argument("--angles", type=int, default=16)
+@@ -32,14 +74,18 @@ def main() -> int:
+     p.add_argument("--require-native", action="store_true")
+     p.add_argument("--out-dir", default="bifurcation_atlas")
+     args = p.parse_args()
++
+     eps = args.epsilon_values
+     if eps is None:
+         count = int(round((args.epsilon_stop - args.epsilon_start) / args.epsilon_step)) + 1
+         eps = np.linspace(args.epsilon_start, args.epsilon_stop, count).tolist()
++    eps = sorted(set(float(v) for v in eps))
++
++    point_map, plans = _point_plan(args, eps)
+     result = build_bifurcation_atlas(
+         args.knots,
+         epsilon_values=eps,
+-        centerline_points=args.centerline_points,
++        centerline_points=point_map,
+         scale_over_rc=args.scale_over_rc,
+         stations=args.stations,
+         angles=args.angles,
+@@ -50,15 +96,30 @@ def main() -> int:
+         auto_build=not args.no_auto_build,
+         reach_pair_points=args.reach_pair_points,
+     )
++    result["resolution_mode"] = args.resolution_mode
++    result["resolution_plans"] = plans
++
+     if args.require_native:
+         for knot_scans in result["scans"].values():
+             if any(scan["backend"]["backend"] != "cpp" for scan in knot_scans.values()):
+                 raise SystemExit("native backend required but at least one scan used Python")
+-    out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
++
++    out = Path(args.out_dir)
++    out.mkdir(parents=True, exist_ok=True)
++    write_json(out / "resolution_plan.json", {
++        "resolution_mode": args.resolution_mode,
++        "centerline_points_by_knot": point_map,
++        "plans": plans,
++    })
+     write_json(out / "bifurcation_atlas.json", result)
+     write_csv(out / "bifurcation_rows.csv", result["rows"])
+     write_csv(out / "bifurcation_summary.csv", result["branch_summaries"])
+-    print(json.dumps({"out_dir": str(out), "branch_summaries": result["branch_summaries"]}, indent=2))
++    print(json.dumps({
++        "out_dir": str(out),
++        "resolution_mode": args.resolution_mode,
++        "centerline_points_by_knot": point_map,
++        "branch_summaries": result["branch_summaries"],
++    }, indent=2))
+     return 0
+ 
+ 
+diff --git a/run_candidate_atlas.py b/run_candidate_atlas.py
+index 456d1a8..5769c70 100755
+--- a/run_candidate_atlas.py
++++ b/run_candidate_atlas.py
+@@ -61,11 +61,14 @@ def main() -> int:
+             "local_minimum_count": result["local_minimum_count"],
+             "rays_with_local_minimum_count": result["rays_with_local_minimum_count"],
+             "candidate_surface_fraction": result["candidate_surface_fraction"],
++            "candidate_surface_fraction_all_rays": result["candidate_surface_fraction_all_rays"],
++            "candidate_surface_fraction_fully_clock_valid_rays": result["candidate_surface_fraction_fully_clock_valid_rays"],
++            "fully_clock_valid_ray_count": result["fully_clock_valid_ray_count"],
+             "invalid_clock_probe_count": result["invalid_clock_probe_count"],
+             "reach_estimate_over_rc": result["reach_diagnostic"]["reach_estimate_over_rc"],
+         })
+     combined = {
+-        "schema": "sst.fermat.candidate-atlas-matrix.v0.4",
++        "schema": "sst.fermat.candidate-atlas-matrix.v0.4.1",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff --git a/run_candidate_convergence.py b/run_candidate_convergence.py
+index 36a1649..e69a468 100755
+--- a/run_candidate_convergence.py
++++ b/run_candidate_convergence.py
+@@ -63,7 +63,7 @@ def main() -> int:
+             "highest_backend": highest["backend"]["backend"],
+         })
+     combined = {
+-        "schema": "sst.fermat.convergence-matrix.v0.4",
++        "schema": "sst.fermat.convergence-matrix.v0.4.1",
+         "settings": vars(args),
+         "rows": rows,
+         "results": results,
+diff --git a/run_full_campaign.py b/run_full_campaign.py
+new file mode 100755
+index 0000000..c177b44
+--- /dev/null
++++ b/run_full_campaign.py
+@@ -0,0 +1,390 @@
++#!/usr/bin/env python3
++"""Sequential v0.4.1 campaign runner with logging, resume support, and ZIP packaging."""
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import os
++import platform
++import shlex
++import shutil
++import subprocess
++import sys
++import time
++import zipfile
++from dataclasses import dataclass
++from datetime import datetime, timezone
++from pathlib import Path
++from typing import Iterable
++
++from fermat_ext import __version__
++
++
++@dataclass(frozen=True)
++class Step:
++    name: str
++    arguments: tuple[str, ...]
++    expected_relative_output: str | None = None
++
++
++def utc_now() -> str:
++    return datetime.now(timezone.utc).isoformat()
++
++
++def command_text(command: Iterable[str]) -> str:
++    return subprocess.list2cmdline(list(command)) if os.name == "nt" else shlex.join(list(command))
++
++
++def write_json(path: Path, payload: object) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
++
++
++def sha256_file(path: Path) -> str:
++    digest = hashlib.sha256()
++    with path.open("rb") as fh:
++        for block in iter(lambda: fh.read(1024 * 1024), b""):
++            digest.update(block)
++    return digest.hexdigest()
++
++
++def add_common_native_flags(args: list[str], require_native: bool) -> None:
++    args.append("--no-auto-build")
++    if require_native:
++        args.append("--require-native")
++
++
++def full_steps(python_exe: str, out_root: Path, require_native: bool, skip_build: bool) -> list[Step]:
++    steps: list[Step] = []
++    if not skip_build:
++        steps.append(Step(
++            "00_build_native",
++            (python_exe, "-m", "fermat_ext.build_ext_if_needed", "--force", "--strict"),
++        ))
++
++    def script_step(name: str, script: str, arguments: list[str], expected: str) -> None:
++        add_common_native_flags(arguments, require_native)
++        steps.append(Step(name, tuple([python_exe, script, *arguments]), expected))
++
++    script_step(
++        "01_audit_out_native", "run_all_checks.py",
++        ["--out-dir", str(out_root / "audit_out_native")],
++        "audit_out_native/audit_summary.json",
++    )
++    script_step(
++        "02_candidate_atlas_0019", "run_candidate_atlas.py",
++        [
++            "--epsilon", "0.0019", "--centerline-points", "8192",
++            "--stations", "8", "--angles", "16", "--bracket-samples", "96",
++            "--out-dir", str(out_root / "candidate_atlas_0019"),
++        ],
++        "candidate_atlas_0019/candidate_atlas.json",
++    )
++    script_step(
++        "03_candidate_atlas_0019_high", "run_candidate_atlas.py",
++        [
++            "--epsilon", "0.0019", "--centerline-points", "16384",
++            "--stations", "32", "--angles", "32", "--bracket-samples", "128",
++            "--out-dir", str(out_root / "candidate_atlas_0019_high"),
++        ],
++        "candidate_atlas_0019_high/candidate_atlas.json",
++    )
++    script_step(
++        "04_convergence_0019", "run_candidate_convergence.py",
++        [
++            "--epsilon", "0.0019", "--point-counts", "4096", "8192", "16384",
++            "--stations", "8", "--angles", "16", "--bracket-samples", "96",
++            "--out-dir", str(out_root / "convergence_0019"),
++        ],
++        "convergence_0019/convergence_report.json",
++    )
++    # v0.4.1 correction: include 3_1 in the high-resolution three-level gate.
++    script_step(
++        "05_convergence_0019_high", "run_candidate_convergence.py",
++        [
++            "--knots", "3_1", "4_1", "5_2",
++            "--epsilon", "0.0019", "--point-counts", "8192", "16384", "32768",
++            "--stations", "8", "--angles", "16", "--bracket-samples", "96",
++            "--out-dir", str(out_root / "convergence_0019_high"),
++        ],
++        "convergence_0019_high/convergence_report.json",
++    )
++    # Conservative resolution near the straight-filament branch-loss threshold.
++    script_step(
++        "06_bifurcation_atlas", "run_bifurcation_atlas.py",
++        [
++            "--epsilon-start", "0.00180", "--epsilon-stop", "0.00210",
++            "--epsilon-step", "0.000025", "--resolution-mode", "adaptive",
++            "--target-ds-over-epsilon", "0.5",
++            "--min-centerline-points", "32768", "--max-centerline-points", "65536",
++            "--round-centerline-points-to", "1024",
++            "--stations", "8", "--angles", "16", "--bracket-samples", "96",
++            "--out-dir", str(out_root / "bifurcation_atlas"),
++        ],
++        "bifurcation_atlas/bifurcation_atlas.json",
++    )
++    # Scale sweep now preserves a controlled mean segment-length/epsilon ratio.
++    script_step(
++        "07_scale_sweep_0019", "run_scale_sweep.py",
++        [
++            "--scales", "0.5", "1.0", "2.0", "4.0", "--epsilon", "0.0019",
++            "--resolution-mode", "adaptive", "--target-ds-over-epsilon", "1.0",
++            "--min-centerline-points", "4096", "--max-centerline-points", "65536",
++            "--round-centerline-points-to", "1024",
++            "--stations", "8", "--angles", "16", "--bracket-samples", "96",
++            "--out-dir", str(out_root / "scale_sweep_0019"),
++        ],
++        "scale_sweep_0019/scale_sweep.json",
++    )
++    script_step(
++        "08_symmetry_audit", "run_symmetry_audit.py",
++        [
++            "--epsilon", "0.0019", "--centerline-points", "4096",
++            "--out-dir", str(out_root / "symmetry_audit"),
++        ],
++        "symmetry_audit/symmetry_audit.json",
++    )
++    return steps
++
++
++def smoke_steps(python_exe: str, out_root: Path, require_native: bool, skip_build: bool) -> list[Step]:
++    steps: list[Step] = []
++    if not skip_build:
++        steps.append(Step(
++            "00_build_native",
++            (python_exe, "-m", "fermat_ext.build_ext_if_needed", "--force", "--strict"),
++        ))
++
++    def script_step(name: str, script: str, arguments: list[str], expected: str) -> None:
++        add_common_native_flags(arguments, require_native)
++        steps.append(Step(name, tuple([python_exe, script, *arguments]), expected))
++
++    script_step("01_audit_out_native", "run_all_checks.py",
++                ["--out-dir", str(out_root / "audit_out_native")],
++                "audit_out_native/audit_summary.json")
++    script_step("02_candidate_smoke", "run_candidate_atlas.py",
++                ["--knots", "0_1", "--epsilon", "0.0019", "--centerline-points", "1024",
++                 "--stations", "1", "--angles", "3", "--bracket-samples", "48",
++                 "--out-dir", str(out_root / "candidate_smoke")],
++                "candidate_smoke/candidate_atlas.json")
++    script_step("03_convergence_smoke", "run_candidate_convergence.py",
++                ["--knots", "0_1", "--epsilon", "0.0019", "--point-counts", "256", "512", "1024",
++                 "--stations", "1", "--angles", "3", "--bracket-samples", "48",
++                 "--out-dir", str(out_root / "convergence_smoke")],
++                "convergence_smoke/convergence_report.json")
++    script_step("04_bifurcation_smoke", "run_bifurcation_atlas.py",
++                ["--knots", "0_1", "--epsilon-values", "0.0019", "0.0020",
++                 "--resolution-mode", "fixed", "--centerline-points", "512",
++                 "--stations", "1", "--angles", "3", "--bracket-samples", "48",
++                 "--out-dir", str(out_root / "bifurcation_smoke")],
++                "bifurcation_smoke/bifurcation_atlas.json")
++    script_step("05_scale_smoke", "run_scale_sweep.py",
++                ["--knots", "0_1", "--scales", "1.0", "2.0", "--epsilon", "0.0019",
++                 "--resolution-mode", "adaptive", "--min-centerline-points", "512",
++                 "--max-centerline-points", "2048", "--stations", "1", "--angles", "3",
++                 "--bracket-samples", "48", "--out-dir", str(out_root / "scale_smoke")],
++                "scale_smoke/scale_sweep.json")
++    script_step("06_symmetry_smoke", "run_symmetry_audit.py",
++                ["--knots", "0_1", "--epsilon", "0.0019", "--centerline-points", "256",
++                 "--out-dir", str(out_root / "symmetry_smoke")],
++                "symmetry_smoke/symmetry_audit.json")
++    return steps
++
++
++def run_step(step: Step, *, cwd: Path, log_path: Path) -> tuple[int, float]:
++    start = time.perf_counter()
++    log_path.parent.mkdir(parents=True, exist_ok=True)
++    with log_path.open("w", encoding="utf-8", errors="replace") as log:
++        header = f"[{utc_now()}] COMMAND: {command_text(step.arguments)}\n"
++        print(header.rstrip())
++        log.write(header)
++        log.flush()
++        process = subprocess.Popen(
++            list(step.arguments),
++            cwd=str(cwd),
++            stdout=subprocess.PIPE,
++            stderr=subprocess.STDOUT,
++            text=True,
++            encoding="utf-8",
++            errors="replace",
++            bufsize=1,
++        )
++        assert process.stdout is not None
++        for line in process.stdout:
++            print(line, end="")
++            log.write(line)
++        rc = process.wait()
++        duration = time.perf_counter() - start
++        footer = f"\n[{utc_now()}] EXIT_CODE={rc} DURATION_SECONDS={duration:.3f}\n"
++        print(footer.rstrip())
++        log.write(footer)
++    return rc, duration
++
++
++def create_archive(out_root: Path, archive_path: Path) -> None:
++    archive_path.parent.mkdir(parents=True, exist_ok=True)
++    temp_path = archive_path.with_suffix(archive_path.suffix + ".tmp")
++    temp_path.unlink(missing_ok=True)
++    archive_path.unlink(missing_ok=True)
++    with zipfile.ZipFile(temp_path, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
++        for path in sorted(out_root.rglob("*")):
++            if path.is_file():
++                arcname = Path(out_root.name) / path.relative_to(out_root)
++                zf.write(path, arcname.as_posix())
++    temp_path.replace(archive_path)
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Run the complete SST Fermat v0.4.1 campaign sequentially and ZIP all outputs."
++    )
++    parser.add_argument("--preset", choices=("full", "smoke"), default="full")
++    parser.add_argument("--out-root", default="v0.4.1_campaign_output")
++    parser.add_argument("--archive", default="SST_fermat_pybind_research_v0.4.1_results.zip")
++    parser.add_argument("--python", dest="python_exe", default=sys.executable)
++    parser.add_argument("--require-native", action="store_true")
++    parser.add_argument("--skip-build", action="store_true")
++    parser.add_argument("--resume", action="store_true")
++    parser.add_argument("--overwrite", action="store_true")
++    parser.add_argument("--keep-going", action="store_true")
++    parser.add_argument("--no-zip", action="store_true")
++    parser.add_argument("--dry-run", action="store_true")
++    args = parser.parse_args()
++
++    project_root = Path(__file__).resolve().parent
++    out_root = Path(args.out_root)
++    if not out_root.is_absolute():
++        out_root = (project_root / out_root).resolve()
++    archive_path = Path(args.archive)
++    if not archive_path.is_absolute():
++        archive_path = (project_root / archive_path).resolve()
++
++    if args.overwrite:
++        shutil.rmtree(out_root, ignore_errors=True)
++        archive_path.unlink(missing_ok=True)
++    elif out_root.exists() and any(out_root.iterdir()) and not args.resume:
++        raise SystemExit(
++            f"output root already contains files: {out_root}\n"
++            "Use --resume to continue or --overwrite to start clean."
++        )
++
++    out_root.mkdir(parents=True, exist_ok=True)
++    logs_dir = out_root / "logs"
++    logs_dir.mkdir(exist_ok=True)
++
++    steps = (
++        full_steps(args.python_exe, out_root, args.require_native, args.skip_build)
++        if args.preset == "full"
++        else smoke_steps(args.python_exe, out_root, args.require_native, args.skip_build)
++    )
++
++    environment = {
++        "package_version": __version__,
++        "preset": args.preset,
++        "project_root": str(project_root),
++        "output_root": str(out_root),
++        "archive": str(archive_path),
++        "python_executable": args.python_exe,
++        "python_version": sys.version,
++        "platform": platform.platform(),
++        "machine": platform.machine(),
++        "processor": platform.processor(),
++        "require_native": args.require_native,
++        "started_utc": utc_now(),
++    }
++    write_json(out_root / "environment.json", environment)
++    (out_root / "campaign_commands.txt").write_text(
++        "\n".join(command_text(step.arguments) for step in steps) + "\n", encoding="utf-8"
++    )
++
++    manifest = {
++        "schema": "sst.fermat.campaign-manifest.v0.4.1",
++        "package_version": __version__,
++        "preset": args.preset,
++        "started_utc": environment["started_utc"],
++        "completed_utc": None,
++        "status": "RUNNING",
++        "steps": [],
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++    }
++    write_json(out_root / "campaign_manifest.json", manifest)
++
++    if args.dry_run:
++        for step in steps:
++            print(f"{step.name}: {command_text(step.arguments)}")
++        manifest["status"] = "DRY_RUN"
++        manifest["completed_utc"] = utc_now()
++        write_json(out_root / "campaign_manifest.json", manifest)
++        return 0
++
++    failed = False
++    for step in steps:
++        marker = logs_dir / f"{step.name}.success.json"
++        expected = out_root / step.expected_relative_output if step.expected_relative_output else None
++        if args.resume and marker.exists() and (expected is None or expected.exists()):
++            record = json.loads(marker.read_text(encoding="utf-8"))
++            record["resume_action"] = "SKIPPED_ALREADY_SUCCESSFUL"
++            manifest["steps"].append(record)
++            write_json(out_root / "campaign_manifest.json", manifest)
++            print(f"[resume] {step.name}: already successful; skipped")
++            continue
++
++        started = utc_now()
++        rc, duration = run_step(step, cwd=project_root, log_path=logs_dir / f"{step.name}.log")
++        expected_ok = expected is None or expected.exists()
++        success = rc == 0 and expected_ok
++        record = {
++            "name": step.name,
++            "command": list(step.arguments),
++            "command_text": command_text(step.arguments),
++            "started_utc": started,
++            "completed_utc": utc_now(),
++            "duration_seconds": duration,
++            "exit_code": rc,
++            "expected_output": str(expected) if expected else None,
++            "expected_output_exists": expected_ok,
++            "status": "SUCCESS" if success else "FAILED",
++            "log": str(logs_dir / f"{step.name}.log"),
++        }
++        manifest["steps"].append(record)
++        write_json(out_root / "campaign_manifest.json", manifest)
++        if success:
++            write_json(marker, record)
++        else:
++            failed = True
++            if not args.keep_going:
++                break
++
++    manifest["completed_utc"] = utc_now()
++    manifest["status"] = "FAILED_OR_PARTIAL" if failed else "SUCCESS"
++    manifest["successful_step_count"] = sum(r.get("status") == "SUCCESS" for r in manifest["steps"])
++    manifest["failed_step_count"] = sum(r.get("status") == "FAILED" for r in manifest["steps"])
++    write_json(out_root / "campaign_manifest.json", manifest)
++    write_json(out_root / "campaign_summary.json", {
++        "package_version": __version__,
++        "preset": args.preset,
++        "status": manifest["status"],
++        "successful_step_count": manifest["successful_step_count"],
++        "failed_step_count": manifest["failed_step_count"],
++        "output_root": str(out_root),
++        "archive_requested": not args.no_zip,
++        "global_closed_orbit_certified": False,
++        "qsm_certified": False,
++    })
++
++    if not args.no_zip:
++        print(f"Creating results archive: {archive_path}")
++        create_archive(out_root, archive_path)
++        digest = sha256_file(archive_path)
++        archive_path.with_suffix(archive_path.suffix + ".sha256").write_text(
++            f"{digest}  {archive_path.name}\n", encoding="utf-8"
++        )
++        print(f"Archive SHA-256: {digest}")
++
++    return 1 if failed else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/run_profile_matrix.py b/run_profile_matrix.py
+index ef7788d..c849839 100755
+--- a/run_profile_matrix.py
++++ b/run_profile_matrix.py
+@@ -36,7 +36,7 @@ def main() -> int:
+         )
+         rows.extend(profile_rows)
+     result = {
+-        "schema": "sst.fermat.profile-matrix.v0.4",
++        "schema": "sst.fermat.profile-matrix.v0.4.1",
+         "package_version": PACKAGE_VERSION,
+         "status": "RESEARCH_TRACK_RADIAL_PROFILE_COMPARISON",
+         "profiles": args.profiles,
+diff --git a/run_scale_sweep.py b/run_scale_sweep.py
+index 9f7ae06..69046e0 100755
+--- a/run_scale_sweep.py
++++ b/run_scale_sweep.py
+@@ -8,14 +8,23 @@ from pathlib import Path
+ from fermat_ext.certification import scan_stationary_candidates
+ from fermat_ext.core import write_csv, write_json
+ from fermat_ext.knot_catalog import DEFAULT_KNOT_IDS
++from fermat_ext.resolution import resolution_plan
+ 
+ 
+ def main() -> int:
+-    p = argparse.ArgumentParser(description="Separate ideal-knot scale from the vortex softening scale.")
++    p = argparse.ArgumentParser(
++        description="Separate ideal-knot scale from softening while controlling centerline resolution."
++    )
+     p.add_argument("--knots", nargs="+", default=list(DEFAULT_KNOT_IDS))
+     p.add_argument("--scales", nargs="+", type=float, default=[0.5, 1.0, 2.0, 4.0])
+     p.add_argument("--epsilon", type=float, default=0.0019)
+-    p.add_argument("--centerline-points", type=int, default=8192)
++    p.add_argument("--resolution-mode", choices=("fixed", "adaptive"), default="adaptive")
++    p.add_argument("--centerline-points", type=int, default=8192,
++                   help="Used only when --resolution-mode fixed.")
++    p.add_argument("--target-ds-over-epsilon", type=float, default=1.0)
++    p.add_argument("--min-centerline-points", type=int, default=4096)
++    p.add_argument("--max-centerline-points", type=int, default=65536)
++    p.add_argument("--round-centerline-points-to", type=int, default=1024)
+     p.add_argument("--stations", type=int, default=8)
+     p.add_argument("--angles", type=int, default=16)
+     p.add_argument("--rho-min", type=float, default=0.0005)
+@@ -27,15 +36,46 @@ def main() -> int:
+     p.add_argument("--require-native", action="store_true")
+     p.add_argument("--out-dir", default="scale_sweep")
+     args = p.parse_args()
+-    out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
+-    rows = []; results = {}; first = True
++
++    out = Path(args.out_dir)
++    out.mkdir(parents=True, exist_ok=True)
++    rows: list[dict] = []
++    results: dict[str, dict] = {}
++    plans: dict[str, dict] = {}
++    first = True
++
+     for scale in args.scales:
+-        results[str(scale)] = {}
++        scale_key = f"{scale:.10g}"
++        results[scale_key] = {}
++        plans[scale_key] = {}
+         for knot_id in args.knots:
++            if args.resolution_mode == "adaptive":
++                plan = resolution_plan(
++                    knot_id,
++                    epsilon=args.epsilon,
++                    scale_over_rc=scale,
++                    target_ds_over_epsilon=args.target_ds_over_epsilon,
++                    min_points=args.min_centerline_points,
++                    max_points=args.max_centerline_points,
++                    round_to=args.round_centerline_points_to,
++                )
++                n_points = int(plan["selected_points"])
++                plan["mode"] = "adaptive_length_and_scale_aware"
++            else:
++                n_points = int(args.centerline_points)
++                plan = {
++                    "knot_id": knot_id,
++                    "mode": "fixed",
++                    "selected_points": n_points,
++                    "scale_over_rc": scale,
++                    "epsilon_over_rc": args.epsilon,
++                }
++            plans[scale_key][knot_id] = plan
++
+             result = scan_stationary_candidates(
+                 knot_id,
+                 epsilon=args.epsilon,
+-                centerline_points=args.centerline_points,
++                centerline_points=n_points,
+                 scale_over_rc=scale,
+                 stations=args.stations,
+                 angles=args.angles,
+@@ -49,23 +89,34 @@ def main() -> int:
+             first = False
+             if args.require_native and result["backend"]["backend"] != "cpp":
+                 raise SystemExit("native backend required")
+-            results[str(scale)][knot_id] = result
++            results[scale_key][knot_id] = result
++            actual_ratio = result["centerline"]["edge_length_mean_over_rc"] / args.epsilon
+             rows.append({
+                 "scale_over_rc": scale,
+                 "epsilon_over_rc": args.epsilon,
+                 "knot_id": knot_id,
++                "resolution_mode": args.resolution_mode,
++                "centerline_points": n_points,
++                "actual_mean_ds_over_epsilon": actual_ratio,
++                "resolution_target_met": actual_ratio <= args.target_ds_over_epsilon if args.resolution_mode == "adaptive" else None,
+                 "local_minimum_count": result["local_minimum_count"],
+                 "candidate_surface_fraction": result["candidate_surface_fraction"],
++                "candidate_surface_fraction_all_rays": result["candidate_surface_fraction_all_rays"],
++                "candidate_surface_fraction_fully_clock_valid_rays": result["candidate_surface_fraction_fully_clock_valid_rays"],
+                 "invalid_clock_probe_count": result["invalid_clock_probe_count"],
+                 "reach_estimate_over_rc": result["reach_diagnostic"]["reach_estimate_over_rc"],
+             })
++
+     combined = {
+-        "schema": "sst.fermat.scale-sweep.v0.4",
++        "schema": "sst.fermat.scale-sweep.v0.4.1",
+         "settings": vars(args),
++        "resolution_plans": plans,
+         "rows": rows,
+         "results": results,
+         "global_closed_orbit_certified": False,
++        "qsm_certified": False,
+     }
++    write_json(out / "resolution_plan.json", plans)
+     write_json(out / "scale_sweep.json", combined)
+     write_csv(out / "scale_sweep.csv", rows)
+     print(json.dumps({"out_dir": str(out), "rows": rows}, indent=2))
+diff --git a/run_symmetry_audit.py b/run_symmetry_audit.py
+index f9ec126..911ca94 100755
+--- a/run_symmetry_audit.py
++++ b/run_symmetry_audit.py
+@@ -43,7 +43,7 @@ def main() -> int:
+             "max_jacobian_linf_error": result["max_jacobian_linf_error"],
+             "max_scalar_G_linf_error": result["max_scalar_G_linf_error"],
+         })
+-    combined = {"schema": "sst.fermat.symmetry-matrix.v0.4", "rows": rows, "results": results}
++    combined = {"schema": "sst.fermat.symmetry-matrix.v0.4.1", "rows": rows, "results": results}
+     write_json(out / "symmetry_audit.json", combined)
+     write_csv(out / "symmetry_audit.csv", rows)
+     print(json.dumps({"out_dir": str(out), "rows": rows}, indent=2))
+diff --git a/tests/test_v041.py b/tests/test_v041.py
+new file mode 100644
+index 0000000..888c058
+--- /dev/null
++++ b/tests/test_v041.py
+@@ -0,0 +1,80 @@
++from __future__ import annotations
++
++import json
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++
++from fermat_ext.certification import build_bifurcation_atlas, scan_stationary_candidates
++from fermat_ext.resolution import resolution_plan
++
++
++def main() -> int:
++    atlas = scan_stationary_candidates(
++        "0_1",
++        epsilon=0.0019,
++        centerline_points=2048,
++        stations=1,
++        angles=3,
++        rho_min=0.0005,
++        rho_max=0.01,
++        bracket_samples=64,
++        force_python=True,
++        auto_build=False,
++        reach_pair_points=256,
++    )
++    assert 0.0 <= atlas["candidate_surface_fraction"] <= 1.0
++    assert atlas["candidate_surface_fraction"] == atlas["candidate_surface_fraction_all_rays"]
++    conditional = atlas["candidate_surface_fraction_fully_clock_valid_rays"]
++    assert conditional is None or 0.0 <= conditional <= 1.0
++    assert all(root["classification"] != "CERTIFIED_LOCAL_MINIMUM_NUMERICAL" for root in atlas["roots"])
++    assert any(root["classification"] == "RESOLVED_LOCAL_MINIMUM" for root in atlas["roots"])
++
++    plan_scale_1 = resolution_plan(
++        "5_2", epsilon=0.0019, scale_over_rc=1.0,
++        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
++    )
++    plan_scale_4 = resolution_plan(
++        "5_2", epsilon=0.0019, scale_over_rc=4.0,
++        target_ds_over_epsilon=1.0, min_points=4096, max_points=65536, round_to=1024,
++    )
++    assert plan_scale_4["selected_points"] > plan_scale_1["selected_points"]
++    assert plan_scale_4["selected_points"] <= 65536
++
++    bif = build_bifurcation_atlas(
++        ["0_1"], epsilon_values=[0.0019], centerline_points={"0_1": 1024},
++        stations=1, angles=3, rho_min=0.0005, rho_max=0.01, bracket_samples=48,
++        force_python=True, auto_build=False, reach_pair_points=128,
++    )
++    assert bif["settings"]["centerline_points_by_knot"] == {"0_1": 1024}
++    assert all(0.0 <= row["candidate_surface_fraction"] <= 1.0 for row in bif["rows"])
++
++    project_root = Path(__file__).resolve().parents[1]
++    with tempfile.TemporaryDirectory() as td:
++        out = Path(td) / "dry_run"
++        archive = Path(td) / "dry_run.zip"
++        proc = subprocess.run(
++            [
++                sys.executable, str(project_root / "run_full_campaign.py"),
++                "--preset", "smoke", "--skip-build", "--dry-run",
++                "--out-root", str(out), "--archive", str(archive),
++            ],
++            cwd=project_root,
++            check=False,
++            capture_output=True,
++            text=True,
++        )
++        assert proc.returncode == 0, proc.stdout + proc.stderr
++        manifest = json.loads((out / "campaign_manifest.json").read_text(encoding="utf-8"))
++        assert manifest["status"] == "DRY_RUN"
++        assert (out / "campaign_commands.txt").exists()
++
++    print("v0.4.1 tests: ok")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

@@ -1,0 +1,29 @@
+SST Fermat pybind research harness v0.1
+======================================
+
+Validation environment:
+- Python: Python 3.13.5
+- C++ compiler: c++ (Debian 14.2.0-19) 14.2.0
+- pybind11 Python package: unavailable in this sandbox; native wrapper could not be built here.
+
+Completed checks:
+- Pure C++17 kernel header compiled successfully.
+- Pure C++ external-profile analytic benchmark passed.
+- Pure C++ regularized Biot-Savart smoke test passed.
+- Python fallback audit battery passed.
+- External 1/r critical radius agrees with x_star=sqrt(2)*beta_0.
+- Research guards preserve global_closed_orbit_certified=false and qsm_certified=false for local knot scans.
+
+Target-machine check still required:
+python -m pip install -r requirements.txt
+python -m fermat_ext.build_ext_if_needed --force --strict
+python run_all_checks.py --out-dir audit_out_native --force-build
+
+See build/cpp_kernel_test.txt and audit_out/audit_summary.json.
+
+
+HOTFIX v0.1.1
+- Explicit setuptools package discovery: packages=["fermat_ext"].
+- Generated setup script also declares packages/package_dir and language="c++".
+- Resolves: Multiple top-level packages discovered in a flat-layout.
+- Native compilation still requires a Python-ABI-compatible Windows C++ toolchain and pybind11.
