@@ -1,0 +1,79 @@
+=== SYNTHETIC PASS AUDIT ===
+========================================================================
+SST MINIMAL FALSIFICATION REPORT
+========================================================================
+Verdict: NOT_FALSIFIED
+The declared truncation passes calibration, leave-one-out, trefoil, and holdout gates. This is not proof of SST; it is survival of the specified falsification test.
+
+L_D                         = 16.3707118929
+(8*pi/3) L_D                = 137.146955245
+target Delta                = -0.110956067839
+frozen predicted Delta      = -0.110956067839
+prediction MC sigma         = 0.000272292
+
+[PASS] G0_NO_ALPHA_LEAKAGE: clean
+[PASS] G1_ENOUGH_CALIBRATION_ROWS: rows=6, coefficients=4; require at least p+1 for a residual test
+[PASS] G2_FULL_RANK: rank=4, required=4
+[PASS] G3_NUMERICAL_CONDITIONING: condition_number=4.02382, limit=1e+08
+[PASS] G4_CALIBRATION_GOODNESS: reduced_chi2=9.49799e-26, limit=3
+[PASS] G5_LEAVE_ONE_OUT: usable=6/6, max|z|=2.94985e-13, limit=3
+[PASS] G6_FROZEN_TREFOIL_PREDICTION: predicted=-0.110956067839, target=-0.110956067839, error=-3.76088e-15, abs_tol=0.001, MC_sigma=0.000272292, z=-1.38119e-11
+[PASS] G7_INDEPENDENT_HOLDOUTS: holdouts=1, max|z|=1.17689e-13
+========================================================================
+Report: /mnt/data/sst_minimal_falsification_harness/synthetic_report.json
+
+=== UNTOUCHED TEMPLATE AUDIT ===
+========================================================================
+SST MINIMAL FALSIFICATION REPORT
+========================================================================
+Verdict: INCONCLUSIVE_UNDERDETERMINED
+The declared response truncation has not earned an independent trefoil prediction. This does not falsify SST; it falsifies the claim that the present calibration is sufficient.
+
+L_D                         = 19.1745487005
+(8*pi/3) L_D                = 160.636323555
+target Delta                = -23.6003243784
+frozen predicted Delta      = 0
+prediction MC sigma         = 19.7357
+
+[FAIL] G0_NO_ALPHA_LEAKAGE: forbidden calibration evidence: alpha; unresolved placeholder token: REPLACE
+[PASS] G1_ENOUGH_CALIBRATION_ROWS: rows=5, coefficients=4; require at least p+1 for a residual test
+[PASS] G2_FULL_RANK: rank=4, required=4
+[PASS] G3_NUMERICAL_CONDITIONING: condition_number=2.23607, limit=1e+08
+[PASS] G4_CALIBRATION_GOODNESS: reduced_chi2=0, limit=3
+[PASS] G5_LEAVE_ONE_OUT: usable=5/5, max|z|=0, limit=3
+[FAIL] G6_FROZEN_TREFOIL_PREDICTION: predicted=0, target=-23.6003243784, error=23.6003, abs_tol=0.001, MC_sigma=19.7357, z=1.19582
+[PASS] G7_INDEPENDENT_HOLDOUTS: holdouts=1, max|z|=0
+========================================================================
+Report: /mnt/data/sst_minimal_falsification_harness/template_inconclusive_report.json
+
+=== TREFOIL GEOMETRY SMOKETEST ===
+{
+  "schema": "sst.geometry-features.v1",
+  "name": "trefoil",
+  "features": {
+    "length": 19.174548700466772,
+    "bend": 17.05935894678712,
+    "twist": 0.0,
+    "contact": 0.02647696721715463
+  },
+  "diagnostics": {
+    "L_D": 19.174548700466772,
+    "I_kappa2": 17.05935894678712,
+    "I_twist2": null,
+    "C_contact": 0.02647696721715463,
+    "thickness_method": "doubly-critical-chord",
+    "estimated_D_raw": 1.6633913998986471,
+    "samples": 600
+  },
+  "metadata": {
+    "normalization": "diameter D = 1",
+    "local_skip_fraction": 0.02,
+    "orthogonality_tolerance": 0.12,
+    "contact_shell_sigma": 0.08,
+    "core_profile": "unit",
+    "gaussian_sigma_over_D": null,
+    "warning": "Built-in analytic knots are smoke-test embeddings, not ideal-knot ropelength minimizers."
+  }
+}
+
+Wrote: /mnt/data/sst_minimal_falsification_harness/trefoil_smoketest_features.json

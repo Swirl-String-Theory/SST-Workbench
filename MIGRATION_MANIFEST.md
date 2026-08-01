@@ -77,3 +77,61 @@ Generated during SST-Workbench migration. **Move-only** — no file deletion.
 | main_sycl.cpp, list_sycl_devices.cpp, vec_add.cpp | experiments/sycl/ | MOVE |
 | test_embedded_knots.py | verification-suites/embedded-knots/ | MOVE |
 | build_wheels_*.{py,ps1,bat,sh} | SSTcore/scripts/ | RELOCATE (not Workbench) |
+
+## Addendum: derive_constants → fermat-style research roots
+
+| source (Workbench) | destination | action |
+|--------------------|-------------|--------|
+| experiments/derive_constants/ (post-merge tree) | `SST_derive_constants_research/`, `SST_routeB_RT_bem_research/`, `SST_Coil_DigitalTwin_research/`, `SST_CoilLab_research/`, `SST_contra_swirl_bridge_research/`, `SST_fs_attachment_audit_research/`, `SST_timefield_spectral_v06_research/` | MOVE (split) |
+| archive/conflict-losers/sstcore-derive/ | archive/sstcore-derive.zip | ZIP (user) |
+
+Details: `MOVE_DERIVE_CONSTANTS_MANIFEST.md`. Script: `scripts/reorg_derive_constants.py`.
+
+## Addendum: trefoil_closure → SST_Trefoil_Closure
+
+| source (Workbench) | destination | action |
+|--------------------|-------------|--------|
+| experiments/trefoil/closure/swirl/trefoil_closure/ | SST_Trefoil_Closure/ | MOVE |
+| experiments/trefoil/closure/sstcore/trefoil_closure/ (sstcore-only paths) | SST_Trefoil_Closure/ | UNION MOVE |
+| experiments/trefoil/closure/{sstcore,swirl}/trefoil_closure/ | stub README only | REPLACE |
+
+Script: `scripts/merge_trefoil_closure.py`.
+
+## Addendum: closure sstcore/swirl → SST_Trefoil_Closure
+
+| source (Workbench) | destination | action |
+|--------------------|-------------|--------|
+| experiments/trefoil/closure/sstcore/ (excl. stub trefoil_closure) | SST_Trefoil_Closure/ | UNION MOVE |
+| experiments/trefoil/closure/swirl/ | *(subset of sstcore; removed)* | DROP after verify |
+| conflicting paths | SST_Trefoil_Closure/_dashboard_conflict/ | MOVE |
+| experiments/trefoil/closure/ | stub README only | REPLACE |
+
+Script: `scripts/merge_closure_sstcore_swirl.py`.
+
+## Addendum: SST-dashboard sstcore/swirl flatten
+
+| source (Workbench) | destination | action |
+|--------------------|-------------|--------|
+| SST-dashboard/swirl/ | SST-dashboard/ | MOVE (first) |
+| SST-dashboard/sstcore/ | SST-dashboard/ | UNION MOVE |
+| SST-dashboard/exports/ideal.txt (swirl) | SST-dashboard/_merge_conflict/exports/ideal.txt | CONFLICT park |
+| SST-dashboard/{sstcore,swirl}/ | *(removed)* | DROP |
+
+Script: `scripts/merge_sst_dashboard.py`.
+
+## Addendum: to_be_processed → research roots
+
+| source (Workbench) | destination | action |
+|--------------------|-------------|--------|
+| to_be_processed/chi_phase/* | SST_chi_phase_research/ | MOVE |
+| to_be_processed/sst_horn_* | SST_horn_bem_research/ | MOVE |
+| to_be_processed/SST_v0_8_19_* + nonfit/torsion | SST_v0_8_19_routes_research/ | MOVE |
+| to_be_processed/ssdl_audit* | SST_ssdl_audit_research/ | MOVE |
+| to_be_processed/SST_dark_knot_rayleigh_harness | SST_dark_knot_rayleigh_research/ | MOVE |
+| to_be_processed/sst_ideal_trefoil_biot* / sst_trefoil_bs / sst_3d_collider_robust | SST_ideal_trefoil_biot_research/ | MOVE |
+| to_be_processed/SST_fermat_pybind_research_v0.1 | SST_fermat_pybind_research/…_v0.1/ | MOVE |
+| to_be_processed/routeI_heat_guard_patch_bundle_v0_8_19 | SST_Route_I_relative_entropy_PoC/ | MOVE |
+| to_be_processed/*.{html,js,md,py,txt} (loose) | GUI/vortexring-lab/inbox_from_to_be_processed/ | MOVE |
+| to_be_processed/ | stub README only | REPLACE |
+
+Script: `scripts/reorg_to_be_processed.py`.

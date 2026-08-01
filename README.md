@@ -29,27 +29,32 @@ Run commands from the repository root.
 
 | What | Path | Command |
 |------|------|---------|
-| SSTcore dashboard | `gui/dashboard/sstcore/sst_dashboard_app.py` | `python gui/dashboard/sstcore/sst_dashboard_app.py` |
-| Swirl dashboard | `gui/dashboard/swirl/sst_dashboard_app.py` | `python gui/dashboard/swirl/sst_dashboard_app.py` |
+| SST dashboard | `SST-dashboard/sst_dashboard_app.py` | `python SST-dashboard/sst_dashboard_app.py` |
 | Full probe harness | `proof-scripts/SSTcore_full_probe.py` | `python proof-scripts/SSTcore_full_probe.py` |
 | Embedded-knots tests | `verification-suites/embedded-knots/` | `pytest verification-suites/embedded-knots/` |
-| Derive constants (BEM, trefoil) | `experiments/derive_constants/` | See scripts per subfolder — [layout doc](WORKBENCH_LAYOUT.md) |
+| Derive / BEM research packs | `SST_derive_constants_research/`, `SST_routeB_RT_bem_research/`, … | See [layout doc](WORKBENCH_LAYOUT.md) / stub at `experiments/derive_constants/` |
 | Chi-phase packages | `to_be_processed/sst_chi_phase_package_v*/` | Each package has its own `README.md` |
 
 ## Layout
 
 | Path | Contents |
 |------|----------|
-| `experiments/derive_constants/` | Finite-cell derivation program (from canon `Derive_Constants/`) |
-| `experiments/derive_constants/bem/` | BEM / CoilLab / routeB outputs (sorted) |
-| `experiments/trefoil/closure/` | Trefoil closure packages from dashboards |
-| `gui/dashboard/` | PyQt dashboards (`sstcore/`, `swirl/`) |
+| `SST_derive_constants_research/` | Finite-cell derivation package (from canon `Derive_Constants/`) |
+| `SST_routeB_RT_bem_research/` | RouteB BEM versions, demos, knot-data, outputs |
+| `SST_CoilLab_research/` / `SST_Coil_DigitalTwin_research/` | Coil packages |
+| `SST_fs_attachment_audit_research/` / `SST_timefield_spectral_v06_research/` / `SST_contra_swirl_bridge_research/` | Related research packs |
+| `experiments/derive_constants/` | Stub README pointing at the research roots above |
+| `SST_Trefoil_Closure/` | Merged trefoil closure package (nested trees + dashboard `sstcore`/`swirl` leftovers) |
+| `experiments/trefoil/closure/` | Stub README pointing at `SST_Trefoil_Closure/` |
+| `SST-dashboard/` | PyQt dashboard (merged former `sstcore/` + `swirl/` trees) |
 | `proof-scripts/` | Python proof harnesses and examples |
 | `datasets/` | SPARC, exports, swirl resources |
 | `generated-figures/` | Resource results and proof plots |
 | `media/` | Images, presentations, voiceovers |
 | `archive/` | Swirl archive + merge conflict losers |
-| `to_be_processed/` | Chi-phase research packages (v10–v16) |
+| `SST_chi_phase_research/` / `SST_horn_bem_research/` / `SST_v0_8_19_routes_research/` / … | Lifted former `to_be_processed/` packs |
+| `GUI/vortexring-lab/inbox_from_to_be_processed/` | Vortexring/gem HTML inbox from `to_be_processed/` |
+| `to_be_processed/` | Stub README pointing at the research roots above |
 | `verification-suites/` | Standalone verification scripts |
 
 See also:
