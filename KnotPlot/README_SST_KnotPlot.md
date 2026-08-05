@@ -65,3 +65,25 @@ length, minimum distance, angle diagnostics, average crossing number, and writhe
 
 Exact coordinates may vary with KnotPlot version, catalogue embedding, and relaxation settings.
 Use the TXT output as input for SSTcore/Biot-Savart/BEM after topology gates pass.
+
+Ridgerunner build batch (effort + multithread)
+---------------------------------------------
+Full command cheat sheet: ``ridgerunner/README.md`` → section **Quick commands**.
+
+```bat
+cd C:\workspace\projects\SST-Workbench\KnotPlot
+
+rem Scout all knots/links/tori (ago ≤5k, short RR, 8 threads)
+run_build_batch.cmd --all -rr --effort min -t8
+
+rem Single knot
+run_build.cmd knot_9.2 -rr --effort min -t8
+
+rem Dry-run first
+run_build_batch.cmd --all -rr --effort min -t8 --dry-run
+```
+
+``--effort min|normal|extra`` · ``-t8`` = multithread · summary:
+``ridgerunner\out\batch_build_summary.json`` · batch logs:
+``ridgerunner\out\build\<id>\batch_build.log`` · RR TXT:
+``knots\<id>\``

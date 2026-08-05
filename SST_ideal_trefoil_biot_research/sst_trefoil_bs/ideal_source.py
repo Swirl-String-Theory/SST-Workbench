@@ -34,11 +34,28 @@ from __future__ import annotations
 import gzip
 import os
 import re
+import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 import numpy as np
+
+# Workbench root (…/SST-Workbench) for shared Gilbert usability helpers.
+_WORKBENCH = Path(__file__).resolve().parents[2]
+if str(_WORKBENCH) not in sys.path:
+    sys.path.insert(0, str(_WORKBENCH))
+
+try:
+    from sst_gilbert_usability import (
+        DEFAULT_MIN_C_CONT,
+        CurvatureOnlyIdealError,
+        usability_from_coeffs,
+    )
+except ImportError:  # pragma: no cover
+    DEFAULT_MIN_C_CONT = 0.05
+    CurvatureOnlyIdealError = ValueError  # type: ignore[misc, assignment]
+    usability_from_coeffs = None  # type: ignore[assignment]
 
 # ── URL constants ──────────────────────────────────────────────────────────
 _GITHUB_RAW = (
@@ -132,9 +149,16 @@ def _parse_float3(s: str) -> np.ndarray:
 def load_knot(
     knot_id: str = "3:1:1",
     ideal_path: Optional[Path] = None,
+    *,
+    require_contact: bool = True,
+    min_c_cont: float = DEFAULT_MIN_C_CONT,
+    usability_samples: int = 384,
 ) -> Tuple[float, float, Dict[int, np.ndarray], Dict[int, np.ndarray]]:
     """
     Load one knot from ideal.txt by its AB Id (e.g. '3:1:1').
+
+    By default, rejects curvature-only Fourier artifacts with C_cont <= min_c_cont.
+    Pass require_contact=False only for diagnostics.
 
     Returns
     -------
@@ -170,6 +194,29 @@ def load_knot(
         b_str = coeff.get("B", "0,0,0").strip()
         cos_coeffs[i] = _parse_float3(a_str)
         sin_coeffs[i] = _parse_float3(b_str)
+
+    if require_contact:
+        if usability_from_coeffs is None:
+            raise ImportError(
+                "sst_gilbert_usability is required for the C_cont gate; "
+                "install/work from SST-Workbench or pass require_contact=False"
+            )
+        modes = sorted(set(cos_coeffs) | set(sin_coeffs))
+        coeff_list = []
+        for k in modes:
+            a = cos_coeffs.get(k, np.zeros(3))
+            b = sin_coeffs.get(k, np.zeros(3))
+            coeff_list.append((k, tuple(map(float, a)), tuple(map(float, b))))
+        _pts, report = usability_from_coeffs(
+            coeff_list, D=D, samples=usability_samples, min_c_cont=min_c_cont
+        )
+        if not report["usable"]:
+            raise CurvatureOnlyIdealError(
+                f"Gilbert {knot_id} fails C_cont gate: "
+                f"C_cont={report['C_cont']:.6g} <= {min_c_cont} "
+                f"(kappa_hat_max={report['kappa_hat_max']:.6g}). "
+                f"Pass require_contact=False only for diagnostics."
+            )
 
     return L, D, cos_coeffs, sin_coeffs
 

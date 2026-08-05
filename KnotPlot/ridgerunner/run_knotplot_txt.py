@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 Point = tuple[float, float, float]
@@ -240,6 +241,14 @@ def parse_stop_steps(rr_args: list[str]) -> int | None:
 
 
 def find_ridgerunner_exe() -> Path:
+    env_exe = os.environ.get("RIDGERUNNER_EXE")
+    if env_exe:
+        env_path = Path(env_exe)
+        if env_path.is_file():
+            return env_path
+        raise FileNotFoundError(
+            f"RIDGERUNNER_EXE is set but not found: {env_path}"
+        )
     candidates = [
         BUNDLE_ROOT / "bin" / "ridgerunner.exe",
         BUNDLE_ROOT / "bin" / "ridgerunner",
@@ -505,6 +514,20 @@ _FIELD_RE = {
 }
 
 
+def format_duration(seconds: float) -> str:
+    """Compact elapsed: 45s, 12m34s, 1h02m03s."""
+    if seconds < 0:
+        seconds = 0.0
+    total = int(round(seconds))
+    h, rem = divmod(total, 3600)
+    m, s = divmod(rem, 60)
+    if h > 0:
+        return f"{h}h{m:02d}m{s:02d}s"
+    if m > 0:
+        return f"{m}m{s:02d}s"
+    return f"{s}s"
+
+
 def format_progress_bar(
     step: int,
     total: int | None,
@@ -513,6 +536,7 @@ def format_progress_bar(
     strut: str | None = None,
     mr: str | None = None,
     thi: str | None = None,
+    elapsed_s: float | None = None,
     width: int = 40,
 ) -> str:
     if total and total > 0:
@@ -538,6 +562,8 @@ def format_progress_bar(
             bits.append(f"Thi:{float(thi):.4f}")
         except ValueError:
             bits.append(f"Thi:{thi}")
+    if elapsed_s is not None:
+        bits.append(f"t={format_duration(elapsed_s)}")
     return "  ".join(bits)
 
 
@@ -555,6 +581,105 @@ def parse_progress_line(line: str) -> dict[str, str | int] | None:
     return out
 
 
+def last_progress_from_text(text: str) -> dict[str, str | int] | None:
+    last: dict[str, str | int] | None = None
+    for line in text.splitlines():
+        prog = parse_progress_line(line)
+        if prog is not None:
+            last = prog
+    return last
+
+
+def print_stage_summary(
+    *,
+    status: str,
+    elapsed_s: float,
+    metrics: dict[str, object] | None = None,
+    stdout_text: str = "",
+    out_txt: Path | None = None,
+    metrics_path: Path | None = None,
+    returncode: int | None = None,
+) -> None:
+    """Print compact end-of-stage stats (also used after Ctrl+C)."""
+    print(flush=True)
+    print("Stage summary", flush=True)
+    print("-------------", flush=True)
+    print(f"status:   {status}", flush=True)
+    if returncode is not None:
+        print(f"exit:     {returncode}", flush=True)
+    print(
+        f"elapsed:  {format_duration(elapsed_s)} ({elapsed_s:.1f}s)",
+        flush=True,
+    )
+    wall = None if metrics is None else metrics.get("walltime")
+    if wall is not None:
+        try:
+            print(
+                f"rr_wall:  {format_duration(float(wall))} ({float(wall):.1f}s)",
+                flush=True,
+            )
+        except (TypeError, ValueError):
+            print(f"rr_wall:  {wall}", flush=True)
+
+    rop = thi = residual = strut = mr = step = None
+    if metrics:
+        rop = metrics.get("ropelength")
+        thi = metrics.get("thickness")
+        residual = metrics.get("residual")
+        strut = metrics.get("strutcount")
+        mr = metrics.get("mr_struts")
+        step = metrics.get("steps")
+    prog = last_progress_from_text(stdout_text)
+    if prog:
+        if rop is None and "rop" in prog:
+            rop = prog["rop"]
+        if thi is None and "thi" in prog:
+            thi = prog["thi"]
+        if strut is None and "str" in prog:
+            strut = prog["str"]
+        if mr is None and "mr" in prog:
+            mr = prog["mr"]
+        if step is None and "step" in prog:
+            step = prog["step"]
+
+    def _fmt(v: object, *, nd: int | None = None) -> str:
+        if v is None:
+            return "n/a"
+        try:
+            f = float(v)  # type: ignore[arg-type]
+            return f"{f:.{nd}f}" if nd is not None else f"{f:g}"
+        except (TypeError, ValueError):
+            return str(v)
+
+    print(f"steps:    {_fmt(step, nd=None)}", flush=True)
+    print(f"Rop:      {_fmt(rop, nd=6)}", flush=True)
+    print(f"Thi:      {_fmt(thi, nd=6)}", flush=True)
+    print(f"residual: {_fmt(residual, nd=6)}", flush=True)
+    print(f"Str:      {_fmt(strut, nd=None)}", flush=True)
+    print(f"MRstruts: {_fmt(mr, nd=None)}", flush=True)
+    if out_txt is not None:
+        print(f"output:   {out_txt}", flush=True)
+    if metrics_path is not None:
+        print(f"metrics:  {metrics_path}", flush=True)
+
+
+def _terminate_process(proc: subprocess.Popen[str]) -> None:
+    if proc.poll() is not None:
+        return
+    try:
+        proc.terminate()
+    except OSError:
+        pass
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try:
+            proc.kill()
+        except OSError:
+            pass
+        proc.wait()
+
+
 def run_ridgerunner_live(
     cmd: list[str],
     *,
@@ -562,8 +687,14 @@ def run_ridgerunner_live(
     env: dict[str, str],
     total_steps: int | None,
     verbose: bool,
-) -> tuple[int, str]:
-    """Run ridgerunner, stream output, return (returncode, full_stdout)."""
+    heartbeat_s: float = 30.0,
+    heartbeat_steps: int = 100,
+) -> tuple[int, str, float]:
+    """Run ridgerunner, stream output, return (returncode, stdout, elapsed_s).
+
+    On KeyboardInterrupt the child is terminated before re-raising.
+    """
+    t0 = time.perf_counter()
     proc = subprocess.Popen(
         cmd,
         cwd=str(cwd),
@@ -576,6 +707,8 @@ def run_ridgerunner_live(
     assert proc.stdout is not None
     chunks: list[str] = []
     bar_active = False
+    last_heartbeat = t0
+    last_hb_step = 0
 
     def finish_bar() -> None:
         nonlocal bar_active
@@ -586,11 +719,31 @@ def run_ridgerunner_live(
     try:
         for line in proc.stdout:
             chunks.append(line)
+            elapsed = time.perf_counter() - t0
+            prog = parse_progress_line(line)
+
             if verbose:
                 print(line, end="", flush=True)
+                step = int(prog["step"]) if prog is not None else None
+                now = time.perf_counter()
+                due_time = (now - last_heartbeat) >= heartbeat_s
+                due_step = (
+                    step is not None
+                    and heartbeat_steps > 0
+                    and (step - last_hb_step) >= heartbeat_steps
+                )
+                if due_time or due_step:
+                    print(
+                        f"[timer] t={format_duration(elapsed)} "
+                        f"({elapsed:.1f}s)"
+                        + (f"  step={step}" if step is not None else ""),
+                        flush=True,
+                    )
+                    last_heartbeat = now
+                    if step is not None:
+                        last_hb_step = step
                 continue
 
-            prog = parse_progress_line(line)
             if prog is not None:
                 bar = format_progress_bar(
                     int(prog["step"]),
@@ -599,20 +752,27 @@ def run_ridgerunner_live(
                     strut=str(prog["str"]) if "str" in prog else None,
                     mr=str(prog["mr"]) if "mr" in prog else None,
                     thi=str(prog["thi"]) if "thi" in prog else None,
+                    elapsed_s=elapsed,
                 )
                 print(f"\r{bar}", end="", flush=True)
                 bar_active = True
                 continue
 
-            # Non-progress line: end bar then print normally
             finish_bar()
             print(line, end="", flush=True)
 
         finish_bar()
-    finally:
+        # Wait for the process. Do not kill on stdout EOF — a broken pipe or
+        # early reader exit must not terminate a still-running ridgerunner.
         returncode = proc.wait()
-
-    return returncode, "".join(chunks)
+        elapsed_s = time.perf_counter() - t0
+        return returncode, "".join(chunks), elapsed_s
+    except KeyboardInterrupt:
+        finish_bar()
+        print("\nInterrupted — stopping ridgerunner…", flush=True)
+        _terminate_process(proc)
+        elapsed_s = time.perf_counter() - t0
+        return 130, "".join(chunks), elapsed_s
 
 
 def build_metrics(
@@ -683,6 +843,7 @@ def build_metrics(
         "edge_length_cv": edges["edge_length_cv"],
         "mr_struts": mr_struts,
         "flatness": flatness_rms(out_components),
+        "walltime": last_logfile_value(logfiles / "walltime.dat"),
         "ridgerunner_args": rr_args,
         "final_vect": str(final_vect),
         "output_txt": str(out_txt),
@@ -742,7 +903,8 @@ def main(argv: list[str] | None = None) -> int:
             "\nAll other arguments are forwarded to ridgerunner.exe.\n"
             "Checkpoint tag comes from -s / --StopSteps "
             "(1000->001k, 20->s20).\n"
-            "Default UI is a progress bar; use --verbose for full Rop lines.\n"
+            "Default UI is a progress bar with live t=elapsed; "
+            "use --verbose for full Rop lines (+ timer heartbeat).\n"
             "Native ridgerunner options:  bin\\ridgerunner.exe -h\n"
             "Example:\n"
             "  ridgerunner -a -s 1000 knot.txt\n"
@@ -802,44 +964,98 @@ def main(argv: list[str] | None = None) -> int:
     cmd = [str(exe), *rr_args, vect_path.name]
     print("Running:", " ".join(cmd), flush=True)
     print("  cwd:", workdir, flush=True)
-    returncode, stdout_text = run_ridgerunner_live(
-        cmd,
-        cwd=workdir,
-        env=env,
-        total_steps=steps,
-        verbose=ours.verbose,
-    )
-    if returncode != 0:
-        print(
-            f"ridgerunner failed with exit code {returncode}",
-            file=sys.stderr,
+
+    returncode = 1
+    stdout_text = ""
+    elapsed_s = 0.0
+    metrics: dict[str, object] | None = None
+    status = "failed"
+    wrote_out = False
+
+    try:
+        returncode, stdout_text, elapsed_s = run_ridgerunner_live(
+            cmd,
+            cwd=workdir,
+            env=env,
+            total_steps=steps,
+            verbose=ours.verbose,
         )
-        return returncode
+        if returncode == 130:
+            status = "interrupted"
+        elif returncode != 0:
+            status = "failed"
+            print(
+                f"ridgerunner failed with exit code {returncode}",
+                file=sys.stderr,
+            )
+        elif not final_vect.is_file():
+            status = "failed"
+            print(f"missing output: {final_vect}", file=sys.stderr)
+            returncode = 1
+        else:
+            out_components = parse_vect_components(final_vect)
+            out_txt.write_text(
+                components_to_txt(out_components), encoding="utf-8"
+            )
+            print(f"Wrote: {out_txt}", flush=True)
+            wrote_out = True
+            metrics = build_metrics(
+                source_txt=txt_path,
+                checkpoint_tag=tag,
+                steps=steps,
+                rr_args=rr_args,
+                out_components=out_components,
+                rr_dir=rr_dir,
+                final_vect=final_vect,
+                out_txt=out_txt,
+                stdout_text=stdout_text,
+            )
+            metrics["elapsed_s"] = elapsed_s
+            metrics_path.write_text(
+                json.dumps(metrics, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            print(f"Wrote: {metrics_path}", flush=True)
+            status = "ok"
+            returncode = 0
+    except KeyboardInterrupt:
+        status = "interrupted"
+        returncode = 130
+    finally:
+        # Partial metrics from logfiles if RR wrote them before interrupt.
+        if metrics is None and rr_dir.is_dir():
+            try:
+                if final_vect.is_file():
+                    out_components = parse_vect_components(final_vect)
+                else:
+                    out_components = components
+                metrics = build_metrics(
+                    source_txt=txt_path,
+                    checkpoint_tag=tag,
+                    steps=steps,
+                    rr_args=rr_args,
+                    out_components=out_components,
+                    rr_dir=rr_dir,
+                    final_vect=final_vect,
+                    out_txt=out_txt,
+                    stdout_text=stdout_text,
+                )
+                metrics["elapsed_s"] = elapsed_s
+            except (OSError, ValueError, KeyError):
+                metrics = {"elapsed_s": elapsed_s}
+        print_stage_summary(
+            status=status,
+            elapsed_s=elapsed_s,
+            metrics=metrics,
+            stdout_text=stdout_text,
+            out_txt=out_txt if wrote_out or out_txt.is_file() else None,
+            metrics_path=(
+                metrics_path if metrics_path.is_file() else None
+            ),
+            returncode=returncode,
+        )
 
-    if not final_vect.is_file():
-        print(f"missing output: {final_vect}", file=sys.stderr)
-        return 1
-
-    out_components = parse_vect_components(final_vect)
-    out_txt.write_text(components_to_txt(out_components), encoding="utf-8")
-    print(f"Wrote: {out_txt}", flush=True)
-
-    metrics = build_metrics(
-        source_txt=txt_path,
-        checkpoint_tag=tag,
-        steps=steps,
-        rr_args=rr_args,
-        out_components=out_components,
-        rr_dir=rr_dir,
-        final_vect=final_vect,
-        out_txt=out_txt,
-        stdout_text=stdout_text,
-    )
-    metrics_path.write_text(
-        json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    print(f"Wrote: {metrics_path}", flush=True)
-    return 0
+    return returncode
 
 
 if __name__ == "__main__":

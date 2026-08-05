@@ -8,6 +8,7 @@ rem   run_build.cmd knot_4.1 -rr
 rem   run_build.cmd torus_6.9 -rr --seed trial_009k
 rem   run_build.cmd knot_3.1 -rr --multistart
 rem   run_build.cmd link_0.2.1 -rr --allow-unverified-topology
+rem   run_build.cmd knot_9.2 -rr --effort min -t8
 
 set "ROOT=%~dp0"
 set "LNK=%ROOT%KnotPlot.lnk"
@@ -18,6 +19,9 @@ set "SEED_OPT="
 set "MULTISTART="
 set "ALLOW_UNVERIFIED="
 set "CERTIFY="
+set "EFFORT=normal"
+set "THREADS="
+set "THREADS_ARG="
 
 if not exist "%LNK%" (
   echo ERROR: KnotPlot.lnk not found at "%LNK%"
@@ -72,6 +76,56 @@ if /I "%~1"=="--certify" (
   shift
   goto parse
 )
+if /I "%~1"=="--effort" (
+  if "%~2"=="" (
+    echo ERROR: --effort requires min ^| normal ^| extra
+    exit /b 1
+  )
+  set "EFFORT=%~2"
+  shift
+  shift
+  goto parse
+)
+set "EAR=%~1"
+if /I "!EAR:~0,9!"=="--effort=" (
+  set "EFFORT=!EAR:~9!"
+  shift
+  goto parse
+)
+if /I "%~1"=="--threads" (
+  if "%~2"=="" (
+    echo ERROR: --threads requires a value
+    exit /b 1
+  )
+  set "THREADS=%~2"
+  shift
+  shift
+  goto parse
+)
+if /I "%~1"=="-t" (
+  if "%~2"=="" (
+    echo ERROR: -t requires a value
+    exit /b 1
+  )
+  set "THREADS=%~2"
+  shift
+  shift
+  goto parse
+)
+set "TAR=%~1"
+if /I "!TAR:~0,10!"=="--threads=" (
+  set "THREADS=!TAR:~10!"
+  shift
+  goto parse
+)
+if /I "!TAR:~0,2!"=="-t" if not "!TAR!"=="-t" (
+  echo.!TAR!| findstr /R /I "^-t[0-9][0-9]*$" >nul
+  if not errorlevel 1 (
+    set "THREADS=!TAR:~2!"
+    shift
+    goto parse
+  )
+)
 if /I "%~1"=="/h" (
   call :HELP
   exit /b 1
@@ -96,6 +150,34 @@ goto parse
 if not defined ARG (
   call :HELP
   exit /b 1
+)
+
+where python >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: python not found on PATH ^(needed for effort / sidecars / seed selection^)
+  exit /b 1
+)
+
+rem Validate effort early
+python "%ROOT%ridgerunner\effort_presets.py" --emit-env "!EFFORT!" >nul
+if errorlevel 1 (
+  echo ERROR: invalid --effort "!EFFORT!" ^(expected min ^| normal ^| extra^)
+  exit /b 1
+)
+
+if defined THREADS (
+  echo.!THREADS!| findstr /R "^[1-9][0-9]*$" >nul
+  if errorlevel 1 (
+    echo ERROR: --threads must be a positive integer, got "!THREADS!"
+    exit /b 1
+  )
+  set "MT_EXE=%ROOT%ridgerunner\bin\ridgerunner_multithread.exe"
+  if not exist "!MT_EXE!" (
+    echo ERROR: multithread exe not found: "!MT_EXE!"
+    exit /b 1
+  )
+  set "RIDGERUNNER_EXE=!MT_EXE!"
+  set "THREADS_ARG=--Threads=!THREADS!"
 )
 
 for /f "usebackq delims=" %%A in (`powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut('%LNK%'); Write-Output $s.TargetPath; Write-Output $s.WorkingDirectory"`) do (
@@ -128,11 +210,20 @@ rem Trailing backslash breaks "...\dir\" quoting in Python/PowerShell args
 if "!OUTDIR:~-1!"=="\" set "OUTDIR=!OUTDIR:~0,-1!"
 set "LOG=!OUTDIR!\build_knotplot.log"
 
+rem Truncate build_*.kpc to effort max-ago (temp alongside outdir)
+for /f "usebackq delims=" %%T in (`python "%ROOT%ridgerunner\effort_presets.py" --truncate "!SCRIPT!" --effort "!EFFORT!" --dest "!OUTDIR!\build_effort_active.kpc"`) do set "SCRIPT=%%T"
+if not exist "!SCRIPT!" (
+  echo ERROR: failed to write truncated build script for effort "!EFFORT!"
+  exit /b 1
+)
+
 pushd "%KP_CWD%" || exit /b 1
 
 echo KnotPlot: "%KP_EXE%"
 echo CWD:      "%CD%"
 echo Script:   "%SCRIPT%"
+echo Effort:   !EFFORT!
+if defined THREADS echo Threads:  !THREADS! ^(!RIDGERUNNER_EXE!^)
 echo Log:      "%LOG%"
 if defined NOG (
   echo Mode:     non-graphics ^(-nog^)
@@ -149,11 +240,6 @@ if not "%RC%"=="0" (
 )
 
 rem Parse CHECKPOINT blocks → *.knotplot.json sidecars
-where python >nul 2>&1
-if errorlevel 1 (
-  echo ERROR: python not found on PATH ^(needed for sidecars / seed selection^)
-  exit /b 1
-)
 python "%ROOT%ridgerunner\parse_knotplot_log.py" "!OUTDIR!" --log "!LOG!"
 if errorlevel 1 (
   if defined DO_RR (
@@ -197,7 +283,7 @@ if not defined SELECTED (
 )
 
 echo Selected seed: !SELECTED!
-call "%RR_PIPE%" "!SELECTED!"
+call "%RR_PIPE%" "!SELECTED!" --effort !EFFORT! !THREADS_ARG!
 if errorlevel 1 exit /b 1
 
 if defined MULTISTART (
@@ -208,12 +294,41 @@ if defined MULTISTART (
         if /I not "%%~fA"=="!SELECTED!" (
           echo.
           echo ---- multistart analytic: %%~nxA ----
-          call "%RR_PIPE%" "%%~fA"
+          call "%RR_PIPE%" "%%~fA" --effort !EFFORT! !THREADS_ARG!
           if errorlevel 1 exit /b 1
         )
       )
     )
   )
+)
+
+rem --effort extra: N600 ladder only (certify still does N600/N1200 when set)
+if /I "!EFFORT!"=="extra" if not defined CERTIFY (
+  echo.
+  echo ============================================================
+  echo Resolution ladder N=600 ^(--effort extra^)
+  echo ============================================================
+  set "POLISH="
+  for %%F in ("!OUTDIR!\!SELECTED:*\=!") do set "SELSTEM=%%~nF"
+  for %%P in ("!OUTDIR!\!SELSTEM!*_polish.txt") do (
+    echo.%%~nxP| findstr /I /C:"uniform" >nul
+    if errorlevel 1 (
+      echo.%%~nxP| findstr /I /C:"N600" /C:"N1200" >nul
+      if errorlevel 1 set "POLISH=%%~fP"
+    )
+  )
+  if not defined POLISH (
+    for %%P in ("!OUTDIR!\*_rr_*_polish.txt") do (
+      echo.%%~nxP| findstr /I /C:"uniform" /C:"N600" /C:"N1200" >nul
+      if errorlevel 1 set "POLISH=%%~fP"
+    )
+  )
+  if not defined POLISH (
+    echo ERROR: no polish found for --effort extra N600 ladder
+    exit /b 1
+  )
+  call "%ROOT%ridgerunner\run_resolution_ladder.cmd" "!POLISH!" --ns="600" !THREADS_ARG!
+  if errorlevel 1 exit /b 1
 )
 
 if defined CERTIFY (
@@ -241,7 +356,7 @@ if defined CERTIFY (
     echo ERROR: no N=300 polish found for resolution ladder
     exit /b 1
   )
-  call "%ROOT%ridgerunner\run_resolution_ladder.cmd" "!POLISH!"
+  call "%ROOT%ridgerunner\run_resolution_ladder.cmd" "!POLISH!" !THREADS_ARG!
   if errorlevel 1 exit /b 1
 )
 
@@ -327,13 +442,18 @@ echo Options:
 echo   /gui                         graphics mode
 echo   /list                        list build_*.kpc
 echo   -rr / --ridgerunner          select one seed + 3-stage ridgerunner
+echo   --effort min^|normal^|extra    KnotPlot ago + RR stage budget
+echo                                  min=ago 5k + short RR; normal=15k;
+echo                                  extra=normal + N600 ladder
+echo   -t N / --threads N           ridgerunner_multithread.exe --Threads=N
 echo   --seed analytic or trial_00Nk  force seed
 echo   --multistart                 also run analytic after selected trial
 echo   --allow-unverified-topology  continue if KnotPlot sidecars incomplete
 echo   --certify                    multi-start + N600/N1200 ladder + reclassify
 echo.
-echo Without -rr: KnotPlot only (15k checkpoints, log + sidecars).
+echo Without -rr: KnotPlot only ^(effort-truncated checkpoints, log + sidecars^).
 echo With -rr: select one trial, 3-stage RR, VortexLab uniform N=300,
 echo   catalog_status.json, upsert knotplot_knots_data.js.
 echo   Ridgerunner polish TXT stays the audit reference.
+echo Batch all ids: run_build_batch.cmd --all -rr --effort min -t8
 goto :eof

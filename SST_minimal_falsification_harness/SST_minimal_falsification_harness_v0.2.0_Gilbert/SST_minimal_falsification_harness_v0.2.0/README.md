@@ -2,47 +2,41 @@
 
 This package implements a strict version of the proposed route
 
-\[
+$$
 \alpha^{-1}
 =
-\frac{8\pi}{3}\mathcal L_D
-+
+\frac{8\pi}{3}\mathcal L_D+
 \Delta[\kappa,\Omega_3,\mathcal C_{\rm contact},f].
-\]
+$$
 
 The program does **not** fit the trefoil correction to \(\alpha\). It first fits a declared EFT truncation to independent observables, freezes the coefficients, and only then compares the trefoil prediction with
 
-\[
-\Delta_{\rm target}
-=
-\alpha^{-1}
--
+$$
+\Delta_{\rm target}=
+\alpha^{-1}-
 \frac{8\pi}{3}\mathcal L_D.
-\]
+$$
 
 ## What it tests
 
 The implemented linear truncation is
 
-\[
+$$
 \Delta
 =
-c_L F_L
-+
-c_\kappa F_\kappa
-+
-c_\Omega F_\Omega
-+
+c_L F_L+
+c_\kappa F_\kappa+
+c_\Omega F_\Omega+
 c_C F_C,
-\]
+$$
 
 with default features
 
-\[
+$$
 F_L=\mathcal L_D,\qquad
 F_\kappa=\int(D\kappa)^2\,\frac{ds}{D},\qquad
 F_\Omega=\int(D\Omega_3)^2\,\frac{ds}{D},
-\]
+$$
 
 and a finite nonlocal contact-shell proxy \(F_C\).
 
@@ -69,22 +63,15 @@ The basis can be changed in the calibration JSON. Each independent observable mu
 The demo is explicitly nonphysical.
 
 ```bash
-python sst_minimal_falsification.py demo \
-  --calibration-out synthetic_calibration.json \
-  --geometry-out synthetic_geometry.json
+python sst_minimal_falsification.py demo --calibration-out synthetic_calibration.json --geometry-out synthetic_geometry.json
 
-python sst_minimal_falsification.py audit \
-  --calibration synthetic_calibration.json \
-  --geometry synthetic_geometry.json \
-  --out synthetic_report.json \
-  --abs-tol 1e-3
+python sst_minimal_falsification.py audit --calibration synthetic_calibration.json --geometry synthetic_geometry.json --out synthetic_report.json --abs-tol 1e-3
 ```
 
 ### 2. Create an independent-calibration template
 
 ```bash
-python sst_minimal_falsification.py template \
-  --out calibration_template.json
+python sst_minimal_falsification.py template --out calibration_template.json
 ```
 
 Replace every `REPLACE` field. Do not use \(\alpha\), the final target correction, the elementary charge, or a swirl speed already calibrated through \(\alpha\).
@@ -94,13 +81,7 @@ Replace every `REPLACE` field. Do not use \(\alpha\), the final target correctio
 For a centerline file:
 
 ```bash
-python sst_minimal_falsification.py geometry \
-  --curve-csv ideal_trefoil.csv \
-  --diameter 1.0 \
-  --samples 2000 \
-  --core-profile gaussian \
-  --gaussian-width 0.25 \
-  --out ideal_trefoil_features.json
+python sst_minimal_falsification.py geometry --curve-csv ideal_trefoil.csv --diameter 1.0 --samples 2000 --core-profile gaussian --gaussian-width 0.25 --out ideal_trefoil_features.json
 ```
 
 The CSV must contain:
@@ -130,13 +111,7 @@ Here \(\omega_{\rm hat}=D\Omega_3\).
 ### 4. Run the falsification audit
 
 ```bash
-python sst_minimal_falsification.py audit \
-  --calibration calibration_filled.json \
-  --geometry ideal_trefoil_features.json \
-  --out falsification_report.json \
-  --abs-tol 1e-3 \
-  --max-z 3 \
-  --max-reduced-chi2 3
+python sst_minimal_falsification.py audit --calibration calibration_filled.json --geometry ideal_trefoil_features.json --out falsification_report.json --abs-tol 1e-3 --max-z 3 --max-reduced-chi2 3
 ```
 
 The tolerance must be chosen before examining the trefoil result.
@@ -145,9 +120,9 @@ The tolerance must be chosen before examining the trefoil result.
 
 Each row is one independent equation
 
-\[
+$$
 y_n = \sum_a A_{na}c_a+\epsilon_n.
-\]
+$$
 
 Example:
 
@@ -217,6 +192,13 @@ S.~Przybyl and P.~Pieranski,
 doi:10.1088/1751-8113/47/28/285201,
 arXiv:1402.5760.
 
+\bibitem{Gilbert2016}
+Brian Gilbert,
+\newblock Database of Ideal Knots 3--10 crossings,
+\newblock electronic database (2016-06-11).
+\newblock Header: Title=``Database of Ideal Knots 3-10 crossings'',
+Author=Brian Gilbert, Date=6/11/2016 2:12:11 p.m.
+
 \end{thebibliography}
 ```
 
@@ -224,23 +206,23 @@ arXiv:1402.5760.
 # Gilbert ideal-knot database integration — v0.2.0
 
 The uploaded `ideal_favorites.txt` is Brian Gilbert's Fourier database of ideal
-knots and links. A single-component centerline is reconstructed as
+knots and links (\cite{Gilbert2016}). A single-component centerline is reconstructed as
 
-\[
+$$
 \mathbf X(t)=
 \sum_{n}
 \left[
 \mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)
 \right],
 \qquad 0\leq t<2\pi.
-\]
+$$
 
 The database reports \(L\) and \(D\) separately. By default the harness uses the
 reported ratio
 
-\[
+$$
 \mathcal L_D=\frac{L}{D}
-\]
+$$
 
 for the leading response term, while the rounded Fourier coefficients are used
 to calculate curvature and contact diagnostics. This separation is deliberate:
@@ -249,21 +231,13 @@ six-decimal coefficient rounding causes a small reconstructed-length drift.
 ## Inventory
 
 ```bash
-python sst_minimal_falsification.py gilbert-list \
-  --database data/ideal_favorites.txt \
-  --out gilbert_manifest.json
+python sst_minimal_falsification.py gilbert-list --database data/ideal_favorites.txt --out gilbert_manifest.json
 ```
 
 ## Full 183-mode trefoil
 
 ```bash
-python sst_minimal_falsification.py gilbert-geometry \
-  --database data/ideal_favorites.txt \
-  --id 3:1:1 \
-  --samples 2000 \
-  --length-source reported \
-  --core-profile unit \
-  --out gilbert_trefoil_features.json
+python sst_minimal_falsification.py gilbert-geometry --database data/ideal_favorites.txt --id 3:1:1 --samples 2000 --length-source reported --core-profile unit --out gilbert_trefoil_features.json
 ```
 
 The identifier `3:1:1` means three crossings, one component, first knot:
@@ -272,12 +246,7 @@ The identifier `3:1:1` means three crossings, one component, first knot:
 ## Cross-knot feature table
 
 ```bash
-python sst_minimal_falsification.py gilbert-batch \
-  --database data/ideal_favorites.txt \
-  --samples 800 \
-  --length-source reported \
-  --out gilbert_feature_batch.json \
-  --csv-out gilbert_feature_batch.csv
+python sst_minimal_falsification.py gilbert-batch --database data/ideal_favorites.txt --samples 800 --length-source reported --out gilbert_feature_batch.json --csv-out gilbert_feature_batch.csv
 ```
 
 Multi-component links are skipped because the present contact functional is a
@@ -289,10 +258,7 @@ contact terms.
 After independent calibration:
 
 ```bash
-python sst_minimal_falsification.py batch-predict \
-  --calibration calibration_filled.json \
-  --batch gilbert_feature_batch.json \
-  --out cross_knot_predictions.json
+python sst_minimal_falsification.py batch-predict --calibration calibration_filled.json --batch gilbert_feature_batch.json --out cross_knot_predictions.json
 ```
 
 This freezes one coefficient vector and applies it to \(0_1,3_1,4_1,5_1,5_2,\ldots\)

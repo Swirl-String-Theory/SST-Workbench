@@ -1,0 +1,76 @@
+SST Fermat pybind research v0.6.1 — build validation
+Date: 2026-08-01
+Environment: Linux container, Python 3, g++ C++17
+
+VALIDATED
+---------
+1. Python syntax compilation
+   - fermat_ext package
+   - all top-level runner scripts
+   - all Python tests
+   Result: PASS
+
+2. Python regression suite
+   - tests/test_catalog.py
+   - tests/test_v030.py
+   - tests/test_v040.py
+   - tests/test_v043.py
+   - tests/test_v051.py
+   - tests/test_v060.py
+   - tests/test_v061.py
+   Result: PASS
+
+3. v0.6.1-specific unit gates
+   - exact requested grid endpoints: 0.06125, 8, -8, 8
+   - mandatory zero-circulation controls
+   - strictly increasing unique grid values
+   - vectorized analytic bundle Jacobian versus central finite differences
+   - exact rigid-motion least-squares recovery
+   - residual Fourier projection normalization
+   Result: PASS
+
+4. Requested full parameter-grid software test
+   - 42 unique radius ratios
+   - 65 circulation ratios
+   - 2730 combinations
+   - Python fallback
+   - N_centerline = 256
+   - zero-circulation controls reproduce the isolated residual
+   Result: PASS
+   Note: low resolution; software validation only.
+
+5. Integrated four-stage Python-fallback smoke campaign
+   - full-domain endpoint smoke sweep
+   - selected convergence stage
+   - axis offset/tilt stage
+   - residual mode-projection stage
+   - integrated summary, manifest, logs and archive checksum
+   Result: PASS (4/4 steps, exit code 0)
+
+6. Standalone C++17 kernel test
+   Command equivalent:
+     g++ -std=c++17 -O2 -Icpp tests/test_kernel.cpp
+   Output:
+     PASS residual=-1.11022e-16 K_hat=-75115.5 jacobian_checked=1
+   Result: PASS
+
+7. Python wheel metadata/build
+   - built with --no-build-isolation because the sandbox package index did not expose build dependencies
+   - wheel: sst_fermat_pybind_research-0.6.1-py3-none-any.whl
+   - SHA-256: 75a801bb3a1dc44a1d85868ae920410d19a9f0f62da3a5b2aadeeeb306b2d914
+   Result: PASS
+
+NOT VALIDATED IN THIS ENVIRONMENT
+---------------------------------
+- Windows CPython native .pyd build and import
+- native C++/Python parity for the complete v0.6.1 campaign
+- the full N=8192, 2730-combination campaign
+- a finite closed vortex bundle in unbounded space
+- a dynamically self-consistent relative equilibrium
+- a global closed Fermat orbit, monodromy spectrum or QSM
+
+EPISTEMIC STATUS
+----------------
+All v0.6.1 hole-bundle results remain Research Track.
+The primary score is absolute post-rigid-fit residual reduction.
+Relative-residual-only improvements are not classified as stabilization.
