@@ -1,0 +1,888 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 6.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[     27851,        879]
+NotebookOptionsPosition[     24130,        756]
+NotebookOutlinePosition[     24523,        773]
+CellTagsIndexPosition[     24480,        770]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Representations package", "Subtitle",
+ InitializationCell->True],
+
+Cell["\<\
+A subpackage for QuantumGroups v2.
+Version 2.0, July 30, 2005, Scott Morrison\
+\>", "Text",
+ InitializationCell->True],
+
+Cell[CellGroupData[{
+
+Cell["Introduction", "Section",
+ InitializationCell->True],
+
+Cell["\<\
+This package implements a weight multiplicity formula and a tensor product \
+decomposition algorithm (the underlying implementation is by Littelmann \
+paths, but you don't need to know that, if you don't care!), and can \
+calculate the weight multiplicities of tensor products and direct sums.\
+\>", "Text",
+ InitializationCell->True]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Implementation", "Section",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"BeginPackage", "[", 
+   RowBox[{"\"\<QuantumGroups`Representations`\>\"", ",", 
+    RowBox[{"{", 
+     RowBox[{
+     "\"\<QuantumGroups`\>\"", ",", "\"\<QuantumGroups`RootSystems`\>\"", 
+      ",", "\"\<QuantumGroups`Algebra`\>\"", ",", 
+      "\"\<QuantumGroups`WeylGroups`\>\"", ",", 
+      "\"\<QuantumGroups`LittelmannPaths`\>\"", ",", 
+      "\"\<QuantumGroups`Steinberg`\>\"", ",", 
+      "\"\<QuantumGroups`Utilities`Debugging`\>\""}], "}"}]}], "]"}], 
+  ";"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.4216305502397423`*^9, 3.421630558161133*^9}, {
+  3.430764651233405*^9, 3.4307646605167537`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "::", "usage"}], "=", "\"\<\>\""}], 
+  ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"WeightMultiplicity", "::", "usage"}], "=", "\"\<\>\""}], 
+  ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "::", "usage"}], "=", "\"\<\>\""}], 
+  ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Weights", "::", "usage"}], "=", "\"\<\>\""}], ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"WeightDiameter", "::", "usage"}], "=", "\"\<\>\""}], 
+  ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"PositiveWeights", "::", "usage"}], "=", "\"\<\>\""}], 
+  ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"qDimension", "::", "usage"}], "=", "\"\<\>\""}], ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"MultiplicityFreeQ", "::", "usage"}], "=", 
+   "\"\<MultiplicityFreeQ[\[CapitalGamma],V] determines whether every weight \
+space in the representation V of \[CapitalGamma] has dimension 1. In the case \
+that this is false, MultiplicityFreeQ is much faster than \
+WeightMultiplicities[\[CapitalGamma],V].\>\""}], ";"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.4130851976403694`*^9, 3.413085299386674*^9}}],
+
+Cell[BoxData[
+ RowBox[{"DualRepresentation", ";"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{3.5323784012295732`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Begin", "[", "\"\<`Private`\>\"", "]"}], ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"DualRepresentation", "[", "X_DirectSum", "]"}], ":=", 
+  RowBox[{"DualRepresentation", "/@", "X"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"DualRepresentation", "[", "X_CircleTimes", "]"}], ":=", 
+  RowBox[{"DualRepresentation", "/@", 
+   RowBox[{"(", 
+    RowBox[{"Reverse", "[", "X", "]"}], ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"DualRepresentation", "[", 
+   RowBox[{
+    RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "V_", "]"}], "]"}], 
+  ":=", 
+  RowBox[{
+   RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{"-", 
+    RowBox[{
+     RowBox[{"LongestWord", "[", "\[CapitalGamma]", "]"}], ".", "V"}]}], 
+   "]"}]}]}], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.53237833785323*^9, 3.532378388350677*^9}, {
+  3.630698193055943*^9, 3.63069819407581*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"q", "=", "Global`q"}], ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Weight and tensor product multiplicities, using the Littelmann path model.\
+\>", "Subsubsection",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "\[DoubleStruckCapitalC]"}], "]"}], ":=", 
+  RowBox[{"{", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"ZeroVector", "[", 
+      RowBox[{"Rank", "[", "\[CapitalGamma]", "]"}], "]"}], ",", "1"}], "}"}],
+    "}"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", 
+    RowBox[{"CircleTimes", "[", "V_", "]"}]}], "]"}], ":=", 
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.630634446522435*^9, 3.630634495359899*^9}, {
+  3.6306977460827427`*^9, 3.6306977552149677`*^9}}],
+
+Cell["Use the functions provided by the LittelmannPath package.", "Text",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", 
+     "]"}]}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", 
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", 
+      "]"}]}], "]"}], "=", 
+   RowBox[{"LittelmannPathWeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", 
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", 
+      "]"}]}], "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"GreatestMultiplicityAfterLowerings", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "\[Lambda]_", ",", "k_"}], "]"}], ":=", 
+  RowBox[{"Max", "[", 
+   RowBox[{"Last", "/@", 
+    RowBox[{"Tally", "[", 
+     RowBox[{"LittelmannPathEndpoint", "/@", 
+      RowBox[{"Nest", "[", 
+       RowBox[{"LittelmannPathOneStepLowerings", ",", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"LittelmannPath", "[", "\[CapitalGamma]", "]"}], "[", 
+          RowBox[{"{", "\[Lambda]", "}"}], "]"}], "}"}], ",", "k"}], "]"}]}], 
+     "]"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.4129910968801217`*^9, 3.412991128485568*^9}, {
+  3.4130851498216095`*^9, 3.4130851648632383`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"MultiplicityFreeQ", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", 
+     "]"}]}], "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"m", ",", 
+      RowBox[{"k", "=", "1"}]}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"While", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{"m", "=", 
+          RowBox[{"GreatestMultiplicityAfterLowerings", "[", 
+           RowBox[{"\[CapitalGamma]", ",", "\[Lambda]", ",", "k"}], "]"}]}], 
+         ")"}], "\[Equal]", "1"}], ",", 
+       RowBox[{"++", "k"}]}], "]"}], ";", "\[IndentingNewLine]", 
+     RowBox[{"m", "\[Equal]", 
+      RowBox[{"-", "\[Infinity]"}]}]}]}], "\[IndentingNewLine]", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.412991259323704*^9, 3.4129913356734896`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", 
+     "]"}], "\[CircleTimes]", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Mu]_", "]"}]}], 
+   "]"}], ":=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", "]"}],
+      "\[CircleTimes]", 
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Mu]", "]"}]}], 
+    "]"}], "=", 
+   RowBox[{
+    RowBox[{
+    "LittelmannPathDecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], 
+    "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", "]"}],
+      "\[CircleTimes]", 
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Mu]", "]"}]}], 
+    "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", 
+    RowBox[{"\[CapitalGamma]_", ",", "l_"}], "]"}], "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", 
+     "]"}], "\[CircleTimes]", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Mu]_", "]"}]}], 
+   "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SteinbergDecomposeRepresentation", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "l"}], "]"}], "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", "]"}], 
+    "\[CircleTimes]", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Mu]", "]"}]}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.430153604410328*^9, 3.430153629666645*^9}, {
+  3.430153729610357*^9, 3.4301537427993217`*^9}, {3.430764623253171*^9, 
+  3.430764639646744*^9}, {3.4307649551003437`*^9, 3.4307649603679185`*^9}, {
+  3.430765016969307*^9, 3.430765052240024*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Weights", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"Weights", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "=", 
+   RowBox[{"First", "/@", 
+    RowBox[{"WeightMultiplicities", "[", 
+     RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}]}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicity", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_", ",", "\[Mu]_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"WeightMultiplicity", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V", ",", "\[Mu]"}], "]"}], "=", 
+   RowBox[{"Plus", "@@", 
+    RowBox[{"Cases", "[", 
+     RowBox[{
+      RowBox[{"WeightMultiplicities", "[", 
+       RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], ",", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Mu]", ",", "n_"}], "}"}], "\[RuleDelayed]", "n"}]}], 
+     "]"}]}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.446832952458647*^9, 3.446832955922299*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightDiameter", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"WeightDiameter", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "=", 
+   RowBox[{"2", 
+    RowBox[{"Max", "[", 
+     RowBox[{
+      RowBox[{
+       SqrtBox[
+        RowBox[{
+         RowBox[{"KillingForm", "[", "\[CapitalGamma]", "]"}], "[", 
+         RowBox[{"#", ",", "#"}], "]"}]], "&"}], "/@", 
+      RowBox[{"Weights", "[", 
+       RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}]}], "]"}]}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{
+    RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", "]"}],
+    "]"}], ":=", 
+  RowBox[{
+   RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", 
+   "]"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   "V_DirectSum", "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "/@", 
+    "V"}], "]"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{"V_DirectSum", "\[CircleTimes]", "W_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{"Distribute", "[", 
+     RowBox[{
+      RowBox[{"V", "\[CircleTimes]", "W"}], ",", "DirectSum"}], "]"}], "]"}], 
+   "]"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{"V_", "\[CircleTimes]", "W_DirectSum"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{"Distribute", "[", 
+     RowBox[{
+      RowBox[{"V", "\[CircleTimes]", "W"}], ",", "DirectSum"}], "]"}], "]"}], 
+   "]"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{"U_", "\[CircleTimes]", "V_"}], ")"}], "\[CircleTimes]", "W__"}],
+    "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+      RowBox[{"U", "\[CircleTimes]", "V"}], "]"}], "\[CircleTimes]", "W"}], 
+    "]"}], "]"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{"U_", "\[CircleTimes]", 
+    RowBox[{"(", 
+     RowBox[{"V_", "\[CircleTimes]", "W__"}], ")"}]}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{"U", "\[CircleTimes]", 
+     RowBox[{
+      RowBox[{"DecomposeRepresentation", "[", "\[CapitalGamma]", "]"}], "[", 
+      RowBox[{"V", "\[CircleTimes]", "W"}], "]"}]}], "]"}], "]"}]}]], "Input",
+ InitializationCell->True]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Weights and weight multiplicities for repesentations", "Subsubsection",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"HighestWeight", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", 
+     "]"}]}], "]"}], ":=", "\[Lambda]"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]_", ",", "V_"}], "]"}], "/;", 
+   RowBox[{"MinisculeRepresentationQ", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}]}], ":=", 
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"#", ",", "1"}], "}"}], "&"}], "/@", 
+    RowBox[{
+     RowBox[{"SortWeights", "[", "\[CapitalGamma]", "]"}], "[", 
+     RowBox[{"WeylOrbit", "[", 
+      RowBox[{"\[CapitalGamma]", ",", 
+       RowBox[{"HighestWeight", "[", 
+        RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}]}], "]"}], 
+     "]"}]}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]_", ",", 
+     RowBox[{
+      RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Mu]_", "]"}]}],
+     "]"}], "/;", 
+   RowBox[{"ZeroVectorQ", "[", "\[Mu]", "]"}]}], ":=", 
+  RowBox[{"{", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"ZeroVector", "[", 
+      RowBox[{"Rank", "[", "\[CapitalGamma]", "]"}], "]"}], ",", "1"}], "}"}],
+    "}"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"TensorWeightMultiplicities", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"\[Lambda]_", ",", "a_"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\[Mu]_", ",", "b_"}], "}"}]}], "]"}], ":=", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"\[Lambda]", "+", "\[Mu]"}], ",", 
+    RowBox[{"a", " ", "b"}]}], "}"}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"CombineWeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "l_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"#", "\[LeftDoubleBracket]", 
+       RowBox[{"1", ",", "1"}], "\[RightDoubleBracket]"}], ",", 
+      RowBox[{"Plus", "@@", 
+       RowBox[{"(", 
+        RowBox[{"Last", "/@", "#"}], ")"}]}]}], "}"}], "&"}], "/@", 
+   RowBox[{"Split", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"SortWeightMultiplicities", "[", "\[CapitalGamma]", "]"}], "[", 
+      "l", "]"}], ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"#1", "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}], 
+       "\[Equal]", 
+       RowBox[{"#2", "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}]}],
+       "&"}]}], "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", 
+    RowBox[{"CircleTimes", "[", 
+     RowBox[{"V_", ",", "W_"}], "]"}]}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", 
+     RowBox[{"V", "\[CircleTimes]", "W"}]}], "]"}], "=", 
+   RowBox[{"CombineWeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", 
+     RowBox[{"Flatten", "[", 
+      RowBox[{
+       RowBox[{"Outer", "[", 
+        RowBox[{"TensorWeightMultiplicities", ",", 
+         RowBox[{"WeightMultiplicities", "[", 
+          RowBox[{"\[CapitalGamma]", ",", "W"}], "]"}], ",", 
+         RowBox[{"WeightMultiplicities", "[", 
+          RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], ",", "1"}], "]"}], 
+       ",", "1"}], "]"}]}], "]"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.6306351045114927`*^9, 3.630635109868891*^9}, {
+  3.6306977609232483`*^9, 3.6306977660756207`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicities", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_DirectSum"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"WeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "=", 
+   RowBox[{"CombineWeightMultiplicities", "[", 
+    RowBox[{"\[CapitalGamma]", ",", 
+     RowBox[{"Join", "@@", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"WeightMultiplicities", "[", 
+          RowBox[{"\[CapitalGamma]", ",", "#"}], "]"}], "&"}], "/@", 
+        RowBox[{"(", 
+         RowBox[{"List", "@@", "V"}], ")"}]}], ")"}]}]}], "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"WeightMultiplicity", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_DirectSum", ",", "\[Lambda]_"}], "]"}],
+   ":=", 
+  RowBox[{"Plus", "@@", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"WeightMultiplicity", "[", 
+       RowBox[{"\[CapitalGamma]", ",", "#", ",", "\[Lambda]"}], "]"}], "&"}], 
+     "/@", 
+     RowBox[{"(", 
+      RowBox[{"List", "@@", "V"}], ")"}]}], ")"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"PositiveWeights", "[", 
+   RowBox[{"\[CapitalGamma]_", ",", "V_"}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{"PositiveWeights", "[", 
+    RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "=", 
+   RowBox[{"Select", "[", 
+    RowBox[{
+     RowBox[{"Weights", "[", 
+      RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], ",", 
+     RowBox[{"PositiveWeightQ", "[", "\[CapitalGamma]", "]"}]}], 
+    "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"qWeylDimension", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{
+    RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", "]"}],
+    "]"}], ":=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"qWeylDimension", "[", "\[CapitalGamma]", "]"}], "[", 
+    RowBox[{
+     RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", "]"}], 
+    "]"}], "=", 
+   RowBox[{"Expand", "[", 
+    RowBox[{"Together", "[", 
+     RowBox[{"Product", "[", 
+      RowBox[{
+       FractionBox[
+        RowBox[{
+         RowBox[{"qInteger", "[", 
+          RowBox[{
+           RowBox[{"KillingForm", "[", "\[CapitalGamma]", "]"}], "[", 
+           RowBox[{"\[Alpha]", ",", 
+            RowBox[{"\[Lambda]", "+", 
+             RowBox[{"\[Rho]", "[", "\[CapitalGamma]", "]"}]}]}], "]"}], 
+          "]"}], "[", "q", "]"}], 
+        RowBox[{
+         RowBox[{"qInteger", "[", 
+          RowBox[{
+           RowBox[{"KillingForm", "[", "\[CapitalGamma]", "]"}], "[", 
+           RowBox[{"\[Alpha]", ",", 
+            RowBox[{"\[Rho]", "[", "\[CapitalGamma]", "]"}]}], "]"}], "]"}], 
+         "[", "q", "]"}]], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Alpha]", ",", 
+         RowBox[{"PositiveRoots", "[", "\[CapitalGamma]", "]"}]}], "}"}]}], 
+      "]"}], "]"}], "]"}]}]}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"qDimension", "[", "\[CapitalGamma]_", "]"}], "[", "V_DirectSum", 
+   "]"}], ":=", 
+  RowBox[{"Plus", "@@", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"qDimension", "[", "\[CapitalGamma]", "]"}], "/@", 
+     RowBox[{"(", 
+      RowBox[{"List", "@@", "V"}], ")"}]}], ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"qDimension", "[", "\[CapitalGamma]_", "]"}], "[", 
+   "V_TensorProduct", "]"}], ":=", 
+  RowBox[{"Times", "@@", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"qDimension", "[", "\[CapitalGamma]", "]"}], "/@", 
+     RowBox[{"(", 
+      RowBox[{"List", "@@", "V"}], ")"}]}], ")"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"qDimension", "[", "\[CapitalGamma]_", "]"}], "[", 
+   RowBox[{
+    RowBox[{"Irrep", "[", "\[CapitalGamma]_", "]"}], "[", "\[Lambda]_", "]"}],
+    "]"}], ":=", 
+  RowBox[{
+   RowBox[{"qWeylDimension", "[", "\[CapitalGamma]", "]"}], "[", 
+   RowBox[{
+    RowBox[{"Irrep", "[", "\[CapitalGamma]", "]"}], "[", "\[Lambda]", "]"}], 
+   "]"}]}]}], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.652741279339999*^9, 3.652741337818116*^9}}],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"qDimension", "[", "\[CapitalGamma]_", "]"}], "[", "V_", "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"qDimension", "[", "\[CapitalGamma]", "]"}], "[", "V", "]"}], 
+    "=", 
+    RowBox[{"With", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"\[Rho]", "=", 
+        RowBox[{"Table", "[", 
+         RowBox[{"1", ",", 
+          RowBox[{"{", 
+           RowBox[{"Rank", "[", "\[CapitalGamma]", "]"}], "}"}]}], "]"}]}], 
+       "}"}], ",", 
+      RowBox[{"Plus", "@@", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"WeightMultiplicities", "[", 
+          RowBox[{"\[CapitalGamma]", ",", "V"}], "]"}], "/.", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"\[Lambda]_", ",", "n_Integer"}], "}"}], "\[RuleDelayed]", 
+          RowBox[{"n", " ", 
+           SuperscriptBox["q", 
+            RowBox[{
+             RowBox[{"KillingForm", "[", "\[CapitalGamma]", "]"}], "[", 
+             RowBox[{
+              RowBox[{"2", "\[Rho]"}], ",", "\[Lambda]"}], "]"}]]}]}]}], 
+        ")"}]}]}], "]"}]}]}], "*)"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.421630292048482*^9, 3.4216303028640337`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"End", "[", "]"}], ";"}]], "Input",
+ InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"EndPackage", "[", "]"}], ";"}]], "Input",
+ InitializationCell->True]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+AutoGeneratedPackage->Automatic,
+WindowSize->{1388, 843},
+WindowMargins->{{Automatic, 203}, {Automatic, 63}},
+FrontEndVersion->"10.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (September 9, \
+2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 70, 1, 51, "Subtitle",
+ InitializationCell->True],
+Cell[640, 25, 128, 4, 49, "Text",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[793, 33, 58, 1, 64, "Section",
+ InitializationCell->True],
+Cell[854, 36, 344, 6, 49, "Text",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1235, 47, 60, 1, 64, "Section",
+ InitializationCell->True],
+Cell[1298, 50, 659, 15, 46, "Input",
+ InitializationCell->True],
+Cell[1960, 67, 152, 5, 28, "Input",
+ InitializationCell->True],
+Cell[2115, 74, 150, 5, 28, "Input",
+ InitializationCell->True],
+Cell[2268, 81, 155, 5, 28, "Input",
+ InitializationCell->True],
+Cell[2426, 88, 136, 4, 28, "Input",
+ InitializationCell->True],
+Cell[2565, 94, 146, 5, 28, "Input",
+ InitializationCell->True],
+Cell[2714, 101, 147, 5, 28, "Input",
+ InitializationCell->True],
+Cell[2864, 108, 139, 4, 28, "Input",
+ InitializationCell->True],
+Cell[3006, 114, 469, 9, 63, "Input",
+ InitializationCell->True],
+Cell[3478, 125, 132, 3, 28, "Input",
+ InitializationCell->True],
+Cell[3613, 130, 119, 3, 28, "Input",
+ InitializationCell->True],
+Cell[3735, 135, 853, 22, 63, "Input",
+ InitializationCell->True],
+Cell[4591, 159, 101, 3, 28, "Input",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[4717, 166, 134, 3, 35, "Subsubsection",
+ InitializationCell->True],
+Cell[4854, 171, 350, 10, 28, "Input",
+ InitializationCell->True],
+Cell[5207, 183, 408, 9, 28, "Input",
+ InitializationCell->True],
+Cell[5618, 194, 100, 1, 30, "Text",
+ InitializationCell->True],
+Cell[5721, 197, 661, 18, 28, "Input",
+ InitializationCell->True],
+Cell[6385, 217, 705, 16, 28, "Input"],
+Cell[7093, 235, 917, 25, 80, "Input"],
+Cell[8013, 262, 1075, 32, 46, "Input",
+ InitializationCell->True],
+Cell[9091, 296, 999, 25, 28, "Input"],
+Cell[10093, 323, 366, 10, 28, "Input",
+ InitializationCell->True],
+Cell[10462, 335, 654, 17, 28, "Input",
+ InitializationCell->True],
+Cell[11119, 354, 582, 17, 43, "Input",
+ InitializationCell->True],
+Cell[11704, 373, 349, 10, 28, "Input",
+ InitializationCell->True],
+Cell[12056, 385, 362, 10, 28, "Input",
+ InitializationCell->True],
+Cell[12421, 397, 512, 13, 28, "Input",
+ InitializationCell->True],
+Cell[12936, 412, 512, 13, 28, "Input",
+ InitializationCell->True],
+Cell[13451, 427, 638, 17, 28, "Input",
+ InitializationCell->True],
+Cell[14092, 446, 629, 15, 28, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14758, 466, 104, 1, 35, "Subsubsection",
+ InitializationCell->True],
+Cell[14865, 469, 259, 7, 28, "Input",
+ InitializationCell->True],
+Cell[15127, 478, 748, 21, 28, "Input",
+ InitializationCell->True],
+Cell[15878, 501, 489, 15, 28, "Input",
+ InitializationCell->True],
+Cell[16370, 518, 381, 12, 28, "Input",
+ InitializationCell->True],
+Cell[16754, 532, 837, 24, 28, "Input",
+ InitializationCell->True],
+Cell[17594, 558, 976, 23, 63, "Input",
+ InitializationCell->True],
+Cell[18573, 583, 649, 17, 28, "Input",
+ InitializationCell->True],
+Cell[19225, 602, 463, 14, 28, "Input",
+ InitializationCell->True],
+Cell[19691, 618, 465, 13, 28, "Input",
+ InitializationCell->True],
+Cell[20159, 633, 1348, 37, 51, "Input",
+ InitializationCell->True],
+Cell[21510, 672, 1163, 33, 63, "Input",
+ InitializationCell->True],
+Cell[22676, 707, 1209, 34, 35, "Input",
+ InitializationCell->True],
+Cell[23888, 743, 96, 3, 28, "Input",
+ InitializationCell->True],
+Cell[23987, 748, 103, 3, 28, "Input",
+ InitializationCell->True]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
