@@ -1,6 +1,6 @@
 # SST ideal links — QM-readiness campaign v0.3.0
 
-- Links completed: **6**
+- Links completed: **18**
 - Preset: **qm_quick**
 - Backend: **cpp**
 - Input SHA-256: `a7481f263d8f152723277d0301372d86cc664c211ea5a50f01d6ac49b7d335de`
@@ -17,8 +17,14 @@ This campaign does not claim a derivation of quantum mechanics. It asks whether 
 | L4a1      | --           |                 1 | topological-sector-ready       |                     0.167737 |                1.74696  |                        0 | diagonal-central |                12 |                     12 |                       0 |
 | L6a4      | ---          |                 1 | topological-sector-ready       |                     0.192715 |                1.59484  |                        0 | diagonal-central |                18 |                     18 |                       0 |
 | L6n1      | -+-          |                 1 | topological-sector-ready       |                     0.194203 |                1.09945  |                        0 | diagonal-central |                18 |                     18 |                       0 |
+| L6a5      | -+-          |                 1 | topological-sector-ready       |                     0.22454  |                1.61754  |                        0 | diagonal-central |                18 |                     18 |                       0 |
 | L5a1      | -+           |                 1 | topological-sector-ready       |                     0.237057 |               10.989    |                        0 | diagonal-central |                12 |                     12 |                       0 |
+| L7a7      | --+          |                 1 | topological-sector-ready       |                     0.240808 |                6.78574  |                        0 | diagonal-central |                18 |                     18 |                       0 |
 | L7n1      | --           |                 1 | topological-sector-ready       |                     0.24413  |                1.92716  |                        0 | diagonal-central |                12 |                     12 |                       0 |
+| L7a1      | --           |                 1 | topological-sector-ready       |                     0.258838 |               13.1197   |                        0 | diagonal-central |                12 |                     12 |                       0 |
+| L7a6      | --           |                 1 | topological-sector-ready       |                     0.261239 |               15.2986   |                        0 | diagonal-central |                12 |                     12 |                       0 |
+| L7a5      | -+           |                 1 | topological-sector-ready       |                     0.279152 |               11.0401   |                        0 | diagonal-central |                12 |                     12 |                       0 |
+| L7a3      | --           |                 1 | topological-sector-ready       |                     0.292506 |                8.81346  |                        0 | diagonal-central |                12 |                     12 |                       0 |
 
 ## Pairwise-linking insufficiency flags
 

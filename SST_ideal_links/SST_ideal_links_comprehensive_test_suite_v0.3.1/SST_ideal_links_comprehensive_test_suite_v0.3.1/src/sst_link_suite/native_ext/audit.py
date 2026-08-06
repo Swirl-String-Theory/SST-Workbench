@@ -38,8 +38,17 @@ def run_native_parity_audit(
         build_verbose=options.build_verbose,
     )
     native, _ = resolve_backend(native_options)
+
+    status_options = BackendOptions(
+        require_native=True,
+        force_python=False,
+        skip_build=True,
+        force_build=False,
+        build_verbose=options.build_verbose,
+    )
+
     report = {
-        "backend_status": backend_status(native_options),
+        "backend_status": backend_status(status_options),
         "abs_tolerance": abs_tolerance,
         "relative_tolerance": relative_tolerance,
         "velocity": [],

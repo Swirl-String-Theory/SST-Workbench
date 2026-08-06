@@ -33,6 +33,10 @@ def _import_native(force_build: bool, skip_build: bool, build_verbose: bool) -> 
     _LAST_NATIVE_ERROR = None
     try:
         if not skip_build:
+            module_name = f"{_config.PACKAGE_NAME}.{_config.EXT_BASENAME}"
+
+            if module_name in sys.modules:
+                return sys.modules[module_name]
             built = build_if_needed(force=force_build, verbose=build_verbose)
             if not built:
                 raise RuntimeError(
