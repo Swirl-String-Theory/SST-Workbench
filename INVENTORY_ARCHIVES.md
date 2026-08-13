@@ -1,13 +1,14 @@
 # SST-Workbench — archive inventory (bundles)
 
-Companion to [INVENTORY.md](INVENTORY.md). Updated **2026-08-05** after zip
-centralization.
+Companion to [INVENTORY.md](INVENTORY.md). Updated **2026-08-12** after root-zip
+theme sort (`IdealLinks/`, `KelvinFloquet/`, Restore root cleared).
 
 ## Central home: `Restore_Archives/`
 
-**Samenvatting:** 368 zip-pakketten (~1,3 GB) met SST-onderzoekssnapshots (Fermat, BEM,
-chi-phase, coil, falsifiers, Route-I, routes, trefoil, …), VortexRing Lab, KnotPlot-data
-en CANON-patches; working trees blijven in de research packs, ~60 zips nog in `Misc/`.
+**Samenvatting:** 420 zip-pakketten (~1,4 GB) met SST-onderzoekssnapshots (Fermat, BEM,
+chi-phase, coil, falsifiers, Route-I, routes, trefoil, ideal-links, …), VortexRing Lab,
+KnotPlot-data en CANON-patches; working trees blijven in de research packs, ~66 zips
+nog in `Misc/`.
 
 All Workbench `.zip` files now live under theme folders in
 [`Restore_Archives/`](Restore_Archives/). Research packs keep **extracted working
@@ -15,16 +16,18 @@ trees only**. Per-thema 1–3 zinnen: [`Restore_Archives/README.md`](Restore_Arc
 § *Per thema*.
 
 Consolidation tool: [`scripts/consolidate_archives.py`](scripts/consolidate_archives.py)
-(manifest: `Restore_Archives/_MANIFEST.csv`).
+(manifest: `Restore_Archives/_MANIFEST.csv`). Phases: Sources_Zips → repo strays →
+`Restore_Archives/` root → Misc reclassify.
 
 `.gitignore` excludes `*.zip` — local-only, not in git.
 
-| Measure (2026-08-05) | Value |
+| Measure (2026-08-12) | Value |
 |----------------------|------:|
-| Zips under `Restore_Archives/` | **368** |
-| Total size | **~1259 MB** |
-| Last consolidate ops | 289 theme moves from Downloads dump + 88 repo moves + 56 duplicate deletes + 2 renames |
+| Zips under `Restore_Archives/` | **420** |
+| Total size | **~1403 MB** |
+| Last consolidate ops | 23 repo + 38 root (30 move / 8 dup delete) + 5 Misc→IdealLinks |
 | Stray zips outside `Restore_Archives/` | **0** |
+| Zips in `Restore_Archives/` root | **0** |
 
 A **bundle** = theme zip under `Restore_Archives/<theme>/` plus the version-notated
 extracted folder elsewhere (e.g. `SST_fermat_pybind_research/…_v0.6.1/`).
@@ -33,34 +36,37 @@ extracted folder elsewhere (e.g. `SST_fermat_pybind_research/…_v0.6.1/`).
 
 | Theme | Zips |
 |-------|-----:|
+| Misc | 66 |
 | VortexLab | 43 |
 | ChiPhase | 34 |
+| DeriveConstants | 29 |
 | RouteB_BEM | 27 |
 | Fermat | 26 |
 | Coil | 22 |
-| DeriveConstants | 20 |
+| IdealLinks | 21 |
 | Canon | 19 |
-| KnotPlot | 17 |
+| KnotPlot | 18 |
+| Falsifiers | 16 |
 | Trefoil | 14 |
 | Route_I | 12 |
 | Routes_v0819 | 11 |
-| Falsifiers | 10 |
 | FS_Attachment | 10 |
-| Dimensionless | 9 |
+| Dimensionless | 10 |
 | Datasets | 8 |
+| Hopf | 7 |
 | Bridge | 6 |
 | TripleGear | 6 |
-| ProofScripts | 3 |
-| Horn_SSDL | 3 |
 | SST21D | 3 |
+| Horn_SSDL | 3 |
+| ProofScripts | 3 |
 | ContactBilliard | 2 |
-| Hopf | 2 |
-| Templates | 1 |
-| Misc | 60 |
+| KelvinFloquet | 2 |
+| Templates | 2 |
 
 Content-differing basename collisions kept as:
 `sst_chi_phase_package__from_repo.zip`,
-`sst_chi_phase_package_v6__from_repo.zip`.
+`sst_chi_phase_package_v6__from_repo.zip`,
+`SST_cpp_pybind_audit_template__from_repo.zip`.
 
 ---
 

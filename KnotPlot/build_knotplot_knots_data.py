@@ -13,7 +13,8 @@ Canonical IDs are folder names: knot_3.1, torus_6.9, link_0.2.1.
 Legacy Tlink_* catalog IDs are dropped (use torus_p.q).
 
 Status comes from catalog_status.json when present
-(relaxed-seed | near-ideal-candidate | near-ideal).
+(relaxed-seed | stalled-not-converged | near-ideal-candidate |
+ converged-local-candidate | near-ideal).
 """
 
 from __future__ import annotations
@@ -465,7 +466,12 @@ def build_entry(
             "strict_near_ideal": catalog_status.get("strict_near_ideal"),
             "epsilon_R": catalog_status.get("epsilon_R"),
             "reference": catalog_status.get("reference"),
+            "campaign_reference": catalog_status.get("campaign_reference"),
             "checks": catalog_status.get("checks"),
+            "chirality": catalog_status.get("chirality"),
+            "catalog_aliases": catalog_status.get("catalog_aliases"),
+            "dowker_code": catalog_status.get("dowker_code"),
+            "equivalent_group": catalog_status.get("equivalent_group"),
         }
 
     d_value = name_metadata.get("D")
@@ -581,14 +587,14 @@ def collect_inputs(positional: list[Path], scan: Path | None, glob_pattern: str)
 
 
 def resolve_rr_outdir_inputs(outdir: Path) -> tuple[Path, dict | None, str | None]:
-    """Return (uniform_N300.txt, catalog_status, polish_audit_path)."""
+    """Return (uniform TXT, catalog_status, polish_audit_path)."""
     outdir = outdir.resolve()
-    uniforms = sorted(outdir.glob("*_polish_uniform_N300.txt"))
+    uniforms = sorted(outdir.glob("*_polish_uniform_N*.txt"))
     if not uniforms:
-        uniforms = sorted(outdir.glob("*_uniform_N300.txt"))
+        uniforms = sorted(outdir.glob("*_uniform_N*.txt"))
     if not uniforms:
         raise FileNotFoundError(
-            f"{outdir}: no *_polish_uniform_N300.txt (run three-stage + resample first)"
+            f"{outdir}: no *_polish_uniform_N*.txt (run three-stage + resample first)"
         )
     # Prefer uniform matching seed_selection / newest polish
     status = None
@@ -597,14 +603,18 @@ def resolve_rr_outdir_inputs(outdir: Path) -> tuple[Path, dict | None, str | Non
         status = json.loads(status_path.read_text(encoding="utf-8"))
     primary = None
     if status and status.get("primary_polish"):
-        polish_stem = Path(status["primary_polish"]).stem
+        pp = Path(status["primary_polish"]).name
+        if pp.endswith(".metrics.json"):
+            polish_base = pp[: -len(".metrics.json")]
+        elif pp.endswith(".txt"):
+            polish_base = pp[: -len(".txt")]
+        else:
+            polish_base = Path(status["primary_polish"]).stem.replace(".metrics", "")
+        # Match any uniform sibling of this polish stem
         for u in uniforms:
-            if polish_stem in u.stem or polish_stem.replace(".metrics", "") in u.name:
-                primary = u
-                break
-            # polish stem without .metrics
-            base = polish_stem.replace(".metrics.json", "").replace(".metrics", "")
-            if base and base in u.stem:
+            if u.name.startswith(polish_base + "_uniform_N") or (
+                polish_base and polish_base in u.stem
+            ):
                 primary = u
                 break
     if primary is None:
@@ -623,12 +633,19 @@ def resolve_rr_outdir_inputs(outdir: Path) -> tuple[Path, dict | None, str | Non
         primary = uniforms[-1]
 
     polish_audit = None
-    # Sibling polish without uniform
-    cand = Path(str(primary).replace("_uniform_N300", "").replace(".txt", ".txt"))
-    # primary is ..._polish_uniform_N300.txt → ..._polish.txt
-    audit = Path(str(primary).replace("_uniform_N300.txt", ".txt"))
-    if audit.is_file():
-        polish_audit = str(audit)
+    # Sibling polish without uniform: ..._polish_uniform_N300.txt → ..._polish.txt
+    name = primary.name
+    marker = "_uniform_N"
+    if marker in name:
+        polish_name = name[: name.index(marker)] + ".txt"
+        audit = primary.with_name(polish_name)
+        if audit.is_file():
+            polish_audit = str(audit)
+    # Prefer explicit final snapshot as audit pointer when present
+    if status and status.get("final_snapshot"):
+        fin = Path(status["final_snapshot"])
+        if fin.is_file():
+            polish_audit = str(fin)
     return primary, status, polish_audit
 
 
@@ -679,7 +696,7 @@ def main() -> int:
     parser.add_argument(
         "--status",
         default=None,
-        help="override status (relaxed-seed|near-ideal-candidate|near-ideal)",
+        help="override status (relaxed-seed|stalled-not-converged|near-ideal-candidate|converged-local-candidate|near-ideal)",
     )
     parser.add_argument(
         "--catalog-status-json",

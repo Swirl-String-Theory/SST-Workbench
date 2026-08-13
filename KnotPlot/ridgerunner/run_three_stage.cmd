@@ -157,7 +157,8 @@ if "%SHORT%"=="1" (
   set "A3=%SEED_DIR%%SEED_STEM%_rr_!EFFORT_COARSE_TAG!_coarse_rr_!EFFORT_EQ_TAG!_eqfinal_rr_!EFFORT_POLISH_TAG!_polish.txt"
   set "A3MET=%SEED_DIR%%SEED_STEM%_rr_!EFFORT_COARSE_TAG!_coarse_rr_!EFFORT_EQ_TAG!_eqfinal_rr_!EFFORT_POLISH_TAG!_polish.metrics.json"
   set "P300="
-  set "R4=%SEED_DIR%%SEED_STEM%_rr_!EFFORT_COARSE_TAG!_coarse_rr_!EFFORT_EQ_TAG!_eqfinal_rr_!EFFORT_POLISH_TAG!_polish_uniform_N300.txt"
+  rem R4 filled after polish exists (N300 or preserve Ni for multi-comp)
+  set "R4="
   set "LBL1=coarse"
   set "LBL2=eqfinal"
   set "LBL3=polish"
@@ -289,9 +290,18 @@ if defined P300 (
 )
 
 echo.
-if not defined FORCE if exist "%R4%" (
+if "%SHORT%"=="1" (
+  rem short seed keeps fixed uNNN path
+) else (
+  for /f "usebackq delims=" %%P in (`python -c "from pathlib import Path; import sys; sys.path.insert(0, r'%ROOT%'); from resample_closed_knot_txt import vortexlab_uniform_path; print(vortexlab_uniform_path(Path(r'!A3!')))"`) do set "R4=%%P"
+  if not defined R4 (
+    echo ERROR: could not resolve VortexLab uniform path for "!A3!"
+    exit /b 1
+  )
+)
+if not defined FORCE if exist "!R4!" (
   echo [4/4] VortexLab uniform resample: skip ^(exists^)
-  echo   %R4%
+  echo   !R4!
   goto after_uniform
 )
 if not exist "%RESAMPLE%" (
@@ -302,21 +312,21 @@ if "%SHORT%"=="1" (
   echo [4/4] VortexLab uniform resample: N=%SN% per component
   python "%RESAMPLE%" "%A3%" --points %SN% --output "%R4%"
 ) else (
-  echo [4/4] VortexLab uniform resample: N=300 per component
-  python "%RESAMPLE%" "%A3%" --points 300
+  echo [4/4] VortexLab uniform resample: default ^(N=300 or preserve Ni^)
+  python "%RESAMPLE%" "!A3!" --output "!R4!"
 )
 if errorlevel 1 (
   echo ERROR: uniform resample failed
   exit /b 1
 )
 
-if not exist "%R4%" (
-  echo ERROR: uniform output missing: "%R4%"
+if not exist "!R4!" (
+  echo ERROR: uniform output missing: "!R4!"
   exit /b 1
 )
 
 if exist "%TO_VECT%" (
-  python "%TO_VECT%" "%R4%" --overwrite
+  python "%TO_VECT%" "!R4!" --overwrite
   if errorlevel 1 (
     echo WARNING: VECT conversion failed for uniform TXT
   )
@@ -331,7 +341,7 @@ echo   Ridgerunner polish ^(audit^): %A3%
 if "%SHORT%"=="1" (
   echo   VortexLab uniform N=%SN%:     %R4%
 ) else (
-  echo   VortexLab uniform N=300:     %R4%
+  echo   VortexLab uniform:            !R4!
 )
 echo Do not re-run Ridgerunner on the uniform file.
 exit /b 0

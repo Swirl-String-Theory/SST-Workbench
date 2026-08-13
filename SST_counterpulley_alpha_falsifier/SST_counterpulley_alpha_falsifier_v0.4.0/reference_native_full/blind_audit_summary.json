@@ -1,0 +1,256 @@
+{
+  "audit_name": "SST counter-pulley RPO + true Floquet falsifier v0.4.0",
+  "protocol": "ALPHA_CLOSED_DURING_H0_H14",
+  "quick": false,
+  "verdict": "NO_ALPHA_BLIND_RPO_FOUND_IN_PREREGISTERED_WINDOW__TRUE_FLOQUET_GATE_CLOSED",
+  "ready_for_alpha_unblinding": false,
+  "canonical_n": 48,
+  "canonical_candidate": {
+    "n": 48,
+    "D": 1.0,
+    "offset_over_D": 0.5,
+    "eps_over_D": 0.05,
+    "channel_phase_rad": 0.0,
+    "gamma_plus": 1.0,
+    "gamma_minus": -1.0,
+    "backend": "cpp",
+    "period_hat": 0.21,
+    "dt_hat": 0.003,
+    "step": 70,
+    "shift": 0,
+    "recurrence_rms_over_D": 0.7019663968394085,
+    "plus_rms_over_D": 0.646946473590137,
+    "minus_rms_over_D": 0.7529766961152848,
+    "endpoint_vectorfield_error": 1.2224030728259843,
+    "pair_min_distance_over_D": 0.21962503696635985,
+    "segment_max_over_min": 4.374068186217829,
+    "rotation": [
+      [
+        0.9998436491092421,
+        0.017662674908032912,
+        0.0008409821696062317
+      ],
+      [
+        -0.017662847192019836,
+        0.9998439801661009,
+        0.00019787542058611707
+      ],
+      [
+        -0.0008373559504817378,
+        -0.00021269862214049948,
+        0.9999996267970843
+      ]
+    ],
+    "translation_over_D": [
+      0.00048141153010084354,
+      -0.0001175802835451914,
+      0.12796269224671342
+    ],
+    "accepted": false
+  },
+  "best_seed": {
+    "n": 32,
+    "D": 1.0,
+    "offset_over_D": 0.3,
+    "eps_over_D": 0.1,
+    "channel_phase_rad": 1.5707963267948966,
+    "gamma_plus": 1.0,
+    "gamma_minus": -1.0,
+    "backend": "cpp",
+    "period_hat": 0.2,
+    "dt_hat": 0.004,
+    "step": 50,
+    "shift": 0,
+    "recurrence_rms_over_D": 0.4090414924140721,
+    "plus_rms_over_D": 0.4643107216390321,
+    "minus_rms_over_D": 0.34502962018311434,
+    "endpoint_vectorfield_error": 0.5595702740726372,
+    "pair_min_distance_over_D": 0.32171378387429383,
+    "segment_max_over_min": 9.919549881028198,
+    "accepted": false
+  },
+  "gates": [
+    {
+      "name": "H0_alpha_blindness",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "files": [
+          "orbit.py",
+          "monodromy.py",
+          "blind_gates.py"
+        ],
+        "violations": []
+      },
+      "criterion": "orbit/monodromy/gates contain no alpha benchmark literal",
+      "note": ""
+    },
+    {
+      "name": "H1_native_python_rhs_parity",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "backend": "cpp",
+        "relative_error": 3.6933111954512e-16
+      },
+      "criterion": "relative RHS error <2e-11",
+      "note": ""
+    },
+    {
+      "name": "H2_time_integrator_convergence",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "dt_hat": [
+          0.002,
+          0.001,
+          0.0005
+        ],
+        "coarse_vs_fine": 1.867673071149214e-06,
+        "medium_vs_fine": 1.0643676581461036e-07,
+        "error_ratio": 17.547255000234536
+      },
+      "criterion": "RK4 medium/fine mismatch <1e-3 D and coarse/fine-to-medium/fine error ratio >10",
+      "note": ""
+    },
+    {
+      "name": "H3_relative_SE3_quotient",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "rms_over_D": 4.7499704361259795e-16,
+        "det_rotation": 0.9999999999999999
+      },
+      "criterion": "known rigid transform removed to <5e-12 D",
+      "note": ""
+    },
+    {
+      "name": "H4_scale_collapse",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "scale": 2.731,
+        "shape_error_over_D": 7.227116372781862e-13
+      },
+      "criterion": "dimensionless orbit invariant under X,D -> lambda(X,D)",
+      "note": ""
+    },
+    {
+      "name": "H5_recurrence_search_wellposed",
+      "status": "PASS",
+      "pass": true,
+      "metrics": {
+        "period_hat": 0.21,
+        "recurrence_rms_over_D": 0.7019663968394085,
+        "shift": 0,
+        "pair_min_distance_over_D": 0.21962503696635985,
+        "segment_max_over_min": 4.374068186217829
+      },
+      "criterion": "finite nonzero recurrence minimum exists",
+      "note": "trajectory termination: cross_channel_core_overlap at tau=1.59"
+    },
+    {
+      "name": "H6_canonical_RPO_closure",
+      "status": "FAIL",
+      "pass": false,
+      "metrics": {
+        "recurrence_rms_over_D": 0.7019663968394085,
+        "period_hat": 0.21
+      },
+      "criterion": "best relative recurrence <0.035 D",
+      "note": ""
+    },
+    {
+      "name": "H7_RPO_tangent_compatibility",
+      "status": "FAIL",
+      "pass": false,
+      "metrics": {
+        "endpoint_vectorfield_error": 1.2224030728259843
+      },
+      "criterion": "relative vector-field mismatch <0.08",
+      "note": ""
+    },
+    {
+      "name": "H8_blind_RPO_seed_search",
+      "status": "FAIL",
+      "pass": false,
+      "metrics": {
+        "best": {
+          "n": 32,
+          "D": 1.0,
+          "offset_over_D": 0.3,
+          "eps_over_D": 0.1,
+          "channel_phase_rad": 1.5707963267948966,
+          "gamma_plus": 1.0,
+          "gamma_minus": -1.0,
+          "backend": "cpp",
+          "period_hat": 0.2,
+          "dt_hat": 0.004,
+          "step": 50,
+          "shift": 0,
+          "recurrence_rms_over_D": 0.4090414924140721,
+          "plus_rms_over_D": 0.4643107216390321,
+          "minus_rms_over_D": 0.34502962018311434,
+          "endpoint_vectorfield_error": 0.5595702740726372,
+          "pair_min_distance_over_D": 0.32171378387429383,
+          "segment_max_over_min": 9.919549881028198,
+          "accepted": false
+        },
+        "seed_count": 36
+      },
+      "criterion": "some predeclared alpha-blind seed closes to <0.05 D with compatible endpoint field",
+      "note": ""
+    },
+    {
+      "name": "H9_true_relative_monodromy_constructed",
+      "status": "SKIP",
+      "pass": null,
+      "metrics": {},
+      "criterion": "construct full D(g^-1 o phi_T) only on an accepted RPO",
+      "note": "Skipped because the orbit gate is closed."
+    },
+    {
+      "name": "H10_time_tangent_neutral_multiplier",
+      "status": "SKIP",
+      "pass": null,
+      "metrics": {},
+      "criterion": "||M f-f||/||f|| <0.08",
+      "note": "Skipped because no scientifically eligible RPO/monodromy exists."
+    },
+    {
+      "name": "H11_monodromy_fd_convergence",
+      "status": "SKIP",
+      "pass": null,
+      "metrics": {},
+      "criterion": "true multiplier/phase stable under FD refinement",
+      "note": "Skipped because no scientifically eligible RPO/monodromy exists."
+    },
+    {
+      "name": "H12_real_monodromy_conjugate_pairing",
+      "status": "SKIP",
+      "pass": null,
+      "metrics": {},
+      "criterion": "real M spectrum closes under complex conjugation",
+      "note": "Skipped because no scientifically eligible RPO/monodromy exists."
+    },
+    {
+      "name": "H13_true_Floquet_phase_defined",
+      "status": "SKIP",
+      "pass": null,
+      "metrics": {},
+      "criterion": "pre-registered Kelvin readout from true M is finite and low-leakage",
+      "note": "Skipped because no scientifically eligible RPO/monodromy exists."
+    },
+    {
+      "name": "H14_ready_for_alpha_unblinding",
+      "status": "FAIL",
+      "pass": false,
+      "metrics": {
+        "ready": false
+      },
+      "criterion": "H0-H13 required gates pass; no skipped Floquet gate",
+      "note": ""
+    }
+  ],
+  "true_monodromy": null
+}

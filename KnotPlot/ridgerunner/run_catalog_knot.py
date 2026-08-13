@@ -259,6 +259,26 @@ def run_rr_pipeline(
         print(f"outdir: {outdir}")
         status = "ok"
         exit_code = 0
+        # Additive final snapshot (does not change RR outputs)
+        try:
+            from write_final_snapshot import (
+                campaign_root_from_path,
+                try_write_final_snapshot,
+            )
+
+            max_n = max(resolutions)
+            final_polish = outdir / f"n{max_n}p.txt"
+            if not final_polish.is_file():
+                final_polish = paths_base["polish"]
+            try_write_final_snapshot(
+                final_polish,
+                stem=label,
+                tag=f"N{max_n}",
+                dest=campaign_root_from_path(outdir),
+                extra_alias={"source": "run_catalog_knot", "label": label},
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"WARNING: final snapshot failed: {exc}", flush=True)
         return exit_code
     except KeyboardInterrupt:
         status = "interrupted"

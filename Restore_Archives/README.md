@@ -2,9 +2,10 @@
 
 ## Samenvatting
 
-`Restore_Archives/` bevat **368** zip-pakketten (~1,3 GB): snapshots van SST-onderzoek
-(Fermat, Route-B BEM, chi-phase, coil, falsifiers, Route-I, Planck-routes, trefoil, enz.),
-plus VortexRing Lab-releases, KnotPlot/ridgerunner-data en SST_CANON-patches.
+`Restore_Archives/` bevat **420** zip-pakketten (~1,4 GB): snapshots van SST-onderzoek
+(Fermat, Route-B BEM, chi-phase, coil, falsifiers, Route-I, Planck-routes, trefoil,
+ideal-links, enz.), plus VortexRing Lab-releases, KnotPlot/ridgerunner-data en
+SST_CANON-patches.
 De zips zijn de enige lokale archiefkopieën (git negeert `*.zip`); uitgepakte working
 trees blijven in de research packs. Ongeveer zestig bestanden zitten nog in `Misc/` en
 wachten op fijnere indeling.
@@ -32,6 +33,8 @@ Restore_Archives/
   ContactBilliard/
   Route_I/
   Routes_v0819/
+  IdealLinks/
+  KelvinFloquet/
   Trefoil/
   Hopf/
   Horn_SSDL/
@@ -47,7 +50,7 @@ Restore_Archives/
   Misc/
 ```
 
-Counts (2026-08-05 after consolidation): **368** zips, **~1259 MB**.
+Counts (2026-08-12 after root-zip sort): **420** zips, **~1403 MB**.
 
 ## Per thema (1–3 zinnen)
 
@@ -72,17 +75,19 @@ Uitgepakte code leeft in `SST_Coil_*_research/` en `GUI/coils/`.
 VortexRing Lab release-train (v4, v7.5.x, v7.6.x), modular M1-extract en sessie-/benchmark-results.
 Browser-simulator snapshots; actieve HTML staat onder `GUI/vortexring-lab/`.
 
-### `DeriveConstants/` (20 zips, ~57 MB)
+### `DeriveConstants/` (29 zips, ~69 MB)
 Finite-cell / gate-packages: Derive_Constants manuscripts+code, pressure/GP/phase-budget gates en batch-runs.
-Hoort bij `SST_derive_constants_research/code/`.
+Ook Independent FiniteCore SpectralSelector-versies (v0.1.x).
+Hoort bij `SST_derive_constants_research/code/` en `Independent_FiniteCore_SpectralSelector/`.
 
-### `Falsifiers/` (10 zips, ~1 MB)
-Minimale α⁻¹-falsification harness (v0.1–v0.3 Gilbert/calibration) en dark-knot Rayleigh harness-versies.
+### `Falsifiers/` (16 zips, ~3 MB)
+Minimale α⁻¹-falsification harness (v0.1–v0.3 Gilbert/calibration), dark-knot Rayleigh,
+counterpulley-α en preferred-frame binary falsifiers.
 Kleine bronzips; Sutcliffe zit hier of onder Falsifiers-gerelateerde packs.
 
-### `Dimensionless/` (9 zips, ~28 MB)
+### `Dimensionless/` (10 zips, ~29 MB)
 Dimensionless dynamic predictions v0.1–v0.4 (background vortex, axial bundle, C9 iso-Γ/A clock) plus outputs.
-Campagnes en Windows batch-wrappers.
+Inclusief `sst_relclock_checks`; campagnes en Windows batch-wrappers.
 
 ### `ContactBilliard/` (2 zips, ~6 MB)
 Contact-billiard hydrodynamic falsifier v0.1.0 en v0.2.0 (H0–H8 gates, research matrix).
@@ -96,12 +101,20 @@ Alleen v0.0.4 is uitgepakt; nieuwste scripts (o.a. v0.1.0 resolved-knot action) 
 Planck Routes A–D evidence/equivalence/v3-preregistered packs, Route-A falsification, nonfit harness en torsion-impedance pybind.
 Gedeeld met `SST_v0_8_19_routes_research/`.
 
+### `IdealLinks/` (21 zips, ~45 MB)
+Comprehensive ideal-links test suite (v0.1–v0.4-alpha) plus continuum-ladder runners en CMD/reporting patches.
+Spiegel van `SST_ideal_links/`; oudere packs uit Misc zijn hierheen verplaatst.
+
+### `KelvinFloquet/` (2 zips, ~0.3 MB)
+Kelvin–Floquet Workbench cpp/pybind packages v0.1.0–v0.1.1.
+Nieuwe thema-map voor Floquet/Kelvin research-archives.
+
 ### `Trefoil/` (14 zips, ~96 MB)
 Ideal-trefoil Biot–Savart packages, robustness sweep outputs, trefoil_closure-bundle en gerelateerde patches.
 Grote resultaat-archieven naast `SST_Trefoil_Closure/` / `SST_ideal_trefoil_biot_research/`.
 
-### `Hopf/` (2 zips, ~0.1 MB)
-Hopf-benchmark packet v0.1 en bijbehorende Python-scripts (H0–H10 gates).
+### `Hopf/` (7 zips, ~0.6 MB)
+Hopf-benchmark packet v0.1 plus SST_Hopf cpp/pybind-lijn v0.1.0–v0.1.4.
 Spiegel van `SST_Hopf_Benchmark/`.
 
 ### `Horn_SSDL/` (3 zips, ~0.1 MB)
@@ -144,9 +157,9 @@ Starter voor native research extensions.
 SST_CANON release-/patch-bundles (v0.8.x), NotebookLM slide packs, prompt/system zips en Whisper ASR-patches.
 Canon-materiaal dat naast SwirlStringTheory-papers werd bewaard.
 
-### `Misc/` (60 zips, ~312 MB)
-Restcategorie: losse outputs (`batch_runs`, campaign timestamps), images, ideal-links testruns en nog niet scherp geclassificeerde bundles.
-Kandidaat voor latere herverdeling naar de thema’s hierboven.
+### `Misc/` (66 zips, ~394 MB)
+Restcategorie: losse outputs (`batch_runs`, campaign timestamps), images en nog niet scherp geclassificeerde bundles.
+Ideal-links packs zijn naar `IdealLinks/` verplaatst; kandidaat voor verdere herverdeling.
 
 ### `Python/` (geen zips)
 Losse `.py`-dumps uit Downloads; nog niet per thema gesorteerd.
@@ -157,6 +170,8 @@ Losse `.py`-dumps uit Downloads; nog niet per thema gesorteerd.
 1. Downloads dump was placed in `Sources_Zips/` (now emptied and removed).
 2. [`scripts/consolidate_archives.py`](../scripts/consolidate_archives.py) moved those
    zips into theme folders, then moved every remaining Workbench `*.zip` here.
+   Later runs also sort zips left in the `Restore_Archives/` root and reclassify
+   matching files out of `Misc/` (e.g. IdealLinks).
 3. **Collision rule**
    - Same basename + same size + same SHA256 → delete the duplicate (keep one).
    - Same basename, different content → keep both; repo copy named
@@ -178,8 +193,10 @@ python scripts/consolidate_archives.py --apply
 | Chi-phase / chiE | `ChiPhase/` |
 | Coil DigitalTwin / CoilLab / rodin GUIs | `Coil/` |
 | VortexRing Lab release train | `VortexLab/` |
-| Derive_Constants gate packages | `DeriveConstants/` |
-| Minimal / Sutcliffe / dark-knot falsifiers | `Falsifiers/` |
+| Derive_Constants / FiniteCore SpectralSelector | `DeriveConstants/` |
+| Minimal / Sutcliffe / dark-knot / counterpulley falsifiers | `Falsifiers/` |
+| Ideal-links comprehensive test suite | `IdealLinks/` |
+| Kelvin–Floquet cpp/pybind workbench | `KelvinFloquet/` |
 | Route-I relative entropy (incl. unextracted v0.1.0) | `Route_I/` |
 | KnotPlot / ridgerunner / fseries data | `KnotPlot/` |
 | SST_CANON / NotebookLM patches | `Canon/` |

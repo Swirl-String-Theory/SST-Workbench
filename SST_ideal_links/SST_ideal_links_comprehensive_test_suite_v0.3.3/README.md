@@ -65,10 +65,7 @@ A new campaign evaluates the same source geometry at several sampling resolution
 or directly:
 
 ```powershell
-python scripts\run_continuum.py `
-  --config configs\qm_full.json `
-  --ids L2a1 L4a1 L6a4 L6n1 L7n2 `
-  --require-native --skip-native-build
+python scripts\run_continuum.py --config configs\qm_full.json --ids L2a1 L4a1 L6a4 L6n1 L7n2 --require-native --skip-native-build
 ```
 
 The full preset uses
@@ -116,11 +113,12 @@ the sampled curves.  `higher_linking_invariant_computed` therefore remains false
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\pip install  -r requirements.txt
+.\.venv\Scripts\Activate.cmd
 python -m pip install -e ".[test]"
 python run_native_preflight.py --force
 python run_native_audit.py --build-verbose
-.\run_continuum.ps1 -Preset full
+.\run_continuum.cmd --Preset full
 python scripts\run_qm.py --preset full --ids L2a1 L4a1 L6a4 L6n1 L7n2 --require-native --skip-native-build
 ```
 

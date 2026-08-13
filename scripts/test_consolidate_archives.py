@@ -34,6 +34,57 @@ def test_classify_key_themes():
     assert m.classify("totally_unknown_blob.zip")[0] == "Misc"
 
 
+def test_classify_root_zip_themes():
+    m = _load()
+    assert m.classify("Independent_FiniteCore_SpectralSelector_v0.1.2.4.zip")[0] == (
+        "DeriveConstants"
+    )
+    assert m.classify("SST_ideal_links_comprehensive_test_suite_v0.3.6.zip")[0] == (
+        "IdealLinks"
+    )
+    assert m.classify("SST_v0.3.4_to_v0.3.4.1_CMD_runners_patch.zip")[0] == "IdealLinks"
+    assert m.classify("SST_v0.3.3_continuum_ladder_runner.zip")[0] == "IdealLinks"
+    assert m.classify("SST_Kelvin_Floquet_Workbench_cpp_pybind_v0.1.1.zip")[0] == (
+        "KelvinFloquet"
+    )
+    assert m.classify("sst_relclock_checks.zip")[0] == "Dimensionless"
+    assert m.classify("SST_counterpulley_alpha_falsifier_v0.5.0.zip")[0] == "Falsifiers"
+    assert m.classify("SST_Hopf_cpp_pybind_v0.1.4.zip")[0] == "Hopf"
+    assert m.classify("Ideal_Links_Comprehensive_Test_first-120_outputs_full.zip")[0] == (
+        "IdealLinks"
+    )
+
+
+def test_iter_restore_root_zips(tmp_path, monkeypatch):
+    m = _load()
+    restore = tmp_path / "Restore_Archives"
+    restore.mkdir()
+    (restore / "Fermat").mkdir()
+    root_zip = restore / "SST_ideal_links_comprehensive_test_suite_v0.3.0.zip"
+    nested = restore / "Fermat" / "nested.zip"
+    root_zip.write_bytes(b"a")
+    nested.write_bytes(b"b")
+    monkeypatch.setattr(m, "RESTORE", restore)
+    found = m.iter_restore_root_zips()
+    assert found == [root_zip]
+
+
+def test_plan_misc_reclassify_ideal_links(tmp_path, monkeypatch):
+    m = _load()
+    restore = tmp_path / "Restore_Archives"
+    misc = restore / "Misc"
+    misc.mkdir(parents=True)
+    src = misc / "SST_ideal_links_comprehensive_test_suite_v0.1.0.zip"
+    src.write_bytes(b"ideal")
+    monkeypatch.setattr(m, "RESTORE", restore)
+    monkeypatch.setattr(m, "SOURCES_ZIPS", restore / "Sources_Zips")
+    plans = m.plan_misc_reclassify()
+    assert len(plans) == 1
+    assert plans[0].theme == "IdealLinks"
+    assert plans[0].action == "move"
+    assert plans[0].dest == restore / "IdealLinks" / src.name
+
+
 def test_classify_fermat_series():
     m = _load()
     theme, series = m.classify("SST_fermat_pybind_research_v0.6.1.zip")

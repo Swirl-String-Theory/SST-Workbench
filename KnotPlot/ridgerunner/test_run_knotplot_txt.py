@@ -15,9 +15,12 @@ from run_ideal_knot import print_campaign_summary
 from run_knotplot_txt import (
     format_duration,
     format_progress_bar,
+    is_residual_converged,
     last_progress_from_text,
+    parse_stop_reason,
     print_stage_summary,
     run_ridgerunner_live,
+    stop_residual_from_args,
 )
 
 
@@ -145,6 +148,53 @@ class TestInterruptTerminatesChild(unittest.TestCase):
         self.assertEqual(rc, 130)
         self.assertIn("Rop:", out)
         self.assertGreaterEqual(elapsed, 0.0)
+
+
+class TestParseStopReason(unittest.TestCase):
+    def test_stop20(self) -> None:
+        text = (
+            "ridgerunner: change in rop over last 20 iterations "
+            "-0.200045 < stop20 = 0.01.\n"
+        )
+        self.assertEqual(parse_stop_reason(text), "stop20")
+
+    def test_residual(self) -> None:
+        text = "ridgerunner: residual 0.00485359 < residualThreshold 0.005\n"
+        self.assertEqual(parse_stop_reason(text), "residual")
+
+    def test_last_match_wins(self) -> None:
+        text = (
+            "ridgerunner: residual 0.1 < residualThreshold 0.05\n"
+            "ridgerunner: change in rop over last 20 iterations 0.001 < stop20 = 0.01.\n"
+        )
+        self.assertEqual(parse_stop_reason(text), "stop20")
+
+    def test_max_steps(self) -> None:
+        text = "ridgerunner: reached maximum number of steps (5000).\n"
+        self.assertEqual(parse_stop_reason(text), "max_steps")
+
+    def test_stop_residual_from_args(self) -> None:
+        self.assertEqual(
+            stop_residual_from_args(["-c", "--StopResidual=0.005", "-s", "100"]),
+            0.005,
+        )
+
+    def test_residual_converged(self) -> None:
+        self.assertTrue(
+            is_residual_converged(
+                residual=0.004, stop_reason="stop20", stop_residual=0.005
+            )
+        )
+        self.assertTrue(
+            is_residual_converged(
+                residual=0.02, stop_reason="residual", stop_residual=0.005
+            )
+        )
+        self.assertFalse(
+            is_residual_converged(
+                residual=1.0, stop_reason="stop20", stop_residual=0.05
+            )
+        )
 
 
 if __name__ == "__main__":

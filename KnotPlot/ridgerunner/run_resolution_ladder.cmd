@@ -380,7 +380,7 @@ if %N% GEQ 1200 if not exist "%EQ_IN%" (
 )
 echo [N=%N% 2/3] eqfinal -c --EqForceOn -s 50000 --StopResidual=0.005 --label e
 echo   input: %EQ_IN%
-call "%RR%" -c --EqForceOn -s 50000 --StopResidual=0.005 --Stop20=0.000001 --label e !VERBOSE! !THREADS! "%EQ_IN%"
+call "%RR%" -c --EqForceOn -s 50000 --StopResidual=0.005 --label e !VERBOSE! !THREADS! "%EQ_IN%"
 set "RR_ERR=!errorlevel!"
 if not "!RR_ERR!"=="0" (
   echo [N=%N% 2/3] eqfinal failed — trying -a recovery from dump.vect
@@ -414,7 +414,7 @@ if not defined FORCE if exist "%C3%" (
   goto after_polish
 )
 echo [N=%N% 3/3] polish -c --EqOn -s 30000 --StopResidual=0.005 --label p
-call "%RR%" -c --EqOn -s 30000 --StopResidual=0.005 --Stop20=0.0000001 --label p !VERBOSE! !THREADS! "%C2%"
+call "%RR%" -c --EqOn -s 30000 --StopResidual=0.005 --label p !VERBOSE! !THREADS! "%C2%"
 set "RR_ERR=!errorlevel!"
 if not "!RR_ERR!"=="0" (
   echo [N=%N% 3/3] polish failed — trying -a recovery from dump.vect

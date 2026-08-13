@@ -32,6 +32,10 @@ EDGE_RATIO_MAX = 1.05
 LENGTH_REL_MAX = 5.0e-3
 MINRAD_RATIO_MIN = 0.90
 ROP_REL_MAX = 1.0e-3
+GLOBAL_DS_RATIO_WARN = 1.02
+GLOBAL_DS_RATIO_MAX = 1.05
+CENTERLINE_DRIFT_WARN = 0.001  # fraction of diameter D
+CENTERLINE_DRIFT_MAX = 0.005  # 0.5% D
 SPLINE_DENSE_FACTOR = 32  # dense polyline samples per input edge before reparam
 
 _RR_DIR = Path(__file__).resolve().parent / "ridgerunner"
@@ -118,6 +122,86 @@ def edge_stats(comp: list[Point]) -> dict[str, float | None]:
         "edge_ratio": (mx / mn) if mn > 0 else None,
         "edge_cv": (std / mean) if abs(mean) > 1e-30 else None,
     }
+
+
+def mean_edge_length(comp: list[Point]) -> float | None:
+    st = edge_stats(comp)
+    mean = st.get("edge_mean")
+    return float(mean) if mean is not None else None
+
+
+def global_ds_ratio(comps: list[list[Point]]) -> float | None:
+    """max(mean Δs_i) / min(mean Δs_i) across components."""
+    means = [mean_edge_length(c) for c in comps]
+    vals = [m for m in means if m is not None and m > 0]
+    if len(vals) < 1:
+        return None
+    if len(vals) == 1:
+        return 1.0
+    return max(vals) / min(vals)
+
+
+def _point_to_segment_dist(p: Point, a: Point, b: Point) -> float:
+    ax, ay, az = a
+    bx, by, bz = b
+    px, py, pz = p
+    ab = (bx - ax, by - ay, bz - az)
+    ap = (px - ax, py - ay, pz - az)
+    ab2 = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2
+    if ab2 <= 1e-30:
+        return _dist(p, a)
+    t = (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / ab2
+    t = max(0.0, min(1.0, t))
+    q = (ax + t * ab[0], ay + t * ab[1], az + t * ab[2])
+    return _dist(p, q)
+
+
+def point_to_polyline_dist(p: Point, poly: list[Point]) -> float:
+    n = len(poly)
+    if n == 0:
+        return float("inf")
+    if n == 1:
+        return _dist(p, poly[0])
+    best = float("inf")
+    for i in range(n):
+        d = _point_to_segment_dist(p, poly[i], poly[(i + 1) % n])
+        if d < best:
+            best = d
+    return best
+
+
+def centerline_hausdorff(a: list[Point], b: list[Point]) -> float:
+    """Symmetric vertex→polyline Hausdorff distance."""
+    if not a or not b:
+        return float("inf")
+    d_ab = max(point_to_polyline_dist(p, b) for p in a)
+    d_ba = max(point_to_polyline_dist(p, a) for p in b)
+    return max(d_ab, d_ba)
+
+
+def centerline_drift_over_d(
+    comps_in: list[list[Point]],
+    comps_out: list[list[Point]],
+    *,
+    diameter: float | None,
+) -> float | None:
+    """Max component Hausdorff / D. D defaults to length-proxy diameter if None."""
+    if diameter is None or diameter <= 0:
+        # Fallback: use max extent of input as crude diameter.
+        pts = [p for c in comps_in for p in c]
+        if len(pts) < 2:
+            return None
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        zs = [p[2] for p in pts]
+        extent = max(max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs))
+        diameter = extent if extent > 0 else None
+    if diameter is None or diameter <= 0:
+        return None
+    drifts = []
+    for cin, cout in zip(comps_in, comps_out):
+        drifts.append(centerline_hausdorff(cin, cout) / diameter)
+    return max(drifts) if drifts else None
 
 
 def polygonal_minrad(comp: list[Point]) -> float | None:
@@ -644,6 +728,9 @@ def resolve_counts(
     ncomp: int,
     points: int | None,
     points_per_component: list[int] | None,
+    *,
+    preserve_counts: bool = False,
+    input_counts: list[int] | None = None,
 ) -> list[int]:
     if points_per_component is not None:
         if len(points_per_component) != ncomp:
@@ -654,7 +741,20 @@ def resolve_counts(
         if any(p < 3 for p in points_per_component):
             raise ValueError("each component needs at least 3 points")
         return points_per_component
+    if preserve_counts:
+        if input_counts is None or len(input_counts) != ncomp:
+            raise ValueError("preserve_counts requires input_counts per component")
+        if any(p < 3 for p in input_counts):
+            raise ValueError("each component needs at least 3 points")
+        return list(input_counts)
     if points is None:
+        # VortexLab default: single-comp → 300; multi-comp → preserve Ni.
+        if ncomp > 1:
+            if input_counts is None or len(input_counts) != ncomp:
+                raise ValueError(
+                    "multi-component default preserve requires input vertex counts"
+                )
+            return list(input_counts)
         points = 300
     if points < 3:
         raise ValueError("--points must be at least 3")
@@ -668,6 +768,25 @@ def output_stem(src: Path, counts: list[int]) -> str:
         return f"{src.stem}_uniform_N{tag}"
     joined = "-".join(str(c) for c in counts)
     return f"{src.stem}_uniform_N{joined}"
+
+
+def vortexlab_counts_for_components(comps: list[list[Point]]) -> list[int]:
+    """Default VortexLab counts: 300 (1-comp) or preserve Ni (multi-comp)."""
+    return resolve_counts(
+        len(comps),
+        points=None,
+        points_per_component=None,
+        preserve_counts=False,
+        input_counts=[len(c) for c in comps],
+    )
+
+
+def vortexlab_uniform_path(polish: Path) -> Path:
+    """Predicted uniform TXT path next to polish for default VortexLab policy."""
+    polish = Path(polish)
+    comps = parse_xyz_txt(polish)
+    counts = vortexlab_counts_for_components(comps)
+    return polish.with_name(f"{output_stem(polish, counts)}.txt")
 
 
 def evaluate_gates(
@@ -745,14 +864,10 @@ def evaluate_gates(
         comps_in, comps_out, include_minrad=True
     )
     # Also record MinRad-only Rop (matches RR when MinRad binds).
-    mr_in = min(
-        (polygonal_minrad(c) for c in comps_in if polygonal_minrad(c) is not None),
-        default=None,
-    )
-    mr_out = min(
-        (polygonal_minrad(c) for c in comps_out if polygonal_minrad(c) is not None),
-        default=None,
-    )
+    mr_vals_in = [polygonal_minrad(c) for c in comps_in]
+    mr_vals_out = [polygonal_minrad(c) for c in comps_out]
+    mr_in = min((m for m in mr_vals_in if m is not None), default=None)
+    mr_out = min((m for m in mr_vals_out if m is not None), default=None)
     rop_mr_in = (src_total / mr_in) if mr_in and mr_in > 0 else None
     rop_mr_out = (out_total / mr_out) if mr_out and mr_out > 0 else None
     delta_rop_mr = (
@@ -760,21 +875,18 @@ def evaluate_gates(
         if rop_mr_in and rop_mr_out and rop_mr_in > 0
         else None
     )
-    # Gate on MinRad-rop when available (RR thickness on tight knots); else proxy.
-    # spline_repair intentionally restores MinRad, so MinRad-Rop can move slightly
-    # even when the geometric thickness proxy is preserved — gate on proxy then.
+    # Primary Rop gate uses thickness-proxy only. MinRad-Rop is diagnostic:
+    # small vertex shifts can swing MinRad hard while the centerline barely moves.
     all_repair = bool(methods) and all(m == "spline_repair" for m in methods)
-    if all_repair and delta_r is not None:
-        gate_delta = delta_r
-        rop_gate = "proxy_spline_repair"
-    elif delta_rop_mr is not None:
-        gate_delta = delta_rop_mr
-        rop_gate = "minrad"
-    else:
-        gate_delta = delta_r
-        rop_gate = "proxy"
+    gate_delta = delta_r
+    rop_gate = "proxy_spline_repair" if all_repair else "proxy"
     r_in = pin.get("length_over_diameter_proxy")
     r_out = pout.get("length_over_diameter_proxy")
+    d_proxy = pin.get("D_proxy") or pout.get("D_proxy")
+    ds_ratio = global_ds_ratio(comps_out)
+    drift = centerline_drift_over_d(
+        comps_in, comps_out, diameter=float(d_proxy) if d_proxy else None
+    )
     rop_meta = {
         "D_proxy_in": pin.get("D_proxy"),
         "D_proxy_out": pout.get("D_proxy"),
@@ -786,7 +898,28 @@ def evaluate_gates(
         "rop_minrad_in": rop_mr_in,
         "rop_minrad_out": rop_mr_out,
         "rop_gate": rop_gate,
+        "global_ds_ratio": ds_ratio,
+        "centerline_drift_over_D": drift,
     }
+    if delta_rop_mr is not None and abs(delta_rop_mr) >= 0.001:
+        warnings.append(
+            f"MinRad-Rop change {delta_rop_mr:.6%} (diagnostic only; not a fail gate)"
+        )
+    if ds_ratio is not None and ds_ratio > GLOBAL_DS_RATIO_WARN:
+        warnings.append(
+            f"global_ds_ratio={ds_ratio:.6g} > {GLOBAL_DS_RATIO_WARN} "
+            f"(prefer <= {GLOBAL_DS_RATIO_WARN})"
+        )
+    if ds_ratio is not None and ds_ratio > GLOBAL_DS_RATIO_MAX:
+        msg = f"global_ds_ratio={ds_ratio:.6g} > {GLOBAL_DS_RATIO_MAX}"
+        (errors if strict else warnings).append(msg)
+    if drift is not None and drift > CENTERLINE_DRIFT_WARN:
+        warnings.append(
+            f"centerline drift {drift:.6%}D (prefer <= {CENTERLINE_DRIFT_WARN:.2%}D)"
+        )
+    if drift is not None and drift > CENTERLINE_DRIFT_MAX:
+        msg = f"centerline drift {drift:.6%}D > {CENTERLINE_DRIFT_MAX:.2%}D"
+        (errors if strict else warnings).append(msg)
     if gate_delta is None:
         msg = "Rop unavailable (cannot enforce ropelength-preservation gate)"
         if strict and upsampled:
@@ -798,8 +931,7 @@ def evaluate_gates(
             warnings.append(
                 f"Rop change {gate_delta:.6%} (prefer |d| < {ROP_REL_MAX:.1%})"
             )
-        # One-sided strict gate: reject collapse (Rop up), allow thickening
-        # from denser sampling / MinRad restore (Rop down).
+        # One-sided strict gate on proxy Rop only: reject collapse (Rop up).
         if gate_delta >= ROP_REL_MAX:
             msg = f"Rop change {gate_delta:.6%} >= {ROP_REL_MAX:.3%} (collapse)"
             if strict and upsampled:
@@ -817,13 +949,20 @@ def main(argv: list[str] | None = None) -> int:
         "--points",
         type=int,
         default=None,
-        help="vertices per component (default 300 if neither count option set)",
+        help=(
+            "vertices per component (default: 300 for 1-comp, preserve Ni for multi-comp)"
+        ),
     )
     ap.add_argument(
         "--points-per-component",
         type=str,
         default=None,
         help="comma-separated counts, e.g. 300,300",
+    )
+    ap.add_argument(
+        "--preserve-counts",
+        action="store_true",
+        help="keep input vertex count per component (uniformize arc-length only)",
     )
     ap.add_argument(
         "--output",
@@ -858,7 +997,14 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         comps = parse_xyz_txt(src)
-        counts = resolve_counts(len(comps), args.points, ppc)
+        in_counts = [len(c) for c in comps]
+        counts = resolve_counts(
+            len(comps),
+            args.points,
+            ppc,
+            preserve_counts=bool(args.preserve_counts),
+            input_counts=in_counts,
+        )
     except (ValueError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -919,6 +1065,8 @@ def main(argv: list[str] | None = None) -> int:
         "relative_rop_proxy_change": rop_meta.get("relative_rop_proxy_change"),
         "relative_rop_minrad_change": rop_meta.get("relative_rop_minrad_change"),
         "rop_gate": rop_meta.get("rop_gate"),
+        "global_ds_ratio": rop_meta.get("global_ds_ratio"),
+        "centerline_drift_over_D": rop_meta.get("centerline_drift_over_D"),
         "components": per_comp,
         "validation_warnings": warnings,
         "validation_errors": errors,
@@ -927,14 +1075,14 @@ def main(argv: list[str] | None = None) -> int:
             "length_rel_max": LENGTH_REL_MAX,
             "minrad_ratio_min": MINRAD_RATIO_MIN,
             "rop_rel_max": ROP_REL_MAX,
-            "rop_gate_mode": "collapse_only",
+            "global_ds_ratio_max": GLOBAL_DS_RATIO_MAX,
+            "centerline_drift_max": CENTERLINE_DRIFT_MAX,
+            "rop_gate_mode": "proxy_collapse_only",
         },
         "notes": (
-            "Ladder upsample uses spline_repair (cubic spline + MinRad restore). "
-            "Strict Rop gate is one-sided: error only if Rop increases "
-            f"(>= {ROP_REL_MAX:.1%}, collapse); negative dR (apparent thickening) "
-            "warns only. Metric: thickness proxy for spline_repair, else "
-            "MinRad-Rop. Bare spline / subdivide sidecars are treated as stale."
+            "Default: N=300 for 1-comp; preserve Ni for multi-comp. "
+            "MinRad-Rop is diagnostic only. Primary gates: length, proxy-Rop "
+            "collapse, edge ratio/CV, global_ds_ratio, centerline drift/D."
         ),
     }
 

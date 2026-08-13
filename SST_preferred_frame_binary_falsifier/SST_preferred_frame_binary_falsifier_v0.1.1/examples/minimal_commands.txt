@@ -1,0 +1,16 @@
+python -m sst_pf_binary_falsifier.build_ext_if_needed --force --strict
+python run_example.py
+python run_all_checks.py --out-dir audit_out
+python run_drift_scan.py --out-dir audit_out/drift
+python run_pf_gate.py
+python run_j1738_gate.py
+python run_dipole_gate.py --objects examples/objects_universal.json
+python run_linear_euler_gate.py
+python run_energy_balance.py --csv examples/energy_balance_example.csv
+python -m pytest -q
+python run_fit_drift_data.py --csv examples/drift_external_example.csv
+
+# Gilbert ideal database support (v0.1.1)
+python run_ideal_database.py --knot-ids 3:1:1 --link-ids L2a1,L4a1
+python run_drift_scan.py --ideal-knot-id 3:1:1 --ideal-samples 96 --steps 2 --out-dir audit_out/drift_3_1_1
+python run_drift_scan.py --ideal-link-id L2a1 --ideal-samples 64 --steps 1 --out-dir audit_out/drift_L2a1

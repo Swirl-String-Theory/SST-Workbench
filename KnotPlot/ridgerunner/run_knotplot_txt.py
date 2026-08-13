@@ -225,6 +225,82 @@ def format_checkpoint_tag(steps: int | None) -> str:
     return f"s{steps}"
 
 
+_STOP_REASON_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "stop20",
+        re.compile(
+            r"change in rop over last 20 iterations\s+\S+\s*<\s*stop20",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "residual",
+        re.compile(
+            r"residual\s+\S+\s*<\s*residualThreshold",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "max_steps",
+        re.compile(
+            r"reached maximum number of steps",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "stop_time",
+        re.compile(
+            r"elapsed time\s+\S+\s*>\s*stopTime",
+            re.IGNORECASE,
+        ),
+    ),
+)
+
+
+def parse_stop_reason(text: str) -> str | None:
+    """Parse ridgerunner stop-reason log lines (last matching wins)."""
+    if not text:
+        return None
+    found: str | None = None
+    for line in text.splitlines():
+        for reason, pat in _STOP_REASON_PATTERNS:
+            if pat.search(line):
+                found = reason
+                break
+    return found
+
+
+def stop_residual_from_args(rr_args: list[str]) -> float | None:
+    """Extract --StopResidual=… from ridgerunner argv."""
+    for arg in rr_args:
+        if arg.startswith("--StopResidual="):
+            try:
+                return float(arg.split("=", 1)[1])
+            except ValueError:
+                return None
+        if arg == "--StopResidual":
+            continue
+    for i, arg in enumerate(rr_args):
+        if arg == "--StopResidual" and i + 1 < len(rr_args):
+            try:
+                return float(rr_args[i + 1])
+            except ValueError:
+                return None
+    return None
+
+
+def is_residual_converged(
+    *,
+    residual: float | None,
+    stop_reason: str | None,
+    stop_residual: float | None,
+) -> bool:
+    """True when RR hit the residual gate (not Stop20 / max-steps alone)."""
+    if residual is not None and stop_residual is not None and residual <= stop_residual:
+        return True
+    return stop_reason == "residual"
+
+
 def parse_stop_steps(rr_args: list[str]) -> int | None:
     """Extract -s N / --StopSteps N / --StopSteps=N from forwarded args."""
     i = 0
@@ -824,6 +900,19 @@ def build_metrics(
 
     edges = edge_length_stats(out_components)
 
+    log_text = ""
+    if log_path.is_file():
+        log_text = log_path.read_text(encoding="utf-8", errors="replace")
+    stop_src = "\n".join(t for t in (stdout_text, log_text) if t)
+    stop_reason = parse_stop_reason(stop_src)
+    residual_val = last_logfile_value(logfiles / "residual.dat")
+    stop_residual = stop_residual_from_args(rr_args)
+    residual_converged = is_residual_converged(
+        residual=residual_val,
+        stop_reason=stop_reason,
+        stop_residual=stop_residual,
+    )
+
     metrics: dict[str, object] = {
         "source_txt": str(source_txt),
         "checkpoint_tag": checkpoint_tag,
@@ -833,7 +922,7 @@ def build_metrics(
         "length": last_logfile_value(logfiles / "length.dat"),
         "thickness": last_logfile_value(logfiles / "thickness.dat"),
         "ropelength": last_logfile_value(logfiles / "ropelength.dat"),
-        "residual": last_logfile_value(logfiles / "residual.dat"),
+        "residual": residual_val,
         "strutcount": strutcount,
         "edge_length_variance": last_logfile_value(logfiles / "edgelenvariance.dat"),
         "edge_length_min": edges["edge_length_min"],
@@ -848,6 +937,8 @@ def build_metrics(
         "final_vect": str(final_vect),
         "output_txt": str(out_txt),
         "rr_dir": str(rr_dir),
+        "stop_reason": stop_reason,
+        "residual_converged": residual_converged,
     }
     return metrics
 

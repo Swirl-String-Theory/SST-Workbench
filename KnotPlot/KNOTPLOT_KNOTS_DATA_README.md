@@ -19,6 +19,15 @@ That:
 4. Resamples → `*_polish_uniform_N300.txt` (+ VECT) for VortexLab
 5. Writes `catalog_status.json`
 6. Upserts the uniform file into `knotplot_knots_data.js`
+7. Writes a unique `build_*_final_*.txt` snapshot of the best polish, then
+   **re-upserts** the JS from a fresh uniform of **that** polish so the catalog
+   matches the snapshotted geometry
+
+**Quality:** JS geometry is arc-length uniform N=300 of the final/polish curve
+(`sourceRole: vortexlab-uniform-N300`). Resampling does **not** re-optimize;
+shape/ropelength stay those of the polish (tiny discrete differences only).
+`polishAudit` / final snapshot paths point at the Ridgerunner audit TXT.
+Do **not** put raw uneven polish XYZ into `.js` as the primary mesh.
 
 Canonical catalog IDs are folder names: `knot_3.1`, `torus_6.9`, `link_0.2.1`.
 There is **no** `Tlink_6_9` entry (legacy mistake; use `torus_6.9`).
@@ -31,6 +40,23 @@ run_build.cmd knot_3.1 -rr --certify
 
 Adds multi-start + independent N=600 / N=1200 ladders from the N=300 polish.
 
+## Sync JS from best final polish
+
+After polish exists (no RR re-run):
+
+```bat
+cd ridgerunner
+run_finalize_knotplot.cmd
+rem skip JS: run_finalize_knotplot.cmd --no-catalog-upsert
+
+rem Or one folder:
+upsert_polish_to_catalog.cmd --from-outdir ..\knots\knot_3.1
+```
+
+That resamples the chosen polish → `*_polish_uniform_N300.txt`, classifies,
+prefers that polish in `catalog_status.json`, and upserts `knotplot_knots_data.js`
+(KnotPlot `knots/` only).
+
 ## Manual upsert after an existing `-rr` folder
 
 ```bat
@@ -38,6 +64,7 @@ python ridgerunner\classify_catalog_status.py knots\knot_3.1
 python build_knotplot_knots_data.py --from-rr-outdir knots\knot_3.1 --output knotplot_knots_data.js --force
 ```
 
+Prefer the final-polish path above so the uniform matches the snapshotted best.
 ## Status levels
 
 | Status | Meaning |

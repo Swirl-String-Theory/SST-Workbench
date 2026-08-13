@@ -70,8 +70,9 @@ EFFORT_PRESETS: dict[str, EffortPreset] = {
         coarse_residual=0.10,
         eq_residual=0.05,
         polish_residual=0.05,
-        eq_stop20=0.01,
-        polish_stop20=0.01,
+        # No Stop20: residual gate alone decides scientific convergence.
+        eq_stop20=None,
+        polish_stop20=None,
         resolution_ladder_ns=(),
     ),
     "normal": EffortPreset(
@@ -83,8 +84,8 @@ EFFORT_PRESETS: dict[str, EffortPreset] = {
         coarse_residual=0.05,
         eq_residual=0.005,
         polish_residual=0.005,
-        eq_stop20=0.000001,
-        polish_stop20=0.0000001,
+        eq_stop20=None,
+        polish_stop20=None,
         resolution_ladder_ns=(),
     ),
     "extra": EffortPreset(
@@ -96,8 +97,8 @@ EFFORT_PRESETS: dict[str, EffortPreset] = {
         coarse_residual=0.05,
         eq_residual=0.005,
         polish_residual=0.005,
-        eq_stop20=0.000001,
-        polish_stop20=0.0000001,
+        eq_stop20=None,
+        polish_stop20=None,
         resolution_ladder_ns=(600,),
     ),
 }

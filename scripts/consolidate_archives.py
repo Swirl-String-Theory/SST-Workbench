@@ -32,7 +32,13 @@ SKIP_DIR_NAMES = {".git", ".venv", "node_modules", "__pycache__", ".tmp.driveupl
 THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
     ("Fermat", None, re.compile(r"fermat", re.I)),
     ("ContactBilliard", None, re.compile(r"contact_billiard|billiard_hydro", re.I)),
-    ("Dimensionless", None, re.compile(r"dimensionless", re.I)),
+    ("Dimensionless", None, re.compile(r"dimensionless|relclock", re.I)),
+    ("IdealLinks", None, re.compile(
+        r"ideal_links|Ideal_Links|continuum_ladder|"
+        r"CMD_runners_patch|reporting_CMD_hotfix",
+        re.I,
+    )),
+    ("KelvinFloquet", None, re.compile(r"Kelvin_Floquet|KelvinFloquet", re.I)),
     ("Route_I", None, re.compile(r"Route_I|relative_entropy|routeI_", re.I)),
     ("Routes_v0819", None, re.compile(
         r"v0_8_19|Planck_Routes|RouteA_|nonfit|torsion_impedance|route_ABCD", re.I
@@ -45,8 +51,9 @@ THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
     ("VortexLab", None, re.compile(r"vortexring|vortexlab|VortexLab", re.I)),
     ("DeriveConstants", None, re.compile(
         r"Derive_Constants|derive_|gp_core|phase_pressure|half_budget|"
-        r"finite_cell|finite_core|accessible_area|pressure_mode|"
-        r"nonlinear_shape|nlse_|phase_budget|next_step_two_gate",
+        r"finite_cell|finite.?core|FiniteCore|accessible_area|pressure_mode|"
+        r"nonlinear_shape|nlse_|phase_budget|next_step_two_gate|"
+        r"SpectralSelector",
         re.I,
     )),
     ("Falsifiers", None, re.compile(
@@ -157,6 +164,13 @@ def iter_sources_zips() -> list[Path]:
     return sorted(p for p in SOURCES_ZIPS.glob("*.zip") if p.is_file())
 
 
+def iter_restore_root_zips() -> list[Path]:
+    """Zips sitting directly in Restore_Archives/ (not in theme subdirs)."""
+    if not RESTORE.is_dir():
+        return []
+    return sorted(p for p in RESTORE.glob("*.zip") if p.is_file())
+
+
 def dest_for(basename: str, theme: str, series: str | None) -> Path:
     base = RESTORE / theme
     if series:
@@ -228,9 +242,48 @@ def plan_repo() -> list[PlannedMove]:
     return plans
 
 
+def plan_restore_root() -> list[PlannedMove]:
+    plans: list[PlannedMove] = []
+    for src in iter_restore_root_zips():
+        theme, series = classify(src.name)
+        dest = dest_for(src.name, theme, series)
+        if dest.resolve() == src.resolve():
+            continue
+        plans.append(resolve_collision(src, dest, "__from_root"))
+    return plans
+
+
+def plan_misc_reclassify() -> list[PlannedMove]:
+    """Move Misc zips that now classify to a real theme (e.g. IdealLinks)."""
+    plans: list[PlannedMove] = []
+    misc = RESTORE / "Misc"
+    if not misc.is_dir():
+        return plans
+    for src in sorted(misc.rglob("*.zip")):
+        if not src.is_file():
+            continue
+        theme, series = classify(src.name)
+        if theme == "Misc":
+            continue
+        dest = dest_for(src.name, theme, series)
+        try:
+            if dest.resolve() == src.resolve():
+                continue
+        except FileNotFoundError:
+            pass
+        plans.append(resolve_collision(src, dest, "__from_misc"))
+    return plans
+
+
 def plan_all() -> list[PlannedMove]:
-    """Sources_Zips first, then repo (callers that apply must run phases sequentially)."""
-    return plan_sources() + plan_repo()
+    """Sources → repo → Restore root → Misc reclassify (apply phases sequentially)."""
+    return (
+        plan_sources()
+        + plan_repo()
+        + plan_restore_root()
+        + plan_misc_reclassify()
+    )
+
 
 
 def ensure_parent(path: Path, apply: bool) -> None:
@@ -367,6 +420,16 @@ def main(argv: list[str] | None = None) -> int:
     phase2 = plan_repo()
     print(f"[{mode}] phase2 repo zips: {len(phase2)} ops {_summarize(phase2)}")
     rows.extend(apply_plan(phase2, apply=apply))
+
+    # Phase 3: zips left in Restore_Archives/ root
+    phase3 = plan_restore_root()
+    print(f"[{mode}] phase3 Restore root: {len(phase3)} ops {_summarize(phase3)}")
+    rows.extend(apply_plan(phase3, apply=apply))
+
+    # Phase 4: reclassify Misc into new/updated themes
+    phase4 = plan_misc_reclassify()
+    print(f"[{mode}] phase4 Misc reclassify: {len(phase4)} ops {_summarize(phase4)}")
+    rows.extend(apply_plan(phase4, apply=apply))
 
     write_manifest(rows, manifest_path)
     if not rows and apply is False:

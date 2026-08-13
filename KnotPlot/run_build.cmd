@@ -205,10 +205,18 @@ if not exist "%SCRIPT%" (
   exit /b 1
 )
 
-for %%F in ("%SCRIPT%") do set "OUTDIR=%%~dpF"
+for %%F in ("%SCRIPT%") do (
+  set "OUTDIR=%%~dpF"
+  set "BUILD_STEM=%%~nF"
+)
 rem Trailing backslash breaks "...\dir\" quoting in Python/PowerShell args
 if "!OUTDIR:~-1!"=="\" set "OUTDIR=!OUTDIR:~0,-1!"
+rem Versioned KnotPlot log + stable latest copy for parsers
+for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "LOG_TS=%%I"
+if not defined LOG_TS set "LOG_TS=unknown"
+set "LOG_VERSIONED=!OUTDIR!\build_knotplot_!LOG_TS!.log"
 set "LOG=!OUTDIR!\build_knotplot.log"
+if not defined BUILD_STEM set "BUILD_STEM=build_unknown"
 
 rem Truncate build_*.kpc to effort max-ago (temp alongside outdir)
 for /f "usebackq delims=" %%T in (`python "%ROOT%ridgerunner\effort_presets.py" --truncate "!SCRIPT!" --effort "!EFFORT!" --dest "!OUTDIR!\build_effort_active.kpc"`) do set "SCRIPT=%%T"
@@ -224,18 +232,19 @@ echo CWD:      "%CD%"
 echo Script:   "%SCRIPT%"
 echo Effort:   !EFFORT!
 if defined THREADS echo Threads:  !THREADS! ^(!RIDGERUNNER_EXE!^)
-echo Log:      "%LOG%"
+echo Log:      "!LOG_VERSIONED!"
 if defined NOG (
   echo Mode:     non-graphics ^(-nog^)
-  "%KP_EXE%" -nog < "%SCRIPT%" > "%LOG%" 2>&1
+  "%KP_EXE%" -nog < "%SCRIPT%" > "!LOG_VERSIONED!" 2>&1
 ) else (
   echo Mode:     GUI
-  "%KP_EXE%" < "%SCRIPT%" > "%LOG%" 2>&1
+  "%KP_EXE%" < "%SCRIPT%" > "!LOG_VERSIONED!" 2>&1
 )
 set "RC=%ERRORLEVEL%"
 popd
+copy /Y "!LOG_VERSIONED!" "!LOG!" >nul
 if not "%RC%"=="0" (
-  echo ERROR: KnotPlot failed, see "%LOG%"
+  echo ERROR: KnotPlot failed, see "!LOG_VERSIONED!"
   exit /b %RC%
 )
 
@@ -376,6 +385,21 @@ if errorlevel 1 (
 )
 
 echo.
+echo ============================================================
+echo Final polish snapshot ^(additive^)
+echo ============================================================
+python "%ROOT%ridgerunner\write_final_snapshot.py" --from-outdir "!OUTDIR!" --stem !BUILD_STEM! --tag !EFFORT!
+if errorlevel 1 (
+  echo WARNING: final snapshot failed ^(RR results unchanged^)
+) else (
+  rem Re-upsert JS from the snapshotted polish ^(uniform of final; WARNING on fail^)
+  python "%ROOT%ridgerunner\upsert_polish_to_catalog.py" --from-outdir "!OUTDIR!" --outdir "!OUTDIR!" --output "%ROOT%knotplot_knots_data.js"
+  if errorlevel 1 (
+    echo WARNING: catalog upsert from final polish failed ^(snapshot kept^)
+  )
+)
+
+echo.
 echo Ridgerunner pipeline finished ^(polish + VortexLab uniform N=300 + catalog^).
 exit /b 0
 
@@ -454,6 +478,10 @@ echo.
 echo Without -rr: KnotPlot only ^(effort-truncated checkpoints, log + sidecars^).
 echo With -rr: select one trial, 3-stage RR, VortexLab uniform N=300,
 echo   catalog_status.json, upsert knotplot_knots_data.js.
-echo   Ridgerunner polish TXT stays the audit reference.
+echo   After final snapshot: re-upsert JS = uniform-of-that-polish ^(same shape^).
+echo   Also mirrors to knots\final\^{id^}_final.txt ^(shared finals folder^).
+echo   Ridgerunner polish / build_*_final_*.txt stay the audit reference.
 echo Batch all ids: run_build_batch.cmd --all -rr --effort min -t8
+echo Post-hoc finals + JS: ridgerunner\run_finalize_knotplot.cmd
+echo Shared finals backfill: ridgerunner\sync_shared_finals.cmd
 goto :eof

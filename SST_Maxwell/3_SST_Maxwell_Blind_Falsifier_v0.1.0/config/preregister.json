@@ -1,0 +1,53 @@
+{
+  "protocol_version": "0.1.0",
+  "blindness": {
+    "mode": "target-blind",
+    "description": "No Maxwell numerical pressure coefficient and no SST electromagnetic normalization target are used by the blind pass/fail analysis. Numerical targets are committed separately and are only read by the unblinding step.",
+    "split_seed": "SST-MAXWELL-BLIND-v0.1.0",
+    "train_fraction": 0.60
+  },
+  "stress_track": {
+    "required": true,
+    "filter_fraction": 0.08,
+    "min_filter_radius_cells": 1,
+    "vorticity_quantile": 0.20,
+    "max_points_per_case": 30000,
+    "trim_extra_cells": 2,
+    "gates": {
+      "median_axisymmetry_residual_max": 0.20,
+      "median_director_alignment_min": 0.90,
+      "positive_anisotropy_fraction_min": 0.80,
+      "velocity_exponent_min": 1.80,
+      "velocity_exponent_max": 2.20,
+      "density_exponent_min": 0.85,
+      "density_exponent_max": 1.15,
+      "geometry_exponent_min": -0.25,
+      "geometry_exponent_max": 0.25,
+      "regression_r2_min": 0.98,
+      "pair_L_cancellation_max": 0.05,
+      "pair_stress_invariance_rel_max": 0.05
+    }
+  },
+  "reduced_momentum_track": {
+    "required": true,
+    "gates": {
+      "validation_nrmse_max": 0.05,
+      "validation_cosine_median_min": 0.995,
+      "group_slope_cv_max": 0.05,
+      "factorization_relative_error_max": 0.05
+    }
+  },
+  "storage_current_track": {
+    "required": false,
+    "gates": {
+      "validation_nrmse_max": 0.20,
+      "validation_r2_min": 0.90,
+      "residual_reduction_min": 0.80
+    }
+  },
+  "decision_rule": {
+    "FAIL": "Any failed mandatory gate falsifies the tested closure within the preregistered model class.",
+    "INCONCLUSIVE": "Missing mandatory data, rank-deficient scans, or insufficient resolution prevent a verdict.",
+    "PASS": "All mandatory blind gates pass. This supports only the tested closure class; it does not establish SST or Maxwell's historical microscopic mechanism."
+  }
+}

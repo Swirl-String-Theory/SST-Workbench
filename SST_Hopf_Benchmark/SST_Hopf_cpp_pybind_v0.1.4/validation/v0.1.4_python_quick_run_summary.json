@@ -1,0 +1,144 @@
+{
+  "tier": "quick",
+  "backend": {
+    "backend": "python",
+    "version": "0.1.4",
+    "openmp": false,
+    "threads": 1
+  },
+  "force_python": true,
+  "ok": true,
+  "records": [
+    {
+      "step": "step01",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "01_definieer_sst_orderparameter.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step01_order_parameter",
+        "--n",
+        "24"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.4572498319994338,
+      "log": "/mnt/data/v014_runall_quick/logs/step01.log"
+    },
+    {
+      "step": "step02",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "02_analytische_hopf_benchmark.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step02_hopf_benchmark",
+        "--resolutions",
+        "24",
+        "48",
+        "64",
+        "--integer-tolerance",
+        "0.05",
+        "--gauge-tolerance",
+        "0.04"
+      ],
+      "returncode": 0,
+      "elapsed_s": 4.286242748000404,
+      "log": "/mnt/data/v014_runall_quick/logs/step02.log"
+    },
+    {
+      "step": "step03",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "03_toroflux_spinorveld.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step03_toroflux_spinor",
+        "--n-grid",
+        "32"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.580999556000279,
+      "log": "/mnt/data/v014_runall_quick/logs/step03.log"
+    },
+    {
+      "step": "step04",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "04_hopf_lading_numeriek.py",
+        "/mnt/data/v014_runall_quick/step02_hopf_benchmark/analytic_hopf_benchmark.npz",
+        "--output",
+        "/mnt/data/v014_runall_quick/step04_hopf_charge",
+        "--director-order",
+        "4"
+      ],
+      "returncode": 0,
+      "elapsed_s": 5.2523787949994585,
+      "log": "/mnt/data/v014_runall_quick/logs/step04.log"
+    },
+    {
+      "step": "step05",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "05_heliciteitsbridge.py",
+        "/mnt/data/v014_runall_quick/step04_hopf_charge/hopf_charge_fields.npz",
+        "--output",
+        "/mnt/data/v014_runall_quick/step05_helicity_bridge"
+      ],
+      "returncode": 0,
+      "elapsed_s": 3.282860004000213,
+      "log": "/mnt/data/v014_runall_quick/logs/step05.log"
+    },
+    {
+      "step": "step06",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "06_effectieve_spinactie.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step06_spin_action",
+        "--samples",
+        "500"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5263632420001159,
+      "log": "/mnt/data/v014_runall_quick/logs/step06.log"
+    },
+    {
+      "step": "step07",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "07_vier_pi_configuratieruimte.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step07_four_pi",
+        "--samples",
+        "501"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.598074276999796,
+      "log": "/mnt/data/v014_runall_quick/logs/step07.log"
+    },
+    {
+      "step": "step08",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "08_trefoil_integratie.py",
+        "--output",
+        "/mnt/data/v014_runall_quick/step08_trefoil",
+        "--hopf-evidence",
+        "/mnt/data/v014_runall_quick/step04_hopf_charge/H1_H3_evidence.json",
+        "--helicity-evidence",
+        "/mnt/data/v014_runall_quick/step05_helicity_bridge/H5_evidence.json",
+        "--spin-evidence",
+        "/mnt/data/v014_runall_quick/step06_spin_action/H6_H8_evidence.json",
+        "--spin-evidence",
+        "/mnt/data/v014_runall_quick/step07_four_pi/H9_evidence.json",
+        "--samples",
+        "220",
+        "--radial-samples",
+        "6",
+        "--angular-samples",
+        "16"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.8073702219999177,
+      "log": "/mnt/data/v014_runall_quick/logs/step08.log"
+    }
+  ],
+  "total_elapsed_s": 20.791538675999618
+}

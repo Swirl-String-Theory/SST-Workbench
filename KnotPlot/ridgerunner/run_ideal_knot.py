@@ -843,6 +843,26 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Target L_3_1 (diameter) = {TARGET_L_3_1_DIAM}")
         status = "ok"
         exit_code = 0
+        try:
+            from write_final_snapshot import (
+                campaign_root_from_path,
+                try_write_final_snapshot,
+            )
+
+            max_n = max(resolutions)
+            final_polish = outdir / f"n{max_n}p.txt"
+            if not final_polish.is_file():
+                final_polish = paths_base["polish"]
+            stem = ab_id.replace(":", "_")
+            try_write_final_snapshot(
+                final_polish,
+                stem=stem,
+                tag=f"N{max_n}",
+                dest=campaign_root_from_path(outdir),
+                extra_alias={"source": "run_ideal_knot", "ab_id": ab_id},
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"WARNING: final snapshot failed: {exc}", flush=True)
         return exit_code
     except KeyboardInterrupt:
         status = "interrupted"

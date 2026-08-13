@@ -81,9 +81,15 @@ run_build.cmd knot_9.2 -rr --effort min -t8
 
 rem Dry-run first
 run_build_batch.cmd --all -rr --effort min -t8 --dry-run
+
+rem Post-hoc finals next to build_*.kpc (+ JS = uniform of that polish)
+cd ridgerunner
+run_finalize_knotplot.cmd
 ```
 
 ``--effort min|normal|extra`` · ``-t8`` = multithread · summary:
 ``ridgerunner\out\batch_build_summary.json`` · batch logs:
 ``ridgerunner\out\build\<id>\batch_build.log`` · RR TXT:
-``knots\<id>\``
+``knots\<id>\`` · finals: ``knots\<id>\build_*_final_*.txt`` ·
+shared finals: ``knots\final\{id}_final.txt`` ·
+JS catalog: uniform N=300 of final polish (see ``KNOTPLOT_KNOTS_DATA_README.md``)

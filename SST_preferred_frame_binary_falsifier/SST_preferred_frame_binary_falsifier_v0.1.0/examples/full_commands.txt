@@ -1,0 +1,39 @@
+# Native build
+python -m sst_pf_binary_falsifier.build_ext_if_needed --force --strict
+
+# Quick full battery
+python run_all_checks.py --quick --out-dir audit_out_quick
+
+# Higher-resolution internal battery
+python run_all_checks.py --force-build --out-dir audit_out
+
+# Uniform-drift Galilean baseline. beta=W/c.
+python run_drift_scan.py --n 96 --steps 3 --betas 0,0.00025,0.0005,0.001,0.002,0.00364867628 --out-dir audit_out/drift_hi
+
+# Synthetic sensitivity recovery control (NOT SST physics)
+python run_drift_scan.py --inject-chi0 1.25 --inject-chi2 -0.40 --out-dir audit_out/drift_injected
+
+# Preferred-frame gate after deriving an SST -> effective PPN mapping
+python run_pf_gate.py --alpha1-eff -5e-5 --alpha2-eff 5e-8
+
+# PSR J1738+0333: insert an SST prediction for intrinsic/corrected Pdot [s/s]
+python run_j1738_gate.py --model-pdot-corr -2.70e-14
+
+# q/m universality and dipole mismatch
+python run_dipole_gate.py --objects examples/objects_universal.json
+python run_dipole_gate.py --objects examples/objects_nonuniversal.json --tolerance 1e-8
+
+# Structural linearized Euler mode gate
+python run_linear_euler_gate.py
+
+# Energy balance closure: dE/dt = -F_inf = P_RR
+python run_energy_balance.py --csv examples/energy_balance_example.csv --rel-tolerance 0.05
+
+# Pure-Python fallback
+python run_example.py --force-python
+python run_sweep.py --force-python --betas 0,0.001,0.002,0.00364867628
+
+# Fit chi0/chi2 from your own SST solver output
+python run_fit_drift_data.py --csv examples/drift_external_example.csv
+# Optional user-defined acceptance thresholds
+python run_fit_drift_data.py --csv your_sst_drift_scan.csv --chi0-max 1e-4 --chi2-max 1e-6

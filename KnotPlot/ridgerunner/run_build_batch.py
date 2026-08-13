@@ -256,7 +256,7 @@ def run_ids_sequential(
         row = run_one_build_job(job)
         results.append(row)
         print(
-            f"  → {row['status']}  exit={row['exit_code']}  "
+            f"  -> {row['status']}  exit={row['exit_code']}  "
             f"{format_duration(row['elapsed_s'])}",
             flush=True,
         )
@@ -451,7 +451,7 @@ def main(argv: list[str] | None = None) -> int:
         metavar="N",
         help=(
             "parallel id workers (process pool; default: 1). "
-            "Clamped so jobs*threads ≤ logical CPUs when -rr."
+            "Clamped so jobs*threads <= logical CPUs when -rr."
         ),
     )
     parser.add_argument("--seed", default=None, help="force --seed for each id")
@@ -671,6 +671,10 @@ def main(argv: list[str] | None = None) -> int:
             "elapsed_s": elapsed,
         },
     )
+    # Best-effort: refresh knots/final/{id}_final.* for this batch
+    from sync_shared_finals import try_sync_shared_finals
+
+    try_sync_shared_finals(knots_root=knots_root, ids=ids)
     print()
     print("============================================================")
     print(

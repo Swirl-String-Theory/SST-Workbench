@@ -118,6 +118,26 @@ class TestEffortPresets(unittest.TestCase):
         self.assertIn("EFFORT_COARSE_TAG=002k", text)
         self.assertIn("EFFORT_LADDER_NS=", text)
 
+    def test_no_stop20_in_scientific_presets(self) -> None:
+        for name in ("min", "normal", "extra"):
+            preset = get_effort(name)
+            self.assertIsNone(preset.eq_stop20, name)
+            self.assertIsNone(preset.polish_stop20, name)
+            text = emit_env(preset)
+            self.assertIn("EFFORT_EQ_STOP20=", text)
+            self.assertNotIn("EFFORT_EQ_STOP20=0", text)
+            # Empty value after '=' (no numeric Stop20).
+            for line in text.splitlines():
+                if line.startswith("EFFORT_EQ_STOP20="):
+                    self.assertEqual(line, "EFFORT_EQ_STOP20=")
+                if line.startswith("EFFORT_POLISH_STOP20="):
+                    self.assertEqual(line, "EFFORT_POLISH_STOP20=")
+
+    def test_ladder_cmd_has_no_stop20(self) -> None:
+        cmd = Path(__file__).resolve().parent / "run_resolution_ladder.cmd"
+        text = cmd.read_text(encoding="utf-8")
+        self.assertNotIn("--Stop20=", text)
+
 
 class TestTruncateBuildKpc(unittest.TestCase):
     def test_truncate_min_stops_at_005k(self) -> None:

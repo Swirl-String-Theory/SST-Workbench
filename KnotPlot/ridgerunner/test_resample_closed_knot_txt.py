@@ -19,6 +19,7 @@ from resample_closed_knot_txt import (  # noqa: E402
     ROP_REL_MAX,
     closed_length,
     evaluate_gates,
+    global_ds_ratio,
     polygonal_minrad,
     relative_rop_change,
     resample_closed,
@@ -26,6 +27,7 @@ from resample_closed_knot_txt import (  # noqa: E402
     resample_closed_spline_repair,
     resample_closed_subdivide,
     resample_component,
+    resolve_counts,
     resolve_method,
     transfer_sidecar_is_stale,
     transfer_sidecar_path,
@@ -152,6 +154,81 @@ class TestResampleClosed(unittest.TestCase):
         self.assertTrue(
             any("Rop change" in e and "collapse" in e for e in errors),
             msg=f"expected Rop collapse gate error, got {errors}",
+        )
+
+    def test_minrad_rop_change_is_diagnostic_only(self) -> None:
+        """Large MinRad-Rop swings must warn, not fail, when proxy Rop is fine."""
+        from unittest.mock import patch
+
+        circ = _circle(40)
+        out = list(circ)
+        pin = {"D_proxy": 2.0, "length_over_diameter_proxy": 3.14}
+        pout = {"D_proxy": 2.0, "length_over_diameter_proxy": 3.14}
+
+        def _fake_minrad(_comp: list) -> float:
+            # Alternate high/low to force a large MinRad-Rop delta.
+            _fake_minrad.n += 1  # type: ignore[attr-defined]
+            return 1.0 if _fake_minrad.n % 2 else 0.5  # type: ignore[attr-defined]
+
+        _fake_minrad.n = 0  # type: ignore[attr-defined]
+
+        with patch(
+            "resample_closed_knot_txt.relative_rop_change",
+            return_value=(0.0, pin, pout),
+        ), patch(
+            "resample_closed_knot_txt.polygonal_minrad",
+            side_effect=_fake_minrad,
+        ):
+            warnings, errors, _, rop_meta = evaluate_gates(
+                comps_in=[circ],
+                comps_out=[out],
+                counts=[40],
+                strict=True,
+                upsampled=False,
+                methods=["linear"],
+            )
+        self.assertFalse(
+            any("collapse" in e for e in errors),
+            msg=f"MinRad-Rop must not fail via collapse, got {errors}",
+        )
+        self.assertTrue(
+            any("MinRad-Rop" in w for w in warnings),
+            msg=f"expected MinRad-Rop diagnostic warning, got {warnings}",
+        )
+        self.assertIsNotNone(rop_meta.get("relative_rop_minrad_change"))
+
+    def test_preserve_counts_multi_comp_global_ds(self) -> None:
+        """Unequal component lengths: preserve Ni keeps global_ds_ratio ~1."""
+        c1 = _circle(40, radius=1.0)
+        c2 = _circle(120, radius=3.0)
+        counts = resolve_counts(
+            2,
+            None,
+            None,
+            preserve_counts=True,
+            input_counts=[40, 120],
+        )
+        self.assertEqual(counts, [40, 120])
+        out1 = resample_closed(c1, 40)
+        out2 = resample_closed(c2, 120)
+        ratio = global_ds_ratio([out1, out2])
+        assert ratio is not None
+        self.assertLess(ratio, 1.05)
+        # Forcing equal N would inflate the ratio.
+        bad1 = resample_closed(c1, 80)
+        bad2 = resample_closed(c2, 80)
+        bad_ratio = global_ds_ratio([bad1, bad2])
+        assert bad_ratio is not None
+        self.assertGreater(bad_ratio, 1.2)
+
+    def test_vortexlab_default_single_vs_multi(self) -> None:
+        self.assertEqual(
+            resolve_counts(1, None, None, input_counts=[50]),
+            [300],
+        )
+        self.assertEqual(
+            resolve_counts(2, None, None, input_counts=[160, 440]),
+            [160, 440],
         )
 
     def test_gate_allows_large_negative_rop_spline_repair(self) -> None:

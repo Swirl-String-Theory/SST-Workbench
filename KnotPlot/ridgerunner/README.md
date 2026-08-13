@@ -49,6 +49,41 @@ Summary: `ridgerunner\out\batch_build_summary.json`
 Batch logs: `ridgerunner\out\build\<id>\batch_build.log`  
 RR outputs: `KnotPlot\knots\<id>\*_rr_*.txt` (next to seeds)
 
+### Final polish snapshots (additive)
+
+Does **not** change the RR pipeline. After a successful `-rr` / catalog / ideal
+run, a unique copy of the best polish is written. Post-hoc without re-run:
+
+```bat
+cd C:\workspace\projects\SST-Workbench\KnotPlot\ridgerunner
+
+rem Scan all knots/links/tori with existing polish → next to each .kpc
+rem Default: also resample that polish → uniform N300 → knotplot_knots_data.js
+run_finalize_knotplot.cmd
+run_finalize_knotplot.cmd --no-catalog-upsert
+run_finalize_knotplot.cmd --kind knot --suffix backlog
+run_finalize_knotplot.cmd --ids knot_3.1 --dry-run
+
+rem Single snapshot / JS sync
+write_final_snapshot.cmd --from-outdir ..\knots\knot_3.1 --stem build_knot_3.1 --tag min
+upsert_polish_to_catalog.cmd --from-outdir ..\knots\knot_3.1
+```
+
+- KnotPlot: `knots\knot_3.1\build_knot_3.1_final_{tag}[_{suffix}]_{YYYYMMDD_HHMMSS}.txt`
+- Also mirrored (overwrite) to **`knots\final\{id}_final.txt`** (+ metrics/alias)
+- fseries/ideal: campaign root under `out\` (best Rop across `t10`/`t12`, not inside `tN\`)
+- Never overwrites historical next to `.kpc`; collision → `_2`. Summary: `out\finalize_knotplot_summary.json`
+- **JS catalog** = VortexLab uniform N=300 of the final/polish (same shape; not a
+  second RR). Audit geometry remains polish / `build_*_final_*.txt`. Catalog
+  upsert is KnotPlot `knots/` only (not fseries/ideal outdirs).
+
+```bat
+rem Backfill / refresh the shared finals folder
+sync_shared_finals.cmd
+sync_shared_finals.cmd --ids knot_3.1,torus_6.9 --dry-run
+```
+
+`run_build_batch` and `run_finalize_knotplot` call this sync at the end (WARNING on fail).
 | `--effort` | KnotPlot max ago | RR coarse / eq / polish | Ladder |
 |------------|------------------|-------------------------|--------|
 | `min` | **5000** (`trial_005k`) | 2000 / 5000 / 5000 | none |
@@ -124,10 +159,10 @@ rem Stage 1
 ridgerunner -a --EqOn -s 10000 --StopResidual=0.05 --label coarse "seed.txt"
 
 rem Stage 2
-ridgerunner -c --EqForceOn -s 50000 --StopResidual=0.005 --Stop20=0.000001 --label eqfinal "seed_rr_010k_coarse.txt"
+ridgerunner -c --EqForceOn -s 50000 --StopResidual=0.005 --label eqfinal "seed_rr_010k_coarse.txt"
 
-rem Stage 3
-ridgerunner -c --EqOn -s 30000 --StopResidual=0.005 --Stop20=0.0000001 --label polish "…_eqfinal.txt"
+rem Stage 3 (residual gate only; no --Stop20 in scientific presets)
+ridgerunner -c --EqOn -s 30000 --StopResidual=0.005 --label polish "…_eqfinal.txt"
 ```
 
 Or: `ridgerunner\run_three_stage.cmd path\to\seed.txt`
@@ -197,14 +232,20 @@ the KnotPlot seed under `knots\<id>\` (same as single `run_build -rr`).
 `-rr` does **not** pipeline every TXT. It runs `select_knotplot_seed.py`
 (after `parse_knotplot_log.py`) and sends **one** seed to `run_three_stage.cmd`.
 After polish, stage 4 writes a **separate** VortexLab copy via
-`resample_closed_knot_txt.py --points 300` → `*_polish_uniform_N300.txt`
-(+ VECT). Then `classify_catalog_status.py` writes `catalog_status.json` and
-`build_knotplot_knots_data.py --from-rr-outdir` upserts that uniform file into
-`knotplot_knots_data.js`. The Ridgerunner `*_polish.txt` is left untouched.
-
-Catalog statuses: `relaxed-seed` → `near-ideal-candidate` → `near-ideal`
+`resample_closed_knot_txt.py` (default: N=300 for 1-comp, **preserve Ni** for
+multi-comp) → `*_polish_uniform_N….txt` (+ VECT). Then `classify_catalog_status.py`
+writes `catalog_status.json` and `build_knotplot_knots_data.py --from-rr-outdir`
+upserts that uniform file into `knotplot_knots_data.js`. The Ridgerunner
+`*_polish.txt` is left untouched.
+After the additive `build_*_final_*` snapshot, `upsert_polish_to_catalog`
+re-resamples **that** polish and re-upserts so JS matches the snapshotted best
+(WARNING on failure; RR outputs unchanged).
+Catalog statuses: `stalled-not-converged` | `relaxed-seed` |
+`near-ideal-candidate` | `converged-local-candidate` | `near-ideal`
 (optional `run_build … -rr --certify` for multi-start + N600/N1200).
-`certified-ideal` is never automatic. See `KNOTPLOT_KNOTS_DATA_README.md`.
+`certified-ideal` is never automatic. Scientific three-stage presets no longer
+pass `--Stop20` (residual gate only). See `KNOTPLOT_KNOTS_DATA_README.md`.
+Correction re-runs: `run_correction_queues.cmd` / `reclassify_catalog_status.py`.
 
 **Robuuste checkpoint-gate (summary):**
 
@@ -460,7 +501,7 @@ run_catalog_knot.cmd --12a_1202z6 -r300,600
 Unit tests:
 
 ```bat
-python -m unittest test_gilbert_ab_to_xyz.py test_run_ideal_knot.py test_run_catalog_knot.py test_run_catalog_batch.py test_run_knotplot_txt.py test_fseries_to_xyz.py test_recover_ladder_coarse.py test_resample_closed_knot_txt.py test_count_rr_la_failures.py -v
+python -m unittest test_gilbert_ab_to_xyz.py test_run_ideal_knot.py test_run_catalog_knot.py test_run_catalog_batch.py test_run_knotplot_txt.py test_fseries_to_xyz.py test_recover_ladder_coarse.py test_resample_closed_knot_txt.py test_count_rr_la_failures.py test_write_final_snapshot.py test_upsert_polish_to_catalog.py test_sync_shared_finals.py -v
 ```
 
 ## Layout
