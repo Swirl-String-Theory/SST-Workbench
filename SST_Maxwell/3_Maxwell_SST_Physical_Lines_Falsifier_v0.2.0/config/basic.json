@@ -1,0 +1,92 @@
+{
+  "protocol_version": "0.2.0",
+  "profile": "basic",
+  "blindness": {
+    "mode": "target-blind",
+    "split_seed": "SST-MAXWELL-3-PHYSICAL-LINES-v0.2.0",
+    "train_fraction": 0.6,
+    "rule": "No historical Maxwell pressure coefficient and no SST m_e/e bridge target is available to blind pass/fail code."
+  },
+  "physical_constants": {
+    "rho_f_kg_m3": 7e-07,
+    "v_swirl_m_s": 1093845.63,
+    "r_c_m": 1.40897017e-15
+  },
+  "selection": {
+    "include": [
+      "knot_3.1_final.txt",
+      "knot_4.1_final.txt",
+      "torus_2.3_final.txt",
+      "torus_2.4_final.txt"
+    ],
+    "glob": "*_final.txt",
+    "exclude": [],
+    "max_files": 0
+  },
+  "geometry": {
+    "resample_points_per_component": 300,
+    "stations_per_component": 16,
+    "radial_samples": 4,
+    "angular_samples": 12,
+    "sample_radius_factor": 1.25,
+    "fallback_thickness_geom": 0.5,
+    "vref_radius_factor": 1.0
+  },
+  "robustness": {
+    "anchor_files": [
+      "knot_3.1_final.txt",
+      "knot_4.1_final.txt"
+    ],
+    "core_ratios": [
+      0.8,
+      1.0,
+      1.2
+    ],
+    "convergence_resample_points": 600,
+    "parity_mirror_test": true
+  },
+  "gates": {
+    "source_quality": {
+      "residual_max": 0.02,
+      "edge_length_ratio_max": 3.0,
+      "min_accepted_files": 4,
+      "min_multicomponent_accepted": 1
+    },
+    "stress_structure": {
+      "median_axisymmetry_residual_max": 0.3,
+      "median_director_alignment_min": 0.85,
+      "positive_anisotropy_fraction_min": 0.75,
+      "axisymmetry_role": "diagnostic"
+    },
+    "robustness": {
+      "core_C_relative_spread_max": 0.35,
+      "resolution_C_relative_change_max": 0.1,
+      "parity_C_relative_change_max": 0.01
+    }
+  },
+  "reduced_momentum_track": {
+    "required": false,
+    "gates": {
+      "validation_nrmse_max": 0.05,
+      "validation_cosine_median_min": 0.995,
+      "group_slope_cv_max": 0.05,
+      "factorization_relative_error_max": 0.05
+    }
+  },
+  "storage_current_track": {
+    "required": false,
+    "gates": {
+      "validation_nrmse_max": 0.2,
+      "validation_r2_min": 0.9,
+      "residual_reduction_min": 0.8
+    }
+  },
+  "runtime": {
+    "require_native": false
+  },
+  "decision_rule": {
+    "FAIL": "Any failed mandatory blind geometry gate falsifies this Maxwell-inspired centerline closure within the stated regularized Biot-Savart surrogate.",
+    "INCONCLUSIVE": "Missing/insufficient geometry metadata or robustness evidence blocks a conclusion.",
+    "PASS": "All mandatory target-blind geometry gates pass. This is not a resolved Euler proof and does not establish SST."
+  }
+}
