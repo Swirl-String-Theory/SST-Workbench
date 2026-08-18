@@ -1,0 +1,53 @@
+# Full command reference — GPU-first SYCL/DPC++ audit template.
+# Run from the project root (this template folder or your renamed copy).
+
+# ---------------------------------------------------------------------------
+# build_ext_if_needed.py
+# ---------------------------------------------------------------------------
+python -m native_ext.build_ext_if_needed
+python -m native_ext.build_ext_if_needed --quiet
+python -m native_ext.build_ext_if_needed --force
+python -m native_ext.build_ext_if_needed --force --quiet
+python -m native_ext.build_ext_if_needed --strict
+
+# Optional env:
+#   set SST_DISABLE_SYCL=1
+#   set SST_DISABLE_OPENMP=1
+#   set SST_BACKEND=sycl
+
+# ---------------------------------------------------------------------------
+# run_example.py — default is heavy biot_savart (N=512, M=8192)
+# ---------------------------------------------------------------------------
+python run_example.py
+python run_example.py --tiny
+python run_example.py --tiny --backend python
+python run_example.py --n-segments 512 --n-queries 8192 --backend auto --summary-only
+python run_example.py --n-segments 64 --n-queries 32 --backend openmp --out example_openmp.json
+python run_example.py --backend sycl --force-build --build-verbose --out example_sycl.json
+python run_example.py --allow-sycl-cpu --backend sycl
+python run_example.py --force-python --n-segments 32 --n-queries 16
+python run_example.py --skip-build
+python run_example.py --gamma 1 --core 1 --out example_out.json
+
+# ---------------------------------------------------------------------------
+# run_sweep.py — scale query count M
+# ---------------------------------------------------------------------------
+python run_sweep.py
+python run_sweep.py --queries 256,1024,4096 --n-segments 128
+python run_sweep.py --backend sycl --out-json example_sweep.json --out-csv example_sweep.csv
+python run_sweep.py --force-python --queries 8,16 --n-segments 16
+
+# ---------------------------------------------------------------------------
+# run_all_checks.py
+# ---------------------------------------------------------------------------
+python run_all_checks.py
+python run_all_checks.py --out-dir audit_out
+python run_all_checks.py --force-python --out-dir audit_out_py
+python run_all_checks.py --force-build --backend sycl --out-dir audit_out_gpu
+python run_all_checks.py --allow-sycl-cpu --backend sycl
+
+# ---------------------------------------------------------------------------
+# Windows Arc launcher (setvars + Level Zero; fails if no GPU)
+# ---------------------------------------------------------------------------
+run_arc.cmd
+run_arc.cmd --out-dir audit_out_arc
