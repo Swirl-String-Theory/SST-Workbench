@@ -1,0 +1,12 @@
+@echo off
+setlocal EnableExtensions
+cd /d "%~dp0"
+call run_00_install.cmd || exit /b 1
+call run_01_build_native.cmd || exit /b 1
+call run_tests.cmd || exit /b 1
+call run_kelvin_oracle.cmd || exit /b 1
+call run_kelvin_hole_basic_prepare.cmd || exit /b 1
+call run_kelvin_hole_basic_blind.cmd || exit /b 1
+call run_kelvin_hole_basic_reveal.cmd || exit /b 1
+echo [SST-TH] kelvin_hole_basic complete. See outputs\kelvin_hole_basic\reveal\HOLE_CONCLUSIONS.md
+exit /b 0

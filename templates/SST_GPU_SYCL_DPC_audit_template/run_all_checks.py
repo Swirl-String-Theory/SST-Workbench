@@ -12,12 +12,20 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from native_ext import _config
 from native_ext.core import run_all_checks
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Run smoke + sweep checks and write audit_out/ artifacts.")
-    p.add_argument("--out-dir", default="audit_out")
+    default_out = str(_config.default_output_dir())
+    p = argparse.ArgumentParser(
+        description="Run smoke + sweep checks and write {folder}_outputs/ artifacts.",
+    )
+    p.add_argument(
+        "--out-dir",
+        default=default_out,
+        help=f"Output directory for JSON/CSV (default: {default_out}).",
+    )
     p.add_argument("--backend", default="auto", choices=["auto", "sycl", "openmp", "python"])
     p.add_argument("--allow-sycl-cpu", action="store_true")
     p.add_argument("--force-python", action="store_true")

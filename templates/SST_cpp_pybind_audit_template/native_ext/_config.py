@@ -16,3 +16,14 @@ STAMP_BASENAME = "native.stamp.json"
 
 # Log prefix for build messages.
 LOG_PREFIX = "[native_ext]"
+
+
+def package_root() -> Path:
+    """Project root (parent of the native_ext package folder)."""
+    return Path(__file__).resolve().parent.parent
+
+
+def default_output_dir() -> Path:
+    """Inside-package outputs: ``{folder_name}_outputs``."""
+    root = package_root()
+    return root / f"{root.name}_outputs"

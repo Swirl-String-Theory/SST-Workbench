@@ -1,0 +1,28 @@
+REM Normal release workflow
+run_all.cmd
+
+REM Fast BASIC run
+run_basic.cmd
+
+REM Extended CPU/OpenMP
+run_cpu.cmd
+
+REM Intel Arc / oneAPI SYCL extended run
+run_gpu_sycl.cmd
+
+REM Summarize a completed output directory
+run_summarize.cmd outputs_extended_YYYYMMDD_HHMMSS_mmm
+
+REM Recompute all archived BASIC conclusions against the exact bundled inputs
+run_reproduce_history_basic.cmd
+
+REM Recompute all archived EXTENDED conclusions against the exact bundled inputs
+run_reproduce_history_extended.cmd
+
+REM Direct custom run
+.venv\Scripts\python.exe run_blind.py ^
+  --fseries "C:\workspace\projects\SST-Workbench\KnotPlot\Knots_FourierSeries\3_1\knot.3_1.fseries" ^
+  --knotplot "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final\knot_3.1_final.txt" ^
+  --config configs\extended.json ^
+  --out-dir outputs_custom ^
+  --backend openmp

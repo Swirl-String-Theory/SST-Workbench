@@ -12,14 +12,20 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from native_ext import _config
 from native_ext.core import run_all_checks
 
 
 def main() -> int:
+    default_out = str(_config.default_output_dir())
     p = argparse.ArgumentParser(
-        description="Run smoke + sweep checks and write audit_out/ artifacts.",
+        description="Run smoke + sweep checks and write {folder}_outputs/ artifacts.",
     )
-    p.add_argument("--out-dir", default="audit_out", help="Output directory for JSON/CSV.")
+    p.add_argument(
+        "--out-dir",
+        default=default_out,
+        help=f"Output directory for JSON/CSV (default: {default_out}).",
+    )
     p.add_argument("--force-python", action="store_true", help="Run C++ path checks in Python mode.")
     p.add_argument("--force-build", action="store_true", help="Force C++ rebuild before checks.")
     args = p.parse_args()

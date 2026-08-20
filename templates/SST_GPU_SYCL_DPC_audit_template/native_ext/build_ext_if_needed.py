@@ -13,7 +13,7 @@ import sys
 import sysconfig
 from pathlib import Path
 
-from ._config import CPP_REL, EXT_BASENAME, LOG_PREFIX, STAMP_BASENAME
+from ._config import CPP_REL, EXT_BASENAME, LOG_PREFIX, STAMP_BASENAME, ensure_oneapi_dll_directories
 
 ROOT = Path(__file__).resolve().parents[1]
 PKG = Path(__file__).resolve().parent
@@ -40,6 +40,7 @@ def extension_path() -> Path:
 def _extension_imports(out: Path) -> bool:
     if not out.exists():
         return False
+    ensure_oneapi_dll_directories()
     loader = importlib.machinery.ExtensionFileLoader(EXT_BASENAME, str(out))
     spec = importlib.util.spec_from_loader(EXT_BASENAME, loader)
     if spec is None or spec.loader is None:
@@ -129,7 +130,20 @@ def _python_link_args_for_windows(*, icpx: bool = False) -> list[str]:
 
 
 def _pybind_includes() -> list[str]:
-    return subprocess.check_output([sys.executable, "-m", "pybind11", "--includes"], text=True).split()
+    try:
+        import pybind11
+
+        return [f"-I{pybind11.get_include()}"]
+    except Exception:
+        pass
+    raw = subprocess.check_output([sys.executable, "-m", "pybind11", "--includes"], text=True).strip()
+    # Windows may quote paths with spaces; avoid naive .split() breakage.
+    import shlex
+
+    try:
+        return shlex.split(raw, posix=False)
+    except Exception:
+        return [raw] if raw else []
 
 
 def _python_include_flags() -> list[str]:
@@ -242,6 +256,7 @@ def _build_with_setuptools(out: Path, verbose: bool, openmp: bool = True) -> boo
 
 
 def build_if_needed(force: bool = False, verbose: bool = True) -> bool:
+    """Build host/OpenMP pybind extension. GPU kernels live in sst_sycl_worker.exe."""
     out = extension_path()
     BUILD.mkdir(exist_ok=True)
 
@@ -256,7 +271,7 @@ def build_if_needed(force: bool = False, verbose: bool = True) -> bool:
         return out.exists()
 
     src_hash = _hash_files([CPP])
-    compiler = str(find_icpx() or os.environ.get("CXX") or shutil.which("c++") or "msvc")
+    compiler = str(os.environ.get("CXX") or shutil.which("c++") or "msvc")
     meta = {"hash": src_hash, "compiler": compiler, "ext": out.name, "cpp": str(CPP_REL)}
     if not force and out.exists() and STAMP.exists():
         try:
@@ -268,49 +283,35 @@ def build_if_needed(force: bool = False, verbose: bool = True) -> bool:
         except Exception:
             pass
 
+    # Never compile SYCL device kernels into the CPython .pyd (0xC0000005 risk on Windows).
     backend = "serial"
-    ok = _build_sycl(out, verbose)
-    if ok and not _extension_imports(out):
-        if verbose:
-            print(
-                f"{LOG_PREFIX} SYCL module built but failed to load (oneAPI DLLs?). "
-                "Call setvars.bat / run_arc.cmd, or falling back to OpenMP.",
-                file=sys.stderr,
-            )
-        try:
-            out.unlink(missing_ok=True)
-        except Exception:
-            pass
-        ok = False
-    if ok:
-        backend = "sycl"
+    ok = False
+    windows = platform.system().lower() == "windows"
+    if windows:
+        ok = _build_with_setuptools(out, verbose, openmp=not openmp_disabled())
+        if not ok:
+            ok = _build_with_setuptools(out, verbose, openmp=False)
     else:
-        windows = platform.system().lower() == "windows"
-        if windows:
+        compiler_bin = os.environ.get("CXX") or shutil.which("c++") or shutil.which("g++") or shutil.which("clang++")
+        if compiler_bin:
+            includes = _pybind_includes()
+            base = [compiler_bin, "-O3", "-std=c++17", "-shared", "-fPIC", *includes, str(CPP), "-o", str(out)]
+            if not openmp_disabled():
+                ok = _run([*base, "-fopenmp"], ROOT, verbose) and out.exists()
+            if not ok:
+                ok = _run(base, ROOT, verbose) and out.exists()
+        if not ok:
             ok = _build_with_setuptools(out, verbose, openmp=not openmp_disabled())
-            if not ok:
-                ok = _build_with_setuptools(out, verbose, openmp=False)
-        else:
-            compiler_bin = os.environ.get("CXX") or shutil.which("c++") or shutil.which("g++") or shutil.which("clang++")
-            if compiler_bin:
-                includes = _pybind_includes()
-                base = [compiler_bin, "-O3", "-std=c++17", "-shared", "-fPIC", *includes, str(CPP), "-o", str(out)]
-                if not openmp_disabled():
-                    ok = _run([*base, "-fopenmp"], ROOT, verbose) and out.exists()
-                if not ok:
-                    ok = _run(base, ROOT, verbose) and out.exists()
-            if not ok:
-                ok = _build_with_setuptools(out, verbose, openmp=not openmp_disabled())
-            if not ok:
-                ok = _build_with_setuptools(out, verbose, openmp=False)
-        if ok:
-            backend = "openmp" if not openmp_disabled() else "serial"
+        if not ok:
+            ok = _build_with_setuptools(out, verbose, openmp=False)
+    if ok:
+        backend = "openmp" if not openmp_disabled() else "serial"
 
     if ok and out.exists():
         meta["backend"] = backend
         STAMP.write_text(json.dumps(meta, indent=2), encoding="utf-8")
         if verbose:
-            print(f"{LOG_PREFIX} built {out.name} backend={backend}", file=sys.stderr)
+            print(f"{LOG_PREFIX} built {out.name} backend={backend} (GPU via external worker)", file=sys.stderr)
         return True
 
     if verbose:

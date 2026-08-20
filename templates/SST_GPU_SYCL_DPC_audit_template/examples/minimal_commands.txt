@@ -1,11 +1,18 @@
 # Quick smokes — run from this template folder.
 
+# One-command Windows (install + Arc worker battery -> {folder}_outputs/):
+run_all.cmd
+
+# Proven Arc GPU smoke (session setvars; no permanent PATH):
+run_sycl_worker_smoke.cmd
+
 python -m native_ext.build_ext_if_needed --force
 python run_example.py --tiny --force-python
 python run_example.py --tiny --summary-only
 python run_example.py --n-segments 32 --n-queries 16 --backend python --out example_python.json
 python -m pytest -q
-python run_all_checks.py --force-python --out-dir audit_out
+python run_all_checks.py --force-python
 
-# Arc / oneAPI (Windows):
-run_arc.cmd
+# Heavy Biot-Savart on external SYCL worker (expect sycl-worker-fp32 / is_gpu=True on Arc):
+set SST_SYCL_ALLOW_FP32=1
+python run_example.py --n-segments 512 --n-queries 8192 --backend sycl --summary-only

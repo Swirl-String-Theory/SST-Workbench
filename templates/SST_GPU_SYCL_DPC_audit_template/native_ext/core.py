@@ -18,6 +18,8 @@ from .fallback import (
     python_backend_info,
     vec_add as vec_add_py,
 )
+from .sycl_worker import biot_savart as worker_biot_savart
+from .sycl_worker import shutdown_worker, worker_info
 
 
 def write_json(path: str | Path, data: Any) -> None:
@@ -47,6 +49,7 @@ def write_csv(path: str | Path, rows: list[dict[str, Any]]) -> None:
 
 def _import_native():
     try:
+        _config.ensure_oneapi_dll_directories()
         return __import__(f"{_config.PACKAGE_NAME}.{_config.EXT_BASENAME}", fromlist=["*"])
     except Exception:
         return None
@@ -65,23 +68,31 @@ def _load_cpp_backend(*, force_build: bool = False, build_verbose: bool = False,
         return None
 
 
-def native_info(mod: Any | None) -> dict[str, Any]:
+def native_info(mod: Any | None, *, probe_sycl_worker: bool = False) -> dict[str, Any]:
     if mod is None:
         info = python_backend_info()
         info["native_loaded"] = False
         info["has_gpu"] = False
-        return info
-    try:
-        info = dict(mod.backend_info())
-    except Exception:
-        info = {}
-    info["native_loaded"] = True
-    info["sycl_compiled"] = bool(getattr(mod, "sycl_compiled", info.get("sycl_compiled", False)))
-    info["openmp_compiled"] = bool(getattr(mod, "openmp_compiled", info.get("openmp_compiled", False)))
-    try:
-        info["has_gpu"] = bool(mod.probe_sycl_gpu())
-    except Exception:
-        info["has_gpu"] = bool(info.get("is_gpu", False))
+    else:
+        try:
+            info = dict(mod.backend_info())
+        except Exception:
+            info = {}
+        info["native_loaded"] = True
+        info["sycl_compiled"] = bool(getattr(mod, "sycl_compiled", info.get("sycl_compiled", False)))
+        info["openmp_compiled"] = bool(getattr(mod, "openmp_compiled", info.get("openmp_compiled", False)))
+        info["has_gpu"] = False
+
+    wi = worker_info(start=False) if not probe_sycl_worker else worker_info(start=True)
+    info["sycl_worker"] = wi
+    info["sycl_worker_available"] = bool(wi.get("available"))
+    if wi.get("available"):
+        info["has_gpu"] = bool(wi.get("is_gpu"))
+        info["is_gpu"] = bool(wi.get("is_gpu"))
+        info["device_name"] = wi.get("device_name", info.get("device_name"))
+        info["fp64"] = bool(wi.get("fp64", False))
+        # Treat external worker as the SYCL path (not in-process .pyd).
+        info["sycl_compiled"] = True
     return info
 
 
@@ -98,30 +109,24 @@ def resolve_backend(
     has_native = bool(info.get("native_loaded"))
 
     def sycl_gpu() -> bool:
-        return bool(info.get("sycl_compiled") and (info.get("has_gpu") or info.get("is_gpu")))
+        return bool(info.get("sycl_worker_available") and (info.get("has_gpu") or info.get("is_gpu")))
 
     if req == "sycl":
         if sycl_gpu():
             return "sycl"
-        if info.get("sycl_compiled") and allow_sycl_cpu:
+        if info.get("sycl_worker_available") and allow_sycl_cpu:
             return "sycl"
         raise RuntimeError(
-            "SYCL GPU required but not visible. Run run_arc.cmd after oneAPI setvars, "
-            "or pass --allow-sycl-cpu for a SYCL CPU device."
+            "SYCL GPU worker required but not visible. Use run_sycl_worker_smoke.cmd / run_arc.cmd "
+            "(session setvars, ONEAPI_DEVICE_SELECTOR=level_zero:gpu, SST_SYCL_ALLOW_FP32=1 on Arc)."
         )
     if req == "openmp":
         return "openmp" if has_native else "python"
     if sycl_gpu():
         return "sycl"
-    if info.get("sycl_compiled") and allow_sycl_cpu:
-        return "sycl"
     if has_native:
         return "openmp"
     return "python"
-
-
-def _use_sycl(backend: str) -> bool:
-    return backend == "sycl"
 
 
 def run_tiny(
@@ -144,17 +149,19 @@ def run_tiny(
     if force_python:
         backend = "python"
     mod = None if force_python else _load_cpp_backend(force_build=force_build, build_verbose=build_verbose, skip_build=skip_build)
-    info = native_info(mod)
+    info = native_info(mod, probe_sycl_worker=(backend in ("sycl", "auto")))
     chosen = resolve_backend(backend, info, allow_sycl_cpu=allow_sycl_cpu, strict_sycl=strict_sycl)
+    # vec_add stays host/OpenMP (worker only implements Biot-Savart).
     if chosen == "python" or mod is None:
         value = vec_add_py(a, b)
         ms = (time.perf_counter() - t0) * 1000.0
         probe = python_backend_info(last_kernel_ms=ms)
         probe.update({"backend": "python", "value": value.tolist(), "ok": np.allclose(value, np.asarray(a) + np.asarray(b))})
         return probe
-    value = np.asarray(mod.vec_add(np.asarray(a, float), np.asarray(b, float), _use_sycl(chosen), allow_sycl_cpu))
+    use_host = True
+    value = np.asarray(mod.vec_add(np.asarray(a, float), np.asarray(b, float), False, False))
     probe = native_info(mod)
-    probe["backend"] = chosen if chosen != "openmp" else probe.get("last_backend", chosen)
+    probe["backend"] = probe.get("last_backend", "openmp" if use_host else chosen)
     probe["value"] = value.tolist()
     probe["ok"] = bool(np.allclose(value, np.asarray(a, float) + np.asarray(b, float)))
     return probe
@@ -174,7 +181,7 @@ def run(
     build_verbose: bool = False,
     strict_sycl: bool = False,
 ) -> dict[str, Any]:
-    """GPU-first Biot-Savart. Python fallback is for tiny sizes only."""
+    """GPU-first Biot-Savart via external worker; OpenMP/Python on host."""
     points = circle(n_segments)
     queries = default_queries(n_queries)
     if force_python:
@@ -186,8 +193,32 @@ def run(
         )
     t0 = time.perf_counter()
     mod = None if force_python else _load_cpp_backend(force_build=force_build, build_verbose=build_verbose, skip_build=skip_build)
-    info = native_info(mod)
+    info = native_info(mod, probe_sycl_worker=(backend in ("sycl", "auto") or strict_sycl))
     chosen = resolve_backend(backend, info, allow_sycl_cpu=allow_sycl_cpu, strict_sycl=strict_sycl)
+
+    if chosen == "sycl":
+        vel, label = worker_biot_savart(points, queries, gamma=float(gamma), core=float(core))
+        ms = (time.perf_counter() - t0) * 1000.0
+        wi = worker_info()
+        probe = {
+            "backend": label,
+            "sycl_compiled": True,
+            "native_loaded": bool(mod is not None),
+            "openmp_compiled": bool(info.get("openmp_compiled")),
+            "is_gpu": bool(wi.get("is_gpu")),
+            "has_gpu": bool(wi.get("is_gpu")),
+            "device_name": wi.get("device_name"),
+            "fp64": bool(wi.get("fp64", False)),
+            "sycl_worker_available": True,
+            "transport": wi.get("transport"),
+            "n_segments": int(n_segments),
+            "n_queries": int(n_queries),
+            "velocity_l2": float(np.linalg.norm(vel)),
+            "last_kernel_ms": ms,
+            "ok": bool(np.isfinite(vel).all()),
+        }
+        return probe
+
     if chosen == "python" or mod is None:
         vel = biot_savart_py(points, queries, gamma, core)
         ms = (time.perf_counter() - t0) * 1000.0
@@ -202,16 +233,15 @@ def run(
             }
         )
         return probe
-    vel = np.asarray(
-        mod.biot_savart(points, queries, float(gamma), float(core), _use_sycl(chosen), allow_sycl_cpu)
-    )
+
+    vel = np.asarray(mod.biot_savart(points, queries, float(gamma), float(core), False, False))
     probe = native_info(mod)
-    probe["backend"] = "sycl" if _use_sycl(chosen) else probe.get("last_backend", chosen)
+    probe["backend"] = probe.get("last_backend", chosen)
     probe["n_segments"] = int(n_segments)
     probe["n_queries"] = int(n_queries)
     probe["velocity_l2"] = float(np.linalg.norm(vel))
     probe["ok"] = bool(np.isfinite(vel).all())
-    probe["is_gpu"] = bool(probe.get("is_gpu") or probe.get("has_gpu"))
+    probe["is_gpu"] = False
     return probe
 
 
@@ -229,14 +259,17 @@ def run_min_abs(
         backend = "python"
     mod = None if force_python else _load_cpp_backend(force_build=force_build, build_verbose=build_verbose, skip_build=skip_build)
     info = native_info(mod)
-    chosen = resolve_backend(backend, info, allow_sycl_cpu=allow_sycl_cpu)
+    # min_abs is host-only in this template.
+    chosen = "python" if force_python or mod is None else ("openmp" if info.get("native_loaded") else "python")
+    if backend == "python":
+        chosen = "python"
     xx = np.asarray(x, dtype=float).reshape(-1)
     if chosen == "python" or mod is None:
         value = min_abs_py(xx)
         return {"backend": "python", "value": value, "ok": True}
-    value = float(mod.min_abs(xx, _use_sycl(chosen), allow_sycl_cpu))
+    value = float(mod.min_abs(xx, False, False))
     probe = native_info(mod)
-    probe["backend"] = "sycl" if _use_sycl(chosen) else probe.get("last_backend", chosen)
+    probe["backend"] = probe.get("last_backend", chosen)
     probe["value"] = value
     probe["ok"] = np.isfinite(value)
     return probe
@@ -310,14 +343,14 @@ def run_sweep(
 
 def run_all_checks(
     *,
-    out_dir: str | Path = "audit_out",
+    out_dir: str | Path | None = None,
     backend: str = "auto",
     allow_sycl_cpu: bool = False,
     force_python: bool = False,
     force_build: bool = False,
     strict_sycl: bool = False,
 ) -> dict[str, Any]:
-    out = Path(out_dir)
+    out = Path(out_dir) if out_dir is not None else _config.default_output_dir()
     out.mkdir(parents=True, exist_ok=True)
 
     smoke_py = run_audit(n_segments=32, n_queries=16, force_python=True, skip_build=True)
@@ -330,7 +363,7 @@ def run_all_checks(
         smoke_native = run_audit(
             n_segments=64,
             n_queries=32,
-            backend="openmp" if backend != "sycl" else "auto",
+            backend="openmp",
             force_build=force_build,
             allow_sycl_cpu=allow_sycl_cpu,
         )
@@ -387,11 +420,21 @@ def run_all_checks(
         "smoke_sycl_ok": None if smoke_sycl is None else smoke_sycl.get("ok"),
         "heavy_sycl_ok": None if heavy is None else heavy.get("ok"),
         "heavy_is_gpu": None if heavy is None else bool(heavy.get("probe", {}).get("is_gpu")),
+        "sycl_backend_label": None if smoke_sycl is None else smoke_sycl.get("probe", {}).get("backend"),
         "sweep_ok": all(r.get("ok") for r in sweep),
         "timings_ms": timings,
         "ok": bool(smoke_py["ok"] and (force_python or (smoke_native and smoke_native["ok"])) and all(r.get("ok") for r in sweep)),
     }
     if strict_sycl:
-        summary["ok"] = bool(summary["ok"] and smoke_sycl and smoke_sycl.get("ok") and smoke_sycl.get("probe", {}).get("is_gpu"))
+        summary["ok"] = bool(
+            summary["ok"]
+            and smoke_sycl
+            and smoke_sycl.get("ok")
+            and smoke_sycl.get("probe", {}).get("is_gpu")
+        )
     write_json(out / "audit_summary.json", summary)
+    try:
+        shutdown_worker()
+    except Exception:
+        pass
     return summary

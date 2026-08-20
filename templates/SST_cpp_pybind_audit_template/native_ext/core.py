@@ -120,12 +120,12 @@ def run_sweep(
 
 def run_all_checks(
     *,
-    out_dir: str | Path = "audit_out",
+    out_dir: str | Path | None = None,
     force_python: bool = False,
     force_build: bool = False,
 ) -> dict[str, Any]:
     """Run a small battery of checks (extend for your audit)."""
-    out = Path(out_dir)
+    out = Path(out_dir) if out_dir is not None else _config.default_output_dir()
     out.mkdir(parents=True, exist_ok=True)
 
     smoke_cpp = run_audit(a=2.0, b=3.0, force_python=force_python, force_build=force_build)

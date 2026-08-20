@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from native_ext import _config
 from native_ext.core import run_audit, write_json
 
 
@@ -50,7 +51,7 @@ def main() -> int:
     p.add_argument(
         "--out",
         default="",
-        help="Optional JSON output path (e.g. example_out.json).",
+        help="Optional JSON output path (bare names go under {folder}_outputs/).",
     )
     p.add_argument(
         "--summary-only",
@@ -70,7 +71,10 @@ def main() -> int:
     )
 
     if args.out:
-        write_json(args.out, result)
+        out_path = Path(args.out)
+        if not out_path.is_absolute() and len(out_path.parts) == 1:
+            out_path = _config.default_output_dir() / out_path
+        write_json(out_path, result)
 
     if args.summary_only:
         status = "PASS" if result["ok"] else "FAIL"

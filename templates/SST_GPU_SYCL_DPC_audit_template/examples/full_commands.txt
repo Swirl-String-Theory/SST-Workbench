@@ -1,53 +1,40 @@
-# Full command reference — GPU-first SYCL/DPC++ audit template.
-# Run from the project root (this template folder or your renamed copy).
+# Full command reference — GPU-first SYCL worker template (Arc A770).
+# Session setvars only; no permanent PATH. GPU via sst_sycl_worker.exe.
 
 # ---------------------------------------------------------------------------
-# build_ext_if_needed.py
+# Windows one-command launchers
 # ---------------------------------------------------------------------------
-python -m native_ext.build_ext_if_needed
-python -m native_ext.build_ext_if_needed --quiet
+run_install.cmd
+run_sycl_worker_smoke.cmd
+run_all.cmd
+run_arc.cmd
+
+# ---------------------------------------------------------------------------
+# Host OpenMP .pyd (no SYCL device code in CPython)
+# ---------------------------------------------------------------------------
 python -m native_ext.build_ext_if_needed --force
-python -m native_ext.build_ext_if_needed --force --quiet
 python -m native_ext.build_ext_if_needed --strict
 
-# Optional env:
-#   set SST_DISABLE_SYCL=1
-#   set SST_DISABLE_OPENMP=1
-#   set SST_BACKEND=sycl
+# ---------------------------------------------------------------------------
+# External worker tools
+# ---------------------------------------------------------------------------
+python tools\build_sycl_worker.py --force --strict
+python -X faulthandler tools\sycl_worker_smoke.py
+
+# Optional env (set by run_*.cmd):
+#   set ONEAPI_DEVICE_SELECTOR=level_zero:gpu
+#   set SYCL_CACHE_PERSISTENT=0
+#   set SST_SYCL_ALLOW_FP32=1
 
 # ---------------------------------------------------------------------------
-# run_example.py — default is heavy biot_savart (N=512, M=8192)
+# run_example.py
 # ---------------------------------------------------------------------------
-python run_example.py
-python run_example.py --tiny
 python run_example.py --tiny --backend python
-python run_example.py --n-segments 512 --n-queries 8192 --backend auto --summary-only
+python run_example.py --n-segments 512 --n-queries 8192 --backend sycl --summary-only
 python run_example.py --n-segments 64 --n-queries 32 --backend openmp --out example_openmp.json
-python run_example.py --backend sycl --force-build --build-verbose --out example_sycl.json
-python run_example.py --allow-sycl-cpu --backend sycl
-python run_example.py --force-python --n-segments 32 --n-queries 16
-python run_example.py --skip-build
-python run_example.py --gamma 1 --core 1 --out example_out.json
 
 # ---------------------------------------------------------------------------
-# run_sweep.py — scale query count M
+# run_all_checks.py (default: {folder}_outputs/)
 # ---------------------------------------------------------------------------
-python run_sweep.py
-python run_sweep.py --queries 256,1024,4096 --n-segments 128
-python run_sweep.py --backend sycl --out-json example_sweep.json --out-csv example_sweep.csv
-python run_sweep.py --force-python --queries 8,16 --n-segments 16
-
-# ---------------------------------------------------------------------------
-# run_all_checks.py
-# ---------------------------------------------------------------------------
-python run_all_checks.py
-python run_all_checks.py --out-dir audit_out
-python run_all_checks.py --force-python --out-dir audit_out_py
-python run_all_checks.py --force-build --backend sycl --out-dir audit_out_gpu
-python run_all_checks.py --allow-sycl-cpu --backend sycl
-
-# ---------------------------------------------------------------------------
-# Windows Arc launcher (setvars + Level Zero; fails if no GPU)
-# ---------------------------------------------------------------------------
-run_arc.cmd
-run_arc.cmd --out-dir audit_out_arc
+python run_all_checks.py --force-python
+python run_all_checks.py --force-build --backend sycl

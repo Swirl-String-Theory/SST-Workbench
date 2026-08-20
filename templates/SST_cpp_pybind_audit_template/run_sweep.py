@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from native_ext import _config
 from native_ext.core import run_sweep, write_csv, write_json
 
 
@@ -20,6 +21,7 @@ def _parse_float_list(s: str) -> list[float]:
 
 
 def main() -> int:
+    default_out = _config.default_output_dir()
     p = argparse.ArgumentParser(
         description="Sweep operands for the SST cpp_pybind audit template.",
     )
@@ -29,8 +31,16 @@ def main() -> int:
     p.add_argument("--skip-build", action="store_true", help="Skip C++ auto-build before sweep.")
     p.add_argument("--force-build", action="store_true", help="Force C++ rebuild before sweep.")
     p.add_argument("--build-verbose", action="store_true", help="Verbose compiler output.")
-    p.add_argument("--out-json", default="example_sweep.json", help="JSON output path.")
-    p.add_argument("--out-csv", default="example_sweep.csv", help="CSV output path.")
+    p.add_argument(
+        "--out-json",
+        default=str(default_out / "sweep.json"),
+        help="JSON output path.",
+    )
+    p.add_argument(
+        "--out-csv",
+        default=str(default_out / "sweep.csv"),
+        help="CSV output path.",
+    )
     args = p.parse_args()
 
     rows = run_sweep(
