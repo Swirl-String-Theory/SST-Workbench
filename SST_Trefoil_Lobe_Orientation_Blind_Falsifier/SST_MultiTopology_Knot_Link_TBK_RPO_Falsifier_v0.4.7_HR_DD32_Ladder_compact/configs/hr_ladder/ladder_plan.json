@@ -1,0 +1,132 @@
+{
+  "version": "0.4.7",
+  "name": "High-Resolution DD32 Convergence Ladder",
+  "backend_default": "sycl-dd32",
+  "rungs": [
+    {
+      "index": 0,
+      "name": "R0_N360_K8_LINEAR",
+      "config": "configs/hr_ladder/00_R0_N360_K8_LINEAR.json",
+      "N": 360,
+      "k_max": 8,
+      "dynamics": false,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [],
+      "reference_eps": 0.004,
+      "description": "Baseline at historical FULL spatial/spectral resolution; linear convergence only."
+    },
+    {
+      "index": 1,
+      "name": "R1_N540_K8_SPATIAL",
+      "config": "configs/hr_ladder/01_R1_N540_K8_SPATIAL.json",
+      "N": 540,
+      "k_max": 8,
+      "dynamics": false,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [],
+      "reference_eps": 0.004,
+      "description": "Spatial refinement with fixed k_max=8."
+    },
+    {
+      "index": 2,
+      "name": "R2_N720_K8_SPATIAL",
+      "config": "configs/hr_ladder/02_R2_N720_K8_SPATIAL.json",
+      "N": 720,
+      "k_max": 8,
+      "dynamics": false,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [],
+      "reference_eps": 0.004,
+      "description": "High spatial refinement with fixed k_max=8; closes spatial tail."
+    },
+    {
+      "index": 3,
+      "name": "R3_N720_K12_SPECTRAL",
+      "config": "configs/hr_ladder/03_R3_N720_K12_SPECTRAL.json",
+      "N": 720,
+      "k_max": 12,
+      "dynamics": false,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [],
+      "reference_eps": 0.004,
+      "description": "Spectral refinement at fixed N=720."
+    },
+    {
+      "index": 4,
+      "name": "R4_N720_K16_SPECTRAL",
+      "config": "configs/hr_ladder/04_R4_N720_K16_SPECTRAL.json",
+      "N": 720,
+      "k_max": 16,
+      "dynamics": false,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [],
+      "reference_eps": 0.004,
+      "description": "High spectral refinement at fixed N=720; closes spectral tail."
+    },
+    {
+      "index": 5,
+      "name": "R5_N720_K16_ROBUST_FULL",
+      "config": "configs/hr_ladder/05_R5_N720_K16_ROBUST_FULL.json",
+      "N": 720,
+      "k_max": 16,
+      "dynamics": true,
+      "eps_convergence": [
+        0.001,
+        0.002,
+        0.004,
+        0.008
+      ],
+      "eps_robustness": [
+        0.012,
+        0.016
+      ],
+      "reference_eps": 0.004,
+      "description": "Final full-dynamics rung plus large-epsilon robustness probes."
+    }
+  ],
+  "comparison": {
+    "growth_threshold": 0.12,
+    "threshold_margin_for_fp64_confirmation": 0.02,
+    "tail_contraction_ratio_max": 0.85,
+    "spatial_relative_tail_max": 0.05,
+    "spectral_relative_tail_max": 0.05,
+    "dominant_kmax_boundary_weight_max": 0.15,
+    "epsilon_robustness_J_drift_warn": 0.25,
+    "extrapolation_p_min": 0.25,
+    "extrapolation_p_max": 4.0,
+    "extrapolation_p_grid": 751
+  },
+  "interpretation": [
+    "R0-R2 isolate spatial convergence at fixed k_max=8.",
+    "R2-R4 isolate spectral convergence at fixed N=720.",
+    "R5 keeps N=720,k_max=16 and adds eps=0.012,0.016 only as robustness probes; P1 uses only eps<=0.008.",
+    "A resolution conclusion is not accepted from an extrapolation fit unless the measured high-resolution tail also contracts and is quasi-monotone.",
+    "Large dominant-eigenvector weight on k_max marks spectral truncation as unresolved.",
+    "DD32 is not IEEE FP64; near-threshold, unresolved, RPO and Floquet cases remain queued for CPU/OpenMP FP64 confirmation."
+  ]
+}
