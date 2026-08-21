@@ -1,0 +1,101 @@
+% ======================================================================
+% 90_charge_anneal_MEB.kpc
+% KnotPlot 3.1 controlled relaxation matrix
+% Purpose: Charge annealing: use strong electric repulsion to enter another basin, then remove it.
+%
+% IMPORTANT:
+% - Every candidate starts from reset all + load 3.1.
+% - nbeads 300 is used as an absolute bead count.
+% - ago is atomic: saves happen only after the requested iterations.
+% - All non-swept dynamical parameters are explicitly fixed.
+% - Saved .k files use float format; coords .txt are plain XYZ-like data.
+% ======================================================================
+
+% ----------------------------------------------------------------------
+% Candidate: A90_MEB_charge_anneal
+% q: 60 -> 30 -> 15 -> 7.5 -> 0
+% cumulative iterations: 0, 1000, 2500, 4500, 7000, 10000
+% ----------------------------------------------------------------------
+reset all
+load 3.1
+nbeads 300
+mode cb
+
+centre
+fitto mindist 1.05
+
+collision fast
+close = 1.0
+max-dr = 0.01
+
+mechforce = on
+elecforce = on
+bendforce = on
+
+hooke 1
+power 6
+timeincr 15
+bencon = 1.0
+
+stusplit = 0
+dstep = 1
+bradius = 0.1
+cradius = 0.05
+energy model MD
+
+charge 60
+centre
+energy
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q60_i00000.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q60_i00000.txt
+
+ago 1000
+centre
+energy
+writhe
+length
+rog
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q60_i01000.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q60_i01000.txt
+
+charge 30
+ago 1500
+centre
+energy
+writhe
+length
+rog
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q30_i02500.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q30_i02500.txt
+
+charge 15
+ago 2000
+centre
+energy
+writhe
+length
+rog
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q15_i04500.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q15_i04500.txt
+
+charge 7.5
+ago 2500
+centre
+energy
+writhe
+length
+rog
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q7p5_i07000.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q7p5_i07000.txt
+
+% Final stage: electric force remains enabled but q=0, i.e. zero electric amplitude.
+charge 0
+ago 3000
+centre
+energy
+writhe
+length
+rog
+alex -1
+save KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q0_i10000.k float
+coords KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0/A90_anneal_q0_i10000.txt

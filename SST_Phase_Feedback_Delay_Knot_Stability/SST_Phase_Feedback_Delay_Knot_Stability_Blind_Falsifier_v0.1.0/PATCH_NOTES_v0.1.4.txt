@@ -1,0 +1,19 @@
+SST Phase-Feedback Delay Knot Stability Blind Falsifier v0.1.4
+================================================================
+
+Hotfix: strict-JSON handling for undersized blind ensembles.
+
+Observed target-machine state:
+- native/Python parity PASS
+- 4 existing tests PASS
+- exactly 1 final-checkpoint candidate prepared
+- evaluate() generated undefined small-sample statistics as NaN
+- json.dumps(..., allow_nan=False) correctly rejected NaN
+
+v0.1.4 changes:
+1. Non-finite scalar values are serialized as JSON null, never NaN/Infinity.
+2. n < min_candidates yields status=INCONCLUSIVE with an explicit status_reason.
+3. Spearman and holdout fields are null when they are not statistically defined.
+4. Adds evaluated=false to gates that were not eligible to run.
+5. Adds a one-candidate regression test.
+6. Scientific thresholds, native kernels, blinding, modal prediction and nonlinear dynamics are unchanged.
