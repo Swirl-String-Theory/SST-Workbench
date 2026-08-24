@@ -1,4 +1,33 @@
-# KnotPlot 3.1 Comprehensive Dynamics Parameter Atlas v0.3.2
+# KnotPlot 3.1 Comprehensive Dynamics Parameter Atlas v0.3.3
+
+
+## v0.3.3 analysis correction + balance candidates
+
+No KnotPlot dynamics are changed and no completed relaxation needs to be rerun.
+
+v0.3.3 replaces the effect-size classification metric by:
+
+1. uniform closed-curve arclength resampling (256 samples);
+2. search over all cyclic curve origins;
+3. proper Kabsch rotation;
+4. normalized RMS using mean radius of gyration.
+
+The old bead-index metric is retained as `legacy_indexed_normalized_rms`.
+
+This specifically prevents tangential bead redistribution from masquerading as
+large physical shape change.
+
+v0.3.3 also derives a **surrogate** `charge × hooke × power` balance ray from
+the one-factor endpoint responses. This is explicitly a candidate generator,
+not proof of instantaneous force balance.
+
+For a completed v0.3.2 campaign, overlay the patch and run:
+
+```bat
+run_reanalyze_v033.cmd
+```
+
+No `ago` command or KnotPlot executable is invoked by that script.
 
 
 ## v0.3.2 isolated-run-failure continuation
