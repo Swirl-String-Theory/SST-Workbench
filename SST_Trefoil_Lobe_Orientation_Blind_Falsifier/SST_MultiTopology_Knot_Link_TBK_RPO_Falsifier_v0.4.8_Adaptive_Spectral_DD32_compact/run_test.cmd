@@ -1,0 +1,13 @@
+@echo off
+setlocal EnableExtensions
+cd /d "%~dp0"
+if not exist ".venv\Scripts\python.exe" call run_install.cmd || exit /b 1
+echo [1/4] Legacy trefoil/native smoke...
+".venv\Scripts\python.exe" tests\smoke_test.py || exit /b 1
+echo [2/4] Multi-topology parser/linking/mode smoke...
+".venv\Scripts\python.exe" tests\panel_smoke_test.py || exit /b 1
+echo [3/4] DD32 reference + fast-Jacobian regressions...
+".venv\Scripts\python.exe" -m pytest -q tests\dd32_reference_test.py tests\test_fast_jacobian_total_only.py tests\test_host_dll_isolation.py || exit /b 1
+echo [4/4] High-resolution ladder synthesis tests...
+".venv\Scripts\python.exe" -m pytest -q tests\test_ladder_analysis.py || exit /b 1
+exit /b 0

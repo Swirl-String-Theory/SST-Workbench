@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\ncd /d "%~dp0"\r\npython analyze_matrix_effects.py %*\r\nexit /b %ERRORLEVEL%\r\n

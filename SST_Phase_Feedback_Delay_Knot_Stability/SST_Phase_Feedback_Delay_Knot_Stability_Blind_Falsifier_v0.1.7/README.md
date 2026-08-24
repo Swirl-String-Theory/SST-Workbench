@@ -1,0 +1,245 @@
+# SST Phase-Feedback Delay Knot Stability Blind Falsifier v0.1.7
+
+## v0.1.7 batch-wrapper fix
+
+The resolver Python code and the dataset are already validated on the target machine.
+The remaining failure was the nested batch wrapper. v0.1.7 calls `resolve_input.py`
+directly from `run_05_find_input.cmd` and `run_10_prepare_blind.cmd`.
+
+Recommended sequence:
+
+```bat
+run_05_find_input.cmd
+run_06_check_dataset.cmd
+run_all_blind.cmd
+```
+
+Expected dataset on the reported workstation: 41 production `*_i10000.txt` files.
+
+---
+
+## v0.1.6 cumulative input-discovery hotfix
+
+This release fixes two target-machine findings:
+
+1. `examples/*_i10000.txt` were being mistaken for real KnotPlot campaign data.
+2. A non-cumulative overlay onto a directory still named `v0.1.0` could leave an old
+   `_RESOLVE_INPUT.cmd`, causing `resolve_input.py` to be called without `--out-file`.
+
+v0.1.6 therefore:
+
+- replaces `_RESOLVE_INPUT.cmd` with a parser-safe launcher that always supplies
+  `--out-file`;
+- excludes `examples`, `results`, `build`, `.venv`, `blind_work`, and other
+  non-production trees from scientific input discovery;
+- adds `run_03_resolver_selftest.cmd`;
+- makes `run_04_inventory_input.cmd` distinguish **production** from **excluded**
+  checkpoint files;
+- provides a **cumulative** patch ZIP suitable for overlaying any v0.1.x directory.
+
+Recommended diagnostic sequence:
+
+```bat
+run_03_resolver_selftest.cmd
+run_04_inventory_input.cmd
+run_05_find_input.cmd
+```
+
+Only when inventory reports production `*_i10000.txt` files should the blind campaign run.
+
+---
+
+## v0.1.5 broad input-discovery hotfix
+
+If the normal KnotPlot directories contain no `*_i10000.txt`, the resolver now
+searches the complete `SST-Workbench` tree and groups final checkpoints by parent
+directory. It also adds:
+
+```bat
+run_04_inventory_input.cmd
+```
+
+which prints counts and exact parent folders for checkpoints at 0, 1000, 4000,
+and 10000 iterations.
+
+This changes only input discovery. Scientific kernels, blinding, preregistered
+minimum sample size, delay predictor, and nonlinear gates are unchanged.
+
+---
+
+## v0.1.4 small-ensemble hotfix
+
+A campaign with fewer than the preregistered `min_candidates` is now reported as `INCONCLUSIVE` rather than attempting to serialize undefined statistics. Undefined Spearman/holdout values are represented by strict-JSON `null`. The basic preset still requires **8** valid candidates for a confirmatory PASS/FAIL decision.
+
+With only one `*_i10000.txt` candidate, the expected result is therefore approximately:
+
+```json
+{
+  "status": "INCONCLUSIVE",
+  "status_reason": "insufficient_candidates: 1 < 8",
+  "n": 1,
+  "min_candidates_required": 8
+}
+```
+
+This is not a scientific failure; it means the KnotPlot relaxation matrix is not populated sufficiently for the preregistered cross-candidate correlation/holdout test.
+
+---
+
+## v0.1.3 PowerShell-policy hotfix
+
+Input discovery no longer depends on PowerShell. `_RESOLVE_INPUT.cmd` runs
+`resolve_input.py` using the project venv when present and otherwise falls back to
+`py -3` or `python`. This avoids `AllSigned` / signature policy failures without
+changing the machine-wide execution policy.
+
+Quick resolver test:
+
+```bat
+run_05_find_input.cmd
+```
+
+You should see a resolved directory and a non-zero count of `*_i10000.txt` files.
+
+---
+
+v0.1.2 fixes the post-native-build failure where an existing but empty/wrong
+KnotPlot directory was accepted and the blind prepare stage then failed with
+`no files matching *_i10000.txt`.
+
+The resolver is now **content based**:
+
+1. an explicit input path is accepted only if it really contains `*_i10000.txt`;
+2. the normal one/two-level sibling layouts are searched;
+3. both campaign workspace spellings `projects` and `projects` are checked when present;
+4. legacy nested source layout `KnotPlot\\_3p1\\_MultiDynamics\\_Relaxation\\_Matrix\\_v0.1.0` is included;
+5. nearby KnotPlot roots are scanned for the actual final-checkpoint files;
+6. ties fail explicitly rather than silently choosing a dataset;
+7. if only earlier checkpoints exist, their counts are printed and the run stops.
+
+The preregistered blind test still requires the **same `i10000` checkpoint** for all
+candidates. It does not silently substitute `i04000` or `i01000`.
+
+Before a full run you can now execute:
+
+```bat
+run_05_find_input.cmd
+```
+
+or pass a dataset explicitly:
+
+```bat
+run_05_find_input.cmd "C:\\path\\to\\matrix-output"
+run_all.cmd "C:\\path\\to\\matrix-output" basic
+```
+
+---
+
+
+## v0.1.2 Windows/MSVC + input-path hotfix
+
+The target workstation log showed that dependency installation completed and the native build reached `build_ext`, but setuptools failed before `cl.exe` was spawned because its nested `cmd /u /c vcvarsall.bat ... && set` returned a non-zero status. v0.1.2 initializes/reuses MSVC in the parent CMD process and sets `DISTUTILS_USE_SDK=1`, so setuptools no longer launches a second `vcvarsall.bat`. The actual native gate is now `where cl.exe`, `where link.exe`, import of the compiled backend, and Python/C++ parity.
+
+The default KnotPlot matrix path is also resolved robustly from either one or two parent levels. This matches the common layout where the falsifier sits inside an SST subfolder while `KnotPlot` is a sibling at the SST-Workbench root.
+
+If the user's CMD AutoRun itself emits `The system cannot find the path specified`, that warning is external to this package. Running from an IDE may still print it once, but v0.1.2 prevents setuptools from triggering the same AutoRun/`vcvarsall` path again during compilation.
+
+# SST Phase Feedback Delay Knot Stability Blind Falsifier v0.1.2
+
+C++17/pybind11 + Python blind falsifier for the question:
+
+> Does a finite self-return phase delay predict which relaxed vortex-knot geometries are dynamically more stable?
+
+It follows the established SST workbench pattern: native C++ kernel, Python orchestration/fallback, strict native preflight, staged `.cmd` scripts, sealed blind IDs, frozen evaluation, then reveal. The architecture is aligned with the prior SST Kelvin/Floquet C++/pybind workbench pattern. 
+
+## Designed input
+
+By default the Windows scripts look for the current KnotPlot relaxation matrix at:
+
+```text
+..\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0
+```
+
+and ingest only terminal checkpoints:
+
+```text
+*_i10000.txt
+```
+
+You can override the input directory:
+
+```bat
+run_all.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
+```
+
+## Recommended scientific workflow
+
+First freeze the blind result without revealing preparation labels:
+
+```bat
+run_all_blind.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
+```
+
+Inspect:
+
+```text
+results\BLIND_EVALUATION.json
+results\BLIND_EVALUATION.sha256.txt
+```
+
+Then reveal:
+
+```bat
+run_40_reveal.cmd
+```
+
+Or use the one-command convenience workflow:
+
+```bat
+run_all.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
+```
+
+Higher resolution:
+
+```bat
+run_all_extended.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
+```
+
+## Core falsification chain
+
+```text
+KnotPlot candidate
+  -> blind ID + SHA-256 seal
+  -> uniform arclength resample
+  -> regularized Biot-Savart modal operator
+  -> omega_m, d omega/dk
+  -> tau_m = L/|v_g,m|
+  -> Theta_m = omega_m tau_m
+  -> preregistered D_m = 1 - cos(Theta_m)
+  ---------------- FROZEN PREDICTION ----------------
+  -> nonlinear paired perturbation evolution
+  -> rigid-motion-aligned shape growth
+  -> blind rank gate + global-gain holdout gate
+  ---------------- SHA-256 FREEZE -------------------
+  -> reveal KnotPlot preparation labels
+```
+
+## What is deliberately NOT allowed
+
+- no per-knot fitting of delay;
+- no per-mode fitting of delay;
+- no choosing a favorable phase branch after seeing stability;
+- no selecting `charge`, `bendforce`, `close`, etc. after reveal;
+- no target fine-structure constant or particle observable in the solver.
+
+## Native backend
+
+`run_00_install.cmd` builds `sst_phase_delay_native` with MSVC/C++17 on Windows and stops if the imported backend is not C++.
+
+The pure-Python backend exists for regression/debug only; campaign scripts require native C++.
+
+## Status interpretation
+
+`PASS` means the preregistered phase-delay score both anticorrelates with observed growth and a single globally calibrated gain improves untouched holdout prediction. It is evidence for this particular delayed self-feedback closure inside the numerical filament surrogate.
+
+`FAIL` is scientifically useful: it means this simple swirl-clock stability mechanism does not explain the relaxation-matrix stability ordering under the chosen unforced dynamics.

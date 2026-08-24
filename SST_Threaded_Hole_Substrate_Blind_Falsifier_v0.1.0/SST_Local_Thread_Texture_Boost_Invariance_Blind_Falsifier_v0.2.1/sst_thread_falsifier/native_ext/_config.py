@@ -1,0 +1,5 @@
+PACKAGE_NAME = "sst_thread_falsifier.native_ext"
+EXT_BASENAME = "_native"
+CPP_REL = "cpp/native.cpp"
+LOG_PREFIX = "[SST-THREAD-NATIVE]"
+STAMP_REL = "build/native_build.stamp.json"

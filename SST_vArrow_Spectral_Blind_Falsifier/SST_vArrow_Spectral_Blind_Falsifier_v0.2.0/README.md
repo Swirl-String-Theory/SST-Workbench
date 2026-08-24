@@ -55,7 +55,7 @@ run_scan.cmd
 Of voor een andere folder:
 
 ```cmd
-run_scan.cmd C:\workspace\solo_projects\SST-Workbench\VortexLab\outputs outputs_scan_vortexlab
+run_scan.cmd C:\workspace\projects\SST-Workbench\VortexLab\outputs outputs_scan_vortexlab
 ```
 
 De scanner loopt recursief door alle subfolders.

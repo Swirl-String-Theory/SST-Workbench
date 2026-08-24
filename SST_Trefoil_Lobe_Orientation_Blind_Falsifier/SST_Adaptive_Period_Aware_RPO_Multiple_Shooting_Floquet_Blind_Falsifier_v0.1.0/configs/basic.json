@@ -1,0 +1,87 @@
+{
+  "version": "0.1.0",
+  "blind_seed": 58117,
+  "selection": {
+    "require_screen_status": "PASS",
+    "require_gates": [
+      "P0_geometry_core_clear",
+      "P1_jacobian_converged",
+      "P2_linear_growth_bounded",
+      "P5_short_ringdown_bounded"
+    ],
+    "exclude_families": [
+      "thermalforce",
+      "thfstrength"
+    ],
+    "max_candidates": 8,
+    "if_spectral_results_exist_require_converged_P2_PASS": true
+  },
+  "certification": {
+    "excursion_min": 0.0075,
+    "recurrence_max": 0.025,
+    "return_ratio_max": 0.5,
+    "return_window_start_periods": 0.5,
+    "core_event_factor": 1.0,
+    "floquet_spectral_radius_max": 1.03
+  },
+  "runtime": {
+    "backend": "openmp",
+    "screen_config": "configs/panel_extended.json",
+    "floquet_config": "configs/hr_ladder/05_R5_N720_K16_ROBUST_FULL.json",
+    "screen_output_rel": "sst_v048_outputs/01_screen_panel_extended_fp64",
+    "spectral_output_rel": "sst_v048_outputs/02_adaptive_spectral_v048/SPECTRAL_EXTENSION_RESULTS.json",
+    "chunk_min_steps": 160,
+    "max_total_steps_per_scan": 12000
+  },
+  "campaign_name": "RPO_BASIC_period_aware_deterministic",
+  "coarse": {
+    "oscillatory_eigenpairs": 3,
+    "amplitudes": [
+      0.002,
+      0.004
+    ],
+    "phase_count": 8,
+    "horizon_periods": 1.4,
+    "max_physical_time": 1.0,
+    "history_stride": 8
+  },
+  "refine": {
+    "top_seeds_per_candidate": 3,
+    "amplitudes": [
+      0.001,
+      0.002,
+      0.004,
+      0.008
+    ],
+    "phase_grid_count": 24,
+    "phase_halfwidth_steps": 2,
+    "horizon_periods": 2.25,
+    "max_physical_time": 1.5,
+    "history_stride": 8
+  },
+  "shooting": {
+    "enabled": true,
+    "top_seeds_per_candidate": 2,
+    "segments": 3,
+    "mode_count": 3,
+    "max_iterations": 2,
+    "fd_eps": 0.0005,
+    "damping": 0.6,
+    "regularization": 0.001,
+    "max_coeff_step": 0.003,
+    "period_scale_grid": [
+      0.95,
+      1.0,
+      1.05
+    ],
+    "continuity_tol": 0.025,
+    "seed_recurrence_max": 0.06,
+    "seed_return_ratio_max": 0.85
+  },
+  "floquet": {
+    "enabled": true,
+    "eps_values": [
+      0.00075
+    ]
+  }
+}

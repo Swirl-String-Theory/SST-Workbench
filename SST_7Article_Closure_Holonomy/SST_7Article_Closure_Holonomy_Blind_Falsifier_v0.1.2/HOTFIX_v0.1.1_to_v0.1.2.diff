@@ -1,0 +1,1269 @@
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/BUILD_REPORT.txt b/BUILD_REPORT.txt
+--- a/BUILD_REPORT.txt	2026-08-21 17:54:32.000000000 +0000
++++ b/BUILD_REPORT.txt	2026-08-24 14:39:23.894583647 +0000
+@@ -1,43 +1,37 @@
+-SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.1
+-Build/validation report
++SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.2
+ 
+-Python syntax: PASS
+-C++17 source compile: PASS
+-OpenMP native test: PASS
+-Python/native curve length parity: PASS
+-Python/native Gauss linking parity: PASS
+-Phase winding selftest: PASS
+-Taylor-Green pressure-Poisson selftest: PASS
+-Periodic Green selftest: PASS
+-Synthetic blind prepare/score/freeze/reveal: PASS_WITH_AVAILABLE_GATES
+-Article-7 logarithmic-q algebra regression: PASS
+-Canon addendum LaTeX syntax harness (T1 + amsmath + hyperref): PASS
++Release focus
++-------------
++Correctness release following the v0.1.1 49-case real-output audit.
+ 
+-Important environment note:
+-The validation container had no outbound package network and no standalone
+-pybind11 Python package. The native source was therefore compiled manually
+-against pybind11 headers already present in the host. The shipped Windows
+-installer uses requirements.txt + pybind11.setup_helpers as intended.
++Corrections
++-----------
++- multi-component TXT/XYZ/CSV/DAT parsing fixed
++- explicit component separators preserved
++- conservative validated jump fallback added
++- G03 pairwise linking activated for recovered components
++- G03 512/1024 resampling improves integer quadrature convergence
++- Windows LF/CRLF freeze mismatch eliminated by byte-exact JSON writes
++- reveal refuses freeze/private-commitment mismatches
++- BASIC/EXTENDED reuse one blind state for the same dataset snapshot
++- byte-identical coordinate files at different paths cannot collide on opaque IDs
++- invalid G00 geometry no longer feeds a misleading G03 linking computation
+ 
+-No real user KnotPlot/Ridgerunner dataset was available in the execution
+-container, so no claim is made that physical SST gates pass on real knots.
+-Static centerline-only real runs are expected to produce INDETERMINATE for
+-phase, pressure, probe and representation gates until independent sidecars
+-are supplied.
++Validation
++----------
++Python selftest: PASS
++Blind infrastructure selftest: PASS
++v0.1.1 prepared-data regression: 49/49 parser counts matched
++Extended G00 on reconstructed 49 cases: 49/49 PASS
++Extended G01 on reconstructed 49 cases: 49/49 PASS
++Recovered multi-component cases with G03: 24
++Worst resampled G03 integer residual (1024): 0.0028357249955792696
++BASIC/EXTENDED shared-manifest comparison: PASS (49/49 IDs/splits/components match)
++Byte-stable freeze/reveal verification: PASS
+ 
+-v0.1.1 repair note
+-------------------
+-The v0.1.0 Windows/MSVC run exposed a portability bug in cpp/native.cpp: POSIX
+-ssize_t was used as an index type. MSVC does not define ssize_t. v0.1.1 uses
+-standard C++17 std::ptrdiff_t and hardens the build/import path. OpenMP is still
+-preferred, with a serial native fallback if the toolchain lacks OpenMP support.
+-
+-Validation in repair environment
+---------------------------------
+-- C++17/OpenMP source: g++ syntax check PASS.
+-- Native pybind11 extension: compiled manually against Python 3.13 headers PASS.
+-- scripts/selftest.py with native extension: PASS.
+-- Pressure-Poisson residual: 2.2061401526383866e-14.
+-- Periodic Green reconstruction relative error: 0.0056985437364457615.
+-- Exact Visual Studio/MSVC rerun remains to be performed on the user's Windows host;
+-  the failing non-standard type has been removed from executable C++ declarations.
++Native
++------
++C++17/pybind11 backend retained.
++MSVC std::ptrdiff_t portability repair from v0.1.1 retained.
++OpenMP preferred; serial fallback retained.
++Current container validation used Python fallback because standalone pybind11 was unavailable offline.
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/CHANGELOG_v0.1.2.md b/CHANGELOG_v0.1.2.md
+--- a/CHANGELOG_v0.1.2.md	1970-01-01 00:00:00.000000000 +0000
++++ b/CHANGELOG_v0.1.2.md	2026-08-24 14:34:40.226568169 +0000
+@@ -0,0 +1,24 @@
++# v0.1.2 — component parsing, blind-integrity, and manifest-reuse correction
++
++This release corrects issues identified by the v0.1.1 real-dataset output audit.
++
++## Fixed
++
++1. **Multi-component TXT/XYZ/CSV/DAT parsing.** Blank/component separators are preserved. Legacy concatenated exports use a conservative jump fallback accepted only if every recovered segment is independently closed.
++2. **G03 execution.** Recovered link components now reach pairwise Gauss-linking diagnostics. Linking is additionally resampled (BASIC 512, EXTENDED 1024) to reduce midpoint-quadrature integer residuals.
++3. **Byte-stable blind freeze on Windows.** JSON is written with `write_bytes`; SHA-256 is computed from the actual saved bytes. Reveal verifies the recorded freeze and refuses a mismatch.
++4. **Byte-stable private commitment.** The private mapping commitment is computed from the saved bytes and verified before reveal.
++5. **Shared BASIC/EXTENDED blind manifest.** An unchanged dataset snapshot reuses the same private random seed, opaque IDs, and train/holdout partition through `results/_blind_state`.
++6. **Duplicate-content collision guard.** Opaque IDs HMAC both relative path and content digest, so byte-identical coordinate files remain separate cases.
++
++## Added
++
++- parser method/component counts in manifests and G00;
++- `scripts/selftest_blind.py`;
++- `scripts/compare_manifests.py`;
++- `run_all_both.cmd`;
++- reveal-time source-drift reporting.
++
++## Scientific status
++
++G03 remains `REFERENCE_ONLY`: integer pairwise linking is a centerline diagnostic and does not identify phase-fiber or material-vorticity topology. Pairwise `Lk=0` also does not prove a multicomponent link is globally trivial. Missing physical sidecars continue to produce `INDETERMINATE`.
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/README.md b/README.md
+--- a/README.md	2026-08-21 17:52:32.000000000 +0000
++++ b/README.md	2026-08-24 14:34:40.226382154 +0000
+@@ -1,4 +1,4 @@
+-# SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.1
++# SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.2
+ 
+ Purpose: convert the seven-paper review into a **blind, non-promotional** SST audit suite.
+ The package distinguishes exact fluid identities, research bridges, representation effects, and genuinely SST-specific hypotheses.
+@@ -49,6 +49,18 @@
+ 7. freeze results before reveal;
+ 8. reveal source filenames only after scoring.
+ 
++## v0.1.2 integrity corrections
++
++- multi-component text links are preserved instead of concatenated;
++- conservative validated jump segmentation recovers legacy concatenated link exports;
++- G03 now actually evaluates pairwise Gauss linking for recovered components and reports raw/resampled quadrature;
++- `opaque_results.json` is written as exact UTF-8/LF bytes and the freeze hashes those bytes; reveal refuses to proceed on a freeze mismatch;
++- the private mapping commitment is likewise byte-stable and verified before reveal;
++- BASIC and EXTENDED reuse one private random blind state for an unchanged dataset snapshot, giving identical opaque IDs and train/holdout assignments;
++- byte-identical files at different relative paths no longer collide on case IDs.
++
++Use `run_all_both.cmd` to run BASIC and EXTENDED and automatically verify that their manifests match. Delete `results\_blind_state` only when you intentionally want a fresh blind randomisation.
++
+ ## Seven source-derived gate families
+ 
+ | Article | Transfer to SST audit | Promotion status |
+@@ -65,7 +77,7 @@
+ 
+ ### 1. Static centerline
+ Recognized coordinate files: `.txt`, `.xyz`, `.csv`, `.dat`, `.vect`.
+-Simple files must contain at least three numeric columns per coordinate row.
++Simple files must contain at least three numeric columns per coordinate row. Multi-component TXT/XYZ/CSV/DAT files may separate closed components with blank lines or component-marker lines. v0.1.2 also has a conservative jump fallback: a split is accepted only when every candidate segment is independently well closed; the parser method is recorded in the blind manifest and G00.
+ 
+ ### 2. Optional phase sidecar
+ Next to `knot.txt` place `knot.phase.npy` (1-D phase in radians). The phase gates measure closed-loop winding, modal purity, and whether the dominant winding remains fixed under sampling refinement rather than following a discretization alias.
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/V0.1.1_RESULTS_AUDIT.md b/V0.1.1_RESULTS_AUDIT.md
+--- a/V0.1.1_RESULTS_AUDIT.md	1970-01-01 00:00:00.000000000 +0000
++++ b/V0.1.1_RESULTS_AUDIT.md	2026-08-24 14:37:26.848138662 +0000
+@@ -0,0 +1,15 @@
++# SST7 v0.1.1 output audit
++
++- Uploaded results: 49 cases.
++- Basic overall: 49 INDETERMINATE.
++- Extended overall: 48 INDETERMINATE, 1 FAIL.
++- All 49 basic G00 and G01 gates pass.
++- Extended FAIL: link_0.3.1_final.txt, G00 closure gap 0.196411 > 0.15.
++- Root cause found in v0.1.1 parser: generic TXT loader concatenates all numeric rows and always returns one component. Multi-component links are therefore not segmented.
++- Post-hoc jump segmentation (not blind-certified) turns link_0.3.1 into 3 components with closure gap ratios about 0.00288--0.00300.
++- With post-hoc component segmentation, all 49 cases satisfy extended geometry thresholds. Maximum corrected closure-gap ratio: 0.00606253979. Maximum corrected last-step length relative error: 0.000925560429. Minimum corrected mode correlation: 0.999999588959.
++- G03 did not execute any pairwise linking in the official run because every TXT input was parsed as one component.
++- Post-hoc corrected segmentation yields 44 pairwise Gauss integrals; maximum residual from nearest integer is 0.0316741034.
++- No phase/field/timeseries/probe/repr sidecars were present, hence G10/G11/G20/G21/G22/G30/G31/G40/G50/G51 are indeterminate for all cases.
++- Freeze integrity bug on Windows: run_campaign hashes the in-memory LF JSON string but Path.write_text writes CRLF bytes. Basic freeze records b8cace... while actual opaque_results.json bytes hash to c8cfdf...; extended freeze records 0028f0... while actual bytes hash to a6ff6c.... This is newline normalization, not evidence of tampering, but the freeze verifier is not byte-stable on Windows.
++- Basic/extended holdout partitions are independently randomized because prepare() uses a fresh random seed each run. Basic split is 30 train / 19 holdout; extended is 36 train / 13 holdout. For direct basic-vs-extended comparison, reuse one blind manifest/seed.
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/VALIDATION.md b/VALIDATION.md
+--- a/VALIDATION.md	2026-08-21 17:52:33.000000000 +0000
++++ b/VALIDATION.md	2026-08-24 14:39:23.889944298 +0000
+@@ -1,68 +1,92 @@
+ # Validation and epistemic status
+ 
+-## Validation performed for v0.1.1
++## Validation performed for v0.1.2
+ 
+-The package was syntax-checked and exercised end-to-end in the build environment.
++The v0.1.2 release was syntax-checked and exercised against both synthetic cases and the 49-case prepared output set from the uploaded v0.1.1 campaign.
+ 
+-### Python/C++ kernel selftest
++### Python selftest
+ 
+ `python scripts/selftest.py` returned `PASS`.
+ 
+ Checks included:
+ 
+ - closed-circle length against \(2\pi\);
+-- Python/C++17 curve-length parity;
+ - Hopf-link Gauss integral with \(|Lk|-1<3\times10^{-3}\);
+-- Python/C++17 Gauss-linking parity;
+ - integer phase winding \(W_\Phi=3\);
+ - periodic Taylor--Green incompressibility/pressure-Poisson closure;
+ - periodic Fourier Green reconstruction;
+-- exact even/odd observable decomposition.
++- exact even/odd observable decomposition;
++- explicit blank-line multi-component TXT parsing;
++- validated jump-fallback parsing;
++- false-split rejection for a corrupted/open single sequence.
+ 
+-Measured Taylor--Green results in this environment:
++Measured Taylor--Green results in this build environment:
+ 
+ ```text
+ pressure-Poisson relative residual = 2.2061401526383866e-14
+ periodic Green relative residual   = 5.6985437364457615e-03
+-native C++ kernel                  = active
+-OpenMP                             = active
+ ```
+ 
+-The host had C++17/OpenMP and pybind11 headers available through another installed package, but did not have the standalone `pybind11` Python package and has no outbound package-network access.  Therefore the C++ source was compiled manually against the available headers for this validation.  On Windows, `run_00_install.cmd` installs the declared `pybind11` dependency and invokes the normal build path.
++The current container does not have the standalone `pybind11` package and has no outbound package network, so the v0.1.2 Linux validation used the Python fallback. The C++17 source retains the v0.1.1 `std::ptrdiff_t` MSVC portability correction; Windows `run_00_install.cmd` installs `pybind11`, builds the native extension, and runs the same parity selftest before any campaign.
+ 
+-### End-to-end blind synthetic campaign
++### Blind-infrastructure selftest
+ 
+-A synthetic case containing a closed centerline, integer phase field, periodic Taylor--Green Euler field, repeated time series, circulation-reversal pair, and equivalent representation pair was passed through:
++`python scripts/selftest_blind.py` returned `PASS`.
++
++It verifies that two preparations of one unchanged dataset, using the shared blind state, receive identical:
+ 
+ ```text
+-prepare_blind.py -> run_campaign.py -> freeze.sha256 -> reveal.py
++case IDs
++train/holdout assignments
++component counts
++dataset snapshot SHA-256
+ ```
+ 
+-The result was `PASS_WITH_AVAILABLE_GATES`.  Missing optional finite-size and commutator-refinement arrays correctly returned `INDETERMINATE` rather than being synthesized.
++It also runs a blind campaign, hashes the **actual saved bytes** of `opaque_results.json`, verifies that `freeze.sha256` matches them, and confirms that reveal refuses unverified data and succeeds only after freeze/private-commitment verification.
+ 
+-### Article-7 algebra guard
++### v0.1.1 49-case prepared-data regression
++
++The uploaded v0.1.1 results were reconstructed into a regression dataset preserving the legacy concatenated point order. v0.1.2 then parsed and scored all 49 cases in EXTENDED mode.
+ 
+-`run_cosmology_guard.cmd` / `scripts/audit_log_q_model.py` reproduces the independent joint-fit audit for the reviewed logarithmic model:
++Results:
+ 
+ ```text
+-q_infinity      = 0.1817586206896552
+-future_pole_z   = -0.29165752904763875
+-transition_z    = 1.5869608744177013
+-age_Gyr         = 14.829736298416817
+-regular(-1,0)   = false
++parser component-count mismatches = 0 / 49
++G00 geometry input                 = 49 / 49 PASS
++G01 resolution convergence         = 49 / 49 PASS
++multi-component G03 cases          = 24
++max G03 integer residual @1024     = 0.0028357249955792696
++G03 numerical integer consistency = 24 / 24 true
++max corrected closure ratio        = 0.006062539786008194
+ ```
+ 
+-These values are included as a methodological regression example, not as an SST cosmological law.
++The same reconstructed 49-case snapshot was separately prepared in BASIC and EXTENDED mode with one shared blind state. `scripts/compare_manifests.py` confirmed all 49 opaque IDs, train/holdout labels, and component counts matched exactly.
++
++The previous Gauss-midpoint audit gave the following worst integer residuals for the high-linking set:
++
++```text
++native/original sampling : 0.0316741034
++512-point resampling     : 0.0113676500
++1024-point resampling    : 0.0028357250
++```
++
++Therefore G03 uses 512 points in BASIC and 1024 in EXTENDED. G03 remains `REFERENCE_ONLY`.
++
++### Article-7 algebra guard
++
++`run_cosmology_guard.cmd` / `scripts/audit_log_q_model.py` remains a methodological regression example for the reviewed logarithmic cosmology ansatz. It is not promoted to SST cosmology.
+ 
+ ## What this package validates
+ 
+ - blind file handling and frozen thresholds;
+-- C++/Python geometric kernel parity;
++- byte-stable SHA-256 commitments on saved files;
++- reusable blind identity/split for the same dataset snapshot;
++- closed-component recovery from supported text/VECT inputs;
+ - centerline-only Gauss-linking diagnostics without topology-layer promotion;
+-- phase winding and sampling-alias consistency;
+-- periodic pressure-Poisson and Green reconstruction;
+-- enstrophy/strain source ledger;
+-- repeatable or finite-size spectral diagnostics when time-series metadata are present;
++- phase winding and sampling-alias consistency when phase data exist;
++- periodic pressure-Poisson and Green reconstruction when volume fields exist;
++- enstrophy/strain pressure-source ledger;
++- repeated or finite-size spectral diagnostics when time-series metadata exist;
+ - even/odd circulation-reversal decomposition;
+ - representation-invariance and optional commutator-refinement diagnostics.
+ 
+@@ -72,15 +96,12 @@
+ - that a centerline hole contains material vorticity;
+ - that an internal phase field exists;
+ - that a phase singularity is a material vortex core;
++- that pairwise \(Lk=0\) makes a multicomponent link globally trivial;
+ - that an effective metric is fundamental spacetime curvature;
+ - that a good phenomenological fit derives SST dynamics.
+ 
+-An exit code zero means the software completed its preregistered checks.  It does not promote `REFERENCE_ONLY`, `INDETERMINATE`, research-track hypotheses, or conditional bridge assumptions into canon physics.
++An exit code zero means the software completed its preregistered checks. It does not promote `REFERENCE_ONLY`, `INDETERMINATE`, research-track hypotheses, or conditional bridge assumptions into canon physics.
+ 
+-## v0.1.1 Windows/MSVC portability repair
++## Historical Windows/MSVC repair retained from v0.1.1
+ 
+-The user-provided Visual Studio 2022 build log for v0.1.0 failed at the first
+-`ssize_t` declaration (`C4430`, `C2146`) and consequently produced an OpenMP loop
+-parse cascade. v0.1.1 removes every use of POSIX `ssize_t` from the C++ extension
+-and uses `std::ptrdiff_t`, a standard signed integral index type. The build helper
+-also verifies the extension import after build and can retry without OpenMP.
++The user-provided Visual Studio 2022 v0.1.0 build failed at POSIX `ssize_t`, producing the subsequent OpenMP parse cascade. v0.1.1 replaced that index with standard C++17 `std::ptrdiff_t`; v0.1.2 retains this fix unchanged and retains the OpenMP-to-serial fallback build policy.
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/canon_patch/SST_CANON-v0.8.35-research-track-seven-article-closure-addendum.tex b/canon_patch/SST_CANON-v0.8.35-research-track-seven-article-closure-addendum.tex
+--- a/canon_patch/SST_CANON-v0.8.35-research-track-seven-article-closure-addendum.tex	2026-08-21 17:52:32.000000000 +0000
++++ b/canon_patch/SST_CANON-v0.8.35-research-track-seven-article-closure-addendum.tex	2026-08-24 14:34:40.226038404 +0000
+@@ -122,7 +122,7 @@
+ 
+ \subsection{Blind execution rule}
+ The companion package
+-\texttt{SST\_7Article\_Closure\_Holonomy\_Blind\_Falsifier\_v0.1.1}
++\texttt{SST\_7Article\_Closure\_Holonomy\_Blind\_Falsifier\_v0.1.2}
+ uses opaque case identifiers, frozen thresholds, SHA-256 commitments, held-out
+ cases, and explicit \texttt{INDETERMINATE} outcomes when a required physical
+ field is absent.  Static centerline geometry is never promoted to a phase,
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/config/basic.json b/config/basic.json
+--- a/config/basic.json	2026-08-21 17:52:32.000000000 +0000
++++ b/config/basic.json	2026-08-24 14:34:40.222966133 +0000
+@@ -17,5 +17,7 @@
+   "representation_rel_max": 0.02,
+   "holdout_fraction": 0.3,
+   "spectral_collapse_cv_max": 0.1,
+-  "commutator_tail_cv_max": 0.15
++  "commutator_tail_cv_max": 0.15,
++  "linking_resample_n": 512,
++  "linking_integer_residual_warn": 0.02
+ }
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/config/extended.json b/config/extended.json
+--- a/config/extended.json	2026-08-21 17:52:32.000000000 +0000
++++ b/config/extended.json	2026-08-24 14:34:40.223179899 +0000
+@@ -18,5 +18,7 @@
+   "representation_rel_max": 0.01,
+   "holdout_fraction": 0.3,
+   "spectral_collapse_cv_max": 0.05,
+-  "commutator_tail_cv_max": 0.08
++  "commutator_tail_cv_max": 0.08,
++  "linking_resample_n": 1024,
++  "linking_integer_residual_warn": 0.005
+ }
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/cpp/native.cpp b/cpp/native.cpp
+--- a/cpp/native.cpp	2026-08-21 17:52:32.000000000 +0000
++++ b/cpp/native.cpp	2026-08-24 14:34:40.226207865 +0000
+@@ -12,7 +12,7 @@
+ namespace py = pybind11;
+ using index_t = std::ptrdiff_t;
+ 
+-// NOTE (v0.1.1): do not use POSIX ssize_t here.  MSVC does not define it.
++// NOTE (v0.1.2, retained from v0.1.1 fix): do not use POSIX ssize_t here.  MSVC does not define it.
+ // std::ptrdiff_t is a standard signed integral type and is accepted by MSVC
+ // OpenMP canonical for-loops while safely representing pybind11 array indices.
+ 
+Binary files a/native_ext/__pycache__/__init__.cpython-313.pyc and b/native_ext/__pycache__/__init__.cpython-313.pyc differ
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/release.yml b/release.yml
+--- a/release.yml	2026-08-21 17:52:33.000000000 +0000
++++ b/release.yml	2026-08-24 14:39:32.656321520 +0000
+@@ -1,6 +1,6 @@
+ release:
+   name: SST Seven-Article Closure & Holonomy Blind Falsifier
+-  version: 0.1.1
++  version: 0.1.2
+   target_canon: v0.8.35
+   status: research audit package
+ scientific_policy:
+@@ -9,6 +9,18 @@
+   holdout_default: 0.30
+   missing_physical_fields: INDETERMINATE
+   source_system_formulas_promoted_to_sst_laws: false
++  multicomponent_topology: centerline_reference_only
++blind_integrity:
++  byte_stable_freeze: true
++  reveal_refuses_freeze_mismatch: true
++  private_mapping_commitment_verified: true
++  same_snapshot_reuses_ids_and_split: true
++  snapshot_state_directory: results/_blind_state
++parser:
++  explicit_component_separators: true
++  validated_jump_fallback: true
++  jump_factor: 5.0
++  fallback_component_closure_max: 0.05
+ native:
+   language: C++17
+   binding: pybind11
+@@ -19,10 +31,12 @@
+   - canon_patch/SST_CANON-v0.8.35-seven-article-closure-addendum.tex
+   - canon_patch/SST_CANON-v0.8.35-research-track-seven-article-closure-addendum.tex
+   - canon_patch/bibliography_additions.tex
++  - V0.1.1_RESULTS_AUDIT.md
++  - run_all_both.cmd
+ validation:
+   python_selftest: PASS
+-  cpp_source_portability_fix: "PASS: POSIX ssize_t removed; standard C++17 index type used"
++  blind_infrastructure_selftest: PASS
++  cpp_source_portability_fix: "PASS: standard C++17 index type"
+   native_build_helper_postbuild_import_check: PASS
+   openmp_policy: "preferred; automatic serial fallback if unavailable"
+-  synthetic_blind_campaign: PASS_WITH_AVAILABLE_GATES
+-  article7_regression: PASS
++  v0_1_1_output_regression: "49-case prepared-data audit used during v0.1.2 development"
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_00_install.cmd b/run_00_install.cmd
+--- a/run_00_install.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_00_install.cmd	2026-08-24 14:34:40.224228893 +0000
+@@ -1,18 +1,19 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-if not exist ".venv\Scripts\python.exe" (
+-  echo [SST7] Creating virtual environment...
+-  py -3 -m venv .venv || goto :fail
+-)
+-call ".venv\Scripts\activate.bat" || goto :fail
+-python -m pip install --upgrade pip setuptools wheel || goto :fail
+-python -m pip install -r requirements.txt || goto :fail
+-set SST_NATIVE_OPENMP=1
+-python -m native_ext.build_ext_if_needed || goto :fail
+-python scripts\selftest.py || goto :fail
+-echo [SST7] Environment ready.
+-exit /b 0
+-:fail
+-echo [SST7] INSTALL/SELFTEST FAILED
+-exit /b 1
++@echo off
++setlocal
++cd /d "%~dp0"
++if not exist ".venv\Scripts\python.exe" (
++  echo [SST7] Creating virtual environment...
++  py -3 -m venv .venv || goto :fail
++)
++call ".venv\Scripts\activate.bat" || goto :fail
++python -m pip install --upgrade pip setuptools wheel || goto :fail
++python -m pip install -r requirements.txt || goto :fail
++set SST_NATIVE_OPENMP=1
++python -m native_ext.build_ext_if_needed || goto :fail
++python scripts\selftest.py || goto :fail
++python scripts\selftest_blind.py || goto :fail
++echo [SST7] Environment ready.
++exit /b 0
++:fail
++echo [SST7] INSTALL/SELFTEST FAILED
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_all.cmd b/run_all.cmd
+--- a/run_all.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_all.cmd	2026-08-24 14:34:40.223577739 +0000
+@@ -1,21 +1,21 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-set "DATASET=%~1"
+-if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
+-set "RUN=results\basic"
+-echo ============================================================
+-echo SST Seven-Article Closure ^& Holonomy Blind Falsifier v0.1.1
+-echo Dataset: %DATASET%
+-echo ============================================================
+-call run_00_install.cmd || goto :fail
+-if exist "%RUN%" rmdir /s /q "%RUN%"
+-.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/basic.json || goto :fail
+-.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/basic.json --mode basic || goto :fail
+-.venv\Scripts\python.exe scripts\reveal.py --run-dir "%RUN%" || goto :fail
+-echo.
+-echo [SST7] COMPLETE: %RUN%\summary_revealed.md
+-exit /b 0
+-:fail
+-echo [SST7] RUN FAILED
+-exit /b 1
++@echo off
++setlocal
++cd /d "%~dp0"
++set "DATASET=%~1"
++if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
++set "RUN=results\basic"
++echo ============================================================
++echo SST Seven-Article Closure ^& Holonomy Blind Falsifier v0.1.2
++echo Dataset: %DATASET%
++echo ============================================================
++call run_00_install.cmd || goto :fail
++if exist "%RUN%" rmdir /s /q "%RUN%"
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/basic.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/basic.json --mode basic || goto :fail
++.venv\Scripts\python.exe scripts\reveal.py --run-dir "%RUN%" || goto :fail
++echo.
++echo [SST7] COMPLETE: %RUN%\summary_revealed.md
++exit /b 0
++:fail
++echo [SST7] RUN FAILED
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_all_both.cmd b/run_all_both.cmd
+--- a/run_all_both.cmd	1970-01-01 00:00:00.000000000 +0000
++++ b/run_all_both.cmd	2026-08-24 14:37:13.543889982 +0000
+@@ -0,0 +1,26 @@
++@echo off
++setlocal
++cd /d "%~dp0"
++set "DATASET=%~1"
++if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
++set "BASIC=results\basic"
++set "EXT=results\extended"
++echo ============================================================
++echo SST7 v0.1.2 BASIC + EXTENDED with shared blind manifest
++echo Dataset: %DATASET%
++echo ============================================================
++call run_00_install.cmd || goto :fail
++if exist "%BASIC%" rmdir /s /q "%BASIC%"
++if exist "%EXT%" rmdir /s /q "%EXT%"
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%BASIC%" --config config/basic.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%BASIC%" --config config/basic.json --mode basic || goto :fail
++.venv\Scripts\python.exe scripts\reveal.py --run-dir "%BASIC%" || goto :fail
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%EXT%" --config config/extended.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%EXT%" --config config/extended.json --mode extended || goto :fail
++.venv\Scripts\python.exe scripts\reveal.py --run-dir "%EXT%" || goto :fail
++.venv\Scripts\python.exe scripts\compare_manifests.py --a "%BASIC%" --b "%EXT%" || goto :fail
++echo [SST7] BOTH RUNS COMPLETE AND MANIFESTS MATCH.
++exit /b 0
++:fail
++echo [SST7] BASIC+EXTENDED RUN FAILED
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_all_extended.cmd b/run_all_extended.cmd
+--- a/run_all_extended.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_all_extended.cmd	2026-08-24 14:34:40.223726950 +0000
+@@ -1,21 +1,21 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-set "DATASET=%~1"
+-if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
+-set "RUN=results\extended"
+-echo ============================================================
+-echo SST Seven-Article Closure ^& Holonomy EXTENDED Blind Falsifier v0.1.1
+-echo Dataset: %DATASET%
+-echo ============================================================
+-call run_00_install.cmd || goto :fail
+-if exist "%RUN%" rmdir /s /q "%RUN%"
+-.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/extended.json || goto :fail
+-.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/extended.json --mode extended || goto :fail
+-.venv\Scripts\python.exe scripts\reveal.py --run-dir "%RUN%" || goto :fail
+-echo.
+-echo [SST7] COMPLETE: %RUN%\summary_revealed.md
+-exit /b 0
+-:fail
+-echo [SST7] RUN FAILED
+-exit /b 1
++@echo off
++setlocal
++cd /d "%~dp0"
++set "DATASET=%~1"
++if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
++set "RUN=results\extended"
++echo ============================================================
++echo SST Seven-Article Closure ^& Holonomy EXTENDED Blind Falsifier v0.1.2
++echo Dataset: %DATASET%
++echo ============================================================
++call run_00_install.cmd || goto :fail
++if exist "%RUN%" rmdir /s /q "%RUN%"
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/extended.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/extended.json --mode extended || goto :fail
++.venv\Scripts\python.exe scripts\reveal.py --run-dir "%RUN%" || goto :fail
++echo.
++echo [SST7] COMPLETE: %RUN%\summary_revealed.md
++exit /b 0
++:fail
++echo [SST7] RUN FAILED
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_blind_extended_only.cmd b/run_blind_extended_only.cmd
+--- a/run_blind_extended_only.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_blind_extended_only.cmd	2026-08-24 14:34:40.224028787 +0000
+@@ -1,15 +1,15 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-set "DATASET=%~1"
+-if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
+-set "RUN=results\extended"
+-call run_00_install.cmd || goto :fail
+-if exist "%RUN%" rmdir /s /q "%RUN%"
+-.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/extended.json || goto :fail
+-.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/extended.json --mode extended || goto :fail
+-echo [SST7] EXTENDED BLIND RESULTS FROZEN. Inspect %RUN%\summary_blind.md before reveal.
+-echo [SST7] Reveal later with: run_reveal.cmd "%RUN%"
+-exit /b 0
+-:fail
+-exit /b 1
++@echo off
++setlocal
++cd /d "%~dp0"
++set "DATASET=%~1"
++if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
++set "RUN=results\extended"
++call run_00_install.cmd || goto :fail
++if exist "%RUN%" rmdir /s /q "%RUN%"
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/extended.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/extended.json --mode extended || goto :fail
++echo [SST7] EXTENDED BLIND RESULTS FROZEN. Inspect %RUN%\summary_blind.md before reveal.
++echo [SST7] Reveal later with: run_reveal.cmd "%RUN%"
++exit /b 0
++:fail
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_blind_only.cmd b/run_blind_only.cmd
+--- a/run_blind_only.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_blind_only.cmd	2026-08-24 14:34:40.223867538 +0000
+@@ -1,15 +1,15 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-set "DATASET=%~1"
+-if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
+-set "RUN=results\basic"
+-call run_00_install.cmd || goto :fail
+-if exist "%RUN%" rmdir /s /q "%RUN%"
+-.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/basic.json || goto :fail
+-.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/basic.json --mode basic || goto :fail
+-echo [SST7] BLIND RESULTS FROZEN. Inspect %RUN%\summary_blind.md before reveal.
+-echo [SST7] Reveal later with: run_reveal.cmd "%RUN%"
+-exit /b 0
+-:fail
+-exit /b 1
++@echo off
++setlocal
++cd /d "%~dp0"
++set "DATASET=%~1"
++if "%DATASET%"=="" set "DATASET=..\..\KnotPlot\knots\final"
++set "RUN=results\basic"
++call run_00_install.cmd || goto :fail
++if exist "%RUN%" rmdir /s /q "%RUN%"
++.venv\Scripts\python.exe scripts\prepare_blind.py --dataset "%DATASET%" --run-dir "%RUN%" --config config/basic.json --shared-state-dir results\_blind_state || goto :fail
++.venv\Scripts\python.exe scripts\run_campaign.py --run-dir "%RUN%" --config config/basic.json --mode basic || goto :fail
++echo [SST7] BLIND RESULTS FROZEN. Inspect %RUN%\summary_blind.md before reveal.
++echo [SST7] Reveal later with: run_reveal.cmd "%RUN%"
++exit /b 0
++:fail
++exit /b 1
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/run_selftest.cmd b/run_selftest.cmd
+--- a/run_selftest.cmd	2026-08-21 17:52:32.000000000 +0000
++++ b/run_selftest.cmd	2026-08-24 14:34:40.224371575 +0000
+@@ -1,5 +1,4 @@
+-@echo off
+-setlocal
+-cd /d "%~dp0"
+-call run_00_install.cmd || exit /b 1
+-.venv\Scripts\python.exe scripts\selftest.py
++@echo off
++setlocal
++cd /d "%~dp0"
++call run_00_install.cmd
+Binary files a/scripts/__pycache__/audit_log_q_model.cpython-313.pyc and b/scripts/__pycache__/audit_log_q_model.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/compare_manifests.cpython-313.pyc and b/scripts/__pycache__/compare_manifests.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/prepare_blind.cpython-313.pyc and b/scripts/__pycache__/prepare_blind.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/reveal.cpython-313.pyc and b/scripts/__pycache__/reveal.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/run_campaign.cpython-313.pyc and b/scripts/__pycache__/run_campaign.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/selftest.cpython-313.pyc and b/scripts/__pycache__/selftest.cpython-313.pyc differ
+Binary files a/scripts/__pycache__/selftest_blind.cpython-313.pyc and b/scripts/__pycache__/selftest_blind.cpython-313.pyc differ
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/compare_manifests.py b/scripts/compare_manifests.py
+--- a/scripts/compare_manifests.py	1970-01-01 00:00:00.000000000 +0000
++++ b/scripts/compare_manifests.py	2026-08-24 14:34:40.224507616 +0000
+@@ -0,0 +1,11 @@
++from pathlib import Path
++import argparse,json,sys
++
++a=argparse.ArgumentParser(); a.add_argument('--a',required=True); a.add_argument('--b',required=True); ns=a.parse_args()
++def load(p): return json.loads((Path(p)/'blind/public_manifest.json').read_text(encoding='utf-8'))
++A=load(ns.a); B=load(ns.b)
++ka=[(c['case_id'],c['split'],c.get('n_components')) for c in A['cases']]
++kb=[(c['case_id'],c['split'],c.get('n_components')) for c in B['cases']]
++if A.get('dataset_snapshot_sha256')!=B.get('dataset_snapshot_sha256') or ka!=kb:
++    print('[SST7] MANIFEST MISMATCH',file=sys.stderr); sys.exit(2)
++print('[SST7] manifests match:',len(ka),'cases; snapshot',A.get('dataset_snapshot_sha256'))
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/prepare_blind.py b/scripts/prepare_blind.py
+--- a/scripts/prepare_blind.py	2026-08-21 17:52:32.000000000 +0000
++++ b/scripts/prepare_blind.py	2026-08-24 14:34:40.222093560 +0000
+@@ -1,12 +1,24 @@
+ from pathlib import Path
+ import argparse,json,hashlib,sys
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+-from sst7.blind import prepare
++from sst7.blind import prepare,write_json_bytes
+ 
+-a=argparse.ArgumentParser(); a.add_argument('--dataset',required=True); a.add_argument('--run-dir',required=True); a.add_argument('--config',default='config/basic.json'); ns=a.parse_args()
++a=argparse.ArgumentParser()
++a.add_argument('--dataset',required=True)
++a.add_argument('--run-dir',required=True)
++a.add_argument('--config',default='config/basic.json')
++a.add_argument('--shared-state-dir',default='results/_blind_state',help='persistent private seed cache; same dataset snapshot => same opaque IDs/split')
++a.add_argument('--seed-hex',default=None,help='optional explicit 256-bit seed for reproducible testing')
++ns=a.parse_args()
+ root=Path(__file__).resolve().parents[1]; cfg=json.loads((root/ns.config).read_text()); run=Path(ns.run_dir); run.mkdir(parents=True,exist_ok=True)
+-pub=prepare(Path(ns.dataset),run,cfg.get('holdout_fraction',0.3))
++state=Path(ns.shared_state_dir) if ns.shared_state_dir else None
++pub=prepare(Path(ns.dataset),run,cfg.get('holdout_fraction',0.3),seed_hex=ns.seed_hex,state_dir=state)
+ config_text=json.dumps(cfg,sort_keys=True,separators=(',',':'))
+-pre={'package_version':'0.1.1','config':cfg,'config_sha256':hashlib.sha256(config_text.encode()).hexdigest(),'public_manifest_commitment':pub['private_commitment_sha256'],'rule':'thresholds frozen before scoring; source names hidden until reveal'}
+-(run/'preregistration.json').write_text(json.dumps(pre,indent=2,sort_keys=True),encoding='utf-8')
++pre={'package_version':'0.1.2','config':cfg,'config_sha256':hashlib.sha256(config_text.encode()).hexdigest(),
++     'public_manifest_commitment':pub['private_commitment_sha256'],
++     'dataset_snapshot_sha256':pub['dataset_snapshot_sha256'],'blind_state_id':pub['blind_state_id'],
++     'rule':'thresholds frozen before scoring; source names hidden until reveal; same dataset snapshot reuses opaque IDs and train/holdout split'}
++write_json_bytes(run/'preregistration.json',pre)
+ print(f"[SST7] prepared {pub['n_cases']} opaque cases in {run}")
++print(f"[SST7] dataset snapshot: {pub['dataset_snapshot_sha256']}")
++print(f"[SST7] shared blind state: {pub['blind_state_id']}")
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/reveal.py b/scripts/reveal.py
+--- a/scripts/reveal.py	2026-08-21 17:52:32.000000000 +0000
++++ b/scripts/reveal.py	2026-08-24 14:34:40.222438671 +0000
+@@ -1,14 +1,37 @@
+ from pathlib import Path
+-import argparse,json,sys,hashlib
++import argparse,json,sys
++sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
++from sst7.blind import sha256_file,write_json_bytes
+ 
+ a=argparse.ArgumentParser(); a.add_argument('--run-dir',required=True); ns=a.parse_args(); run=Path(ns.run_dir)
+-opaque=json.loads((run/'opaque_results.json').read_text()); private=json.loads((run/'blind/private_mapping.json').read_text())
+-rev={'version':'0.1.1','freeze_sha256':hashlib.sha256((run/'opaque_results.json').read_bytes()).hexdigest(),'cases':[]}
++opaque_path=run/'opaque_results.json'; freeze_path=run/'freeze.sha256'
++if not freeze_path.exists(): raise RuntimeError('missing freeze.sha256; refusing reveal')
++recorded=freeze_path.read_text(encoding='ascii').strip().split()[0]
++actual=sha256_file(opaque_path)
++if recorded.lower()!=actual.lower():
++    raise RuntimeError(f'freeze verification FAILED: recorded={recorded} actual={actual}; refusing reveal')
++public=json.loads((run/'blind/public_manifest.json').read_text(encoding='utf-8'))
++private_path=run/'blind/private_mapping.json'; private=json.loads(private_path.read_text(encoding='utf-8'))
++priv_actual=sha256_file(private_path); priv_expected=public.get('private_commitment_sha256')
++if priv_expected and priv_actual.lower()!=priv_expected.lower():
++    raise RuntimeError('private mapping commitment verification FAILED; refusing reveal')
++opaque=json.loads(opaque_path.read_text(encoding='utf-8'))
++rev={'version':'0.1.2','freeze_sha256':actual,'freeze_verified':True,
++     'private_mapping_commitment_verified':(not priv_expected or priv_actual.lower()==priv_expected.lower()),
++     'dataset_snapshot_sha256':public.get('dataset_snapshot_sha256'),'blind_state_id':public.get('blind_state_id'),'cases':[]}
+ for c in opaque['cases']:
+     m=private['cases'][c['case_id']]
+-    rev['cases'].append({**c,'source':m['source'],'source_sha256':m['sha256'],'source_sidecars':m['sidecars']})
+-(run/'revealed_results.json').write_text(json.dumps(rev,indent=2,sort_keys=True),encoding='utf-8')
+-lines=['# Revealed summary','',f"Freeze SHA-256: `{rev['freeze_sha256']}`",'','| Case | Split | Overall | Source |','|---|---|---|---|']
+-for c in rev['cases']: lines.append(f"| {c['case_id']} | {c['split']} | {c['overall']} | `{c['source']}` |")
+-(run/'summary_revealed.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+-print('[SST7] reveal complete')
++    source_hash_now=None; source_unchanged=None
++    sp=Path(m['source'])
++    if sp.exists():
++        source_hash_now=sha256_file(sp); source_unchanged=(source_hash_now.lower()==m['sha256'].lower())
++    rev['cases'].append({**c,'source':m['source'],'source_sha256':m['sha256'],'source_sha256_at_reveal':source_hash_now,
++                         'source_unchanged_since_prepare':source_unchanged,'parser':m.get('parser'),
++                         'source_sidecars':m['sidecars']})
++write_json_bytes(run/'revealed_results.json',rev)
++lines=['# Revealed summary','',f"Freeze SHA-256: `{actual}`",'',f"Freeze verified: **YES**",f"Private mapping commitment verified: **YES**",'',
++       '| Case | Split | Overall | Components | Parser | Source |','|---|---|---|---:|---|---|']
++for c in rev['cases']:
++    parser=c.get('parser') or {}; lines.append(f"| {c['case_id']} | {c['split']} | {c['overall']} | {parser.get('n_components','')} | {parser.get('method','')} | `{c['source']}` |")
++(run/'summary_revealed.md').write_bytes(('\n'.join(lines)+'\n').encode('utf-8'))
++print('[SST7] reveal complete; freeze + private commitment verified')
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/run_campaign.py b/scripts/run_campaign.py
+--- a/scripts/run_campaign.py	2026-08-21 17:52:32.000000000 +0000
++++ b/scripts/run_campaign.py	2026-08-24 14:34:40.222291743 +0000
+@@ -2,17 +2,20 @@
+ import argparse,json,sys,hashlib
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+ from sst7.gates import run_case,summarize_case
++from sst7.blind import sha256_file,write_json_bytes
+ 
+ a=argparse.ArgumentParser(); a.add_argument('--run-dir',required=True); a.add_argument('--config',default='config/basic.json'); a.add_argument('--mode',choices=['basic','extended'],default='basic'); ns=a.parse_args()
+ root=Path(__file__).resolve().parents[1]; cfg=json.loads((root/ns.config).read_text()); run=Path(ns.run_dir)
+ pub=json.loads((run/'blind/public_manifest.json').read_text()); cdir=run/'blind/cases'
+-res={'version':'0.1.1','mode':ns.mode,'cases':[]}
++res={'version':'0.1.2','mode':ns.mode,'dataset_snapshot_sha256':pub.get('dataset_snapshot_sha256'),'blind_state_id':pub.get('blind_state_id'),'cases':[]}
+ for c in pub['cases']:
+     gs=run_case(cdir,c['case_id'],cfg,ns.mode); res['cases'].append({'case_id':c['case_id'],'split':c['split'],'overall':summarize_case(gs),'gates':gs})
+-txt=json.dumps(res,indent=2,sort_keys=True); (run/'opaque_results.json').write_text(txt,encoding='utf-8'); (run/'freeze.sha256').write_text(hashlib.sha256(txt.encode()).hexdigest()+'  opaque_results.json\n')
++outfile=run/'opaque_results.json'; write_json_bytes(outfile,res); digest=sha256_file(outfile)
++(run/'freeze.sha256').write_bytes((digest+'  opaque_results.json\n').encode('ascii'))
+ counts={}
+ for c in res['cases']: counts[c['overall']]=counts.get(c['overall'],0)+1
+ lines=['# Blind summary','',f"Mode: **{ns.mode}**",'',f"Cases: **{len(res['cases'])}**",'', '## Overall opaque statuses','']+[f"- {k}: {v}" for k,v in sorted(counts.items())]
+-lines+=['','A static-centerline-only `INDETERMINATE` is expected: absent phase/volume/probe data are never manufactured from geometry.','',f"Freeze SHA-256: `{hashlib.sha256(txt.encode()).hexdigest()}`"]
+-(run/'summary_blind.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
++lines+=['','A static-centerline-only `INDETERMINATE` is expected: absent phase/volume/probe data are never manufactured from geometry.','',f"Dataset snapshot: `{pub.get('dataset_snapshot_sha256','')}`",f"Blind state: `{pub.get('blind_state_id','')}`",f"Freeze SHA-256: `{digest}`"]
++(run/'summary_blind.md').write_bytes(('\n'.join(lines)+'\n').encode('utf-8'))
+ print('[SST7] blind scoring frozen:',run/'freeze.sha256')
++print('[SST7] freeze verified against file bytes:',digest)
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/selftest.py b/scripts/selftest.py
+--- a/scripts/selftest.py	2026-08-21 17:52:32.000000000 +0000
++++ b/scripts/selftest.py	2026-08-24 14:34:55.279150175 +0000
+@@ -1,10 +1,11 @@
+ from pathlib import Path
+-import sys,tempfile,json,numpy as np
++import sys,tempfile,numpy as np
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+ from sst7.geometry import curve_length,resample_closed,gauss_linking
+ from sst7.phase import winding
+ from sst7.pressure import poisson_residual,green_relative
+ from sst7.representation import even_odd
++from sst7.io import load_curve,split_components_by_jumps
+ try:
+     from native_ext import native
+ except Exception: native=None
+@@ -21,6 +22,23 @@
+ lk=gauss_linking(h1,h2); assert abs(abs(lk)-1)<3e-3,lk
+ if native is not None:
+     lkn=native.gauss_linking(h1,h2); assert abs(lkn-lk)<1e-10,(lkn,lk)
++# Generic TXT component parser: explicit separator and validated jump fallback.
++with tempfile.TemporaryDirectory() as td:
++    td=Path(td)
++    a=np.c_[np.cos(s),np.sin(s),0*s]
++    b=np.c_[5+np.cos(s),np.sin(s),0*s]
++    p=td/'two.txt'
++    p.write_text('\n'.join('%.12g %.12g %.12g'%tuple(x) for x in a)+'\n\n'+
++                 '\n'.join('%.12g %.12g %.12g'%tuple(x) for x in b)+'\n',encoding='utf-8')
++    comps,info=load_curve(p,return_info=True); assert len(comps)==2 and info['method']=='explicit_separators',info
++    p2=td/'three_concat.txt'
++    c3=np.c_[10+np.cos(s),np.sin(s),0*s]
++    arr=np.vstack([a,b,c3])
++    p2.write_text('\n'.join('%.12g %.12g %.12g'%tuple(x) for x in arr)+'\n',encoding='utf-8')
++    comps2,info2=load_curve(p2,return_info=True); assert len(comps2)==3 and info2['method']=='jump_fallback_validated',info2
++    # A single open/corrupted sequence with a big jump must not be promoted to a link
++    bad=np.vstack([a[:250],a[400:]])
++    comps3,jinfo=split_components_by_jumps(bad); assert len(comps3)==1,jinfo
+ # phase winding
+ phi=3*th; assert abs(winding(phi)-3)<1e-10
+ # Taylor-Green periodic Euler pressure Poisson
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/scripts/selftest_blind.py b/scripts/selftest_blind.py
+--- a/scripts/selftest_blind.py	1970-01-01 00:00:00.000000000 +0000
++++ b/scripts/selftest_blind.py	2026-08-24 14:34:55.279276972 +0000
+@@ -0,0 +1,28 @@
++from pathlib import Path
++import tempfile,json,hashlib,subprocess,sys,numpy as np
++sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
++from sst7.blind import prepare,sha256_file
++
++ROOT=Path(__file__).resolve().parents[1]
++with tempfile.TemporaryDirectory() as td0:
++    td=Path(td0); data=td/'data'; data.mkdir(); state=td/'state'
++    t=np.linspace(0,2*np.pi,96,endpoint=False)
++    c=np.c_[np.cos(t),np.sin(t),0*t]
++    d=np.c_[4+np.cos(t),np.sin(t),0*t]
++    (data/'single.txt').write_text('\n'.join(' '.join(map(str,x)) for x in c)+'\n',encoding='utf-8')
++    (data/'link.txt').write_text('\n'.join(' '.join(map(str,x)) for x in c)+'\n\n'+
++                                  '\n'.join(' '.join(map(str,x)) for x in d)+'\n',encoding='utf-8')
++    r1=td/'basic'; r2=td/'extended'
++    p1=prepare(data,r1,0.3,state_dir=state); p2=prepare(data,r2,0.3,state_dir=state)
++    a=[(x['case_id'],x['split'],x['n_components']) for x in p1['cases']]
++    b=[(x['case_id'],x['split'],x['n_components']) for x in p2['cases']]
++    assert a==b,(a,b)
++    assert p1['dataset_snapshot_sha256']==p2['dataset_snapshot_sha256']
++    # Run + byte-stable freeze + reveal verification.
++    cmd=[sys.executable,str(ROOT/'scripts/run_campaign.py'),'--run-dir',str(r1),'--config','config/basic.json','--mode','basic']
++    subprocess.check_call(cmd,cwd=ROOT)
++    recorded=(r1/'freeze.sha256').read_text(encoding='ascii').split()[0]
++    actual=sha256_file(r1/'opaque_results.json'); assert recorded==actual,(recorded,actual)
++    subprocess.check_call([sys.executable,str(ROOT/'scripts/reveal.py'),'--run-dir',str(r1)],cwd=ROOT)
++    rev=json.loads((r1/'revealed_results.json').read_text()); assert rev['freeze_verified'] is True
++print('[SST7] blind infrastructure selftest PASS')
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/sst7/__init__.py b/sst7/__init__.py
+--- a/sst7/__init__.py	2026-08-21 17:52:32.000000000 +0000
++++ b/sst7/__init__.py	2026-08-24 14:34:40.224562347 +0000
+@@ -1 +1 @@
+-__version__ = "0.1.1"
++__version__ = "0.1.2"
+Binary files a/sst7/__pycache__/__init__.cpython-313.pyc and b/sst7/__pycache__/__init__.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/blind.cpython-313.pyc and b/sst7/__pycache__/blind.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/gates.cpython-313.pyc and b/sst7/__pycache__/gates.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/geometry.cpython-313.pyc and b/sst7/__pycache__/geometry.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/io.cpython-313.pyc and b/sst7/__pycache__/io.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/phase.cpython-313.pyc and b/sst7/__pycache__/phase.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/pressure.cpython-313.pyc and b/sst7/__pycache__/pressure.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/representation.cpython-313.pyc and b/sst7/__pycache__/representation.cpython-313.pyc differ
+Binary files a/sst7/__pycache__/spectral.cpython-313.pyc and b/sst7/__pycache__/spectral.cpython-313.pyc differ
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/sst7/blind.py b/sst7/blind.py
+--- a/sst7/blind.py	2026-08-21 17:52:32.000000000 +0000
++++ b/sst7/blind.py	2026-08-24 14:34:40.221840705 +0000
+@@ -3,38 +3,98 @@
+ import hashlib,hmac,secrets,json,shutil,numpy as np
+ from .io import discover,load_curve,sidecars
+ 
++PACKAGE_VERSION='0.1.2'
++
++
+ def sha256_file(p):
+     h=hashlib.sha256()
+     with open(p,'rb') as f:
+         for b in iter(lambda:f.read(1<<20),b''): h.update(b)
+     return h.hexdigest()
+ 
+-def prepare(dataset:Path,run_dir:Path,holdout_fraction=0.3,seed_hex=None):
+-    files=discover(dataset)
+-    if not files: raise RuntimeError(f'No coordinate files found under {dataset}')
++
++def canonical_json_bytes(obj, *, pretty=True):
++    if pretty:
++        txt=json.dumps(obj,indent=2,sort_keys=True,ensure_ascii=False)+'\n'
++    else:
++        txt=json.dumps(obj,sort_keys=True,separators=(',',':'),ensure_ascii=False)
++    return txt.encode('utf-8')
++
++
++def write_json_bytes(path:Path,obj):
++    b=canonical_json_bytes(obj,pretty=True)
++    path.write_bytes(b)
++    return hashlib.sha256(b).hexdigest()
++
++
++def _inventory(dataset:Path):
++    dataset=dataset.resolve()
++    rows=[]
++    for p in discover(dataset):
++        rel=p.resolve().relative_to(dataset).as_posix()
++        rows.append({'relpath':rel,'sha256':sha256_file(p)})
++    if not rows:
++        raise RuntimeError(f'No coordinate files found under {dataset}')
++    snap=hashlib.sha256(canonical_json_bytes(rows,pretty=False)).hexdigest()
++    return rows,snap
++
++
++def _shared_seed(state_dir:Path|None,snapshot_sha256:str,holdout_fraction:float,seed_hex=None):
++    if seed_hex:
++        return bytes.fromhex(seed_hex), 'explicit-seed'
++    if state_dir is None:
++        return secrets.token_bytes(32), 'ephemeral-random'
++    state_dir.mkdir(parents=True,exist_ok=True)
++    htag=int(round(float(holdout_fraction)*10000))
++    state_file=state_dir/f'{snapshot_sha256[:24]}_h{htag:04d}.json'
++    if state_file.exists():
++        st=json.loads(state_file.read_text(encoding='utf-8'))
++        if st.get('dataset_snapshot_sha256')!=snapshot_sha256:
++            raise RuntimeError('blind-state snapshot mismatch')
++        if abs(float(st.get('holdout_fraction'))-float(holdout_fraction))>1e-12:
++            raise RuntimeError('blind-state holdout fraction mismatch')
++        return bytes.fromhex(st['seed_hex']), state_file.name
++    st={'version':PACKAGE_VERSION,'dataset_snapshot_sha256':snapshot_sha256,
++        'holdout_fraction':float(holdout_fraction),'seed_hex':secrets.token_hex(32)}
++    write_json_bytes(state_file,st)
++    return bytes.fromhex(st['seed_hex']),state_file.name
++
++
++def prepare(dataset:Path,run_dir:Path,holdout_fraction=0.3,seed_hex=None,state_dir:Path|None=None):
++    dataset=dataset.resolve(); inventory,snapshot=_inventory(dataset)
++    file_map={r['relpath']:r['sha256'] for r in inventory}
++    seed,state_id=_shared_seed(state_dir,snapshot,holdout_fraction,seed_hex)
+     bdir=run_dir/'blind'; cdir=bdir/'cases'; cdir.mkdir(parents=True,exist_ok=True)
+-    seed=bytes.fromhex(seed_hex) if seed_hex else secrets.token_bytes(32)
+-    private={'seed_hex':seed.hex(),'dataset':str(dataset.resolve()),'cases':{}}
+-    public={'version':'0.1.1','n_cases':0,'cases':[]}
+-    for p in files:
+-        try: comps=load_curve(p)
++    private={'version':PACKAGE_VERSION,'seed_hex':seed.hex(),'blind_state_id':state_id,
++             'dataset':str(dataset),'dataset_snapshot_sha256':snapshot,'cases':{}}
++    public={'version':PACKAGE_VERSION,'n_cases':0,'dataset_snapshot_sha256':snapshot,
++            'blind_state_id':state_id,'holdout_fraction':float(holdout_fraction),'cases':[]}
++    for rel,digest in file_map.items():
++        p=dataset/Path(rel)
++        try: comps,pinfo=load_curve(p,return_info=True)
+         except Exception: continue
+-        digest=sha256_file(p)
+-        tag=hmac.new(seed,digest.encode(),hashlib.sha256).hexdigest()
++        # Include the relative path as well as content digest so byte-identical duplicate
++        # files cannot collide on case ID or overwrite one another.
++        case_key=(rel+'\0'+digest).encode('utf-8')
++        tag=hmac.new(seed,case_key,hashlib.sha256).hexdigest()
+         cid='C'+tag[:12].upper()
+         split='holdout' if (int(tag[12:20],16)/0xffffffff)<holdout_fraction else 'train'
+-        np.savez_compressed(cdir/f'{cid}.npz', **{f'component_{i}':c for i,c in enumerate(comps)})
++        case_path=cdir/f'{cid}.npz'
++        np.savez_compressed(case_path, **{f'component_{i}':c for i,c in enumerate(comps)})
+         sc=sidecars(p); copied={}
+         for k,sp in sc.items():
+             dst=cdir/f'{cid}.{k}{sp.suffix}'
+             shutil.copy2(sp,dst); copied[k]=dst.name
+-        private['cases'][cid]={'source':str(p.resolve()),'sha256':digest,'sidecars':{k:str(v.resolve()) for k,v in sc.items()}}
+-        public['cases'].append({'case_id':cid,'split':split,'sidecars':sorted(copied.keys())})
++        meta={'parser':pinfo,'component_lengths':[int(len(c)) for c in comps],
++              'n_components':len(comps),'coordinate_sha256':digest}
++        write_json_bytes(cdir/f'{cid}.meta.json',meta)
++        private['cases'][cid]={'source':str(p.resolve()),'relative_source':rel,'sha256':digest,
++                               'parser':pinfo,'sidecars':{k:str(v.resolve()) for k,v in sc.items()}}
++        public['cases'].append({'case_id':cid,'split':split,'sidecars':sorted(copied.keys()),
++                                'n_components':len(comps),'parser_method':pinfo.get('method','unknown')})
+     public['n_cases']=len(public['cases'])
+     if not public['n_cases']: raise RuntimeError('Files were found but none parsed as coordinate curves')
+-    priv_txt=json.dumps(private,indent=2,sort_keys=True)
+-    (bdir/'private_mapping.json').write_text(priv_txt,encoding='utf-8')
+-    public['private_commitment_sha256']=hashlib.sha256(priv_txt.encode()).hexdigest()
+-    pub_txt=json.dumps(public,indent=2,sort_keys=True)
+-    (bdir/'public_manifest.json').write_text(pub_txt,encoding='utf-8')
++    private_hash=write_json_bytes(bdir/'private_mapping.json',private)
++    public['private_commitment_sha256']=private_hash
++    write_json_bytes(bdir/'public_manifest.json',public)
+     return public
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/sst7/gates.py b/sst7/gates.py
+--- a/sst7/gates.py	2026-08-21 17:52:32.000000000 +0000
++++ b/sst7/gates.py	2026-08-24 14:36:47.375238768 +0000
+@@ -26,38 +26,57 @@
+ 
+ def run_case(cdir:Path,case_id:str,cfg:dict,mode='basic'):
+     out=[]; comps=_load_components(cdir/f'{case_id}.npz')
++    meta_file=cdir/f'{case_id}.meta.json'
++    case_meta=json.loads(meta_file.read_text(encoding='utf-8')) if meta_file.exists() else {}
+     # G00 data integrity/closure
+     gaps=[closure_gap_ratio(c) for c in comps]
+     finite=all(np.isfinite(c).all() and len(c)>=16 for c in comps)
+-    ok=finite and max(gaps)<=cfg['closure_gap_rel_max']
+-    out.append(gate('PASS' if ok else 'FAIL','G00_geometry_input',n_components=len(comps),closure_gap_ratios=gaps,finite=finite))
++    geometry_ok=finite and max(gaps)<=cfg['closure_gap_rel_max']
++    out.append(gate('PASS' if geometry_ok else 'FAIL','G00_geometry_input',n_components=len(comps),component_lengths=[len(c) for c in comps],closure_gap_ratios=gaps,finite=finite,parser=case_meta.get('parser',{})))
+     # G01 resampling convergence and low-mode stability
+-    ns=cfg['resample_ns']; all_len=[]; corrs=[]
+-    for c in comps:
+-        lengths=[]; powers=[]
+-        for n in ns:
+-            r=resample_closed(c,n); lengths.append(curve_length(r)); powers.append(normalized_mode_power(r))
+-        all_len.append(lengths)
+-        corrs.extend(mode_corr(powers[i],powers[i+1]) for i in range(len(powers)-1))
+-    rels=[]
+-    for L in all_len:
+-        rels.append(abs(L[-1]-L[-2])/(abs(L[-1])+1e-300) if len(L)>1 else 0.)
+-    ok=max(rels)<=cfg['length_conv_rel_max'] and (min(corrs) if corrs else 1)>=cfg['mode_shape_corr_min']
+-    out.append(gate('PASS' if ok else 'FAIL','G01_resolution_convergence',lengths=all_len,last_step_relative=rels,mode_correlations=corrs))
++    ns=cfg['resample_ns']; all_len=[]; corrs=[]; resample_error=None
++    try:
++        for c in comps:
++            lengths=[]; powers=[]
++            for n in ns:
++                r=resample_closed(c,n); lengths.append(curve_length(r)); powers.append(normalized_mode_power(r))
++            all_len.append(lengths)
++            corrs.extend(mode_corr(powers[i],powers[i+1]) for i in range(len(powers)-1))
++        rels=[]
++        for L in all_len:
++            rels.append(abs(L[-1]-L[-2])/(abs(L[-1])+1e-300) if len(L)>1 else 0.)
++        resolution_ok=max(rels)<=cfg['length_conv_rel_max'] and (min(corrs) if corrs else 1)>=cfg['mode_shape_corr_min']
++    except Exception as e:
++        rels=[]; resolution_ok=False; resample_error=repr(e)
++    out.append(gate('PASS' if resolution_ok else 'FAIL','G01_resolution_convergence',lengths=all_len,last_step_relative=rels,mode_correlations=corrs,error=resample_error))
+     # G02 topology-layer epistemic guard: static curves never promote phase/vorticity claims
+     phasefile=cdir/f'{case_id}.phase.npy'
+     out.append(gate('REFERENCE_ONLY','G02_topology_layer_guard',centerline_available=True,phase_available=phasefile.exists(),vorticity_volume_available=(cdir/f'{case_id}.field.npz').exists(),claim='no cross-layer equality inferred'))
+-    # G03 centerline linking: geometric diagnostic only
+-    pair_links=[]
+-    for i in range(len(comps)):
+-        for j in range(i+1,len(comps)):
+-            if native is not None:
+-                lk=float(native.gauss_linking(np.asarray(comps[i],float),np.asarray(comps[j],float)))
+-                backend='cpp'
+-            else:
+-                lk=float(gauss_linking(comps[i],comps[j])); backend='python'
+-            pair_links.append({'i':i,'j':j,'gauss_linking':lk,'nearest_integer':int(round(lk)),'integer_residual':abs(lk-round(lk))})
+-    out.append(gate('REFERENCE_ONLY','G03_centerline_linking',pairs=pair_links,backend=('none' if not pair_links else backend),claim='centerline-only; no phase/vorticity identification'))
++    # G03 centerline linking: geometric diagnostic only.  Resample before
++    # quadrature so high-linking torus links do not look non-integer merely from
++    # coarse midpoint integration.  Raw and resampled values are both reported.
++    pair_links=[]; link_n=int(cfg.get('linking_resample_n',512 if mode=='basic' else 1024))
++    warn=float(cfg.get('linking_integer_residual_warn',0.02 if mode=='basic' else 0.005))
++    if geometry_ok:
++        for i in range(len(comps)):
++            for j in range(i+1,len(comps)):
++                raw=float(native.gauss_linking(np.asarray(comps[i],float),np.asarray(comps[j],float))) if native is not None else float(gauss_linking(comps[i],comps[j]))
++                ai=resample_closed(comps[i],link_n); bj=resample_closed(comps[j],link_n)
++                if native is not None:
++                    lk=float(native.gauss_linking(np.asarray(ai,float),np.asarray(bj,float))); backend='cpp'
++                else:
++                    lk=float(gauss_linking(ai,bj)); backend='python'
++                pair_links.append({'i':i,'j':j,'gauss_linking_raw':raw,'gauss_linking':lk,'resample_n':link_n,
++                                   'nearest_integer':int(round(lk)),'integer_residual':abs(lk-round(lk)),
++                                   'raw_to_resampled_delta':abs(lk-raw)})
++        max_res=max((p['integer_residual'] for p in pair_links),default=None)
++        out.append(gate('REFERENCE_ONLY','G03_centerline_linking',pairs=pair_links,backend=('none' if not pair_links else backend),
++                        resample_n=link_n,integer_residual_warn=warn,max_integer_residual=max_res,
++                        numerical_integer_consistency=(None if max_res is None else max_res<=warn),
++                        claim='centerline-only; no phase/vorticity identification; pairwise Lk=0 does not prove a multicomponent link is topologically trivial'))
++    else:
++        out.append(gate('REFERENCE_ONLY','G03_centerline_linking',pairs=[],backend='none',resample_n=link_n,
++                        numerical_integer_consistency=None,reason='G00 geometry invalid; linking not evaluated'))
+     # phase
+     if phasefile.exists():
+         phi=np.load(phasefile); ww=sampling_windings(phi,tuple(n for n in (32,64,128,256,512) if n<=len(phi)))
+@@ -84,7 +103,7 @@
+         if boundary.lower()=='periodic':
+             gr=green_relative(pr['source'],pr['pi'],dx); ok2=gr<=cfg['green_rel_max']
+             out.append(gate('PASS' if ok2 else 'FAIL','G21_green_closure',relative=gr,boundary='periodic'))
+-        else: out.append(gate('INDETERMINATE','G21_green_closure',reason='v0.1.1 implements Green closure only for periodic domains'))
++        else: out.append(gate('INDETERMINATE','G21_green_closure',reason='v0.1.2 implements Green closure only for periodic domains'))
+     else:
+         out.append(gate('INDETERMINATE','G20_pressure_poisson',reason='no .field.npz sidecar'))
+         out.append(gate('INDETERMINATE','G21_green_closure',reason='no .field.npz sidecar'))
+diff -ruN '--exclude=SHA256SUMS.txt' '--exclude=results' a/sst7/io.py b/sst7/io.py
+--- a/sst7/io.py	2026-08-21 17:52:32.000000000 +0000
++++ b/sst7/io.py	2026-08-24 14:34:40.221537105 +0000
+@@ -1,10 +1,21 @@
+ from __future__ import annotations
+ from pathlib import Path
+-import re, numpy as np
++import re
++import numpy as np
+ 
+ EXTS={'.txt','.xyz','.csv','.dat','.vect'}
+ SIDE_SUFFIXES=('.phase.npy','.field.npz','.timeseries.npz','.probe_pair.npz','.repr.npz','.model.json')
+ 
++# Conservative generic-text component recovery.  Explicit blank/component separators
++# are preferred.  Jump segmentation is only accepted when every recovered segment
++# is itself a well-closed curve, which prevents one bad edge in a single knot from
++# being silently reinterpreted as a link.
++TEXT_COMPONENT_JUMP_FACTOR = 5.0
++TEXT_COMPONENT_MIN_POINTS = 16
++TEXT_COMPONENT_CLOSURE_MAX = 0.05
++_COMPONENT_MARKER = re.compile(r'^\s*(?:component|curve|strand|polyline|loop)\b', re.I)
++
++
+ def discover(root: Path):
+     out=[]
+     for p in root.rglob('*'):
+@@ -12,28 +23,120 @@
+             out.append(p)
+     return sorted(out)
+ 
++
+ def _floats(line):
+     vals=[]
+     for tok in re.split(r'[\s,;]+', line.strip()):
+         try: vals.append(float(tok))
+-        except: pass
++        except Exception: pass
+     return vals
+ 
+-def load_curve(path: Path):
++
++def _closure_gap_ratio_local(p):
++    p=np.asarray(p,float)
++    if len(p)<2: return float('inf')
++    seg=np.linalg.norm(np.diff(p,axis=0),axis=1)
++    L=float(seg.sum())
++    return float(np.linalg.norm(p[0]-p[-1])/max(L,1e-300))
++
++
++def split_components_by_jumps(points, jump_factor=TEXT_COMPONENT_JUMP_FACTOR,
++                               min_points=TEXT_COMPONENT_MIN_POINTS,
++                               closure_max=TEXT_COMPONENT_CLOSURE_MAX):
++    """Conservative fallback for concatenated closed link components.
++
++    A split is accepted only when (i) one or more inter-row jumps exceed a robust
++    multiple of the median step, (ii) every resulting segment has enough samples,
++    and (iii) every segment is independently closed to ``closure_max``.  Otherwise
++    the input remains a single component and G00 is allowed to reject it normally.
++    """
++    a=np.asarray(points,float)
++    if a.ndim!=2 or a.shape[1]!=3 or len(a)<2*min_points:
++        return [a], {'method':'single','jump_indices':[],'jump_factor':jump_factor}
++    d=np.linalg.norm(np.diff(a,axis=0),axis=1)
++    positive=d[np.isfinite(d) & (d>1e-15)]
++    if len(positive)<2:
++        return [a], {'method':'single','jump_indices':[],'jump_factor':jump_factor}
++    typical=float(np.median(positive))
++    if not np.isfinite(typical) or typical<=0:
++        return [a], {'method':'single','jump_indices':[],'jump_factor':jump_factor}
++    cut_after=np.flatnonzero(d > jump_factor*typical)
++    if len(cut_after)==0:
++        return [a], {'method':'single','jump_indices':[],'jump_factor':jump_factor,'median_step':typical}
++    cuts=(cut_after+1).tolist()
++    bounds=[0,*cuts,len(a)]
++    comps=[a[bounds[i]:bounds[i+1]] for i in range(len(bounds)-1)]
++    if any(len(c)<min_points for c in comps):
++        return [a], {'method':'single','jump_indices':cuts,'jump_factor':jump_factor,'median_step':typical,
++                     'fallback_rejected':'short_component'}
++    gaps=[_closure_gap_ratio_local(c) for c in comps]
++    if max(gaps)>closure_max:
++        return [a], {'method':'single','jump_indices':cuts,'jump_factor':jump_factor,'median_step':typical,
++                     'fallback_rejected':'components_not_closed','candidate_closure_gap_ratios':gaps}
++    return comps, {'method':'jump_fallback_validated','jump_indices':cuts,'jump_factor':jump_factor,
++                   'median_step':typical,'component_closure_gap_ratios':gaps}
++
++
++def _validate_explicit_groups(groups):
++    comps=[np.asarray(g,float) for g in groups if len(g)>=4]
++    if len(comps)<2:
++        return None
++    if any(c.ndim!=2 or c.shape[1]!=3 or len(c)<4 for c in comps):
++        return None
++    gaps=[_closure_gap_ratio_local(c) for c in comps]
++    if max(gaps)>TEXT_COMPONENT_CLOSURE_MAX:
++        return None
++    return comps, gaps
++
++
++def load_curve(path: Path, return_info=False):
+     if path.suffix.lower()=='.vect':
+-        return load_vect(path)
+-    pts=[]
++        comps,info=load_vect(path,return_info=True)
++        return (comps,info) if return_info else comps
++
++    groups=[]; current=[]; numeric_all=[]; saw_separator=False
++    def flush():
++        nonlocal current
++        if current:
++            groups.append(current); current=[]
++
+     for line in path.read_text(errors='ignore').splitlines():
+         s=line.strip()
+-        if not s or s.startswith(('#','%','//')): continue
++        if not s:
++            if current: saw_separator=True
++            flush(); continue
++        if s.startswith(('#','%','//')):
++            marker=s.lstrip('#%/ ').strip()
++            if _COMPONENT_MARKER.match(marker):
++                if current: saw_separator=True
++                flush()
++            continue
++        if _COMPONENT_MARKER.match(s):
++            if current: saw_separator=True
++            flush(); continue
+         v=_floats(s)
+-        if len(v)>=3: pts.append(v[:3])
+-    a=np.asarray(pts,dtype=float)
++        if len(v)>=3:
++            xyz=v[:3]; current.append(xyz); numeric_all.append(xyz)
++    flush()
++    a=np.asarray(numeric_all,dtype=float)
+     if a.ndim!=2 or a.shape[1]!=3 or len(a)<4:
+         raise ValueError(f'No usable XYZ curve in {path}')
+-    return [a]
+ 
+-def load_vect(path: Path):
++    if saw_separator:
++        valid=_validate_explicit_groups(groups)
++        if valid is not None:
++            comps,gaps=valid
++            info={'format':'text','method':'explicit_separators','n_components':len(comps),
++                  'component_lengths':[len(c) for c in comps],
++                  'component_closure_gap_ratios':gaps}
++            return (comps,info) if return_info else comps
++
++    comps,jinfo=split_components_by_jumps(a)
++    info={'format':'text',**jinfo,'n_components':len(comps),'component_lengths':[len(c) for c in comps]}
++    return (comps,info) if return_info else comps
++
++
++def load_vect(path: Path, return_info=False):
+     lines=[ln.strip() for ln in path.read_text(errors='ignore').splitlines() if ln.strip() and not ln.lstrip().startswith('#')]
+     if not lines: raise ValueError('empty VECT')
+     # Minimal Geomview VECT reader. Fall back to generic numeric rows if header does not match.
+@@ -43,7 +146,6 @@
+             npoly,nvert,_=hdr
+             counts=[int(round(x)) for x in _floats(lines[2])]
+             if len(counts)>=npoly:
+-                # colors count line follows; coordinates begin after it.
+                 idx=4
+                 coords=[]
+                 while idx<len(lines) and len(coords)<nvert:
+@@ -54,14 +156,21 @@
+                 for c in counts[:npoly]:
+                     n=abs(c); comp=coords[off:off+n]; off+=n
+                     if len(comp)>=4: comps.append(comp)
+-                if comps: return comps
++                if comps:
++                    info={'format':'vect','method':'vect_header','n_components':len(comps),
++                          'component_lengths':[len(c) for c in comps]}
++                    return (comps,info) if return_info else comps
+     pts=[]
+     for ln in lines:
+         v=_floats(ln)
+         if len(v)>=3: pts.append(v[:3])
+     a=np.asarray(pts,float)
+     if len(a)<4: raise ValueError('No usable VECT coordinates')
+-    return [a]
++    comps,jinfo=split_components_by_jumps(a)
++    info={'format':'vect','method':'vect_numeric_'+jinfo['method'],'n_components':len(comps),
++          'component_lengths':[len(c) for c in comps],**{k:v for k,v in jinfo.items() if k!='method'}}
++    return (comps,info) if return_info else comps
++
+ 
+ def sidecars(path: Path):
+     base=path.with_suffix('')

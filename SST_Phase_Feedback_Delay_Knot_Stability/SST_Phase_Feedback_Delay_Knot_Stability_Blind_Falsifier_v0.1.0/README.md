@@ -62,7 +62,7 @@ The resolver is now **content based**:
 
 1. an explicit input path is accepted only if it really contains `*_i10000.txt`;
 2. the normal one/two-level sibling layouts are searched;
-3. both campaign workspace spellings `solo_projects` and `solo\\_projects` are checked when present;
+3. both campaign workspace spellings `projects` and `projects` are checked when present;
 4. legacy nested source layout `KnotPlot\\_3p1\\_MultiDynamics\\_Relaxation\\_Matrix\\_v0.1.0` is included;
 5. nearby KnotPlot roots are scanned for the actual final-checkpoint files;
 6. ties fail explicitly rather than silently choosing a dataset;
@@ -120,7 +120,7 @@ and ingest only terminal checkpoints:
 You can override the input directory:
 
 ```bat
-run_all.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
+run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
 ```
 
 ## Recommended scientific workflow
@@ -128,7 +128,7 @@ run_all.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_Mul
 First freeze the blind result without revealing preparation labels:
 
 ```bat
-run_all_blind.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
+run_all_blind.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
 ```
 
 Inspect:
@@ -147,13 +147,13 @@ run_40_reveal.cmd
 Or use the one-command convenience workflow:
 
 ```bat
-run_all.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
+run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0" basic
 ```
 
 Higher resolution:
 
 ```bat
-run_all_extended.cmd "C:\workspace\solo\_projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
+run_all_extended.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.0"
 ```
 
 ## Core falsification chain

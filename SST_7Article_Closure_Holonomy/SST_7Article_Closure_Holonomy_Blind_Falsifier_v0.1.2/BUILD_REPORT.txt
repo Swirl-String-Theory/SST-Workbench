@@ -1,0 +1,37 @@
+SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.2
+
+Release focus
+-------------
+Correctness release following the v0.1.1 49-case real-output audit.
+
+Corrections
+-----------
+- multi-component TXT/XYZ/CSV/DAT parsing fixed
+- explicit component separators preserved
+- conservative validated jump fallback added
+- G03 pairwise linking activated for recovered components
+- G03 512/1024 resampling improves integer quadrature convergence
+- Windows LF/CRLF freeze mismatch eliminated by byte-exact JSON writes
+- reveal refuses freeze/private-commitment mismatches
+- BASIC/EXTENDED reuse one blind state for the same dataset snapshot
+- byte-identical coordinate files at different paths cannot collide on opaque IDs
+- invalid G00 geometry no longer feeds a misleading G03 linking computation
+
+Validation
+----------
+Python selftest: PASS
+Blind infrastructure selftest: PASS
+v0.1.1 prepared-data regression: 49/49 parser counts matched
+Extended G00 on reconstructed 49 cases: 49/49 PASS
+Extended G01 on reconstructed 49 cases: 49/49 PASS
+Recovered multi-component cases with G03: 24
+Worst resampled G03 integer residual (1024): 0.0028357249955792696
+BASIC/EXTENDED shared-manifest comparison: PASS (49/49 IDs/splits/components match)
+Byte-stable freeze/reveal verification: PASS
+
+Native
+------
+C++17/pybind11 backend retained.
+MSVC std::ptrdiff_t portability repair from v0.1.1 retained.
+OpenMP preferred; serial fallback retained.
+Current container validation used Python fallback because standalone pybind11 was unavailable offline.

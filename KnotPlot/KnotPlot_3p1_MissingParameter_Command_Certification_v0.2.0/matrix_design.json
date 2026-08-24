@@ -1,0 +1,89 @@
+{
+  "version": "0.2.2",
+  "seed": "3.1",
+  "purpose": "Certify charge/hooke/power/timeincr using KnotPlot parameter assignment syntax (`name = value`), then run the 1000-iteration sensitivity stage only for certified-effective families.",
+  "base_force_model": "ME (mechforce on, elecforce on, bendforce off)",
+  "base_values": {
+    "charge": 15.0,
+    "hooke": 1.0,
+    "power": 6.0,
+    "timeincr": 15.0
+  },
+  "sweeps": {
+    "charge": {
+      "values": [
+        3.75,
+        15.0,
+        60.0
+      ],
+      "labels": [
+        "3p75",
+        "15p0",
+        "60p0"
+      ]
+    },
+    "hooke": {
+      "values": [
+        0.25,
+        1.0,
+        4.0
+      ],
+      "labels": [
+        "0p25",
+        "1p0",
+        "4p0"
+      ]
+    },
+    "power": {
+      "values": [
+        4.0,
+        6.0,
+        8.0
+      ],
+      "labels": [
+        "4p0",
+        "6p0",
+        "8p0"
+      ]
+    },
+    "timeincr": {
+      "values": [
+        3.75,
+        15.0,
+        30.0
+      ],
+      "labels": [
+        "3p75",
+        "15p0",
+        "30p0"
+      ]
+    }
+  },
+  "cert_checkpoints": [
+    0,
+    100
+  ],
+  "extended_checkpoints": [
+    0,
+    100,
+    1000
+  ],
+  "classification": {
+    "CERTIFIED_EFFECTIVE": "No command-rejection marker; common i0 geometry within family; at least two distinct i100 geometries with non-zero aligned RMS.",
+    "ACCEPTED_NO_EFFECT_AT_100": "No command-rejection marker, but i100 states are indistinguishable at the certification horizon.",
+    "REJECTED_BY_KNOTPLOT": "KnotPlot reports unknown/obsolete/invalid parameter or command syntax for the swept control.",
+    "RUN_FAILED": "Seed/output failure or missing outputs."
+  },
+  "syntax": {
+    "charge": "charge = value",
+    "hooke": "hooke = value",
+    "power": "power = value",
+    "timeincr": "timeincr = value",
+    "note": "charge, power and hooke assignment syntax was confirmed on the target KnotPlot installation by the user. timeincr uses the same assignment form here but remains an empirical certification target."
+  },
+  "log_policy": {
+    "startup_preamble": "Ignore `nothing to save` / `nothing to output` lines that occur before the first successful `knot loaded` marker.",
+    "post_load_hard_failures": "Treat `nothing to save` / `nothing to output` after `knot loaded` as RUN_FAILED.",
+    "parameter_rejection": "Unknown/invalid parameter messages remain explicit COMMAND_REJECTED."
+  }
+}

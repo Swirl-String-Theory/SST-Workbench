@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal EnableExtensions\r\ncd /d "%~dp0"\r\npython run_catalog_batch.py %*\r\nexit /b %ERRORLEVEL%\r\n

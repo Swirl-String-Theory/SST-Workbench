@@ -1,0 +1,38 @@
+@echo off
+setlocal EnableExtensions
+cd /d "%~dp0"
+
+echo ============================================================
+echo KnotPlot 3.1 Comprehensive Dynamics Parameter Atlas v0.3.2
+echo ============================================================
+
+call run_filesystem_preflight.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_00_generate.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_dry.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_10_probe.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_20_analyze_probe.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_30_extended.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_40_analyze_extended.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+call run_90_pack_outputs.cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
+
+echo ============================================================
+echo DONE
+echo See analysis\PROBE.md and analysis\EXTENDED.md
+echo Use analysis\downstream_unique_i01000.csv for physical stability tests.
+echo ============================================================
+exit /b 0

@@ -1,0 +1,7 @@
+@echo off
+call "%~dp0run_00_install.cmd" || exit /b 1
+call "%~dp0run_01_check_backend.cmd" || exit /b 1
+call "%~dp0run_20_extended.cmd" || exit /b 1
+call "%~dp0run_40_bv_demo_pass.cmd" || exit /b 1
+call "%~dp0run_41_bv_demo_fail.cmd" || exit /b 1
+exit /b 0

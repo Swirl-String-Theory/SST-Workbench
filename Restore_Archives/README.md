@@ -2,12 +2,12 @@
 
 ## Samenvatting
 
-`Restore_Archives/` bevat **420** zip-pakketten (~1,4 GB): snapshots van SST-onderzoek
-(Fermat, Route-B BEM, chi-phase, coil, falsifiers, Route-I, Planck-routes, trefoil,
-ideal-links, enz.), plus VortexRing Lab-releases, KnotPlot/ridgerunner-data en
+`Restore_Archives/` bevat **563** zip-pakketten (~2,4 GB): snapshots van SST-onderzoek
+(Fermat, Route-B BEM, chi-phase, coil, falsifiers, Maxwell, Route-I, Planck-routes,
+trefoil, ideal-links, enz.), plus VortexRing Lab-releases, KnotPlot/ridgerunner-data en
 SST_CANON-patches.
 De zips zijn de enige lokale archiefkopieën (git negeert `*.zip`); uitgepakte working
-trees blijven in de research packs. Ongeveer zestig bestanden zitten nog in `Misc/` en
+trees blijven in de research packs. Ongeveer tachtig bestanden zitten nog in `Misc/` en
 wachten op fijnere indeling.
 
 Central home for **all** Workbench `.zip` archives. Research packs keep only their
@@ -29,6 +29,7 @@ Restore_Archives/
   VortexLab/
   DeriveConstants/
   Falsifiers/
+  Maxwell/
   Dimensionless/
   ContactBilliard/
   Route_I/
@@ -50,7 +51,7 @@ Restore_Archives/
   Misc/
 ```
 
-Counts (2026-08-12 after root-zip sort): **420** zips, **~1403 MB**.
+Counts (2026-08-24 after Downloads + Workbench ingest): **563** zips, **~2406 MB**.
 
 ## Per thema (1–3 zinnen)
 
@@ -194,9 +195,10 @@ python scripts/consolidate_archives.py --apply
 | Coil DigitalTwin / CoilLab / rodin GUIs | `Coil/` |
 | VortexRing Lab release train | `VortexLab/` |
 | Derive_Constants / FiniteCore SpectralSelector | `DeriveConstants/` |
-| Minimal / Sutcliffe / dark-knot / counterpulley falsifiers | `Falsifiers/` |
+| Minimal / Sutcliffe / dark-knot / counterpulley / blind falsifier packs | `Falsifiers/` |
+| Maxwell SST falsifier chain (v0.1–v0.3) | `Maxwell/` |
 | Ideal-links comprehensive test suite | `IdealLinks/` |
-| Kelvin–Floquet cpp/pybind workbench | `KelvinFloquet/` |
+| Kelvin–Floquet / Kelvin–Joule / Kelvin–Kirchhoff workbench | `KelvinFloquet/` |
 | Route-I relative entropy (incl. unextracted v0.1.0) | `Route_I/` |
 | KnotPlot / ridgerunner / fseries data | `KnotPlot/` |
 | SST_CANON / NotebookLM patches | `Canon/` |

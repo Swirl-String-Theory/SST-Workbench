@@ -38,7 +38,9 @@ THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
         r"CMD_runners_patch|reporting_CMD_hotfix",
         re.I,
     )),
-    ("KelvinFloquet", None, re.compile(r"Kelvin_Floquet|KelvinFloquet", re.I)),
+    ("KelvinFloquet", None, re.compile(
+        r"Kelvin_Floquet|KelvinFloquet|Kelvin_Joule|Kelvin_Kirchhoff", re.I
+    )),
     ("Route_I", None, re.compile(r"Route_I|relative_entropy|routeI_", re.I)),
     ("Routes_v0819", None, re.compile(
         r"v0_8_19|Planck_Routes|RouteA_|nonfit|torsion_impedance|route_ABCD", re.I
@@ -49,15 +51,18 @@ THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
         r"Coil|coil_|rodin_GUI|SawBowl|sawcoil|Halbach|halbach|starshaped", re.I
     )),
     ("VortexLab", None, re.compile(r"vortexring|vortexlab|VortexLab", re.I)),
+    ("Maxwell", None, re.compile(r"Maxwell", re.I)),
+    ("Falsifiers", None, re.compile(
+        r"falsif|minimal_falsif|Sutcliffe|dark_knot|Gilbert|"
+        r"Einstein_SST|Helmholtz_SST",
+        re.I,
+    )),
     ("DeriveConstants", None, re.compile(
         r"Derive_Constants|derive_|gp_core|phase_pressure|half_budget|"
         r"finite_cell|finite.?core|FiniteCore|accessible_area|pressure_mode|"
         r"nonlinear_shape|nlse_|phase_budget|next_step_two_gate|"
         r"SpectralSelector",
         re.I,
-    )),
-    ("Falsifiers", None, re.compile(
-        r"falsif|minimal_falsif|Sutcliffe|dark_knot|Gilbert", re.I
     )),
     ("Trefoil", None, re.compile(r"Trefoil|trefoil|biot|trefoil_closure", re.I)),
     ("Hopf", None, re.compile(r"Hopf|hopf", re.I)),

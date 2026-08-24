@@ -1,0 +1,222 @@
+# SST v0.4.8 Adaptive Spectral DD32 compact — interface discovery
+
+- Status: **FOUND_INTERFACE_NOT_INVOKED**
+- Workspace: `C:\workspace\projects\SST-Workbench`
+- Target: `SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.8_Adaptive_Spectral_DD32_compact`
+
+- Selected: `C:\workspace\projects\SST-Workbench\SST_Trefoil_Lobe_Orientation_Blind_Falsifier\SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.8_Adaptive_Spectral_DD32_compact`
+
+## Root CMD entry points
+- `run_all.cmd`
+- `run_archive_all.cmd`
+- `run_archive_extra_extended.cmd`
+- `run_archive_extra_extended_sharded.cmd`
+- `run_archive_extra_extended_sycl.cmd`
+- `run_archive_extra_extended_sycl_dd32.cmd`
+- `run_archive_full.cmd`
+- `run_archive_full_sharded.cmd`
+- `run_archive_full_sycl.cmd`
+- `run_archive_full_sycl_dd32.cmd`
+- `run_archive_inventory.cmd`
+- `run_archive_resume.cmd`
+- `run_archive_single_shard.cmd`
+- `run_archive_survey.cmd`
+- `run_archive_validate.cmd`
+- `run_basic.cmd`
+- `run_cpu.cmd`
+- `run_extended.cmd`
+- `run_gpu_sycl.cmd`
+- `run_hr_ladder_analyze.cmd`
+- `run_hr_ladder_dd32.cmd`
+- `run_hr_ladder_dd32_shard.cmd`
+- `run_hr_ladder_merge_shards.cmd`
+- `run_hr_ladder_resume_dd32.cmd`
+- `run_install.cmd`
+- `run_panel_basic.cmd`
+- `run_panel_extended.cmd`
+- `run_reproduce_history_basic.cmd`
+- `run_reproduce_history_extended.cmd`
+- `run_spectral_extension_baseline_check.cmd`
+- `run_spectral_extension_dd32.cmd`
+- `run_spectral_extension_dd32_shard.cmd`
+- `run_spectral_extension_merge_shards.cmd`
+- `run_spectral_extension_resume_dd32.cmd`
+- `run_summarize.cmd`
+- `run_sycl_dd32_smoke.cmd`
+- `run_sycl_diagnostics.cmd`
+- `run_sycl_diagnostics_legacy_inprocess.cmd`
+- `run_sycl_worker_smoke.cmd`
+- `run_test.cmd`
+- `run_trefoil_v030_basic.cmd`
+
+## Root Python entry points
+- `run_archive_campaign.py`
+- `run_archive_sweep.py`
+- `run_blind.py`
+- `run_hr_ladder.py`
+- `run_panel.py`
+- `run_spectral_extension.py`
+
+## Static interface hints
+```json
+{
+  "run_all.cmd": {
+    "run_all": [
+      "echo [SST] run_all uses confirmatory CPU/OpenMP FP64 only."
+    ],
+    "rpo": [
+      "echo SST Multi-Topology Knot/Link TBK + RPO/Floquet v0.4.8"
+    ],
+    "tbk": [
+      "echo SST Multi-Topology Knot/Link TBK + RPO/Floquet v0.4.8"
+    ]
+  },
+  "run_archive_extra_extended.cmd": {
+    "input": [
+      "echo [SST] v0.4.8 ALL 127 INPUTS EXTRA_EXTENDED -^> %OUT%"
+    ],
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_extra_extended.json --out-dir \"%OUT%\" --backend auto %*"
+    ]
+  },
+  "run_archive_extra_extended_sharded.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_extra_extended.json --out-dir \"%ROOTOUT%\\shard_%%I\" --backend auto --shard-count !N! --shard-index %%I"
+    ]
+  },
+  "run_archive_extra_extended_sycl.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_extra_extended.json --out-dir \"outputs_archive_extra_extended_sycl_fp32_screen_%TS%\" --backend sycl"
+    ],
+    "rpo": [
+      "echo [WARN] CPU/OpenMP FP64 remains confirmatory for gate decisions near thresholds/RPO/Floquet."
+    ]
+  },
+  "run_archive_extra_extended_sycl_dd32.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_extra_extended.json --out-dir \"outputs_archive_extra_extended_sycl_dd32_%TS%\" --backend sycl-dd32"
+    ],
+    "dd32": [
+      "\".venv\\Scripts\\python.exe\" tools\\sycl_dd32_smoke.py --strict || exit /b 1",
+      "echo [WARN] DD32 is experimental FP32x2 arithmetic, not native/IEEE FP64.",
+      "set \"TSFILE=.sst_timestamp_archive_extra_dd32.tmp\"",
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_extra_extended.json --out-dir \"outputs_archive_extra_extended_sycl_dd32_%TS%\" --backend sycl-dd32"
+    ]
+  },
+  "run_archive_full.cmd": {
+    "input": [
+      "echo [SST] v0.4.8 ALL 127 INPUTS FULL -^> %OUT%"
+    ],
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_full.json --out-dir \"%OUT%\" --backend auto %*"
+    ]
+  },
+  "run_archive_full_sharded.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_full.json --out-dir \"%ROOTOUT%\\shard_%%I\" --backend auto --shard-count !N! --shard-index %%I"
+    ]
+  },
+  "run_archive_full_sycl.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_full.json --out-dir \"outputs_archive_full_sycl_fp32_screen_%TS%\" --backend sycl"
+    ],
+    "rpo": [
+      "echo [WARN] CPU/OpenMP FP64 remains confirmatory for gate decisions near thresholds/RPO/Floquet."
+    ]
+  },
+  "run_archive_full_sycl_dd32.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_full.json --out-dir \"outputs_archive_full_sycl_dd32_%TS%\" --backend sycl-dd32"
+    ],
+    "rpo": [
+      "echo [WARN] Near-threshold gates, RPO and Floquet still require CPU/OpenMP FP64 confirmation until parity is demonstrated."
+    ],
+    "dd32": [
+      "\".venv\\Scripts\\python.exe\" tools\\sycl_dd32_smoke.py --strict || exit /b 1",
+      "echo [WARN] FULL DD32 is an experimental high-precision GPU candidate, not native/IEEE FP64.",
+      "set \"TSFILE=.sst_timestamp_archive_full_dd32.tmp\"",
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config configs\\archive_full.json --out-dir \"outputs_archive_full_sycl_dd32_%TS%\" --backend sycl-dd32"
+    ]
+  },
+  "run_archive_resume.cmd": {
+    "config": [
+      "set \"CFG=configs\\archive_extra_extended.json\"",
+      "if /I \"%MODE%\"==\"full\" set \"CFG=configs\\archive_full.json\"",
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config \"%CFG%\" --out-dir \"%OUT%\" --backend auto"
+    ]
+  },
+  "run_archive_single_shard.cmd": {
+    "config": [
+      "set \"CFG=configs\\archive_extra_extended.json\"",
+      "if /I \"%~1\"==\"full\" set \"CFG=configs\\archive_full.json\"",
+      "\".venv\\Scripts\\python.exe\" run_archive_campaign.py --config \"%CFG%\" --out-dir \"%~4\" --backend auto --shard-index %~2 --shard-count %~3"
+    ]
+  },
+  "run_archive_survey.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_archive_sweep.py --config configs\\panel_survey.json --out-dir \"%OUT%\" --backend auto %*"
+    ]
+  },
+  "run_archive_validate.cmd": {
+    "input": [
+      "echo [SST] Validating every archive input parser/hash..."
+    ]
+  },
+  "run_cpu.cmd": {
+    "run_extended": [
+      "call run_extended.cmd --backend openmp %*"
+    ]
+  },
+  "run_hr_ladder_dd32.cmd": {
+    "dd32": [
+      "\".venv\\Scripts\\python.exe\" tools\\sycl_dd32_smoke.py --strict || exit /b 1",
+      "set \"OUT=outputs_hr_ladder_dd32_%TS%\"",
+      "\".venv\\Scripts\\python.exe\" run_hr_ladder.py --out-dir \"%OUT%\" --backend sycl-dd32"
+    ]
+  },
+  "run_hr_ladder_dd32_shard.cmd": {
+    "dd32": [
+      "if \"%~3\"==\"\" echo Usage: run_hr_ladder_dd32_shard.cmd ^<shard_count^> ^<shard_index^> ^<output_dir^> & exit /b 2",
+      "\".venv\\Scripts\\python.exe\" tools\\sycl_dd32_smoke.py --strict || exit /b 1",
+      "\".venv\\Scripts\\python.exe\" run_hr_ladder.py --out-dir \"%OUT%\" --backend sycl-dd32 --shard-count %COUNT% --shard-index %INDEX%"
+    ]
+  },
+  "run_hr_ladder_resume_dd32.cmd": {
+    "dd32": [
+      "if \"%~1\"==\"\" echo Usage: run_hr_ladder_resume_dd32.cmd ^<existing_output_dir^> [start_rung] & exit /b 2",
+      "\".venv\\Scripts\\python.exe\" tools\\sycl_dd32_smoke.py --strict || exit /b 1",
+      "\".venv\\Scripts\\python.exe\" run_hr_ladder.py --out-dir \"%OUT%\" --backend sycl-dd32 --start-rung %START%"
+    ]
+  },
+  "run_panel_basic.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_panel.py --config configs\\panel_basic.json --out-dir \"%OUT%\" --backend auto %*"
+    ]
+  },
+  "run_panel_extended.cmd": {
+    "config": [
+      "\".venv\\Scripts\\python.exe\" run_panel.py --config configs\\panel_extended.json --out-dir \"%OUT%\" --backend auto %*"
+    ]
+  },
+  "run_reproduce_history_basic.cmd": {
+    "input": [
+      "echo [SST] Recomputing BASIC conclusions for v0.1.0, v0.1.1, v0.2.0 and v0.3.0 from bundled identical inputs..."
+    ]
+  },
+  "run_reproduce_history_extended.cmd": {
+    "input": [
+      "echo [SST] Recomputing EXTENDED conclusions for v0.1.0, v0.1.1, v0.2.0 and v0.3.0 from bundled identical inputs..."
+    ]
+  },
+  "run_spectral_extension_baseline_check.cmd": {
+    "spectral": [
+      "if \"%~1\"==\"\" echo Usage: run_spectral_extension_baseline_check.cmd ^<v0.4.7_output_dir_or_zip^> & exit /b 2",
+      "if not exist \"outputs_spectral_baseline_check\" mkdir \"outputs_spectral_baseline_check\"",
+      "\".venv\\Scripts\\python.exe\" run_spectral_extension.py --out-dir \"outputs_spectral_baseline_check\" --backend cpu --baseline \"%~1\" --baseline-check-only"
+    ]
+  }
+}
+```
+
+## Safety policy
+The bridge does not guess command-line arguments. Use this discovery report or provide the package archive so the adapter can be wired against its actual interface.

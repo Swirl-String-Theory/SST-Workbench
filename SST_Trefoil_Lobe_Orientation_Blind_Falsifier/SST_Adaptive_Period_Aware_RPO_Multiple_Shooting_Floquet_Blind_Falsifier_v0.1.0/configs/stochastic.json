@@ -1,0 +1,95 @@
+{
+  "version": "0.1.0",
+  "blind_seed": 58117,
+  "selection": {
+    "require_screen_status": "PASS",
+    "require_gates": [
+      "P0_geometry_core_clear",
+      "P1_jacobian_converged",
+      "P2_linear_growth_bounded",
+      "P5_short_ringdown_bounded"
+    ],
+    "exclude_families": [],
+    "max_candidates": 8,
+    "if_spectral_results_exist_require_converged_P2_PASS": true,
+    "include_families_only": [
+      "thermalforce",
+      "thfstrength"
+    ]
+  },
+  "certification": {
+    "excursion_min": 0.0075,
+    "recurrence_max": 0.025,
+    "return_ratio_max": 0.5,
+    "return_window_start_periods": 0.5,
+    "core_event_factor": 1.0,
+    "floquet_spectral_radius_max": 1.03
+  },
+  "runtime": {
+    "backend": "openmp",
+    "screen_config": "configs/panel_extended.json",
+    "floquet_config": "configs/hr_ladder/05_R5_N720_K16_ROBUST_FULL.json",
+    "screen_output_rel": "sst_v048_outputs/01_screen_panel_extended_fp64",
+    "spectral_output_rel": "sst_v048_outputs/02_adaptive_spectral_v048/SPECTRAL_EXTENSION_RESULTS.json",
+    "chunk_min_steps": 160,
+    "max_total_steps_per_scan": 12000
+  },
+  "campaign_name": "RPO_STOCHASTIC_BRANCH_thermal_preparations",
+  "coarse": {
+    "oscillatory_eigenpairs": 6,
+    "amplitudes": [
+      0.001,
+      0.002,
+      0.004,
+      0.008
+    ],
+    "phase_count": 12,
+    "horizon_periods": 1.6,
+    "max_physical_time": 1.25,
+    "history_stride": 8
+  },
+  "refine": {
+    "top_seeds_per_candidate": 6,
+    "amplitudes": [
+      0.001,
+      0.002,
+      0.004,
+      0.008
+    ],
+    "phase_grid_count": 36,
+    "phase_halfwidth_steps": 3,
+    "horizon_periods": 3.0,
+    "max_physical_time": 2.0,
+    "history_stride": 6
+  },
+  "shooting": {
+    "enabled": true,
+    "top_seeds_per_candidate": 4,
+    "segments": 4,
+    "mode_count": 4,
+    "max_iterations": 4,
+    "fd_eps": 0.000375,
+    "damping": 0.65,
+    "regularization": 0.001,
+    "max_coeff_step": 0.003,
+    "period_scale_grid": [
+      0.9,
+      0.95,
+      1.0,
+      1.05,
+      1.1
+    ],
+    "continuity_tol": 0.025,
+    "seed_recurrence_max": 0.06,
+    "seed_return_ratio_max": 0.85
+  },
+  "floquet": {
+    "enabled": true,
+    "eps_values": [
+      0.000375,
+      0.00075,
+      0.0015
+    ],
+    "certification_eps": 0.00075
+  }
+}

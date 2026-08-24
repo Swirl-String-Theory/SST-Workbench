@@ -86,25 +86,25 @@ def main() -> int:
     # Compatibility for both workspace spellings observed in this campaign.
     rtxt = str(repo)
     low = rtxt.lower()
-    if "\\solo_projects\\" in low:
-        i = low.index("\\solo_projects\\")
-        alt = rtxt[:i] + "\\solo\\_projects\\" + rtxt[i + len("\\solo_projects\\"):]
+    if "\\projects\\" in low:
+        i = low.index("\\projects\\")
+        alt = rtxt[:i] + "\\projects\\" + rtxt[i + len("\\projects\\"):]
         add_unique(roots, Path(alt) / ".." / ".." / "KnotPlot")
         add_unique(roots, Path(alt) / ".." / "KnotPlot")
-    if "\\solo\\_projects\\" in low:
-        i = low.index("\\solo\\_projects\\")
-        alt = rtxt[:i] + "\\solo_projects\\" + rtxt[i + len("\\solo\\_projects\\"):]
+    if "\\projects\\" in low:
+        i = low.index("\\projects\\")
+        alt = rtxt[:i] + "\\projects\\" + rtxt[i + len("\\projects\\"):]
         add_unique(roots, Path(alt) / ".." / ".." / "KnotPlot")
         add_unique(roots, Path(alt) / ".." / "KnotPlot")
 
-    add_unique(roots, r"C:\workspace\solo_projects\SST-Workbench\KnotPlot")
-    add_unique(roots, r"C:\workspace\solo\_projects\SST-Workbench\KnotPlot")
+    add_unique(roots, r"C:\workspace\projects\SST-Workbench\KnotPlot")
+    add_unique(roots, r"C:\workspace\projects\SST-Workbench\KnotPlot")
 
     # v0.1.5 broad fallback roots: search the complete SST-Workbench tree if the
     # expected KnotPlot roots do not contain the preregistered final checkpoint.
     broad_roots: list[Path] = []
-    add_unique(broad_roots, r"C:\workspace\solo_projects\SST-Workbench")
-    add_unique(broad_roots, r"C:\workspace\solo\_projects\SST-Workbench")
+    add_unique(broad_roots, r"C:\workspace\projects\SST-Workbench")
+    add_unique(broad_roots, r"C:\workspace\projects\SST-Workbench")
 
     # Also infer an SST-Workbench ancestor from the falsifier's own location.
     for parent in [repo, *repo.parents]:

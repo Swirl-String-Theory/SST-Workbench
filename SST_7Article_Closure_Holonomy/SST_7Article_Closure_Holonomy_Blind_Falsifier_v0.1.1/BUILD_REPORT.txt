@@ -1,0 +1,43 @@
+SST Seven-Article Closure & Holonomy Blind Falsifier v0.1.1
+Build/validation report
+
+Python syntax: PASS
+C++17 source compile: PASS
+OpenMP native test: PASS
+Python/native curve length parity: PASS
+Python/native Gauss linking parity: PASS
+Phase winding selftest: PASS
+Taylor-Green pressure-Poisson selftest: PASS
+Periodic Green selftest: PASS
+Synthetic blind prepare/score/freeze/reveal: PASS_WITH_AVAILABLE_GATES
+Article-7 logarithmic-q algebra regression: PASS
+Canon addendum LaTeX syntax harness (T1 + amsmath + hyperref): PASS
+
+Important environment note:
+The validation container had no outbound package network and no standalone
+pybind11 Python package. The native source was therefore compiled manually
+against pybind11 headers already present in the host. The shipped Windows
+installer uses requirements.txt + pybind11.setup_helpers as intended.
+
+No real user KnotPlot/Ridgerunner dataset was available in the execution
+container, so no claim is made that physical SST gates pass on real knots.
+Static centerline-only real runs are expected to produce INDETERMINATE for
+phase, pressure, probe and representation gates until independent sidecars
+are supplied.
+
+v0.1.1 repair note
+------------------
+The v0.1.0 Windows/MSVC run exposed a portability bug in cpp/native.cpp: POSIX
+ssize_t was used as an index type. MSVC does not define ssize_t. v0.1.1 uses
+standard C++17 std::ptrdiff_t and hardens the build/import path. OpenMP is still
+preferred, with a serial native fallback if the toolchain lacks OpenMP support.
+
+Validation in repair environment
+--------------------------------
+- C++17/OpenMP source: g++ syntax check PASS.
+- Native pybind11 extension: compiled manually against Python 3.13 headers PASS.
+- scripts/selftest.py with native extension: PASS.
+- Pressure-Poisson residual: 2.2061401526383866e-14.
+- Periodic Green reconstruction relative error: 0.0056985437364457615.
+- Exact Visual Studio/MSVC rerun remains to be performed on the user's Windows host;
+  the failing non-standard type has been removed from executable C++ declarations.

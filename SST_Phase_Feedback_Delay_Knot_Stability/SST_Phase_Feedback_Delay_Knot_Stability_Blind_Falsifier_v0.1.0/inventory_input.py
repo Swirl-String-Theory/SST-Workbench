@@ -3,8 +3,8 @@ import os, re
 from collections import Counter
 
 roots = [
-    Path(r"C:\workspace\solo_projects\SST-Workbench"),
-    Path(r"C:\workspace\solo\_projects\SST-Workbench"),
+    Path(r"C:\workspace\projects\SST-Workbench"),
+    Path(r"C:\workspace\projects\SST-Workbench"),
 ]
 patterns = ["*_i00000.txt", "*_i01000.txt", "*_i04000.txt", "*_i10000.txt"]
 print("SST Phase-Delay input inventory")

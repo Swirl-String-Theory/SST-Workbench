@@ -7,6 +7,7 @@ This is a full-tree inventory of the Workbench. It complements (and in places co
 
 | Companion document | Contents |
 |--------------------|----------|
+| [INVENTORY_FALSIFIERS.md](INVENTORY_FALSIFIERS.md) | Master falsifier registry (5 families; physics vs numerics) |
 | [INVENTORY_PYTHON.md](INVENTORY_PYTHON.md) | Research / calculation Python scripts by pack |
 | [INVENTORY_ARCHIVES.md](INVENTORY_ARCHIVES.md) | Zip archives (centralized under `Restore_Archives/`) |
 | [INVENTORY_DUPLICATES.md](INVENTORY_DUPLICATES.md) | Nested / duplicated working directories and copies |
@@ -33,7 +34,7 @@ Measured baseline (excluding `.git`):
 | Python files (excl. `.venv` / caches) | 1528 |
 | Of which `test_*.py` | 108 |
 | `pyproject.toml` / `pytest.ini` / `conftest.py` | 23 |
-| Archives (`.zip` etc.) | **368 under `Restore_Archives/` (~1259 MB)** as of 2026-08-05 |
+| Archives (`.zip` etc.) | **563 under `Restore_Archives/` (~2406 MB)** as of 2026-08-24 |
 | Archives with an extracted sibling folder | See [INVENTORY_ARCHIVES.md](INVENTORY_ARCHIVES.md) (bundles = theme zip + pack tree) |
 | Archives never unpacked here | See [INVENTORY_ARCHIVES.md](INVENTORY_ARCHIVES.md) |
 | Python scripts that exist **only** inside archives | 13 (paths now under `Restore_Archives/`) |
@@ -134,7 +135,7 @@ Versioned sandboxes with runnable calculation scripts (see [INVENTORY_PYTHON.md]
 
 | Location | Size | Note |
 |----------|-----:|------|
-| `Restore_Archives/` | ~1259 MB / 368 zips | **Central zip store** (theme-nested); see [Restore_Archives/README.md](Restore_Archives/README.md) |
+| `Restore_Archives/` | ~2406 MB / 563 zips | **Central zip store** (theme-nested); see [Restore_Archives/README.md](Restore_Archives/README.md) |
 | `.tmp.driveupload/` | 4.4 GB / 9051 files | Hidden Google Drive sync staging; not part of the research tree |
 | `SST_contact_billiard_hydrodynamic_falsifier/..._v0.2.0/.venv/` | ~280 MB | Virtualenv living inside a research pack |
 | `3D/Python/3d_sliced/*.gcode` | ~60 MB | Slicer output, not Python source |

@@ -1,0 +1,57 @@
+% ================================================================
+% hooke_0p25 / stage=extended
+% One-parameter-at-a-time certification on trefoil 3.1.
+% Only the swept uncertain parameter is explicitly assigned.
+% Other uncertain controls remain at KnotPlot reset-all defaults.
+% ================================================================
+reset all
+load 3.1
+refine nbeads 300
+mode cb
+
+centre
+fitto mindist 1.05
+
+collision fast
+close = 1
+max-dr = 0.01
+
+mechforce = on
+elecforce = on
+bendforce = off
+
+hooke = 0.25
+bencon = 1
+
+stusplit = 0
+dstep = 1
+bradius = 0.1
+cradius = 0.05
+energy model MD
+
+centre
+energy
+writhe
+length
+rog
+save __OUTROOT__/hooke_0p25_i00000.k float
+coords __OUTROOT__/hooke_0p25_i00000.txt
+
+ago 100
+centre
+energy
+writhe
+length
+rog
+save __OUTROOT__/hooke_0p25_i00100.k float
+coords __OUTROOT__/hooke_0p25_i00100.txt
+
+ago 900
+centre
+energy
+writhe
+length
+rog
+save __OUTROOT__/hooke_0p25_i01000.k float
+coords __OUTROOT__/hooke_0p25_i01000.txt
+

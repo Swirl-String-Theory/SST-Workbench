@@ -34,6 +34,29 @@ def test_classify_key_themes():
     assert m.classify("totally_unknown_blob.zip")[0] == "Misc"
 
 
+def test_classify_archive_ingest_themes():
+    m = _load()
+    assert m.classify("1_Maxwell_SST_Kinetic_Falsifier_v0.3.1.zip")[0] == "Maxwell"
+    assert m.classify("Kelvin_Joule_SST_Transient_Energy_Falsifier_v0.1.0.zip")[0] == (
+        "KelvinFloquet"
+    )
+    assert m.classify("Kelvin_Kirchhoff_SST_Falsifier_v0.1.1.zip")[0] == "KelvinFloquet"
+    assert (
+        m.classify(
+            "SST_Finite_Core_Axial_Toroidal_Phase_Delay_Blind_Falsifier_v0.1.0.zip"
+        )[0]
+        == "Falsifiers"
+    )
+    assert m.classify("Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1.zip")[0] == (
+        "Falsifiers"
+    )
+    assert m.classify("Helmholtz_SST_Vortex_Gates_Falsifier_v0.1.0.zip")[0] == "Falsifiers"
+    assert (
+        m.classify("KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v0.3.0.zip")[0]
+        == "KnotPlot"
+    )
+
+
 def test_classify_root_zip_themes():
     m = _load()
     assert m.classify("Independent_FiniteCore_SpectralSelector_v0.1.2.4.zip")[0] == (

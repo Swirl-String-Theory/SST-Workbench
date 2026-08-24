@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal EnableExtensions\r\ncd /d "%~dp0"\r\npython archive_previous_run.py || exit /b 1\r\npython kpc_audit.py || exit /b 1\r\ncall run_all.cmd || exit /b %ERRORLEVEL%\r\ncall run_analyze.cmd\r\nexit /b %ERRORLEVEL%\r\n

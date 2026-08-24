@@ -1,0 +1,6 @@
+from pathlib import Path
+def write_report(outdir,s):
+    lines=['# SST Material-Coordinate / Phase-Shift EFT Falsifier','',f"**Version:** {s['version']}  ",f"**Overall:** **{s['overall_status']}**  ",f"**Samples analyzed:** {s['n_samples']}  ",'','## Gate counts','','| Gate | PASS | FAIL | SKIP |','|---|---:|---:|---:|']
+    for g,c in s['gate_counts'].items(): lines.append(f"| {g} | {c.get('PASS',0)} | {c.get('FAIL',0)} | {c.get('SKIP',0)} |")
+    lines += ['','## Interpretation','','- G1: centerline-accessible surrogate of material relabeling.','- G2: gauge invariance + convergence of candidate Bishop-frame holonomy; no measured physical SST phase is assumed.','- G3: total-derivative and integration-by-parts operator redundancy.','- G4: regularized finite-core Biot-Savart perturbation dynamics; fits `omega^2 = a2 q^2 + a4 q^4`.','- T/S: separate numerical certification with RK4, `dt proportional to ds^2`, fixed final time and arclength reparameterization.','','PASS means the preregistered closure survived the gate at the configured tolerance; it is not confirmation of SST. FAIL falsifies the tested closure/hypothesis subject to the numerical-certification gates.']
+    Path(outdir,'REPORT.md').write_text('\n'.join(lines),encoding='utf-8')

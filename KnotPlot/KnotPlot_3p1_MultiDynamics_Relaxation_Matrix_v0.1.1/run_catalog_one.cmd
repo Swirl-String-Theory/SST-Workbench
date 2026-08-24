@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal EnableExtensions\r\ncd /d "%~dp0"\r\nif "%~1"=="" (echo Usage: run_catalog_one.cmd knot_3.1& exit /b 2)\r\npython run_catalog_batch.py --one "%~1"\r\nexit /b %ERRORLEVEL%\r\n

@@ -59,22 +59,22 @@ Add-Unique $roots (Join-Path $repo '..\KnotPlot')
 Add-Unique $roots (Join-Path $repo '..\..\KnotPlot')
 
 # Compatibility for the two workspace spellings seen in this campaign:
-#   C:\workspace\solo_projects\...   vs   C:\workspace\solo\_projects\...
+#   C:\workspace\projects\...   vs   C:\workspace\projects\...
 $repoText = $repo
-if ($repoText -match '\\solo_projects\\') {
-    $alt = $repoText -replace '\\solo_projects\\','\\solo\\_projects\\'
+if ($repoText -match '\\projects\\') {
+    $alt = $repoText -replace '\\projects\\','\\projects\\'
     Add-Unique $roots (Join-Path $alt '..\..\KnotPlot')
     Add-Unique $roots (Join-Path $alt '..\KnotPlot')
 }
-if ($repoText -match '\\solo\\_projects\\') {
-    $alt = $repoText -replace '\\solo\\_projects\\','\\solo_projects\\'
+if ($repoText -match '\\projects\\') {
+    $alt = $repoText -replace '\\projects\\','\\projects\\'
     Add-Unique $roots (Join-Path $alt '..\..\KnotPlot')
     Add-Unique $roots (Join-Path $alt '..\KnotPlot')
 }
 
 # Explicit campaign roots, only used when they exist.
-Add-Unique $roots 'C:\workspace\solo_projects\SST-Workbench\KnotPlot'
-Add-Unique $roots 'C:\workspace\solo\_projects\SST-Workbench\KnotPlot'
+Add-Unique $roots 'C:\workspace\projects\SST-Workbench\KnotPlot'
+Add-Unique $roots 'C:\workspace\projects\SST-Workbench\KnotPlot'
 
 # If an explicit path has real final-checkpoint files, it wins.
 if ($Explicit -and (Test-Path -LiteralPath $Explicit -PathType Container)) {
