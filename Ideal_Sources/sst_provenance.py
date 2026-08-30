@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import hashlib
+import fnmatch
 import io
 import json
 import re
@@ -183,9 +184,22 @@ def describe(path: Path, root: Path, with_records: bool) -> dict:
 # --------------------------------------------------------------------------- #
 # commands
 # --------------------------------------------------------------------------- #
+def iter_init_files(root: Path, include: list[str] | None) -> list[Path]:
+    """All files under root, optionally filtered by basename/path glob patterns."""
+    files = [p for p in root.rglob("*") if p.is_file() and p.name != "MANIFEST.json"]
+    if include:
+        kept = []
+        for p in files:
+            rel = str(p.relative_to(root)).replace("\\", "/")
+            if any(fnmatch.fnmatch(p.name, pat) or fnmatch.fnmatch(rel, pat) for pat in include):
+                kept.append(p)
+        files = kept
+    return sorted(files)
+
+
 def cmd_init(args) -> int:
     root = Path(args.directory).resolve()
-    files = sorted(p for p in root.rglob("*") if p.is_file() and p.name != "MANIFEST.json")
+    files = iter_init_files(root, args.include or None)
     manifest = {
         "schema": SCHEMA,
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -285,6 +299,13 @@ def main() -> int:
     q.add_argument("directory")
     q.add_argument("-o", "--output", default="MANIFEST.json")
     q.add_argument("--source", default=None, help="free-text provenance note")
+    q.add_argument(
+        "--include",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="only hash files whose path matches this glob (repeatable; e.g. *.gz)",
+    )
     q.add_argument("--no-records", action="store_true", help="skip per-record hashing")
     q.set_defaults(func=cmd_init)
 

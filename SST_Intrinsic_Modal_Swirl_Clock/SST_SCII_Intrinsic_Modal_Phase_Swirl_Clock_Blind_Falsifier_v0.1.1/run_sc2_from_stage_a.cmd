@@ -1,0 +1,38 @@
+@echo off
+setlocal EnableExtensions
+set WORK=%~1
+if "%WORK%"=="" set WORK=outputs\basic
+set CFG=%~2
+if "%CFG%"=="" set CFG=config\basic.json
+echo ============================================================
+echo SST SC-II v0.1.1 - reuse existing Stage-A trajectories
+echo Work:   %WORK%
+echo Config: %CFG%
+echo No Stage-A physics will be recomputed.
+echo ============================================================
+call run_setup.cmd || exit /b 1
+call run_build_native.cmd || exit /b 1
+call run_selftest.cmd || exit /b 1
+call .venv\Scripts\activate.bat || exit /b 1
+if not exist "%WORK%\results_stage_a\candidates" (
+  echo ERROR: missing %WORK%\results_stage_a\candidates
+  exit /b 2
+)
+echo [1/8] Analyze existing Stage A for SC-II phase candidates
+python -m sst_modal_clock.cli analyze-sc2-stage-a "%WORK%" "%CFG%" || exit /b 1
+echo [2/8] LOW mesh-gauge replay on provisional candidates only
+python -m sst_modal_clock.cli run "%WORK%" "%CFG%" --branch stage_a_gauge_low || exit /b 1
+echo [3/8] HIGH mesh-gauge replay on provisional candidates only
+python -m sst_modal_clock.cli run "%WORK%" "%CFG%" --branch stage_a_gauge_high || exit /b 1
+echo [4/8] SC-II mesh-gauge certification
+python -m sst_modal_clock.cli analyze-sc2-gauge "%WORK%" "%CFG%" || exit /b 1
+echo [5/8] SC-II provenance robustness
+python -m sst_modal_clock.cli analyze-sc2-provenance "%WORK%" "%CFG%" || exit /b 1
+echo [6/8] Material-core Stage B on certified candidates
+python -m sst_modal_clock.cli run "%WORK%" "%CFG%" --branch material || exit /b 1
+echo [7/8] Fixed-core Stage B null
+python -m sst_modal_clock.cli run "%WORK%" "%CFG%" --branch fixed || exit /b 1
+echo [8/8] SC-II causal phase analysis
+python -m sst_modal_clock.cli analyze-sc2-stage-b "%WORK%" "%CFG%" || exit /b 1
+echo.
+echo Result: %WORK%\analysis\blind_sc2_summary.json

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SST Math Lab v0.2.0</title><link rel="stylesheet" href="css/app.css">
+  <script src="lib/math.js"></script><script src="lib/numeric-1.2.6.min.js"></script><script src="lib/numeral.min.js"></script><script src="lib/bignumber.min.js"></script><script src="lib/accounting.min.js"></script><script src="lib/plotly.min.js"></script>
+</head>
+<body>
+<header class="topbar"><div><h1>SST Math Lab <span>v0.2.0</span></h1><p>Knot geometry · finite-core Biot–Savart · reduced stability diagnostics</p></div><div id="dependencyStatus" class="status-badge">Checking libraries…</div></header>
+<div class="layout">
+<aside class="sidebar">
+  <section class="panel"><h2>1 · Geometry source</h2>
+    <label>Source<select id="sourceMode"><option value="trefoil">T(2,3) trefoil</option><option value="import">Imported XYZ/TXT</option></select></label>
+    <div class="grid2"><label>R<input id="trefoilR" type="number" value="2.5" step="0.05"></label><label>a<input id="trefoilA" type="number" value="1.0" step="0.05"></label></div>
+    <label>Display / geometry points<input id="sampleCount" type="number" value="1200" min="64" max="12000" step="64"></label>
+    <label>Physical scale [m / coordinate unit]<input id="physicalScale" type="text" value="1.40897017e-15"></label>
+    <div class="hint">Imported KnotPlot/Ridgerunner centerlines are uniformly resampled on closed arclength before derivatives.</div>
+    <input id="fileInput" type="file" accept=".txt,.xyz,.csv,.dat" hidden>
+    <div class="button-row"><button id="loadFileBtn">Load XYZ/TXT</button><button id="loadSampleBtn">Load sample</button></div>
+    <div id="sourceInfo" class="small-box">Generated T(2,3)</div>
+  </section>
+
+  <section class="panel"><h2>2 · Finite-core Biot–Savart</h2>
+    <label>Physics points<input id="physicsSamples" type="number" value="192" min="32" max="768" step="16"></label>
+    <label>Regularization core radius / r_c<input id="biotCoreFraction" type="number" value="1.0" min="0.01" max="10" step="0.05"></label>
+    <label>Circulation multiplier Γ / Γ_SST<input id="circulationMultiplier" type="number" value="1.0" min="-10" max="10" step="0.05"></label>
+    <label>Pressure-Poisson probe step / a_core<input id="pressureProbeFraction" type="number" value="0.25" min="0.02" max="2" step="0.05"></label>
+    <label>Time + pressure velocity source<select id="diagnosticVelocitySource"><option value="biotShape">Biot–Savart shape speed</option><option value="biotTotal">Biot–Savart total speed</option><option value="curvature">Exploratory curvature-weighted</option><option value="constant">Canonical constant swirl</option></select></label>
+    <div class="warning">Biot–Savart uses a Rosenhead–Moore-style finite-core segment quadrature in SI units. Core radius is user-controlled.</div>
+  </section>
+
+  <section class="panel"><h2>3 · Exploratory mapping</h2>
+    <label>Curvature exponent p<input id="curvatureExponent" type="number" value="0.5" min="0" max="4" step="0.05"></label>
+    <label>Speed multiplier<input id="speedMultiplier" type="number" value="1.0" min="0" max="10" step="0.05"></label>
+    <div class="hint">Used only when the velocity source is curvature-weighted or constant.</div>
+  </section>
+
+  <section class="panel"><h2>4 · Stability gate</h2>
+    <label>Fourier mode ceiling m<input id="stabilityModes" type="number" value="4" min="1" max="12" step="1"></label>
+    <label>Perturbation ε / a_core<input id="perturbationFraction" type="number" value="0.02" min="0.0001" max="0.25" step="0.005"></label>
+    <label class="check"><input id="stabilityConvergence" type="checkbox" checked> ε/2, ε, 2ε convergence ladder</label>
+    <button id="stabilityBtn" class="primary">Run reduced stability</button>
+    <div id="stabilityStatus" class="small-box">Not run.</div>
+  </section>
+
+  <section class="panel"><h2>5 · Kelvin / LIA</h2>
+    <label>Kelvin regulator a / r_c<input id="kelvinCoreFraction" type="number" value="0.10" min="0.001" max="2" step="0.01"></label>
+    <div class="grid2"><label>Modes<input id="kelvinModes" type="number" value="12" min="1" max="100"></label><label>k a cutoff<input id="kaCutoff" type="number" value="0.30" min="0.01" max="0.95" step="0.01"></label></div>
+  </section>
+
+  <section class="panel"><h2>Actions</h2><div class="stack"><button id="recalculateBtn" class="primary">Recalculate all base diagnostics</button><button id="selfTestBtn">Run self-test</button><button id="exportCsvBtn">Export current CSV</button><button id="exportJsonBtn">Export current JSON</button></div><div id="testResult" class="small-box">Self-test not run.</div></section>
+</aside>
+
+<main class="workspace">
+  <section class="metrics" id="metrics"></section>
+  <section class="plot-panel"><nav class="tabs" id="plotTabs">
+    <button data-plot="trefoil" class="active">3D knot</button><button data-plot="geometry">κ / τ</button><button data-plot="biot">Biot velocity</button><button data-plot="time">Time scaling</button><button data-plot="pressure">Pressure</button><button data-plot="kelvin">Kelvin</button><button data-plot="spectrum">FD sanity</button><button data-plot="stability">Stability eigs</button>
+  </nav><div id="plot"></div></section>
+
+  <section class="bottom-grid">
+    <div class="panel"><h2>Math console</h2><p class="hint">Includes current physical values: <code>biot_speed_mean</code>, <code>biot_speed_max</code>, <code>core_radius</code>, <code>max_growth</code> after stability.</p><div class="console-row"><input id="expressionInput" value="Gamma_SST"><button id="evaluateBtn">Evaluate</button></div><div class="example-row"><button data-expr="vSwirl/c">v/c</button><button data-expr="biot_speed_mean/vSwirl">Biot/v_swirl</button><button data-expr="sqrt(1-(biot_speed_max/c)^2)">Biot time factor</button><button data-expr="L/r_c">L/r_c</button><button data-expr="12.7 cm to inch">units</button></div><pre id="consoleOutput">Ready.</pre></div>
+    <div class="panel"><h2>Analysis notes</h2><div id="analysisNotes"></div></div>
+  </section>
+
+  <section class="panel batch-panel"><h2>Batch KnotPlot / Ridgerunner analysis</h2>
+    <p class="hint">Select several XYZ/TXT files, or a complete folder. Batch mode uses the same physical scale and finite-core settings as the current lab.</p>
+    <input id="batchFilesInput" type="file" accept=".txt,.xyz,.csv,.dat" multiple hidden>
+    <input id="batchFolderInput" type="file" webkitdirectory directory multiple hidden>
+    <div class="batch-controls"><button id="batchFilesBtn">Select files</button><button id="batchFolderBtn">Select folder</button><label class="check"><input id="batchStability" type="checkbox"> include reduced stability</label><button id="runBatchBtn" class="primary">Run batch</button><button id="exportBatchBtn">Export batch CSV</button></div>
+    <div id="batchInfo" class="small-box">No batch files selected.</div>
+    <div class="table-wrap"><table id="batchTable"><thead><tr><th>File</th><th>Status</th><th>Raw N</th><th>L/r_c</th><th>max κr_c</th><th>mean |v_BS|</th><th>max |v_BS|</th><th>max Re λ</th></tr></thead><tbody></tbody></table></div>
+  </section>
+</main></div>
+<footer><span id="footerStatus">Ready.</span><span>SST Math Lab v0.2.0 · browser-local numerical workbench</span></footer>
+<script src="js/constants.js"></script><script src="js/vector.js"></script><script src="js/geometry.js"></script><script src="js/diagnostics.js"></script><script src="js/physics.js"></script><script src="js/io.js"></script><script src="js/batch.js"></script><script src="js/plots.js"></script><script src="js/app.js"></script>
+</body></html>

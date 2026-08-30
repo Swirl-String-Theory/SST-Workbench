@@ -28,38 +28,61 @@ The policy below makes each of these mechanically detectable.
 
 ## 1. Directory layout
 
+Working archive (flat; used today):
+
+```
+SST-Workbench/Ideal_Sources/       # immutable upstream bytes + provenance docs
+  Ideal.txt.gz
+  Ideal_11a.txt.gz
+  Ideal_11n.txt.gz
+  IdealLinks.txt.gz
+  IdealLinks_10a.txt.gz
+  IdealLinks_10n.txt.gz
+  IdealLinks_11a1.txt.gz
+  IdealLinks_11a2.txt.gz
+  IdealLinks_11n1.txt.gz
+  IdealLinks_11n2.txt.gz
+  TwelveData.zip
+  TwelveSummary.zip
+  0TwelveData.csv
+  SOURCE.md
+  MANIFEST.json                    # generated; commit after init
+  PROVENANCE.md
+  sst_provenance.py
+```
+
+Canonical long-term sketch (same policy; nested by upstream date when migrated):
+
 ```
 SST-Workbench/
   data/
     upstream/                      # immutable. Never edited, never normalised.
       knotatlas/
-        2016-11/
-          ideal.txt.gz
-          idealLinks.txt.gz
-          ideal_11a.txt.gz
-          ideal_11n.txt.gz
+        <upstream-date>/
+          Ideal.txt.gz … IdealLinks_11n2.txt.gz
           TwelveData.zip
+          TwelveSummary.zip
           0TwelveData.csv
-      SOURCE.md                    # URL, retrieval date, licence status
-      MANIFEST.json                # generated; committed
+      SOURCE.md
+      MANIFEST.json
     derived/
       <artifact-name>/
-        RECIPE.json                # inputs (by payload hash) + exact command
-        <files>
-        MANIFEST.json
+        RECIPE.json
+        …
     tools/
       sst_provenance.py
 ```
 
 Rules:
 
-- **`upstream/` is read-only.** Files land there exactly as downloaded,
-  compression intact. No line-ending conversion, no reformatting, no merging.
-  Anything a tool cannot read in that form is the tool's problem.
-- **Every consumer reads from `upstream/` or from a `derived/` artifact with a
-  `RECIPE.json`.** Nothing reads from a loose copy.
-- **The directory name is the upstream date, not the download date.** The
-  download date lives in `SOURCE.md` and in `MANIFEST.generated_utc`.
+- **Upstream data is read-only.** Files land there exactly as downloaded,
+  compression intact. No gunzip/unzip-to-replace, no line-ending conversion,
+  no reformatting, no merging. Anything a tool cannot read in that form is
+  the tool's problem.
+- **Every consumer reads from Ideal_Sources (or `data/upstream/`) or from a
+  `derived/` artifact with a `RECIPE.json`.** Nothing reads from a loose copy.
+- **The nested directory name is the upstream date, not the download date.**
+  The download date lives in `SOURCE.md` and in `MANIFEST.generated_utc`.
 
 ---
 

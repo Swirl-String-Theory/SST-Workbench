@@ -1,6 +1,6 @@
 # Falsifier inventory
 
-Generated from `falsifier_registry.yaml` (schema v1) on 2026-08-24 16:41 UTC.
+Generated from `falsifier_registry.yaml` (schema v1) on 2026-08-29 23:05 UTC.
 Regenerate: `python scripts/render_falsifier_inventory.py --write`.
 
 ## Status legend
@@ -18,7 +18,7 @@ Regenerate: `python scripts/render_falsifier_inventory.py --write`.
 
 ## Hypothesis roadmap
 
-Core hypothesis rows (28) plus 17 registry-only hypotheses.
+Core hypothesis rows (28) plus 18 registry-only hypotheses.
 
 | # | ID | Status | ★ | Central question | Pack (latest) | Physics | Numerics |
 |---:|---|:---:|:---:|---|---|:---:|:---:|
@@ -45,8 +45,8 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | 21 | SST-FALS-V-01 | 🟠 | ★★★★☆ | Does boost invariance control catch preferred-frame artefacts? | Preferred-Frame / Boost Invariance Control (v0.1.1) | INDETERMINATE | PASS |
 | 22 | SST-FALS-V-02 | 🟡 | ★★★☆☆ | Are results robust across ideal link topologies? | Ideal Links Comprehensive Topology Robustness (v0.4.0) | INDETERMINATE | PASS |
 | 23 | SST-FALS-V-03 | 🔧 | ★★★☆☆ | Does SST21D qualify knot-order ranking? | SST21D Knot-Order Pipeline Qualification (v0.2.0) | REFERENCE_ONLY | PASS |
-| 24 | SST-FALS-V-04 | 🔧 | ★★☆☆☆ | Does KnotPlot multi-dynamics matrix generate qualified candidates? | KnotPlot Multi-Dynamics Matrix Generator (v0.1.6) | REFERENCE_ONLY | PASS |
-| 25 | SST-FALS-V-05 | 🔧 | ★★☆☆☆ | Does the parameter atlas catch campaign failures? | KnotPlot Parameter Atlas QA (v0.3.0) | REFERENCE_ONLY | PASS |
+| 24 | SST-FALS-V-04 | 🔧 | ★★☆☆☆ | Does KnotPlot multi-dynamics matrix generate qualified candidates? | KnotPlot Multi-Dynamics Matrix Generator (v0.1.7) | REFERENCE_ONLY | PASS |
+| 25 | SST-FALS-V-05 | 🔧 | ★★☆☆☆ | Does the parameter atlas catch campaign failures? | KnotPlot Parameter Atlas QA (v0.3.2) | REFERENCE_ONLY | PASS |
 | 26 | SST-FALS-V-06 | 🔧 | ★★☆☆☆ | Are trefoil seeds qualified for falsifier runs? | KnotPlot Trefoil Seed Campaign (v0.1.3) | REFERENCE_ONLY | PASS |
 | 27 | SST-FALS-V-07 | 🔧 | ★★☆☆☆ | Does certification catch missing KnotPlot parameters? | KnotPlot MissingParameter Certification (v0.2.0) | REFERENCE_ONLY | PASS |
 | 28 | SST-FALS-V-08 | 🟡 | ★★★☆☆ | Does the ropelength gate qualify geometry? | Counterpulley α / Ropelength Geometry Gate (v0.5.0) | INDETERMINATE | PASS |
@@ -57,6 +57,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 |---|:---:|:---:|:---|:---:|:---:|
 | SST-FALS-I-06b | I | ⚪ | Does the adaptive RPO ladder converge to a stable orbit? | UNTESTED | PASS |
 | SST-FALS-I-08 | I | ⚪ | Does the finite-core c2 falsifier decide secondary stability? | UNTESTED | NOT_RUN |
+| SST-FALS-I-09 | I | 🟠 | Does any independently sourced trefoil seed become a numerically certified near-RPO/projected-Floquet candidate? | INDETERMINATE | PASS |
 | SST-FALS-II-02 | II | 🟡 | Do evanescent core modes gate Kelvin transport? | INDETERMINATE | PASS |
 | SST-FALS-II-06 | II | ⚪ | Does material-phase EFT close holonomy observables? | UNTESTED | PASS |
 | SST-FALS-III-03 | III | ⚪ | Does the blind Einstein falsifier reject null models? | UNTESTED | NOT_RUN |
@@ -75,7 +76,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 
 ## Master registry
 
-**45** entries — single source of truth in [`falsifier_registry.yaml`](falsifier_registry.yaml).
+**46** entries — single source of truth in [`falsifier_registry.yaml`](falsifier_registry.yaml).
 
 | ID | Name | Version | Family | Blind | Physics | Numerics | Next test |
 |---|---|:---:|:---:|:---:|:---:|:---:|---|
@@ -88,6 +89,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-I-06b | Adaptive Period-Aware RPO Ladder | v0.1.0 | I | yes | UNTESTED | PASS | blind ladder campaign on held-out topology |
 | SST-FALS-I-07 | Threaded Hole / Separatrix Dynamics | v0.3.0 | I | yes | INDETERMINATE | PASS | blind separatrix replication |
 | SST-FALS-I-08 | Finite-Core c2 Falsifier (Archive) | v0.1.0 | I | yes | UNTESTED | NOT_RUN | unpack archive + run c2 campaign |
+| SST-FALS-I-09 | Trefoil Dynamic Seed Qualification Mega Chain | v0.2.1 | I | yes | INDETERMINATE | PASS | run v0.2.1 on a fresh held-out three-family atlas with frozen config and evidence hashes |
 | SST-FALS-II-01 | Chiral Kelvin Core Localization | v0.1.3.1 | II | yes | INDETERMINATE | PASS | held-out chiral core shard |
 | SST-FALS-II-02 | Kelvin–Kirchhoff Evanescent Core Modes | v0.1.1 | II | yes | INDETERMINATE | PASS | independent evanescent gate replication |
 | SST-FALS-II-03 | v↺ Spectral Swirl-Clock Signature | v0.2.1 | II | yes | INDETERMINATE | PASS | blind spectral replication |
@@ -108,8 +110,8 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-V-01 | Preferred-Frame / Boost Invariance Control | v0.1.1 | V | yes | INDETERMINATE | PASS | held-out boost shard |
 | SST-FALS-V-02 | Ideal Links Comprehensive Topology Robustness | v0.4.0 | V | no | INDETERMINATE | PASS | expand ideal-link panel |
 | SST-FALS-V-03 | SST21D Knot-Order Pipeline Qualification | v0.2.0 | V | no | REFERENCE_ONLY | PASS | blind order-qualification on held-out knots |
-| SST-FALS-V-04 | KnotPlot Multi-Dynamics Matrix Generator | v0.1.6 | V | no | REFERENCE_ONLY | PASS | expand dynamics matrix panel |
-| SST-FALS-V-05 | KnotPlot Parameter Atlas QA | v0.3.0 | V | no | REFERENCE_ONLY | PASS | atlas shard on new topology |
+| SST-FALS-V-04 | KnotPlot Multi-Dynamics Matrix Generator | v0.1.7 | V | no | REFERENCE_ONLY | PASS | expand dynamics matrix panel |
+| SST-FALS-V-05 | KnotPlot Parameter Atlas QA | v0.3.2 | V | no | REFERENCE_ONLY | PASS | atlas shard on new topology |
 | SST-FALS-V-06 | KnotPlot Trefoil Seed Campaign | v0.1.3 | V | no | REFERENCE_ONLY | PASS | held-out trefoil seed shard |
 | SST-FALS-V-07 | KnotPlot MissingParameter Certification | v0.2.0 | V | no | REFERENCE_ONLY | PASS | expand command certification panel |
 | SST-FALS-V-08 | Counterpulley α / Ropelength Geometry Gate | v0.5.0 | V | no | INDETERMINATE | PASS | held-out ropelength shard |
@@ -129,7 +131,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 
 ### Family I — Dynamic particle stability
 
-9 entries.
+10 entries.
 
 | ID | Version | Blind | Physics | Numerics |
 |---|:---:|:---:|:---:|:---:|
@@ -142,6 +144,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-I-06b | v0.1.0 | yes | UNTESTED | PASS |
 | SST-FALS-I-07 | v0.3.0 | yes | INDETERMINATE | PASS |
 | SST-FALS-I-08 | v0.1.0 | yes | UNTESTED | NOT_RUN |
+| SST-FALS-I-09 | v0.2.1 | yes | INDETERMINATE | PASS |
 
 ### Family II — Local mode / field structure
 
@@ -190,8 +193,8 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-V-01 | v0.1.1 | yes | INDETERMINATE | PASS |
 | SST-FALS-V-02 | v0.4.0 | no | INDETERMINATE | PASS |
 | SST-FALS-V-03 | v0.2.0 | no | REFERENCE_ONLY | PASS |
-| SST-FALS-V-04 | v0.1.6 | no | REFERENCE_ONLY | PASS |
-| SST-FALS-V-05 | v0.3.0 | no | REFERENCE_ONLY | PASS |
+| SST-FALS-V-04 | v0.1.7 | no | REFERENCE_ONLY | PASS |
+| SST-FALS-V-05 | v0.3.2 | no | REFERENCE_ONLY | PASS |
 | SST-FALS-V-06 | v0.1.3 | no | REFERENCE_ONLY | PASS |
 | SST-FALS-V-07 | v0.2.0 | no | REFERENCE_ONLY | PASS |
 | SST-FALS-V-08 | v0.5.0 | no | INDETERMINATE | PASS |
@@ -223,6 +226,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-I-06b | SST_Trefoil_Lobe_Orientation_Blind_Falsifier/SST_Adaptive_Period_Aware_RPO_Multiple_Shooting_Floquet_Blind_Falsifier_v0.1.0 | Restore_Archives/Falsifiers/SST_Adaptive_Period_Aware_RPO_Multiple_Shooting_Floquet_Blind_Falsifier_v0.1.0.zip |
 | SST-FALS-I-07 | SST_Threaded_Hole_Substrate_Blind_Falsifier_v0.1.0/SST_Threaded_Hole_Substrate_Blind_Falsifier_v0.3.0 | Restore_Archives/Falsifiers/SST_Threaded_Hole_Substrate_Blind_Falsifier_v0.3.0.zip |
 | SST-FALS-I-08 | — | Restore_Archives/DeriveConstants/SST_finite_core_c2_falsifier_v0.1.0.zip |
+| SST-FALS-I-09 | SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier/SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.1 | — |
 | SST-FALS-II-01 | SST_Chiral-Kelvin-Mode/SST_chiral_kelvin_falsification_v0.1.3.1 | — |
 | SST-FALS-II-02 | SST_Kelvin_Floquet/Kelvin_Kirchhoff_SST_Falsifier_v0.1.1 | Restore_Archives/KelvinFloquet/Kelvin_Kirchhoff_SST_Falsifier_v0.1.1.zip |
 | SST-FALS-II-03 | SST_vArrow_Spectral_Blind_Falsifier/SST_vArrow_Spectral_Blind_Falsifier_v0.2.1 | Restore_Archives/Falsifiers/SST_vArrow_Spectral_Blind_Falsifier_v0.2.1.zip |
@@ -235,7 +239,7 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-III-04 | SST_Maxwell/3_Maxwell_SST_Physical_Lines_Falsifier_v0.2.0 | Restore_Archives/Maxwell/3_Maxwell_SST_Physical_Lines_Falsifier_v0.2.0.zip |
 | SST-FALS-III-05 | SST_Maxwell/4_SST_Maxwell_Falsifier_v0.2.0 | Restore_Archives/Maxwell/4_SST_Maxwell_Falsifier_v0.2.0.zip |
 | SST-FALS-III-06 | SST_Maxwell/5_Maxwell_SST_Reciprocal_Falsifier_v0.2.0 | Restore_Archives/Maxwell/5_Maxwell_SST_Reciprocal_Falsifier_v0.2.0.zip |
-| SST-FALS-IV-01 | SST_Maxwell/1_Maxwell_SST_Kinetic_Falsifier_v0.3.1 | Restore_Archives/Maxwell/1_Maxwell_SST_Kinetic_Falsifier_v0.3.1.zip |
+| SST-FALS-IV-01 | SST_Maxwell/1_Maxwell_SST_Kinetic_Falsifier_v0.3.1 | Restore_Archives/Falsifiers/1_Maxwell_SST_Kinetic_Falsifier_v0.3.1_outputs.zip |
 | SST-FALS-IV-02 | SST_Maxwell/2_Maxwell_SST_Dynamical_Field_Closure_Falsifier_v0.2.0 | Restore_Archives/Maxwell/2_Maxwell_SST_Dynamical_Field_Closure_Falsifier_v0.2.0.zip |
 | SST-FALS-IV-03 | — | Restore_Archives/KelvinFloquet/Kelvin_Joule_SST_Transient_Energy_Falsifier_v0.1.1.zip |
 | SST-FALS-IV-04 | SST_6Source_Blind_Falsifier_v0.1.0/SST_6Source_Blind_Falsifier_v0.1.0 | Restore_Archives/Falsifiers/SST_6Source_Blind_Falsifier_v0.1.0.zip |
@@ -243,8 +247,8 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 | SST-FALS-V-01 | SST_preferred_frame_binary_falsifier/SST_preferred_frame_binary_falsifier_v0.1.1 | Restore_Archives/Falsifiers/SST_preferred_frame_binary_falsifier_v0.1.1(1).zip |
 | SST-FALS-V-02 | SST_ideal_links/SST_ideal_links_comprehensive_test_suite_v0.4.0-alpha.1 | Restore_Archives/IdealLinks/SST_ideal_links_comprehensive_test_suite_v0.4.0-alpha.1.zip |
 | SST-FALS-V-03 | SST21D_knot_order_pipeline/SST21D_knot_order_pipeline_v0.2.0 | Restore_Archives/SST21D/SST21D_knot_order_pipeline_v0.2.0.zip |
-| SST-FALS-V-04 | KnotPlot/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.6 | Restore_Archives/KnotPlot/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.6_CLEAN_FULL.zip |
-| SST-FALS-V-05 | KnotPlot/KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v0.3.0 | Restore_Archives/KnotPlot/KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v0.3.0.zip |
+| SST-FALS-V-04 | KnotPlot/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.7 | Restore_Archives/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.7.zip |
+| SST-FALS-V-05 | KnotPlot/KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v0.3.2 | — |
 | SST-FALS-V-06 | KnotPlot/KnotPlot_3p1_Trefoil_Seed_Campaign_v0.1.3 | Restore_Archives/Trefoil/KnotPlot_3p1_Trefoil_Seed_Campaign_v0.1.3.zip |
 | SST-FALS-V-07 | KnotPlot/KnotPlot_3p1_MissingParameter_Command_Certification_v0.2.0 | Restore_Archives/KnotPlot/KnotPlot_3p1_MissingParameter_Command_Certification_v0.2.0.zip |
 | SST-FALS-V-08 | SST_counterpulley_alpha_falsifier/SST_counterpulley_alpha_falsifier_v0.5.0 | Restore_Archives/Falsifiers/SST_counterpulley_alpha_falsifier_v0.5.0.zip |
@@ -264,11 +268,28 @@ Core hypothesis rows (28) plus 17 registry-only hypotheses.
 
 ## Unregistered packs (CI warning)
 
-20 working-tree pack(s) match falsifier heuristics but no registry glob:
+37 working-tree pack(s) match falsifier heuristics but no registry glob:
 
+- `SST_Breathing_Stretching_Return_Phase_Causality/SST_Breathing_Stretching_Return_Phase_Causality_Blind_Falsifier_v0.1.0`
+- `SST_Chirality_Helicity_Transport_Polarity/SST_Chirality_Helicity_Transport_Polarity_Falsifier_v0.1.0`
+- `SST_Chirality_Helicity_Transport_Polarity/SST_Chirality_Helicity_Transport_Polarity_Falsifier_v0.2.0`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.1.0`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.1.1`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.0`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.1`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.5`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.6`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.7`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.8`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_SCII_Intrinsic_Modal_Phase_Swirl_Clock_Blind_Falsifier_v0.1.0`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_SCII_Intrinsic_Modal_Phase_Swirl_Clock_Blind_Falsifier_v0.1.1`
+- `SST_Intrinsic_Modal_Swirl_Clock/SST_SCIIb_Frozen_Modal_Pair_Subspace_Phase_Clock_Blind_Falsifier_v0.1.0`
 - `SST_Kelvin_Floquet/SST_Kelvin_Floquet_Workbench_cpp_pybind_v0.1.0`
 - `SST_Kelvin_Floquet/SST_Kelvin_Floquet_Workbench_cpp_pybind_v0.1.1`
 - `SST_Maxwell/3_SST_Maxwell_Blind_Falsifier_v0.1.0`
+- `SST_QHP_Stability_Landscape/SST_QHP_Stability_Landscape_Blind_Falsifier_v0.1.0`
+- `SST_QHP_Stability_Landscape/SST_QHP_Stability_Landscape_Blind_Falsifier_v0.1.3`
 - `SST_dimensionless_dynamic_predictions/SST_dimensionless_dynamic_predictions_v0.1.0`
 - `SST_dimensionless_dynamic_predictions/SST_dimensionless_dynamic_predictions_v0.2.0_infinite_background_vortex`
 - `SST_dimensionless_dynamic_predictions/SST_dimensionless_dynamic_predictions_v0.4.0_iso_gamma_area_dynamic_clock`

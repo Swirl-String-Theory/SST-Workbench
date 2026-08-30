@@ -1,0 +1,42 @@
+from __future__ import annotations
+from pathlib import Path
+import hashlib,json,re,sys
+
+ROOT=Path(__file__).resolve().parent
+EXCLUDE={".venv","campaigns","__pycache__",".git"}
+BROKEN='data format "/I,/l,/g,/N"'
+FIXED='data format "/I,/l,/g,/N"'
+OLD_HEADER='data header "iteration,length,rog,nbeads"'
+NEW_HEADER='data header "iteration,length,rog,nbeads"'
+
+def eligible(p):
+    return p.suffix.lower() in {".py",".kpc",".txt",".tmpl",".template"} and not any(x in EXCLUDE for x in p.parts)
+
+modified=[]
+for p in sorted(ROOT.rglob("*")):
+    if not p.is_file() or not eligible(p):
+        continue
+    try:t=p.read_text(encoding="utf-8")
+    except UnicodeDecodeError:continue
+    n=t.count(BROKEN)+t.count(OLD_HEADER)
+    if not n:continue
+    before=hashlib.sha256(p.read_bytes()).hexdigest()
+    t2=t.replace(BROKEN,FIXED).replace(OLD_HEADER,NEW_HEADER)
+    backup=p.with_suffix(p.suffix+".pre_v0324")
+    if not backup.exists():
+        backup.write_bytes(p.read_bytes())
+    p.write_text(t2,encoding="utf-8",newline="\n")
+    after=hashlib.sha256(p.read_bytes()).hexdigest()
+    modified.append({"path":str(p.relative_to(ROOT)),"replacements":n,"sha_before":before,"sha_after":after})
+
+payload={
+    "format":"KNOTPLOT-MULTITOPOLOGY-QHP-HOTFIX-3.2.4",
+    "modified":modified,
+    "note":"Removes unsupported /s data field. Saved .k states remain authoritative for recovery analysis."
+}
+(ROOT/"HOTFIX_v0.3.2.4_APPLIED.json").write_text(json.dumps(payload,indent=2)+"\n",encoding="utf-8")
+print("v0.3.2.4 APPLY COMPLETE")
+print("files modified:",len(modified))
+for x in modified:print(" ",x["path"],"replacements",x["replacements"])
+if not modified:
+    print("NOTE: no broken literal found in project sources. Existing campaigns can still be recovered from .k states.")
