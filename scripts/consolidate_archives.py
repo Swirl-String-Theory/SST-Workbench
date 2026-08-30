@@ -98,6 +98,45 @@ THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
 ]
 
 
+# Run-output archives stay next to research packs until SSTcore ingest.
+_OUTPUT_ZIP_RE = re.compile(
+    r"(?:^|[_-])outputs?(?:[_-]|\.zip$)|(?:^|[_-])output\.zip$",
+    re.I,
+)
+
+DOWNLOADS_DIR = Path.home() / "Downloads"
+
+# Source/hotfix families to copy from Downloads into Restore_Archives.
+DOWNLOADS_INGEST_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r"SST_Intrinsic_Modal_Swirl_Clock", re.I),
+    re.compile(r"SST_SCII", re.I),
+    re.compile(r"SST_SCIIb", re.I),
+    re.compile(r"SST_Breathing_Stretching", re.I),
+    re.compile(r"SST_Chirality_Helicity", re.I),
+    re.compile(r"SST_QHP_Stability", re.I),
+    re.compile(r"SST_KnotPlot_QHP_Sweep_Generator", re.I),
+    re.compile(r"SST_Trefoil_Dynamic_Seed", re.I),
+    re.compile(r"KnotPlot_MultiTopology_QHP_Sweep", re.I),
+    re.compile(r"Trefoil_Balance_Point_Campaign", re.I),
+]
+
+
+def is_output_archive(basename: str) -> bool:
+    """True for campaign/run output zips that must not leave the working tree."""
+    return bool(_OUTPUT_ZIP_RE.search(basename))
+
+
+def matches_downloads_ingest(basename: str) -> bool:
+    if is_output_archive(basename):
+        return False
+    return any(pat.search(basename) for pat in DOWNLOADS_INGEST_PATTERNS)
+
+
+def canonical_zip_basename(basename: str) -> str:
+    """Strip Chrome duplicate suffixes like ' (1).zip'."""
+    return re.sub(r"\s+\(\d+\)\.zip$", ".zip", basename, flags=re.I)
+
+
 def classify(basename: str) -> tuple[str, str | None]:
     """Return (theme, series) for a zip basename."""
     name = basename
@@ -141,11 +180,13 @@ class PlannedMove:
     dest: Path
     theme: str
     series: str | None
-    action: str  # move | delete_duplicate | move_renamed
+    action: str  # move | copy | delete_duplicate | skip_duplicate | move_renamed | copy_renamed
     note: str = ""
 
 
-def iter_zips_outside_restore(root: Path = WB) -> list[Path]:
+def iter_zips_outside_restore(root: Path | None = None) -> list[Path]:
+    if root is None:
+        root = WB
     found: list[Path] = []
     for p in root.rglob("*.zip"):
         if not p.is_file():
@@ -241,9 +282,43 @@ def plan_sources() -> list[PlannedMove]:
 def plan_repo() -> list[PlannedMove]:
     plans: list[PlannedMove] = []
     for src in iter_zips_outside_restore():
+        if is_output_archive(src.name):
+            continue
         theme, series = classify(src.name)
         dest = dest_for(src.name, theme, series)
         plans.append(resolve_collision(src, dest, "__from_repo"))
+    return plans
+
+
+def iter_downloads_ingest_zips(downloads: Path | None = None) -> list[Path]:
+    root = downloads if downloads is not None else DOWNLOADS_DIR
+    if not root.is_dir():
+        return []
+    found: list[Path] = []
+    for p in sorted(root.glob("*.zip")):
+        if not p.is_file():
+            continue
+        if not matches_downloads_ingest(p.name):
+            continue
+        found.append(p)
+    return found
+
+
+def plan_downloads_copy(downloads: Path | None = None) -> list[PlannedMove]:
+    """Copy matching Downloads zips into Restore_Archives (never delete Downloads)."""
+    plans: list[PlannedMove] = []
+    for src in iter_downloads_ingest_zips(downloads):
+        dest_name = canonical_zip_basename(src.name)
+        theme, series = classify(dest_name)
+        dest = dest_for(dest_name, theme, series)
+        plans.append(resolve_collision(src, dest, "__from_downloads"))
+        if plans[-1].action == "move":
+            plans[-1].action = "copy"
+        elif plans[-1].action == "move_renamed":
+            plans[-1].action = "copy_renamed"
+        elif plans[-1].action == "delete_duplicate":
+            plans[-1].action = "skip_duplicate"
+            plans[-1].note = "identical copy already in Restore_Archives; Downloads kept"
     return plans
 
 
@@ -303,14 +378,14 @@ def apply_plan(plans: list[PlannedMove], apply: bool) -> list[dict[str, str]]:
         rel_dst = _rel(p.dest)
         size = p.source.stat().st_size if p.source.exists() else 0
 
-        if p.action == "delete_duplicate":
+        if p.action in {"delete_duplicate", "skip_duplicate"}:
             if p.dest.exists():
                 digest = sha256_file(p.dest)
             elif p.source.exists():
                 digest = sha256_file(p.source)
             else:
                 digest = ""
-            if apply:
+            if apply and p.action == "delete_duplicate":
                 p.source.unlink()
             rows.append(
                 {
@@ -329,7 +404,10 @@ def apply_plan(plans: list[PlannedMove], apply: bool) -> list[dict[str, str]]:
 
         if apply:
             ensure_parent(p.dest, True)
-            shutil.move(str(p.source), str(p.dest))
+            if p.action in {"copy", "copy_renamed"}:
+                shutil.copy2(str(p.source), str(p.dest))
+            else:
+                shutil.move(str(p.source), str(p.dest))
             digest = sha256_file(p.dest)
             out_size = p.dest.stat().st_size
         else:
@@ -416,10 +494,15 @@ def main(argv: list[str] | None = None) -> int:
 
     mode = "APPLY" if apply else "DRY-RUN"
 
+    # Phase 0: copy matching Downloads zips (Downloads is never deleted)
+    phase0 = plan_downloads_copy()
+    print(f"[{mode}] phase0 Downloads copy: {len(phase0)} ops {_summarize(phase0)}")
+    rows = apply_plan(phase0, apply=apply)
+
     # Phase 1: reorganize Sources_Zips into themes
     phase1 = plan_sources()
     print(f"[{mode}] phase1 Sources_Zips: {len(phase1)} ops {_summarize(phase1)}")
-    rows = apply_plan(phase1, apply=apply)
+    rows.extend(apply_plan(phase1, apply=apply))
 
     # Phase 2: move remaining Workbench zips (collisions see phase1 destinations)
     phase2 = plan_repo()

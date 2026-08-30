@@ -10,10 +10,15 @@ De zips zijn de enige lokale archiefkopieën (git negeert `*.zip`); uitgepakte w
 trees blijven in de research packs. Ongeveer tachtig bestanden zitten nog in `Misc/` en
 wachten op fijnere indeling.
 
-Central home for **all** Workbench `.zip` archives. Research packs keep only their
-extracted working trees; zips live here under theme folders.
+Central home for **package and hotfix** Workbench `.zip` archives. Research packs
+keep extracted working trees. Campaign/falsifier **output** trees stay on disk
+(gitignored) and their `*_outputs.zip` files stay next to those packs until they
+are published to [SSTcore](https://github.com/Swirl-String-Theory/SSTcore).
 
-`.gitignore` excludes `*.zip`, so these files are local-only (not in git).
+`.gitignore` excludes generic `*.zip` and unpacked `**/outputs/`. Sibling
+`{pack}_outputs.zip` under 50 MiB, and `{pack}_outputs.zip.partNN` for
+archives in [50 MiB, 500 MiB), can be force-added next to falsifiers.
+Larger zips stay local for later [SSTcore](https://github.com/Swirl-String-Theory/SSTcore) ingest.
 
 ## Layout
 

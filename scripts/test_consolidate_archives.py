@@ -191,3 +191,64 @@ def test_apply_plan_move_and_manifest(tmp_path, monkeypatch):
     assert man.exists()
     text = man.read_text(encoding="utf-8")
     assert "Fermat" in text
+
+
+def test_is_output_archive():
+    m = _load()
+    assert m.is_output_archive("Trefoil_Balance_Point_Campaign_v0.2.4_outputs.zip")
+    assert m.is_output_archive("SST_pack_v0.2.2-outputs.zip")
+    assert not m.is_output_archive(
+        "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.8.zip"
+    )
+    assert not m.is_output_archive(
+        "Trefoil_Balance_Point_Campaign_v0.2.4.2_INCOMPLETE_CONTINUATION_RECOVERY_HOTFIX.zip"
+    )
+
+
+def test_plan_repo_skips_output_archives(tmp_path, monkeypatch):
+    m = _load()
+    wb = tmp_path / "wb"
+    restore = wb / "Restore_Archives"
+    restore.mkdir(parents=True)
+    pack = wb / "KnotPlot"
+    pack.mkdir()
+    out_zip = pack / "Trefoil_Balance_Point_Campaign_v0.2.4_outputs.zip"
+    out_zip.write_bytes(b"outputs")
+    src_zip = pack / "Trefoil_Balance_Point_Campaign_v0.2.4.zip"
+    src_zip.write_bytes(b"source")
+    monkeypatch.setattr(m, "WB", wb)
+    monkeypatch.setattr(m, "RESTORE", restore)
+    monkeypatch.setattr(m, "SOURCES_ZIPS", restore / "Sources_Zips")
+    names = {p.source.name for p in m.plan_repo()}
+    assert "Trefoil_Balance_Point_Campaign_v0.2.4.zip" in names
+    assert "Trefoil_Balance_Point_Campaign_v0.2.4_outputs.zip" not in names
+
+
+def test_plan_downloads_copy_skip_duplicate(tmp_path, monkeypatch):
+    m = _load()
+    restore = tmp_path / "Restore_Archives"
+    downloads = tmp_path / "Downloads"
+    downloads.mkdir()
+    dest_dir = restore / "Falsifiers"
+    dest_dir.mkdir(parents=True)
+    name = "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.8.zip"
+    payload = b"swirl-src"
+    (dest_dir / name).write_bytes(payload)
+    (downloads / name).write_bytes(payload)
+    (downloads / "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.7.zip").write_bytes(
+        b"swirl-7"
+    )
+    monkeypatch.setattr(m, "RESTORE", restore)
+    monkeypatch.setattr(m, "SOURCES_ZIPS", restore / "Sources_Zips")
+    plans = m.plan_downloads_copy(downloads)
+    by_name = {p.source.name: p for p in plans}
+    assert by_name[name].action == "skip_duplicate"
+    assert (
+        by_name["SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.7.zip"].action
+        == "copy"
+    )
+    m.apply_plan(plans, apply=True)
+    assert (downloads / name).exists()
+    assert (
+        restore / "Falsifiers" / "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.7.zip"
+    ).exists()
