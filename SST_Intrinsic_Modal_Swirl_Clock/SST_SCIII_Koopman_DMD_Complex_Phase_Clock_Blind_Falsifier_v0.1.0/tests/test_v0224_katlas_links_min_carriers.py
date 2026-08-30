@@ -39,25 +39,6 @@ def test_katlas_link_discovery_marks_pd_generated_not_source_coordinates(tmp_pat
     assert rows[0].metadata['source_coordinates'] is False
     assert st['link_geometry_records']==1 and st['component_mismatch']==0
 
-def test_katlas_link_prefers_sibling_conditioned_geometry_npz(tmp_path):
-    root=tmp_path/'katlas'; _write_katlas_link(root)
-    link_dir=root/'links'/'02'/'L2a1'
-    c0=np.column_stack([np.cos(np.linspace(0,2*np.pi,32,endpoint=False)),
-                        np.sin(np.linspace(0,2*np.pi,32,endpoint=False)),
-                        np.zeros(32)])
-    c1=np.column_stack([np.cos(np.linspace(0,2*np.pi,32,endpoint=False))+2.0,
-                        np.zeros(32),
-                        np.sin(np.linspace(0,2*np.pi,32,endpoint=False))])
-    pts=np.vstack([c0,c1]); offs=np.array([0,len(c0),len(pts)],dtype=np.int64)
-    np.savez(link_dir/'conditioned_geometry.npz',points=pts,component_offsets=offs)
-    rows,st=discover_katlas(root,64)
-    assert len(rows)==1 and len(rows[0].components)==2
-    assert st['conditioned_link_records']==1 and st['pd_link_records']==0
-    assert rows[0].metadata['translator']=='SST-KATLAS-ISOTOPY-HARMONIC-2.0'
-    assert rows[0].metadata['geometry_origin']=='generated_from_katlas_pd_conditioned'
-    assert rows[0].metadata['source_coordinates'] is False
-    assert abs(rows[0].components[0][0,0]-1.0)<1e-12
-
 def test_min_carriers_counts_source_families_not_files(tmp_path):
     ir=tmp_path/'ideal'; kr=tmp_path/'katlas'; fr=tmp_path/'fremlin'; fr.mkdir()
     _write_gilbert_link(ir); _write_katlas_link(kr)

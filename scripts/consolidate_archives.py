@@ -111,6 +111,7 @@ DOWNLOADS_INGEST_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"SST_Intrinsic_Modal_Swirl_Clock", re.I),
     re.compile(r"SST_SCII", re.I),
     re.compile(r"SST_SCIIb", re.I),
+    re.compile(r"SST_Katlas_Link_Geometry", re.I),
     re.compile(r"SST_Breathing_Stretching", re.I),
     re.compile(r"SST_Chirality_Helicity", re.I),
     re.compile(r"SST_QHP_Stability", re.I),

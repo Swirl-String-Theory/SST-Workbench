@@ -52,14 +52,20 @@ def test_plan_family_zip_copies_skips_outputs_and_large(tmp_path):
     downloads = tmp_path / "Downloads"
     downloads.mkdir()
     (wb / "SST_Intrinsic_Modal_Swirl_Clock").mkdir(parents=True)
+    (wb / "SST_Katlas_Link_Geometry_Conditioning_v2.0.0").mkdir(parents=True)
     small = downloads / "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.7.zip"
     small.write_bytes(b"src")
     out_zip = downloads / "SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2_outputs.zip"
     out_zip.write_bytes(b"out")
+    katlas = downloads / "SST_Katlas_Link_Geometry_Conditioning_v2.0.0.zip"
+    katlas.write_bytes(b"kat")
     planned = m.plan_family_zip_copies(wb, downloads)
     names = {src.name for src, _dest in planned}
     assert small.name in names
     assert out_zip.name not in names
+    assert katlas.name in names
+    dests = {dest for _src, dest in planned}
+    assert any(d.name == katlas.name and "Katlas_Link_Geometry" in str(d) for d in dests)
 
 
 def test_should_untrack_rel(tmp_path):

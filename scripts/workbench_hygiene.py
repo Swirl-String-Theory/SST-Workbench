@@ -15,6 +15,7 @@ DELETE_ROOT = Path(r"C:\workspace\projects\DELETE")
 # (family_dir relative to workbench, filename regex for Downloads/Restore)
 FAMILY_ZIP_COPY: list[tuple[str, re.Pattern[str]]] = [
     ("SST_Intrinsic_Modal_Swirl_Clock", re.compile(r"SST_Intrinsic_Modal_Swirl_Clock|SST_SCII", re.I)),
+    ("SST_Katlas_Link_Geometry_Conditioning_v2.0.0", re.compile(r"SST_Katlas_Link_Geometry", re.I)),
     ("SST_QHP_Stability_Landscape", re.compile(r"SST_QHP_Stability|SST_KnotPlot_QHP_Sweep_Generator", re.I)),
     ("SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier", re.compile(r"SST_Trefoil_Dynamic_Seed", re.I)),
     ("SST_Chirality_Helicity_Transport_Polarity", re.compile(r"SST_Chirality_Helicity", re.I)),
