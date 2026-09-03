@@ -1,15 +1,20 @@
 // SST swirl-clock beads  —  [BRIDGE] visualisation only (not a proof)
 // Image-tab. iChannel0 = Microphone or Audio.
-// Linear stack + radial ring of beads (clock ticks); nearest wins.
-// n = 24 swirl-clock bins. Original rewrite (not a golf fork).
+// Still camera until mouse orbit; last mouse pose persists after release.
+// 3-strand centre helix + radial ring; both roll one way. Original rewrite.
 
 #define MAX_STEPS  72
-#define MAX_DIST   6.0
+#define MAX_DIST   12.0
 #define SURF_EPS   0.01
 #define N_BEADS    24.0
+#define N_STRANDS  3.0
 #define RING_R     0.6
+#define HELIX_R    0.14
+#define HELIX_TWIST 2.3
+#define HELIX_DIR  1.0
 #define BEAD_SEP   0.1
 #define BEAD_STEP  0.16
+#define CAM_DIST   2.8
 #define SPEED      0.08
 #define PI         3.14159265
 #define TAU        6.2831853
@@ -55,26 +60,51 @@ mat2 rot2(float a)
     return mat2(c, -s, s, c);
 }
 
-// Returns distance; writes bead id into beadId
-float mapBeads(vec3 p, float beadR, float spin, out float beadId)
+void mouseOrbit(float az0, float el0, out float az, out float el)
 {
-    p.y += 0.08 * sin(iTime * 2.7);
-    p.z -= 2.2;
-    p.xz *= rot2(spin);
+    az = az0;
+    el = el0;
+    // Shadertoy keeps iMouse.xy at the last drag after release; z>0 only while held.
+    if (iMouse.x > 0.5 || iMouse.y > 0.5)
+    {
+        az = (iMouse.x / iResolution.x - 0.5) * TAU;
+        el = clamp((0.5 - iMouse.y / iResolution.y) * PI, -1.15, 1.15);
+    }
+}
 
+void camRay(vec2 uv, float az, float el, float dist, out vec3 ro, out vec3 rd)
+{
+    float ca = cos(az), sa = sin(az);
+    float ce = cos(el), se = sin(el);
+    ro = vec3(sa * ce, se, ca * ce) * dist;
+    vec3 ww = normalize(-ro);
+    vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
+    vec3 vv = cross(uu, ww);
+    rd = normalize(uv.x * uu + uv.y * vv + 1.7 * ww);
+}
+
+// Returns distance; writes bead id into beadId
+float mapBeads(vec3 p, float beadR, float twist, out float beadId)
+{
     vec3 q = p;
     float halfSpan = (N_BEADS - 1.0) * 0.5 * BEAD_STEP;
+    float hsec = TAU / N_STRANDS;
 
-    // --- linear stack along z ---
+    // --- 3-strand helix along z (one-way roll) ---
     float pz = -p.z;
     float idl = clamp(round(pz / BEAD_STEP) * BEAD_STEP, -halfSpan, halfSpan);
     vec3 pl = p;
     pl.z = pz - idl;
-    pl.yx *= rot2(idl * 2.3 + iTime * 5.0);
-    pl.y = abs(pl.y) - BEAD_SEP;
-    float dLin = length(pl) - beadR;
+    pl.xy *= rot2(-(idl * HELIX_TWIST + twist));
+    float hr = length(pl.xy);
+    float ha = atan(pl.x, pl.y);
+    float hm = mod(ha + 8.0 * TAU, hsec) - 0.5 * hsec;
+    float strand = floor(mod(ha + 8.0 * TAU, TAU) / hsec);
+    pl.xy = vec2(sin(hm), cos(hm)) * hr;
+    pl.y -= HELIX_R;
+    float dHelix = length(pl) - beadR;
 
-    // --- radial ring in xy ---
+    // --- radial ring in xy (same roll sign as helix) ---
     float ang = atan(q.x, q.y);
     float sector = TAU / N_BEADS;
     float idr = floor(ang / sector) * sector;
@@ -84,33 +114,34 @@ float mapBeads(vec3 p, float beadR, float spin, out float beadId)
     pr.xy = vec2(sin(m), cos(m)) * rr;
     pr.z = q.z;
     pr.y -= RING_R;
-    pr.yz *= rot2(1.5 * idr + iTime * 5.0);
+    pr.yz *= rot2(1.5 * idr + twist);
     pr.y = abs(pr.y) - BEAD_SEP;
     float dRad = length(pr) - beadR;
 
-    if (dLin < dRad)
+    if (dHelix < dRad)
     {
-        beadId = (idl / BEAD_STEP) + 0.5 * (N_BEADS - 1.0);
-        return dLin;
+        beadId = (idl / BEAD_STEP) + 0.5 * (N_BEADS - 1.0)
+               + strand * (N_BEADS / N_STRANDS);
+        return dHelix;
     }
     beadId = idr / sector;
     return dRad;
 }
 
-float mapSimple(vec3 p, float beadR, float spin)
+float mapSimple(vec3 p, float beadR, float twist)
 {
     float id;
-    return mapBeads(p, beadR, spin, id);
+    return mapBeads(p, beadR, twist, id);
 }
 
-vec3 calcNormal(vec3 p, float beadR, float spin)
+vec3 calcNormal(vec3 p, float beadR, float twist)
 {
     vec2 e = vec2(0.001, 0.0);
     return normalize(vec3(
-        mapSimple(p + e.yxx, beadR, spin),
-        mapSimple(p + e.xyx, beadR, spin),
-        mapSimple(p + e.xxy, beadR, spin)
-    ) - mapSimple(p, beadR, spin));
+        mapSimple(p + e.yxx, beadR, twist),
+        mapSimple(p + e.xyx, beadR, twist),
+        mapSimple(p + e.xxy, beadR, twist)
+    ) - mapSimple(p, beadR, twist));
 }
 
 vec3 aetherBg(vec2 uv)
@@ -128,14 +159,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float mid  = sstBand(sstMid(),  0.05);
     float high = sstBand(sstHigh(), 0.04);
     float beadR = 0.065 * (0.85 + 0.55 * bass);
-    float spin = iTime * (0.25 + 0.55 * mid);
+    float twist = HELIX_DIR * iTime * (0.40 + 0.50 * mid);
     float emit = 0.85 + 0.5 * high;
 
-    if (iMouse.z > 0.0)
-        spin = (iMouse.x / R.x - 0.5) * TAU;
-
-    vec3 rd = normalize(vec3(uv, 1.0));
-    vec3 ro = vec3(0.0);
+    float az, el;
+    mouseOrbit(0.0, 0.22, az, el);
+    vec3 ro, rd;
+    camRay(uv, az, el, CAM_DIST, ro, rd);
 
     float t = 0.0;
     float beadId = 0.0;
@@ -143,7 +173,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     for (int i = 0; i < MAX_STEPS; i++)
     {
         vec3 pos = ro + rd * t;
-        float d = mapBeads(pos, beadR, spin, beadId);
+        float d = mapBeads(pos, beadR, twist, beadId);
         t += d;
         if (d < SURF_EPS) { hit = true; break; }
         if (t > MAX_DIST) break;
@@ -153,9 +183,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     if (hit)
     {
         vec3 pos = ro + rd * t;
-        vec3 nor = calcNormal(pos, beadR, spin);
+        vec3 nor = calcNormal(pos, beadR, twist);
         vec3 mate = phaseColor(beadId);
-        vec3 L = normalize(vec3(cos(iTime * 2.0), sin(iTime), 0.4));
+        vec3 L = normalize(vec3(0.35, 0.75, 0.45));
         float dif = 0.45 + 0.55 * max(0.0, dot(nor, L));
         float spe = pow(max(0.0, dot(nor, normalize(L - rd))), 80.0);
         col = mate * dif * emit + spe * 0.55 * vec3(0.9, 0.95, 1.0);

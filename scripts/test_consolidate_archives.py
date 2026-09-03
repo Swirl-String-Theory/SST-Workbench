@@ -55,6 +55,28 @@ def test_classify_archive_ingest_themes():
         m.classify("KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v0.3.0.zip")[0]
         == "KnotPlot"
     )
+    assert m.classify("SST_Knot_Library_v0.2.5.zip")[0] == "KnotLibrary"
+    assert m.classify("SST_Knot_Geometry_Library_v0.1.3.zip")[0] == "KnotLibrary"
+    assert m.classify("SST_Katlas_Link_Geometry_Conditioning_v2.0.0.zip")[0] == (
+        "KnotLibrary"
+    )
+    assert m.classify("SST_Trefoil_v0.3.0_with_Knot_Library_v0.2.5.zip")[0] == "Trefoil"
+    assert (
+        m.classify(
+            "SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.3.0.zip"
+        )[0]
+        == "Falsifiers"
+    )
+    assert (
+        m.classify(
+            "SST_SCIII_Koopman_DMD_Complex_Phase_Clock_Blind_Falsifier_v0.1.0.zip"
+        )[0]
+        == "Falsifiers"
+    )
+    assert (
+        m.classify("KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v0.1.7.zip")[0]
+        == "KnotPlot"
+    )
 
 
 def test_classify_root_zip_themes():

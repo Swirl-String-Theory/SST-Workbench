@@ -1,0 +1,18 @@
+@echo off
+setlocal EnableExtensions
+pushd "%~dp0" || exit /b 1
+set DATA=%~1
+if "%DATA%"=="" (
+  echo ERROR: run_focus_link_4p2p1_control.cmd is a historical KnotPlot/reference focus runner.
+  echo v0.3.1 primary discovery is the self-contained PTSA atlas.
+  echo Supply an explicit external KnotPlot dataset path, for example:
+  echo   run_focus_link_4p2p1_control.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final"
+  popd
+  exit /b 2
+)
+echo REFERENCE CONTROL ONLY: external KnotPlot dataset = %DATA%
+call run_20_campaign.cmd "%DATA%" config\focus_link_4p2p1_control.json || exit /b 1
+call run_30_blind.cmd "" config\focus_link_4p2p1_control.json
+
+popd
+endlocal

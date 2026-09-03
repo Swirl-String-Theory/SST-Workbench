@@ -16,6 +16,11 @@ TWOPI = 2.0 * math.pi
 LOG_SPIRAL_EPS = 1e-4
 CLASSIC_TREFOIL_SCALE = 0.55
 SWIRL_CLOCK_BEADS = 24
+SWIRL_CLOCK_HELIX_STRANDS = 3
+SWIRL_CLOCK_HELIX_R = 0.14
+SWIRL_CLOCK_HELIX_TWIST = 2.3
+SWIRL_CLOCK_HELIX_DIR = 1.0
+SWIRL_CLOCK_BEAD_STEP = 0.16
 PHI = (1.0 + 5.0 ** 0.5) / 2.0  # golden ratio — GLSL #define PHI
 VORONOI_PARTICLE_COUNT = 1200
 VORONOI_NUM_PATHS = 8
@@ -146,6 +151,35 @@ def braid_phases(n: int = BRAID_N_STRANDS) -> list[float]:
     return [TWOPI * i / n for i in range(n)]
 
 
+def swirl_clock_helix_point(
+    z: float,
+    strand: int,
+    twist: float = 0.0,
+    helix_r: float = SWIRL_CLOCK_HELIX_R,
+    helix_twist: float = SWIRL_CLOCK_HELIX_TWIST,
+    n_strands: int = SWIRL_CLOCK_HELIX_STRANDS,
+) -> tuple[float, float, float]:
+    """Centre-helix bead on strand `strand` — identical to GLSL unwind+3-fold home.
+
+    Unwound home is (0, helix_r); world xy is rot2(z * helix_twist + twist + 2π s / n)
+    applied to that home, matching `pl.xy *= rot2(-(idl * HELIX_TWIST + twist))`.
+    """
+    if n_strands < 1:
+        raise ValueError("n_strands must be >= 1")
+    if strand < 0 or strand >= n_strands:
+        raise ValueError("strand must be in 0..n_strands-1")
+    phase = TWOPI * strand / n_strands
+    a = z * helix_twist + twist + phase
+    c, s = math.cos(a), math.sin(a)
+    # rot2(a) * (0, helix_r) = (-s * helix_r, c * helix_r)
+    return (-s * helix_r, c * helix_r, z)
+
+
+def trefoil_ribbon_roll(t: float, time: float, twist_amp: float = 0.55) -> float:
+    """One-way Frenet roll — identical to GLSL `closestT * 3.0 - iTime * (0.70 + 0.90 * twistAmp)`."""
+    return t * 3.0 - time * (0.70 + 0.90 * twist_amp)
+
+
 def braid_strand_point(
     t: float,
     k: float = BRAID_K,
@@ -166,7 +200,7 @@ def braid_strand_point(
 
 
 def braid_chirality_side(time_sec: float) -> float:
-    """~2s matter / antimatter flip — same as GLSL chiralitySide()."""
+    """~2s matter / antimatter flip — same as closed-braid / nested-braid GLSL."""
     return 1.0 if (time_sec % 4.0) < 2.0 else -1.0
 
 
@@ -479,6 +513,40 @@ def particle_glow_dist(dist: float, particle_size: float) -> float:
     return dist / max(particle_size, 0.05)
 
 
+def particle_disc_body(glow_body: float, discs: float) -> float:
+    """Flat particle-disc fill — identical to GLSL body * SL_DISCS."""
+    return glow_body * min(max(discs, 0.0), 1.0)
+
+
+def loop_dist(a: tuple[float, float], b: tuple[float, float]) -> float:
+    """Euclidean distance — identical to GLSL loopDist() (no toroidal wrap)."""
+    return math.hypot(a[0] - b[0], a[1] - b[1])
+
+
+def loop_rel(a: tuple[float, float], b: tuple[float, float]) -> tuple[float, float]:
+    """Relative vector — identical to GLSL loopRel() (no toroidal wrap)."""
+    return (a[0] - b[0], a[1] - b[1])
+
+
+def particle_glow_window(dist: float, r_max: float) -> float:
+    """Finite glow falloff — identical to GLSL smoothstep(rMax, rMax*0.35, dist)."""
+    if r_max <= 0.0:
+        return 0.0
+    # GLSL smoothstep(edge0, edge1, x): 0 if x<=edge0, 1 if x>=edge1
+    edge0 = r_max
+    edge1 = r_max * 0.35
+    if dist <= edge0 and edge0 == edge1:
+        return 0.0 if dist < edge0 else 1.0
+    t = (dist - edge0) / (edge1 - edge0)
+    t = min(max(t, 0.0), 1.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+def particle_glow_r_max(particle_size: float, glow_base: float = 18.0) -> float:
+    """Glow clip radius — identical to GLSL Image rMax."""
+    return max(48.0, 90.0 * max(particle_size, 0.05) + 0.35 * glow_base)
+
+
 def strand_width_px(
     strand_width: float,
     particle_size: float,
@@ -499,6 +567,183 @@ def rgb_strand_chase(
         0.5 + 0.5 * math.sin(a),
         0.5 + 0.5 * math.sin(a + TWOPI / 3.0),
         0.5 + 0.5 * math.sin(a + 2.0 * TWOPI / 3.0),
+    )
+
+
+UI_SLOT_HEAD = 0
+UI_SLOT_META = 1
+UI_SLOT_SL0 = 2
+UI_N_SL = 13
+UI_SLOT_PATH = 20
+UI_PATH_FIELDS = 4
+UI_SLOT_COUNT = UI_SLOT_PATH + VORONOI_NUM_PATHS * UI_PATH_FIELDS
+
+SL_SCALE = 0
+SL_SPEED = 1
+SL_ATTRACT = 2
+SL_REPEL = 3
+SL_STRETCH = 4
+SL_STEREO = 5
+SL_GLOW = 6
+SL_VIGNETTE = 7
+SL_GAMMA = 8
+SL_STRAND = 9
+SL_HUEAUD = 10
+SL_AUDIOFB = 11
+SL_DISCS = 12
+
+PF_SIZE = 0
+PF_SPEED = 1
+PF_HUE = 2
+PF_MODE = 3
+
+HIT_NONE = 0
+HIT_HEADER = 1
+HIT_SL0 = 100
+HIT_PF0 = 200
+
+UI_PANEL_W = 310.0
+UI_PANEL_W_EXP = 420.0
+UI_HDR_H = 34.0
+UI_TAB_H = 26.0
+UI_ROW_H = 24.0
+UI_ROWS = 6.0
+UI_EXP_ROWS = 12.0
+UI_EXP_PAGES = 3
+
+
+def ui_texel_index(slot: int) -> int:
+    """Buffer B texel after particles + phases — identical to GLSL uiTexelIndex()."""
+    return VORONOI_PARTICLE_COUNT + VORONOI_NUM_PATHS + slot
+
+
+def ui_path_slot(path_id: int, field: int) -> int:
+    """Per-path UI slot — identical to GLSL path field texels."""
+    return UI_SLOT_PATH + (path_id % VORONOI_NUM_PATHS) * UI_PATH_FIELDS + field
+
+
+def ui_slider_range(sl: int) -> tuple[float, float]:
+    """(min, max) — identical to GLSL uiSliderMin/Max()."""
+    ranges = {
+        SL_SCALE: (0.08, 0.42),
+        SL_SPEED: (0.0, 2.50),
+        SL_ATTRACT: (0.0, 0.10),
+        SL_REPEL: (0.0, 0.80),
+        SL_STRETCH: (0.0, 1.00),
+        SL_STEREO: (0.0, 0.40),
+        SL_GLOW: (4.0, 48.0),
+        SL_VIGNETTE: (0.0, 0.85),
+        SL_GAMMA: (0.55, 1.40),
+        SL_STRAND: (0.002, 0.040),
+        SL_HUEAUD: (0.0, 0.25),
+        SL_AUDIOFB: (0.0, 1.0),
+        SL_DISCS: (0.0, 1.0),
+    }
+    return ranges[sl]
+
+
+def ui_mix_slider(sl: int, t: float) -> float:
+    """Map 0..1 track position to slider value — identical to GLSL uiMixSlider()."""
+    lo, hi = ui_slider_range(sl)
+    t = min(max(t, 0.0), 1.0)
+    return lo + (hi - lo) * t
+
+
+def ui_path_field_range(field: int) -> tuple[float, float]:
+    """(min, max) — identical to GLSL uiPathFieldMin/Max()."""
+    if field == PF_SIZE:
+        return (0.20, 2.00)
+    if field == PF_SPEED:
+        return (0.00, 2.50)
+    return (0.0, 1.0)
+
+
+def ui_mix_path_field(field: int, t: float) -> float:
+    """Map 0..1 track position to a path field — identical to GLSL uiMixPathField()."""
+    lo, hi = ui_path_field_range(field)
+    t = min(max(t, 0.0), 1.0)
+    return lo + (hi - lo) * t
+
+
+def ui_panel_height(open_: int, exp_on: int = 0) -> float:
+    """Collapsed / expanded / export panel height — identical to GLSL uiPanelH()."""
+    if open_ < 1:
+        return UI_HDR_H
+    if exp_on > 0:
+        return UI_HDR_H + UI_TAB_H + UI_EXP_ROWS * UI_ROW_H + 6.0
+    return UI_HDR_H + UI_TAB_H + UI_ROWS * UI_ROW_H + 6.0
+
+
+def format_ui_preset_glsl(
+    sliders: list[float] | tuple[float, ...],
+    paths: list[tuple[float, float, float, float]] | tuple[tuple[float, float, float, float], ...],
+) -> str:
+    """Paste-ready Common PRESET block from live values (Shadertoy cannot clipboard)."""
+    if len(sliders) < 13:
+        raise ValueError("need 13 slider values")
+    if len(paths) < 8:
+        raise ValueError("need 8 path tuples (size, speed, hue, mode)")
+    names = (
+        "SCALE", "SPEED", "ATTRACT", "REPEL", "STRETCH", "STEREO",
+        "GLOW", "VIGNETTE", "GAMMA", "STRAND", "HUEAUD", "AUDIOFB", "DISCS",
+    )
+    lines = [
+        "// === SST UI PRESET (paste EXP export here; used on Buffer B init / Reset) ===",
+        "// Shadertoy cannot write the system clipboard — open MENU > EXP, read values, paste below.",
+    ]
+    for name, val in zip(names, sliders):
+        lines.append(f"#define PRESET_SL_{name:<8} {val:.4g}")
+    lines.append("// path fields: size, speed, hue(0..1), mode(0=particles,1=strands)")
+    for i, (sz, spd, hue, mode) in enumerate(paths[:8]):
+        lines.append(f"#define PRESET_P{i}_SIZE {sz:.4g}")
+        lines.append(f"#define PRESET_P{i}_SPEED {spd:.4g}")
+        lines.append(f"#define PRESET_P{i}_HUE   {hue:.4g}")
+        lines.append(f"#define PRESET_P{i}_MODE  {mode:.4g}")
+    lines.append("// === end SST UI PRESET ===")
+    return "\n".join(lines)
+
+
+def rgb_hue(color: tuple[float, float, float]) -> float:
+    """Hue in 0..1 — identical to GLSL rgbHue()."""
+    r, g, b = color
+    m = min(r, g, b)
+    mx = max(r, g, b)
+    d = mx - m
+    if d < 1e-5:
+        return 0.0
+    if r >= g and r >= b:
+        h = ((g - b) / d) % 6.0
+    elif g >= b:
+        h = (b - r) / d + 2.0
+    else:
+        h = (r - g) / d + 4.0
+    return (h / 6.0) % 1.0
+
+
+def hsv_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
+    """HSV to RGB — identical to GLSL hsvRgb()."""
+    hh = (h % 1.0) * 6.0
+    i = math.floor(hh)
+    f = hh - i
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
+    if i < 0.5:
+        o = (v, t, p)
+    elif i < 1.5:
+        o = (q, v, p)
+    elif i < 2.5:
+        o = (p, v, t)
+    elif i < 3.5:
+        o = (p, q, v)
+    elif i < 4.5:
+        o = (t, p, v)
+    else:
+        o = (v, p, q)
+    return (
+        min(max(o[0], 0.0), 1.0),
+        min(max(o[1], 0.0), 1.0),
+        min(max(o[2], 0.0), 1.0),
     )
 
 

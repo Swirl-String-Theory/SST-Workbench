@@ -11,7 +11,7 @@ Workbench archive of **original** GLSL Image-tab shaders you paste back onto [sh
 | [`sst_closed_braid.glsl`](sst_closed_braid.glsl) | **3D** closed 3-strand braid + audio |
 | [`sst_domain_twist_ring.glsl`](sst_domain_twist_ring.glsl) | **3D** domain-deform twist ring + audio |
 | [`sst_trefoil_ribbon.glsl`](sst_trefoil_ribbon.glsl) | **3D** T(2,3) Frenet ribbon + audio |
-| [`sst_swirl_clock_beads.glsl`](sst_swirl_clock_beads.glsl) | **3D** linear+radial swirl-clock beads + audio |
+| [`sst_swirl_clock_beads.glsl`](sst_swirl_clock_beads.glsl) | **3D** still-camera 3-strand helix + radial swirl-clock beads + audio |
 | [`sst_phi_log_spiral.glsl`](sst_phi_log_spiral.glsl) | **2D** φ log-polar fractal + audio |
 | [`sst_voronoi_filaments_*.glsl`](sst_voronoi_filaments_common.glsl) | **Multi-pass** Voronoi particles on multi knot/link paths + audio |
 | [`sst_nested_braid_tree.glsl`](sst_nested_braid_tree.glsl) | **3D** nested 3×3×3 braid tree fly-through + audio |
@@ -26,7 +26,7 @@ python -m pytest test_sst_knot_catalog.py -v
 
 ## Pairing
 
-Same SST look (cyan→magenta). Tube, spiral, domain-twist, and φ-spiral share the coprime `(p,q)` catalogue (~2s dwell). Closed braid / trefoil ribbon stay **T(2,3)** with chirality flip. Beads = **24** swirl-clock ticks. Nested braid tree = **27** (3×3×3) leaves. Image-tab kits react to **iChannel0** audio (Voronoi uses iChannel2).
+Same SST look (cyan→magenta). Tube, spiral, domain-twist, and φ-spiral share the coprime `(p,q)` catalogue (~2s dwell). Closed braid stays **T(2,3)** with chirality flip; trefoil ribbon stays **T(2,3)** with one-way roll. Beads = **24** swirl-clock ticks. Nested braid tree = **27** (3×3×3) leaves. Image-tab kits react to **iChannel0** audio (Voronoi uses iChannel2).
 
 ## Audio (all kits)
 
@@ -38,7 +38,7 @@ Same SST look (cyan→magenta). Tube, spiral, domain-twist, and φ-spiral share 
 | Band | Tube | Spiral | Braid | Domain-twist | Ribbon | Beads | Phi-spiral | Nested-braid |
 |------|------|--------|-------|--------------|--------|-------|------------|--------------|
 | Bass | core radius + glow | zoom + tick brightness | strand radius | tube radius + glow | ribbon width/thickness | bead radius | curve thickness / bright | leaf radius |
-| Mid | twist intensity | spin rate | camera/phase spin | object rotation | twist amplitude | spin | rotation speed | nest spin |
+| Mid | twist intensity | spin rate | camera/phase spin | object rotation | roll speed | helix twist | rotation speed | nest spin |
 | High | phase scroll speed | arm contrast | emissive pulse | lobe contrast / phase | specular | emissive | layer contrast | leaf highlight |
 
 Reference helpers: [`sst_audio.inc.glsl`](sst_audio.inc.glsl) (already inlined in each `.glsl`).
@@ -57,8 +57,8 @@ Reference helpers: [`sst_audio.inc.glsl`](sst_audio.inc.glsl) (already inlined i
 | Soft ring (2D) | Unknot / R≈const reference |
 | Closed 3-strand braid (3D) | Braid-index visualisation for 3₁; `side=±1` chirality |
 | Domain-twist ring (3D) | Double polar unwrap + shear + mod lobes; `(p,q)` windings |
-| Trefoil ribbon (3D) | T(2,3) Frenet ribbon; twist in N/B; chirality ~2s |
-| Swirl-clock beads (3D) | 24 linear + radial beads = discrete clock ticks |
+| Trefoil ribbon (3D) | T(2,3) Frenet ribbon; one-way N/B roll; mouse orbit persists |
+| Swirl-clock beads (3D) | 24 radial ticks + 3-strand centre helix |
 | Phi log-spiral (2D) | φ-fractal log-polar layers; scale from `|p|`, chirality `sign(q)` |
 | Voronoi filaments (multi-pass) | 8 concentric Trefoils; per-path particles vs RGB strands; FilamentPath sizes |
 | Nested braid tree (3D) | 3×3×3 hierarchical curve_transform; 27 leaves; chirality ~2s |
@@ -266,17 +266,17 @@ trefoil, ribbon, knot, raymarching, science, audio
 
 T(2,3) trefoil as a twisted Frenet ribbon (rounded-box cross-section).
 Coarse+fine nearest-t search along the centreline.
-Chirality flips twist/z every ~2s.
+Ribbon rolls one way (no chirality flip).
 
 • Colour = phase along the loop (cyan→magenta).
-• Audio: bass→width/thickness, mid→twist amplitude, high→specular.
+• Audio: bass→width/thickness, mid→roll speed, high→specular.
 
 Companions: tube, spiral, braid, domain-twist, beads.
 
 Original rewrite (ribbon idea only; not a fork).
 No Biot–Savart, no mass formula, no hyperbolic 4₁ here.
 
-Mouse: orbit. Channel 0: mic/audio.
+Mouse: orbit, pose persists after release. Channel 0: mic/audio.
 ```
 
 ---
@@ -304,17 +304,19 @@ beads, clock, swirl, raymarching, science, audio
 ```text
 [BRIDGE] visualisation — not a proof.
 
-Discrete swirl-clock: 24 beads in a linear stack and a radial ring;
-nearest layout wins. Phase colour per bead id.
+Discrete swirl-clock: 24 beads on a radial ring plus a 3-strand
+centre helix along z; nearest layout wins. Phase colour per bead id.
+Helix and ring roll one way. Camera stays still until mouse orbit;
+last mouse pose persists after release.
 
-• Audio: bass→radius, mid→spin, high→emissive.
+• Audio: bass→radius, mid→helix twist, high→emissive.
 
 Companions: tube, spiral, braid, domain-twist, ribbon.
 
-Original rewrite (linear∪radial bead idea only; not a fork).
+Original rewrite (helix∪radial bead idea only; not a fork).
 No Biot–Savart, no mass formula, no hyperbolic 4₁ here.
 
-Mouse X: spin. Channel 0: mic/audio.
+Mouse: orbit, pose persists after release. Channel 0: mic/audio.
 ```
 
 ---
@@ -389,7 +391,19 @@ Buffer B:  iChannel0 = Buffer A,  iChannel1 = Buffer B,  iChannel2 = Audio (Mic)
 Image:     iChannel0 = Buffer A,  iChannel1 = Buffer B,  iChannel2 = Audio (Mic)
 ```
 
-Set Buffer A/B to filter **Nearest**, wrap **Repeat** if available.
+Set Buffer A/B to filter **Nearest**, wrap **Clamp** (not Repeat — Repeat
+re-introduces edge ghosts via texture sampling).
+
+**Live UI:** click the top-left `SST MENU` bar to expand. Tabs **MOT / LOOK / PATH**
+host sliders (scale, speed, attract, glow, **DOT** disc opacity, …), an audio-fallback toggle, and
+per-path size / speed / hue / mode plus Reset. State lives in Buffer B texels
+after the particle + phase block — Buffer A stays a Voronoi site field.
+
+**Persist settings:** Shadertoy cannot write the OS clipboard. Click **EXP** in the
+menu header to show live values (page 0 = sliders, pages 1–2 = paths). Copy those
+numbers into the `// === SST UI PRESET ===` block in Common, then recompile /
+reset — init and Reset reload from that block. Optional Python helper:
+`format_ui_preset_glsl(sliders, paths)`.
 
 **Default kit (Common `pathAt`):** 8 concentric Trefoils, `off=0`,
 `R = TREFOIL_R0 * (1..8)`, paste `rr` character × `TREFOIL_r_SCALE`.
@@ -427,6 +441,9 @@ Multi-pass swirl field: 8 concentric Trefoils (R = R0…8×R0). Even paths
 are Voronoi particles; odd paths are RGB strand tubes. Black background.
 FilamentPath holds mode, ParticleConfig (size/color/speed), strandWidth.
 Every path — particles and strands — has its own particle config.
+On-screen SST MENU (top-left) for live sliders / path mode.
+No canvas wrap (Euclidean distance); particle glow is clipped to a finite radius.
+DOT slider fades the whole particle field (0 = glow off, strands only).
 
 • Audio (iChannel2): bass→radial stretch/glow, mid→speed + slight hue,
   high→edge; path0 mono, outer paths stereo-wide.

@@ -1,32 +1,32 @@
 # SST-Workbench — archive inventory (bundles)
 
-Companion to [INVENTORY.md](INVENTORY.md). Updated **2026-08-24** after Downloads
-ingest, Workbench stray cleanup, and root-zip theme sort.
+Companion to [INVENTORY.md](INVENTORY.md). Updated **2026-09-03** after Knot Library /
+Geometry / Katlas / Trefoil Mega root-zip theme sort and consolidate apply.
 
 ## Central home: `Restore_Archives/`
 
-**Samenvatting:** 563 zip-pakketten (~2,4 GB) met SST-onderzoekssnapshots (Fermat, BEM,
-chi-phase, coil, falsifiers, Maxwell, Route-I, routes, trefoil, ideal-links, …),
-VortexRing Lab, KnotPlot-data en CANON-patches; working trees blijven in de research
-packs, ~80 zips nog in `Misc/`.
+**Samenvatting:** 648 zip-pakketten (~3,6 GB) met SST-onderzoekssnapshots (Fermat, BEM,
+chi-phase, coil, falsifiers, Maxwell, Route-I, routes, trefoil, ideal-links,
+knot library/geometry, …), VortexRing Lab, KnotPlot-data en CANON-patches; working
+trees blijven in de research packs, ~80 zips nog in `Misc/`.
 
-All Workbench `.zip` files now live under theme folders in
+All Workbench package/hotfix `.zip` files live under theme folders in
 [`Restore_Archives/`](Restore_Archives/). Research packs keep **extracted working
-trees only**. Per-thema 1–3 zinnen: [`Restore_Archives/README.md`](Restore_Archives/README.md)
-§ *Per thema*.
+trees** plus sibling `*_outputs.zip`. Per-thema 1–3 zinnen:
+[`Restore_Archives/README.md`](Restore_Archives/README.md) § *Per thema*.
 
 Consolidation tool: [`scripts/consolidate_archives.py`](scripts/consolidate_archives.py)
-(manifest: `Restore_Archives/_MANIFEST.csv`). Phases: Sources_Zips → repo strays →
-`Restore_Archives/` root → Misc reclassify.
+(manifest: `Restore_Archives/_MANIFEST.csv`). Phases: Downloads copy → Sources_Zips →
+repo strays → `Restore_Archives/` root → Misc reclassify.
 
 `.gitignore` excludes `*.zip` — local-only, not in git.
 
-| Measure (2026-08-24) | Value |
+| Measure (2026-09-03) | Value |
 |----------------------|------:|
-| Zips under `Restore_Archives/` | **563** |
-| Total size | **~2406 MB** |
-| Last consolidate ops | 67 Sources + 142 repo + 19 root (228 manifest rows) |
-| Stray zips outside `Restore_Archives/` | **0** (excl. `.venv`) |
+| Zips under `Restore_Archives/` | **648** |
+| Total size | **~3601 MB** |
+| Last consolidate ops | 52 Downloads + 78 repo + 13 root (143 manifest rows) |
+| Package/hotfix strays outside `Restore_Archives/` | **0** (sibling `*_outputs.zip` stay next to packs) |
 | Zips in `Restore_Archives/` root | **0** |
 
 A **bundle** = theme zip under `Restore_Archives/<theme>/` plus the version-notated
@@ -36,27 +36,28 @@ extracted folder elsewhere (e.g. `SST_fermat_pybind_research/…_v0.6.1/`).
 
 | Theme | Zips |
 |-------|-----:|
-| Falsifiers | 93 |
-| Misc | 80 |
+| Falsifiers | 137 |
+| Misc | 82 |
+| KnotPlot | 53 |
 | VortexLab | 43 |
-| KnotPlot | 42 |
+| Trefoil | 35 |
 | ChiPhase | 34 |
 | DeriveConstants | 29 |
 | RouteB_BEM | 27 |
 | Fermat | 26 |
-| Trefoil | 20 |
 | Coil | 22 |
 | IdealLinks | 21 |
 | Canon | 19 |
-| Maxwell | 15 |
+| KnotLibrary | 14 |
+| Maxwell | 14 |
 | Route_I | 12 |
 | Routes_v0819 | 11 |
-| FS_Attachment | 10 |
 | Dimensionless | 10 |
+| FS_Attachment | 10 |
 | Datasets | 8 |
 | Hopf | 7 |
-| KelvinFloquet | 6 |
 | Bridge | 6 |
+| KelvinFloquet | 6 |
 | TripleGear | 6 |
 | SST21D | 4 |
 | Templates | 4 |

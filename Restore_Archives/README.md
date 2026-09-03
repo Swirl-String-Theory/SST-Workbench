@@ -2,10 +2,10 @@
 
 ## Samenvatting
 
-`Restore_Archives/` bevat **563** zip-pakketten (~2,4 GB): snapshots van SST-onderzoek
+`Restore_Archives/` bevat **648** zip-pakketten (~3,6 GB): snapshots van SST-onderzoek
 (Fermat, Route-B BEM, chi-phase, coil, falsifiers, Maxwell, Route-I, Planck-routes,
-trefoil, ideal-links, enz.), plus VortexRing Lab-releases, KnotPlot/ridgerunner-data en
-SST_CANON-patches.
+trefoil, ideal-links, knot library/geometry, enz.), plus VortexRing Lab-releases,
+KnotPlot/ridgerunner-data en SST_CANON-patches.
 De zips zijn de enige lokale archiefkopieën (git negeert `*.zip`); uitgepakte working
 trees blijven in de research packs. Ongeveer tachtig bestanden zitten nog in `Misc/` en
 wachten op fijnere indeling.
@@ -47,6 +47,7 @@ Restore_Archives/
   FS_Attachment/
   Bridge/
   KnotPlot/
+  KnotLibrary/
   SST21D/
   ProofScripts/
   Datasets/
@@ -56,7 +57,8 @@ Restore_Archives/
   Misc/
 ```
 
-Counts (2026-08-24 after Downloads + Workbench ingest): **563** zips, **~2406 MB**.
+Counts (2026-09-03 after Knot Library / Geometry / Katlas / Trefoil Mega ingest):
+**648** zips, **~3601 MB**.
 
 ## Per thema (1–3 zinnen)
 
@@ -135,9 +137,14 @@ Hoort bij `SST_fs_attachment_audit_research/` en dashboard FFS-scripts.
 Contra-swirl bridge resultaten (v0.3–v0.6 timefield) plus CASTLE/Eckvahl Science 2023 EPR-data.
 Voedt `SST_contra_swirl_bridge_research/` en `SST_timefield_spectral_v06_research/`.
 
-### `KnotPlot/` (17 zips, ~310 MB)
-Grootste datamap: KnotPlot/ridgerunner-bundles, fseries/Fresnel-archieven, ideal_3_1-runs en tooling.
-Bron voor `KnotPlot/` working trees en Route-B knot-data.
+### `KnotPlot/` (53 zips)
+KnotPlot/ridgerunner-bundles, 3p1 MultiDynamics/Atlas/Seed campaigns, fseries/Fresnel
+en tooling. Bron voor `KnotPlot/` working trees en Route-B knot-data.
+
+### `KnotLibrary/` (14 zips)
+SST Knot Library (v0.2.0–v0.2.5), Knot Geometry Library (v0.1.2–v0.1.3) en Katlas Link
+Geometry Conditioning v2.0.0. Uitgepakte trees: `Knot_Library/`, `Knot_Geometry_Library/`,
+`SST_Katlas_Link_Geometry_Conditioning_v2.0.0/`.
 
 ### `SST21D/` (3 zips, ~2 MB)
 SST-21D knot-order pipeline v0.1.0 / v0.2.0 (Gilbert + Fresnel static tables).
@@ -206,6 +213,7 @@ python scripts/consolidate_archives.py --apply
 | Kelvin–Floquet / Kelvin–Joule / Kelvin–Kirchhoff workbench | `KelvinFloquet/` |
 | Route-I relative entropy (incl. unextracted v0.1.0) | `Route_I/` |
 | KnotPlot / ridgerunner / fseries data | `KnotPlot/` |
+| Knot Library / Geometry Library / Katlas conditioning | `KnotLibrary/` |
 | SST_CANON / NotebookLM patches | `Canon/` |
 
 Extracted working trees stay at the Workbench root (e.g.

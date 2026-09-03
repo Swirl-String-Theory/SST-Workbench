@@ -1,7 +1,7 @@
 // SST trefoil ribbon  —  [BRIDGE] visualisation only (not a proof)
 // Image-tab. iChannel0 = Microphone or Audio.
 // T(2,3) centreline + Frenet frame + twisted rounded-box ribbon.
-// Chirality: twist sign flips ~2s. Original rewrite (not a fork).
+// One-way roll (no chirality flip). Mouse orbit persists after release.
 
 #define MAX_STEPS  100
 #define MAX_DIST   50.0
@@ -53,7 +53,19 @@ vec3 classicTrefoil(float t, float scale)
 
 float chiralitySide()
 {
-    return (mod(iTime, 4.0) < 2.0) ? 1.0 : -1.0;
+    return 1.0;
+}
+
+void mouseOrbit(float az0, float el0, out float az, out float el)
+{
+    az = az0;
+    el = el0;
+    // Shadertoy keeps iMouse.xy at the last drag after release; z>0 only while held.
+    if (iMouse.x > 0.5 || iMouse.y > 0.5)
+    {
+        az = (iMouse.x / iResolution.x - 0.5) * TAU;
+        el = clamp((0.5 - iMouse.y / iResolution.y) * PI, -1.15, 1.15);
+    }
 }
 
 void getFrame(float t, float scale, float side, out vec3 p, out vec3 T, out vec3 N, out vec3 B)
@@ -104,14 +116,14 @@ float mapRibbon(vec3 p, float side, float halfW, float halfT, float twistAmp, ou
 
     vec3 cp, T, N, B;
     getFrame(closestT, TREFOIL_S, side, cp, T, N, B);
-    float w = sin(closestT * 3.0 + iTime * 1.2) * twistAmp;
-    float ang = w * PI * 0.9 * side;
+    float w = closestT * 3.0 - iTime * (0.70 + 0.90 * twistAmp);
+    float ang = w;
     vec3 toP = p - cp;
     float u = dot(toP, N * cos(ang) + B * sin(ang));
     float v = dot(toP, B * cos(ang) - N * sin(ang));
     float d = sdRoundedBox2D(vec2(u, v), vec2(halfW, halfT), 0.015);
     hitT = closestT;
-    twistW = w;
+    twistW = sin(w);
     return d * 0.85;
 }
 
@@ -159,18 +171,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float specGain = 0.8 + 1.4 * high;
     float side = chiralitySide();
 
-    float az = 0.2 * iTime;
-    float el = 0.35;
-    if (iMouse.z > 0.0)
-    {
-        az = 3.0 * PI * (iMouse.x / iResolution.x - 0.5);
-        el = clamp(PI * (0.5 - iMouse.y / iResolution.y), -1.0, 1.0);
-    }
+    float az, el;
+    mouseOrbit(0.0, 0.35, az, el);
     float ca = cos(az), sa = sin(az);
     float ce = cos(el), se = sin(el);
     vec3 ro = vec3(sa * ce, se, ca * ce) * 7.5;
-    // mild vertical orbit blend
-    ro.y += 1.2 * sin(iTime * 0.12);
     vec3 ta = vec3(0.0);
     vec3 ww = normalize(ta - ro);
     vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));

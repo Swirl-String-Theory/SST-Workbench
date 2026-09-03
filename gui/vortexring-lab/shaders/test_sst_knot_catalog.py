@@ -31,6 +31,11 @@ from sst_knot_catalog import (
     PHI,
     STRETCH_BASS,
     SWIRL_CLOCK_BEADS,
+    SWIRL_CLOCK_BEAD_STEP,
+    SWIRL_CLOCK_HELIX_DIR,
+    SWIRL_CLOCK_HELIX_R,
+    SWIRL_CLOCK_HELIX_STRANDS,
+    SWIRL_CLOCK_HELIX_TWIST,
     TORUS_R,
     TORUS_r,
     TREFOIL_R0,
@@ -57,7 +62,28 @@ from sst_knot_catalog import (
     linking_proxy,
     log_spiral_plane,
     nested_braid_point,
+    particle_disc_body,
     particle_glow_dist,
+    particle_glow_r_max,
+    particle_glow_window,
+    loop_dist,
+    loop_rel,
+    hsv_rgb,
+    rgb_hue,
+    format_ui_preset_glsl,
+    ui_mix_path_field,
+    ui_mix_slider,
+    ui_panel_height,
+    ui_path_slot,
+    ui_texel_index,
+    HIT_HEADER,
+    HIT_SL0,
+    PF_SIZE,
+    SL_DISCS,
+    SL_SCALE,
+    UI_HDR_H,
+    UI_SLOT_COUNT,
+    UI_SLOT_PATH,
     path_phase_index,
     path_freq_x,
     path_phase_speed,
@@ -70,6 +96,8 @@ from sst_knot_catalog import (
     phi_log_scale,
     resolve_voronoi_kind,
     spiral_arm_phase,
+    swirl_clock_helix_point,
+    trefoil_ribbon_roll,
     torus_knot_path_2d,
     torus_knot_point,
     torus_knot_polyline,
@@ -298,6 +326,71 @@ def test_swirl_clock_beads_constant():
     assert SWIRL_CLOCK_BEADS % 2 == 0
 
 
+def test_swirl_clock_helix_strands_constant():
+    assert SWIRL_CLOCK_HELIX_STRANDS == 3
+    assert SWIRL_CLOCK_HELIX_R > 0.0
+    assert SWIRL_CLOCK_HELIX_TWIST > 0.0
+    assert SWIRL_CLOCK_HELIX_DIR > 0.0
+    assert SWIRL_CLOCK_BEAD_STEP > 0.0
+
+
+def test_swirl_clock_helix_point_home_on_plus_y():
+    x, y, z = swirl_clock_helix_point(0.0, 0, twist=0.0)
+    assert math.isclose(x, 0.0, abs_tol=1e-12)
+    assert math.isclose(y, SWIRL_CLOCK_HELIX_R, abs_tol=1e-12)
+    assert math.isclose(z, 0.0, abs_tol=1e-12)
+
+
+def test_swirl_clock_helix_three_strands_are_120_apart():
+    pts = [swirl_clock_helix_point(0.0, s) for s in range(SWIRL_CLOCK_HELIX_STRANDS)]
+    radii = [math.hypot(x, y) for x, y, _z in pts]
+    assert all(math.isclose(r, SWIRL_CLOCK_HELIX_R, abs_tol=1e-12) for r in radii)
+    dots = []
+    for i in range(SWIRL_CLOCK_HELIX_STRANDS):
+        a = pts[i]
+        b = pts[(i + 1) % SWIRL_CLOCK_HELIX_STRANDS]
+        dots.append((a[0] * b[0] + a[1] * b[1]) / (SWIRL_CLOCK_HELIX_R ** 2))
+    # cos(120°) = -0.5
+    assert all(math.isclose(d, -0.5, abs_tol=1e-12) for d in dots)
+
+
+def test_swirl_clock_helix_twist_rotates_in_xy():
+    z = SWIRL_CLOCK_BEAD_STEP
+    x0, y0, _ = swirl_clock_helix_point(z, 0, twist=0.0)
+    a = z * SWIRL_CLOCK_HELIX_TWIST
+    expected = (-math.sin(a) * SWIRL_CLOCK_HELIX_R, math.cos(a) * SWIRL_CLOCK_HELIX_R)
+    assert math.isclose(x0, expected[0], abs_tol=1e-12)
+    assert math.isclose(y0, expected[1], abs_tol=1e-12)
+
+
+def test_swirl_clock_helix_rejects_bad_strand():
+    with pytest.raises(ValueError):
+        swirl_clock_helix_point(0.0, -1)
+    with pytest.raises(ValueError):
+        swirl_clock_helix_point(0.0, SWIRL_CLOCK_HELIX_STRANDS)
+    with pytest.raises(ValueError):
+        swirl_clock_helix_point(0.0, 0, n_strands=0)
+
+
+def test_swirl_clock_helix_advances_one_way():
+    a = swirl_clock_helix_point(0.0, 0, twist=0.0)
+    b = swirl_clock_helix_point(0.0, 0, twist=0.2 * SWIRL_CLOCK_HELIX_DIR)
+    cross_z = a[0] * b[1] - a[1] * b[0]
+    assert cross_z > 0.0
+
+
+def test_trefoil_ribbon_roll_one_way():
+    t = 0.4
+    w0 = trefoil_ribbon_roll(t, 0.0)
+    w1 = trefoil_ribbon_roll(t, 0.5)
+    assert w1 < w0
+    assert math.isclose(
+        trefoil_ribbon_roll(1.1, 2.0, 0.55),
+        1.1 * 3.0 - 2.0 * (0.70 + 0.90 * 0.55),
+        abs_tol=1e-12,
+    )
+
+
 def test_phi_golden_ratio():
     assert math.isclose(PHI, (1.0 + 5.0 ** 0.5) / 2.0, abs_tol=1e-12)
     assert math.isclose(PHI, 1.61803398875, abs_tol=1e-9)
@@ -499,4 +592,62 @@ def test_nested_braid_chirality_mirrors_z():
     _, _, z_plus = nested_braid_point(t, phase, side=1.0)
     _, _, z_minus = nested_braid_point(t, phase, side=-1.0)
     assert math.isclose(z_plus, -z_minus, abs_tol=1e-12)
+
+
+def test_voronoi_live_ui_slots_and_mix():
+    assert ui_texel_index(0) == VORONOI_PARTICLE_COUNT + VORONOI_NUM_PATHS
+    assert ui_texel_index(UI_SLOT_COUNT - 1) == (
+        VORONOI_PARTICLE_COUNT + VORONOI_NUM_PATHS + UI_SLOT_COUNT - 1
+    )
+    assert ui_path_slot(0, PF_SIZE) == UI_SLOT_PATH
+    assert ui_path_slot(1, PF_SIZE) == UI_SLOT_PATH + 4
+    assert ui_mix_slider(SL_SCALE, 0.0) == pytest.approx(0.08)
+    assert ui_mix_slider(SL_SCALE, 1.0) == pytest.approx(0.42)
+    assert ui_mix_slider(SL_SCALE, 0.5) == pytest.approx(0.25)
+    assert ui_mix_path_field(PF_SIZE, 0.0) == pytest.approx(0.20)
+    assert ui_panel_height(0) == pytest.approx(UI_HDR_H)
+    assert ui_panel_height(1) > UI_HDR_H
+    assert ui_panel_height(1, 1) > ui_panel_height(1, 0)
+    block = format_ui_preset_glsl(
+        [0.22, 1.0, 0.025, 0.25, 0.35, 0.12, 18.0, 0.35, 0.92, 0.012, 0.05, 1.0, 0.0],
+        [
+            (0.75, 0.70, 0.583, 0.0),
+            (0.83, 0.82, 0.902, 1.0),
+            (0.91, 0.94, 0.439, 0.0),
+            (0.99, 1.06, 0.078, 1.0),
+            (1.07, 1.18, 0.694, 0.0),
+            (1.15, 1.30, 0.512, 1.0),
+            (1.23, 1.42, 0.976, 0.0),
+            (1.31, 1.54, 0.078, 1.0),
+        ],
+    )
+    assert "PRESET_SL_SCALE" in block
+    assert "PRESET_P7_MODE" in block
+    assert "SST UI PRESET" in block
+    assert HIT_HEADER == 1
+    assert HIT_SL0 == 100
+    red_h = rgb_hue((0.95, 0.20, 0.20))
+    assert red_h < 0.08 or red_h > 0.92
+    rgb = hsv_rgb(0.0, 1.0, 1.0)
+    assert rgb[0] == pytest.approx(1.0)
+    assert rgb[1] == pytest.approx(0.0)
+    assert rgb[2] == pytest.approx(0.0)
+    assert ui_mix_slider(SL_DISCS, 0.0) == pytest.approx(0.0)
+    assert ui_mix_slider(SL_DISCS, 1.0) == pytest.approx(1.0)
+    assert particle_disc_body(0.8, 0.0) == pytest.approx(0.0)
+    assert particle_disc_body(0.8, 0.5) == pytest.approx(0.4)
+
+
+def test_loop_dist_euclidean_no_wrap():
+    w = 800.0
+    # Toroidal wrap would give ~0; Euclidean must give full width.
+    assert loop_dist((0.0, 0.0), (w, 0.0)) == pytest.approx(w)
+    assert loop_dist((0.0, 0.0), (10.0, 0.0)) == pytest.approx(10.0)
+    assert loop_rel((5.0, 3.0), (1.0, 1.0)) == pytest.approx((4.0, 2.0))
+    r = particle_glow_r_max(1.0, 18.0)
+    assert r == pytest.approx(max(48.0, 90.0 + 0.35 * 18.0))
+    assert particle_glow_window(r + 1.0, r) == pytest.approx(0.0)
+    assert particle_glow_window(0.0, r) == pytest.approx(1.0)
+    mid = r * 0.35 + (r - r * 0.35) * 0.5
+    assert 0.0 < particle_glow_window(mid, r) < 1.0
 

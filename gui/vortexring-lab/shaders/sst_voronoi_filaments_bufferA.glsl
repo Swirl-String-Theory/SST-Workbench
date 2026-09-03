@@ -1,6 +1,7 @@
 // SST Voronoi filaments — BUFFER A
 // Nearest / second-nearest particle indices per pixel (jump-flood style).
 // Channels: iChannel0 = Buffer A (self), iChannel1 = Buffer B (particles)
+// Live UI state lives in Buffer B extra texels — this pass stays a site field.
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {

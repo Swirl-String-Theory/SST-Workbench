@@ -71,6 +71,11 @@ THEME_RULES: list[tuple[str, str | None, re.Pattern[str]]] = [
     ("Bridge", None, re.compile(
         r"contra_swirl|bridge|timefield|CASTLE|Eckvahl", re.I
     )),
+    # Anchored so SST_Trefoil_*_with_Knot_Library_* stays Trefoil (earlier rule).
+    ("KnotLibrary", None, re.compile(
+        r"^SST_Knot_Library_v|^SST_Knot_Geometry_Library_v|^SST_Katlas_Link_Geometry",
+        re.I,
+    )),
     ("KnotPlot", None, re.compile(
         r"KnotPlot|knotplot|ridgerunner|RidgeRunner|Fresnel|"
         r"Knots_Fourier|knots\.zip|fseries|ideal_3_1",

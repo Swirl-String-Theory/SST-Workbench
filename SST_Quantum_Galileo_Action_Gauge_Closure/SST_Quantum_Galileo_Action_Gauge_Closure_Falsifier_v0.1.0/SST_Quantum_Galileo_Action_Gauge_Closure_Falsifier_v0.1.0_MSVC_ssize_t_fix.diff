@@ -1,0 +1,90 @@
+--- a/cpp/sst_qgi_native.cpp
++++ b/cpp/sst_qgi_native.cpp
+@@ -5,16 +5,17 @@
+ #include <stdexcept>
+ #include <vector>
+ #include <array>
++#include <algorithm>
+ 
+ namespace py = pybind11;
+ 
+ static double polyline_length(py::array_t<double, py::array::c_style | py::array::forcecast> pts) {
+     auto b = pts.unchecked<2>();
+     if (b.shape(1) != 3 || b.shape(0) < 3) throw std::runtime_error("Expected Nx3 points");
+-    const ssize_t n = b.shape(0);
++    const py::ssize_t n = b.shape(0);
+     double L = 0.0;
+-    for (ssize_t i=0; i<n; ++i) {
+-        const ssize_t j = (i+1)%n;
++    for (py::ssize_t i=0; i<n; ++i) {
++        const py::ssize_t j = (i+1)%n;
+         double dx=b(j,0)-b(i,0), dy=b(j,1)-b(i,1), dz=b(j,2)-b(i,2);
+         L += std::sqrt(dx*dx+dy*dy+dz*dz);
+     }
+@@ -27,12 +28,12 @@
+ ) {
+     auto b = pts.unchecked<2>();
+     if (b.shape(1) != 3 || b.shape(0) < 8) throw std::runtime_error("Expected Nx3 points");
+-    const ssize_t n = b.shape(0);
++    const py::ssize_t n = b.shape(0);
+     double d2min = std::numeric_limits<double>::infinity();
+-    for (ssize_t i=0; i<n; ++i) {
+-        for (ssize_t j=i+1; j<n; ++j) {
+-            ssize_t sep = j-i;
+-            ssize_t cyc = std::min(sep, n-sep);
++    for (py::ssize_t i=0; i<n; ++i) {
++        for (py::ssize_t j=i+1; j<n; ++j) {
++            py::ssize_t sep = j-i;
++            py::ssize_t cyc = std::min(sep, n-sep);
+             if (cyc <= exclude_neighbors) continue;
+             double dx=b(j,0)-b(i,0), dy=b(j,1)-b(i,1), dz=b(j,2)-b(i,2);
+             double d2=dx*dx+dy*dy+dz*dz;
+@@ -47,11 +48,11 @@
+ ) {
+     auto b = pts.unchecked<2>();
+     if (b.shape(1) != 3 || b.shape(0) < 8) throw std::runtime_error("Expected Nx3 points");
+-    const ssize_t n = b.shape(0);
++    const py::ssize_t n = b.shape(0);
+     std::vector<double> kappas;
+     kappas.reserve(n);
+-    for (ssize_t i=0; i<n; ++i) {
+-        ssize_t im=(i+n-1)%n, ip=(i+1)%n;
++    for (py::ssize_t i=0; i<n; ++i) {
++        py::ssize_t im=(i+n-1)%n, ip=(i+1)%n;
+         std::array<double,3> a{b(i,0)-b(im,0), b(i,1)-b(im,1), b(i,2)-b(im,2)};
+         std::array<double,3> c{b(ip,0)-b(i,0), b(ip,1)-b(i,1), b(ip,2)-b(i,2)};
+         double la=std::sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
+--- a/run_02_build_native.cmd
++++ b/run_02_build_native.cmd
+@@ -5,12 +5,29 @@
+ echo [2/7] Build C++17 / pybind11 native backend
+ echo ============================================================
+ call .venv\Scripts\activate.bat
++
+ python setup.py build_ext --inplace
+ if errorlevel 1 (
++  echo.
+   echo ERROR: native build failed.
+-  echo Install Visual Studio Build Tools with "Desktop development with C++".
++  echo.
++  echo Review the compiler/build output ABOVE for the actual cause.
++  echo Common categories:
++  echo   - setuptools package discovery/configuration
++  echo   - C++ source portability/compiler errors
++  echo   - missing or incompatible Visual C++ build tools
++  echo   - pybind11/Python ABI configuration
++  echo.
++  echo For setuptools flat-layout errors, setup.py must use explicit package discovery.
++  echo For MSVC C4430 errors around ssize_t, use pybind11's py::ssize_t.
++  echo.
+   exit /b 1
+ )
++
+ python -c "import sst_qgi_native; print('native backend: cpp-pybind11')"
+-if errorlevel 1 exit /b 1
++if errorlevel 1 (
++  echo ERROR: native extension was built but could not be imported.
++  exit /b 1
++)
++
+ endlocal

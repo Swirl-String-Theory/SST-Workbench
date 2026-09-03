@@ -1,0 +1,49 @@
+--- a/setup.py
++++ b/setup.py
+@@ -1,4 +1,4 @@
+-from setuptools import setup, Extension
++from setuptools import setup, Extension, find_packages
+ import sys
+ 
+ try:
+@@ -23,5 +23,6 @@
+ setup(
+     name="sst-qgi-native",
+     version="0.1.0",
++    packages=find_packages(include=["sst_qgi", "sst_qgi.*"]),
+     ext_modules=ext_modules,
+ )
+--- a/run_02_build_native.cmd
++++ b/run_02_build_native.cmd
+@@ -5,12 +5,29 @@
+ echo [2/7] Build C++17 / pybind11 native backend
+ echo ============================================================
+ call .venv\Scripts\activate.bat
++
+ python setup.py build_ext --inplace
+ if errorlevel 1 (
++  echo.
+   echo ERROR: native build failed.
+-  echo Install Visual Studio Build Tools with "Desktop development with C++".
++  echo.
++  echo Possible causes include:
++  echo   - setuptools package-discovery/configuration error
++  echo   - missing or incompatible C++ compiler/build tools
++  echo   - pybind11/compiler configuration error
++  echo.
++  echo Review the build output ABOVE for the actual cause.
++  echo If the error mentions "Multiple top-level packages discovered",
++  echo verify that setup.py uses explicit package discovery, e.g.:
++  echo   packages=find_packages(include=["sst_qgi", "sst_qgi.*"])
++  echo.
+   exit /b 1
+ )
++
+ python -c "import sst_qgi_native; print('native backend: cpp-pybind11')"
+-if errorlevel 1 exit /b 1
++if errorlevel 1 (
++  echo ERROR: native extension was built but could not be imported.
++  exit /b 1
++)
++
+ endlocal
