@@ -2,6 +2,8 @@
 
 Audit date: 2026-08-30. Evidence source: local code, frozen configuration and stored JSON outputs in the v0.2.0 package. Conversation prose is treated as a claim, not as evidence.
 
+The exact inspected historical paths and SHA-256 hashes are archived in `HISTORICAL_ARTIFACT_MANIFEST_v0.2.0.json`; its machine-readable counts reconfirm 1 accepted source group, 0/8 S37, and zero S40/S50/S60 rows.
+
 ## Classification vocabulary
 
 - **VERIFIED** — directly supported by locally inspectable artifacts.
@@ -19,9 +21,9 @@ Numerical and physics status are independent. A passing test suite, native parit
 | v0.1.1 found no near-RPO | CONTRADICTED | All five S40 trajectories stopped before the return window; S50/S60 had zero rows | RPO existence was numerically untested |
 | v0.2.0 BASIC was source-stratified over three source families | CONTRADICTED | prepare_summary.json reports three discovered files but one group with candidates; link_0.3.1_final.txt and link_6.3.1_final.txt were admitted by the regex and then entirely rejected | The real BASIC result is a one-source search |
 | v0.2.0 produced mesh-gauge-certified blind seeds | CONTRADICTED | S37 reports 0/8 qualified; best final-shape discrepancy is 0.035943229463292516 against the frozen 0.035 gate | No real blind candidate entered S40 |
-| R557 long-run regression passed T=0.9 and T=1.2 | VERIFIED | VALIDATION.md records completed regression runs and mesh/physical ratios | The new controller improves numerical coverage for one previously selected geometry |
+| R557 long-run regression passed T=0.9 and T=1.2 | SUPPORTED | VALIDATION.md records completed regression runs and mesh/physical ratios; regression geometries are present, but the old raw trajectories are not in that bundle | Documented numerical coverage improvement for one previously selected geometry, not independently replayed in this audit |
 | R557 regression establishes recurrence or stability | CONTRADICTED | The regression is non-blind and no RPO/Floquet result follows from it | It is numerical regression evidence only |
-| Full synthetic chain validates the workflow | VERIFIED | The package documents a permissive three-source smoke reaching S70 | Code paths are exercised; this is not SST evidence |
+| Full synthetic chain validates the workflow | SUPPORTED | The package documents a permissive three-source smoke reaching S70; the old raw smoke bundle is not present | Documented workflow validation only; the new v0.2.1 smoke is independently executable |
 | v0.2.0 chain summary correctly represented S37 failure | CONTRADICTED | CHAIN_CORE_ROBUST_MESH_CERTIFIED__RPO_NOT_TESTABLE_NUMERICALLY was emitted while S37 had zero qualified seeds | Chain-verdict precedence contained an epistemic labeling bug |
 | S40 and S50 evaluated one discretized flow map | CONTRADICTED | S40 used global_volume plus tangential mesh feedback; S50 replayed fixed core without mesh feedback | The projected monodromy was not the derivative of the searched S40 map |
 | S60 established causality | CONTRADICTED | S60 used lag discovery plus held-out linear prediction, without intervention or ablation | At most a predictive-specificity candidate can be claimed |

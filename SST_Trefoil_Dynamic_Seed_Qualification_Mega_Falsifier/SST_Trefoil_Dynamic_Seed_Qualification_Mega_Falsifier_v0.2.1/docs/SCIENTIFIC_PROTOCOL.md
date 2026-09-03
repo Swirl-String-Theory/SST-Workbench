@@ -41,6 +41,10 @@
 17. A blind scientific run requires at least three independent geometry-qualified source families.
 18. S40 and S50 must carry the same frozen dynamics-contract hash.
 19. Blind keys and identity maps remain in a sibling sealed-private bundle until reveal.
+20. A source-family manifest must declare independent provenance and held-out status; distinct filenames do not establish independence.
+21. Public evidence contains commitments, not source names. Scoring verifies frozen code/config; reveal verifies committed maps and geometries and fails closed on mismatch.
+22. S50 reuses S40's exact timestep and guard cadence for its base and perturbations. Guard scheduling is part of the replay contract.
+23. Closed-curve sampling/name checks are admission checks, not a mathematical trefoil certificate. Publication requires independent source-topology/provenance validation.
 
 ## Geometry / rolling observables
 

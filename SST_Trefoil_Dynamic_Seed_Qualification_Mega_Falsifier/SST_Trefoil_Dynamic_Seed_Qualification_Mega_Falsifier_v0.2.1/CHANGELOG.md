@@ -11,6 +11,10 @@
 - Freezes a shared S40/S50 dynamics contract; projected Floquet now differentiates that same map and removes resolved neutral directions.
 - Recasts S60 as held-out predictive specificity. Causal claims remain unauthorized without intervention or ablation.
 - Adds a four-source workflow-smoke profile whose physics verdict is always not-applicable.
+- Requires family/provenance declarations for scientific promotion; three files from one family cannot satisfy diversity.
+- Commits identity/source/refinement/evidence maps, redacts public source names, and makes reveal fail closed on tampering.
+- Freezes the actual S40 timestep/guard cadence for every S50 perturbation, compares spatial trajectories at equal times, and rejects unrealized temporal ladders.
+- Adds an executable native selftest entry point and expands the test suite to 40 tests.
 
 ## v0.2.0 — source-stratified dynamic-shape search and numerical-certification redesign
 

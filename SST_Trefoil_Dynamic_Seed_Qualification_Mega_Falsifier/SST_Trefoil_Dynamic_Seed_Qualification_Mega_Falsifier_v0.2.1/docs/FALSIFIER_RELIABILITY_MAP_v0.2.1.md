@@ -1,6 +1,6 @@
 # SST falsifier reliability map — audit layer
 
-The registry contains 28 core hypotheses plus 17 registry-only hypotheses. This map ranks evidential reliability, not novelty. Registry status remains authoritative until the underlying evidence bundle is audited.
+The current registry contains 28 core hypotheses plus 18 additional entries, including the new Mega Falsifier entry. The complete 46-entry coverage table is in `REGISTRY_COVERAGE_v0.2.1.md`. This topline map ranks evidential reliability, not novelty. Registry statuses are metadata claims, not substitutes for artifact-level evidence.
 
 | Line | Audit class | Physics interpretation |
 |---|---|---|

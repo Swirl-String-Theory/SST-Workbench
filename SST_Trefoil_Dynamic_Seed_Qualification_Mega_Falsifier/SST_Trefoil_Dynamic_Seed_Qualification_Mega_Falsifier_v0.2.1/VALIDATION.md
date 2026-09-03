@@ -3,10 +3,13 @@
 ## Correctness-release validation
 
 - Python syntax compilation: **PASS**.
-- Pytest methodology/regression suite: **20/20 PASS** using the local Windows v0.2.0 environment with the v0.2.1 source tree on `PYTHONPATH`.
+- Pytest methodology/regression/integrity suite: **40/40 PASS** in 1.21 seconds, using the local Windows v0.2.0 environment with the v0.2.1 source tree on `PYTHONPATH`.
+- Actual native selftest: **PASS**, backend `cpp-pybind11-openmp`, native/Python relative L2 error `0.0`.
 - Historical `KnotPlot/knots/final` prepare: expected nonzero stop with `INDETERMINATE_INSUFFICIENT_SOURCE_DIVERSITY`; one eligible source group against the required three.
-- Four-source real-geometry workflow smoke: S10–S60 and reveal executed; 4 source groups at S20, 3 S37-qualified smoke candidates, 2 S40 rows, 1 S50 row, 1 S60 row, and verified blind-key commitment.
-- Smoke top-level physics verdict: **NOT_APPLICABLE_WORKFLOW_VALIDATION**.
+- Four-source real-geometry workflow smoke: S10–S60 and reveal executed; 4 distinct geometric sources, 3 S37-qualified smoke candidates, 2 S40 rows, 1 S50 row, 1 S60 row, and verified key/map/geometry/evidence commitments.
+- Source provenance in this smoke is undeclared: these four files are not claimed to be four independently established scientific families.
+- All smoke stage physics verdicts: **NOT_APPLICABLE_WORKFLOW_VALIDATION**.
+- S40/S50 contract hashes match; both use timestep `0.0009287925696594427` and guard stride `14` for the tested candidate.
 
 The workflow smoke uses deliberately permissive thresholds and is not SST evidence. No new held-out scientific atlas was available, so v0.2.1 does not publish a new blind physics result.
 
@@ -15,17 +18,32 @@ Exact release-validation commands (PowerShell, from the v0.2.1 package root):
 ```powershell
 $env:PYTHONPATH=(Resolve-Path 'src').Path
 & '..\SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.0\.venv\Scripts\python.exe' -m compileall -q src tests
-& '..\SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.0\.venv\Scripts\python.exe' -m pytest -q --basetemp 'C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\pytest-v021-release'
+& '..\SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.0\.venv\Scripts\python.exe' -m pytest -q --basetemp 'C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\pytest-v021-validated'
 & '..\SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.0\.venv\Scripts\python.exe' -m sst_seed_falsifier.selftest
 ```
 
 The fresh full smoke used the same interpreter and `PYTHONPATH`, `config\workflow_smoke.json`, the real four-file `Knot_Geometry_Library\SST_Knot_Geometry_Library_v0.1.1\outputs\seed_suite`, and these CLI commands in order:
 
-```text
-prepare, early, refine, resolution, temporal, core, mesh-gauge, long, rpo, mechanism, reveal
+```powershell
+$out='C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\v021-validated-release'
+$data=(Resolve-Path '..\..\Knot_Geometry_Library\SST_Knot_Geometry_Library_v0.1.1\outputs\seed_suite').Path
+$cfg=(Resolve-Path 'config\workflow_smoke.json').Path
+$py=(Resolve-Path '..\SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.2.0\.venv\Scripts\python.exe').Path
+& $py -m sst_seed_falsifier.cli prepare $data $out $cfg
+foreach ($stage in @('early','refine','resolution','temporal','core','mesh-gauge','long','rpo','mechanism')) {
+    & $py -m sst_seed_falsifier.cli $stage $out $cfg
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+& $py -m sst_seed_falsifier.cli reveal $out
 ```
 
-Release smoke output: `C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\v021-workflow-smoke-release`. Historical-source regression output: `C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\v021-historical-dataset-release`.
+Historical-source regression (expected prepare exit code 1):
+
+```powershell
+& $py -m sst_seed_falsifier.cli prepare '..\..\KnotPlot\knots\final' 'C:\Users\oscar\Documents\Codex\2026-08-30\explore-x20\work\v021-validated-historical' 'config\basic.json'
+```
+
+These paths now contain archived results; use a new output path for replay. Existing public/private evidence is never overwritten. The early `python -m selftest` no-op was corrected by adding an executable module entry point; the reported native values above come from the subsequently executed check.
 
 ## Inherited v0.2.0 numerical regression record
 

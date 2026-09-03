@@ -4,7 +4,11 @@
 
 v0.2.1 preserves the frozen scientific S37 threshold but corrects the v0.2.0 source-selection, status, RPO-contract and causal-language problems documented in `docs/SCIENTIFIC_AUDIT_v0.2.1.md`.
 
+S37 remains `0.035` for BASIC. The previously stricter EXTENDED `0.030` and PRODUCTION `0.025` thresholds are retained, not relaxed. Scientific preparation rejects any threshold above `0.035` and the entire configuration is frozen before scoring.
+
 Scientific BASIC/EXTENDED/PRODUCTION runs now require an explicit fresh held-out dataset path and at least three independent geometry-qualified trefoil source families. The historical `KnotPlot/knots/final` directory is retained for regression only and correctly stops at S10 with `INDETERMINATE_INSUFFICIENT_SOURCE_DIVERSITY`.
+
+The dataset must contain `source_families.json` (see `docs/source_families.example.json`). Each accepted source declares its relative path, family ID, provenance, trefoil topology, single component and held-out status. Multiple shapes from one family count once; missing declarations block scientific promotion. These are auditable declarations, not an automated proof of independence or knot type. Closure/contact checks reject malformed curves but do not replace a topological certificate.
 
 For a non-physical end-to-end code-path check:
 
@@ -51,6 +55,9 @@ A later stage cannot rescue an upstream rejection. Source identity and deformati
 - S37 zero-qualified status can no longer be mislabeled as mesh certified;
 - returns must themselves occur after the frozen observation time and pass local mesh/contact gates;
 - S40 and S50 share a hashed discretized dynamics contract;
+- S50 freezes S40's actual timestep and guard cadence for the base and every perturbation;
+- scoring rejects changed code/config hashes and S10 refuses to overwrite existing evidence;
+- public evidence excludes source filenames; reveal fails closed on key, identity-map, geometry or evidence tampering;
 - projected Floquet removes resolved neutral directions but remains explicitly projected;
 - S60 is a predictive-specificity gate; causal claims remain unauthorized without intervention.
 
@@ -59,7 +66,9 @@ A later stage cannot rescue an upstream rejection. Source identity and deformati
 ### 1. Source-stratified discovery
 v0.1.1 BASIC found three unique trefoil source files but its candidate budget could be consumed by variants of the first source. v0.2.0 schedules candidates round-robin across accepted source groups. Base candidates are distributed before deeper variants, and promotion/refinement/qualification stages can enforce a minimum per source group.
 
-Source dedup is geometry-aware after normalized closed-curve cyclic/rigid alignment (`source_dedup_rms_tol = 1e-7` by default), rather than relying on filenames. This directly protects against pseudoreplication by rotated/reindexed/duplicated files.
+Source dedup uses raw and resampled normalized closed-curve cyclic/rigid alignment, including reversed vertex order (`source_dedup_rms_tol = 1e-7` by default). It protects against rotated/reindexed/duplicated files; family provenance is checked separately.
+
+The sibling sealed-private directory is an operational separation, not encryption or an access-control boundary. The same local user can read it, and recognizable public geometry may reveal identity. Independent blind evaluation requires a separate custodian/process with access only to the public bundle until S70.
 
 ### 2. POD/QHP are diagnostics, not seed-selection priors
 The early score no longer rewards a low POD rank (`pod` weight is frozen to `0.0`). A physically good rolling trefoil may live on a higher-dimensional shape manifold. The ranking is dominated by coherent rigid/rolling motion, symmetry-reduced shape drift, high-k contamination, contact survival and mesh quality.

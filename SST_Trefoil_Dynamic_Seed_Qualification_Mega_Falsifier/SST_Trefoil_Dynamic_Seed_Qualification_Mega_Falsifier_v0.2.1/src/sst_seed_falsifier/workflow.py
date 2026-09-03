@@ -1,13 +1,13 @@
 from pathlib import Path
-import csv,hashlib,json,math
+import csv,hashlib,hmac,json,math
 import numpy as np
-from .io import load_json,dump_json
+from .io import load_json,dump_json,geom_sha
 from .geometry import resample_closed,normalize_length,normal_frame,min_nonlocal_vertex_distance,segment_lengths
 from .dynamics import simulate
 from .metrics import rolling_metrics,recurrence_metrics,shape_distance
 from .floquet import projected_floquet
 from .causality import causal_gate
-from .evidence import dynamics_contract
+from .evidence import dynamics_contract,object_sha256
 from .blind import sealed_private_dir
 
 
@@ -66,10 +66,17 @@ def _rel_span(a):
     return float((np.max(a)-np.min(a))/max(abs(np.median(a)),1e-12)) if len(a) else float('inf')
 
 def _trajectory_shape_distance(a,b,coarse_stride=4,samples=24):
-    na=len(a['x']); nb=len(b['x']); count=max(2,min(int(samples),na,nb))
-    ia=np.linspace(0,na-1,count).round().astype(int); ib=np.linspace(0,nb-1,count).round().astype(int)
-    distances=[shape_distance(a['x'][i],b['x'][j],coarse_stride) for i,j in zip(ia,ib)]
-    return {'mean':float(np.mean(distances)),'max':float(np.max(distances)),'samples':count}
+    ta=np.asarray(a['t'],float); tb=np.asarray(b['t'],float)
+    if len(ta)<2 or len(tb)<2 or np.any(np.diff(ta)<=0) or np.any(np.diff(tb)<=0):
+        return {'mean':float('inf'),'max':float('inf'),'samples':0}
+    start=max(ta[0],tb[0]); end=min(ta[-1],tb[-1])
+    if end<=start: return {'mean':float('inf'),'max':float('inf'),'samples':0}
+    count=max(2,min(int(samples),len(ta),len(tb))); times=np.linspace(start,end,count)
+    def at(tr,times,t):
+        j=int(np.clip(np.searchsorted(times,t,side='right'),1,len(times)-1)); w=(t-times[j-1])/(times[j]-times[j-1])
+        return (1-w)*tr['x'][j-1]+w*tr['x'][j]
+    distances=[shape_distance(at(a,ta,t),at(b,tb,t),coarse_stride) for t in times]
+    return {'mean':float(np.mean(distances)),'max':float(np.max(distances)),'samples':count,'time_start':float(start),'time_end':float(end)}
 
 def _run_kind(cfg): return str(cfg.get('run_kind','blind_scientific'))
 
@@ -171,7 +178,7 @@ def stage_refine(out,cfg):
             xr=normalize_length(resample_closed(x,N),2*np.pi); tr=simulate(xr,cfg,T,'fixed',False); m=rolling_metrics(tr,xr,cfg); rows.append({'candidate_id':cid,'source_group_id':gid,**m})
     rows.sort(key=lambda r:float(r['score']),reverse=True)
     promoted=_stratified_ids(rows,int(cfg['resolution_top_k']),groups,int(cfg.get('resolution_min_per_source',1)))
-    dump_json(out/'stage25_refine'/'public_manifest.json',{'n_refined':len(public),'parents':parents,'parameters_hidden':True,'candidates':public})
+    dump_json(out/'stage25_refine'/'public_manifest.json',{'n_refined':len(public),'parents':parents,'parameters_hidden':True,'private_refine_commitment_sha256':object_sha256(private),'candidates':public})
     dump_json(private_root/'stage25_refine'/'private_refine_map.json',private); _write_csv(out/'stage25_refine'/'results.csv',rows)
     dump_json(out/'stage25_refine'/'summary.json',{
         'run_kind':_run_kind(cfg),'numerics_verdict':'PASS' if public else 'INDETERMINATE','physics_verdict':_physics_for_run(cfg,'UNTESTED'),
@@ -181,6 +188,8 @@ def stage_refine(out,cfg):
 
 
 def stage_resolution(out,cfg):
+    ladder=[int(n) for n in cfg['resolution_n']]
+    if len(ladder)<2 or any(b<=a for a,b in zip(ladder[:-1],ladder[1:])): raise ValueError('SPATIAL_LADDER_REQUIRES_INCREASING_RESOLUTIONS')
     out=Path(out); groups=_group_map(out); rankfile=out/'stage25_refine'/'results.csv' if (out/'stage25_refine'/'results.csv').exists() else out/'stage20_early'/'results.csv'
     rank=list(csv.DictReader(open(rankfile,encoding='utf-8'))); ids=_stratified_ids(rank,int(cfg['resolution_top_k']),groups,int(cfg.get('resolution_min_per_source',1))); rows=[]
     for cid in ids:
@@ -206,12 +215,15 @@ def stage_temporal(out,cfg):
     ids=_stratified_ids(rr,int(cfg.get('temporal_top_k',8)),groups,int(cfg.get('temporal_min_per_source',1)),'qualified'); rows=[]
     basefac=float(cfg.get('dt_factor',.025)); factors=[basefac*float(z) for z in cfg.get('temporal_dt_factor_multipliers',[1.0,.5,.25])]
     if len(factors)!=3: raise ValueError('temporal_dt_factor_multipliers must contain exactly 3 factors')
+    if not np.allclose(np.asarray(factors[1:])/np.asarray(factors[:-1]),.5,rtol=1e-12,atol=0): raise ValueError('TEMPORAL_LADDER_MUST_HALVE_TIMESTEP')
     N=int(cfg.get('temporal_n',96)); T=float(cfg.get('temporal_t_final',cfg['resolution_t_final']))
     for cid in ids:
         x=normalize_length(resample_closed(np.load(out/'geometries'/f'{cid}.npy'),N),2*np.pi); trs=[]
         for fac in factors: trs.append(simulate(x,cfg,T,'fixed',False,dt_factor_override=fac,store_samples=int(cfg.get('temporal_samples',48))))
         e1=shape_distance(trs[0]['x'][-1],trs[1]['x'][-1],int(cfg.get('cyclic_stride',4))); e2=shape_distance(trs[1]['x'][-1],trs[2]['x'][-1],int(cfg.get('cyclic_stride',4)))
         completed=all(tr['stop_reason']=='COMPLETED' for tr in trs); mode,p,converged=_temporal_classification(e1,e2,completed,cfg)
+        actual_dt=np.asarray([float(tr['dt']) for tr in trs]); ratios=actual_dt[:-1]/actual_dt[1:]
+        if not np.allclose(ratios,2.0,rtol=float(cfg.get('temporal_dt_ratio_tolerance',.05)),atol=0): mode,p,converged='FAILED',None,False
         rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'qualified':bool(converged),'convergence_mode':mode,'error_h_h2':e1,'error_h2_h4':e2,'observed_order':p,'dt_factors':factors,'actual_dt':[float(tr['dt']) for tr in trs],'stop_reasons':[tr['stop_reason'] for tr in trs]})
     rows.sort(key=lambda r:(r['qualified'],r['convergence_mode']=='FLOOR_LIMITED',r['observed_order'] if r['observed_order'] is not None else -1e9),reverse=True); dump_json(out/'stage32_temporal'/'results.json',rows)
     promoted=_stratified_ids(rows,int(cfg.get('core_top_k',8)),groups,int(cfg.get('core_min_per_source',1)),'qualified')
@@ -267,7 +279,7 @@ def stage_long(out,cfg):
         x=normalize_length(resample_closed(np.load(out/'geometries'/f'{cid}.npy'),int(cfg['long_n'])),2*np.pi)
         tr=simulate(x,cfg,float(cfg['long_t_final']),'global_volume',True,store_samples=int(cfg.get('long_samples',240)),max_ds_cv_override=float(cfg.get('long_hard_ds_cv',.45)))
         np.savez_compressed(out/'stage40_long'/'trajectories'/f'{cid}.npz',**tr); rec=recurrence_metrics(tr,x,cfg); m=rolling_metrics(tr,x,cfg)
-        rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'mesh_gauge_certified':cid in mesh_cert,'dynamics_contract':contract,'dynamics_contract_sha256':contract_hash,**rec,'long_score':m['score'],'max_mesh_ratio':float(np.max(tr['mesh_ratio'])),'max_ds_cv':float(np.max(tr['ds_cv'])),'min_gap_over_ds':float(np.min(tr['gap_over_ds']))})
+        rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'mesh_gauge_certified':cid in mesh_cert,'dynamics_contract':contract,'dynamics_contract_sha256':contract_hash,'dynamics_replay':{'dt':float(tr['dt']),'guard_stride':int(tr['guard_stride'])},**rec,'long_score':m['score'],'max_mesh_ratio':float(np.max(tr['mesh_ratio'])),'max_ds_cv':float(np.max(tr['ds_cv'])),'min_gap_over_ds':float(np.min(tr['gap_over_ds']))})
     rows.sort(key=lambda r:(_rpo_eligibility(r,cfg)[0],r['n_returns']>0,-float(r['best_return']) if _finite_number(r.get('best_return')) else -1e9,r['long_score']),reverse=True); dump_json(out/'stage40_long'/'results.json',rows)
     eligible=[r for r in rows if _rpo_eligibility(r,cfg)[0]]; cand=[r['candidate_id'] for r in eligible[:int(cfg['rpo_top_k'])]]
     nwin=sum(bool(r.get('observation_window_reached')) for r in rows); nfull=sum(bool(r.get('completed')) for r in rows); n=len(rows); min_count=int(cfg.get('long_min_window_valid_count',max(1,min(3,n)))); min_frac=float(cfg.get('long_min_window_valid_fraction_for_fail',.60)); full_frac=float(cfg.get('long_min_full_horizon_fraction_for_fail',.60)); coverage_ok=n>0 and nwin>=min_count and nwin/n>=min_frac; full_ok=n>0 and nfull/n>=full_frac
@@ -287,11 +299,12 @@ def stage_rpo(out,cfg):
     for r in long:
         ok,reason=_rpo_eligibility(r,cfg)
         if ok and r.get('dynamics_contract_sha256')!=contract_hash: ok,reason=False,'DYNAMICS_CONTRACT_MISMATCH'
+        if ok and (not _finite_number(r.get('dynamics_replay',{}).get('dt')) or float(r['dynamics_replay']['dt'])<=0 or int(r.get('dynamics_replay',{}).get('guard_stride',0))<1): ok,reason=False,'MISSING_DYNAMICS_REPLAY'
         if ok: eligible.append(r)
         else: rejected.append({'candidate_id':r.get('candidate_id'),'reason':reason})
     pool=eligible[:int(cfg['rpo_top_k'])]
     for r in pool:
-        cid=r['candidate_id']; x=normalize_length(resample_closed(np.load(out/'geometries'/f'{cid}.npy'),int(cfg['rpo_n'])),2*np.pi); fl=projected_floquet(x,float(r['best_return_time']),cfg,expected_contract_sha256=r['dynamics_contract_sha256'])
+        cid=r['candidate_id']; x=normalize_length(resample_closed(np.load(out/'geometries'/f'{cid}.npy'),int(cfg['rpo_n'])),2*np.pi); fl=projected_floquet(x,float(r['best_return_time']),cfg,expected_contract_sha256=r['dynamics_contract_sha256'],replay=r['dynamics_replay'])
         passed=bool(fl['quality_completed'] and fl['base_return']<=float(cfg['rpo_return_threshold']) and fl['spectral_radius']<=float(cfg['floquet_rho_max']))
         rows.append({'candidate_id':cid,'period':float(r['best_return_time']),'rpo_floquet_pass':passed,'projected_floquet_candidate_pass':passed,**fl})
     rows.sort(key=lambda r:(r['rpo_floquet_pass'],-r['spectral_radius'] if np.isfinite(r['spectral_radius']) else -1e9,-r['base_return']),reverse=True); dump_json(out/'stage50_rpo_floquet'/'results.json',rows)
@@ -315,7 +328,7 @@ def stage_mechanism(out,cfg):
         pp=out/rel
         if pp.exists(): summaries[nm]=load_json(pp)
     diversity=_source_diversity(out)
-    if diversity=='INDETERMINATE_INSUFFICIENT_SOURCE_DIVERSITY': verdict='CHAIN_INDETERMINATE_INSUFFICIENT_SOURCE_DIVERSITY'
+    if str(diversity).startswith('INDETERMINATE'): verdict='CHAIN_'+diversity
     elif ok: verdict='CHAIN_PASS_PREDICTIVE_SPECIFICITY_CANDIDATE'
     elif rows: verdict='CHAIN_PROJECTED_RPO__MECHANISM_FAIL_OR_INDETERMINATE'
     elif summaries.get('rpo',{}).get('n_projected_floquet_pass',0)>0: verdict='CHAIN_PROJECTED_RPO_ONLY'
@@ -339,11 +352,40 @@ def stage_mechanism(out,cfg):
 
 
 def reveal(out):
-    out=Path(out); private=sealed_private_dir(out); identity=load_json(private/'identity_map.json'); manifest=load_json(out/'public_manifest.json'); key=(private/'blind_key.bin').read_bytes(); verified=hashlib.sha256(key).hexdigest()==manifest.get('private_key_commitment_sha256'); result={'identity_commitment_verified':verified,'sealed_private_bundle_name':private.name,'revealed_candidates':identity}
+    out=Path(out); private=sealed_private_dir(out); identity=load_json(private/'identity_map.json'); manifest=load_json(out/'public_manifest.json'); key=(private/'blind_key.bin').read_bytes()
+    if hashlib.sha256(key).hexdigest()!=manifest.get('private_key_commitment_sha256'):
+        raise ValueError('BLIND_KEY_COMMITMENT_MISMATCH')
+    if object_sha256(identity)!=manifest.get('identity_map_commitment_sha256'):
+        raise ValueError('IDENTITY_MAP_COMMITMENT_MISMATCH')
+    if set(identity)!={r['candidate_id'] for r in manifest['candidates']}:
+        raise ValueError('PUBLIC_IDENTITY_COVERAGE_MISMATCH')
+    for i,r in enumerate(manifest['candidates']):
+        cid=r['candidate_id']; record=identity[cid]
+        expected='C'+hmac.new(key,f"{i}|{record['geom_sha']}".encode(),hashlib.sha256).hexdigest()[:14].upper()
+        if cid!=expected or record['geom_sha']!=r['geom_sha'] or geom_sha(np.load(out/'geometries'/f'{cid}.npy'))!=r['geom_sha']:
+            raise ValueError('CANDIDATE_GEOMETRY_OR_IDENTITY_MISMATCH')
+    result={'identity_commitment_verified':True,'sealed_private_bundle_name':private.name,'revealed_candidates':identity}
     rp=private/'stage25_refine'/'private_refine_map.json'
-    if rp.exists(): result['revealed_refinements']=load_json(rp)
+    if rp.exists():
+        refined=load_json(rp); public_refined=load_json(out/'stage25_refine'/'public_manifest.json')
+        if object_sha256(refined)!=public_refined.get('private_refine_commitment_sha256'):
+            raise ValueError('REFINEMENT_COMMITMENT_MISMATCH')
+        if set(refined)!={r['candidate_id'] for r in public_refined['candidates']}:
+            raise ValueError('REFINEMENT_IDENTITY_COVERAGE_MISMATCH')
+        for r in public_refined['candidates']:
+            cid=r['candidate_id']
+            if refined[cid]['geom_sha']!=r['geom_sha'] or geom_sha(np.load(out/'geometries'/f'{cid}.npy'))!=r['geom_sha']:
+                raise ValueError('REFINEMENT_GEOMETRY_MISMATCH')
+        result['revealed_refinements']=refined
     sg=private/'source_generation_audit.json'
-    if sg.exists(): result['revealed_source_generation_audit']=load_json(sg)
+    audit=load_json(sg)
+    if object_sha256(audit)!=manifest.get('source_audit_commitment_sha256'):
+        raise ValueError('SOURCE_AUDIT_COMMITMENT_MISMATCH')
+    result['revealed_source_generation_audit']=audit
+    evidence=load_json(private/'EVIDENCE_MANIFEST_PRIVATE.json'); public_evidence=load_json(out/'EVIDENCE_MANIFEST.json')
+    if object_sha256(evidence)!=public_evidence.get('private_evidence_sha256'):
+        raise ValueError('EVIDENCE_COMMITMENT_MISMATCH')
+    result['revealed_evidence_manifest']=evidence
     b=out/'BLIND_CHAIN_SUMMARY.json'
     if b.exists(): result['blind_chain']=load_json(b)
     for stage,path in [('early','stage20_early/summary.json'),('refine','stage25_refine/summary.json'),('resolution','stage30_resolution/summary.json'),('temporal','stage32_temporal/summary.json'),('core','stage35_core_robustness/summary.json'),('mesh_gauge','stage37_mesh_gauge/summary.json'),('long','stage40_long/summary.json'),('rpo','stage50_rpo_floquet/summary.json'),('mechanism','stage60_finite_core_clock/summary.json')]:
