@@ -7,11 +7,18 @@ This is a full-tree inventory of the Workbench. It complements (and in places co
 
 | Companion document | Contents |
 |--------------------|----------|
+| [INVENTORY_TREE.json](INVENTORY_TREE.json) | Folder map: family → versions / subfolders, with created + modified |
 | [INVENTORY_FALSIFIERS.md](INVENTORY_FALSIFIERS.md) | Master falsifier registry (5 families; physics vs numerics) |
 | [INVENTORY_PYTHON.md](INVENTORY_PYTHON.md) | Research / calculation Python scripts by pack |
 | [INVENTORY_ARCHIVES.md](INVENTORY_ARCHIVES.md) | Zip archives (centralized under `Restore_Archives/`) |
 | [INVENTORY_DUPLICATES.md](INVENTORY_DUPLICATES.md) | Nested / duplicated working directories and copies |
 | [Restore_Archives/README.md](Restore_Archives/README.md) | Theme layout + consolidate script usage |
+
+Machine-readable folder map: [INVENTORY_TREE.json](INVENTORY_TREE.json)
+(`73` top-level families, `275` version directories as of 2026-09-03). Shape is
+`family → { versions: { v0.1, v0.2, … }, folders: { … } }` plus `created` /
+`modified` (filesystem birth time and mtime). Regenerate with
+`python scripts/workbench_tree.py`.
 
 ## What this repository is
 
