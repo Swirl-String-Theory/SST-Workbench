@@ -1,0 +1,1638 @@
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/CHANGELOG.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/CHANGELOG.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/CHANGELOG.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/CHANGELOG.md	2026-09-03 14:20:55.130422199 +0000
+@@ -1,6 +1,15 @@
+ # Changelog
+ 
+-## v0.2.1 — strict SST-constant-blind anti-circularity correction
++## v0.2.2 — Windows CMD/VS environment bootstrap hotfix
++
++- Fixes the v0.2.1 Windows/Python 3.14 native-build failure occurring before C++ compilation in setuptools' `cmd /u /c vcvarsall.bat ... && set` bootstrap.
++- Directly initializes `vcvarsall.bat`, verifies `cl.exe` and `link.exe`, and sets `DISTUTILS_USE_SDK=1` plus `MSSdk=1` before `build_ext`.
++- Adds `run_01_build_native_clean.cmd` using `cmd.exe /d` to suppress registry Command Processor AutoRun hooks for the build child shell.
++- Makes all major runners working-directory independent with `pushd "%~dp0"`.
++- Invokes `.venv\Scripts\python.exe` directly instead of relying on activation for normal Python stages.
++- No change to strict dimensionless blindness, scientific gates, thresholds, finite-core kernel, or reveal policy.
++
++## v0.2.2 — strict SST-constant-blind anti-circularity correction
+ 
+ - Removes all SST canonical constants from the pre-reveal Universal Action campaign and scorer.
+ - Deletes the old `constants.py` and `action_constants.py` pre-reveal modules.
+@@ -28,4 +37,4 @@
+ 
+ Introduced the integrated Wien–Planck field–matter and Universal Action workbench,
+ but the action path still used canonical SST values for SI dimensionalization before
+-blind scoring. v0.2.1 removes that remaining provenance vulnerability.
++blind scoring. v0.2.2 removes that remaining provenance vulnerability.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/PROVENANCE_AUDIT.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/PROVENANCE_AUDIT.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/PROVENANCE_AUDIT.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/PROVENANCE_AUDIT.md	2026-09-03 14:20:55.116017260 +0000
+@@ -1,4 +1,4 @@
+-# Provenance audit — v0.2.1
++# Provenance audit — v0.2.2
+ 
+ The legacy relation
+ 
+@@ -38,7 +38,7 @@
+ 2\pi\hbar=h.
+ \]
+ 
+-v0.2.1 additionally audits the dimensional action scale
++v0.2.2 additionally audits the dimensional action scale
+ 
+ \[
+ J_0=\rho\Gamma L^3.
+@@ -68,7 +68,7 @@
+ Therefore this normalization is an explicit **contaminated negative control** and
+ cannot establish an independent absolute Planck scale.
+ 
+-The pre-reveal v0.2.1 Universal Action branch avoids this by using only
++The pre-reveal v0.2.2 Universal Action branch avoids this by using only
+ 
+ \[
+ L_{\rm hat}=1,\qquad\Gamma_{\rm hat}=1
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/README.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/README.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/README.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/README.md	2026-09-03 14:20:55.130489488 +0000
+@@ -1,8 +1,8 @@
+-# Wien–Planck SST Field–Matter Closure Falsifier v0.2.1
++# Wien–Planck SST Field–Matter Closure Falsifier v0.2.2
+ 
+ ## Strict anti-circularity correction
+ 
+-v0.2.1 changes the Universal Action / Planck branch from **target-blind with SST physical scaling**
++v0.2.2 changes the Universal Action / Planck branch from **target-blind with SST physical scaling**
+ to **SST-constant-blind and SI-blind discovery**.
+ 
+ The pre-reveal scientific path uses only
+@@ -225,5 +225,24 @@
+ - establish an absolute Planck scale without independent dimensional provenance.
+ 
+ See `docs/THEORY_AND_GATES.md`,
+-`docs/STRICT_BLINDNESS_v0.2.1.md`,
++`docs/STRICT_BLINDNESS_v0.2.2.md`,
+ `PROVENANCE_AUDIT.md`, and `VALIDATION.md`.
++
++
++## Windows build note — v0.2.2
++
++The v0.2.1 user run reached Visual Studio 2026 environment discovery but failed before C++ compilation because setuptools spawned a contaminated `cmd /u /c vcvarsall...` bootstrap shell. v0.2.2 bypasses that bootstrap.
++
++Recommended first native retry:
++
++```bat
++run_01_build_native_clean.cmd
++```
++
++Then run the scientific chain, preferably with an explicit dataset path:
++
++```bat
++run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final"
++```
++
++See `docs\WINDOWS_BUILD_FIX_v0.2.2.md`.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/VALIDATION.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/VALIDATION.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/VALIDATION.md	2026-09-03 10:42:06.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/VALIDATION.md	2026-09-03 14:20:55.130618953 +0000
+@@ -1,4 +1,4 @@
+-# Validation — v0.2.1
++# Validation — v0.2.2
+ 
+ Generation-time validation was executed against the final strict-blind source tree.
+ 
+@@ -79,3 +79,10 @@
+ - temporal and spatial convergence on the real dataset.
+ 
+ No physical SST/Planck result is included in this validation.
++
++
++## v0.2.2 Windows-build hotfix validation
++
++The supplied user log establishes that v0.2.1 successfully created the Python 3.14 venv and installed NumPy/pybind11, then failed before compiling `native.cpp` while setuptools invoked its own `cmd /u /c vcvarsall.bat ... && set` bootstrap.
++
++This release changes only Windows environment/bootstrap runners. Static package checks and Python unit tests were rerun in the generation environment. A real MSVC PASS remains intentionally unclaimed until the user's Windows machine executes `run_01_build_native_clean.cmd` and the native/Python parity self-test passes.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/INPUT_FORMATS.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/INPUT_FORMATS.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/INPUT_FORMATS.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/INPUT_FORMATS.md	2026-09-03 14:20:55.125102487 +0000
+@@ -1,4 +1,4 @@
+-# Input formats — v0.2.1
++# Input formats — v0.2.2
+ 
+ ## Geometry dataset
+ 
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/PRIOR_CONCLUSIONS_INTEGRATED.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/PRIOR_CONCLUSIONS_INTEGRATED.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/PRIOR_CONCLUSIONS_INTEGRATED.md	2026-09-03 10:42:45.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/PRIOR_CONCLUSIONS_INTEGRATED.md	2026-09-03 14:20:55.125304117 +0000
+@@ -1,4 +1,4 @@
+-# Prior SST conclusions integrated into v0.2.1
++# Prior SST conclusions integrated into v0.2.2
+ 
+ This release deliberately incorporates methodological conclusions from earlier SST workbenches rather than treating the Planck gate in isolation.
+ 
+@@ -12,11 +12,11 @@
+ 7. **Numerical certification first.** RK4, \(\Delta t\propto\Delta s^2\), dynamic subcycling, fixed final physical time, scheduled arclength redistribution, and separate resolution convergence are required before stronger claims.
+ 8. **Multi-component geometry.** Links remain multiple closed components; components are never flattened with artificial connector segments.
+ 9. **Action quantization is stronger than discrete modes.** The package contains a classical-continuity null. If modal action scales smoothly with excitation amplitude, discrete eigenfrequencies do not count as Planck-like quantization.
+-10. **Anti-circularity.** v0.2.1 strengthens the previous rule: the pre-reveal Universal Action branch uses no canonical SST constant and no SI scale at all. It is normalized only by \(L_{\rm hat}=1\) and \(\Gamma_{\rm hat}=1\).
++10. **Anti-circularity.** v0.2.2 strengthens the previous rule: the pre-reveal Universal Action branch uses no canonical SST constant and no SI scale at all. It is normalized only by \(L_{\rm hat}=1\) and \(\Gamma_{\rm hat}=1\).
+ 
+ 11. **Focused carriers retained from the intrinsic-modal campaign.** Convenience presets are included for `knot_6.3` discovery, `link_9.2.20` comparison, `link_4.2.1` anti-restoring control, and trefoil `3_1` runs. These are search priorities, not privileged truths.
+ 
+ 
+-## v0.2.1 anti-circularity conclusion
++## v0.2.2 anti-circularity conclusion
+ 
+ The Universal Action discovery must be fully dimensionless and must not use any canonical SST constant or SI scale before reveal. The legacy mapping `rho_core`, `Gamma=2*pi*r_c*v`, `L=r_c` is retained only as a reveal-only contaminated normalization negative control.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/SCIENTIFIC_STATUS.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/SCIENTIFIC_STATUS.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/SCIENTIFIC_STATUS.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/SCIENTIFIC_STATUS.md	2026-09-03 14:20:55.124966381 +0000
+@@ -1,4 +1,4 @@
+-# Scientific status — v0.2.1
++# Scientific status — v0.2.2
+ 
+ - **Provenance identity:** classified as parameter echo under the legacy SST chain.
+ - **Blind Universal Action discovery:** fully dimensionless; no SST canonical constant or SI scale is permitted.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/STRICT_BLINDNESS_v0.2.1.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/STRICT_BLINDNESS_v0.2.1.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/STRICT_BLINDNESS_v0.2.1.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/STRICT_BLINDNESS_v0.2.1.md	2026-09-03 14:20:55.124855278 +0000
+@@ -1,4 +1,4 @@
+-# Strict blindness architecture — v0.2.1
++# Strict blindness architecture — v0.2.2
+ 
+ ## Motivation
+ 
+@@ -7,7 +7,7 @@
+ That is unacceptable for the strongest Universal Action / Planck test because the
+ absolute dimensional scale may already carry Planck provenance.
+ 
+-v0.2.1 therefore separates three claims.
++v0.2.2 therefore separates three claims.
+ 
+ ## UA-A — dimensionless discovery
+ 
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/THEORY_AND_GATES.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/THEORY_AND_GATES.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/THEORY_AND_GATES.md	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/THEORY_AND_GATES.md	2026-09-03 14:20:55.125154530 +0000
+@@ -1,4 +1,4 @@
+-# Theory and gates — v0.2.1
++# Theory and gates — v0.2.2
+ 
+ ## Dimensionless vortex dynamics
+ 
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/WINDOWS_BUILD_FIX_v0.2.2.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/WINDOWS_BUILD_FIX_v0.2.2.md
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/WINDOWS_BUILD_FIX_v0.2.2.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/WINDOWS_BUILD_FIX_v0.2.2.md	2026-09-03 14:20:55.130305682 +0000
+@@ -0,0 +1,45 @@
++# Windows native-build hotfix v0.2.2
++
++## Failure reproduced from the v0.2.1 user log
++
++The Python 3.14 environment and dependencies installed successfully. The failure occurred at `build_ext`, before `native.cpp` compiled, while setuptools attempted to initialize MSVC through:
++
++```text
++cmd /u /c "...vcvarsall.bat" x86_amd64 && set
++```
++
++The log simultaneously showed repeated `The system cannot find the path specified.` messages and a Visual Studio 2026 Developer Command Prompt banner. This means the compiler installation was discovered, but the subprocess bootstrap shell was contaminated by a path/AutoRun failure.
++
++## v0.2.2 fix
++
++`run_01_build_native.cmd` now:
++
++1. reuses an existing `cl.exe` environment when available;
++2. otherwise locates Visual Studio with `VSINSTALLDIR`, `vswhere.exe`, or conservative VS 18/2022 fallbacks;
++3. calls `vcvarsall.bat` directly in the current batch process;
++4. checks `cl.exe` and `link.exe` explicitly;
++5. sets
++
++```text
++DISTUTILS_USE_SDK=1
++MSSdk=1
++```
++
++before invoking setuptools, so setuptools does **not** launch its own `cmd /u /c vcvarsall...` environment bootstrap;
++6. provides `run_01_build_native_clean.cmd`, which starts the native build under `cmd.exe /d` so registry `Command Processor\AutoRun` hooks are disabled in the child shell.
++
++All runners now enter their own package directory via `pushd "%~dp0"`, and normal Python steps invoke `.venv\Scripts\python.exe` directly instead of depending on activation or the caller's working directory.
++
++## Recommended first retry
++
++```bat
++run_01_build_native_clean.cmd
++```
++
++If that succeeds:
++
++```bat
++run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final"
++```
++
++Use the actual dataset path on the machine. The build fix changes no scientific gate, no blind constant policy, no numerical kernel, and no threshold.
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/pyproject.toml /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/pyproject.toml
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/pyproject.toml	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/pyproject.toml	2026-09-03 14:20:55.116476174 +0000
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "sst-wien-planck-field-matter-falsifier"
+-version = "0.2.1"
++version = "0.2.2"
+ description = "Blind Wien-Planck SST field-matter closure and universal-action falsifier"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=2.0", "pybind11>=3.0"]
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_00_setup.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_00_setup.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_00_setup.cmd	2026-09-03 10:08:18.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_00_setup.cmd	2026-09-03 14:20:55.127118928 +0000
+@@ -1,7 +1,16 @@
+ @echo off
+-setlocal
+-if not exist .venv py -3 -m venv .venv || exit /b 1
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m pip install --upgrade pip setuptools wheel || exit /b 1
+-python -m pip install -r requirements.txt || exit /b 1
+-endlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (
++  echo [setup] Creating local virtual environment...
++  py -3 -m venv .venv || goto :fail
++)
++"%PY%" -m pip install --upgrade pip setuptools wheel || goto :fail
++"%PY%" -m pip install -r requirements.txt || goto :fail
++popd
++exit /b 0
++:fail
++set "RC=%ERRORLEVEL%"
++popd
++exit /b %RC%
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native.cmd	2026-09-03 10:08:18.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native.cmd	2026-09-03 14:20:55.127150955 +0000
+@@ -1,7 +1,79 @@
+ @echo off
+-setlocal
+-call .venv\Scripts\activate.bat || exit /b 1
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (
++  echo ERROR: %PY% not found. Run run_00_setup.cmd first.
++  goto :fail
++)
++
+ if exist build\temp_native rmdir /s /q build\temp_native
+-python setup_native.py build_ext --inplace --build-temp build\temp_native || exit /b 1
+-python -c "from sst_wp.native_ext import NATIVE_AVAILABLE; assert NATIVE_AVAILABLE; print('native backend loaded')" || exit /b 1
+-endlocal
++set "VCVARS="
++set "VSROOT="
++
++rem 1) Reuse an already initialized VS environment when possible.
++where cl.exe >nul 2>&1
++if not errorlevel 1 goto :compiler_ready
++
++rem 2) Prefer the VSINSTALLDIR already known to the parent shell.
++if defined VSINSTALLDIR if exist "%VSINSTALLDIR%VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%VSINSTALLDIR%VC\Auxiliary\Build\vcvarsall.bat"
++
++rem 3) Discover Visual Studio/Build Tools using vswhere.
++if not defined VCVARS (
++  set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
++  if exist "%VSWHERE%" (
++    for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSROOT=%%I"
++    if defined VSROOT if exist "%VSROOT%\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%VSROOT%\VC\Auxiliary\Build\vcvarsall.bat"
++  )
++)
++
++rem 4) Conservative fallbacks for VS 2026/2022 editions.
++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"
++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
++
++if not defined VCVARS (
++  echo ERROR: Could not locate vcvarsall.bat.
++  echo Install the MSVC x64/x86 build tools, or run from a Developer Command Prompt.
++  goto :fail
++)
++
++echo [native] Initializing compiler with:
++echo          "%VCVARS%"
++call "%VCVARS%" x86_amd64 >nul
++if errorlevel 1 (
++  echo [native] WARNING: vcvarsall returned %ERRORLEVEL%. Checking whether cl.exe was nevertheless initialized...
++)
++
++:compiler_ready
++where cl.exe >nul 2>&1 || (
++  echo ERROR: cl.exe is not on PATH after Visual Studio initialization.
++  goto :fail
++)
++where link.exe >nul 2>&1 || (
++  echo ERROR: link.exe is not on PATH after Visual Studio initialization.
++  goto :fail
++)
++
++for /f "delims=" %%I in ('where cl.exe') do if not defined CL_PATH set "CL_PATH=%%I"
++echo [native] cl.exe: %CL_PATH%
++cl.exe 2>&1 | findstr /I /C:"Version" >nul
++
++rem Critical v0.2.2 fix:
++rem Tell setuptools/distutils that the MSVC SDK is ALREADY initialized.
++rem This prevents its internal `cmd /u /c vcvarsall.bat ... && set` bootstrap,
++rem which is vulnerable to broken CMD AutoRun/path hooks on some Windows systems.
++set "DISTUTILS_USE_SDK=1"
++set "MSSdk=1"
++
++"%PY%" setup_native.py build_ext --inplace --build-temp build\temp_native || goto :fail
++"%PY%" -c "from sst_wp.native_ext import NATIVE_AVAILABLE; assert NATIVE_AVAILABLE; print('native backend loaded')" || goto :fail
++
++popd
++exit /b 0
++:fail
++set "RC=%ERRORLEVEL%"
++if "%RC%"=="0" set "RC=1"
++popd
++exit /b %RC%
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native_clean.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native_clean.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native_clean.cmd	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native_clean.cmd	2026-09-03 14:20:55.127402790 +0000
+@@ -0,0 +1,8 @@
++@echo off
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++rem Launch a child command processor with /d so HKCU/HKLM Command Processor AutoRun is ignored.
++"%ComSpec%" /d /s /c ""%~dp0run_01_build_native.cmd""
++set "RC=%ERRORLEVEL%"
++popd
++exit /b %RC%
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_02_selftest.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_02_selftest.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_02_selftest.cmd	2026-09-03 10:08:18.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_02_selftest.cmd	2026-09-03 14:20:55.127522348 +0000
+@@ -1,5 +1,8 @@
+ @echo off
+-setlocal
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m unittest discover -s tests -v || exit /b 1
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -m unittest discover -s tests -v || exit /b 1
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_03_seal.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_03_seal.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_03_seal.cmd	2026-09-03 10:11:40.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_03_seal.cmd	2026-09-03 14:20:55.127600721 +0000
+@@ -1,5 +1,8 @@
+ @echo off
+-setlocal
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -c "from sst_wp.trust import seal; r=seal('.', 'outputs/runtime_code_seal.json'); print(r['commitment_sha256'])" || exit /b 1
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -c "from sst_wp.trust import seal; r=seal('.', 'outputs/runtime_code_seal.json'); print(r['commitment_sha256'])" || exit /b 1
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_04_blind_guard.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_04_blind_guard.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_04_blind_guard.cmd	2026-09-03 10:40:50.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_04_blind_guard.cmd	2026-09-03 14:20:55.127879400 +0000
+@@ -1,7 +1,10 @@
+ @echo off
+-setlocal
+-call .venv\Scripts\activate.bat || exit /b 1
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+ if not exist outputs mkdir outputs
+-python -m sst_wp.blind_guard --out outputs\BLIND_CODE_AUDIT.json || exit /b 1
++"%PY%" -m sst_wp.blind_guard --out outputs\BLIND_CODE_AUDIT.json || exit /b 1
+ echo Blind constant/SI leakage guard: PASS
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_05_provenance.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_05_provenance.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_05_provenance.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_05_provenance.cmd	2026-09-03 14:20:55.116809589 +0000
+@@ -1,4 +1,4 @@
+ @echo off
+-echo ERROR: v0.2.1 does not run provenance during the blind chain.
++echo ERROR: v0.2.2 does not run provenance during the blind chain.
+ echo Use run_90_provenance_audit_REVEAL_ONLY.cmd after the blind result is frozen.
+ exit /b 2
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_10_inventory.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_10_inventory.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_10_inventory.cmd	2026-09-03 10:08:18.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_10_inventory.cmd	2026-09-03 14:20:55.127959524 +0000
+@@ -1,7 +1,10 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m sst_wp.inventory "%DATA%" --out outputs\dataset_inventory.json --n 96 || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -m sst_wp.inventory "%DATA%" --out outputs\dataset_inventory.json --n 96 || exit /b 1
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_20_campaign.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_20_campaign.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_20_campaign.cmd	2026-09-03 10:15:03.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_20_campaign.cmd	2026-09-03 14:20:55.128334664 +0000
+@@ -1,5 +1,6 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ set CFG=%~2
+@@ -9,7 +10,9 @@
+   for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set TS=%%i
+   set OUT=outputs\basic_%TS%
+ )
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m sst_wp.campaign "%DATA%" --config "%CFG%" --out "%OUT%" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -m sst_wp.campaign "%DATA%" --config "%CFG%" --out "%OUT%" || exit /b 1
+ echo %OUT%> outputs\LAST_OUT.txt
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_30_blind.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_30_blind.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_30_blind.cmd	2026-09-03 10:40:50.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_30_blind.cmd	2026-09-03 14:20:55.128748724 +0000
+@@ -1,5 +1,6 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set OUT=%~1
+ if "%OUT%"=="" if exist outputs\LAST_OUT.txt set /p OUT=<outputs\LAST_OUT.txt
+ if "%OUT%"=="" (
+@@ -8,13 +9,15 @@
+ )
+ set CFG=%~2
+ if "%CFG%"=="" set CFG=config\basic.json
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m sst_wp.blind_guard || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -m sst_wp.blind_guard || exit /b 1
+ if exist outputs\BLIND_CODE_AUDIT.json copy /Y outputs\BLIND_CODE_AUDIT.json "%OUT%\BLIND_CODE_AUDIT.json" >nul
+-python -m sst_wp.action_prepare "%OUT%\raw_observations.csv" --out-dir "%OUT%" --private-dir private_reveal_keys --quarantine-raw || exit /b 1
+-python -m sst_wp.action_analyze "%OUT%\BLIND_INPUT.csv" --config "%CFG%" --out "%OUT%\BLIND_RESULTS.json" || exit /b 1
+-python -m sst_wp.report "%OUT%\BLIND_RESULTS.json" --out "%OUT%\REPORT_BLIND.md" --title "Wien-Planck SST v0.2.1 STRICT DIMENSIONLESS BLIND report" || exit /b 1
+-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\campaign.json','%OUT%\BLIND_CODE_AUDIT.json','%OUT%\BLIND_INPUT.csv','%OUT%\BLIND_SEAL.json','%OUT%\BLIND_RESULTS.json','%OUT%\REPORT_BLIND.md' -DestinationPath '%OUT%\Wien_Planck_v0.2.1_BLIND.zip'" || exit /b 1
++"%PY%" -m sst_wp.action_prepare "%OUT%\raw_observations.csv" --out-dir "%OUT%" --private-dir private_reveal_keys --quarantine-raw || exit /b 1
++"%PY%" -m sst_wp.action_analyze "%OUT%\BLIND_INPUT.csv" --config "%CFG%" --out "%OUT%\BLIND_RESULTS.json" || exit /b 1
++"%PY%" -m sst_wp.report "%OUT%\BLIND_RESULTS.json" --out "%OUT%\REPORT_BLIND.md" --title "Wien-Planck SST v0.2.2 STRICT DIMENSIONLESS BLIND report" || exit /b 1
++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\campaign.json','%OUT%\BLIND_CODE_AUDIT.json','%OUT%\BLIND_INPUT.csv','%OUT%\BLIND_SEAL.json','%OUT%\BLIND_RESULTS.json','%OUT%\REPORT_BLIND.md' -DestinationPath '%OUT%\Wien_Planck_v0.2.2_BLIND.zip'" || exit /b 1
+ echo BLIND complete. No SST canonical constants or SI scales were supplied to campaign/scorer.
+ echo Read %OUT%\REPORT_BLIND.md before any reveal.
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_40_reveal.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_40_reveal.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_40_reveal.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_40_reveal.cmd	2026-09-03 14:20:55.128888812 +0000
+@@ -1,5 +1,6 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set OUT=%~1
+ if "%OUT%"=="" if exist outputs\LAST_OUT.txt set /p OUT=<outputs\LAST_OUT.txt
+ if "%OUT%"=="" (
+@@ -7,15 +8,17 @@
+   exit /b 2
+ )
+ set NORM=%~2
+-call .venv\Scripts\activate.bat || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+ if "%NORM%"=="" (
+   python -m sst_wp.action_reveal "%OUT%\BLIND_RESULTS.json" "%OUT%\BLIND_SEAL.json" "%OUT%\BLIND_INPUT.csv" --private-dir private_reveal_keys --out "%OUT%\REVEALED_RESULTS.json" || exit /b 1
+ ) else (
+   python -m sst_wp.action_reveal "%OUT%\BLIND_RESULTS.json" "%OUT%\BLIND_SEAL.json" "%OUT%\BLIND_INPUT.csv" --private-dir private_reveal_keys --normalization "%NORM%" --out "%OUT%\REVEALED_RESULTS.json" || exit /b 1
+ )
+-python -m sst_wp.report "%OUT%\REVEALED_RESULTS.json" --out "%OUT%\REPORT_REVEALED.md" --title "Wien-Planck SST v0.2.1 REVEALED report" || exit /b 1
+-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '%OUT%\Wien_Planck_v0.2.1_REVEALED.zip'" || exit /b 1
++"%PY%" -m sst_wp.report "%OUT%\REVEALED_RESULTS.json" --out "%OUT%\REPORT_REVEALED.md" --title "Wien-Planck SST v0.2.2 REVEALED report" || exit /b 1
++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '%OUT%\Wien_Planck_v0.2.2_REVEALED.zip'" || exit /b 1
+ echo.
+ echo Optional independent normalization usage:
+ echo run_40_reveal.cmd "%OUT%" reveal_only\independent_normalization_TEMPLATE.json
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_90_provenance_audit_REVEAL_ONLY.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_90_provenance_audit_REVEAL_ONLY.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_90_provenance_audit_REVEAL_ONLY.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_90_provenance_audit_REVEAL_ONLY.cmd	2026-09-03 14:20:55.128936863 +0000
+@@ -1,6 +1,9 @@
+ @echo off
+-setlocal
+-call .venv\Scripts\activate.bat || exit /b 1
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+ if not exist outputs mkdir outputs
+-python -m sst_wp.provenance outputs\provenance_audit_REVEAL_ONLY.json || exit /b 1
++"%PY%" -m sst_wp.provenance outputs\provenance_audit_REVEAL_ONLY.json || exit /b 1
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all.cmd	2026-09-03 14:20:55.129184232 +0000
+@@ -1,9 +1,10 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_00_setup.cmd || exit /b 1
+-call run_01_build_native.cmd || exit /b 1
++call run_01_build_native_clean.cmd || exit /b 1
+ call run_02_selftest.cmd || exit /b 1
+ call run_03_seal.cmd || exit /b 1
+ call run_04_blind_guard.cmd || exit /b 1
+@@ -11,8 +12,9 @@
+ call run_20_campaign.cmd "%DATA%" config\basic.json || exit /b 1
+ call run_30_blind.cmd "" config\basic.json || exit /b 1
+ echo ============================================================
+-echo v0.2.1 STRICT BLIND chain complete.
++echo v0.2.2 STRICT BLIND chain complete.
+ echo No SST canonical constants or SI scales were used by the action campaign/scorer.
+ echo Reveal and provenance audit are intentionally manual.
+ echo ============================================================
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_extended.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_extended.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_extended.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_extended.cmd	2026-09-03 14:20:55.129414809 +0000
+@@ -1,14 +1,16 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_00_setup.cmd || exit /b 1
+-call run_01_build_native.cmd || exit /b 1
++call run_01_build_native_clean.cmd || exit /b 1
+ call run_02_selftest.cmd || exit /b 1
+ call run_03_seal.cmd || exit /b 1
+ call run_04_blind_guard.cmd || exit /b 1
+ call run_10_inventory.cmd "%DATA%" || exit /b 1
+ call run_20_campaign.cmd "%DATA%" config\extended.json || exit /b 1
+ call run_30_blind.cmd "" config\extended.json || exit /b 1
+-echo v0.2.1 strict blind campaign complete. Reveal is manual.
++echo v0.2.2 strict blind campaign complete. Reveal is manual.
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_highres.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_highres.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_highres.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_highres.cmd	2026-09-03 14:20:55.129455154 +0000
+@@ -1,14 +1,16 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_00_setup.cmd || exit /b 1
+-call run_01_build_native.cmd || exit /b 1
++call run_01_build_native_clean.cmd || exit /b 1
+ call run_02_selftest.cmd || exit /b 1
+ call run_03_seal.cmd || exit /b 1
+ call run_04_blind_guard.cmd || exit /b 1
+ call run_10_inventory.cmd "%DATA%" || exit /b 1
+ call run_20_campaign.cmd "%DATA%" config\highres.json || exit /b 1
+ call run_30_blind.cmd "" config\highres.json || exit /b 1
+-echo v0.2.1 strict blind campaign complete. Reveal is manual.
++echo v0.2.2 strict blind campaign complete. Reveal is manual.
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_closure_external.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_closure_external.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_closure_external.cmd	2026-09-03 10:17:24.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_closure_external.cmd	2026-09-03 14:20:55.128977477 +0000
+@@ -1,9 +1,12 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ if "%~1"=="" (
+   echo Usage: run_closure_external.cmd observations.csv
+   exit /b 2
+ )
+-call .venv\Scripts\activate.bat || exit /b 1
+-python -m sst_wp.closure_analyze "%~1" --config config\basic.json --out outputs\closure_external.json || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++"%PY%" -m sst_wp.closure_analyze "%~1" --config config\basic.json --out outputs\closure_external.json || exit /b 1
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_demo_controls.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_demo_controls.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_demo_controls.cmd	2026-09-03 10:43:46.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_demo_controls.cmd	2026-09-03 14:20:55.129029063 +0000
+@@ -1,18 +1,21 @@
+ @echo off
+-setlocal
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ if not exist .venv call run_00_setup.cmd || exit /b 1
+-call .venv\Scripts\activate.bat || exit /b 1
++set "PY=.venv\Scripts\python.exe"
++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+ if not exist demo mkdir demo
+-python -m sst_wp.blind_guard || exit /b 1
+-python -m sst_wp.synthetic_controls action-positive demo\action_positive.csv
+-python -m sst_wp.synthetic_controls action-classical demo\action_classical.csv
+-python -m sst_wp.synthetic_controls closure-positive demo\closure_positive.csv
+-python -m sst_wp.synthetic_controls closure-negative demo\closure_negative.csv
+-python -m sst_wp.action_prepare demo\action_positive.csv --out-dir outputs\demo_positive --private-dir private_reveal_keys
+-python -m sst_wp.action_analyze outputs\demo_positive\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_positive\BLIND_RESULTS.json
+-python -m sst_wp.action_prepare demo\action_classical.csv --out-dir outputs\demo_classical --private-dir private_reveal_keys
+-python -m sst_wp.action_analyze outputs\demo_classical\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_classical\BLIND_RESULTS.json
+-python -m sst_wp.closure_analyze demo\closure_positive.csv --config config\basic.json --out outputs\demo_closure_positive.json
+-python -m sst_wp.closure_analyze demo\closure_negative.csv --config config\basic.json --out outputs\demo_closure_negative.json
++"%PY%" -m sst_wp.blind_guard || exit /b 1
++"%PY%" -m sst_wp.synthetic_controls action-positive demo\action_positive.csv
++"%PY%" -m sst_wp.synthetic_controls action-classical demo\action_classical.csv
++"%PY%" -m sst_wp.synthetic_controls closure-positive demo\closure_positive.csv
++"%PY%" -m sst_wp.synthetic_controls closure-negative demo\closure_negative.csv
++"%PY%" -m sst_wp.action_prepare demo\action_positive.csv --out-dir outputs\demo_positive --private-dir private_reveal_keys
++"%PY%" -m sst_wp.action_analyze outputs\demo_positive\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_positive\BLIND_RESULTS.json
++"%PY%" -m sst_wp.action_prepare demo\action_classical.csv --out-dir outputs\demo_classical --private-dir private_reveal_keys
++"%PY%" -m sst_wp.action_analyze outputs\demo_classical\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_classical\BLIND_RESULTS.json
++"%PY%" -m sst_wp.closure_analyze demo\closure_positive.csv --config config\basic.json --out outputs\demo_closure_positive.json
++"%PY%" -m sst_wp.closure_analyze demo\closure_negative.csv --config config\basic.json --out outputs\demo_closure_negative.json
+ echo Synthetic controls complete. They are pipeline tests only.
++popd
+ endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_6p3.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_6p3.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_6p3.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_6p3.cmd	2026-09-03 14:20:55.129884682 +0000
+@@ -1,5 +1,10 @@
+ @echo off
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_20_campaign.cmd "%DATA%" config\focus_6p3.json || exit /b 1
+ call run_30_blind.cmd "" config\focus_6p3.json
++
++popd
++endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_4p2p1_control.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_4p2p1_control.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_4p2p1_control.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_4p2p1_control.cmd	2026-09-03 14:20:55.129971853 +0000
+@@ -1,5 +1,10 @@
+ @echo off
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_20_campaign.cmd "%DATA%" config\focus_link_4p2p1_control.json || exit /b 1
+ call run_30_blind.cmd "" config\focus_link_4p2p1_control.json
++
++popd
++endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_9p2p20.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_9p2p20.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_9p2p20.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_9p2p20.cmd	2026-09-03 14:20:55.130009595 +0000
+@@ -1,5 +1,10 @@
+ @echo off
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_20_campaign.cmd "%DATA%" config\focus_link_9p2p20.json || exit /b 1
+ call run_30_blind.cmd "" config\focus_link_9p2p20.json
++
++popd
++endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_trefoil_3p1.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_trefoil_3p1.cmd
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_trefoil_3p1.cmd	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_trefoil_3p1.cmd	2026-09-03 14:20:55.130041193 +0000
+@@ -1,5 +1,10 @@
+ @echo off
++setlocal EnableExtensions
++pushd "%~dp0" || exit /b 1
+ set DATA=%~1
+ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
+ call run_20_campaign.cmd "%DATA%" config\focus_trefoil_3p1.json || exit /b 1
+ call run_30_blind.cmd "" config\focus_trefoil_3p1.json
++
++popd
++endlocal
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/setup_native.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/setup_native.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/setup_native.py	2026-09-03 10:43:16.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/setup_native.py	2026-09-03 14:20:55.130075444 +0000
+@@ -8,4 +8,4 @@
+     language="c++",
+     extra_compile_args=["/std:c++17"] if __import__('os').name == 'nt' else ["-std=c++17", "-O3"],
+ )
+-setup(name="sst_wp_native", version="0.2.1", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
++setup(name="sst_wp_native", version="0.2.2", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/__init__.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/__init__.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/__init__.py	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/__init__.py	2026-09-03 14:20:55.130099477 +0000
+@@ -1 +1 @@
+-__version__ = "0.2.1"
++__version__ = "0.2.2"
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/blind_guard.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/blind_guard.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/blind_guard.py	2026-09-03 10:40:50.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/blind_guard.py	2026-09-03 14:21:58.441805877 +0000
+@@ -120,7 +120,7 @@
+     root = Path(__file__).resolve().parents[1]
+     bad = scan_blind_source(root)
+     result = {
+-        "format": "SST-WP-BLIND-GUARD-2.1",
++        "format": "SST-WP-BLIND-GUARD-2.2",
+         "blind_modules": BLIND_MODULES,
+         "violations": bad,
+         "pass": not bad,
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/campaign.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/campaign.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/campaign.py	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/campaign.py	2026-09-03 14:20:55.124387816 +0000
+@@ -39,7 +39,7 @@
+     # Strictly dimensionless blind dynamics.
+     gamma_hat = float(cfg.get("gamma_dimensionless", 1.0))
+     if gamma_hat != 1.0:
+-        raise RuntimeError("v0.2.1 strict blind action campaign requires gamma_dimensionless = 1")
++        raise RuntimeError("v0.2.2 strict blind action campaign requires gamma_dimensionless = 1")
+     reinfo = fit_relative_equilibrium(
+         X, offs, gamma_hat, cfg["core_fraction"], cfg.get("require_native", False)
+     )
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/provenance.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/provenance.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/provenance.py	2026-09-03 10:37:41.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/provenance.py	2026-09-03 14:20:55.121741743 +0000
+@@ -51,7 +51,7 @@
+                 "CONTAMINATED_NORMALIZATION; hbar is algebraically embedded",
+         },
+         "action_path_rule":
+-            "v0.2.1 pre-reveal campaign/scoring uses only L_hat=1, "
++            "v0.2.2 pre-reveal campaign/scoring uses only L_hat=1, "
+             "Gamma_hat=1, core_fraction, geometry, and dimensionless numerical controls. "
+             "All SST canonical constants and SI scales are forbidden until reveal.",
+     }
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/trust.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/trust.py
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/trust.py	2026-09-03 10:42:45.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/trust.py	2026-09-03 14:20:55.130135331 +0000
+@@ -10,7 +10,7 @@
+     return rows
+ 
+ def seal(root,out):
+-    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-2.1','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
++    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-2.2','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
+ 
+ def scan_target_leak(obj):
+     txt=json.dumps(obj).lower(); bad=[]
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/v0.2.1_to_v0.2.2.diff /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/v0.2.1_to_v0.2.2.diff
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/v0.2.1_to_v0.2.2.diff	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/v0.2.1_to_v0.2.2.diff	2026-09-03 14:21:58.633586367 +0000
+@@ -0,0 +1,794 @@
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/CHANGELOG.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/CHANGELOG.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/CHANGELOG.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/CHANGELOG.md	2026-09-03 14:20:55.130422199 +0000
++@@ -1,6 +1,15 @@
++ # Changelog
++ 
++-## v0.2.1 — strict SST-constant-blind anti-circularity correction
+++## v0.2.2 — Windows CMD/VS environment bootstrap hotfix
+++
+++- Fixes the v0.2.1 Windows/Python 3.14 native-build failure occurring before C++ compilation in setuptools' `cmd /u /c vcvarsall.bat ... && set` bootstrap.
+++- Directly initializes `vcvarsall.bat`, verifies `cl.exe` and `link.exe`, and sets `DISTUTILS_USE_SDK=1` plus `MSSdk=1` before `build_ext`.
+++- Adds `run_01_build_native_clean.cmd` using `cmd.exe /d` to suppress registry Command Processor AutoRun hooks for the build child shell.
+++- Makes all major runners working-directory independent with `pushd "%~dp0"`.
+++- Invokes `.venv\Scripts\python.exe` directly instead of relying on activation for normal Python stages.
+++- No change to strict dimensionless blindness, scientific gates, thresholds, finite-core kernel, or reveal policy.
+++
+++## v0.2.2 — strict SST-constant-blind anti-circularity correction
++ 
++ - Removes all SST canonical constants from the pre-reveal Universal Action campaign and scorer.
++ - Deletes the old `constants.py` and `action_constants.py` pre-reveal modules.
++@@ -28,4 +37,4 @@
++ 
++ Introduced the integrated Wien–Planck field–matter and Universal Action workbench,
++ but the action path still used canonical SST values for SI dimensionalization before
++-blind scoring. v0.2.1 removes that remaining provenance vulnerability.
+++blind scoring. v0.2.2 removes that remaining provenance vulnerability.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/PROVENANCE_AUDIT.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/PROVENANCE_AUDIT.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/PROVENANCE_AUDIT.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/PROVENANCE_AUDIT.md	2026-09-03 14:20:55.116017260 +0000
++@@ -1,4 +1,4 @@
++-# Provenance audit — v0.2.1
+++# Provenance audit — v0.2.2
++ 
++ The legacy relation
++ 
++@@ -38,7 +38,7 @@
++ 2\pi\hbar=h.
++ \]
++ 
++-v0.2.1 additionally audits the dimensional action scale
+++v0.2.2 additionally audits the dimensional action scale
++ 
++ \[
++ J_0=\rho\Gamma L^3.
++@@ -68,7 +68,7 @@
++ Therefore this normalization is an explicit **contaminated negative control** and
++ cannot establish an independent absolute Planck scale.
++ 
++-The pre-reveal v0.2.1 Universal Action branch avoids this by using only
+++The pre-reveal v0.2.2 Universal Action branch avoids this by using only
++ 
++ \[
++ L_{\rm hat}=1,\qquad\Gamma_{\rm hat}=1
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/README.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/README.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/README.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/README.md	2026-09-03 14:20:55.130489488 +0000
++@@ -1,8 +1,8 @@
++-# Wien–Planck SST Field–Matter Closure Falsifier v0.2.1
+++# Wien–Planck SST Field–Matter Closure Falsifier v0.2.2
++ 
++ ## Strict anti-circularity correction
++ 
++-v0.2.1 changes the Universal Action / Planck branch from **target-blind with SST physical scaling**
+++v0.2.2 changes the Universal Action / Planck branch from **target-blind with SST physical scaling**
++ to **SST-constant-blind and SI-blind discovery**.
++ 
++ The pre-reveal scientific path uses only
++@@ -225,5 +225,24 @@
++ - establish an absolute Planck scale without independent dimensional provenance.
++ 
++ See `docs/THEORY_AND_GATES.md`,
++-`docs/STRICT_BLINDNESS_v0.2.1.md`,
+++`docs/STRICT_BLINDNESS_v0.2.2.md`,
++ `PROVENANCE_AUDIT.md`, and `VALIDATION.md`.
+++
+++
+++## Windows build note — v0.2.2
+++
+++The v0.2.1 user run reached Visual Studio 2026 environment discovery but failed before C++ compilation because setuptools spawned a contaminated `cmd /u /c vcvarsall...` bootstrap shell. v0.2.2 bypasses that bootstrap.
+++
+++Recommended first native retry:
+++
+++```bat
+++run_01_build_native_clean.cmd
+++```
+++
+++Then run the scientific chain, preferably with an explicit dataset path:
+++
+++```bat
+++run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final"
+++```
+++
+++See `docs\WINDOWS_BUILD_FIX_v0.2.2.md`.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/VALIDATION.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/VALIDATION.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/VALIDATION.md	2026-09-03 10:42:06.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/VALIDATION.md	2026-09-03 14:20:55.130618953 +0000
++@@ -1,4 +1,4 @@
++-# Validation — v0.2.1
+++# Validation — v0.2.2
++ 
++ Generation-time validation was executed against the final strict-blind source tree.
++ 
++@@ -79,3 +79,10 @@
++ - temporal and spatial convergence on the real dataset.
++ 
++ No physical SST/Planck result is included in this validation.
+++
+++
+++## v0.2.2 Windows-build hotfix validation
+++
+++The supplied user log establishes that v0.2.1 successfully created the Python 3.14 venv and installed NumPy/pybind11, then failed before compiling `native.cpp` while setuptools invoked its own `cmd /u /c vcvarsall.bat ... && set` bootstrap.
+++
+++This release changes only Windows environment/bootstrap runners. Static package checks and Python unit tests were rerun in the generation environment. A real MSVC PASS remains intentionally unclaimed until the user's Windows machine executes `run_01_build_native_clean.cmd` and the native/Python parity self-test passes.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/INPUT_FORMATS.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/INPUT_FORMATS.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/INPUT_FORMATS.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/INPUT_FORMATS.md	2026-09-03 14:20:55.125102487 +0000
++@@ -1,4 +1,4 @@
++-# Input formats — v0.2.1
+++# Input formats — v0.2.2
++ 
++ ## Geometry dataset
++ 
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/PRIOR_CONCLUSIONS_INTEGRATED.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/PRIOR_CONCLUSIONS_INTEGRATED.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/PRIOR_CONCLUSIONS_INTEGRATED.md	2026-09-03 10:42:45.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/PRIOR_CONCLUSIONS_INTEGRATED.md	2026-09-03 14:20:55.125304117 +0000
++@@ -1,4 +1,4 @@
++-# Prior SST conclusions integrated into v0.2.1
+++# Prior SST conclusions integrated into v0.2.2
++ 
++ This release deliberately incorporates methodological conclusions from earlier SST workbenches rather than treating the Planck gate in isolation.
++ 
++@@ -12,11 +12,11 @@
++ 7. **Numerical certification first.** RK4, \(\Delta t\propto\Delta s^2\), dynamic subcycling, fixed final physical time, scheduled arclength redistribution, and separate resolution convergence are required before stronger claims.
++ 8. **Multi-component geometry.** Links remain multiple closed components; components are never flattened with artificial connector segments.
++ 9. **Action quantization is stronger than discrete modes.** The package contains a classical-continuity null. If modal action scales smoothly with excitation amplitude, discrete eigenfrequencies do not count as Planck-like quantization.
++-10. **Anti-circularity.** v0.2.1 strengthens the previous rule: the pre-reveal Universal Action branch uses no canonical SST constant and no SI scale at all. It is normalized only by \(L_{\rm hat}=1\) and \(\Gamma_{\rm hat}=1\).
+++10. **Anti-circularity.** v0.2.2 strengthens the previous rule: the pre-reveal Universal Action branch uses no canonical SST constant and no SI scale at all. It is normalized only by \(L_{\rm hat}=1\) and \(\Gamma_{\rm hat}=1\).
++ 
++ 11. **Focused carriers retained from the intrinsic-modal campaign.** Convenience presets are included for `knot_6.3` discovery, `link_9.2.20` comparison, `link_4.2.1` anti-restoring control, and trefoil `3_1` runs. These are search priorities, not privileged truths.
++ 
++ 
++-## v0.2.1 anti-circularity conclusion
+++## v0.2.2 anti-circularity conclusion
++ 
++ The Universal Action discovery must be fully dimensionless and must not use any canonical SST constant or SI scale before reveal. The legacy mapping `rho_core`, `Gamma=2*pi*r_c*v`, `L=r_c` is retained only as a reveal-only contaminated normalization negative control.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/SCIENTIFIC_STATUS.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/SCIENTIFIC_STATUS.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/SCIENTIFIC_STATUS.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/SCIENTIFIC_STATUS.md	2026-09-03 14:20:55.124966381 +0000
++@@ -1,4 +1,4 @@
++-# Scientific status — v0.2.1
+++# Scientific status — v0.2.2
++ 
++ - **Provenance identity:** classified as parameter echo under the legacy SST chain.
++ - **Blind Universal Action discovery:** fully dimensionless; no SST canonical constant or SI scale is permitted.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/STRICT_BLINDNESS_v0.2.1.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/STRICT_BLINDNESS_v0.2.1.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/STRICT_BLINDNESS_v0.2.1.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/STRICT_BLINDNESS_v0.2.1.md	2026-09-03 14:20:55.124855278 +0000
++@@ -1,4 +1,4 @@
++-# Strict blindness architecture — v0.2.1
+++# Strict blindness architecture — v0.2.2
++ 
++ ## Motivation
++ 
++@@ -7,7 +7,7 @@
++ That is unacceptable for the strongest Universal Action / Planck test because the
++ absolute dimensional scale may already carry Planck provenance.
++ 
++-v0.2.1 therefore separates three claims.
+++v0.2.2 therefore separates three claims.
++ 
++ ## UA-A — dimensionless discovery
++ 
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/THEORY_AND_GATES.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/THEORY_AND_GATES.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/THEORY_AND_GATES.md	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/THEORY_AND_GATES.md	2026-09-03 14:20:55.125154530 +0000
++@@ -1,4 +1,4 @@
++-# Theory and gates — v0.2.1
+++# Theory and gates — v0.2.2
++ 
++ ## Dimensionless vortex dynamics
++ 
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/WINDOWS_BUILD_FIX_v0.2.2.md /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/WINDOWS_BUILD_FIX_v0.2.2.md
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/docs/WINDOWS_BUILD_FIX_v0.2.2.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/docs/WINDOWS_BUILD_FIX_v0.2.2.md	2026-09-03 14:20:55.130305682 +0000
++@@ -0,0 +1,45 @@
+++# Windows native-build hotfix v0.2.2
+++
+++## Failure reproduced from the v0.2.1 user log
+++
+++The Python 3.14 environment and dependencies installed successfully. The failure occurred at `build_ext`, before `native.cpp` compiled, while setuptools attempted to initialize MSVC through:
+++
+++```text
+++cmd /u /c "...vcvarsall.bat" x86_amd64 && set
+++```
+++
+++The log simultaneously showed repeated `The system cannot find the path specified.` messages and a Visual Studio 2026 Developer Command Prompt banner. This means the compiler installation was discovered, but the subprocess bootstrap shell was contaminated by a path/AutoRun failure.
+++
+++## v0.2.2 fix
+++
+++`run_01_build_native.cmd` now:
+++
+++1. reuses an existing `cl.exe` environment when available;
+++2. otherwise locates Visual Studio with `VSINSTALLDIR`, `vswhere.exe`, or conservative VS 18/2022 fallbacks;
+++3. calls `vcvarsall.bat` directly in the current batch process;
+++4. checks `cl.exe` and `link.exe` explicitly;
+++5. sets
+++
+++```text
+++DISTUTILS_USE_SDK=1
+++MSSdk=1
+++```
+++
+++before invoking setuptools, so setuptools does **not** launch its own `cmd /u /c vcvarsall...` environment bootstrap;
+++6. provides `run_01_build_native_clean.cmd`, which starts the native build under `cmd.exe /d` so registry `Command Processor\AutoRun` hooks are disabled in the child shell.
+++
+++All runners now enter their own package directory via `pushd "%~dp0"`, and normal Python steps invoke `.venv\Scripts\python.exe` directly instead of depending on activation or the caller's working directory.
+++
+++## Recommended first retry
+++
+++```bat
+++run_01_build_native_clean.cmd
+++```
+++
+++If that succeeds:
+++
+++```bat
+++run_all.cmd "C:\workspace\projects\SST-Workbench\KnotPlot\knots\final"
+++```
+++
+++Use the actual dataset path on the machine. The build fix changes no scientific gate, no blind constant policy, no numerical kernel, and no threshold.
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/pyproject.toml /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/pyproject.toml
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/pyproject.toml	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/pyproject.toml	2026-09-03 14:20:55.116476174 +0000
++@@ -4,7 +4,7 @@
++ 
++ [project]
++ name = "sst-wien-planck-field-matter-falsifier"
++-version = "0.2.1"
+++version = "0.2.2"
++ description = "Blind Wien-Planck SST field-matter closure and universal-action falsifier"
++ requires-python = ">=3.10"
++ dependencies = ["numpy>=2.0", "pybind11>=3.0"]
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_00_setup.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_00_setup.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_00_setup.cmd	2026-09-03 10:08:18.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_00_setup.cmd	2026-09-03 14:20:55.127118928 +0000
++@@ -1,7 +1,16 @@
++ @echo off
++-setlocal
++-if not exist .venv py -3 -m venv .venv || exit /b 1
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m pip install --upgrade pip setuptools wheel || exit /b 1
++-python -m pip install -r requirements.txt || exit /b 1
++-endlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (
+++  echo [setup] Creating local virtual environment...
+++  py -3 -m venv .venv || goto :fail
+++)
+++"%PY%" -m pip install --upgrade pip setuptools wheel || goto :fail
+++"%PY%" -m pip install -r requirements.txt || goto :fail
+++popd
+++exit /b 0
+++:fail
+++set "RC=%ERRORLEVEL%"
+++popd
+++exit /b %RC%
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native.cmd	2026-09-03 10:08:18.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native.cmd	2026-09-03 14:20:55.127150955 +0000
++@@ -1,7 +1,79 @@
++ @echo off
++-setlocal
++-call .venv\Scripts\activate.bat || exit /b 1
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (
+++  echo ERROR: %PY% not found. Run run_00_setup.cmd first.
+++  goto :fail
+++)
+++
++ if exist build\temp_native rmdir /s /q build\temp_native
++-python setup_native.py build_ext --inplace --build-temp build\temp_native || exit /b 1
++-python -c "from sst_wp.native_ext import NATIVE_AVAILABLE; assert NATIVE_AVAILABLE; print('native backend loaded')" || exit /b 1
++-endlocal
+++set "VCVARS="
+++set "VSROOT="
+++
+++rem 1) Reuse an already initialized VS environment when possible.
+++where cl.exe >nul 2>&1
+++if not errorlevel 1 goto :compiler_ready
+++
+++rem 2) Prefer the VSINSTALLDIR already known to the parent shell.
+++if defined VSINSTALLDIR if exist "%VSINSTALLDIR%VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%VSINSTALLDIR%VC\Auxiliary\Build\vcvarsall.bat"
+++
+++rem 3) Discover Visual Studio/Build Tools using vswhere.
+++if not defined VCVARS (
+++  set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+++  if exist "%VSWHERE%" (
+++    for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSROOT=%%I"
+++    if defined VSROOT if exist "%VSROOT%\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%VSROOT%\VC\Auxiliary\Build\vcvarsall.bat"
+++  )
+++)
+++
+++rem 4) Conservative fallbacks for VS 2026/2022 editions.
+++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"
+++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
+++if not defined VCVARS if exist "%ProgramFiles%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+++
+++if not defined VCVARS (
+++  echo ERROR: Could not locate vcvarsall.bat.
+++  echo Install the MSVC x64/x86 build tools, or run from a Developer Command Prompt.
+++  goto :fail
+++)
+++
+++echo [native] Initializing compiler with:
+++echo          "%VCVARS%"
+++call "%VCVARS%" x86_amd64 >nul
+++if errorlevel 1 (
+++  echo [native] WARNING: vcvarsall returned %ERRORLEVEL%. Checking whether cl.exe was nevertheless initialized...
+++)
+++
+++:compiler_ready
+++where cl.exe >nul 2>&1 || (
+++  echo ERROR: cl.exe is not on PATH after Visual Studio initialization.
+++  goto :fail
+++)
+++where link.exe >nul 2>&1 || (
+++  echo ERROR: link.exe is not on PATH after Visual Studio initialization.
+++  goto :fail
+++)
+++
+++for /f "delims=" %%I in ('where cl.exe') do if not defined CL_PATH set "CL_PATH=%%I"
+++echo [native] cl.exe: %CL_PATH%
+++cl.exe 2>&1 | findstr /I /C:"Version" >nul
+++
+++rem Critical v0.2.2 fix:
+++rem Tell setuptools/distutils that the MSVC SDK is ALREADY initialized.
+++rem This prevents its internal `cmd /u /c vcvarsall.bat ... && set` bootstrap,
+++rem which is vulnerable to broken CMD AutoRun/path hooks on some Windows systems.
+++set "DISTUTILS_USE_SDK=1"
+++set "MSSdk=1"
+++
+++"%PY%" setup_native.py build_ext --inplace --build-temp build\temp_native || goto :fail
+++"%PY%" -c "from sst_wp.native_ext import NATIVE_AVAILABLE; assert NATIVE_AVAILABLE; print('native backend loaded')" || goto :fail
+++
+++popd
+++exit /b 0
+++:fail
+++set "RC=%ERRORLEVEL%"
+++if "%RC%"=="0" set "RC=1"
+++popd
+++exit /b %RC%
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native_clean.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native_clean.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_01_build_native_clean.cmd	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_01_build_native_clean.cmd	2026-09-03 14:20:55.127402790 +0000
++@@ -0,0 +1,8 @@
+++@echo off
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++rem Launch a child command processor with /d so HKCU/HKLM Command Processor AutoRun is ignored.
+++"%ComSpec%" /d /s /c ""%~dp0run_01_build_native.cmd""
+++set "RC=%ERRORLEVEL%"
+++popd
+++exit /b %RC%
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_02_selftest.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_02_selftest.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_02_selftest.cmd	2026-09-03 10:08:18.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_02_selftest.cmd	2026-09-03 14:20:55.127522348 +0000
++@@ -1,5 +1,8 @@
++ @echo off
++-setlocal
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m unittest discover -s tests -v || exit /b 1
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -m unittest discover -s tests -v || exit /b 1
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_03_seal.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_03_seal.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_03_seal.cmd	2026-09-03 10:11:40.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_03_seal.cmd	2026-09-03 14:20:55.127600721 +0000
++@@ -1,5 +1,8 @@
++ @echo off
++-setlocal
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -c "from sst_wp.trust import seal; r=seal('.', 'outputs/runtime_code_seal.json'); print(r['commitment_sha256'])" || exit /b 1
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -c "from sst_wp.trust import seal; r=seal('.', 'outputs/runtime_code_seal.json'); print(r['commitment_sha256'])" || exit /b 1
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_04_blind_guard.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_04_blind_guard.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_04_blind_guard.cmd	2026-09-03 10:40:50.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_04_blind_guard.cmd	2026-09-03 14:20:55.127879400 +0000
++@@ -1,7 +1,10 @@
++ @echo off
++-setlocal
++-call .venv\Scripts\activate.bat || exit /b 1
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++ if not exist outputs mkdir outputs
++-python -m sst_wp.blind_guard --out outputs\BLIND_CODE_AUDIT.json || exit /b 1
+++"%PY%" -m sst_wp.blind_guard --out outputs\BLIND_CODE_AUDIT.json || exit /b 1
++ echo Blind constant/SI leakage guard: PASS
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_05_provenance.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_05_provenance.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_05_provenance.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_05_provenance.cmd	2026-09-03 14:20:55.116809589 +0000
++@@ -1,4 +1,4 @@
++ @echo off
++-echo ERROR: v0.2.1 does not run provenance during the blind chain.
+++echo ERROR: v0.2.2 does not run provenance during the blind chain.
++ echo Use run_90_provenance_audit_REVEAL_ONLY.cmd after the blind result is frozen.
++ exit /b 2
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_10_inventory.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_10_inventory.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_10_inventory.cmd	2026-09-03 10:08:18.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_10_inventory.cmd	2026-09-03 14:20:55.127959524 +0000
++@@ -1,7 +1,10 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m sst_wp.inventory "%DATA%" --out outputs\dataset_inventory.json --n 96 || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -m sst_wp.inventory "%DATA%" --out outputs\dataset_inventory.json --n 96 || exit /b 1
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_20_campaign.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_20_campaign.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_20_campaign.cmd	2026-09-03 10:15:03.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_20_campaign.cmd	2026-09-03 14:20:55.128334664 +0000
++@@ -1,5 +1,6 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ set CFG=%~2
++@@ -9,7 +10,9 @@
++   for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set TS=%%i
++   set OUT=outputs\basic_%TS%
++ )
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m sst_wp.campaign "%DATA%" --config "%CFG%" --out "%OUT%" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -m sst_wp.campaign "%DATA%" --config "%CFG%" --out "%OUT%" || exit /b 1
++ echo %OUT%> outputs\LAST_OUT.txt
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_30_blind.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_30_blind.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_30_blind.cmd	2026-09-03 10:40:50.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_30_blind.cmd	2026-09-03 14:20:55.128748724 +0000
++@@ -1,5 +1,6 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set OUT=%~1
++ if "%OUT%"=="" if exist outputs\LAST_OUT.txt set /p OUT=<outputs\LAST_OUT.txt
++ if "%OUT%"=="" (
++@@ -8,13 +9,15 @@
++ )
++ set CFG=%~2
++ if "%CFG%"=="" set CFG=config\basic.json
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m sst_wp.blind_guard || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -m sst_wp.blind_guard || exit /b 1
++ if exist outputs\BLIND_CODE_AUDIT.json copy /Y outputs\BLIND_CODE_AUDIT.json "%OUT%\BLIND_CODE_AUDIT.json" >nul
++-python -m sst_wp.action_prepare "%OUT%\raw_observations.csv" --out-dir "%OUT%" --private-dir private_reveal_keys --quarantine-raw || exit /b 1
++-python -m sst_wp.action_analyze "%OUT%\BLIND_INPUT.csv" --config "%CFG%" --out "%OUT%\BLIND_RESULTS.json" || exit /b 1
++-python -m sst_wp.report "%OUT%\BLIND_RESULTS.json" --out "%OUT%\REPORT_BLIND.md" --title "Wien-Planck SST v0.2.1 STRICT DIMENSIONLESS BLIND report" || exit /b 1
++-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\campaign.json','%OUT%\BLIND_CODE_AUDIT.json','%OUT%\BLIND_INPUT.csv','%OUT%\BLIND_SEAL.json','%OUT%\BLIND_RESULTS.json','%OUT%\REPORT_BLIND.md' -DestinationPath '%OUT%\Wien_Planck_v0.2.1_BLIND.zip'" || exit /b 1
+++"%PY%" -m sst_wp.action_prepare "%OUT%\raw_observations.csv" --out-dir "%OUT%" --private-dir private_reveal_keys --quarantine-raw || exit /b 1
+++"%PY%" -m sst_wp.action_analyze "%OUT%\BLIND_INPUT.csv" --config "%CFG%" --out "%OUT%\BLIND_RESULTS.json" || exit /b 1
+++"%PY%" -m sst_wp.report "%OUT%\BLIND_RESULTS.json" --out "%OUT%\REPORT_BLIND.md" --title "Wien-Planck SST v0.2.2 STRICT DIMENSIONLESS BLIND report" || exit /b 1
+++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\campaign.json','%OUT%\BLIND_CODE_AUDIT.json','%OUT%\BLIND_INPUT.csv','%OUT%\BLIND_SEAL.json','%OUT%\BLIND_RESULTS.json','%OUT%\REPORT_BLIND.md' -DestinationPath '%OUT%\Wien_Planck_v0.2.2_BLIND.zip'" || exit /b 1
++ echo BLIND complete. No SST canonical constants or SI scales were supplied to campaign/scorer.
++ echo Read %OUT%\REPORT_BLIND.md before any reveal.
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_40_reveal.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_40_reveal.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_40_reveal.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_40_reveal.cmd	2026-09-03 14:20:55.128888812 +0000
++@@ -1,5 +1,6 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set OUT=%~1
++ if "%OUT%"=="" if exist outputs\LAST_OUT.txt set /p OUT=<outputs\LAST_OUT.txt
++ if "%OUT%"=="" (
++@@ -7,15 +8,17 @@
++   exit /b 2
++ )
++ set NORM=%~2
++-call .venv\Scripts\activate.bat || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++ if "%NORM%"=="" (
++   python -m sst_wp.action_reveal "%OUT%\BLIND_RESULTS.json" "%OUT%\BLIND_SEAL.json" "%OUT%\BLIND_INPUT.csv" --private-dir private_reveal_keys --out "%OUT%\REVEALED_RESULTS.json" || exit /b 1
++ ) else (
++   python -m sst_wp.action_reveal "%OUT%\BLIND_RESULTS.json" "%OUT%\BLIND_SEAL.json" "%OUT%\BLIND_INPUT.csv" --private-dir private_reveal_keys --normalization "%NORM%" --out "%OUT%\REVEALED_RESULTS.json" || exit /b 1
++ )
++-python -m sst_wp.report "%OUT%\REVEALED_RESULTS.json" --out "%OUT%\REPORT_REVEALED.md" --title "Wien-Planck SST v0.2.1 REVEALED report" || exit /b 1
++-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '%OUT%\Wien_Planck_v0.2.1_REVEALED.zip'" || exit /b 1
+++"%PY%" -m sst_wp.report "%OUT%\REVEALED_RESULTS.json" --out "%OUT%\REPORT_REVEALED.md" --title "Wien-Planck SST v0.2.2 REVEALED report" || exit /b 1
+++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '%OUT%\Wien_Planck_v0.2.2_REVEALED.zip'" || exit /b 1
++ echo.
++ echo Optional independent normalization usage:
++ echo run_40_reveal.cmd "%OUT%" reveal_only\independent_normalization_TEMPLATE.json
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_90_provenance_audit_REVEAL_ONLY.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_90_provenance_audit_REVEAL_ONLY.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_90_provenance_audit_REVEAL_ONLY.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_90_provenance_audit_REVEAL_ONLY.cmd	2026-09-03 14:20:55.128936863 +0000
++@@ -1,6 +1,9 @@
++ @echo off
++-setlocal
++-call .venv\Scripts\activate.bat || exit /b 1
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++ if not exist outputs mkdir outputs
++-python -m sst_wp.provenance outputs\provenance_audit_REVEAL_ONLY.json || exit /b 1
+++"%PY%" -m sst_wp.provenance outputs\provenance_audit_REVEAL_ONLY.json || exit /b 1
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all.cmd	2026-09-03 14:20:55.129184232 +0000
++@@ -1,9 +1,10 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_00_setup.cmd || exit /b 1
++-call run_01_build_native.cmd || exit /b 1
+++call run_01_build_native_clean.cmd || exit /b 1
++ call run_02_selftest.cmd || exit /b 1
++ call run_03_seal.cmd || exit /b 1
++ call run_04_blind_guard.cmd || exit /b 1
++@@ -11,8 +12,9 @@
++ call run_20_campaign.cmd "%DATA%" config\basic.json || exit /b 1
++ call run_30_blind.cmd "" config\basic.json || exit /b 1
++ echo ============================================================
++-echo v0.2.1 STRICT BLIND chain complete.
+++echo v0.2.2 STRICT BLIND chain complete.
++ echo No SST canonical constants or SI scales were used by the action campaign/scorer.
++ echo Reveal and provenance audit are intentionally manual.
++ echo ============================================================
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_extended.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_extended.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_extended.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_extended.cmd	2026-09-03 14:20:55.129414809 +0000
++@@ -1,14 +1,16 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_00_setup.cmd || exit /b 1
++-call run_01_build_native.cmd || exit /b 1
+++call run_01_build_native_clean.cmd || exit /b 1
++ call run_02_selftest.cmd || exit /b 1
++ call run_03_seal.cmd || exit /b 1
++ call run_04_blind_guard.cmd || exit /b 1
++ call run_10_inventory.cmd "%DATA%" || exit /b 1
++ call run_20_campaign.cmd "%DATA%" config\extended.json || exit /b 1
++ call run_30_blind.cmd "" config\extended.json || exit /b 1
++-echo v0.2.1 strict blind campaign complete. Reveal is manual.
+++echo v0.2.2 strict blind campaign complete. Reveal is manual.
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_highres.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_highres.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_all_highres.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_all_highres.cmd	2026-09-03 14:20:55.129455154 +0000
++@@ -1,14 +1,16 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_00_setup.cmd || exit /b 1
++-call run_01_build_native.cmd || exit /b 1
+++call run_01_build_native_clean.cmd || exit /b 1
++ call run_02_selftest.cmd || exit /b 1
++ call run_03_seal.cmd || exit /b 1
++ call run_04_blind_guard.cmd || exit /b 1
++ call run_10_inventory.cmd "%DATA%" || exit /b 1
++ call run_20_campaign.cmd "%DATA%" config\highres.json || exit /b 1
++ call run_30_blind.cmd "" config\highres.json || exit /b 1
++-echo v0.2.1 strict blind campaign complete. Reveal is manual.
+++echo v0.2.2 strict blind campaign complete. Reveal is manual.
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_closure_external.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_closure_external.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_closure_external.cmd	2026-09-03 10:17:24.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_closure_external.cmd	2026-09-03 14:20:55.128977477 +0000
++@@ -1,9 +1,12 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ if "%~1"=="" (
++   echo Usage: run_closure_external.cmd observations.csv
++   exit /b 2
++ )
++-call .venv\Scripts\activate.bat || exit /b 1
++-python -m sst_wp.closure_analyze "%~1" --config config\basic.json --out outputs\closure_external.json || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+++"%PY%" -m sst_wp.closure_analyze "%~1" --config config\basic.json --out outputs\closure_external.json || exit /b 1
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_demo_controls.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_demo_controls.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_demo_controls.cmd	2026-09-03 10:43:46.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_demo_controls.cmd	2026-09-03 14:20:55.129029063 +0000
++@@ -1,18 +1,21 @@
++ @echo off
++-setlocal
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ if not exist .venv call run_00_setup.cmd || exit /b 1
++-call .venv\Scripts\activate.bat || exit /b 1
+++set "PY=.venv\Scripts\python.exe"
+++if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
++ if not exist demo mkdir demo
++-python -m sst_wp.blind_guard || exit /b 1
++-python -m sst_wp.synthetic_controls action-positive demo\action_positive.csv
++-python -m sst_wp.synthetic_controls action-classical demo\action_classical.csv
++-python -m sst_wp.synthetic_controls closure-positive demo\closure_positive.csv
++-python -m sst_wp.synthetic_controls closure-negative demo\closure_negative.csv
++-python -m sst_wp.action_prepare demo\action_positive.csv --out-dir outputs\demo_positive --private-dir private_reveal_keys
++-python -m sst_wp.action_analyze outputs\demo_positive\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_positive\BLIND_RESULTS.json
++-python -m sst_wp.action_prepare demo\action_classical.csv --out-dir outputs\demo_classical --private-dir private_reveal_keys
++-python -m sst_wp.action_analyze outputs\demo_classical\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_classical\BLIND_RESULTS.json
++-python -m sst_wp.closure_analyze demo\closure_positive.csv --config config\basic.json --out outputs\demo_closure_positive.json
++-python -m sst_wp.closure_analyze demo\closure_negative.csv --config config\basic.json --out outputs\demo_closure_negative.json
+++"%PY%" -m sst_wp.blind_guard || exit /b 1
+++"%PY%" -m sst_wp.synthetic_controls action-positive demo\action_positive.csv
+++"%PY%" -m sst_wp.synthetic_controls action-classical demo\action_classical.csv
+++"%PY%" -m sst_wp.synthetic_controls closure-positive demo\closure_positive.csv
+++"%PY%" -m sst_wp.synthetic_controls closure-negative demo\closure_negative.csv
+++"%PY%" -m sst_wp.action_prepare demo\action_positive.csv --out-dir outputs\demo_positive --private-dir private_reveal_keys
+++"%PY%" -m sst_wp.action_analyze outputs\demo_positive\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_positive\BLIND_RESULTS.json
+++"%PY%" -m sst_wp.action_prepare demo\action_classical.csv --out-dir outputs\demo_classical --private-dir private_reveal_keys
+++"%PY%" -m sst_wp.action_analyze outputs\demo_classical\BLIND_INPUT.csv --config config\basic.json --out outputs\demo_classical\BLIND_RESULTS.json
+++"%PY%" -m sst_wp.closure_analyze demo\closure_positive.csv --config config\basic.json --out outputs\demo_closure_positive.json
+++"%PY%" -m sst_wp.closure_analyze demo\closure_negative.csv --config config\basic.json --out outputs\demo_closure_negative.json
++ echo Synthetic controls complete. They are pipeline tests only.
+++popd
++ endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_6p3.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_6p3.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_6p3.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_6p3.cmd	2026-09-03 14:20:55.129884682 +0000
++@@ -1,5 +1,10 @@
++ @echo off
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_20_campaign.cmd "%DATA%" config\focus_6p3.json || exit /b 1
++ call run_30_blind.cmd "" config\focus_6p3.json
+++
+++popd
+++endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_4p2p1_control.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_4p2p1_control.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_4p2p1_control.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_4p2p1_control.cmd	2026-09-03 14:20:55.129971853 +0000
++@@ -1,5 +1,10 @@
++ @echo off
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_20_campaign.cmd "%DATA%" config\focus_link_4p2p1_control.json || exit /b 1
++ call run_30_blind.cmd "" config\focus_link_4p2p1_control.json
+++
+++popd
+++endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_9p2p20.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_9p2p20.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_link_9p2p20.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_link_9p2p20.cmd	2026-09-03 14:20:55.130009595 +0000
++@@ -1,5 +1,10 @@
++ @echo off
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_20_campaign.cmd "%DATA%" config\focus_link_9p2p20.json || exit /b 1
++ call run_30_blind.cmd "" config\focus_link_9p2p20.json
+++
+++popd
+++endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_trefoil_3p1.cmd /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_trefoil_3p1.cmd
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/run_focus_trefoil_3p1.cmd	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/run_focus_trefoil_3p1.cmd	2026-09-03 14:20:55.130041193 +0000
++@@ -1,5 +1,10 @@
++ @echo off
+++setlocal EnableExtensions
+++pushd "%~dp0" || exit /b 1
++ set DATA=%~1
++ if "%DATA%"=="" set DATA=..\..\KnotPlot\knots\final
++ call run_20_campaign.cmd "%DATA%" config\focus_trefoil_3p1.json || exit /b 1
++ call run_30_blind.cmd "" config\focus_trefoil_3p1.json
+++
+++popd
+++endlocal
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/setup_native.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/setup_native.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/setup_native.py	2026-09-03 10:43:16.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/setup_native.py	2026-09-03 14:20:55.130075444 +0000
++@@ -8,4 +8,4 @@
++     language="c++",
++     extra_compile_args=["/std:c++17"] if __import__('os').name == 'nt' else ["-std=c++17", "-O3"],
++ )
++-setup(name="sst_wp_native", version="0.2.1", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
+++setup(name="sst_wp_native", version="0.2.2", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/__init__.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/__init__.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/__init__.py	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/__init__.py	2026-09-03 14:20:55.130099477 +0000
++@@ -1 +1 @@
++-__version__ = "0.2.1"
+++__version__ = "0.2.2"
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/blind_guard.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/blind_guard.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/blind_guard.py	2026-09-03 10:40:50.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/blind_guard.py	2026-09-03 14:21:58.441805877 +0000
++@@ -120,7 +120,7 @@
++     root = Path(__file__).resolve().parents[1]
++     bad = scan_blind_source(root)
++     result = {
++-        "format": "SST-WP-BLIND-GUARD-2.1",
+++        "format": "SST-WP-BLIND-GUARD-2.2",
++         "blind_modules": BLIND_MODULES,
++         "violations": bad,
++         "pass": not bad,
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/campaign.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/campaign.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/campaign.py	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/campaign.py	2026-09-03 14:20:55.124387816 +0000
++@@ -39,7 +39,7 @@
++     # Strictly dimensionless blind dynamics.
++     gamma_hat = float(cfg.get("gamma_dimensionless", 1.0))
++     if gamma_hat != 1.0:
++-        raise RuntimeError("v0.2.1 strict blind action campaign requires gamma_dimensionless = 1")
+++        raise RuntimeError("v0.2.2 strict blind action campaign requires gamma_dimensionless = 1")
++     reinfo = fit_relative_equilibrium(
++         X, offs, gamma_hat, cfg["core_fraction"], cfg.get("require_native", False)
++     )
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/provenance.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/provenance.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/provenance.py	2026-09-03 10:37:41.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/provenance.py	2026-09-03 14:20:55.121741743 +0000
++@@ -51,7 +51,7 @@
++                 "CONTAMINATED_NORMALIZATION; hbar is algebraically embedded",
++         },
++         "action_path_rule":
++-            "v0.2.1 pre-reveal campaign/scoring uses only L_hat=1, "
+++            "v0.2.2 pre-reveal campaign/scoring uses only L_hat=1, "
++             "Gamma_hat=1, core_fraction, geometry, and dimensionless numerical controls. "
++             "All SST canonical constants and SI scales are forbidden until reveal.",
++     }
++diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/trust.py /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/trust.py
++--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/sst_wp/trust.py	2026-09-03 10:42:45.000000000 +0000
+++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/sst_wp/trust.py	2026-09-03 14:20:55.130135331 +0000
++@@ -10,7 +10,7 @@
++     return rows
++ 
++ def seal(root,out):
++-    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-2.1','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
+++    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-2.2','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
++ 
++ def scan_target_leak(obj):
++     txt=json.dumps(obj).lower(); bad=[]
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/validation_reference/BLIND_CODE_AUDIT.json /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/validation_reference/BLIND_CODE_AUDIT.json
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/validation_reference/BLIND_CODE_AUDIT.json	2026-09-03 10:44:15.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/validation_reference/BLIND_CODE_AUDIT.json	1970-01-01 00:00:00.000000000 +0000
+@@ -1,18 +0,0 @@
+-{
+-  "format": "SST-WP-BLIND-GUARD-2.1",
+-  "blind_modules": [
+-    "sst_wp/campaign.py",
+-    "sst_wp/energy.py",
+-    "sst_wp/action_prepare.py",
+-    "sst_wp/action_analyze.py",
+-    "sst_wp/dynamics.py",
+-    "sst_wp/kernels.py",
+-    "sst_wp/modal.py",
+-    "sst_wp/perturb.py",
+-    "sst_wp/geometry.py",
+-    "sst_wp/relative_equilibrium.py",
+-    "sst_wp/common.py"
+-  ],
+-  "violations": [],
+-  "pass": true
+-}
+\ No newline at end of file
+diff -ruN '--exclude=.venv' '--exclude=build' '--exclude=outputs' '--exclude=private_reveal_keys' '--exclude=__pycache__' '--exclude=CODE_SEAL.json' '--exclude=PACKAGE_MANIFEST.json' '--exclude=v0.2.0_to_v0.2.1.diff' /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/validation_reference/BLIND_CODE_AUDIT_v0.2.1_HISTORICAL.json /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/validation_reference/BLIND_CODE_AUDIT_v0.2.1_HISTORICAL.json
+--- /mnt/data/wp_v021_extract/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.1/validation_reference/BLIND_CODE_AUDIT_v0.2.1_HISTORICAL.json	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.2.2/validation_reference/BLIND_CODE_AUDIT_v0.2.1_HISTORICAL.json	2026-09-03 14:20:55.131051556 +0000
+@@ -0,0 +1,18 @@
++{
++  "format": "SST-WP-BLIND-GUARD-2.1",
++  "blind_modules": [
++    "sst_wp/campaign.py",
++    "sst_wp/energy.py",
++    "sst_wp/action_prepare.py",
++    "sst_wp/action_analyze.py",
++    "sst_wp/dynamics.py",
++    "sst_wp/kernels.py",
++    "sst_wp/modal.py",
++    "sst_wp/perturb.py",
++    "sst_wp/geometry.py",
++    "sst_wp/relative_equilibrium.py",
++    "sst_wp/common.py"
++  ],
++  "violations": [],
++  "pass": true
++}
+\ No newline at end of file
