@@ -1,8 +1,11 @@
 """Rules for Workbench output archives next to falsifier packs.
 
-Single sibling zip if size < 50 MiB (tracked with git add -f).
-If 50 MiB <= size < 500 MiB, split into 50 MiB ``*.zip.partNN`` files (tracked).
-If size >= 500 MiB, keep the zip local only (gitignored).
+Outputs and zip files go to GitHub only as files under 50 MiB:
+- sibling ``{pack}_outputs.zip`` if size < 50 MiB (``git add -f``)
+- any other pack-adjacent ``.zip`` under 50 MiB (``git add -f``)
+- if 50 MiB <= size < 500 MiB, split into 50 MiB ``*.zip.partNN`` (tracked)
+- if size >= 500 MiB, keep the zip local only (gitignored)
+- unpacked ``outputs/`` stay on disk (gitignored) so git status stays small
 
 Naming matches Trefoil pack_outputs.py::
 
@@ -23,8 +26,9 @@ PART_BYTES = 50 * MIB
 SPLIT_MIN_BYTES = 50 * MIB
 SPLIT_MAX_BYTES = 500 * MIB
 
-OUTPUT_DIR_NAMES = ("outputs", "out", "campaigns", "analysis", "logs")
+OUTPUT_DIR_NAMES = ("outputs", "out", "campaigns", "analysis", "logs", "artifacts")
 SKIP_ZIP_PARTS = {".venv", "__pycache__", ".git", "node_modules"}
+SKIP_COMMIT_DIR_NAMES = SKIP_ZIP_PARTS | {"Restore_Archives"}
 
 _PART_RE = re.compile(r"^(.+_outputs\.zip)\.part(\d+)$", re.I)
 _OUTPUTS_ZIP_RE = re.compile(r"_outputs\.zip$", re.I)
@@ -68,20 +72,79 @@ def output_zip_class(size: int) -> str:
 
 
 def is_commitable_output_artifact(path: Path, *, restore_name: str = "Restore_Archives") -> bool:
-    """True if this file should stay in git next to a pack."""
+    """True if this file should be force-added: zip/part under the 50 MiB rule."""
     p = Path(path)
     if not p.is_file():
         return False
-    if restore_name in p.parts:
+    if restore_name in p.parts or any(part in SKIP_COMMIT_DIR_NAMES for part in p.parts):
         return False
     parsed = parse_part_name(p.name)
     if parsed is not None:
         return True
-    if p.name.endswith("_outputs.zip.parts.json"):
+    name = p.name.lower()
+    if name.endswith("_outputs.zip.parts.json") or name.endswith(".zip.sha256"):
         return True
-    if not is_outputs_zip_name(p.name):
+    if p.suffix.lower() != ".zip":
         return False
     return p.stat().st_size < SPLIT_MIN_BYTES
+
+
+def _output_tree_bytes(pack_dir: Path) -> int:
+    pack_dir = Path(pack_dir)
+    total = 0
+    for name in OUTPUT_DIR_NAMES:
+        root = pack_dir / name
+        if root.is_file():
+            total += root.stat().st_size
+        elif root.is_dir():
+            for f in root.rglob("*"):
+                if f.is_file():
+                    total += f.stat().st_size
+    return total
+
+
+def iter_commitable_zips(workbench: Path) -> list[Path]:
+    """Pack-adjacent ``.zip`` files that pass ``is_commitable_output_artifact``."""
+    workbench = Path(workbench)
+    found: list[Path] = []
+    for z in workbench.rglob("*.zip"):
+        if not z.is_file():
+            continue
+        if any(part in SKIP_COMMIT_DIR_NAMES for part in z.parts):
+            continue
+        if is_commitable_output_artifact(z):
+            found.append(z)
+    return found
+
+
+def ensure_sibling_output_zips(workbench: Path) -> list[Path]:
+    """Create missing sibling ``*_outputs.zip`` from unpacked output dirs.
+
+    Skip trees whose unpacked size is already >= 500 MiB; those stay local
+    or must be split with the existing ``*_outputs.zip.partNN`` workflow.
+    """
+    workbench = Path(workbench).resolve()
+    created: list[Path] = []
+    seen_packs: set[Path] = set()
+    for name in ("outputs", "artifacts"):
+        for root in workbench.rglob(name):
+            if not root.is_dir():
+                continue
+            if any(part in SKIP_COMMIT_DIR_NAMES for part in root.parts):
+                continue
+            pack = root.parent
+            if pack == workbench or pack in seen_packs:
+                continue
+            seen_packs.add(pack)
+            sibling = output_zip_path(pack)
+            if sibling.is_file():
+                continue
+            if _output_tree_bytes(pack) >= SPLIT_MAX_BYTES:
+                continue
+            packed = pack_output_dirs(pack)
+            if packed is not None:
+                created.append(packed)
+    return created
 
 
 def sha256_file(path: Path, chunk: int = 1 << 20) -> str:

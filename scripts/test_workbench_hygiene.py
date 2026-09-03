@@ -84,7 +84,10 @@ def test_should_untrack_rel(tmp_path):
     (wb / "Restore_Archives" / "Falsifiers").mkdir(parents=True)
     rz = wb / "Restore_Archives" / "Falsifiers" / "x.zip"
     rz.write_bytes(b"r")
+    generic = pack.parent / "dataset_official.zip"
+    generic.write_bytes(b"ds")
     assert not m.should_untrack_rel("Fam/Pack_v0.1.0_outputs.zip", wb, pol)
+    assert not m.should_untrack_rel("Fam/dataset_official.zip", wb, pol)
     assert m.should_untrack_rel("Restore_Archives/Falsifiers/x.zip", wb, pol)
     assert m.should_untrack_rel("Fam/Pack_v0.1.0/outputs/a.npz", wb, pol)
     assert m.should_untrack_rel("Fam/Pack_v0.1.0/src/a.npz", wb, pol)

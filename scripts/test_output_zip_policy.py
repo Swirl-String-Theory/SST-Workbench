@@ -54,9 +54,51 @@ def test_is_commitable_skips_restore_keeps_sibling_and_parts(tmp_path):
     restore.write_bytes(b"z" * 100)
     part = tmp_path / "Fam" / "Pack_v0.2.0_outputs.zip.part01"
     part.write_bytes(b"part")
+    generic = tmp_path / "Fam" / "dataset_official.zip"
+    generic.write_bytes(b"y" * 100)
+    large = tmp_path / "Fam" / "huge.zip"
+    large.write_bytes(b"h" * (50 * MIB))
     assert p.is_commitable_output_artifact(small)
+    assert p.is_commitable_output_artifact(generic)
     assert not p.is_commitable_output_artifact(restore)
+    assert not p.is_commitable_output_artifact(large)
     assert p.is_commitable_output_artifact(part)
+
+
+def test_ensure_sibling_output_zips_creates_missing(tmp_path):
+    p = _load()
+    pack = tmp_path / "Fam" / "Blind_v0.1.0"
+    out = pack / "outputs" / "run"
+    out.mkdir(parents=True)
+    (out / "a.json").write_text("{}", encoding="utf-8")
+    created = p.ensure_sibling_output_zips(tmp_path)
+    assert created == [p.output_zip_path(pack)]
+    assert created[0].is_file()
+    assert p.ensure_sibling_output_zips(tmp_path) == []
+
+
+def test_ensure_sibling_skips_trees_over_500_mib(tmp_path, monkeypatch):
+    p = _load()
+    pack = tmp_path / "Fam" / "Huge_v0.1.0"
+    (pack / "outputs").mkdir(parents=True)
+    (pack / "outputs" / "a.bin").write_bytes(b"x")
+    monkeypatch.setattr(p, "_output_tree_bytes", lambda _pack: p.SPLIT_MAX_BYTES)
+    assert p.ensure_sibling_output_zips(tmp_path) == []
+    assert not p.output_zip_path(pack).exists()
+
+
+def test_iter_commitable_zips_skips_restore_and_large(tmp_path):
+    p = _load()
+    small = tmp_path / "Fam" / "ok.zip"
+    small.parent.mkdir(parents=True)
+    small.write_bytes(b"ok")
+    large = tmp_path / "Fam" / "big.zip"
+    large.write_bytes(b"h" * (50 * MIB))
+    restore = tmp_path / "Restore_Archives" / "x.zip"
+    restore.parent.mkdir(parents=True)
+    restore.write_bytes(b"r")
+    names = {q.name for q in p.iter_commitable_zips(tmp_path)}
+    assert names == {"ok.zip"}
 
 
 def test_split_join_roundtrip(tmp_path):
