@@ -9,7 +9,8 @@ Status: **FROZEN** · Recorded: 2026-09-04T13:38:15+02:00
 | SHA | `816505699e62f84cce2d4cc67ecb52c6e39c9d3c` |
 | Short | `81650569` |
 | Message | Add PyYAML to workbench requirements and fix workbench_tree ASCII help text. |
-| Branch | `main` (ahead of `origin/main` by 3 at freeze time) |
+| Branch | `main` (ahead of `origin/main` by 3 at content-freeze time) |
+| SP00 artifacts commit | `480945f9` (FREEZE + provenance + generators) |
 
 Phase A commits under this freeze:
 
