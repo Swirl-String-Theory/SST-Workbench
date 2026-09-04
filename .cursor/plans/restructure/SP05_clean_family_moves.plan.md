@@ -45,7 +45,7 @@ version. If that fails, the problem is the method, not the family.
 
 ## The thirty-three
 
-Full destinations in [RESTRUCTURE_PLAN_v0.1.md](RESTRUCTURE_PLAN_v0.1.md) §2. Grouped by risk:
+Full destinations in [RESTRUCTURE_PLAN_v0.1.plan.md](RESTRUCTURE_PLAN_v0.1.plan.md) §2. Grouped by risk:
 
 **Group A — single version, trivial** (5): `SST_6Source_Blind_Falsifier_v0.1.0`,
 `SST_Breathing_Stretching_Return_Phase_Causality`, `SST_Sutcliffe_HSS_feasibility_gate`,

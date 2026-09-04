@@ -36,7 +36,7 @@ Generate into `10_docs/migration/`:
 - `checksums.sha256` — SHA-256 for every tracked file, plus every ignored file above 1 MB. Full
   hashing of ~12 GB is feasible once; do it now, not later.
 - `path_map.csv` — the machine-readable mapping, seeded from
-  [RESTRUCTURE_PLAN_v0.1.md](RESTRUCTURE_PLAN_v0.1.md).
+  [RESTRUCTURE_PLAN_v0.1.plan.md](RESTRUCTURE_PLAN_v0.1.plan.md).
 
 ### 3. `path_map.csv` schema
 

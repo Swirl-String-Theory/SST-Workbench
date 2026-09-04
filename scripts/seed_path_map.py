@@ -1,4 +1,4 @@
-"""Seed 10_docs/migration/path_map.csv from RESTRUCTURE_PLAN_v0.1.md.
+"""Seed 10_docs/migration/path_map.csv from RESTRUCTURE_PLAN_v0.1.plan.md.
 
 Parses the six mapping-table layouts and expands path abbreviations and
 brace sets (e.g. R/A/{A011,A012}) using CATALOG_v0.1.md family slugs.
@@ -13,7 +13,9 @@ from pathlib import Path
 from typing import Any
 
 WB = Path(__file__).resolve().parents[1]
-DEFAULT_PLAN = WB / ".cursor" / "plans" / "restructure" / "RESTRUCTURE_PLAN_v0.1.md"
+DEFAULT_PLAN = (
+    WB / ".cursor" / "plans" / "restructure" / "RESTRUCTURE_PLAN_v0.1.plan.md"
+)
 DEFAULT_CATALOG = WB / ".cursor" / "plans" / "restructure" / "CATALOG_v0.1.md"
 DEFAULT_OUT = WB / "10_docs" / "migration" / "path_map.csv"
 

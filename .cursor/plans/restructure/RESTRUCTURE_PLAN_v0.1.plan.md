@@ -117,7 +117,7 @@ versions move to the family; `outputs/` and `shared/` go to `D/D/D004_routeb_sha
 ## 3. Container splits — one root, several families
 
 These need semantic classification, not a blind `git mv`. Full per-container detail in
-[SP06](SP06_container_splits.md).
+[SP06](SP06_container_splits.plan.md).
 
 | # | Current root | Splits into | Count | Phase |
 |---|--------------|-------------|------:|-------|
@@ -148,7 +148,7 @@ consumes. A generator and its consumer are not versions of each other.
 ## 4. KnotPlot — its own refactor
 
 `KnotPlot/` is ~12.4 GB and currently holds four different kinds of thing. Full detail in
-[SP07](SP07_knotplot_refactor.md).
+[SP07](SP07_knotplot_refactor.plan.md).
 
 | # | Current sub-path | Destination | Kind | Approx. size |
 |---|------------------|-------------|------|-------------:|
