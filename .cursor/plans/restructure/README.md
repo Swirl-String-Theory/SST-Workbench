@@ -43,7 +43,8 @@ Each sub-plan carries a status line at the top:
 - `DONE` — completed and verified against its done-criteria
 - `BLOCKED` — waiting on a dependency or a decision, with the blocker named
 
-All twelve are `PLANNED` at the time of writing.
+All twelve were `PLANNED` at the time of writing. **SP00 is `DONE`** (see
+`10_docs/migration/FREEZE.md`); the rest remain `PLANNED`.
 
 ## Hard rules that apply to every sub-plan
 

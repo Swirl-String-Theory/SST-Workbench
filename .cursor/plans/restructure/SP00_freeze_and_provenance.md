@@ -1,6 +1,6 @@
 # SP00 — Freeze and provenance
 
-Status: `PLANNED` · Priority: P0 · Risk: low · Depends on: nothing
+Status: `DONE` · Priority: P0 · Risk: low · Depends on: nothing
 
 Nothing moves in this sub-plan. Its only job is to make every later move reversible and to resolve
 three questions that would otherwise be discovered mid-migration.
