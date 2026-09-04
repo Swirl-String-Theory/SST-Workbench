@@ -1,6 +1,44 @@
+---
+name: SP02 compat junction layer
+overview: ""
+todos:
+  - id: t00
+    content: Document junction policy (`mklink /J`, `.git/info/exclude` not `.gitignore`)
+    status: completed
+  - id: t01
+    content: Implement `junctions.py` create/verify/remove/status
+    status: completed
+  - id: t02
+    content: Create `junction_registry.csv` schema
+    status: completed
+  - id: t03
+    content: Ship `bootstrap_junctions.cmd` + `junctions.md`
+    status: completed
+  - id: t04
+    content: "Tests: junctions, git-invisibility, bootstrap; remove must not delete targets"
+    status: completed
+  - id: t05
+    content: "Done-criteria: machinery ready before first SP04 move"
+    status: completed
+isProject: false
+---
+
 # SP02 — Compatibility junction layer, stage 1
 
 Status: `PLANNED` · Priority: P0 · Risk: low · Depends on: SP01, SP03
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Document junction policy (`mklink /J`, `.git/info/exclude` not `.gitignore`)
+- [ ] Implement `junctions.py` create/verify/remove/status
+- [ ] Create `junction_registry.csv` schema
+- [ ] Ship `bootstrap_junctions.cmd` + `junctions.md`
+- [ ] Tests: junctions, git-invisibility, bootstrap; remove must not delete targets
+- [ ] Done-criteria: machinery ready before first SP04 move
+
+**Next:** Blocked on SP01 + SP03
 
 This is what makes the migration non-breaking. After a family moves, a junction at its old root
 keeps all ~2,064 hardcoded references working, unchanged, until SP11 removes them.

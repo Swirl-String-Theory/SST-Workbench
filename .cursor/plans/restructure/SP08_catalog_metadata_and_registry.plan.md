@@ -1,6 +1,37 @@
+---
+name: SP08 catalog metadata and registry
+todos:
+  - id: t00
+    content: "Complete every `FAMILY.yaml`"
+    status: pending
+  - id: t01
+    content: "Add `project.json` per version"
+    status: pending
+  - id: t02
+    content: "Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`"
+    status: pending
+  - id: t03
+    content: "Build `catalog_index.json`; refresh inventories"
+    status: pending
+  - id: t04
+    content: "Done-criteria: registry validate/discover clean; metadata tests green"
+    status: pending
+---
 # SP08 — Catalog metadata and registry
 
 Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP06, SP07
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Complete every `FAMILY.yaml`
+- [ ] Add `project.json` per version
+- [ ] Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`
+- [ ] Build `catalog_index.json`; refresh inventories
+- [ ] Done-criteria: registry validate/discover clean; metadata tests green
+
+**Next:** Blocked on SP06 + SP07
 
 Every family now sits at its catalog path. This sub-plan makes the catalog *machine-readable* and
 turns the version identifiers into something a program can compare.
@@ -13,7 +44,7 @@ against top-level directory names that no longer exist.
 One per family, completing the stubs written in SP05 and SP06.
 
 ```yaml
-catalog_id: A039
+catalog_id: A042
 domain: 01_research
 letter: A_falsifiers
 name: SST Quantum Galileo Action Gauge Closure Falsifier
@@ -33,7 +64,7 @@ output_prefix: SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier
 ```
 
 `output_prefix` is what preserves the output convention. A run from
-`A039_.../A039-v0.1.1/` produces `SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1-outputs/`
+`A039_.../A042-v0.1.1/` produces `SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1-outputs/`
 because the prefix comes from here, not from the directory name. Without this field, SP09's rename
 would silently change every output artifact name.
 
@@ -43,11 +74,11 @@ paper, a zip or a lab notebook, the family that owns it is findable.
 ## 2. `project.json`
 
 One per version directory, so a version copied loose stays identifiable — the reason for the
-`A039-v0.1.1` naming in the first place.
+`A042-v0.1.1` naming in the first place.
 
 ```json
 {
-  "catalog_id": "A039",
+  "catalog_id": "A042",
   "name": "SST Quantum Galileo Action Gauge Closure Falsifier",
   "version": "v0.1.1",
   "revision": null,

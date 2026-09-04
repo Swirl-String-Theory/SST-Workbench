@@ -1,6 +1,65 @@
+---
+name: RESTRUCTURE EPIC
+todos:
+  - id: t00
+    content: "Catalog model + 10 domains documented"
+    status: completed
+  - id: t01
+    content: "Invariants written (incl. git_mv-only + DELETE/<relpath> soft-retire)"
+    status: completed
+  - id: t02
+    content: "Phase graph SP00–SP11 defined"
+    status: completed
+  - id: t03
+    content: "A001–A042 chronology frozen; 01/02/03 catalog tables aligned"
+    status: completed
+  - id: t04
+    content: "SP00 freeze & provenance completed (`10_docs/migration/FREEZE.md`)"
+    status: completed
+  - id: t05
+    content: "SP01 path resolver implemented & verified"
+    status: pending
+  - id: t06
+    content: "SP02 junction layer live for moved roots"
+    status: pending
+  - id: t07
+    content: "SP03 catalog skeleton + hygiene on disk"
+    status: pending
+  - id: t08
+    content: "SP04–SP07 physical `git mv` waves complete"
+    status: pending
+  - id: t09
+    content: "SP08–SP09 metadata + version rename"
+    status: pending
+  - id: t10
+    content: "SP10 reproducibility gate passed"
+    status: pending
+  - id: t11
+    content: "SP11 soft-retire stubs to `DELETE/` + junction decommission"
+    status: pending
+---
 # RESTRUCTURE EPIC — SST-Workbench catalog migration
 
 Status: `PLANNED` · Version: 0.1 · Baseline: 2026-09-03
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [x] Catalog model + 10 domains documented
+- [x] Invariants written (incl. git_mv-only + DELETE/<relpath> soft-retire)
+- [x] Phase graph SP00–SP11 defined
+- [x] A001–A042 chronology frozen; 01/02/03 catalog tables aligned
+- [x] SP00 freeze & provenance completed (`10_docs/migration/FREEZE.md`)
+- [ ] SP01 path resolver implemented & verified
+- [ ] SP02 junction layer live for moved roots
+- [ ] SP03 catalog skeleton + hygiene on disk
+- [ ] SP04–SP07 physical `git mv` waves complete
+- [ ] SP08–SP09 metadata + version rename
+- [ ] SP10 reproducibility gate passed
+- [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission
+
+**Next:** SP01 path resolver
 
 ## 1. Problem
 
@@ -38,7 +97,7 @@ while quoting 2026-09-03 tree statistics. Relocation stubs (`to_be_processed/`, 
 Every path level carries exactly one meaning, and the full path is the identity:
 
 ```text
-01_research / A_falsifiers / A001_contact_billiard_hydrodynamic / <version>/
+01_research / A_falsifiers / A006_contact_billiard_hydrodynamic / <version>/
      |              |               |                                 |
      |              |               |                                 +-- release
      |              |               +-- permanent research family, never a version
@@ -76,19 +135,19 @@ hypothesis is not a new software version, and a research topic is not a director
 ### Family layout
 
 ```text
-01_research/A_falsifiers/A039_quantum_galileo_action_gauge_closure/
+01_research/A_falsifiers/A042_quantum_galileo_action_gauge_closure/
 ├── FAMILY.yaml          # catalog_id, official name, kind, status, latest, legacy_paths
 ├── README.md
 ├── CHANGELOG.md
 ├── references/
-├── <version>/           # long name in stage 1, A039-v0.1.0 after SP09
+├── <version>/           # long name in stage 1, A042-v0.1.0 after SP09
 └── <version>/
 ```
 
 `FAMILY.yaml` is where non-version-bound metadata lives:
 
 ```yaml
-catalog_id: A039
+catalog_id: A042
 domain: 01_research
 letter: A_falsifiers
 name: SST Quantum Galileo Action Gauge Closure Falsifier
@@ -102,7 +161,7 @@ legacy_paths:
 And `project.json` inside each version keeps the version identifiable when copied loose:
 
 ```json
-{ "catalog_id": "A039", "name": "SST Quantum Galileo Action Gauge Closure Falsifier", "version": "v0.1.1" }
+{ "catalog_id": "A042", "name": "SST Quantum Galileo Action Gauge Closure Falsifier", "version": "v0.1.1" }
 ```
 
 ### ID allocation
@@ -118,11 +177,11 @@ These hold across every phase. A step that violates one is wrong by definition.
 
 1. **`family` ≠ `version` ≠ `configuration` ≠ `result`.** Four levels, four meanings.
 2. **Old paths keep working** until SP11. Junctions, not promises.
-3. **No deletion outside SP11**, and SP11 only runs after SP10 passes.
+3. **No content deletion, ever.** Former delete candidates are `git mv`'d to `DELETE/<original/relative/path>`. SP11 only runs after SP10 passes and performs soft-retire + junction cleanup — never `rm` of research trees.
 4. **Long official names never disappear.** They move from the directory name into `FAMILY.yaml`,
    `project.json` and the output artifact names.
 5. **The output convention is preserved.** A run from
-   `01_research/A_falsifiers/A039_.../A039-v0.1.1/` still produces
+   `01_research/A_falsifiers/A042_.../A042-v0.1.1/` still produces
    `SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1-outputs/`, and its blind and revealed
    variants, with zips at the agreed higher level. The name is sourced from `project.json`, not
    from the directory.
@@ -176,7 +235,7 @@ Moving a family and renaming its version directories are deliberately separated.
 **Stage 1 (SP04–SP07)** moves families into their catalog location with version directory names
 untouched. One junction per vacated root, roughly 73, keeps every old path alive.
 
-**Stage 2 (SP09)** renames version directories to `A039-v0.1.1`. A root junction now points at a
+**Stage 2 (SP09)** renames version directories to `A042-v0.1.1`. A root junction now points at a
 directory where the old version names no longer exist, so this stage needs its own two-level
 scaffold: a real directory at the old root holding one junction per old version name, roughly 272
 more.

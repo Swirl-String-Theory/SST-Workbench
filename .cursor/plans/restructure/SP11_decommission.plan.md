@@ -1,8 +1,48 @@
+---
+name: SP11 decommission
+todos:
+  - id: t00
+    content: "Soft-retire stubs: `git mv` → `DELETE/<original/relative/path>` (never unlink research)"
+    status: pending
+  - id: t01
+    content: "Stage disposable caches/venvs under `DELETE/` only if reproducible"
+    status: pending
+  - id: t02
+    content: "Remove junctions domain-by-domain after SP10 clean"
+    status: pending
+  - id: t03
+    content: "Archive dedup with hash-matched siblings only; stage candidates to `DELETE/`"
+    status: pending
+  - id: t04
+    content: "Decide `.tmp.driveupload/` separately"
+    status: pending
+  - id: t05
+    content: "Done-criteria: soft-retire complete; junctions gone safely; provenance retained"
+    status: pending
+---
 # SP11 — Decommission
 
 Status: `PLANNED` · Priority: P4 · Risk: high · Depends on: SP10
 
-The only sub-plan that deletes anything. It runs **only after SP10 passes**, and it is ordered so
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Soft-retire stubs: `git mv` → `DELETE/<original/relative/path>` (never unlink research)
+- [ ] Stage disposable caches/venvs under `DELETE/` only if reproducible
+- [ ] Remove junctions domain-by-domain after SP10 clean
+- [ ] Archive dedup with hash-matched siblings only; stage candidates to `DELETE/`
+- [ ] Decide `.tmp.driveupload/` separately
+- [ ] Done-criteria: soft-retire complete; junctions gone safely; provenance retained
+
+**Next:** Blocked on SP10 — last phase
+
+## Soft-delete via `DELETE/`
+
+Any former delete candidate is relocated with `git mv` to `DELETE/<path relative to repo root>`,
+preserving the original folder layout. No `git rm`, no filesystem unlink of research or stub content.
+
+The only sub-plan that soft-retires paths. **Nothing is unlinked.** It runs **only after SP10 passes**, and it is ordered so
 that each deletion is smaller in consequence than the one after it.
 
 Risk is marked high not because the steps are difficult but because they are irreversible in a way
@@ -19,7 +59,7 @@ nothing before them was. Every prior phase could be undone with `git mv` and a j
 | `experiments/trefoil/closure/` | stub README |
 | `falsifier_registry/` | `README.md`, already copied to `10_docs/registry/` |
 
-These describe a filesystem that no longer exists. Delete.
+These describe a filesystem that no longer exists. `git mv` each to `DELETE/<original/relative/path>` (e.g. `to_be_processed/` → `DELETE/to_be_processed/`).
 
 ### 2. Build and cache residue — zero risk, high disk
 
@@ -30,7 +70,7 @@ The known large one: `SST_contact_billiard_hydrodynamic_falsifier_v0.2.0/.venv/`
 `SST_Intrinsic_Modal_Swirl_Clock` had a `.venv` in seven of its version directories;
 `SST_Threaded_Hole_Substrate` in all five. A per-family virtualenv is not a research artifact.
 
-Delete after confirming each family's `run_01_install.cmd` can recreate it. That is the actual
+Stage ignored residue under `DELETE/<pack-relative-path>/` after confirming each family's `run_01_install.cmd` can recreate it — still no `rm -rf` of research trees. That is the actual
 precondition: a `.venv` is disposable only if it is reproducible.
 
 ### 3. Junction layer removal — the point of no return
@@ -64,7 +104,7 @@ Rules:
   re-verified against the post-migration tree, not trusted.
 - Deduplicate only where a zip and its extracted sibling hash-match file for file.
 - Deletion candidates go to a staging list, are reviewed, and are moved to
-  `C:\workspace\projects\DELETE` — the existing `workbench_hygiene.py` convention — never unlinked
+  ``DELETE/<original/relative/path>` under the repo root` — the existing `workbench_hygiene.py` convention — never unlinked
   directly.
 
 The earlier analysis was explicit that archives should not be redistributed or re-extracted. That
@@ -118,7 +158,7 @@ re-running `bootstrap_junctions.cmd`, as long as `junction_registry.csv` is inta
 that file.
 
 Sections 4 and 5 are **not** recoverable. That is why deletion candidates are staged to
-`C:\workspace\projects\DELETE` rather than unlinked, and why this sub-plan is last.
+``DELETE/<original/relative/path>` under the repo root` rather than unlinked, and why this sub-plan is last.
 
 ## Done criteria
 

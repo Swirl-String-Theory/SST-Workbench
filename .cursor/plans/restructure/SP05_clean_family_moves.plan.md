@@ -1,6 +1,41 @@
+---
+name: SP05 clean family moves
+todos:
+  - id: t00
+    content: "Pilot A038 trefoil dynamic seed qualification (full run + output hash)"
+    status: pending
+  - id: t01
+    content: "Move remaining clean families (version names unchanged)"
+    status: pending
+  - id: t02
+    content: "Stub `FAMILY.yaml` per family"
+    status: pending
+  - id: t03
+    content: "Place variants/keys correctly (no new catalog IDs)"
+    status: pending
+  - id: t04
+    content: "Route-B last (shared outputs split rows)"
+    status: pending
+  - id: t05
+    content: "Done-criteria: families at catalog paths; SHA junctions; ≥5 packs run via old paths"
+    status: pending
+---
 # SP05 — Clean family moves
 
 Status: `PLANNED` · Priority: P1 · Risk: medium · Depends on: SP04
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Pilot A038 trefoil dynamic seed qualification (full run + output hash)
+- [ ] Move remaining clean families (version names unchanged)
+- [ ] Stub `FAMILY.yaml` per family
+- [ ] Place variants/keys correctly (no new catalog IDs)
+- [ ] Route-B last (shared outputs split rows)
+- [ ] Done-criteria: families at catalog paths; SHA junctions; ≥5 packs run via old paths
+
+**Next:** Blocked on SP04
 
 Thirty-three roots where the directory already equals exactly one research family. The root is
 renamed to its catalog family directory; version directories inside keep their current long names
@@ -12,7 +47,7 @@ until SP09.
 SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier/     (junction)
         |
         v
-01_research/A_falsifiers/A037_trefoil_dynamic_seed_qualification/
+01_research/A_falsifiers/A038_trefoil_dynamic_seed_qualification/
 ├── FAMILY.yaml                                            (stub here, completed in SP08)
 ├── SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.1.0/
 ├── SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.1.1/

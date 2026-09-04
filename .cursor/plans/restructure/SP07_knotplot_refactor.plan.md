@@ -1,6 +1,37 @@
+---
+name: SP07 knotplot refactor
+todos:
+  - id: t00
+    content: "Archive zips → `09_archive/restore/KnotPlot/`"
+    status: pending
+  - id: t01
+    content: "Move qhp* → `03_data/D_generated/qhp/`"
+    status: pending
+  - id: t02
+    content: "Move Fourier / campaigns / ridgerunner out / tool scripts"
+    status: pending
+  - id: t03
+    content: "Move `knots/` last after `SST_KNOT_DATASET` + ≥3 pack conversions"
+    status: pending
+  - id: t04
+    content: "Done-criteria: old KnotPlot is junction scaffold; ≥5 packs run unmodified; file count conserved"
+    status: pending
+---
 # SP07 — KnotPlot tool / data / campaign / result split
 
 Status: `PLANNED` · Priority: P2 · Risk: **high** · Depends on: SP05
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Archive zips → `09_archive/restore/KnotPlot/`
+- [ ] Move qhp* → `03_data/D_generated/qhp/`
+- [ ] Move Fourier / campaigns / ridgerunner out / tool scripts
+- [ ] Move `knots/` last after `SST_KNOT_DATASET` + ≥3 pack conversions
+- [ ] Done-criteria: old KnotPlot is junction scaffold; ≥5 packs run unmodified; file count conserved
+
+**Next:** Blocked on SP05 (can parallel SP06 after SP05)
 
 The highest-risk sub-plan. `KnotPlot/` is ~12.4 GB, 12,979 tracked files, and roughly 1,458 files
 elsewhere in the repo reference it by name. It is also the only root where four conceptually
@@ -31,16 +62,16 @@ Three reasons, any one of which is sufficient:
 |------|----|------|-----:|
 | `KnotPlot/*.py`, `*.kps`, `*.lnk`, `run_build*.cmd`, `knotplot_knots_data.js` | `04_tools/A_geometry/A001_knotplot/` | tool | small |
 | `KnotPlot/ridgerunner/` excluding `out/` | `04_tools/A_geometry/A002_ridgerunner/` | tool | ~50 MB |
-| `KnotPlot/knots/` | `03_data/A_knots/A001_knotplot_relaxed/` | data | ~7.8 GB |
-| `KnotPlot/Knots_FourierSeries/` | `03_data/A_knots/A002_knotplot_fourier_series/` | data | ~0.7 MB |
-| `KnotPlot/qhp/`, `qhp_6p3/`, `qhp_extended/` | `03_data/A_knots/A003_knotplot_qhp/` | data | ~29 MB |
-| `KnotPlot/ridgerunner/out/` | `03_data/D_generated/D005_knotplot_campaign_outputs/` | output | ~3.9 GB |
-| `KnotPlot/Trefoil_Balance_Point_Campaign_v*` (6) | `01_research/E_pipelines/E004_knotplot_trefoil_balance_point/` | campaign | ~413 MB |
-| `KnotPlot/KnotPlot_3p1_Trefoil_Seed_Campaign_v*` (2) | `.../E005_knotplot_trefoil_seed/` | campaign | ~133 MB |
-| `KnotPlot/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v*` (7) | `.../E006_knotplot_multidynamics_relaxation_matrix/` | campaign | ~85 MB |
-| `KnotPlot/KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v*` (3) | `.../E007_knotplot_dynamics_parameter_atlas/` | campaign | ~188 MB |
-| `KnotPlot/KnotPlot_3p1_MissingParameter_Command_Certification_v0.2.0` | `.../E008_knotplot_command_certification/` | campaign | ~2 MB |
-| `KnotPlot/KnotPlot_MultiTopology_QHP_Sweep_v0.3.2` | `.../E009_knotplot_multitopology_qhp_sweep/` | campaign | ~99 MB |
+| `KnotPlot/knots/` | `03_data/A_knots/04_knotplot/` | data | ~7.8 GB |
+| `KnotPlot/Knots_FourierSeries/` | `03_data/A_knots/02_fourier/knotplot_legacy/` | data | ~0.7 MB |
+| `KnotPlot/qhp/`, `qhp_6p3/`, `qhp_extended/` | `03_data/D_generated/qhp/` | data | ~29 MB |
+| `KnotPlot/ridgerunner/out/` | `03_data/D_generated/knotplot_campaign_outputs/` | output | ~3.9 GB |
+| `KnotPlot/Trefoil_Balance_Point_Campaign_v*` (6) | `01_research/E_pipelines/E004_trefoil_balance_point_campaign/` | campaign | ~413 MB |
+| `KnotPlot/KnotPlot_3p1_Trefoil_Seed_Campaign_v*` (2) | `01_research/E_pipelines/E003_knotplot_trefoil_seed_campaign/` | campaign | ~133 MB |
+| `KnotPlot/KnotPlot_3p1_MultiDynamics_Relaxation_Matrix_v*` (7) | `01_research/E_pipelines/E002_knotplot_multidynamics_relaxation_matrix/` | campaign | ~85 MB |
+| `KnotPlot/KnotPlot_3p1_Comprehensive_Dynamics_Parameter_Atlas_v*` (3) | `01_research/D_benchmarks/D009_knotplot_parameter_atlas/` | campaign | ~188 MB |
+| `KnotPlot/KnotPlot_3p1_MissingParameter_Command_Certification_v0.2.0` | `01_research/D_benchmarks/D008_knotplot_missingparameter_certification/` | campaign | ~2 MB |
+| `KnotPlot/KnotPlot_MultiTopology_QHP_Sweep_v0.3.2` | `01_research/E_pipelines/E006_knotplot_multitopology_qhp_sweep/` | campaign | ~99 MB |
 | `KnotPlot/*_outputs.zip` (17) + `.sha256` | `09_archive/restore/KnotPlot/` | archive | — |
 
 ## Execution order
@@ -76,7 +107,7 @@ After moving, both of these must resolve to the same file with the same SHA-256:
 
 ```text
 KnotPlot\knots\final\<known file>                                    (through the junction)
-03_data\A_knots\A001_knotplot_relaxed\final\<known file>             (direct)
+03_data\A_knots\04_knotplot\final\<known file>             (direct)
 ```
 
 ## Circular references to break first

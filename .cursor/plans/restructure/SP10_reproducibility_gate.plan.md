@@ -1,6 +1,37 @@
+---
+name: SP10 reproducibility gate
+todos:
+  - id: t00
+    content: "Gate every active family's `latest` (install → build → run → manifest)"
+    status: pending
+  - id: t01
+    content: "Record tolerances in `FAMILY.yaml` gate section"
+    status: pending
+  - id: t02
+    content: "Write `reproducibility_gate.md`"
+    status: pending
+  - id: t03
+    content: "Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason"
+    status: pending
+  - id: t04
+    content: "Done-criteria: no unjustified fails; gate report committed"
+    status: pending
+---
 # SP10 — Reproducibility gate
 
 Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP09
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Gate every active family's `latest` (install → build → run → manifest)
+- [ ] Record tolerances in `FAMILY.yaml` gate section
+- [ ] Write `reproducibility_gate.md`
+- [ ] Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason
+- [ ] Done-criteria: no unjustified fails; gate report committed
+
+**Next:** Blocked on SP09
 
 The gate that decides whether the migration succeeded. Nothing is deleted until this passes.
 

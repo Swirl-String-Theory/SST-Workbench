@@ -1,6 +1,49 @@
+---
+name: SP00 freeze and provenance
+todos:
+  - id: t00
+    content: "Baseline tests recorded (`baseline_tests.md`)"
+    status: completed
+  - id: t01
+    content: "`pre-restructure-tree.json` generated"
+    status: completed
+  - id: t02
+    content: "`file_manifest.csv` generated"
+    status: completed
+  - id: t03
+    content: "`checksums.sha256` generated"
+    status: completed
+  - id: t04
+    content: "`path_map.csv` seeded with schema"
+    status: completed
+  - id: t05
+    content: "Q1 / Q2 / Q3 answered (`open_questions.md`)"
+    status: completed
+  - id: t06
+    content: "`FREEZE.md` written with SHA + inventory numbers"
+    status: completed
+  - id: t07
+    content: "Done-criteria met — SP00 closed"
+    status: completed
+---
 # SP00 — Freeze and provenance
 
 Status: `DONE` · Priority: P0 · Risk: low · Depends on: nothing
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [x] Baseline tests recorded (`baseline_tests.md`)
+- [x] `pre-restructure-tree.json` generated
+- [x] `file_manifest.csv` generated
+- [x] `checksums.sha256` generated
+- [x] `path_map.csv` seeded with schema
+- [x] Q1 / Q2 / Q3 answered (`open_questions.md`)
+- [x] `FREEZE.md` written with SHA + inventory numbers
+- [x] Done-criteria met — SP00 closed
+
+**Next:** Proceed to SP01
 
 Nothing moves in this sub-plan. Its only job is to make every later move reversible and to resolve
 three questions that would otherwise be discovered mid-migration.

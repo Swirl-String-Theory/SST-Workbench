@@ -1,21 +1,52 @@
+---
+name: SP09 version rename stage2
+todos:
+  - id: t00
+    content: "Convert output-name scripts to `output_prefix` first"
+    status: pending
+  - id: t01
+    content: "Rename version dirs to `<catalog_id>-v…`"
+    status: pending
+  - id: t02
+    content: "Build level-2 junction scaffolds from `legacy_dir`"
+    status: pending
+  - id: t03
+    content: "Family-at-a-time: rename → scaffold → verify → commit"
+    status: pending
+  - id: t04
+    content: "Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK"
+    status: pending
+---
 # SP09 — Version-directory rename, stage 2
 
 Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP08
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Convert output-name scripts to `output_prefix` first
+- [ ] Rename version dirs to `<catalog_id>-v…`
+- [ ] Build level-2 junction scaffolds from `legacy_dir`
+- [ ] Family-at-a-time: rename → scaffold → verify → commit
+- [ ] Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK
+
+**Next:** Blocked on SP08
 
 Version directories get their short catalog-prefixed names. This is the second half of the
 deliberately split rename, and the phase that finally shortens paths.
 
 ```text
-01_research/A_falsifiers/A039_quantum_galileo_action_gauge_closure/
-├── SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.0/     ->  A039-v0.1.0/
-└── SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1/     ->  A039-v0.1.1/
+01_research/A_falsifiers/A042_quantum_galileo_action_gauge_closure/
+├── SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.0/     ->  A042-v0.1.0/
+└── SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1/     ->  A042-v0.1.1/
 ```
 
 ## Why the catalog prefix and not a bare version
 
-`A039-v0.1.1` costs eleven characters more than `v0.1.1` and buys the thing that matters for a
+`A042-v0.1.1` costs eleven characters more than `v0.1.1` and buys the thing that matters for a
 ZIP-driven workflow: a version directory copied loose, mailed, or extracted from an archive is
-still unambiguously identifiable. Combined with `project.json` inside it, a stray `A039-v0.1.1/`
+still unambiguously identifiable. Combined with `project.json` inside it, a stray `A042-v0.1.1/`
 found in a downloads folder resolves to a family, a name and a version with no guesswork.
 
 ## The path-length payoff
@@ -29,7 +60,7 @@ SST_Trefoil_Lobe_Orientation_Blind_Falsifier/
   SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.8_Adaptive_Spectral_DD32_compact/
                                                                           129 chars
 
-01_research/A_falsifiers/A021_multitopology_knot_link_tbk_rpo/A021-v0.4.8/
+01_research/A_falsifiers/A023_multitopology_rpo_floquet/A021-v0.4.8/
                                                                            73 chars
 ```
 
@@ -52,8 +83,8 @@ version name:
 
 ```text
 SST_Quantum_Galileo_Action_Gauge_Closure/          real directory, in .git/info/exclude
-├── SST_..._Falsifier_v0.1.0/    -> junction -> 01_research/.../A039_.../A039-v0.1.0/
-└── SST_..._Falsifier_v0.1.1/    -> junction -> 01_research/.../A039_.../A039-v0.1.1/
+├── SST_..._Falsifier_v0.1.0/    -> junction -> 01_research/.../A042_.../A042-v0.1.0/
+└── SST_..._Falsifier_v0.1.1/    -> junction -> 01_research/.../A039_.../A042-v0.1.1/
 ```
 
 Roughly 73 real directories and 272 junctions. `junctions.py` gains a `--level 2` mode that reads
@@ -70,7 +101,7 @@ The renames come straight from `project.json`:
 
 | Recorded | Directory name |
 |----------|----------------|
-| `version: v0.1.1`, `revision: null` | `A039-v0.1.1` |
+| `version: v0.1.1`, `revision: null` | `A042-v0.1.1` |
 | `version: v0.2.2`, `revision: 8` | `A032-v0.2.2-r8` |
 | `version: v0.4.8`, config `adaptive-spectral-dd32-compact` | `A021-v0.4.8` |
 | `version: v16B0` (documented exception) | `C001-v16B0` |
@@ -80,7 +111,7 @@ recorded in `FAMILY.yaml`, so nothing has to infer it.
 
 ## Output artifacts do not change
 
-The single most important invariant of this phase. A run from `A039-v0.1.1/` still produces:
+The single most important invariant of this phase. A run from `A042-v0.1.1/` still produces:
 
 ```text
 SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1-outputs/
@@ -92,7 +123,7 @@ with zips at the agreed higher level. The name is built from `output_prefix` in 
 `version` in `project.json` — never from the directory name.
 
 Any run script that derives its output name from `%~dp0` or `Path(__file__).parent.name` **will
-break silently**, producing `A039-v0.1.1-outputs/` instead. Silently, because the run succeeds and
+break silently**, producing `A042-v0.1.1-outputs/` instead. Silently, because the run succeeds and
 the artifact is simply misnamed. Enumerate and convert these before renaming; a test that only
 checks "the run succeeded" will not catch it.
 

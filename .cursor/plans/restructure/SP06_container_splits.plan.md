@@ -1,6 +1,37 @@
+---
+name: SP06 container splits
+todos:
+  - id: t00
+    content: "Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe"
+    status: pending
+  - id: t01
+    content: "Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)"
+    status: pending
+  - id: t02
+    content: "Reveal keys under `keys/`; multi-junction roots where needed"
+    status: pending
+  - id: t03
+    content: "Record `sst_trefoil_biot_py` diffs (no dedupe)"
+    status: pending
+  - id: t04
+    content: "Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches"
+    status: pending
+---
 # SP06 — Ambiguous container splits
 
 Status: `PLANNED` · Priority: P2 · Risk: medium · Depends on: SP05
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe
+- [ ] Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)
+- [ ] Reveal keys under `keys/`; multi-junction roots where needed
+- [ ] Record `sst_trefoil_biot_py` diffs (no dedupe)
+- [ ] Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches
+
+**Next:** Blocked on SP05
 
 Seventeen roots that each hold more than one thing. This is the phase that cannot be automated: a
 script cannot tell a new hypothesis from a new software release. Every split below is a judgement,
@@ -29,12 +60,12 @@ just makes them real.
 
 | From | To | Versions |
 |------|----|---------:|
-| `1_Maxwell_SST_Kinetic_Falsifier_v{0.1.0,0.2.0,0.3.0,0.3.1}` | `R/A/A011_maxwell_kinetic/` | 4 |
-| `2_Maxwell_SST_Dynamical_Field_Closure_Falsifier_v{0.1.0,0.2.0}` | `R/A/A012_maxwell_dynamical_field_closure/` | 2 |
-| `3_Maxwell_SST_Physical_Lines_Falsifier_v0.2.0` | `R/A/A013_maxwell_physical_lines/` | 1 |
-| `3_SST_Maxwell_Blind_Falsifier_v0.1.0` | `R/A/A014_maxwell_blind/` | 1 |
-| `4_SST_Maxwell_Falsifier_v{0.1.0,0.2.0}` | `R/A/A015_maxwell_core/` | 2 |
-| `5_{Maxwell_SST,SST_Maxwell}_Reciprocal_Falsifier_v{0.2.0,0.1.0}` | `R/A/A016_maxwell_reciprocal/` | 2 |
+| `1_Maxwell_SST_Kinetic_Falsifier_v{0.1.0,0.2.0,0.3.0,0.3.1}` | `R/A/A011_maxwell_1_kinetic_energy/` | 4 |
+| `2_Maxwell_SST_Dynamical_Field_Closure_Falsifier_v{0.1.0,0.2.0}` | `R/A/A015_maxwell_2_dynamical_field/` | 2 |
+| `3_Maxwell_SST_Physical_Lines_Falsifier_v0.2.0` | `R/A/A012_maxwell_3_physical_lines/` | 1 |
+| `3_SST_Maxwell_Blind_Falsifier_v0.1.0` | `R/A/A012_maxwell_3_physical_lines/` | 1 |
+| `4_SST_Maxwell_Falsifier_v{0.1.0,0.2.0}` | `R/A/A013_maxwell_4_field_null/` | 2 |
+| `5_{Maxwell_SST,SST_Maxwell}_Reciprocal_Falsifier_v{0.2.0,0.1.0}` | `R/A/A014_maxwell_5_reciprocal_figures/` | 2 |
 
 Two unblind keys are **not** families — see §Reveal keys.
 
@@ -50,10 +81,10 @@ split — they are the seven-file list from SP01, and this is the natural moment
 
 | From | To | Versions |
 |------|----|---------:|
-| `SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v*` | `R/A/A032_intrinsic_modal_swirl_clock/` | 7 |
-| `SST_SCII_Intrinsic_Modal_Phase_Swirl_Clock_Blind_Falsifier_v*` | `R/A/A034_scii_intrinsic_modal_phase_swirl_clock/` | 2 |
-| `SST_SCIIb_Frozen_Modal_Pair_Subspace_Phase_Clock_Blind_Falsifier_v*` | `R/A/A035_sciib_frozen_modal_pair_subspace_phase_clock/` | 2 |
-| `SST_SCIII_Koopman_DMD_Complex_Phase_Clock_Blind_Falsifier_v0.1.0` | `R/A/A038_sciii_koopman_dmd_complex_phase_clock/` | 1 |
+| `SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v*` | `R/A/A035_intrinsic_modal_swirl_clock/` | 7 |
+| `SST_SCII_Intrinsic_Modal_Phase_Swirl_Clock_Blind_Falsifier_v*` | `R/A/A036_scii_intrinsic_modal_phase_clock/` | 2 |
+| `SST_SCIIb_Frozen_Modal_Pair_Subspace_Phase_Clock_Blind_Falsifier_v*` | `R/A/A039_sciib_frozen_modal_pair_phase_clock/` | 2 |
+| `SST_SCIII_Koopman_DMD_Complex_Phase_Clock_Blind_Falsifier_v0.1.0` | `R/A/A040_sciii_koopman_dmd_phase_clock/` | 1 |
 
 A032 carries the four-part identifiers `v0.2.2.5` and `v0.2.2.8`. They move unchanged; SP08
 normalizes them.
@@ -72,8 +103,8 @@ disappears entirely.
 
 | From | To | Versions |
 |------|----|---------:|
-| `SST_Threaded_Hole_Substrate_Blind_Falsifier_v{0.1.0,0.1.1,0.2.0,0.2.1,0.3.0}` | `R/A/A022_threaded_hole_substrate/` | 5 |
-| `SST_Local_Thread_Texture_Boost_Invariance_Blind_Falsifier_v{0.1.0,0.2.0,0.2.1,0.2.2,0.3.0}` | `R/A/A023_local_thread_texture_boost_invariance/` | 5 |
+| `SST_Threaded_Hole_Substrate_Blind_Falsifier_v{0.1.0,0.1.1,0.2.0,0.2.1,0.3.0}` | `R/A/A024_threaded_hole_separatrix/` | 5 |
+| `SST_Local_Thread_Texture_Boost_Invariance_Blind_Falsifier_v{0.1.0,0.2.0,0.2.1,0.2.2,0.3.0}` | `R/A/A025_local_thread_texture_boost/` | 5 |
 
 The junction here is unusual: the old root name is `SST_Threaded_Hole_Substrate_Blind_Falsifier_v0.1.0`,
 and old references reach *through* it to both families. A single junction cannot serve two targets,
@@ -87,9 +118,9 @@ children actually belong to the family the root is named after.
 
 | From | To | Versions |
 |------|----|---------:|
-| `SST_Trefoil_Lobe_Orientation_Blind_Falsifier_v{0.1.0,0.3.0}` | `R/A/A020_trefoil_lobe_orientation/` | 2 |
-| `SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.*` | `R/A/A021_multitopology_knot_link_tbk_rpo/` | 9 |
-| `SST_Adaptive_Period_Aware_RPO_Multiple_Shooting_Floquet_Blind_Falsifier_v0.1.0` | `R/A/A030_adaptive_period_aware_rpo_floquet/` | 1 |
+| `SST_Trefoil_Lobe_Orientation_Blind_Falsifier_v{0.1.0,0.3.0}` | `R/A/A021_trefoil_lobe_self_confinement/` | 2 |
+| `SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.*` | `R/A/A023_multitopology_rpo_floquet/` | 9 |
+| `SST_Adaptive_Period_Aware_RPO_Multiple_Shooting_Floquet_Blind_Falsifier_v0.1.0` | `R/A/A031_adaptive_period_rpo_floquet/` | 1 |
 
 A021's version names carry configuration: `v0.4.6_DD32_compact`,
 `v0.4.7_HR_DD32_Ladder_compact`, `v0.4.8_Adaptive_Spectral_DD32_compact`. These move unchanged and
@@ -104,8 +135,8 @@ or the two junction layers will have to cover each other.
 
 | From | To | Versions |
 |------|----|---------:|
-| `Einstein_SST_Blind_Falsifier_v0.1.0` | `R/A/A008_einstein_blind/` | 1 |
-| `Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v{0.1.0,0.1.1}` | `R/A/A009_einstein_emergent_metric_poisson_closure/` | 2 |
+| `Einstein_SST_Blind_Falsifier_v0.1.0` | `R/A/A018_einstein_blind/` | 1 |
+| `Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v{0.1.0,0.1.1}` | `R/A/A017_einstein_emergent_metric_poisson/` | 2 |
 
 `Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/` contains a directory of its own name —
 a nested self-copy. Confirm it is a duplicate before moving; if so it goes to `09_archive/`, not
@@ -115,8 +146,8 @@ into the family.
 
 | From | To | Versions |
 |------|----|---------:|
-| `Kelvin_Kirchhoff_SST_Falsifier_v{0.1.0,0.1.1}` | `R/A/A017_kelvin_kirchhoff/` | 2 |
-| `Kelvin_Joule_SST_Transient_Energy_Falsifier_v0.1.0` | `R/A/A028_kelvin_joule_transient_energy/` | 1 |
+| `Kelvin_Kirchhoff_SST_Falsifier_v{0.1.0,0.1.1}` | `R/A/A019_kelvin_kirchhoff_evanescent_core/` | 2 |
+| `Kelvin_Joule_SST_Transient_Energy_Falsifier_v0.1.0` | `R/A/A032_kelvin_joule_transient_energy/` | 1 |
 | `SST_Kelvin_Floquet_Workbench_cpp_pybind_v{0.1.0,0.1.1}` | `R/C/C008_kelvin_floquet_workbench/` | 2 |
 
 The third is a workbench, not a falsifier — it goes to `C_dynamics`. This is the split that most
@@ -129,8 +160,8 @@ justifies the letter layer: three things sharing a root, two domains apart.
 
 | From | To | Versions |
 |------|----|---------:|
-| `SST_Hopf_Benchmark_Packet_v0.1` | `R/D/D002_hopf_benchmark_packet/` | 1 |
-| `SST_Hopf_cpp_pybind_v{0.1.0,0.1.1,0.1.3,0.1.4}` | `R/D/D004_hopf_cpp_pybind/` | 4 |
+| `SST_Hopf_Benchmark_Packet_v0.1` | `R/D/D005_hopf_benchmark/` | 1 |
+| `SST_Hopf_cpp_pybind_v{0.1.0,0.1.1,0.1.3,0.1.4}` | `R/D/D005_hopf_benchmark/` | 4 |
 
 ## 8. `SST_chi_phase_research/` → two families
 
@@ -150,11 +181,11 @@ series. See §14.
 
 | From | To |
 |------|-----|
-| `SST_v0_8_19_Planck_Routes_A_to_D_equivalence_corrected_pack` | `R/B/B003_planck_routes_a_to_d_equivalence/` |
-| `SST_v0_8_19_Planck_Routes_v3_preregistered_all_inclusive_pack` | `R/B/B004_planck_routes_v3_preregistered/` |
-| `SST_v0_8_19_RouteA_parallel_derivation_falsification_pack` | `R/B/B005_route_a_parallel_derivation/` |
+| `SST_v0_8_19_Planck_Routes_A_to_D_equivalence_corrected_pack` | `R/B/B002_planck_routes_a_to_d/` |
+| `SST_v0_8_19_Planck_Routes_v3_preregistered_all_inclusive_pack` | `R/B/B002_planck_routes_a_to_d/` |
+| `SST_v0_8_19_RouteA_parallel_derivation_falsification_pack` | `R/A/A001_route_a_parallel_derivation_falsification/` |
 | `sst_torsion_impedance_pybind11_v0.8.19_autobuild` | `R/C/C004_torsion_impedance/` |
-| `sst_nonfit_prediction_harness_v0_8_19` | `R/F/F005_nonfit_prediction_harness/` |
+| `sst_nonfit_prediction_harness_v0_8_19` | `R/A/A002_nonfit_prediction_routes_control/` |
 
 B004 contains the two longest paths in the repository, both 231 characters, under
 `archive/legacy_extracted_v2_corrected_pack/canon_patches/`. Verify `core.longpaths` from SP03 is
@@ -164,8 +195,8 @@ active before moving this one.
 
 | From | To |
 |------|-----|
-| `sst_horn_dirichlet_package` | `R/B/B006_horn_dirichlet_bem/` |
-| `sst_horn_neumann_bem_package`, `sst_horn_neumann_bem_all_audits` | `R/B/B007_horn_neumann_bem/` |
+| `sst_horn_dirichlet_package` | `R/B/B003_horn_bem/` |
+| `sst_horn_neumann_bem_package`, `sst_horn_neumann_bem_all_audits` | `R/B/B003_horn_bem/` |
 
 `_all_audits` is a variant of the package, not a separate family: same boundary condition, same
 question, broader audit set. It goes to `B007/variants/all_audits/`.
@@ -212,8 +243,8 @@ versions compute, which is precisely what SP10 exists to prevent. Instead:
 
 | From | To |
 |------|-----|
-| `SST_Route_I_relative_entropy_PoC_v0.0.4` | `R/F/F007_route_i_relative_entropy/` |
-| `routeI_heat_guard_patch_bundle_v0_8_19` | `R/F/F004_route_i_heat_guard_patch/` |
+| `SST_Route_I_relative_entropy_PoC_v0.0.4` | `R/F/F002_route_i_relative_entropy_poc/` |
+| `routeI_heat_guard_patch_bundle_v0_8_19` | `R/F/F002_route_i_relative_entropy_poc/variants/` |
 
 Most of this family exists only inside `Restore_Archives/Route_I/` (12 zips). Record in
 `FAMILY.yaml` that only v0.0.4 is extracted; do not unpack the rest.
@@ -222,11 +253,11 @@ Most of this family exists only inside `Restore_Archives/Route_I/` (12 zips). Re
 
 | From | To |
 |------|-----|
-| `SST_QHP_Stability_Landscape_Blind_Falsifier_v{0.1.0,0.1.3}` | `R/A/A033_qhp_stability_landscape/` |
+| `SST_QHP_Stability_Landscape_Blind_Falsifier_v{0.1.0,0.1.3}` | `R/A/A034_qhp_stability_landscape/` |
 | `SST_KnotPlot_QHP_Sweep_Generator_v0.1.0` | `T/A/A003_knotplot_qhp_sweep_generator/` |
 
 A generator and the falsifier that consumes its output are not versions of each other. The
-generator's output lands in `03_data/A_knots/A003_knotplot_qhp/`, which SP07 also feeds — coordinate
+generator's output lands in `03_data/D_generated/qhp/`, which SP07 also feeds — coordinate
 the two.
 
 ## 14. `SST_Trefoil_Closure/` → one existing family, one new, plus outputs
@@ -237,7 +268,7 @@ lineage, not two.
 | From | To |
 |------|-----|
 | `sst_chi_phase_package`, `_v2` … `_v6` | `R/C/C001_chi_phase_track_b/` (early versions) |
-| `sst_taxonomy_starter_v2`, `_v3b` | `R/F/F009_taxonomy_starter/` |
+| `sst_taxonomy_starter_v2`, `_v3b` | `R/F/F004_taxonomy_starter/` |
 | `multisector_fit_results/`, `exports/`, `phi-3_1/` | `03_data/D_generated/` |
 | `build/` | delete (SP11) |
 | `_dashboard_conflict/`, `archive/` | `09_archive/` |
@@ -320,7 +351,7 @@ this is a filesystem move with no index change. Verify before assuming.
 
 | From | To |
 |------|-----|
-| `experiments/sycl/*.cpp` | `R/F/F010_sycl_probes/` |
+| `experiments/sycl/*.cpp` | `04_tools/D_compute/sycl_probes/` |
 | `experiments/derive_constants/`, `experiments/trefoil/` | stubs — delete in SP11 |
 
 ---
@@ -358,7 +389,7 @@ verifies, or it is reverted whole.
 ## Done criteria
 
 - All seventeen roots split, every child accounted for.
-- The one remaining `provisional` entry, `F009_taxonomy_starter`, resolved in writing. The other
+- The one remaining `provisional` entry, `F007_taxonomy_starter`, resolved in writing. The other
   four were settled before this sub-plan started; see [CATALOG_v0.1.md](CATALOG_v0.1.md)
   §Changes since first draft.
 - The six `sst_trefoil_biot_py` copies diffed and their divergence recorded, with **no copy

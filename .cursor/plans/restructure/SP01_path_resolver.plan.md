@@ -1,6 +1,60 @@
+---
+name: SP01 path resolver
+overview: ""
+todos:
+  - id: t00
+    content: Create `07_scripts/sst_workbench_paths/` module
+    status: completed
+  - id: t01
+    content: Implement `WORKBENCH_ROOT` / `DATA_ROOT` / `KNOT_DATASET` / … resolution
+    status: completed
+  - id: t02
+    content: Implement `resolve_family(catalog_id[, version])` against `path_map.csv`
+    status: completed
+  - id: t03
+    content: Create matching `07_scripts/paths.cmd`
+    status: completed
+  - id: t04
+    content: Write `10_docs/architecture/path_resolution.md`
+    status: completed
+  - id: t05
+    content: List seven absolute `paths.cmd` conversion targets (do not convert yet)
+    status: completed
+  - id: t06
+    content: Add `test_workbench_paths.py`
+    status: completed
+  - id: t07
+    content: Add `test_resolve_family.py`
+    status: completed
+  - id: t08
+    content: Add `test_paths_cmd.py`
+    status: completed
+  - id: t09
+    content: "Done-criteria: identical resolution from ≥3 depths; all three tests green"
+    status: completed
+isProject: false
+---
+
 # SP01 — Central path resolver
 
 Status: `PLANNED` · Priority: P0 · Risk: low · Depends on: SP00
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Create `07_scripts/sst_workbench_paths/` module
+- [ ] Implement `WORKBENCH_ROOT` / `DATA_ROOT` / `KNOT_DATASET` / … resolution
+- [ ] Implement `resolve_family(catalog_id[, version])` against `path_map.csv`
+- [ ] Create matching `07_scripts/paths.cmd`
+- [ ] Write `10_docs/architecture/path_resolution.md`
+- [ ] List seven absolute `paths.cmd` conversion targets (do not convert yet)
+- [ ] Add `test_workbench_paths.py`
+- [ ] Add `test_resolve_family.py`
+- [ ] Add `test_paths_cmd.py`
+- [ ] Done-criteria: identical resolution from ≥3 depths; all three tests green
+
+**Next:** Start here — next executable sub-plan after SP00
 
 ~2,064 files hardcode a path that a move breaks. This sub-plan gives them somewhere better to point,
 before anything moves. It changes no directory layout.
@@ -26,7 +80,7 @@ absolute. Keep the name, fix the resolution.
 ```python
 WORKBENCH_ROOT      # SST_WORKBENCH_ROOT, else upward search for the root marker
 DATA_ROOT           # SST_DATA_ROOT,      else WORKBENCH_ROOT / "03_data"
-KNOT_DATASET        # SST_KNOT_DATASET,   else DATA_ROOT / "A_knots/A001_knotplot_relaxed/final"
+KNOT_DATASET        # SST_KNOT_DATASET,   else DATA_ROOT / "A_knots/04_knotplot/final"
 IDEAL_SOURCES       # SST_IDEAL_SOURCES
 KATLAS_SOURCES      # SST_KATLAS_SOURCES
 FSERIES_ROOT        # SST_FSERIES_ROOT
@@ -42,7 +96,7 @@ working with no edit.
 ### 2. `resolve_family(catalog_id)` — the important part
 
 ```python
-resolve_family("A039")  # -> .../01_research/A_falsifiers/A039_quantum_galileo_action_gauge_closure
+resolve_family("A042")  # -> .../01_research/A_falsifiers/A042_quantum_galileo_action_gauge_closure
 resolve_family("A039", version="v0.1.1")
 ```
 
@@ -61,7 +115,7 @@ resolution without a Python round-trip:
 ```bat
 if not defined SST_WORKBENCH_ROOT call :find_root
 if not defined SST_DATA_ROOT set "SST_DATA_ROOT=%SST_WORKBENCH_ROOT%\03_data"
-if not defined SST_KNOT_DATASET set "SST_KNOT_DATASET=%SST_DATA_ROOT%\A_knots\A001_knotplot_relaxed\final"
+if not defined SST_KNOT_DATASET set "SST_KNOT_DATASET=%SST_DATA_ROOT%\A_knots\04_knotplot\final"
 ```
 
 `:find_root` walks up from `%~dp0` looking for `.sst-workbench-root`.

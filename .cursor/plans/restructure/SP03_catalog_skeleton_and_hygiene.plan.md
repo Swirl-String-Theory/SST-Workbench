@@ -1,6 +1,48 @@
+---
+name: SP03 catalog skeleton and hygiene
+overview: ""
+todos:
+  - id: t00
+    content: Create 10-domain + letter skeleton (`.gitkeep` / README per leaf)
+    status: completed
+  - id: t01
+    content: "Write `.sst-workbench-root` marker (`catalog_schema: 1`)"
+    status: completed
+  - id: t02
+    content: Ensure `core.longpaths` / Windows LongPathsEnabled
+    status: completed
+  - id: t03
+    content: "Confirm/fix `gui` casing (SP00 Q3: already lowercase — verify no-op)"
+    status: completed
+  - id: t04
+    content: Extend `.gitignore` for `*-outputs*` and `keys/`
+    status: completed
+  - id: t05
+    content: Tests for skeleton / marker / gitignore
+    status: completed
+  - id: t06
+    content: "Done-criteria: skeleton present; hygiene tests green"
+    status: completed
+isProject: false
+---
+
 # SP03 — Catalog skeleton and repo hygiene
 
 Status: `PLANNED` · Priority: P1 · Risk: low · Depends on: SP00
+
+## Todos
+
+Progress tracker — checkboxes include completed work so status is obvious at a glance.
+
+- [ ] Create 10-domain + letter skeleton (`.gitkeep` / README per leaf)
+- [ ] Write `.sst-workbench-root` marker (`catalog_schema: 1`)
+- [ ] Ensure `core.longpaths` / Windows LongPathsEnabled
+- [ ] Confirm/fix `gui` casing (SP00 Q3: already lowercase — verify no-op)
+- [ ] Extend `.gitignore` for `*-outputs*` and `keys/`
+- [ ] Tests for skeleton / marker / gitignore
+- [ ] Done-criteria: skeleton present; hygiene tests green
+
+**Next:** Can run in parallel with SP01 after SP00
 
 Creates the empty target structure and fixes three repo-level problems that would otherwise
 corrupt the first move. **No research pack moves in this sub-plan.**
