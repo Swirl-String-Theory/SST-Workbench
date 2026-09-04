@@ -9,5 +9,5 @@ Procedure:
 3. Only then extract this archive into the project root.
 4. Run `run_reveal.cmd`.
 
-The `reveal/reveal_target.json` file contains the SI Planck target and must not be present
+The `../SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1_BLIND_SOURCE/reveal/reveal_target.json` file contains the SI Planck target and must not be present
 during the blind stage.

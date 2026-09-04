@@ -1,0 +1,133 @@
+--- a/run_02_build_native.cmd
++++ b/run_02_build_native.cmd
+@@ -4,8 +4,113 @@
+ echo ============================================================
+ echo [2/7] Build C++17 / pybind11 native backend
+ echo ============================================================
++
+ call .venv\Scripts\activate.bat
++if errorlevel 1 (
++  echo ERROR: failed to activate .venv.
++  exit /b 1
++)
+ 
++REM ============================================================
++REM Prefer an already initialized MSVC environment.
++REM This keeps compatibility with Developer Command Prompt shells.
++REM ============================================================
++where cl >nul 2>nul
++if not errorlevel 1 goto :compiler_ready
++
++REM ============================================================
++REM Visual Studio 2026 Community fallback.
++REM Try native x64 first, then x86-hosted x64 because some
++REM installations expose only Hostx86\x64 correctly.
++REM ============================================================
++set "VS2026_VCVARS=C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"
++
++if exist "%VS2026_VCVARS%" (
++  echo Trying Visual Studio 2026 Community x64...
++  call "%VS2026_VCVARS%" x64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++
++  echo Visual Studio 2026 x64 did not expose cl.exe.
++  echo Trying Visual Studio 2026 Community x86_amd64...
++  call "%VS2026_VCVARS%" x86_amd64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++)
++
++REM ============================================================
++REM Preserve the previous Visual Studio 2022 Community path.
++REM ============================================================
++set "VS2022_VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
++
++if exist "%VS2022_VCVARS%" (
++  echo Trying Visual Studio 2022 Community x64...
++  call "%VS2022_VCVARS%" x64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++
++  echo Visual Studio 2022 x64 did not expose cl.exe.
++  echo Trying Visual Studio 2022 Community x86_amd64...
++  call "%VS2022_VCVARS%" x86_amd64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++)
++
++REM ============================================================
++REM Optional Build Tools fallbacks for both generations.
++REM ============================================================
++set "VS2026_BT_VCVARS=C:\Program Files\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
++if exist "%VS2026_BT_VCVARS%" (
++  echo Trying Visual Studio 2026 BuildTools x64...
++  call "%VS2026_BT_VCVARS%" x64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++
++  echo Trying Visual Studio 2026 BuildTools x86_amd64...
++  call "%VS2026_BT_VCVARS%" x86_amd64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++)
++
++set "VS2022_BT_VCVARS=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
++if exist "%VS2022_BT_VCVARS%" (
++  echo Trying Visual Studio 2022 BuildTools x64...
++  call "%VS2022_BT_VCVARS%" x64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++
++  echo Trying Visual Studio 2022 BuildTools x86_amd64...
++  call "%VS2022_BT_VCVARS%" x86_amd64 >nul
++  where cl >nul 2>nul
++  if not errorlevel 1 goto :compiler_ready
++)
++
++echo.
++echo ERROR: no usable MSVC cl.exe was found.
++echo Checked:
++echo   - existing PATH
++echo   - Visual Studio 2026 Community
++echo   - Visual Studio 2022 Community
++echo   - Visual Studio 2026 BuildTools
++echo   - Visual Studio 2022 BuildTools
++echo.
++exit /b 1
++
++:compiler_ready
++echo.
++echo Using compiler:
++where cl
++cl 2>&1 | findstr /C:"Microsoft (R) C/C++ Optimizing Compiler"
++
++REM ============================================================
++REM Critical: tell setuptools/distutils to use the environment
++REM we just validated instead of invoking vcvarsall.bat again.
++REM ============================================================
++set DISTUTILS_USE_SDK=1
++set MSSdk=1
++
++echo.
++echo Building native extension...
+ python setup.py build_ext --inplace
+ if errorlevel 1 (
+   echo.
+@@ -14,8 +119,8 @@
+   echo Common categories:
+   echo   - setuptools package discovery/configuration
+   echo   - C++ source portability/compiler errors
+-  echo   - missing or incompatible Visual C++ build tools
+-  echo   - pybind11/Python ABI configuration
++  echo   - Python/MSVC ABI configuration
++  echo   - pybind11 configuration
+   echo.
+   exit /b 1
+ )
+@@ -25,4 +130,5 @@
+   echo ERROR: native extension was built but could not be imported.
+   exit /b 1
+ )
++
+ endlocal

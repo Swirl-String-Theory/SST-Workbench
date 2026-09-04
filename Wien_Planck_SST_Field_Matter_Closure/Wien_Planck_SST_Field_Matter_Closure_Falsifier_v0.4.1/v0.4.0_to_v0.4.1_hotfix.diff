@@ -1,0 +1,232 @@
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/CHANGELOG.md	2026-09-04 02:02:08.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/CHANGELOG.md	2026-09-04 10:12:06.744669027 +0000
+@@ -1,8 +1,8 @@
+ # Changelog
+ 
+-## v0.4.0
++## v0.4.1
+ 
+-- Replaced PTSA-only discovery with self-contained PKLSA v0.1.0: 49 × 48 = 2352 seeds.
++- Replaced PTSA-only discovery with self-contained PKLSA v0.1.1: 49 × 48 = 2352 seeds.
+ - Added SYCL/oneAPI broad-screen backend with deterministic binary geometry protocol.
+ - Added Stage-1 rigid-invariant pair-strain screening; top 8 per family survive (392).
+ - Added Stage-2 short RK2 invariant-shape/mesh screening; top 2 per family survive (98).
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/README.md	2026-09-04 02:12:30.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/README.md	2026-09-04 10:12:06.781973953 +0000
+@@ -1,8 +1,8 @@
+-# Wien–Planck SST Field–Matter Closure Falsifier v0.4.0
++# Wien–Planck SST Field–Matter Closure Falsifier v0.4.1
+ 
+ **PKLSA-2352 + GPU qualification funnel release.**
+ 
+-v0.4.0 replaces the trefoil-only PTSA discovery population of v0.3.x with the complete self-contained **SST Parametric Knot–Link Seed Atlas (PKLSA) v0.1.0**:
++v0.4.1 replaces the trefoil-only PTSA discovery population of v0.3.x with the complete self-contained **SST Parametric Knot–Link Seed Atlas (PKLSA) v0.1.0**:
+ 
+ \[
+ 49\ \text{families}\times48\ \text{variants}=2352\ \text{candidate centerlines}.
+@@ -12,7 +12,7 @@
+ 
+ ## Why a GPU funnel
+ 
+-Running the full v0.3.1 frozen-mode/action campaign directly on all 2352 candidates would spend most compute on poor carriers. v0.4.0 therefore preregisters a four-stage funnel:
++Running the full v0.3.1 frozen-mode/action campaign directly on all 2352 candidates would spend most compute on poor carriers. v0.4.1 therefore preregisters a four-stage funnel:
+ 
+ ```text
+ PKLSA 2352
+@@ -108,9 +108,9 @@
+ Results use the project convention:
+ 
+ ```text
+-./Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs/
+-../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs.zip
+-../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs_BLIND.zip
++./Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs/
++../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs.zip
++../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs_BLIND.zip
+ ```
+ 
+ The two shareable archives created by the blind run exclude `private_reveal_keys`, raw identity-bearing observations, private campaign records, GPU candidate maps, and the Stage-C materialized identity mapping.
+@@ -124,7 +124,7 @@
+ which additionally creates:
+ 
+ ```text
+-../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs_REVEALED.zip
++../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs_REVEALED.zip
+ ```
+ 
+ ## Reveal semantics
+@@ -142,3 +142,6 @@
+ This is a regularized centerline model, not a complete 3-D finite-core Euler solver. PKLSA is a constructive topology-preserving seed atlas, not an independent complete knot-invariant solver. GPU screening is explicitly approximate and non-final. A blind PASS can therefore establish only a **dimensionless numerical centerline Universal-Action candidate** pending stronger finite-core and provenance tests.
+ 
+ See `docs/V0.4.0_METHOD.md`, `docs/GPU_FUNNEL.md`, `PROVENANCE_AUDIT.md`, and `VALIDATION.md`.
++
++
++> **v0.4.1 hotfix:** fixes interpreter-specific PKLSA bytecode-manifest failure seen on Python 3.14; scientific v0.4.0 protocol unchanged.
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/VALIDATION.md	2026-09-04 02:09:40.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/VALIDATION.md	2026-09-04 10:12:06.781854153 +0000
+@@ -1,4 +1,4 @@
+-# Validation — Wien–Planck SST Field–Matter Closure Falsifier v0.4.0
++# Validation — Wien–Planck SST Field–Matter Closure Falsifier v0.4.1
+ 
+ Generation-time validation was rerun after the PKLSA-2352/GPU-funnel integration and final fail-closed preflight correction. Production BASIC/EXTENDED/HIGHRES profiles require the native C++17/pybind11 CPU backend. The default GPU route additionally requires Intel oneAPI/SYCL and a GPU↔CPU-native parity gate.
+ 
+@@ -6,7 +6,7 @@
+ 
+ ## 1. Embedded PKLSA integrity
+ 
+-The embedded **PKLSA v0.1.0** validation reports:
++The embedded **PKLSA v0.1.1** validation reports:
+ 
+ ```text
+ families                         49 / 49      PASS
+@@ -46,7 +46,7 @@
+ 
+ The single SKIP is the compiled native C++/Python kernel parity test because the native extension is not built in this Linux generation environment.
+ 
+-v0.4.0-specific tests cover:
++v0.4.1-specific tests cover:
+ 
+ - exact atlas scope: 2352 candidates / 49 families / 48 variants per family;
+ - preservation of true multi-component candidates;
+@@ -155,6 +155,10 @@
+ 
+ ## 9. Scientific status
+ 
+-v0.4.0 remains a strict-blind **regularized centerline numerical falsifier**. PKLSA is a constructive seed atlas, not independent topology certification; the GPU stages are approximate broad screening, not physics verdicts; and the CPU action solver is not a full three-dimensional finite-core Euler calculation.
++v0.4.1 remains a strict-blind **regularized centerline numerical falsifier**. PKLSA is a constructive seed atlas, not independent topology certification; the GPU stages are approximate broad screening, not physics verdicts; and the CPU action solver is not a full three-dimensional finite-core Euler calculation.
+ 
+ A future blind PASS would therefore establish only a dimensionless, numerically certified centerline candidate subject to subsequent finite-core and independent-SI-provenance tests.
++
++## v0.4.1 portability validation
++
++The embedded PKLSA manifest contains no `__pycache__`/`.pyc` records. `verify_atlas.py` is interpreter-independent and was replayed against the complete embedded atlas. Scientific v0.4.0 gates are unchanged.
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/RELEASE.json	2026-09-04 02:09:40.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/RELEASE.json	2026-09-04 10:12:06.744914977 +0000
+@@ -1,12 +1,12 @@
+ {
+-  "format": "SST-WP-RELEASE-4.0",
++  "format": "SST-WP-RELEASE-4.1",
+   "name": "Wien–Planck SST Field–Matter Closure Falsifier",
+-  "version": "0.4.0",
++  "version": "0.4.1",
+   "release_focus": "PKLSA-2352 + GPU qualification funnel",
+   "embedded_dataset": {
+     "name": "SST Parametric Knot–Link Seed Atlas",
+     "short_name": "PKLSA",
+-    "version": "0.1.0",
++    "version": "0.1.1",
+     "family_count": 49,
+     "candidates_per_family": 48,
+     "candidate_count": 2352
+@@ -51,10 +51,11 @@
+     "sycl_executed": false,
+     "native_windows_compiled": false
+   },
+-  "output_root": "Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs",
++  "output_root": "Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs",
+   "blind_archives": [
+-    "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs.zip",
+-    "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs_BLIND.zip"
++    "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs.zip",
++    "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs_BLIND.zip"
+   ],
+-  "revealed_archive": "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs_REVEALED.zip"
++  "revealed_archive": "../Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs_REVEALED.zip",
++  "hotfix": "portable PKLSA manifest; no scientific gate changes"
+ }
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/run_06_verify_pklsa.cmd	2026-09-04 01:58:52.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/run_06_verify_pklsa.cmd	2026-09-04 10:12:06.726906509 +0000
+@@ -2,8 +2,8 @@
+ setlocal EnableExtensions
+ pushd "%~dp0" || exit /b 1
+ set "PY=.venv\Scripts\python.exe"
+-set "ATLAS=datasets\SST_Parametric_Knot_Link_Seed_Atlas_v0.1.0"
+-set "OUTROOT=Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs"
++set "ATLAS=datasets\SST_Parametric_Knot_Link_Seed_Atlas_v0.1.1"
++set "OUTROOT=Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs"
+ if not exist "%PY%" (echo ERROR: Run run_00_setup.cmd first. & popd & exit /b 1)
+ if not exist "%OUTROOT%" mkdir "%OUTROOT%"
+ "%PY%" "%ATLAS%\tools\verify_atlas.py" || exit /b 1
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/setup_native.py	2026-09-04 01:54:54.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/setup_native.py	2026-09-04 10:12:06.744183947 +0000
+@@ -8,4 +8,4 @@
+     language="c++",
+     extra_compile_args=["/std:c++17"] if __import__('os').name == 'nt' else ["-std=c++17", "-O3"],
+ )
+-setup(name="sst_wp_native", version="0.4.0", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
++setup(name="sst_wp_native", version="0.4.1", packages=["sst_wp", "sst_wp.native_ext"], ext_modules=[ext])
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/sst_wp/trust.py	2026-09-04 01:57:54.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/sst_wp/trust.py	2026-09-04 10:12:06.739049531 +0000
+@@ -6,11 +6,11 @@
+ def code_manifest(root):
+     root=Path(root);rows=[]
+     for p in sorted(root.rglob('*')):
+-        if p.is_file() and p.name not in {'CODE_SEAL.json','PACKAGE_MANIFEST.json'} and not any(x in p.parts for x in ['outputs','Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0-outputs','private_reveal_keys','.venv','build','__pycache__']): rows.append({'path':str(p.relative_to(root)).replace('\\','/'),'sha256':sha256_file(p),'size':p.stat().st_size})
++        if p.is_file() and p.name not in {'CODE_SEAL.json','PACKAGE_MANIFEST.json'} and not any(x in p.parts for x in ['outputs','Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1-outputs','private_reveal_keys','.venv','build','__pycache__']): rows.append({'path':str(p.relative_to(root)).replace('\\','/'),'sha256':sha256_file(p),'size':p.stat().st_size})
+     return rows
+ 
+ def seal(root,out):
+-    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-4.0','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
++    m=code_manifest(root); payload=json.dumps(m,sort_keys=True,separators=(',',':')).encode(); r={'format':'SST-WP-CODE-SEAL-4.1','manifest':m,'commitment_sha256':hashlib.sha256(payload).hexdigest()};dump_json(out,r);return r
+ 
+ def scan_target_leak(obj):
+     txt=json.dumps(obj).lower(); bad=[]
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/sst_wp/blind_guard.py	2026-09-04 01:58:22.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/sst_wp/blind_guard.py	2026-09-04 10:12:06.738966246 +0000
+@@ -127,7 +127,7 @@
+     root = Path(__file__).resolve().parents[1]
+     bad = scan_blind_source(root)
+     result = {
+-        "format": "SST-WP-BLIND-GUARD-4.0",
++        "format": "SST-WP-BLIND-GUARD-4.1",
+         "blind_modules": BLIND_MODULES,
+         "violations": bad,
+         "pass": not bad,
+
+--- /mnt/data/v040_inspect/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.0/datasets/SST_Parametric_Knot_Link_Seed_Atlas_v0.1.0/tools/verify_atlas.py	2026-09-03 21:37:18.000000000 +0000
++++ /mnt/data/Wien_Planck_SST_Field_Matter_Closure_Falsifier_v0.4.1/datasets/SST_Parametric_Knot_Link_Seed_Atlas_v0.1.1/tools/verify_atlas.py	2026-09-04 10:12:06.744245630 +0000
+@@ -1,14 +1,32 @@
+ from pathlib import Path
+-import hashlib,json,sys,zipfile
++import hashlib,json,sys
+ ROOT=Path(__file__).resolve().parents[1]
+ def sha(p):
+- h=hashlib.sha256();
++ h=hashlib.sha256()
+  with p.open('rb') as f:
+   for b in iter(lambda:f.read(1<<20),b''): h.update(b)
+  return h.hexdigest()
+-m=json.loads((ROOT/'PACKAGE_MANIFEST.json').read_text())
++def runtime_bytecode(rel):
++ p=Path(rel)
++ return "__pycache__" in p.parts or p.suffix.lower()==".pyc"
++m=json.loads((ROOT/'PACKAGE_MANIFEST.json').read_text(encoding='utf-8'))
+ bad=[]
++portable=[]
++ignored_runtime=[]
+ for r in m['files']:
++ if runtime_bytecode(r['path']):
++  ignored_runtime.append(r['path'])
++  continue
++ portable.append(r)
+  p=ROOT/r['path']
+- if not p.is_file() or p.stat().st_size!=r['size'] or sha(p)!=r['sha256']: bad.append(r['path'])
+-print(json.dumps({'files':len(m['files']),'bad':bad,'pass':not bad},indent=2)); raise SystemExit(0 if not bad else 1)
++ if not p.is_file() or p.stat().st_size!=r['size'] or sha(p)!=r['sha256']:
++  bad.append(r['path'])
++print(json.dumps({
++ 'format':'SST-PKLSA-VERIFY-0.1.1',
++ 'manifest_records':len(m['files']),
++ 'portable_records_checked':len(portable),
++ 'ignored_runtime_bytecode':ignored_runtime,
++ 'bad':bad,
++ 'pass':not bad
++},indent=2))
++raise SystemExit(0 if not bad else 1)
