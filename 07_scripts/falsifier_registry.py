@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import hashlib
+import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -154,22 +155,61 @@ def _match_glob(name: str, pattern: str) -> bool:
     return fnmatch.fnmatch(name.lower(), pattern.lower())
 
 
+def _is_reparse_point(path: Path) -> bool:
+    """True for a Windows junction or symlink.
+
+    The SP02 compatibility layer puts ~50 junctions at the repo root, each pointing
+    back into the catalog. A plain rglob descends through every one of them and
+    re-walks the whole tree once per junction, which took pack discovery from under a
+    second to ten minutes. Reparse points must be pruned, not merely filtered out of
+    the results.
+    """
+    try:
+        attrs = os.stat(path, follow_symlinks=False).st_file_attributes
+    except (OSError, AttributeError):
+        return path.is_symlink()
+    return bool(attrs & 0x400)  # FILE_ATTRIBUTE_REPARSE_POINT
+
+
+def _walk_pruned(root: Path):
+    """os.walk over root, pruning skip-listed names and reparse points."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [
+            d
+            for d in dirnames
+            if d not in SKIP_DIR_NAMES
+            and not d.startswith(".")
+            and not _is_reparse_point(Path(dirpath) / d)
+        ]
+        yield Path(dirpath), dirnames, filenames
+
+
 def _iter_candidate_dirs(root: Path) -> list[Path]:
     found: list[Path] = []
     if not root.is_dir():
         return found
-    for p in root.rglob("*"):
-        if not p.is_dir() or _should_skip_path(p):
-            continue
-        if _is_pack_dir(p):
-            found.append(p)
+    for dirpath, dirnames, _filenames in _walk_pruned(root):
+        for name in dirnames:
+            p = dirpath / name
+            if _should_skip_path(p):
+                continue
+            if _is_pack_dir(p):
+                found.append(p)
     return found
 
 
 def _iter_candidate_zips(root: Path) -> list[Path]:
     if not root.is_dir():
         return []
-    return [z for z in root.rglob("*.zip") if z.is_file() and not _should_skip_path(z)]
+    out: list[Path] = []
+    for dirpath, _dirnames, filenames in _walk_pruned(root):
+        for name in filenames:
+            if not name.lower().endswith(".zip"):
+                continue
+            z = dirpath / name
+            if not _should_skip_path(z):
+                out.append(z)
+    return out
 
 
 def resolve_pack(

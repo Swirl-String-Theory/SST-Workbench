@@ -116,3 +116,35 @@ class TestRegistryEntryCount(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestJunctionPruning(unittest.TestCase):
+    """Pack discovery must not descend into SP02 compatibility junctions.
+
+    ~50 junctions sit at the repo root, each pointing back into the catalog. A walk
+    that follows them re-scans the whole tree once per junction; discovery went from
+    under a second to ten minutes before this was pruned.
+    """
+
+    def test_walk_pruned_skips_junctions(self):
+        import os
+        import subprocess
+
+        from falsifier_registry import _is_reparse_point, _walk_pruned
+
+        if os.name != "nt":
+            self.skipTest("junctions are Windows-only")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            real = root / "real"
+            (real / "deep").mkdir(parents=True)
+            (real / "deep" / "marker.txt").write_text("x", encoding="utf-8")
+            link = root / "loop"
+            subprocess.run(
+                ["cmd", "/d", "/c", "mklink", "/J", str(link), str(real)],
+                check=True, capture_output=True,
+            )
+            self.assertTrue(_is_reparse_point(link))
+            walked = [d for d, _dn, _fn in _walk_pruned(root)]
+            self.assertNotIn(link, walked, "walk descended into the junction")
+            self.assertIn(real / "deep", walked, "walk missed the real tree")
