@@ -46,16 +46,22 @@ echo SST_KNOT_DATASET=%SST_KNOT_DATASET%
 echo SST_IDEAL_SOURCES=%SST_IDEAL_SOURCES%
 echo SST_FSERIES_ROOT=%SST_FSERIES_ROOT%
 '''
+    # The probe must live in `cwd` so paths.cmd resolves the root by walking up from
+    # %~dp0. That means writing into the real tree, so always clean it up again -
+    # earlier runs left _probe_paths.cmd behind in four directories.
     bat = cwd / "_probe_paths.cmd"
     bat.write_text(script, encoding="utf-8")
-    # /d disables CMD AutoRun (machine AutoRun can fail and poison errorlevel).
-    proc = subprocess.run(
-        ["cmd", "/d", "/c", str(bat)],
-        cwd=str(cwd),
-        capture_output=True,
-        text=True,
-        env=env,
-    )
+    try:
+        # /d disables CMD AutoRun (machine AutoRun can fail and poison errorlevel).
+        proc = subprocess.run(
+            ["cmd", "/d", "/c", str(bat)],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+    finally:
+        bat.unlink(missing_ok=True)
     if proc.returncode != 0:
         raise AssertionError(
             f"paths.cmd failed rc={proc.returncode}\n"

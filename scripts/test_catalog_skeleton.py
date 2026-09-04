@@ -39,23 +39,35 @@ CATALOG_LEAVES = [
 ]
 
 
-def test_every_catalog_leaf_exists_with_readme():
+def test_every_catalog_leaf_exists_with_namespace_doc():
+    """Each leaf documents itself in _NAMESPACE.md.
+
+    Deliberately not README.md: incoming packs bring their own README.md, and a
+    placeholder of the same name collides on every merge move (SP04 hit this on
+    media/, Restore_Archives/ and scripts/).
+    """
     missing = []
     for rel in CATALOG_LEAVES:
         d = WB / rel
         if not d.is_dir():
             missing.append(f"missing dir: {rel}")
             continue
-        if not (d / "README.md").is_file():
-            missing.append(f"missing README: {rel}")
+        if not (d / "_NAMESPACE.md").is_file():
+            missing.append(f"missing _NAMESPACE.md: {rel}")
     assert missing == [], "\n".join(missing)
+
+
+def test_no_placeholder_readme_shadows_incoming_content():
+    """A skeleton leaf must never carry its own README.md."""
+    offenders = [rel for rel in CATALOG_LEAVES if (WB / rel / "README.md").is_file()]
+    assert offenders == [], f"placeholder README.md would collide on merge: {offenders}"
 
 
 def test_d_numerics_is_intentionally_empty_of_packs():
     """SP03 reserve: only scaffolding, no library packs yet."""
     d = WB / "02_libraries" / "D_numerics"
     assert d.is_dir()
-    children = [p.name for p in d.iterdir() if p.name not in {".gitkeep", "README.md"}]
+    children = [p.name for p in d.iterdir() if p.name not in {".gitkeep", "_NAMESPACE.md"}]
     assert children == [], f"D_numerics should be empty of packs, found {children}"
 
 
