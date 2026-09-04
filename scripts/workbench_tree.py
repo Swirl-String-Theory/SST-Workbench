@@ -1,4 +1,4 @@
-"""Build a folder-map JSON of SST-Workbench: family → versions / subfolders + dates."""
+"""Build a folder-map JSON of SST-Workbench: family -> versions / subfolders + dates."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ SKIP_DIR_NAMES = frozenset(
     }
 )
 
-# Counts only — expanding these would dump thousands of data dirs into the map.
+# Counts only -- expanding these would dump thousands of data dirs into the map.
 OPAQUE_NAMES = frozenset(
     {
         "knots",
@@ -253,7 +253,7 @@ def write_inventory(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Write INVENTORY_TREE.json (family → versions / folders + dates)."
+        description="Write INVENTORY_TREE.json (family -> versions / folders + dates)."
     )
     parser.add_argument("--root", type=Path, default=WB)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
