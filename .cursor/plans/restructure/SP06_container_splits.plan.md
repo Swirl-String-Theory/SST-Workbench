@@ -270,7 +270,7 @@ lineage, not two.
 | `sst_chi_phase_package`, `_v2` … `_v6` | `R/C/C001_chi_phase_track_b/` (early versions) |
 | `sst_taxonomy_starter_v2`, `_v3b` | `R/F/F004_taxonomy_starter/` |
 | `multisector_fit_results/`, `exports/`, `phi-3_1/` | `03_data/D_generated/` |
-| `build/` | delete (SP11) |
+| `build/` | `git mv` → `DELETE/SST_Trefoil_Closure/build/` (SP11) |
 | `_dashboard_conflict/`, `archive/` | `09_archive/` |
 
 C001 therefore spans two current roots and is assembled from both in the same commit. Its version
@@ -352,7 +352,7 @@ this is a filesystem move with no index change. Verify before assuming.
 | From | To |
 |------|-----|
 | `experiments/sycl/*.cpp` | `04_tools/D_compute/sycl_probes/` |
-| `experiments/derive_constants/`, `experiments/trefoil/` | stubs — delete in SP11 |
+| `experiments/derive_constants/`, `experiments/trefoil/` | stubs — `git mv` → `DELETE/experiments/...` in SP11 |
 
 ---
 
