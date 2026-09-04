@@ -65,9 +65,16 @@ def test_path_map_schema_and_status():
 
 
 def test_path_map_unique_new_paths():
-    rows = _load_rows()
+    """No two actionable rows may target the same destination.
+
+    Skipped rows are excluded: they record provenance, not an action. A directory that
+    was partly moved and partly locked legitimately produces two rows with one
+    destination, the second marked skipped because the first already merged it there.
+    """
+    rows = [r for r in _load_rows() if r["status"] != "skipped"]
     news = [r["new_path"] for r in rows]
-    assert len(news) == len(set(news))
+    dupes = sorted({p for p in news if news.count(p) > 1})
+    assert dupes == [], f"actionable rows share a destination: {dupes}"
 
 
 def test_path_map_old_paths_exist_when_pending():
