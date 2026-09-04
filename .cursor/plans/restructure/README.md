@@ -29,7 +29,7 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP01](SP01_path_resolver.plan.md) | Central path resolver | `DONE` | 10/10 | P0 | low |
 | [SP02](SP02_compat_junction_layer.plan.md) | Compatibility junction layer, stage 1 | `DONE` | 6/6 | P0 | low |
 | [SP03](SP03_catalog_skeleton_and_hygiene.plan.md) | Catalog skeleton and repo hygiene | `DONE` | 7/7 | P1 | low |
-| [SP04](SP04_low_risk_moves.plan.md) | Low-risk moves | `PLANNED` | 0/5 | P1 | low |
+| [SP04](SP04_low_risk_moves.plan.md) | Low-risk moves | `DONE` | 5/5 | P1 | low |
 | [SP05](SP05_clean_family_moves.plan.md) | Clean family moves | `PLANNED` | 0/6 | P1 | medium |
 | [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `PLANNED` | 0/5 | P2 | medium |
 | [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `PLANNED` | 0/5 | P2 | high |
