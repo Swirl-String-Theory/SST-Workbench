@@ -31,7 +31,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] Family-at-a-time: rename → scaffold → verify → commit
 - [ ] Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK
 
-**Next:** Blocked on SP08 (needs project.json legacy_dir).
+**Next:** Convert output-name scripts to `output_prefix`, then pilot A042 (own root junction, two versions). A039 is nested under the swirl-clock split and is a bad first family.
 
 Version directories get their short catalog-prefixed names. This is the second half of the
 deliberately split rename, and the phase that finally shortens paths.

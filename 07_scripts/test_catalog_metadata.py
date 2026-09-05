@@ -127,3 +127,81 @@ class TestGeneratedDocuments:
         text = cm.family_yaml(self._family())
         assert "variants: []" in text
         assert "legacy_paths: []" in text
+        assert "intermediate_paths: []" in text
+
+
+class TestLegacyByDomain:
+    #: Catalog ids legitimately reused across domains (design, not a bug).
+    SHARED_IDS = ("A001", "A002", "A003", "A004", "B001", "C001", "D001")
+
+    def test_legacy_keyed_on_domain_and_catalog_id(self):
+        hist = cm.legacy_by_id()
+        assert isinstance(next(iter(hist)), tuple)
+        assert all(len(k) == 2 for k in hist)
+
+    def test_shared_ids_keep_disjoint_histories(self):
+        """A003 in research must not inherit apps A003's vortexring-lab paths."""
+        hist = cm.legacy_by_id()
+        for cid in self.SHARED_IDS:
+            keys = [k for k in hist if k[1] == cid]
+            if len(keys) < 2:
+                continue
+            path_sets = []
+            for key in keys:
+                paths = set(hist[key]["legacy_paths"]) | set(hist[key]["intermediate_paths"])
+                path_sets.append((key, paths))
+            for i, (ka, pa) in enumerate(path_sets):
+                for kb, pb in path_sets[i + 1 :]:
+                    overlap = pa & pb
+                    assert overlap == set(), (
+                        f"{ka} and {kb} share legacy/intermediate paths: {sorted(overlap)[:5]}"
+                    )
+
+    def test_discovered_families_do_not_carry_foreign_legacy_paths(self):
+        """Every legacy/intermediate path on a family must match its (domain, id) rows."""
+        hist = cm.legacy_by_id()
+        bad = []
+        for fam in cm.discover():
+            expected = hist.get((fam.domain, fam.catalog_id), {
+                "legacy_paths": [], "intermediate_paths": [],
+            })
+            if fam.legacy_paths != expected["legacy_paths"]:
+                bad.append((fam.domain, fam.catalog_id, "legacy_paths"))
+            if fam.intermediate_paths != expected["intermediate_paths"]:
+                bad.append((fam.domain, fam.catalog_id, "intermediate_paths"))
+        assert bad == [], f"family history mismatch: {bad[:10]}"
+
+    def test_no_family_inherits_another_domains_history_for_shared_id(self):
+        """The seven reused ids must not merge path_map rows across domains."""
+        cases = [
+            (("01_research", "A003"), "05_apps/A002_coil_gui/vortexring-lab"),
+            (("01_research", "B001"), "Independent_FiniteCore_SpectralSelector"),
+            (("01_research", "B001"), "Katlas_Source_Crawler_v0.2.2"),
+            (("01_research", "C001"), "3D"),
+            (("01_research", "D001"), "proof-scripts"),
+        ]
+        hist = cm.legacy_by_id()
+        for key, foreign in cases:
+            buckets = hist.get(key, {"legacy_paths": [], "intermediate_paths": []})
+            all_paths = set(buckets["legacy_paths"]) | set(buckets["intermediate_paths"])
+            assert foreign not in all_paths, f"{key} still carries {foreign}"
+
+    def test_intermediate_paths_are_catalog_domain_prefixed(self):
+        for fam in cm.discover():
+            for p in fam.intermediate_paths:
+                assert cm.is_intermediate_path(p), p
+            for p in fam.legacy_paths:
+                assert not cm.is_intermediate_path(p), p
+
+    def test_research_a003_does_not_claim_vortexring_lab(self):
+        fams = {
+            (f.domain, f.catalog_id): f
+            for f in cm.discover()
+            if f.catalog_id == "A003"
+        }
+        research = fams[("01_research", "A003")]
+        apps = fams[("05_apps", "A003")]
+        assert "05_apps/A002_coil_gui/vortexring-lab" not in research.legacy_paths
+        assert "05_apps/A002_coil_gui/vortexring-lab" not in research.intermediate_paths
+        assert "SST_dark_knot_rayleigh_research" in research.legacy_paths
+        assert "05_apps/A002_coil_gui/vortexring-lab" in apps.intermediate_paths

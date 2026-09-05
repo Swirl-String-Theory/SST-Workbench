@@ -26,6 +26,7 @@ def parse_family(path: Path) -> dict:
     scalars: dict[str, str] = {}
     versions: list[dict] = []
     legacy: list[str] = []
+    intermediate: list[str] = []
     variants: list[str] = []
     section = None
 
@@ -53,6 +54,8 @@ def parse_family(path: Path) -> dict:
                 versions[-1][k.strip()] = v.strip().strip('"')
         elif section == "legacy_paths" and stripped.startswith("- "):
             legacy.append(stripped[2:].strip().strip('"'))
+        elif section == "intermediate_paths" and stripped.startswith("- "):
+            intermediate.append(stripped[2:].strip().strip('"'))
         elif section == "variants" and stripped.startswith("- "):
             variants.append(stripped[2:].strip().strip('"'))
 
@@ -70,6 +73,7 @@ def parse_family(path: Path) -> dict:
         "versions": versions,
         "variants": variants,
         "legacy_paths": legacy,
+        "intermediate_paths": intermediate,
     }
 
 
@@ -79,8 +83,12 @@ def build() -> dict:
     legacy_lookup: dict[str, str] = {}
     for e in entries:
         by_domain.setdefault(e["domain"], {})[e["catalog_id"]] = e
+        target = f"{e['domain']}/{e['catalog_id']}"
         for old in e["legacy_paths"]:
-            legacy_lookup[old] = f"{e['domain']}/{e['catalog_id']}"
+            legacy_lookup[old] = target
+        # Intermediate paths still resolve to the family; they are post-migration history.
+        for old in e["intermediate_paths"]:
+            legacy_lookup[old] = target
     return {
         "schema": 1,
         "families": len(entries),

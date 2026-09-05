@@ -94,6 +94,14 @@ class Version:
     blind: str | None = None
 
 
+#: Paths whose old_path already sits under a post-restructure domain are intermediate
+#: moves from catalog realignment, not pre-migration history.
+CATALOG_DOMAIN_PREFIXES = (
+    "01_research/", "02_libraries/", "03_data/", "04_tools/", "05_apps/",
+    "06_paper/", "07_scripts/", "08_ci/", "09_archive/", "10_docs/", "DELETE/",
+)
+
+
 @dataclass
 class Family:
     catalog_id: str
@@ -105,6 +113,8 @@ class Family:
     versions: list[Version] = field(default_factory=list)
     variants: list[str] = field(default_factory=list)
     legacy_paths: list[str] = field(default_factory=list)
+    #: Intermediate catalog paths created during realignment (not pre-migration roots).
+    intermediate_paths: list[str] = field(default_factory=list)
     output_prefix: str = ""
     #: True when no subdirectory carries a version token. Such a family is laid out by
     #: topic (audits/, code/, figures/) or holds distinct unversioned packages. Those
@@ -131,16 +141,34 @@ def catalog_names() -> dict[str, str]:
     return out
 
 
-def legacy_by_id() -> dict[str, list[str]]:
-    out: dict[str, list[str]] = defaultdict(list)
+def is_intermediate_path(old: str) -> bool:
+    """True when old_path is already under a catalog domain (post-migration move)."""
+    return any(old.startswith(p) for p in CATALOG_DOMAIN_PREFIXES)
+
+
+def legacy_by_id() -> dict[tuple[str, str], dict[str, list[str]]]:
+    """Map (domain, catalog_id) -> {legacy_paths, intermediate_paths}.
+
+    Catalog ids are reused across domains by design (A001, B001, …). Keying on the
+    bare id merges unrelated histories, so the domain from path_map.csv is required.
+    """
+    out: dict[tuple[str, str], dict[str, list[str]]] = defaultdict(
+        lambda: {"legacy_paths": [], "intermediate_paths": []}
+    )
     if not PATH_MAP.is_file():
         return out
     for row in csv.DictReader(PATH_MAP.open(encoding="utf-8-sig")):
         cid = (row.get("catalog_id") or "").strip()
+        domain = (row.get("domain") or "").strip()
         old = (row.get("old_path") or "").strip()
-        if cid and old and "*" not in old:
-            out[cid].append(old)
-    return {k: sorted(set(v)) for k, v in out.items()}
+        if not (cid and domain and old) or "*" in old:
+            continue
+        bucket = "intermediate_paths" if is_intermediate_path(old) else "legacy_paths"
+        out[(domain, cid)][bucket].append(old)
+    return {
+        key: {kind: sorted(set(paths)) for kind, paths in buckets.items()}
+        for key, buckets in out.items()
+    }
 
 
 def parse_version(dirname: str) -> Version:
@@ -214,10 +242,12 @@ def discover() -> list[Family]:
                 if not m:
                     continue
                 cid, slug = m.group(1), m.group(2)
+                hist = legacy.get((domain, cid), {})
                 fam = Family(
                     catalog_id=cid, slug=slug, domain=domain, letter=letter, path=d,
                     name=names.get(f"{cid}|{slug}", slug.replace("_", " ").title()),
-                    legacy_paths=legacy.get(cid, []),
+                    legacy_paths=hist.get("legacy_paths", []),
+                    intermediate_paths=hist.get("intermediate_paths", []),
                 )
                 children = [
                     c for c in sorted(d.iterdir())
@@ -301,6 +331,13 @@ def family_yaml(fam: Family) -> str:
             lines.append(f"  - {yaml_escape(p)}")
     else:
         lines[-1] = "legacy_paths: []"
+
+    lines.append("intermediate_paths:")
+    if fam.intermediate_paths:
+        for p in fam.intermediate_paths:
+            lines.append(f"  - {yaml_escape(p)}")
+    else:
+        lines[-1] = "intermediate_paths: []"
 
     return "\n".join(lines) + "\n"
 

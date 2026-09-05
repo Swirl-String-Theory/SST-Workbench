@@ -18,16 +18,16 @@ todos:
     status: completed
   - id: t05
     content: "SP04: 18 simple moves executed (`git mv` + junctions)"
-    status: pending
+    status: completed
   - id: t06
     content: "SP05: clean family moves executed (pilot A038 first)"
-    status: pending
+    status: completed
   - id: t07
     content: "SP06: container splits executed"
-    status: pending
+    status: completed
   - id: t08
     content: "SP07: KnotPlot tool/data/campaign/result split executed"
-    status: pending
+    status: completed
   - id: t09
     content: "SP09: version dirs renamed to `<ID>-v…`"
     status: pending
@@ -37,7 +37,7 @@ todos:
 ---
 # RESTRUCTURE PLAN v0.1 — all 73 roots to exact destinations
 
-Status: `PLANNED` · Baseline: 2026-09-03
+Status: `IN PROGRESS` · Baseline: 2026-09-03
 
 ## Todos
 
@@ -55,7 +55,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] SP09: version dirs renamed to `<ID>-v…`
 - [ ] SP11: stubs soft-retired under `DELETE/`
 
-**Next:** SP01 (no physical moves until resolver + junctions)
+**Next:** SP09 version dirs renamed to `<ID>-v…`. Mapping freeze and SP04–SP07 moves are done.
 
 The one-time mapping. Every current top-level directory appears exactly once. When the migration
 finishes, this document is history; [CATALOG_v0.1.md](CATALOG_v0.1.md) is what remains.

@@ -18,16 +18,16 @@ todos:
     status: completed
   - id: t05
     content: "SP01 path resolver implemented & verified"
-    status: pending
+    status: completed
   - id: t06
     content: "SP02 junction layer live for moved roots"
-    status: pending
+    status: completed
   - id: t07
     content: "SP03 catalog skeleton + hygiene on disk"
-    status: pending
+    status: completed
   - id: t08
     content: "SP04–SP07 physical `git mv` waves complete"
-    status: pending
+    status: completed
   - id: t09
     content: "SP08–SP09 metadata + version rename"
     status: pending
@@ -40,7 +40,7 @@ todos:
 ---
 # RESTRUCTURE EPIC — SST-Workbench catalog migration
 
-Status: `PLANNED` · Version: 0.1 · Baseline: 2026-09-03
+Status: `IN PROGRESS` · Version: 0.1 · Baseline: 2026-09-03
 
 ## Todos
 
@@ -59,7 +59,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] SP10 reproducibility gate passed
 - [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission
 
-**Next:** SP01 path resolver
+**Next:** SP09 version-directory rename. SP08 catalog metadata is done.
 
 ## 1. Problem
 

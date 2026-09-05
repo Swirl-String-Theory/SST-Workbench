@@ -38,25 +38,14 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
 | [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
 
-Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (5/12 planning done) ·
-[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (5/11 mapping freeze done).
+Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (9/12; SP08–SP09 still open) ·
+[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (9/11; SP09 + SP11 remain).
 Each file has a **Todos** section (checked = done) and YAML frontmatter todos for Cursor.
 
-**Resume here:** SP08 catalog metadata. SP00-SP07 are closed: 279 path_map rows
-verified, 58 junctions live, 84 catalog families on disk holding 303 version
-directories, 149 tests green.
-
-**Open before SP08 writes any metadata** (from `07_scripts/catalog_audit.py`):
-
-- Three catalog ids exist twice on disk, so a bare id no longer identifies a family:
-  `B003` (horn_bem and planck_routes_a_to_d_equivalence), `B004`
-  (planck_routes_v3_preregistered and route_b_rt_bem), `C006`
-  (kelvin_floquet_workbench and uq_twisted_vortex_ring).
-- Three catalog rows have no directory: `B002` (the catalog folds the Planck routes
-  into one family while disk has them as B003 + B004), research `D001`
-  (`schrodinger_gate_constants_audit`, still a subfolder of B001_derive_constants),
-  and `E007` (superseded by `04_tools/A_geometry/A003_knotplot_qhp_sweep_generator`).
-- `A005` has no directory on purpose: it is marked `reserved`, archive-only.
+**Resume here:** SP09 version-directory rename. SP00–SP08 are closed: catalog
+metadata is on disk (`FAMILY.yaml`, `project.json`, `catalog_id` in the registry),
+duplicate ids B003/B004/C006 and missing rows B002/D001/E007 are resolved.
+`A005` remains `reserved` / archive-only by design.
 
 
 ## Status legend
@@ -68,8 +57,7 @@ Each sub-plan carries a status line at the top:
 - `DONE` — completed and verified against its done-criteria
 - `BLOCKED` — waiting on a dependency or a decision, with the blocker named
 
-All twelve were `PLANNED` at the time of writing. **SP00 is `DONE`** (see
-`10_docs/migration/FREEZE.md`); the rest remain `PLANNED`. Open each file’s **Todos**
+SP00–SP08 are `DONE`. SP09–SP11 remain `PLANNED`. Open each file’s **Todos**
 section to see what is already checked off versus what remains.
 
 ## Hard rules that apply to every sub-plan
