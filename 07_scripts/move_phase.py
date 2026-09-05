@@ -72,6 +72,40 @@ def clear_readonly(path: Path) -> None:
             pass
 
 
+def is_junction(path: Path) -> bool:
+    try:
+        attrs = os.stat(path, follow_symlinks=False).st_file_attributes
+    except (OSError, AttributeError):
+        return False
+    return bool(attrs & 0x400) and path.is_dir()  # FILE_ATTRIBUTE_REPARSE_POINT
+
+
+def strip_junctions(src: Path) -> list[str]:
+    """Remove any compat junctions inside `src` before it is moved.
+
+    A junction travels with the directory that contains it. SP07 moved
+    KnotPlot/ridgerunner/out first and created its junction, then moved
+    KnotPlot/ridgerunner - carrying the junction to
+    04_tools/.../A002_ridgerunner/out, where its .git/info/exclude entry no longer
+    applied. `git add -A` then followed it and tracked 3.8 GB of campaign output,
+    including nine files over GitHub's 100 MB hard limit.
+
+    Junctions are recreated at their correct old paths by `junctions.py create`, so
+    removing them here loses nothing. Removal never touches the target.
+    """
+    removed: list[str] = []
+    if not src.is_dir() or is_junction(src):
+        return removed
+    for dirpath, dirnames, _files in os.walk(src):
+        for name in list(dirnames):
+            p = Path(dirpath) / name
+            if is_junction(p):
+                os.rmdir(p)  # safe on a reparse point: never follows into the target
+                dirnames.remove(name)
+                removed.append(str(p))
+    return removed
+
+
 def _same_bytes(a: Path, b: Path) -> bool:
     import hashlib
 
@@ -206,6 +240,8 @@ def move_one(root: Path, src: Path, dst: Path, *, dry_run: bool) -> list[str]:
 
     dst.parent.mkdir(parents=True, exist_ok=True)
     clear_readonly(src)
+    for gone in strip_junctions(src):
+        log.append(f"stripped junction before move: {Path(gone).relative_to(root).as_posix()}")
 
     if is_tracked(root, rel_src):
         proc = git(root, "mv", rel_src, rel_dst)

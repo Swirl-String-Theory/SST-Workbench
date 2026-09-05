@@ -313,3 +313,48 @@ def test_file_into_existing_directory_goes_inside(repo: Path):
 
     assert move_phase.run_phase(repo, "SP07", dry_run=False) == 0
     assert (repo / "09_archive/restore/KnotPlot/tool.zip").read_text() == "z\n"
+
+
+def test_junction_inside_a_moved_directory_is_stripped(repo: Path):
+    """A junction must never travel with the directory that contains it.
+
+    SP07 moved KnotPlot/ridgerunner/out, created its junction, then moved
+    KnotPlot/ridgerunner - carrying the junction into the new location where its
+    .git/info/exclude entry no longer matched. git add -A followed it and tracked
+    3.8 GB, nine files of it over GitHub's 100 MB hard limit.
+    """
+    if os.name != "nt":
+        import pytest
+
+        pytest.skip("junctions are Windows-only")
+
+    real = repo / "results"
+    real.mkdir()
+    (real / "big.dat").write_text("payload\n", encoding="utf-8")
+
+    tool = repo / "tool"
+    (tool / "src").mkdir(parents=True)
+    (tool / "src" / "main.py").write_text("x\n", encoding="utf-8")
+    _write_path_map(repo, [{
+        "old_path": "tool", "new_path": "04_tools/A_geometry/A002_tool",
+        "phase": "SP07", "junction": "no", "status": "pending",
+    }])
+    _commit_all(repo)
+
+    # Create the junction after committing and exclude it, exactly as SP02 does:
+    # junction names live in .git/info/exclude so git never tracks through them.
+    subprocess.run(
+        ["cmd", "/d", "/c", "mklink", "/J", str(tool / "out"), str(real)],
+        check=True, capture_output=True,
+    )
+    exclude = repo / ".git" / "info" / "exclude"
+    exclude.parent.mkdir(parents=True, exist_ok=True)
+    with exclude.open("a", encoding="utf-8") as fh:
+        fh.write("\ntool/out/\n")
+    assert move_phase.is_junction(tool / "out")
+
+    assert move_phase.run_phase(repo, "SP07", dry_run=False) == 0
+    moved = repo / "04_tools/A_geometry/A002_tool"
+    assert (moved / "src" / "main.py").is_file()
+    assert not (moved / "out").exists(), "junction travelled with the move"
+    assert (real / "big.dat").read_text() == "payload\n", "target was damaged"

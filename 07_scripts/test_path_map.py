@@ -64,17 +64,31 @@ def test_path_map_schema_and_status():
         assert row["junction"] in {"yes", "no"}, row
 
 
-def test_path_map_unique_new_paths():
-    """No two actionable rows may target the same destination.
+def _is_glob(old_path: str) -> bool:
+    return any(ch in old_path for ch in "*?[")
 
-    Skipped rows are excluded: they record provenance, not an action. A directory that
-    was partly moved and partly locked legitimately produces two rows with one
-    destination, the second marked skipped because the first already merged it there.
+
+def test_path_map_unique_new_paths():
+    """No two whole-directory rows may claim the same destination.
+
+    Two kinds of row are excluded, because for them a shared destination is correct:
+
+    * skipped rows record provenance, not an action - a directory that was partly moved
+      and partly locked legitimately leaves a second row pointing at the same place;
+    * glob rows deposit *files* into a collection directory, so KnotPlot/*.py,
+      *.kps, *.lnk, *.js, *.md and run_build*.cmd all landing in the knotplot tool
+      directory is the intended result, not a collision.
+
+    A row that moves a whole directory still claims its destination exclusively.
     """
-    rows = [r for r in _load_rows() if r["status"] != "skipped"]
+    rows = [
+        r
+        for r in _load_rows()
+        if r["status"] != "skipped" and not _is_glob(r["old_path"])
+    ]
     news = [r["new_path"] for r in rows]
     dupes = sorted({p for p in news if news.count(p) > 1})
-    assert dupes == [], f"actionable rows share a destination: {dupes}"
+    assert dupes == [], f"whole-directory rows share a destination: {dupes}"
 
 
 def test_path_map_old_paths_exist_when_pending():
