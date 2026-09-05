@@ -55,7 +55,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP09: version dirs renamed to `<ID>-v…`
 - [ ] SP11: stubs soft-retired under `DELETE/`
 
-**Next:** SP10 reproducibility gate (epic), then SP11 soft-retire. Version directories are `<ID>-v…`.
+**Next:** SP11 soft-retire. Version directories are `<ID>-v…`; SP10 gate is green.
 
 The one-time mapping. Every current top-level directory appears exactly once. When the migration
 finishes, this document is history; [CATALOG_v0.1.md](CATALOG_v0.1.md) is what remains.

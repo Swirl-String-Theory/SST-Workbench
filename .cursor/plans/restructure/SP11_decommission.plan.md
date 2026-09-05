@@ -35,7 +35,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] Decide `.tmp.driveupload/` separately
 - [ ] Done-criteria: soft-retire complete; junctions gone safely; provenance retained
 
-**Next:** Blocked on SP10. 4 path_map rows pending.
+**Next:** SP10 is green — soft-retire stubs first, then junction removal.
 
 ## Soft-delete via `DELETE/`
 

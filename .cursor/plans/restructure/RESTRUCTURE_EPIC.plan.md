@@ -33,7 +33,7 @@ todos:
     status: completed
   - id: t10
     content: "SP10 reproducibility gate passed"
-    status: pending
+    status: completed
   - id: t11
     content: "SP11 soft-retire stubs to `DELETE/` + junction decommission"
     status: pending
@@ -56,10 +56,10 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP03 catalog skeleton + hygiene on disk
 - [x] SP04–SP07 physical `git mv` waves complete
 - [x] SP08–SP09 metadata + version rename
-- [ ] SP10 reproducibility gate passed
+- [x] SP10 reproducibility gate passed
 - [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission
 
-**Next:** SP10 reproducibility gate. SP00–SP09 are closed: version directories are `<catalog_id>-v…` and the two-level junction scaffold is live.
+**Next:** SP11 soft-retire + junction decommission. SP10 gate is green (0 fail; 24 Tier-1 passes).
 
 ## 1. Problem
 

@@ -50,8 +50,13 @@ def kelvin_duration(t: np.ndarray,a: np.ndarray)->float:
     """Kelvin-like support time applied to S(t)=a(t)^2."""
     t=np.asarray(t,float);S=np.asarray(a,float)**2
     if len(t)<2:return float('nan')
-    # np.trapz is available on NumPy 1.26 and 2.x.
-    trap=getattr(np,'trapezoid',np.trapz);i1=float(trap(S,t));i2=float(trap(S*S,t));return i1*i1/i2 if i2>0 else float('nan')
+    # NumPy 2 removed np.trapz; do not evaluate it as a getattr default.
+    trap = getattr(np, "trapezoid", None) or getattr(np, "trapz", None)
+    if trap is None:
+        raise AttributeError("numpy has neither trapezoid nor trapz")
+    i1 = float(trap(S, t))
+    i2 = float(trap(S * S, t))
+    return i1 * i1 / i2 if i2 > 0 else float("nan")
 
 
 def kelvin_window_metrics(t: np.ndarray,a: np.ndarray)->dict:

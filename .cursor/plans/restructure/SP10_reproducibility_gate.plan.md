@@ -3,35 +3,35 @@ name: SP10 reproducibility gate
 todos:
   - id: t00
     content: "Gate every active family's `latest` (install → build → run → manifest)"
-    status: pending
+    status: completed
   - id: t01
     content: "Record tolerances in `FAMILY.yaml` gate section"
-    status: pending
+    status: completed
   - id: t02
     content: "Write `reproducibility_gate.md`"
-    status: pending
+    status: completed
   - id: t03
     content: "Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: no unjustified fails; gate report committed"
-    status: pending
+    status: completed
 ---
 # SP10 — Reproducibility gate
 
-Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP09
+Status: `DONE` · Priority: P3 · Risk: medium · Depends on: SP09
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Gate every active family's `latest` (install → build → run → manifest)
-- [ ] Record tolerances in `FAMILY.yaml` gate section
-- [ ] Write `reproducibility_gate.md`
-- [ ] Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason
-- [ ] Done-criteria: no unjustified fails; gate report committed
+- [x] Gate every active family's `latest` (install → build → run → manifest)
+- [x] Record tolerances in `FAMILY.yaml` gate section
+- [x] Write `reproducibility_gate.md`
+- [x] Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason
+- [x] Done-criteria: no unjustified fails; gate report committed
 
-**Next:** Blocked on SP09.
+**Next:** SP11 decommission. Gate report: 87 families, 28 pass (24 Tier 1), 59 structural, 0 fail. Dataset moves preserved bytes (`ok=True`); Fremlin/Ideal_Sources show post-SP00 freeze drift only.
 
 The gate that decides whether the migration succeeded. Nothing is deleted until this passes.
 

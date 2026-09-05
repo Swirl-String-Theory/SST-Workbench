@@ -35,16 +35,16 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `DONE` | 5/5 | P2 | high |
 | [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `DONE` | 7/7 | P3 | medium |
 | [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `DONE` | 5/5 | P3 | medium |
-| [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
+| [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `DONE` | 5/5 | P3 | medium |
 | [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
 
-Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (10/12; SP10–SP11 still open) ·
+Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (11/12; SP11 remains) ·
 [RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (10/11; SP11 remains).
 Each file has a **Todos** section (checked = done) and YAML frontmatter todos for Cursor.
 
-**Resume here:** SP10 reproducibility gate. SP00–SP09 are closed: version directories
-use `<catalog_id>-v…`, `legacy_dir` still names output artifacts, and the two-level
-junction scaffold keeps old paths working until SP11.
+**Resume here:** SP11 decommission. SP00–SP10 are closed: the reproducibility gate
+report is in `10_docs/migration/reproducibility_gate.md` (0 fail, ≥10 Tier-1).
+Junctions stay until SP11.
 
 
 ## Status legend
@@ -56,7 +56,7 @@ Each sub-plan carries a status line at the top:
 - `DONE` — completed and verified against its done-criteria
 - `BLOCKED` — waiting on a dependency or a decision, with the blocker named
 
-SP00–SP09 are `DONE`. SP10–SP11 remain `PLANNED`. Open each file’s **Todos**
+SP00–SP10 are `DONE`. SP11 remains `PLANNED`. Open each file’s **Todos**
 section to see what is already checked off versus what remains.
 
 ## Hard rules that apply to every sub-plan
