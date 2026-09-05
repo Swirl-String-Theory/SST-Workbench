@@ -156,6 +156,10 @@ def move_one(root: Path, src: Path, dst: Path, *, dry_run: bool) -> list[str]:
     rel_dst = dst.relative_to(root).as_posix()
     log: list[str] = []
 
+    if dst.is_dir() and src.is_file():
+        # A file addressed at an existing directory belongs inside it, not beside it.
+        return move_one(root, src, dst / src.name, dry_run=dry_run)
+
     if dst.exists() and src.is_dir() and dst.is_dir():
         # Merge: move children individually so the source does not nest inside.
         for child in sorted(src.iterdir()):

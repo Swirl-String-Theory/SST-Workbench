@@ -287,6 +287,33 @@ def drop_registry(root: Path, old_path: str) -> None:
     save_registry(root, rows)
 
 
+def has_glob(old_rel: str) -> bool:
+    return any(ch in old_rel for ch in "*?[")
+
+
+def expand_glob_row(root: Path, old_rel: str, new_rel: str) -> list[tuple[str, Path]]:
+    """Concrete (link_rel, target) pairs for a row whose old_path is a glob.
+
+    A glob cannot be a junction: there is no single path to link. The mover placed each
+    match under the destination keeping its own name, so the compat layer is one
+    junction per *directory* match, created next to where the glob used to live.
+
+    File matches are skipped - a junction can only point at a directory. Old references
+    to those files (for example KnotPlot/*.py) need the SP01 resolver instead.
+    """
+    old_parent = str(Path(old_rel.replace("\\", "/")).parent).replace("\\", "/")
+    dest = root / new_rel.replace("\\", "/")
+    if not dest.is_dir():
+        return []
+    out: list[tuple[str, Path]] = []
+    for child in sorted(dest.iterdir()):
+        if not child.is_dir():
+            continue
+        link_rel = f"{old_parent}/{child.name}" if old_parent not in ("", ".") else child.name
+        out.append((link_rel, child))
+    return out
+
+
 def _abs_old(root: Path, old_rel: str) -> Path:
     return (root / old_rel.replace("\\", "/")).resolve()
 
@@ -307,6 +334,29 @@ def cmd_create(
     for r in rows:
         old_rel = r["old_path"].strip()
         new_rel = r["new_path"].strip()
+        row_phase = (r.get("phase") or phase or "").strip()
+
+        if has_glob(old_rel):
+            pairs = expand_glob_row(root, old_rel, new_rel)
+            if not pairs:
+                print(f"create: {old_rel} -> {new_rel} (no directory matches; skipped)")
+                continue
+            for link_rel, target in pairs:
+                print(f"create: {link_rel} -> {target.relative_to(root).as_posix()}"
+                      f"{' (dry-run)' if dry_run else ''}")
+                if dry_run:
+                    continue
+                try:
+                    create_junction(root / link_rel, target)
+                    ensure_git_exclude(root, link_rel)
+                    upsert_registry(
+                        root, old_path=link_rel, target=target, phase=row_phase
+                    )
+                except JunctionError as e:
+                    print(f"ERROR: {e}", file=sys.stderr)
+                    errors += 1
+            continue
+
         link = root / old_rel.replace("\\", "/")
         target = _abs_new(root, new_rel)
         print(f"create: {old_rel} -> {new_rel}"
@@ -319,10 +369,7 @@ def cmd_create(
             create_junction(link, target)
             ensure_git_exclude(root, old_rel)
             upsert_registry(
-                root,
-                old_path=old_rel,
-                target=target,
-                phase=(r.get("phase") or phase or "").strip(),
+                root, old_path=old_rel, target=target, phase=row_phase
             )
         except JunctionError as e:
             print(f"ERROR: {e}", file=sys.stderr)
@@ -336,11 +383,17 @@ def cmd_verify(root: Path, *, phase: str | None) -> int:
         print("verify: nothing to check (no moved junction rows)")
         return 0
     errors = 0
+    checks: list[tuple[str, Path]] = []
     for r in rows:
         old_rel = r["old_path"].strip()
         new_rel = r["new_path"].strip()
+        if has_glob(old_rel):
+            checks.extend(expand_glob_row(root, old_rel, new_rel))
+        else:
+            checks.append((old_rel, _abs_new(root, new_rel)))
+
+    for old_rel, expected in checks:
         link = root / old_rel.replace("\\", "/")
-        expected = _abs_new(root, new_rel)
         try:
             if not link.exists() and not is_junction(link):
                 raise JunctionError(f"missing junction: {old_rel}")

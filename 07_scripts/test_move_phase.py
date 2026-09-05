@@ -283,3 +283,33 @@ def test_verify_marks_rows_verified(repo: Path):
     move_phase.run_phase(repo, "SP04", dry_run=False)
     assert move_phase.verify_phase(repo, "SP04") == 0
     assert _read_path_map(repo)[0]["status"] == "verified"
+
+
+def test_file_into_existing_directory_goes_inside(repo: Path):
+    """A file row whose destination is an existing directory must land inside it."""
+    (repo / "KnotPlot").mkdir()
+    (repo / "KnotPlot" / "tool.zip").write_text("z\n", encoding="utf-8")
+    (repo / "09_archive" / "restore" / "KnotPlot").mkdir(parents=True)
+    _write_path_map(repo, [{
+        "old_path": "KnotPlot/tool.zip", "new_path": "09_archive/restore/KnotPlot",
+        "phase": "SP07", "junction": "no", "status": "pending",
+    }])
+    _commit_all(repo)
+
+    assert move_phase.run_phase(repo, "SP07", dry_run=False) == 0
+    assert (repo / "09_archive/restore/KnotPlot/tool.zip").read_text() == "z\n"
+
+
+def test_file_into_existing_directory_goes_inside(repo: Path):
+    """A file row whose destination is an existing directory must land inside it."""
+    (repo / "KnotPlot").mkdir()
+    (repo / "KnotPlot" / "tool.zip").write_text("z\n", encoding="utf-8")
+    (repo / "09_archive" / "restore" / "KnotPlot").mkdir(parents=True)
+    _write_path_map(repo, [{
+        "old_path": "KnotPlot/tool.zip", "new_path": "09_archive/restore/KnotPlot",
+        "phase": "SP07", "junction": "no", "status": "pending",
+    }])
+    _commit_all(repo)
+
+    assert move_phase.run_phase(repo, "SP07", dry_run=False) == 0
+    assert (repo / "09_archive/restore/KnotPlot/tool.zip").read_text() == "z\n"

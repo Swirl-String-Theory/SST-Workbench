@@ -198,3 +198,39 @@ def test_verified_rows_still_select_for_junctions():
     ]
     picked = {r["old_path"] for r in j.selectable_rows(rows)}
     assert picked == {"A", "B"}, picked
+
+
+def test_glob_row_expands_to_one_junction_per_directory(tmp_path):
+    """A glob old_path cannot be a junction; each moved child gets one instead.
+
+    SP07 moved KnotPlot/qhp* and six campaign globs. mklink cannot create a link at a
+    wildcard, so junctions.py expands the row against the destination and links each
+    directory match next to where the glob used to live. File matches are skipped
+    because a junction can only point at a directory.
+    """
+    import junctions as j
+
+    root = tmp_path
+    dest = root / "03_data" / "D_generated" / "qhp"
+    for name in ("qhp", "qhp_6p3", "qhp_extended"):
+        (dest / name).mkdir(parents=True)
+    (dest / "loose_file.txt").write_text("x", encoding="utf-8")
+
+    pairs = j.expand_glob_row(root, "KnotPlot/qhp*", "03_data/D_generated/qhp")
+    links = {rel for rel, _target in pairs}
+    assert links == {
+        "KnotPlot/qhp",
+        "KnotPlot/qhp_6p3",
+        "KnotPlot/qhp_extended",
+    }, links
+    for rel, target in pairs:
+        assert target.is_dir()
+        assert target.name == rel.split("/")[-1]
+
+
+def test_glob_detection():
+    import junctions as j
+
+    assert j.has_glob("KnotPlot/*.py")
+    assert j.has_glob("KnotPlot/qhp*")
+    assert not j.has_glob("KnotPlot/knots")
