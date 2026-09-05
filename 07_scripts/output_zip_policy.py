@@ -7,10 +7,11 @@ Outputs and zip files go to GitHub only as files under 50 MiB:
 - if size >= 500 MiB, keep the zip local only (gitignored)
 - unpacked ``outputs/`` stay on disk (gitignored) so git status stays small
 
-Naming matches Trefoil pack_outputs.py::
+Naming matches Trefoil pack_outputs.py, but the stem is ``legacy_dir`` from
+``project.json`` once SP09 shortens version directories::
 
-    pack.parent / f"{pack.name}_outputs.zip"
-    pack.parent / f"{pack.name}_outputs.zip.part01"
+    pack.parent / f"{artifact_stem(pack)}_outputs.zip"
+    pack.parent / f"{artifact_stem(pack)}_outputs.zip.part01"
 """
 
 from __future__ import annotations
@@ -18,8 +19,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sys
 import zipfile
 from pathlib import Path
+
+_SCRIPTS = str(Path(__file__).resolve().parent)
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from output_naming import artifact_stem  # noqa: E402
 
 MIB = 1024 * 1024
 PART_BYTES = 50 * MIB
@@ -35,9 +43,9 @@ _OUTPUTS_ZIP_RE = re.compile(r"_outputs\.zip$", re.I)
 
 
 def output_zip_path(pack_dir: Path) -> Path:
-    """Sibling archive path: ``{parent}/{pack_dir.name}_outputs.zip``."""
+    """Sibling archive path: ``{parent}/{artifact_stem}_outputs.zip``."""
     pack_dir = Path(pack_dir)
-    return pack_dir.parent / f"{pack_dir.name}_outputs.zip"
+    return pack_dir.parent / f"{artifact_stem(pack_dir)}_outputs.zip"
 
 
 def part_path(zip_path: Path, index: int) -> Path:

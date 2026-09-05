@@ -118,7 +118,11 @@ class TestProjectJson:
             for v in f.versions:
                 path = f.path / v.directory / "project.json"
                 data = json.loads(path.read_text(encoding="utf-8"))
-                assert data["legacy_dir"] == v.directory
+                assert data["legacy_dir"]
+                if re.match(rf"^{f.catalog_id}-v", v.directory):
+                    assert data["legacy_dir"] != v.directory
+                else:
+                    assert data["legacy_dir"] == v.directory
 
 
 class TestRegistrySync:

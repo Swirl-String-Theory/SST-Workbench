@@ -181,13 +181,23 @@ def parse_version(dirname: str) -> Version:
     raw = m.group(1)
     tail = dirname[m.end():].strip("_-")
 
-    parts = raw.replace("_", ".").split(".")
     revision: int | None = None
-    if len(parts) == 4 and all(p.isdigit() for p in parts):
+    rev_in_token = re.search(r"-r(\d+)$", raw, re.I)
+    if rev_in_token:
+        revision = int(rev_in_token.group(1))
+        raw = raw[: rev_in_token.start()]
+
+    parts = raw.replace("_", ".").split(".")
+    if revision is None and len(parts) == 4 and all(p.isdigit() for p in parts):
         revision = int(parts[3])
         raw = ".".join(parts[:3])
 
     config = blind = None
+    if tail:
+        rev_m = re.fullmatch(r"r(\d+)", tail, re.I)
+        if rev_m:
+            revision = int(rev_m.group(1))
+            tail = ""
     if tail:
         key = re.sub(r"[\s-]+", "_", tail).lower()
         if key in BLIND_STATES:
@@ -199,6 +209,69 @@ def parse_version(dirname: str) -> Version:
         directory=dirname, version=f"v{raw}",
         revision=revision, config=config, blind=blind,
     )
+
+
+def overlay_project_json(v: Version, path: Path) -> Version:
+    """Fill version/revision/config/blind from project.json after SP09 shortens dirs."""
+    pj = path / "project.json"
+    if not pj.is_file():
+        return v
+    try:
+        data = json.loads(pj.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return v
+    if data.get("version"):
+        v.version = data["version"]
+    if "revision" in data:
+        v.revision = data["revision"]
+    if "config" in data:
+        v.config = data["config"]
+    if "blind" in data:
+        v.blind = data["blind"]
+    return v
+
+
+def short_directory_name(catalog_id: str, v: Version) -> str:
+    """SP09 directory name: ``A042-v0.1.1`` or ``A032-v0.2.2-r8``."""
+    name = f"{catalog_id}-{v.version}"
+    if v.revision is not None:
+        name += f"-r{v.revision}"
+    return name
+
+
+def short_names_for_family(fam: Family) -> dict[str, str]:
+    """Map current directory name -> unique short name.
+
+    Config and blinding stay out of the default name (SP09 table). If two versions
+    would collide, config then blind is appended so the count of directories is
+    unchanged.
+    """
+    groups: dict[str, list[Version]] = defaultdict(list)
+    for v in fam.versions:
+        groups[short_directory_name(fam.catalog_id, v)].append(v)
+    out: dict[str, str] = {}
+    for base, vs in groups.items():
+        if len(vs) == 1:
+            out[vs[0].directory] = base
+            continue
+        for v in vs:
+            name = base
+            if v.config:
+                name += f"-{v.config}"
+            elif v.blind:
+                name += f"-{v.blind.replace('_', '-')}"
+            else:
+                name += f"-{v.directory}"
+            out[v.directory] = name
+    seen: dict[str, str] = {}
+    for directory, name in out.items():
+        if name in seen and seen[name] != directory:
+            raise ValueError(
+                f"short-name collision in {fam.catalog_id}: {name} "
+                f"({seen[name]!r} vs {directory!r})"
+            )
+        seen[name] = directory
+    return out
 
 
 def output_prefix_for(versions: list[Version]) -> str:
@@ -256,7 +329,9 @@ def discover() -> list[Family]:
                 ]
                 versioned = [c for c in children if VERSION_TOKEN.search(c.name)]
                 if versioned:
-                    fam.versions = [parse_version(c.name) for c in versioned]
+                    fam.versions = [
+                        overlay_project_json(parse_version(c.name), c) for c in versioned
+                    ]
                     fam.layout = [c.name for c in children if c not in versioned]
                 else:
                     fam.unversioned = True

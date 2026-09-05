@@ -54,6 +54,18 @@ class TestParseVersion:
         v = cm.parse_version("SST_contra_swirl_bridge_research_v0_6")
         assert v.version == "v0_6"
 
+    def test_catalog_prefixed_short_name(self):
+        v = cm.parse_version("A042-v0.1.1")
+        assert v.version == "v0.1.1"
+        assert v.revision is None
+        assert v.config is None
+
+    def test_revision_suffix_on_short_name_is_not_config(self):
+        v = cm.parse_version("A032-v0.2.2-r8")
+        assert v.version == "v0.2.2"
+        assert v.revision == 8
+        assert v.config is None
+
     def test_directory_without_version_token(self):
         v = cm.parse_version("sst_horn_dirichlet_package")
         assert v.version == "sst_horn_dirichlet_package"
@@ -93,6 +105,37 @@ class TestSortKey:
         assert [(v.version, v.revision) for v in versions] == [
             ("v0.2.2", None), ("v0.2.2", 5), ("v0.2.2", 8),
         ]
+
+
+class TestShortDirectoryName:
+    def test_plain_semver(self):
+        v = cm.parse_version("SST_Quantum_Galileo_Action_Gauge_Closure_Falsifier_v0.1.1")
+        assert cm.short_directory_name("A042", v) == "A042-v0.1.1"
+
+    def test_revision(self):
+        v = cm.parse_version("SST_Intrinsic_Modal_Swirl_Clock_Blind_Falsifier_v0.2.2.8")
+        assert cm.short_directory_name("A035", v) == "A035-v0.2.2-r8"
+
+    def test_config_is_omitted_when_unique(self):
+        v = cm.parse_version(
+            "SST_MultiTopology_Knot_Link_TBK_RPO_Falsifier_v0.4.8_Adaptive_Spectral_DD32_compact"
+        )
+        assert cm.short_directory_name("A023", v) == "A023-v0.4.8"
+
+    def test_closed_historical_series(self):
+        v = cm.parse_version("sst_chi_phase_package_v16B0")
+        assert cm.short_directory_name("C001", v) == "C001-v16B0"
+
+    def test_live_families_have_unique_short_names(self):
+        collisions = []
+        for fam in cm.discover():
+            if not fam.versions:
+                continue
+            mapping = cm.short_names_for_family(fam)
+            assert len(mapping) == len(fam.versions)
+            if len(set(mapping.values())) != len(mapping):
+                collisions.append(fam.catalog_id)
+        assert collisions == []
 
 
 class TestGeneratedDocuments:

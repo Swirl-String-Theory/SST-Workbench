@@ -19,7 +19,7 @@ todos:
 ---
 # SP09 — Version-directory rename, stage 2
 
-Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP08
+Status: `IN PROGRESS` · Priority: P3 · Risk: medium · Depends on: SP08
 
 ## Todos
 
@@ -31,7 +31,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] Family-at-a-time: rename → scaffold → verify → commit
 - [ ] Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK
 
-**Next:** Convert output-name scripts to `output_prefix`, then pilot A042 (own root junction, two versions). A039 is nested under the swirl-clock split and is a bad first family.
+**Next:** Continue family-at-a-time. A042 is the proven pattern (rename + level-2 scaffold + path_map rows). Leave A023 (config-laden) until more simple families are done.
 
 Version directories get their short catalog-prefixed names. This is the second half of the
 deliberately split rename, and the phase that finally shortens paths.
