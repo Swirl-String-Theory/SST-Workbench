@@ -3,43 +3,43 @@ name: SP08 catalog metadata and registry
 todos:
   - id: t00
     content: "Complete every `FAMILY.yaml`"
-    status: pending
+    status: completed
   - id: t01
     content: "Add `project.json` per version"
-    status: pending
+    status: completed
   - id: t02
     content: "Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`"
-    status: pending
+    status: completed
   - id: t03
     content: "Build `catalog_index.json`; refresh inventories"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: registry validate/discover clean; metadata tests green"
-    status: pending
+    status: completed
   - id: t05
     content: "Fix 3 duplicate catalog ids on disk: B003, B004, C006"
-    status: pending
+    status: completed
   - id: t06
     content: "Resolve 3 catalog rows with no directory: B002, research D001, E007"
-    status: pending
+    status: completed
 ---
 # SP08 — Catalog metadata and registry
 
-Status: `PLANNED` · Priority: P3 · Risk: medium · Depends on: SP06, SP07
+Status: `DONE` · Priority: P3 · Risk: medium · Depends on: SP06, SP07
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Complete every `FAMILY.yaml`
-- [ ] Add `project.json` per version
-- [ ] Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`
-- [ ] Build `catalog_index.json`; refresh inventories
-- [ ] Done-criteria: registry validate/discover clean; metadata tests green
-- [ ] Fix 3 duplicate catalog ids on disk: B003, B004, C006
-- [ ] Resolve 3 catalog rows with no directory: B002, research D001, E007
+- [x] Complete every `FAMILY.yaml`
+- [x] Add `project.json` per version
+- [x] Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`
+- [x] Build `catalog_index.json`; refresh inventories
+- [x] Done-criteria: registry validate/discover clean; metadata tests green
+- [x] Fix 3 duplicate catalog ids on disk: B003, B004, C006
+- [x] Resolve 3 catalog rows with no directory: B002, research D001, E007
 
-**Next:** Ready. First fix 3 duplicate catalog ids on disk (B003, B004, C006) and 3 catalog rows with no directory (B002, D001 research, E007).
+**Next:** Done. 87 FAMILY.yaml, 246 project.json, 46 registry entries carrying catalog_id, catalog_index.json with 229 legacy lookups.
 
 Every family now sits at its catalog path. This sub-plan makes the catalog *machine-readable* and
 turns the version identifiers into something a program can compare.

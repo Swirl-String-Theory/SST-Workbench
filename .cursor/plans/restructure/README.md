@@ -33,7 +33,7 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP05](SP05_clean_family_moves.plan.md) | Clean family moves | `DONE` | 6/6 | P1 | medium |
 | [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `DONE` | 5/5 | P2 | medium |
 | [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `DONE` | 5/5 | P2 | high |
-| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `PLANNED` | 0/7 | P3 | medium |
+| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `DONE` | 7/7 | P3 | medium |
 | [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `PLANNED` | 0/5 | P3 | medium |
 | [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
 | [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
