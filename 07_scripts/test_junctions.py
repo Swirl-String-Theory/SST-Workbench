@@ -175,3 +175,26 @@ def test_live_workbench_status_noop():
     assert jn.main(["--root", str(WB), "status"]) == 0
     assert jn.main(["--root", str(WB), "create", "--dry-run"]) == 0
     assert jn.main(["--root", str(WB), "verify"]) == 0
+
+
+def test_verified_rows_still_select_for_junctions():
+    """A signed-off phase must not make junction checks vacuous.
+
+    selectable_rows once matched only status="moved". The moment move_phase --verify
+    promoted rows to "verified", junctions.py reported zero rows and `verify` passed
+    without checking anything - which is how two missing junctions went unnoticed.
+    """
+    import junctions as j
+
+    rows = [
+        {"old_path": "A", "new_path": "01_research/x", "junction": "yes",
+         "status": "moved", "phase": "SP04"},
+        {"old_path": "B", "new_path": "01_research/y", "junction": "yes",
+         "status": "verified", "phase": "SP04"},
+        {"old_path": "C", "new_path": "01_research/z", "junction": "yes",
+         "status": "pending", "phase": "SP04"},
+        {"old_path": "D", "new_path": "01_research/w", "junction": "no",
+         "status": "verified", "phase": "SP04"},
+    ]
+    picked = {r["old_path"] for r in j.selectable_rows(rows)}
+    assert picked == {"A", "B"}, picked

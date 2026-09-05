@@ -60,6 +60,12 @@ def load_path_map(root: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+#: A row needs a junction once its content has left the old path. `verified` is the
+#: terminal state of a completed move, so it must select just like `moved` - otherwise
+#: `verify` silently checks nothing the moment a phase is signed off.
+JUNCTION_STATUSES = frozenset({"moved", "verified"})
+
+
 def selectable_rows(
     rows: list[dict[str, str]], *, phase: str | None = None
 ) -> list[dict[str, str]]:
@@ -67,7 +73,7 @@ def selectable_rows(
     for r in rows:
         if (r.get("junction") or "").strip().lower() != "yes":
             continue
-        if (r.get("status") or "").strip().lower() != "moved":
+        if (r.get("status") or "").strip().lower() not in JUNCTION_STATUSES:
             continue
         if not _phase_matches(r.get("phase") or "", phase):
             continue
