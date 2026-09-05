@@ -116,6 +116,14 @@ families. Horn Dirichlet and Neumann packages are **subtrees under B003**.
 | C004 | `torsion_impedance` | SST Torsion Impedance pybind11 | `SST_v0_8_19_routes_research/sst_torsion_impedance_*` | 2026-07-07 | confirmed |
 | C005 | `fermat_biot_savart` | SST Fermat-Metric / Biot–Savart Knot Diagnostics | `SST_fermat_pybind_research/` | 2026-07-28 | confirmed |
 | C006 | `kelvin_floquet_workbench` | SST Kelvin Floquet Workbench (C++/pybind) | `SST_Kelvin_Floquet/SST_Kelvin_Floquet_Workbench_*` | 2026-08-10 | confirmed |
+| C007 | `uq_twisted_vortex_ring` | U(q) Twisted Vortex Ring Speed Deficit Experiment | `GUI/additional for Vlab/` | 2026-07-25 | confirmed |
+
+**C007 was added after the freeze.** `GUI/additional for Vlab/` is not an app asset: it
+is a self-contained physics experiment that integrates the axisymmetric Euler equations
+with swirl on a 256x512 grid to fix the Kirchhoff twist-stiffness prefactor `C_eff` and
+tell a Rankine core from a hollow one. The frozen tables classified `GUI/` as apps, so
+it never surfaced there. It briefly occupied C006, which belongs to
+`kelvin_floquet_workbench`, and moved to the next free number.
 
 `sst_3d_collider_robust` and `sst_trefoil_bs` move with **C002** (no own catalog ID).
 `GUI/additional for Vlab/` is handled in the GUI/apps split (SP06), not as a C-family.
