@@ -18,10 +18,9 @@ def _clear_env(monkeypatch):
     monkeypatch.delenv("SST_WORKBENCH_ROOT", raising=False)
 
 
-def test_known_falsifier_resolves_to_existing_old_path():
-    # Pre-move: old_path still on disk.
+def test_known_falsifier_resolves_to_catalog_family():
     path = swp.resolve_family("A006")
-    assert path == (WB / "SST_contact_billiard_hydrodynamic_falsifier").resolve()
+    assert path == (WB / "01_research/A_falsifiers/A006_contact_billiard_hydrodynamic").resolve()
     assert path.is_dir()
 
 
@@ -31,7 +30,11 @@ def test_galileo_a042():
     assert path.is_dir()
 
 
-def test_unknown_id_raises():
+def test_catalog_index_by_domain_returns_the_family_path():
+    index = swp._load_catalog_index(WB)
+    rel = swp._family_from_catalog_index(index, "A006", domain="01_research")
+    assert rel is not None
+    assert rel.as_posix().endswith("A006_contact_billiard_hydrodynamic")
     with pytest.raises(KeyError, match="unknown catalog_id"):
         swp.resolve_family("Z999")
 
@@ -55,7 +58,7 @@ def test_version_selects_subdirectory():
 def test_domain_disambiguation_for_shared_ids():
     # A001 exists in research (route_a) and may appear in apps/libraries.
     research = swp.resolve_family("A001", domain="01_research")
-    assert "route_a" in research.name or research.name.startswith("SST_v0_8_19")
+    assert "route_a" in research.name or research.name.startswith("A001_")
     # Default preference is 01_research
     default = swp.resolve_family("A001")
     assert default == research

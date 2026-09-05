@@ -30,7 +30,7 @@ todos:
     status: completed
   - id: t09
     content: "SP09: version dirs renamed to `<ID>-v…`"
-    status: pending
+    status: completed
   - id: t10
     content: "SP11: stubs soft-retired under `DELETE/`"
     status: pending
@@ -52,10 +52,10 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP05: clean family moves executed (pilot A038 first)
 - [x] SP06: container splits executed
 - [x] SP07: KnotPlot tool/data/campaign/result split executed
-- [ ] SP09: version dirs renamed to `<ID>-v…`
+- [x] SP09: version dirs renamed to `<ID>-v…`
 - [ ] SP11: stubs soft-retired under `DELETE/`
 
-**Next:** SP09 version dirs renamed to `<ID>-v…`. Mapping freeze and SP04–SP07 moves are done.
+**Next:** SP10 reproducibility gate (epic), then SP11 soft-retire. Version directories are `<ID>-v…`.
 
 The one-time mapping. Every current top-level directory appears exactly once. When the migration
 finishes, this document is history; [CATALOG_v0.1.md](CATALOG_v0.1.md) is what remains.

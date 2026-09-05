@@ -3,35 +3,35 @@ name: SP09 version rename stage2
 todos:
   - id: t00
     content: "Convert output-name scripts to `output_prefix` first"
-    status: pending
+    status: completed
   - id: t01
     content: "Rename version dirs to `<catalog_id>-v…`"
-    status: pending
+    status: completed
   - id: t02
     content: "Build level-2 junction scaffolds from `legacy_dir`"
-    status: pending
+    status: completed
   - id: t03
     content: "Family-at-a-time: rename → scaffold → verify → commit"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK"
-    status: pending
+    status: completed
 ---
 # SP09 — Version-directory rename, stage 2
 
-Status: `IN PROGRESS` · Priority: P3 · Risk: medium · Depends on: SP08
+Status: `DONE` · Priority: P3 · Risk: medium · Depends on: SP08
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Convert output-name scripts to `output_prefix` first
-- [ ] Rename version dirs to `<catalog_id>-v…`
-- [ ] Build level-2 junction scaffolds from `legacy_dir`
-- [ ] Family-at-a-time: rename → scaffold → verify → commit
-- [ ] Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK
+- [x] Convert output-name scripts to `output_prefix` first
+- [x] Rename version dirs to `<catalog_id>-v…`
+- [x] Build level-2 junction scaffolds from `legacy_dir`
+- [x] Family-at-a-time: rename → scaffold → verify → commit
+- [x] Done-criteria: all versions renamed; legacy paths hash-resolve; path lengths OK
 
-**Next:** Continue family-at-a-time. A042 is the proven pattern (rename + level-2 scaffold + path_map rows). Leave A023 (config-laden) until more simple families are done.
+**Next:** SP10 reproducibility gate. 249 version directories across 74 versioned families now use `<catalog_id>-v…`. Output names still come from `legacy_dir` / `output_prefix`. Remaining tracked paths over 200 characters are deep `_variants/` and output trees, not long version-directory names.
 
 Version directories get their short catalog-prefixed names. This is the second half of the
 deliberately split rename, and the phase that finally shortens paths.

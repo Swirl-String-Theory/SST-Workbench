@@ -33,6 +33,65 @@ def test_a023_config_versions_stay_unique_without_sharing_a_name():
     assert "A023-v0.4.8" in shorts
 
 
+def test_c005_keeps_plain_v043_when_flat_variant_exists():
+    fam = next(f for f in cm.discover() if f.catalog_id == "C005" and f.domain == "01_research")
+    mapping = cm.short_names_for_family(fam)
+    shorts = set(mapping.values())
+    assert "C005-v0.4.3" in shorts
+    assert "C005-v0.4.3-flat" in shorts
+    assert mapping["C005-v0.4.3"] == "C005-v0.4.3"
+
+
 def test_family_legacy_root_is_a_single_component():
     fam = next(f for f in cm.discover() if f.catalog_id == "A042" and f.domain == "01_research")
     assert vr.family_legacy_root(fam) == "SST_Quantum_Galileo_Action_Gauge_Closure"
+
+
+def test_should_retarget_root_when_legacy_name_is_the_root():
+    dest = Path("01_research/A_falsifiers/A020_six_source_blind_energy/A020-v0.1.0")
+    assert vr.should_retarget_root(
+        "SST_6Source_Blind_Falsifier_v0.1.0",
+        [("SST_6Source_Blind_Falsifier_v0.1.0", dest)],
+    )
+    assert not vr.should_retarget_root(
+        "SST_ideal_links",
+        [("SST_ideal_links_comprehensive_test_suite_v0.1.0", dest)],
+    )
+
+
+def test_absorb_leftover_moves_untracked_children_then_removes_husk(tmp_path: Path):
+    src = tmp_path / "old_dir"
+    dest = tmp_path / "A007-v0.2.1"
+    (src / ".venv" / "lib").mkdir(parents=True)
+    (src / ".venv" / "lib" / "marker.txt").write_text("venv", encoding="utf-8")
+    (src / "src").mkdir()
+    (dest / "src").mkdir(parents=True)
+    (dest / "project.json").write_text("{}", encoding="utf-8")
+    (dest / "src" / "kept.py").write_text("ok", encoding="utf-8")
+
+    vr.absorb_leftover(src, dest)
+
+    assert not src.exists()
+    assert (dest / "project.json").is_file()
+    assert (dest / "src" / "kept.py").read_text(encoding="utf-8") == "ok"
+    assert (dest / ".venv" / "lib" / "marker.txt").read_text(encoding="utf-8") == "venv"
+
+
+def test_yaml_rewrite_map_includes_legacy_dir(tmp_path: Path):
+    fam_dir = tmp_path / "A007_ideal_links"
+    dest = fam_dir / "A007-v0.2.1"
+    dest.mkdir(parents=True)
+    (dest / "project.json").write_text(
+        '{"version": "v0.2.1", "legacy_dir": '
+        '"SST_ideal_links_comprehensive_test_suite_v0.2.1"}',
+        encoding="utf-8",
+    )
+    fam = cm.Family(
+        catalog_id="A007", slug="ideal_links", domain="01_research",
+        letter="A_falsifiers", path=fam_dir,
+        versions=[cm.Version(directory="A007-v0.2.1", version="v0.2.1")],
+    )
+    mapping = {"A007-v0.2.1": "A007-v0.2.1"}
+    out = vr.yaml_rewrite_map(fam, mapping)
+    assert out["A007-v0.2.1"] == "A007-v0.2.1"
+    assert out["SST_ideal_links_comprehensive_test_suite_v0.2.1"] == "A007-v0.2.1"

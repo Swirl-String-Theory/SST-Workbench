@@ -96,6 +96,12 @@ class TestResolvePack(unittest.TestCase):
         unresolved = [e.id for e in entries if e.resolved is None]
         self.assertLessEqual(len(unresolved), 2, msg=str(unresolved))
 
+    def test_legacy_glob_matches_short_version_directory(self) -> None:
+        resolved = resolve_pack("SST_routeB_RT_bem_research_v3")
+        self.assertIsNotNone(resolved)
+        assert resolved is not None
+        self.assertIn("B004", resolved.working_tree or "")
+
 
 class TestDiscoverUnregistered(unittest.TestCase):
     def setUp(self) -> None:

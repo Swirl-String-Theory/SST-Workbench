@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import hashlib
+import json
 import os
 import re
 import sys
@@ -49,14 +50,24 @@ def build_pack_index(*, wb: Path = WB, restore: Path = RESTORE) -> PackIndex:
     for p in _iter_candidate_dirs(wb):
         if p.parts and p.parts[0] == "Restore_Archives":
             continue
-        ver = parse_version(p.name)
-        if ver is None:
-            lower = p.name.lower()
-            if "stecklov" in lower:
-                ver = (5, 1)
-            else:
-                continue
-        dirs.append((p.name, ver, p))
+        aliases = [p.name]
+        pj = p / "project.json"
+        if pj.is_file():
+            try:
+                legacy = (json.loads(pj.read_text(encoding="utf-8")).get("legacy_dir") or "").strip()
+            except (OSError, json.JSONDecodeError):
+                legacy = ""
+            if legacy and legacy != p.name:
+                aliases.append(legacy)
+        for alias in aliases:
+            ver = parse_version(alias) or parse_version(p.name)
+            if ver is None:
+                lower = alias.lower()
+                if "stecklov" in lower:
+                    ver = (5, 1)
+                else:
+                    continue
+            dirs.append((alias, ver, p))
     zips: list[tuple[str, tuple[int, ...], Path]] = []
     for z in _iter_candidate_zips(restore):
         ver = parse_version(z.name)

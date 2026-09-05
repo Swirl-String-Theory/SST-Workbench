@@ -84,7 +84,9 @@ def test_path_map_unique_new_paths():
     rows = [
         r
         for r in _load_rows()
-        if r["status"] != "skipped" and not _is_glob(r["old_path"])
+        if r["status"] != "skipped"
+        and not _is_glob(r["old_path"])
+        and r["junction"] != "yes"
     ]
     news = [r["new_path"] for r in rows]
     dupes = sorted({p for p in news if news.count(p) > 1})

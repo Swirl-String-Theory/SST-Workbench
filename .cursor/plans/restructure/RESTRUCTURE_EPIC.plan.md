@@ -30,7 +30,7 @@ todos:
     status: completed
   - id: t09
     content: "SP08–SP09 metadata + version rename"
-    status: pending
+    status: completed
   - id: t10
     content: "SP10 reproducibility gate passed"
     status: pending
@@ -55,11 +55,11 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP02 junction layer live for moved roots
 - [x] SP03 catalog skeleton + hygiene on disk
 - [x] SP04–SP07 physical `git mv` waves complete
-- [ ] SP08–SP09 metadata + version rename
+- [x] SP08–SP09 metadata + version rename
 - [ ] SP10 reproducibility gate passed
 - [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission
 
-**Next:** SP09 version-directory rename. SP08 catalog metadata is done.
+**Next:** SP10 reproducibility gate. SP00–SP09 are closed: version directories are `<catalog_id>-v…` and the two-level junction scaffold is live.
 
 ## 1. Problem
 

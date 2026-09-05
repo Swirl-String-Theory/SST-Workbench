@@ -34,18 +34,17 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `DONE` | 5/5 | P2 | medium |
 | [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `DONE` | 5/5 | P2 | high |
 | [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `DONE` | 7/7 | P3 | medium |
-| [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `PLANNED` | 0/5 | P3 | medium |
+| [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `DONE` | 5/5 | P3 | medium |
 | [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
 | [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
 
-Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (9/12; SP08–SP09 still open) ·
-[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (9/11; SP09 + SP11 remain).
+Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (10/12; SP10–SP11 still open) ·
+[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (10/11; SP11 remains).
 Each file has a **Todos** section (checked = done) and YAML frontmatter todos for Cursor.
 
-**Resume here:** SP09 version-directory rename. SP00–SP08 are closed: catalog
-metadata is on disk (`FAMILY.yaml`, `project.json`, `catalog_id` in the registry),
-duplicate ids B003/B004/C006 and missing rows B002/D001/E007 are resolved.
-`A005` remains `reserved` / archive-only by design.
+**Resume here:** SP10 reproducibility gate. SP00–SP09 are closed: version directories
+use `<catalog_id>-v…`, `legacy_dir` still names output artifacts, and the two-level
+junction scaffold keeps old paths working until SP11.
 
 
 ## Status legend
@@ -57,7 +56,7 @@ Each sub-plan carries a status line at the top:
 - `DONE` — completed and verified against its done-criteria
 - `BLOCKED` — waiting on a dependency or a decision, with the blocker named
 
-SP00–SP08 are `DONE`. SP09–SP11 remain `PLANNED`. Open each file’s **Todos**
+SP00–SP09 are `DONE`. SP10–SP11 remain `PLANNED`. Open each file’s **Todos**
 section to see what is already checked off versus what remains.
 
 ## Hard rules that apply to every sub-plan

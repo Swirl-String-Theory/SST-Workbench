@@ -254,14 +254,19 @@ def short_names_for_family(fam: Family) -> dict[str, str]:
         if len(vs) == 1:
             out[vs[0].directory] = base
             continue
-        for v in vs:
+        plain = [v for v in vs if not v.config and not v.blind]
+        extra = [v for v in vs if v.config or v.blind]
+        if len(plain) == 1:
+            out[plain[0].directory] = base
+        else:
+            for v in plain:
+                out[v.directory] = f"{base}-{v.directory}"
+        for v in extra:
             name = base
             if v.config:
                 name += f"-{v.config}"
             elif v.blind:
                 name += f"-{v.blind.replace('_', '-')}"
-            else:
-                name += f"-{v.directory}"
             out[v.directory] = name
     seen: dict[str, str] = {}
     for directory, name in out.items():
