@@ -1,4 +1,4 @@
-# 🧪 SST-Workbench
+# SST-Workbench
 
 **Research sandbox for Swirl–String Theory**
 
@@ -16,7 +16,7 @@ Canon chat: [Gemini notebook — Canon v0.8.36](https://notebook.google.com/note
 
 ---
 
-## 🧭 Three-repo map
+## Three-repo map
 
 | Repository | Role |
 |------------|------|
@@ -26,28 +26,49 @@ Canon chat: [Gemini notebook — Canon v0.8.36](https://notebook.google.com/note
 
 ---
 
-## 📐 How this maps to Canon v0.8.36
+## Layout (catalog domains)
+
+The tree was restructured into **ten top-level domains**. Families carry stable catalog IDs (`A011`, `B001`, `C001`, …); version directories use short names like `A011-v0.3.1`. Legacy flat roots (`SST_Maxwell/`, `KnotPlot/`, …) are gone from the working tree — use catalog paths or `07_scripts/sst_workbench_paths`.
+
+| Domain | Role |
+|--------|------|
+| `01_research/` | Falsifiers, closures, dynamics, benchmarks, pipelines, exploratory packs |
+| `02_libraries/` | Shared libraries (knot geometry, finite-core, numerics) |
+| `03_data/` | Knot datasets, external data, media, generated outputs |
+| `04_tools/` | KnotPlot/Ridgerunner tools, crawlers, proof scripts, fabrication |
+| `05_apps/` | Dashboard, coil GUI, VortexRing Lab, math lab |
+| `06_templates/` | Pack / audit templates |
+| `07_scripts/` | Repo helpers, path resolver, migration tooling, tests |
+| `08_third_party/` | Vendored third-party (e.g. KnotTheory) |
+| `09_archive/` | Restore zips and legacy working-tree archives |
+| `10_docs/` | Inventory, migration provenance, registry, architecture |
+
+Marker file: `.sst-workbench-root`. Machine catalog index: [`10_docs/registry/catalog_index.json`](10_docs/registry/catalog_index.json). Move provenance: [`10_docs/migration/path_map.csv`](10_docs/migration/path_map.csv).
+
+**Paths:** prefer `import sst_workbench_paths` / `07_scripts/paths.cmd`. Optional legacy junctions can be rebuilt with `07_scripts/bootstrap_junctions.cmd` — do **not** run that casually on a clean tree.
+
+---
+
+## How this maps to Canon v0.8.36
 
 The Canon is stratified: **[ORTHODOX]** / **[DERIVED]** / **[SPECULATIVE]**. Workbench packs are mostly *tests and bridges*, not automatic promotions into the Canon.
 
-| Theme | Typical packs | Canon touchpoint |
-|-------|---------------|------------------|
-| Maxwell swirl-tonic / kinetic / reciprocal / mechanical | `SST_Maxwell/` (1–5, **v0.2.0**) | v0.8.36 Maxwell-stack; do **not** conflate material swirl-tonic velocity with \(\mathbf{A}_{\mathrm{eff}}\) |
-| Einstein emergent metric / Poisson | `SST_Einstein/` (**v0.1.0**) | analogue-metric / clock-field bridges |
-| Helmholtz vortex gates | `SST_Helmholtz/` (**v0.1.0**) | vortex-gate falsifiers |
-| Kelvin / Floquet | `SST_Kelvin_Floquet/` (**v0.1.1**), `SST_Chiral-Kelvin-Mode/` | Kelvin-mode suppression / Floquet workbenches |
-| Spectroscopic / finite-core | `Independent_FiniteCore_SpectralSelector/` | spectroscopic-response guards |
-| Geometry provenance | `KnotPlot/` → ridgerunner → `knots/final` | Canon `PROJ2026-KNOTPLOT-RR-001` → SSTcore `PipelineProvenanceAPI` |
+| Theme | Catalog home (examples) | Canon touchpoint |
+|-------|-------------------------|------------------|
+| Maxwell stack | `01_research/A_falsifiers/A011`…`A015` | v0.8.36 Maxwell-stack; do **not** conflate material swirl-tonic velocity with \(\mathbf{A}_{\mathrm{eff}}\) |
+| Einstein emergent metric | `A017_einstein_emergent_metric_poisson` | analogue-metric / clock-field bridges |
+| Helmholtz vortex gates | `A016_helmholtz_vortex_transport` | vortex-gate falsifiers |
+| Kelvin / Floquet | `A019`, `A032`, `A008_chiral_kelvin_core`, `C006_kelvin_floquet_workbench` | Kelvin-mode / Floquet workbenches |
+| Finite-core spectral | `02_libraries/B_finite_core/B001_…` | spectroscopic-response guards |
+| Geometry provenance | `04_tools/A_geometry` + `03_data/A_knots/04_knotplot` | Canon `PROJ2026-KNOTPLOT-RR-001` → SSTcore `PipelineProvenanceAPI` |
 
 **Interpretation boundary:** geometry proxies and campaign PASS/WARN/SKIP reports are **not** derived physics by themselves. A green gate means the *test* passed under its stated assumptions — not that the Standard Model owes you an apology.
-
-Slogan from the Canon, which this sandbox tries to honour:
 
 > *delay selects modes, topology protects them.*
 
 ---
 
-## 🚀 Quick start
+## Quick start
 
 ```powershell
 python -m venv .venv
@@ -66,121 +87,120 @@ python -m pip install SSTcore
 python -m pip install -r requirements-workbench.txt
 ```
 
-Run commands from the repository root. SSTcore ships as **both** a Python package (`pip install SSTcore`) and a Node.js package (`npm install sst-core`) — not as a sibling path / submodule. Most Workbench packs are Python-first; use the npm package when you are in Node / TypeScript (see SSTcore `examples/example_*.ts`).
+Run commands from the repository root. SSTcore ships as **both** a Python package (`pip install SSTcore`) and a Node.js package (`npm install sst-core`). Most Workbench packs are Python-first; use the npm package for Node / TypeScript (see SSTcore `examples/example_*.ts`).
 
 ---
 
-## 🗺 What lives here (themed map)
+## What lives where (themed map)
 
-This tree is large on purpose. Below is a **themed** map, not a dump of every nested version folder. For measured sizes and duplicates see [INVENTORY.md](INVENTORY.md).
+Not every version folder is listed. Full inventories: [`10_docs/inventory/root_docs/INVENTORY.md`](10_docs/inventory/root_docs/INVENTORY.md).
 
-### Falsifiers & prediction gates
+### Falsifiers & prediction gates — `01_research/A_falsifiers/`
 
-| Path | Latest (approx.) | Notes |
-|------|------------------|-------|
-| `SST_Maxwell/` | **v0.2.0** (packs 1–5) | Kinetic, dynamical-field, physical-lines, mechanical, reciprocal; target-blind keys exist — treat unblind folders with care |
-| `SST_Einstein/` | **v0.1.0** | Blind falsifier + emergent-metric / Poisson closure gates |
-| `SST_Helmholtz/` | **v0.1.0** | Helmholtz vortex-gates falsifier |
-| `SST_Kelvin_Floquet/` | **v0.1.1** | C++/pybind Kelvin-wave / Floquet workbench |
-| `SST_Chiral-Kelvin-Mode/` | **v0.1.3.x** | Chiral Kelvin falsification lineage |
-| `SST_Hopf_Benchmark/` | **v0.1.4** | Hopf H0–H10 C++/pybind benchmark |
-| `SST_ideal_links/` | **v0.3.6.1** (+ `v0.4.0-alpha.1`) | Ideal-links comprehensive suite |
-| `SST_counterpulley_alpha_falsifier/` | **v0.5.0** | Counterpulley \(\alpha\) falsifier |
-| `SST_preferred_frame_binary_falsifier/` | **v0.1.1** | Preferred-frame binary falsifier |
-| `SST_contact_billiard_hydrodynamic_falsifier/` | **v0.2.0** | Contact-billiard hydrodynamic falsifier |
-| `SST_minimal_falsification_harness/` | **v0.3.0** | Minimal \(\alpha^{-1}\) harness |
-| `SST_dimensionless_dynamic_predictions/` | **v0.4.0** | Dimensionless knot dynamics / iso-Γ predictions |
-| `Independent_FiniteCore_SpectralSelector/` | **v0.1.2.4** | Finite-core spectral selector |
-| `SST_Sutcliffe_HSS_feasibility_gate/` | **v0.1.0** | Hopf-soliton feasibility gate |
-| `SST_dark_knot_rayleigh_research/` | — | Dark-knot Rayleigh / rocking audits |
+| Catalog ID | Theme |
+|------------|--------|
+| `A011`–`A015` | Maxwell kinetic / dynamical / physical-lines / field-null / reciprocal |
+| `A017` | Einstein emergent metric / Poisson |
+| `A016` | Helmholtz vortex transport |
+| `A008`, `A019`, `A032` | Chiral Kelvin / Kirchhoff / Joule transient |
+| `A007` | Ideal-links topology robustness |
+| `A010` | Counterpulley \(\alpha\) |
+| `A009` | Preferred-frame binary |
+| `A006` | Contact-billiard hydrodynamic |
+| `A005` / harness families | Minimal falsification harness lineage |
+| `A004` | Dimensionless dynamic predictions |
+| `A003` | Dark-knot Rayleigh |
+| `A001`–`A002` | Route-A / Planck-routes packs |
 
-### Geometry intake (Canon provenance)
+Each family has `FAMILY.yaml` and version dirs `A0xx-v…`. Blind/unblind artifacts stay separate — treat unblind keys carefully.
 
-| Path | Role |
-|------|------|
-| `KnotPlot/` | SST geometry intake — presets, ridgerunner pipeline, `knots/final` shared with falsifiers. **Not** a physics solver. |
-| `Ideal_Sources/` | Ideal knot/link geometry archives + provenance |
-| `KnotTheory/` | Vendored Bar-Natan HFK-Zurich (Python 2) + WikiLink |
-
-Downstream of certified geometry: **SSTcore** resource APIs and `PipelineProvenanceAPI`.
-
-### Labs & dashboards
+### Geometry & data — `03_data/` + `04_tools/`
 
 | Path | Role |
 |------|------|
-| `GUI/vortexring-lab/` | VortexRing Lab (HTML/JS monolith + modular tracks) |
-| `SST-dashboard/` | PyQt research dashboard |
-| `SST_CoilLab_research/` / `SST_Coil_DigitalTwin_research/` | Coil lab / digital twin packs |
-| `3D/` | Coil / gear / mold STL generators and slicer outputs |
+| `04_tools/A_geometry/A001_knotplot` | KnotPlot tool surface |
+| `04_tools/A_geometry/A002_ridgerunner` | Ridgerunner pipeline |
+| `03_data/A_knots/04_knotplot` | Shared `final` knot dataset |
+| `03_data/A_knots/01_ideal/ideal_sources` | Ideal knot/link archives + provenance |
+| `03_data/A_knots/02_fourier/…` | Fremlin / KnotPlot Fourier series |
+| `03_data/A_knots/03_katlas/v0.2.2` | Katlas sources |
+| `03_data/A_knots/07_knotinfo` | KnotInfo upstream archives |
+| `08_third_party/knot_theory` | Vendored Bar-Natan HFK-Zurich + WikiLink |
 
-### Research packs (calculation sandboxes)
+Resolver helpers: `sst_workbench_paths.knot_dataset()`, `.ideal_sources()`, `.katlas_sources()`, `.fseries_root()`.
 
-| Theme | Paths |
-|-------|-------|
-| Fermat / geodesic | `SST_fermat_pybind_research/` (live ~v0.6.1) |
-| Route-B BEM | `SST_routeB_RT_bem_research/` (v18 production scan lineage) |
-| Horn / SSDL | `SST_horn_bem_research/`, `SST_ssdl_audit_research/` |
-| Constants | `SST_derive_constants_research/` |
-| Chi-phase / Biot | `SST_chi_phase_research/` (not under `to_be_processed/` — that is a stub) |
-| Trefoil | `SST_Trefoil_Closure/`, `SST_ideal_trefoil_biot_research/` |
-| SST-21D | `SST21D_knot_order_pipeline/` |
-| Attachment / contra-swirl | `SST_fs_attachment_audit_research/`, `SST_contra_swirl_bridge_research/` |
-| Routes / Route-I | `SST_v0_8_19_routes_research/`, `SST_Route_I_relative_entropy_PoC/` |
-| Timefield outputs | `SST_timefield_spectral_v06_research/` (often output-only) |
-
-### Proofs, data, media, archives
+### Labs & apps — `05_apps/`
 
 | Path | Role |
 |------|------|
-| `proof-scripts/` | SSTcore probes + swirl/VAM proof trees |
-| `datasets/` | SPARC, exports, visualizers |
-| `generated-figures/` | Plot archives |
-| `media/` | Images, presentations, voiceovers |
-| `Restore_Archives/` | **Central** local zip store (theme folders) — not the old `archive/` story |
-| `bundles/` | Occasional zip bundles (e.g. trefoil) |
-| `scripts/`, `templates/` | Repo helpers; C++/pybind audit template |
-| `verification-suites/` | Thin (mainly embedded-knots) |
-| `experiments/`, `to_be_processed/` | **Relocation stubs** — real content lives at the research roots above |
+| `A001_dashboard/` | PyQt research dashboard (`sst_dashboard_app.py`) |
+| `A002_coil_gui/` | Coil GUI |
+| `A003_vortexlab/vortexring-lab/` | VortexRing Lab (HTML/JS) |
+| `A004_math_lab/` | Math lab packs |
+
+### Other research domains
+
+| Domain letter | Path prefix | Examples |
+|---------------|-------------|----------|
+| Closures | `01_research/B_closures/` | derive-constants, Route-B BEM, horn/SSDL, contra-swirl |
+| Dynamics | `01_research/C_dynamics/` | chi-phase, ideal-trefoil Biot, Kelvin Floquet workbench |
+| Benchmarks | `01_research/D_benchmarks/` | Hopf, verification suites, KnotPlot atlases |
+| Pipelines | `01_research/E_pipelines/` | KnotPlot campaigns, PTSA, Katlas conditioning |
+| Exploratory | `01_research/F_exploratory/` | coil digital twin / coil lab, Route-I PoC |
+
+### Proofs, archives, docs
+
+| Path | Role |
+|------|------|
+| `04_tools/D_proof/D001_proof_scripts/` | SSTcore probes + proof trees |
+| `03_data/B_external/`, `C_media/`, `D_generated/` | Datasets, media, generated figures/outputs |
+| `09_archive/restore/` | Central local zip store (themed) |
+| `10_docs/` | Inventory, migration, registry, architecture |
+| `06_templates/` | C++/pybind audit and pack templates |
+| `07_scripts/` | Resolvers, gates, consolidate/migration scripts, pytest |
+
+Root keepers: `README.md`, `falsifier_registry.yaml`, `requirements-workbench.txt`, `pyrightconfig.json`.
 
 ---
 
-## ▶️ Common entry points
+## Common entry points
 
 | What | Path | Command |
 |------|------|---------|
-| SST dashboard | `SST-dashboard/sst_dashboard_app.py` | `python SST-dashboard/sst_dashboard_app.py` |
-| Full probe harness | `proof-scripts/SSTcore_full_probe.py` | `python proof-scripts/SSTcore_full_probe.py` |
-| Embedded-knots tests | `verification-suites/embedded-knots/` | `pytest verification-suites/embedded-knots/` |
-| Gilbert usability | root | `python -m unittest test_sst_gilbert_usability` |
-| Derive / BEM packs | `SST_derive_constants_research/`, `SST_routeB_RT_bem_research/`, … | See each pack README / [INVENTORY_PYTHON.md](INVENTORY_PYTHON.md) |
-| Chi-phase | `SST_chi_phase_research/` | Each package has its own README |
-| Maxwell campaign | `SST_Maxwell/` | Prefer **v0.2.0** trees; respect blind/unblind boundaries |
+| SST dashboard | `05_apps/A001_dashboard/sst_dashboard_app.py` | `python 05_apps/A001_dashboard/sst_dashboard_app.py` |
+| Full probe harness | `04_tools/D_proof/D001_proof_scripts/` | see pack README; typically `python …/SSTcore_full_probe.py` |
+| Embedded-knots tests | `01_research/D_benchmarks/D003_verification_suites/` | `pytest 01_research/D_benchmarks/D003_verification_suites` |
+| Gilbert usability | `07_scripts/` | `python -m pytest 07_scripts/test_sst_gilbert_usability.py` |
+| Repo tooling tests | `07_scripts/` | `python -m pytest 07_scripts` |
+| Maxwell / other falsifiers | `01_research/A_falsifiers/A0xx_…/A0xx-v…/` | Prefer latest version dir; respect blind/unblind |
 
 ---
 
-## 📚 Docs in this repo
+## Docs in this repo
 
 | Doc | Contents |
 |-----|----------|
-| [INVENTORY.md](INVENTORY.md) | Measured overview, directory roles, stale-doc corrections |
-| [INVENTORY_PYTHON.md](INVENTORY_PYTHON.md) | Research scripts by pack |
-| [INVENTORY_ARCHIVES.md](INVENTORY_ARCHIVES.md) | Zip ↔ folder bundles |
-| [INVENTORY_DUPLICATES.md](INVENTORY_DUPLICATES.md) | Nested / duplicated trees |
-| [WORKBENCH_LAYOUT.md](WORKBENCH_LAYOUT.md) | Directory map / origins (partially superseded by INVENTORY) |
-| [Restore_Archives/README.md](Restore_Archives/README.md) | Theme layout + consolidate script |
-| [MIGRATION_MANIFEST.md](MIGRATION_MANIFEST.md) | Historical move-only migration log (rev. 5) |
+| [INVENTORY.md](10_docs/inventory/root_docs/INVENTORY.md) | Measured overview |
+| [INVENTORY_PYTHON.md](10_docs/inventory/root_docs/INVENTORY_PYTHON.md) | Research scripts by pack |
+| [INVENTORY_ARCHIVES.md](10_docs/inventory/root_docs/INVENTORY_ARCHIVES.md) | Zip ↔ folder bundles |
+| [INVENTORY_FALSIFIERS.md](10_docs/inventory/root_docs/INVENTORY_FALSIFIERS.md) | Falsifier inventory |
+| [path_map.csv](10_docs/migration/path_map.csv) | Old → new path provenance |
+| [WORKBENCH_LAYOUT.md](10_docs/migration/WORKBENCH_LAYOUT.md) | Historical layout notes |
+| [MIGRATION_MANIFEST.md](10_docs/migration/MIGRATION_MANIFEST.md) | Earlier move log |
+| [sp11_decommission.md](10_docs/migration/sp11_decommission.md) | Junction teardown / soft-retire |
+| [delete_retirement.md](10_docs/migration/delete_retirement.md) | Why `DELETE/` was emptied and removed |
+| [09_archive/restore/README.md](09_archive/restore/README.md) | Archive theme layout |
+| [.cursor/plans/restructure/](.cursor/plans/restructure/) | Restructure epic + SP00–SP11 plans |
 
 ---
 
-## 🚫 Not in git (usually)
-
-Large or generated binaries stay local / ignored:
+## Not in git (usually)
 
 | Excluded | Reason |
 |----------|--------|
-| `Restore_Archives/` contents, many `*.zip` | Snapshot store; see Restore_Archives README |
-| `hardware/`, heavy `3D/` slicer output | STL / gcode assets |
-| `*.pyd` | Compiled SSTcore — install via `pip install SSTcore` |
+| `09_archive/restore/` zip contents, many `*.zip` | Snapshot store; see archive README |
+| Heavy fabrication / slicer output under `04_tools/C_fabrication/` | STL / gcode assets |
+| `*.pyd` | Compiled extensions — install SSTcore via pip |
 | `*.blend` | Blender scenes |
 | `.idea/`, `.venv/` | IDE / local env |
 
@@ -188,7 +208,7 @@ This sandbox may contain **more version folders than particles**. That is not a 
 
 ---
 
-## 🧬 Provenance (short)
+## Provenance (short)
 
 SST’s written history and early theory drafts:
 
@@ -198,7 +218,7 @@ SST’s written history and early theory drafts:
 
 ---
 
-## 🔬 Author
+## Author
 
 **Omar Iskandarani**  
 Independent Researcher, Groningen, The Netherlands  
@@ -209,20 +229,20 @@ Conceived, written, and (sometimes reluctantly) sandboxed.
 
 ---
 
-## ⚠️ Warning
+## Warning
 
 This repository may induce:
 
 - spontaneous fluid metaphors,
 - academic eye-rolling,
-- an unhealthy attachment to version folders named `v0.1.2.4`,
+- an unhealthy attachment to version folders named `A011-v0.1.2.4`,
 - the belief that every trefoil deserves its own falsifier.
 
 Proceed responsibly. Geometry is not physics until the Canon says so — and even then, check the epistemic tag.
 
 ---
 
-## 💬 Feedback
+## Feedback
 
 - Open an [issue](https://github.com/Swirl-String-Theory/SST-Workbench/issues)
 - Prefer contributing mature closures **up** into SSTcore / Canon rather than forking yet another nested copy

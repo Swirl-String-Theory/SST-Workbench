@@ -14,12 +14,13 @@ import sp11_decommission as sp11  # noqa: E402
 # Explicit accept-list for lingering documentary / historical path strings.
 # Runtime resolvers must use catalog paths; these docs may still mention legacy names.
 ACCEPTED_LEGACY_MENTIONS = {
-    "MIGRATION_MANIFEST.md",
-    "MOVE_DERIVE_CONSTANTS_MANIFEST.md",
+    "10_docs/migration/MIGRATION_MANIFEST.md",
+    "10_docs/migration/MOVE_DERIVE_CONSTANTS_MANIFEST.md",
     "10_docs/migration/path_map.csv",
     "10_docs/migration/junction_registry.csv",
     "10_docs/migration/junction_registry_pre_sp11.csv",
     "10_docs/migration/sp11_decommission.md",
+    "10_docs/migration/sp11_husk_cleanup.md",
     "10_docs/migration/reproducibility_gate.md",
     ".cursor/plans/restructure",
 }
@@ -35,7 +36,6 @@ def test_domain_roots_exist():
         "07_scripts",
         "09_archive",
         "10_docs",
-        "DELETE",
     ):
         assert (WB / rel).is_dir(), rel
 
