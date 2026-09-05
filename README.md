@@ -184,6 +184,8 @@ Root keepers: `README.md`, `falsifier_registry.yaml`, `requirements-workbench.tx
 | [INVENTORY_PYTHON.md](10_docs/inventory/root_docs/INVENTORY_PYTHON.md) | Research scripts by pack |
 | [INVENTORY_ARCHIVES.md](10_docs/inventory/root_docs/INVENTORY_ARCHIVES.md) | Zip ↔ folder bundles |
 | [INVENTORY_FALSIFIERS.md](10_docs/inventory/root_docs/INVENTORY_FALSIFIERS.md) | Falsifier inventory |
+| [family_hierarchy.json](10_docs/registry/family_hierarchy.json) | Live hierarchy: families → versions → outputs (+ naming rules) |
+| [catalog_index.json](10_docs/registry/catalog_index.json) | Compact catalog index for `resolve_family()` |
 | [path_map.csv](10_docs/migration/path_map.csv) | Old → new path provenance |
 | [WORKBENCH_LAYOUT.md](10_docs/migration/WORKBENCH_LAYOUT.md) | Historical layout notes |
 | [MIGRATION_MANIFEST.md](10_docs/migration/MIGRATION_MANIFEST.md) | Earlier move log |
