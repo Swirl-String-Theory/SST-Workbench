@@ -14,14 +14,23 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from collections import defaultdict
 from pathlib import Path
+
+# Downloads holds filenames with characters cp1252 cannot encode (for example the
+# "AEther" ligature), which crashes printing on a default Windows console.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 WB = Path(__file__).resolve().parents[1]
 DOWNLOADS = Path.home() / "Downloads"
 
 #: extensions worth considering as Workbench material
-CANDIDATE_SUFFIXES = {".zip", ".stl", ".patch", ".diff", ".tar", ".gz", ".7z"}
+CANDIDATE_SUFFIXES = {
+    ".zip", ".stl", ".3mf", ".gcode", ".patch", ".diff", ".tar", ".gz", ".7z",
+    ".md", ".csv", ".json", ".txt", ".tex", ".yaml", ".yml",
+}
 
 #: Names that look like SST research material. Downloads holds 21 GB of games,
 #: drivers and installers; only what matches this is worth reporting.
