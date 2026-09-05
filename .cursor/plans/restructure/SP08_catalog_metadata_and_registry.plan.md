@@ -16,6 +16,12 @@ todos:
   - id: t04
     content: "Done-criteria: registry validate/discover clean; metadata tests green"
     status: pending
+  - id: t05
+    content: "Fix 3 duplicate catalog ids on disk: B003, B004, C006"
+    status: pending
+  - id: t06
+    content: "Resolve 3 catalog rows with no directory: B002, research D001, E007"
+    status: pending
 ---
 # SP08 — Catalog metadata and registry
 
@@ -30,8 +36,10 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] Migrate `falsifier_registry.yaml` to `catalog_id` + `resolve_family`
 - [ ] Build `catalog_index.json`; refresh inventories
 - [ ] Done-criteria: registry validate/discover clean; metadata tests green
+- [ ] Fix 3 duplicate catalog ids on disk: B003, B004, C006
+- [ ] Resolve 3 catalog rows with no directory: B002, research D001, E007
 
-**Next:** Blocked on SP06 + SP07
+**Next:** Ready. First fix 3 duplicate catalog ids on disk (B003, B004, C006) and 3 catalog rows with no directory (B002, D001 research, E007).
 
 Every family now sits at its catalog path. This sub-plan makes the catalog *machine-readable* and
 turns the version identifiers into something a program can compare.

@@ -37,24 +37,24 @@ isProject: false
 
 # SP01 — Central path resolver
 
-Status: `PLANNED` · Priority: P0 · Risk: low · Depends on: SP00
+Status: `DONE` · Priority: P0 · Risk: low · Depends on: SP00
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Create `07_scripts/sst_workbench_paths/` module
-- [ ] Implement `WORKBENCH_ROOT` / `DATA_ROOT` / `KNOT_DATASET` / … resolution
-- [ ] Implement `resolve_family(catalog_id[, version])` against `path_map.csv`
-- [ ] Create matching `07_scripts/paths.cmd`
-- [ ] Write `10_docs/architecture/path_resolution.md`
-- [ ] List seven absolute `paths.cmd` conversion targets (do not convert yet)
-- [ ] Add `test_workbench_paths.py`
-- [ ] Add `test_resolve_family.py`
-- [ ] Add `test_paths_cmd.py`
-- [ ] Done-criteria: identical resolution from ≥3 depths; all three tests green
+- [x] Create `07_scripts/sst_workbench_paths/` module
+- [x] Implement `WORKBENCH_ROOT` / `DATA_ROOT` / `KNOT_DATASET` / … resolution
+- [x] Implement `resolve_family(catalog_id[, version])` against `path_map.csv`
+- [x] Create matching `07_scripts/paths.cmd`
+- [x] Write `10_docs/architecture/path_resolution.md`
+- [x] List seven absolute `paths.cmd` conversion targets (do not convert yet)
+- [x] Add `test_workbench_paths.py`
+- [x] Add `test_resolve_family.py`
+- [x] Add `test_paths_cmd.py`
+- [x] Done-criteria: identical resolution from ≥3 depths; all three tests green
 
-**Next:** Start here — next executable sub-plan after SP00
+**Next:** Resolver shipped: sst_workbench_paths + paths.cmd + resolve_family.
 
 ~2,064 files hardcode a path that a move breaks. This sub-plan gives them somewhere better to point,
 before anything moves. It changes no directory layout.

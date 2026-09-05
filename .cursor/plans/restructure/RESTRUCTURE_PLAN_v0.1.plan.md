@@ -48,10 +48,10 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] 01_research / 02_libraries / 03_data destinations frozen to inventory tables
 - [x] Soft-delete rule: former deletes → `DELETE/<original/relative/path>`
 - [x] JSON restructure map regenerated from CATALOG + path_map
-- [ ] SP04: 18 simple moves executed (`git mv` + junctions)
-- [ ] SP05: clean family moves executed (pilot A038 first)
-- [ ] SP06: container splits executed
-- [ ] SP07: KnotPlot tool/data/campaign/result split executed
+- [x] SP04: 18 simple moves executed (`git mv` + junctions)
+- [x] SP05: clean family moves executed (pilot A038 first)
+- [x] SP06: container splits executed
+- [x] SP07: KnotPlot tool/data/campaign/result split executed
 - [ ] SP09: version dirs renamed to `<ID>-v…`
 - [ ] SP11: stubs soft-retired under `DELETE/`
 

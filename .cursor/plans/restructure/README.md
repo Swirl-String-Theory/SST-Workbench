@@ -33,7 +33,7 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | [SP05](SP05_clean_family_moves.plan.md) | Clean family moves | `DONE` | 6/6 | P1 | medium |
 | [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `DONE` | 5/5 | P2 | medium |
 | [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `DONE` | 5/5 | P2 | high |
-| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `PLANNED` | 0/5 | P3 | medium |
+| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `PLANNED` | 0/7 | P3 | medium |
 | [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `PLANNED` | 0/5 | P3 | medium |
 | [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
 | [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
@@ -42,7 +42,21 @@ Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (5/12 planning done) 
 [RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (5/11 mapping freeze done).
 Each file has a **Todos** section (checked = done) and YAML frontmatter todos for Cursor.
 
-**Resume here:** SP01 path resolver (SP00 is closed).
+**Resume here:** SP08 catalog metadata. SP00-SP07 are closed: 279 path_map rows
+verified, 58 junctions live, 84 catalog families on disk holding 303 version
+directories, 149 tests green.
+
+**Open before SP08 writes any metadata** (from `07_scripts/catalog_audit.py`):
+
+- Three catalog ids exist twice on disk, so a bare id no longer identifies a family:
+  `B003` (horn_bem and planck_routes_a_to_d_equivalence), `B004`
+  (planck_routes_v3_preregistered and route_b_rt_bem), `C006`
+  (kelvin_floquet_workbench and uq_twisted_vortex_ring).
+- Three catalog rows have no directory: `B002` (the catalog folds the Planck routes
+  into one family while disk has them as B003 + B004), research `D001`
+  (`schrodinger_gate_constants_audit`, still a subfolder of B001_derive_constants),
+  and `E007` (superseded by `04_tools/A_geometry/A003_knotplot_qhp_sweep_generator`).
+- `A005` has no directory on purpose: it is marked `reserved`, archive-only.
 
 
 ## Status legend

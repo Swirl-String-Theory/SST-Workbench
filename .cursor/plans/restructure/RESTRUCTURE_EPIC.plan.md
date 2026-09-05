@@ -51,10 +51,10 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] Phase graph SP00–SP11 defined
 - [x] A001–A042 chronology frozen; 01/02/03 catalog tables aligned
 - [x] SP00 freeze & provenance completed (`10_docs/migration/FREEZE.md`)
-- [ ] SP01 path resolver implemented & verified
-- [ ] SP02 junction layer live for moved roots
-- [ ] SP03 catalog skeleton + hygiene on disk
-- [ ] SP04–SP07 physical `git mv` waves complete
+- [x] SP01 path resolver implemented & verified
+- [x] SP02 junction layer live for moved roots
+- [x] SP03 catalog skeleton + hygiene on disk
+- [x] SP04–SP07 physical `git mv` waves complete
 - [ ] SP08–SP09 metadata + version rename
 - [ ] SP10 reproducibility gate passed
 - [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission

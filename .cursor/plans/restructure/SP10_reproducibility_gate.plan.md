@@ -31,7 +31,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [ ] Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason
 - [ ] Done-criteria: no unjustified fails; gate report committed
 
-**Next:** Blocked on SP09
+**Next:** Blocked on SP09.
 
 The gate that decides whether the migration succeeded. Nothing is deleted until this passes.
 

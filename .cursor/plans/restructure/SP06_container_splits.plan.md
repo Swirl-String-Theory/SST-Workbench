@@ -3,35 +3,35 @@ name: SP06 container splits
 todos:
   - id: t00
     content: "Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe"
-    status: pending
+    status: completed
   - id: t01
     content: "Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)"
-    status: pending
+    status: completed
   - id: t02
     content: "Reveal keys under `keys/`; multi-junction roots where needed"
-    status: pending
+    status: completed
   - id: t03
     content: "Record `sst_trefoil_biot_py` diffs (no dedupe)"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches"
-    status: pending
+    status: completed
 ---
 # SP06 — Ambiguous container splits
 
-Status: `PLANNED` · Priority: P2 · Risk: medium · Depends on: SP05
+Status: `DONE` · Priority: P2 · Risk: medium · Depends on: SP05
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe
-- [ ] Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)
-- [ ] Reveal keys under `keys/`; multi-junction roots where needed
-- [ ] Record `sst_trefoil_biot_py` diffs (no dedupe)
-- [ ] Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches
+- [x] Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe
+- [x] Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)
+- [x] Reveal keys under `keys/`; multi-junction roots where needed
+- [x] Record `sst_trefoil_biot_py` diffs (no dedupe)
+- [x] Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches
 
-**Next:** Blocked on SP05
+**Next:** 191 rows verified; 7 collapsed containers re-split into 16 families.
 
 Seventeen roots that each hold more than one thing. This is the phase that cannot be automated: a
 script cannot tell a new hypothesis from a new software release. Every split below is a judgement,
