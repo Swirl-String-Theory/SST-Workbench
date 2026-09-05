@@ -33,11 +33,11 @@ todos:
     status: completed
   - id: t10
     content: "SP11: stubs soft-retired under `DELETE/`"
-    status: pending
+    status: completed
 ---
 # RESTRUCTURE PLAN v0.1 — all 73 roots to exact destinations
 
-Status: `IN PROGRESS` · Baseline: 2026-09-03
+Status: `DONE` · Baseline: 2026-09-03
 
 ## Todos
 
@@ -53,9 +53,9 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP06: container splits executed
 - [x] SP07: KnotPlot tool/data/campaign/result split executed
 - [x] SP09: version dirs renamed to `<ID>-v…`
-- [ ] SP11: stubs soft-retired under `DELETE/`
+- [x] SP11: stubs soft-retired under `DELETE/`
 
-**Next:** SP11 soft-retire. Version directories are `<ID>-v…`; SP10 gate is green.
+**Closed:** SP11 soft-retire + junction teardown recorded in `sp11_decommission.md`.
 
 The one-time mapping. Every current top-level directory appears exactly once. When the migration
 finishes, this document is history; [CATALOG_v0.1.md](CATALOG_v0.1.md) is what remains.

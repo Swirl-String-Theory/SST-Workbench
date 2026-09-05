@@ -99,13 +99,31 @@ def test_bootstrap_reconstructs_and_verifies(tmp_path: Path):
     assert jn.main(["--root", str(root), "verify"]) == 0
 
 
-def test_bootstrap_on_live_workbench_noop():
-    """Live tree has no status=moved rows yet — bootstrap must exit 0."""
-    proc = subprocess.run(
-        ["cmd", "/d", "/c", str(BOOTSTRAP)],
-        cwd=str(WB),
-        capture_output=True,
-        text=True,
-    )
-    assert proc.returncode == 0, proc.stdout + "\n" + proc.stderr
-    assert "nothing to do" in proc.stdout.lower() or "ok" in proc.stdout.lower()
+def test_bootstrap_cmd_exists_and_is_documented():
+    """Bootstrap remains the official restore path; do not run it on the live tree.
+
+    Pre-SP11 this test executed ``bootstrap_junctions.cmd`` against the real
+    workbench under the outdated assumption that there were no selectable
+    junction rows. After SP04–SP10 those rows exist (status moved/verified), so
+    a live bootstrap recreates the entire compat layer — which undoes SP11.
+    """
+    assert BOOTSTRAP.is_file()
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    assert "junctions.py" in text
+    assert "create" in text
+
+
+def test_live_workbench_create_dry_run_only():
+    """Dry-run may list rows; must not create junctions on the live tree."""
+    before = {
+        r["old_path"]
+        for r in jn.load_registry(WB)
+        if jn.is_junction(WB / (r.get("old_path") or "").replace("\\", "/"))
+    }
+    assert jn.main(["--root", str(WB), "create", "--dry-run"]) == 0
+    after = {
+        r["old_path"]
+        for r in jn.load_registry(WB)
+        if jn.is_junction(WB / (r.get("old_path") or "").replace("\\", "/"))
+    }
+    assert after == before

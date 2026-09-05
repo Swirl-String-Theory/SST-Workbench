@@ -1,4 +1,8 @@
-"""SP09: ``legacy_dir`` resolves through the two-level junction scaffold."""
+"""SP09: ``legacy_dir`` resolves through the two-level junction scaffold.
+
+After SP11 the compatibility junctions are removed; these checks skip unless a
+legacy scaffold link is still present on disk.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -17,6 +21,15 @@ import junctions as jn  # noqa: E402
 import version_rename as vr  # noqa: E402
 
 pytestmark = pytest.mark.skipif(os.name != "nt", reason="junctions need Windows")
+
+
+def _compat_layer_present() -> bool:
+    """True if any registry old_path is still a live junction."""
+    for r in jn.load_registry(WB):
+        old = (r.get("old_path") or "").strip()
+        if old and jn.is_junction(WB / old.replace("\\", "/")):
+            return True
+    return False
 
 
 def _sha256(path: Path) -> str:
@@ -60,6 +73,8 @@ def _resolves_to(link: Path, dest: Path) -> bool:
 
 
 def test_legacy_dir_scaffold_resolves_to_the_renamed_directory():
+    if not _compat_layer_present():
+        pytest.skip("SP11 removed compatibility junctions")
     missing = []
     for fam in cm.discover():
         if not fam.legacy_paths:
@@ -84,6 +99,8 @@ def test_legacy_dir_scaffold_resolves_to_the_renamed_directory():
 
 
 def test_project_json_hash_matches_through_the_scaffold():
+    if not _compat_layer_present():
+        pytest.skip("SP11 removed compatibility junctions")
     mismatches = []
     for fam in cm.discover():
         if not fam.legacy_paths:

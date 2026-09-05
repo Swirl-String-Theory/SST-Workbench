@@ -31,7 +31,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] Special cases: blind-only, datasets, non-runnable, GPU skip-with-reason
 - [x] Done-criteria: no unjustified fails; gate report committed
 
-**Next:** SP11 decommission. Gate report: 87 families, 28 pass (24 Tier 1), 59 structural, 0 fail. Dataset moves preserved bytes (`ok=True`); Fremlin/Ideal_Sources show post-SP00 freeze drift only.
+**Closed into SP11.** Gate report: 87 families, 28 pass (24 Tier 1), 59 structural, 0 fail. Dataset moves preserved bytes (`ok=True`); Fremlin/Ideal_Sources show post-SP00 freeze drift only.
 
 The gate that decides whether the migration succeeded. Nothing is deleted until this passes.
 

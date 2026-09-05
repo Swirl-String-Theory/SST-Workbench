@@ -40,8 +40,9 @@ def test_workbench_root_from_module_location():
 def test_workbench_root_from_nested_start(tmp_path):
     nested = tmp_path / "a" / "b" / "c"
     nested.mkdir(parents=True)
-    # Walk from a path inside the real workbench
-    deep = WB / "scripts"
+    # Walk from a path inside the real workbench (catalog path; SP11 removed
+    # the ``scripts`` junction).
+    deep = WB / "07_scripts"
     root = swp.workbench_root(start=deep)
     assert root == WB.resolve()
 
@@ -68,19 +69,20 @@ def test_explicit_without_marker_raises(tmp_path):
 
 def test_data_root_default_and_override(monkeypatch):
     assert swp.data_root() == (WB / "03_data").resolve()
-    monkeypatch.setenv("SST_DATA_ROOT", str(WB / "scripts"))
-    assert swp.data_root() == (WB / "scripts").resolve()
+    monkeypatch.setenv("SST_DATA_ROOT", str(WB / "07_scripts"))
+    assert swp.data_root() == (WB / "07_scripts").resolve()
 
 
-def test_knot_dataset_falls_back_to_knotplot():
-    # Pre-SP07: KnotPlot/knots/final should exist on this workbench.
+def test_knot_dataset_prefers_catalog_path():
     kd = swp.knot_dataset()
-    assert kd == (WB / "KnotPlot" / "knots" / "final").resolve()
+    assert kd == (WB / "03_data" / "A_knots" / "04_knotplot" / "final").resolve()
     assert kd.is_dir()
 
 
-def test_ideal_sources_falls_back():
-    assert swp.ideal_sources() == (WB / "Ideal_Sources").resolve()
+def test_ideal_sources_prefers_catalog_path():
+    assert swp.ideal_sources() == (
+        WB / "03_data" / "A_knots" / "01_ideal" / "ideal_sources"
+    ).resolve()
     assert swp.ideal_sources().is_dir()
 
 

@@ -80,9 +80,9 @@ echo SST_FSERIES_ROOT=%SST_FSERIES_ROOT%
     "rel_cwd",
     [
         ".",
-        "scripts",
         "07_scripts",
-        "SST_Fourier_vs_Ideal_Blind_Falsifier",
+        "10_docs/migration",
+        "01_research/A_falsifiers",
     ],
 )
 def test_paths_cmd_matches_python_from_depth(rel_cwd, tmp_path):

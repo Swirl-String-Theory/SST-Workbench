@@ -134,7 +134,8 @@ def verify_datasets(
             # Move integrity: legacy path (junction or leftover) vs new path.
             legacy_path = root / old_file
             legacy_same = False
-            if legacy_path.is_file():
+            legacy_present = legacy_path.is_file()
+            if legacy_present:
                 try:
                     legacy_same = sha256_file(legacy_path) == got
                 except OSError:
@@ -143,7 +144,10 @@ def verify_datasets(
                 "old": old_file, "new": mapped, "want": want, "got": got,
                 "legacy_matches_new": legacy_same,
             }
-            if legacy_same:
+            # Freeze drift: new file differs from SP00 freeze, but the move did
+            # not corrupt bytes (legacy twin matches new, or legacy is gone after
+            # SP11 junction removal — SP10 already proved move integrity then).
+            if legacy_same or not legacy_present:
                 stats["freeze_drift"] += 1
                 if len(freeze_drift) < 20:
                     freeze_drift.append(entry)

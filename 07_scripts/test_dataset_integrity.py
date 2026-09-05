@@ -40,6 +40,9 @@ def test_fremlin_move_preserves_bytes_even_if_freeze_drifted():
     if sample not in digests:
         pytest.skip("sample not in freeze checksums")
     new = WB / "03_data/A_knots/02_fourier/fremlin_fourier_series/fremlin/3_1/knot.3_1.fseries"
+    assert new.is_file()
+    # After SP11 the Fremlin junction is gone; move integrity is the catalog file.
+    # Freeze drift (got != SP00 digest) remains allowed — see SP10 gate report.
     old = WB / sample
-    assert new.is_file() and old.is_file()
-    assert di.sha256_file(new) == di.sha256_file(old)
+    if old.is_file():
+        assert di.sha256_file(new) == di.sha256_file(old)

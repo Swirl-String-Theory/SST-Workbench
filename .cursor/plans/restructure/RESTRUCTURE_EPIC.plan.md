@@ -36,11 +36,11 @@ todos:
     status: completed
   - id: t11
     content: "SP11 soft-retire stubs to `DELETE/` + junction decommission"
-    status: pending
+    status: completed
 ---
 # RESTRUCTURE EPIC — SST-Workbench catalog migration
 
-Status: `IN PROGRESS` · Version: 0.1 · Baseline: 2026-09-03
+Status: `DONE` · Version: 0.1 · Baseline: 2026-09-03
 
 ## Todos
 
@@ -57,9 +57,9 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] SP04–SP07 physical `git mv` waves complete
 - [x] SP08–SP09 metadata + version rename
 - [x] SP10 reproducibility gate passed
-- [ ] SP11 soft-retire stubs to `DELETE/` + junction decommission
+- [x] SP11 soft-retire stubs to `DELETE/` + junction decommission
 
-**Next:** SP11 soft-retire + junction decommission. SP10 gate is green (0 fail; 24 Tier-1 passes).
+**Closed:** SP00–SP11 complete. See `10_docs/migration/sp11_decommission.md`.
 
 ## 1. Problem
 

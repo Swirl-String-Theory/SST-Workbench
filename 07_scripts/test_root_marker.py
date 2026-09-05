@@ -26,7 +26,7 @@ def test_marker_found_from_four_depths(monkeypatch):
     monkeypatch.delenv("SST_WORKBENCH_ROOT", raising=False)
     starts = [
         WB,
-        WB / "scripts",
+        WB / "07_scripts",
         WB / "07_scripts" / "sst_workbench_paths",
         WB / "10_docs" / "migration",
         WB / "01_research" / "A_falsifiers",

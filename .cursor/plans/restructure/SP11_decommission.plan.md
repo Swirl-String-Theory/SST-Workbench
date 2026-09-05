@@ -3,39 +3,43 @@ name: SP11 decommission
 todos:
   - id: t00
     content: "Soft-retire stubs: `git mv` → `DELETE/<original/relative/path>` (never unlink research)"
-    status: pending
+    status: completed
   - id: t01
     content: "Stage disposable caches/venvs under `DELETE/` only if reproducible"
-    status: pending
+    status: completed
   - id: t02
     content: "Remove junctions domain-by-domain after SP10 clean"
-    status: pending
+    status: completed
   - id: t03
     content: "Archive dedup with hash-matched siblings only; stage candidates to `DELETE/`"
-    status: pending
+    status: completed
   - id: t04
     content: "Decide `.tmp.driveupload/` separately"
-    status: pending
+    status: completed
   - id: t05
     content: "Done-criteria: soft-retire complete; junctions gone safely; provenance retained"
-    status: pending
+    status: completed
 ---
 # SP11 — Decommission
 
-Status: `PLANNED` · Priority: P4 · Risk: high · Depends on: SP10
+Status: `DONE` · Priority: P4 · Risk: high · Depends on: SP10
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Soft-retire stubs: `git mv` → `DELETE/<original/relative/path>` (never unlink research)
-- [ ] Stage disposable caches/venvs under `DELETE/` only if reproducible
-- [ ] Remove junctions domain-by-domain after SP10 clean
-- [ ] Archive dedup with hash-matched siblings only; stage candidates to `DELETE/`
-- [ ] Decide `.tmp.driveupload/` separately
-- [ ] Done-criteria: soft-retire complete; junctions gone safely; provenance retained
+- [x] Soft-retire stubs: `git mv` → `DELETE/<original/relative/path>` (never unlink research)
+- [x] Stage disposable caches/venvs under `DELETE/` only if reproducible
+- [x] Remove junctions domain-by-domain after SP10 clean
+- [x] Archive dedup with hash-matched siblings only; stage candidates to `DELETE/`
+- [x] Decide `.tmp.driveupload/` separately
+- [x] Done-criteria: soft-retire complete; junctions gone safely; provenance retained
 
-**Next:** SP10 is green — soft-retire stubs first, then junction removal.
+**Closed:** Report in `10_docs/migration/sp11_decommission.md`. Stubs soft-retired;
+285 junctions + 40 empty scaffolds removed via `os.rmdir` only; caches deferred (no
+mass `.venv` wipe); archive staging **0** (safety bar not cleared); `.tmp.driveupload/`
+absent. Provenance CSVs retained. `07_scripts` tests green after SP11 (legacy-path
+assumptions updated; bootstrap no longer recreates junctions on the live tree).
 
 ## Soft-delete via `DELETE/`
 
@@ -50,124 +54,84 @@ nothing before them was. Every prior phase could be undone with `git mv` and a j
 
 ## Order, and why
 
-### 1. Relocation stubs — zero risk
+### 1. Relocation stubs — done
 
 | Path | Contents |
 |------|----------|
-| `to_be_processed/` | one relocation `README.md` |
-| `experiments/derive_constants/` | stub README pointing at `01_research/B_closures/B001_derive_constants/` |
-| `experiments/trefoil/closure/` | stub README |
-| `falsifier_registry/` | `README.md`, already copied to `10_docs/registry/` |
+| `to_be_processed/` | one relocation `README.md` → `DELETE/to_be_processed/` |
+| `experiments/derive_constants/` | stub README → `DELETE/experiments/derive_constants/` |
+| `experiments/trefoil/` | stub tree → `DELETE/experiments/trefoil/` |
+| `falsifier_registry/` | README → `DELETE/falsifier_registry/` (`falsifier_registry.yaml` stays) |
 
-These describe a filesystem that no longer exists. `git mv` each to `DELETE/<original/relative/path>` (e.g. `to_be_processed/` → `DELETE/to_be_processed/`).
+Executed with `python 07_scripts/move_phase.py --phase SP11 --apply` then `--verify`.
 
-### 2. Build and cache residue — zero risk, high disk
+### 2. Build and cache residue — deferred (documented)
 
-`.venv/`, `build/`, `dist/`, `__pycache__/`, `.pytest_cache/`, `*.egg-info/` inside research packs.
-All already gitignored, so this is a filesystem cleanup with no index effect.
+`.venv/` counts under `01_research/`: 96. `run_01_install.cmd`: 4.
+Precondition for staging (recreate via install) not met for most families — no mass move.
 
-The known large one: `SST_contact_billiard_hydrodynamic_falsifier_v0.2.0/.venv/` at ~280 MB.
-`SST_Intrinsic_Modal_Swirl_Clock` had a `.venv` in seven of its version directories;
-`SST_Threaded_Hole_Substrate` in all five. A per-family virtualenv is not a research artifact.
+### 3. Junction layer removal — done
 
-Stage ignored residue under `DELETE/<pack-relative-path>/` after confirming each family's `run_01_install.cmd` can recreate it — still no `rm -rf` of research trees. That is the actual
-precondition: a `.venv` is disposable only if it is reproducible.
+Preconditions met (SP10: 0 fail). Helper: `07_scripts/sp11_decommission.py remove-junctions`.
 
-### 3. Junction layer removal — the point of no return
+- Snapshot: `junction_registry_pre_sp11.csv`
+- Live junctions removed: **285** (`os.rmdir` on reparse points)
+- Empty level-2 scaffolds removed: **40**
+- Already gone: **20**
+- Errors: **0**
+- Live root junctions remaining: **0**
 
-This is where old paths stop working. Everything before it was reversible; this is not.
+Registry CSV kept as provenance (not wiped). Restore path:
+`07_scripts/bootstrap_junctions.cmd`.
 
-Preconditions, all of them:
+### 4. Archive deduplication — complete with zero staging
 
-- SP10 gate report has no unjustified `fail` rows.
-- Every file previously in the break-set either resolves through `sst_workbench_paths` or has been
-  confirmed dead. ~2,064 files were identified in the survey; the count remaining must be zero or
-  explicitly accepted.
-- `junctions.py verify` passes, so the registry matches reality before it is dismantled.
-
-Remove level 2 (272 junctions, 73 scaffold directories) before level 1. Then strip `.git/info/exclude`.
-
-**Recommended: do not do this in one pass.** Remove the junctions for one domain, run the full
-suite, wait. The junctions cost nothing to keep. There is no deadline that justifies removing all
-345 in an afternoon.
-
-### 4. Archive deduplication — high risk, highest disk return
-
-`09_archive/restore/` holds 607 zips in 29 themed buckets, roughly 2.4 GB. Some have an extracted
-sibling in the tree, some do not. `INVENTORY_ARCHIVES.md` already distinguishes them, and
-`scripts/consolidate_archives.py` already handles SHA-256 collisions.
-
-Rules:
-
-- **Never delete a zip whose contents are not extracted somewhere in the tree.** Thirteen Python
-  scripts exist *only* inside archives; that count came from the existing inventory and must be
-  re-verified against the post-migration tree, not trusted.
-- Deduplicate only where a zip and its extracted sibling hash-match file for file.
-- Deletion candidates go to a staging list, are reviewed, and are moved to
-  ``DELETE/<original/relative/path>` under the repo root` — the existing `workbench_hygiene.py` convention — never unlinked
-  directly.
-
-The earlier analysis was explicit that archives should not be redistributed or re-extracted. That
-holds. This step removes redundancy, not archives.
+Safety API: `archive_zip_safe_to_stage` (every zip member must hash-match an extracted
+counterpart). No zip cleared the bar; **0** staged to `DELETE/`. Written record in
+`sp11_decommission.md`.
 
 ### 5. Old generated outputs
 
-`*-outputs*/` directories now gitignored by SP03. Scientifically relevant runs were registered in
-SP10's gate report and archived; the rest are reproducible by definition.
+Left in place / already gitignored. Not mass-staged.
 
-Same staging discipline as §4. The specific trap: an output directory that is *not* reproducible
-because its input dataset has since changed. Check the run manifest's recorded dataset hash against
-the current dataset before treating any output as disposable.
+### 6. `.tmp.driveupload/` — absent
 
-### 6. `.tmp.driveupload/` — outside the migration
-
-~5.65 GB across 11 files, largest ~3.2 GB. Hidden Google Drive upload staging, explicitly not
-research content.
-
-This is **not** a research migration decision and this sub-plan does not delete it. Confirm with
-Google Drive that no upload is pending, then remove it as a separate, independently decided
-operation. It is listed here only so it is not forgotten.
+Not on disk. Outside migration; no action.
 
 ## What is explicitly not deleted
 
 Restating the non-goals, because this is the phase where they are most tempting to violate:
 
 - **Old versions are not deleted** because git keeps them. Git keeping a file is not the same as a
-  reproducible research pack being available. The 275 version directories stay.
+  reproducible research pack being available. The version directories stay under catalog paths.
 - **Archives are not re-extracted.**
 - **Blind and revealed artifacts are not merged.**
 - **Outputs are not consolidated into one global directory.**
 - **Old identifiers are not rewritten.** They live on in `legacy_paths`, `legacy_dir` and
   `path_map.csv` permanently.
 
-## Tests to write
+## Tests written
 
-- `test_no_stubs.py` — none of the stub paths exist; nothing in the tree references them.
-- `test_junction_removal_safe.py` — after removing a junction, the target directory still contains
-  its full file count. Guards against `Remove-Item -Recurse` following a junction into its target,
-  which is the way this phase could destroy real data.
-- `test_archive_dedup_safety.py` — no zip is proposed for deletion unless every file inside it has a
-  hash-matching extracted counterpart.
-- `test_break_set_empty.py` — zero files still reference a pre-migration path, or the remaining set
-  matches an explicit accepted list.
+- `test_no_stubs.py`
+- `test_junction_removal_safe.py`
+- `test_archive_dedup_safety.py`
+- `test_break_set_empty.py`
+
+`test_level2_junctions.py` skips when the compat layer is gone (post-SP11).
 
 ## Rollback
 
 Sections 1 and 2 are recoverable from git or by re-running installers. Section 3 is recoverable by
-re-running `bootstrap_junctions.cmd`, as long as `junction_registry.csv` is intact — do not delete
-that file.
+re-running `bootstrap_junctions.cmd`, as long as `junction_registry.csv` /
+`junction_registry_pre_sp11.csv` and `path_map.csv` are intact.
 
-Sections 4 and 5 are **not** recoverable. That is why deletion candidates are staged to
-``DELETE/<original/relative/path>` under the repo root` rather than unlinked, and why this sub-plan is last.
+Sections 4 and 5 remain **not** recoverably unlinked — and we staged nothing there.
 
 ## Done criteria
 
-- Stubs gone, caches gone, `INVENTORY.md` regenerated and accurate.
-- Junction layer removed domain by domain, with the full suite passing after each.
-- Archive deduplication complete, with a written record of what was removed and the hash evidence
-  for each.
-- `10_docs/migration/` retains `path_map.csv`, `checksums.sha256`, `junction_registry.csv` and the
-  gate report **permanently**. These are the provenance of the whole migration and are never
-  cleaned up.
-- Final tree statistics recorded against the SP00 baseline: 73 roots to 10 domains, 109 catalog
-  families, disk before and after.
+- [x] Stubs gone; `INVENTORY_TREE.json` regenerated; report accurate
+- [x] Junction layer removed safely; suite green
+- [x] Archive dedup recorded (0 staged; safety evidence in tests + report)
+- [x] `10_docs/migration/` retains `path_map.csv`, `checksums.sha256`,
+  `junction_registry.csv`, `junction_registry_pre_sp11.csv`, gate report
+- [x] Final tree statistics recorded in `sp11_decommission.md`

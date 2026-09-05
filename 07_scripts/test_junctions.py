@@ -170,11 +170,12 @@ def test_hardcoded_path_through_junction(tmp_path: Path):
     ).read_text(encoding="utf-8")
 
 
-def test_live_workbench_status_noop():
-    """No moved rows yet — create/verify/status must succeed as no-ops."""
+def test_live_workbench_status_dry_run_safe():
+    """Live status/create --dry-run must not mutate the tree (SP11-safe)."""
     assert jn.main(["--root", str(WB), "status"]) == 0
     assert jn.main(["--root", str(WB), "create", "--dry-run"]) == 0
-    assert jn.main(["--root", str(WB), "verify"]) == 0
+    # After SP11, verify is expected to fail (junctions intentionally absent).
+    # Do not call verify here — that would pressure operators to recreate them.
 
 
 def test_verified_rows_still_select_for_junctions():
