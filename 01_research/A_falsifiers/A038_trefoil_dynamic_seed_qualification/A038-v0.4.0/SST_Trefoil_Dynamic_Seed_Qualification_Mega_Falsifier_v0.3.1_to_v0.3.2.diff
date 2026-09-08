@@ -1,0 +1,908 @@
+--- v0.3.1/src/sst_seed_falsifier/workflow.py
++++ v0.3.2/src/sst_seed_falsifier/workflow.py
+@@ -10,6 +10,9 @@
+ from .evidence import dynamics_contract,object_sha256
+ from .blind import sealed_private_dir
+ from .mesh_closure import run_resolution as run_mesh_closure_resolution, classify_resolution_ladder
++from .operator_split_cert import run_resolution as run_operator_split_resolution, classify_resolution_ladder as classify_operator_split_ladder
++from .operator_split import simulate_operator_split
++from .shape_ratio import trefoil_shape_ratio_series
+ 
+ 
+ def cfgload(path): return load_json(path)
+@@ -319,15 +322,44 @@
+     dump_json(out/'stage37b_mesh_closure'/'summary.json',summary)
+     return rows
+ 
++
++def stage_operator_split(out,cfg):
++    """S37C prospective admission gate: physical RK4 and arclength remap are split operators."""
++    out=Path(out); groups=_group_map(out); core=load_json(out/'stage35_core_robustness'/'results.json')
++    ids=_stratified_ids(core,int(cfg.get('mesh_gauge_top_k',cfg.get('long_top_k',8))),groups,int(cfg.get('mesh_gauge_min_per_source',1)),'qualified')
++    ladder=[int(n) for n in cfg.get('operator_split_resolution_ladder',[64,96,128])]
++    T=float(cfg.get('operator_split_t_final',cfg.get('mesh_gauge_t_final',1.2))); rows=[]
++    for cid in ids:
++        base=np.load(out/'geometries'/f'{cid}.npy'); per=[run_operator_split_resolution(base,cfg,n,T) for n in ladder]
++        cert=classify_operator_split_ladder(per,cfg)
++        rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'qualified':bool(cert['qualified']),
++                     'resolution_ladder':per,'certificate':cert,'promotion_to_s40_allowed':bool(cert['qualified']),
++                     'legacy_s37a_result_is_not_reused':True,'target_ratio_used':False})
++    rows.sort(key=lambda r:(r['qualified'],-float(r['certificate'].get('finest_max_pairwise_remap_shape_distance',1e99))),reverse=True)
++    dump_json(out/'stage37c_operator_split_remap'/'results.json',rows)
++    promoted=_stratified_ids(rows,int(cfg['long_top_k']),groups,int(cfg.get('long_min_per_source',1)),'qualified')
++    dump_json(out/'stage37c_operator_split_remap'/'summary.json',{
++        'format':'SST-TREFOIL-OPERATOR-SPLIT-REMAP-CERT-1','run_kind':_run_kind(cfg),'n_tested':len(rows),'n_qualified':sum(r['qualified'] for r in rows),
++        'top_ids':promoted,'source_coverage':_coverage(promoted,groups),'resolution_ladder':ladder,
++        'remap_intervals':[float(v) for v in cfg.get('operator_split_remap_intervals',[.5,.25,.125])],
++        'continuous_tangential_mesh_velocity_enabled':False,'chi_eff_target_free_observable':True,
++        'admission_gate_for_s40':True,'numerics_verdict':'PASS' if promoted else 'INDETERMINATE',
++        'physics_verdict':_physics_for_run(cfg,'UNTESTED'),'verdict':'PASS_OPERATOR_SPLIT_REMAP_CERTIFIED_SEEDS' if promoted else 'INDETERMINATE_NO_OPERATOR_SPLIT_CERTIFIED_SEED'})
++    return rows
++
+ def stage_long(out,cfg):
+-    out=Path(out); groups=_group_map(out); gp=out/'stage37_mesh_gauge'/'results.json'; cp=out/'stage35_core_robustness'/'results.json'
++    out=Path(out); groups=_group_map(out); gp=out/'stage37c_operator_split_remap'/'results.json'; cp=out/'stage35_core_robustness'/'results.json'
+     rr=load_json(gp) if gp.exists() else load_json(cp); ids=_stratified_ids(rr,int(cfg['long_top_k']),groups,int(cfg.get('long_min_per_source',1)),'qualified'); rows=[]; (out/'stage40_long'/'trajectories').mkdir(parents=True,exist_ok=True)
+-    mesh_cert=set(ids) if gp.exists() else set(); contract,contract_hash=dynamics_contract(cfg,int(cfg['long_n']))
++    cert=set(ids) if gp.exists() else set(); contract,contract_hash=dynamics_contract(cfg,int(cfg['long_n']))
+     for cid in ids:
+         x=normalize_length(resample_closed(np.load(out/'geometries'/f'{cid}.npy'),int(cfg['long_n'])),2*np.pi)
+-        tr=simulate(x,cfg,float(cfg['long_t_final']),'global_volume',True,store_samples=int(cfg.get('long_samples',240)),max_ds_cv_override=float(cfg.get('long_hard_ds_cv',.45)))
+-        np.savez_compressed(out/'stage40_long'/'trajectories'/f'{cid}.npz',**tr); rec=recurrence_metrics(tr,x,cfg); m=rolling_metrics(tr,x,cfg)
+-        rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'mesh_gauge_certified':cid in mesh_cert,'dynamics_contract':contract,'dynamics_contract_sha256':contract_hash,'dynamics_replay':{'dt':float(tr['dt']),'guard_stride':int(tr['guard_stride'])},**rec,'long_score':m['score'],'max_mesh_ratio':float(np.max(tr['mesh_ratio'])),'max_ds_cv':float(np.max(tr['ds_cv'])),'min_gap_over_ds':float(np.min(tr['gap_over_ds']))})
++        tr=simulate_operator_split(x,cfg,float(cfg['long_t_final']),'global_volume',remap_interval_override=float(cfg.get('operator_split_remap_interval',.25)),store_samples=int(cfg.get('long_samples',240)),max_ds_cv_override=float(cfg.get('long_hard_ds_cv',.45)))
++        np.savez_compressed(out/'stage40_long'/'trajectories'/f'{cid}.npz',**tr); rec=recurrence_metrics(tr,x,cfg); m=rolling_metrics(tr,x,cfg); chi=trefoil_shape_ratio_series(tr,x,int(cfg.get('cyclic_stride',4)))
++        rows.append({'candidate_id':cid,'source_group_id':groups.get(cid,'G_UNKNOWN'),'mesh_gauge_certified':cid in cert,'reparameterization_certified':cid in cert,
++                     'admission_gate':'S37C_OPERATOR_SPLIT_REMAP','dynamics_contract':contract,'dynamics_contract_sha256':contract_hash,
++                     'dynamics_replay':{'dt':float(tr['dt']),'guard_stride':int(tr['guard_stride']),'remap_interval':float(tr['remap_interval'])},
++                     **rec,'long_score':m['score'],'max_mesh_ratio':0.0,'max_ds_cv':float(np.max(tr['ds_cv'])),'min_gap_over_ds':float(np.min(tr['gap_over_ds'])),
++                     'remap_event_count':int(tr['remap_event_count']),'max_remap_shape_distance':float(np.max(tr['remap_shape_distance'])) if len(tr['remap_shape_distance']) else 0.0,'chi_eff':chi})
+     rows.sort(key=lambda r:(_rpo_eligibility(r,cfg)[0],r['n_returns']>0,-float(r['best_return']) if _finite_number(r.get('best_return')) else -1e9,r['long_score']),reverse=True); dump_json(out/'stage40_long'/'results.json',rows)
+     eligible=[r for r in rows if _rpo_eligibility(r,cfg)[0]]; cand=[r['candidate_id'] for r in eligible[:int(cfg['rpo_top_k'])]]
+     nwin=sum(bool(r.get('observation_window_reached')) for r in rows); nfull=sum(bool(r.get('completed')) for r in rows); n=len(rows); min_count=int(cfg.get('long_min_window_valid_count',max(1,min(3,n)))); min_frac=float(cfg.get('long_min_window_valid_fraction_for_fail',.60)); full_frac=float(cfg.get('long_min_full_horizon_fraction_for_fail',.60)); coverage_ok=n>0 and nwin>=min_count and nwin/n>=min_frac; full_ok=n>0 and nfull/n>=full_frac
+@@ -335,9 +367,8 @@
+     elif not coverage_ok: verdict='INDETERMINATE_RPO_WINDOW_NUMERICAL_COVERAGE'
+     elif not full_ok: verdict='INDETERMINATE_RPO_LONG_HORIZON_COVERAGE'
+     else: verdict='FAIL_NO_NEAR_RPO_WITH_VALID_COVERAGE'
+-    dump_json(out/'stage40_long'/'summary.json',{
+-        'n_tested':n,'n_observation_window_reached':nwin,'n_full_horizon_completed':nfull,'window_coverage_fraction':nwin/max(n,1),'full_horizon_fraction':nfull/max(n,1),
+-        'n_near_rpo_candidates':len(cand),'top_ids':cand,'source_coverage':_coverage(ids,groups),'mesh_ratio_gate_max':float(cfg.get('long_max_mesh_ratio',.50)),
++    dump_json(out/'stage40_long'/'summary.json',{'n_tested':n,'n_observation_window_reached':nwin,'n_full_horizon_completed':nfull,'window_coverage_fraction':nwin/max(n,1),'full_horizon_fraction':nfull/max(n,1),
++        'n_near_rpo_candidates':len(cand),'top_ids':cand,'source_coverage':_coverage(ids,groups),'continuous_mesh_velocity_enabled':False,'operator_split_remap_interval':float(cfg.get('operator_split_remap_interval',.25)),
+         'eligibility_counts':_eligibility_counts(rows,cfg),'hard_fail_coverage_satisfied':bool(coverage_ok and full_ok),'dynamics_contract':contract,'dynamics_contract_sha256':contract_hash,
+         'run_kind':_run_kind(cfg),'numerics_verdict':'PASS' if n>0 and nwin>0 else 'INDETERMINATE','physics_verdict':_physics_for_run(cfg,'SUPPORTED_CANDIDATE' if cand else ('FAIL' if verdict=='FAIL_NO_NEAR_RPO_WITH_VALID_COVERAGE' else 'INDETERMINATE')),'verdict':verdict}); return rows
+ 
+@@ -372,7 +403,7 @@
+     dump_json(out/'stage60_finite_core_clock'/'results.json',rows); ok=[r for r in rows if r['predictive_specificity_gate_pass']]
+     mech={'run_kind':_run_kind(cfg),'n_tested':len(rows),'n_predictive_specificity_pass':len(ok),'n_mechanism_pass':len(ok),'causal_claim_authorized':False,'numerics_verdict':'PASS' if rows and all(r['material']['completed'] and r['fixed']['completed'] for r in rows) else ('NOT_RUN' if not rows else 'FAIL'),'physics_verdict':_physics_for_run(cfg,'SUPPORTED_PREDICTIVE_ASSOCIATION' if ok else ('INDETERMINATE' if not rows else 'FAIL_PREDICTIVE_GATE')),'verdict':'PASS_DELAY_PREDICTIVE_SPECIFICITY_CANDIDATE' if ok else ('FAIL_PREDICTIVE_SPECIFICITY_ON_PROJECTED_RPO' if rows else 'NOT_RUN_NO_PROJECTED_RPO')}; dump_json(out/'stage60_finite_core_clock'/'summary.json',mech)
+     summaries={}
+-    for nm,rel in [('early','stage20_early/summary.json'),('refine','stage25_refine/summary.json'),('resolution','stage30_resolution/summary.json'),('temporal','stage32_temporal/summary.json'),('core','stage35_core_robustness/summary.json'),('mesh_gauge','stage37_mesh_gauge/summary.json'),('mesh_closure','stage37b_mesh_closure/summary.json'),('long','stage40_long/summary.json'),('rpo','stage50_rpo_floquet/summary.json')]:
++    for nm,rel in [('early','stage20_early/summary.json'),('refine','stage25_refine/summary.json'),('resolution','stage30_resolution/summary.json'),('temporal','stage32_temporal/summary.json'),('core','stage35_core_robustness/summary.json'),('mesh_gauge','stage37_mesh_gauge/summary.json'),('mesh_closure','stage37b_mesh_closure/summary.json'),('operator_split','stage37c_operator_split_remap/summary.json'),('long','stage40_long/summary.json'),('rpo','stage50_rpo_floquet/summary.json')]:
+         pp=out/rel
+         if pp.exists(): summaries[nm]=load_json(pp)
+     diversity=_source_diversity(out)
+@@ -381,11 +412,11 @@
+     elif rows: verdict='CHAIN_PROJECTED_RPO__MECHANISM_FAIL_OR_INDETERMINATE'
+     elif summaries.get('rpo',{}).get('n_projected_floquet_pass',0)>0: verdict='CHAIN_PROJECTED_RPO_ONLY'
+     elif summaries.get('long',{}).get('n_near_rpo_candidates',0)>0: verdict='CHAIN_NEAR_RPO_ONLY'
+-    elif summaries.get('mesh_gauge',{}).get('n_qualified',0)<=0 and summaries.get('core',{}).get('n_qualified',0)>0: verdict='CHAIN_CORE_ROBUST_SEEDS__MESH_GAUGE_NOT_CERTIFIED'
+-    elif summaries.get('mesh_gauge',{}).get('n_qualified',0)>0 and str(summaries.get('long',{}).get('verdict','')).startswith('INDETERMINATE'): verdict='CHAIN_MESH_GAUGE_CERTIFIED__RPO_NOT_TESTABLE_NUMERICALLY'
++    elif summaries.get('operator_split',{}).get('n_qualified',0)<=0 and summaries.get('core',{}).get('n_qualified',0)>0: verdict='CHAIN_CORE_ROBUST_SEEDS__OPERATOR_SPLIT_NOT_CERTIFIED'
++    elif summaries.get('operator_split',{}).get('n_qualified',0)>0 and str(summaries.get('long',{}).get('verdict','')).startswith('INDETERMINATE'): verdict='CHAIN_OPERATOR_SPLIT_CERTIFIED__RPO_NOT_TESTABLE_NUMERICALLY'
+     elif summaries.get('long',{}).get('verdict')=='FAIL_NO_NEAR_RPO_WITH_VALID_COVERAGE': verdict='CHAIN_VALID_LONG_COVERAGE__NO_NEAR_RPO'
+-    elif summaries.get('mesh_gauge',{}).get('n_qualified',0)>0: verdict='CHAIN_MESH_GAUGE_CERTIFIED_SEEDS__LONG_NOT_DECISIVE'
+-    elif summaries.get('core',{}).get('n_qualified',0)>0: verdict='CHAIN_CORE_ROBUST_SEEDS__MESH_GAUGE_NOT_CERTIFIED'
++    elif summaries.get('operator_split',{}).get('n_qualified',0)>0: verdict='CHAIN_OPERATOR_SPLIT_CERTIFIED_SEEDS__LONG_NOT_DECISIVE'
++    elif summaries.get('core',{}).get('n_qualified',0)>0: verdict='CHAIN_CORE_ROBUST_SEEDS__OPERATOR_SPLIT_NOT_CERTIFIED'
+     elif summaries.get('temporal',{}).get('n_qualified',0)>0: verdict='CHAIN_TEMPORALLY_CERTIFIED_SEEDS__NO_CORE_ROBUSTNESS'
+     elif summaries.get('resolution',{}).get('n_qualified',0)>0: verdict='CHAIN_RESOLUTION_STABLE_SEEDS__NO_TEMPORAL_CERTIFICATION'
+     elif summaries.get('early',{}).get('n',0)>0: verdict='CHAIN_EARLY_SCREEN_ONLY'
+@@ -395,8 +426,8 @@
+     elif verdict=='CHAIN_VALID_LONG_COVERAGE__NO_NEAR_RPO': physics='FAIL'
+     elif ok: physics='SUPPORTED_PREDICTIVE_ASSOCIATION_CANDIDATE'
+     else: physics='INDETERMINATE'
+-    numerics='PASS_PARTIAL' if any(summaries.get(k,{}).get('n_qualified',0)>0 for k in ('resolution','temporal','core','mesh_gauge')) else 'INDETERMINATE'
+-    dump_json(out/'BLIND_CHAIN_SUMMARY.json',{'format':'SST-TREFOIL-DYNAMIC-SEED-CHAIN-3','run_kind':run_kind,'source_diversity_status':diversity,'numerics_verdict':numerics,'physics_verdict':physics,'verdict':verdict,'identity_read':False,**summaries,'mechanism':mech}); return rows
++    numerics='PASS_PARTIAL' if any(summaries.get(k,{}).get('n_qualified',0)>0 for k in ('resolution','temporal','core','operator_split')) else 'INDETERMINATE'
++    dump_json(out/'BLIND_CHAIN_SUMMARY.json',{'format':'SST-TREFOIL-DYNAMIC-SEED-CHAIN-4','run_kind':run_kind,'source_diversity_status':diversity,'numerics_verdict':numerics,'physics_verdict':physics,'verdict':verdict,'identity_read':False,**summaries,'mechanism':mech}); return rows
+ 
+ 
+ def reveal(out):
+@@ -436,7 +467,7 @@
+     result['revealed_evidence_manifest']=evidence
+     b=out/'BLIND_CHAIN_SUMMARY.json'
+     if b.exists(): result['blind_chain']=load_json(b)
+-    for stage,path in [('early','stage20_early/summary.json'),('refine','stage25_refine/summary.json'),('resolution','stage30_resolution/summary.json'),('temporal','stage32_temporal/summary.json'),('core','stage35_core_robustness/summary.json'),('mesh_gauge','stage37_mesh_gauge/summary.json'),('mesh_closure','stage37b_mesh_closure/summary.json'),('long','stage40_long/summary.json'),('rpo','stage50_rpo_floquet/summary.json'),('mechanism','stage60_finite_core_clock/summary.json')]:
++    for stage,path in [('early','stage20_early/summary.json'),('refine','stage25_refine/summary.json'),('resolution','stage30_resolution/summary.json'),('temporal','stage32_temporal/summary.json'),('core','stage35_core_robustness/summary.json'),('mesh_gauge','stage37_mesh_gauge/summary.json'),('mesh_closure','stage37b_mesh_closure/summary.json'),('operator_split','stage37c_operator_split_remap/summary.json'),('long','stage40_long/summary.json'),('rpo','stage50_rpo_floquet/summary.json'),('mechanism','stage60_finite_core_clock/summary.json')]:
+         p=out/path
+         if p.exists(): result[stage]=load_json(p)
+     dump_json(out/'REVEAL_SUMMARY.json',result); return result
+--- v0.3.1/src/sst_seed_falsifier/evidence.py
++++ v0.3.2/src/sst_seed_falsifier/evidence.py
+@@ -42,13 +42,9 @@
+ 
+ 
+ def dynamics_contract(cfg, resolution):
+-    """Frozen discretized orbital map shared by S40 and S50.
+-
+-    The integration horizon is intentionally absent: S40 searches it and S50 replays
+-    the same map at the selected return time.
+-    """
++    """Frozen S40/S50 operator-split orbital map (v0.3.2)."""
+     contract = {
+-        "format": "SST-TREFOIL-DYNAMICS-CONTRACT-1",
++        "format": "SST-TREFOIL-DYNAMICS-CONTRACT-2",
+         "physical_model": "regularized_vortex_filament_surrogate",
+         "core_mode": "global_volume",
+         "gamma": float(cfg.get("gamma", 1.0)),
+@@ -57,16 +53,16 @@
+         "integrator": "RK4",
+         "dt_policy": "dt_factor_times_min_ds_squared_over_abs_gamma",
+         "dt_factor": float(cfg.get("dt_factor", 0.025)),
+-        "mesh_enabled": True,
+-        "mesh_method": str(cfg.get("mesh_redistribution_method", "segment_feedback")),
+-        "mesh_rate": float(cfg.get("mesh_rate", 4.0)),
+-        "mesh_max_relative_rms": float(cfg.get("mesh_max_relative_rms", 1.25)),
++        "continuous_mesh_velocity_enabled": False,
++        "reparameterization_scheme": "operator_split_uniform_arclength_v1",
++        "remap_interval": float(cfg.get("operator_split_remap_interval", .25)),
++        "remap_phase_anchor": "first_marker_preserved",
+         "hard_ds_cv": float(cfg.get("long_hard_ds_cv", 0.45)),
+         "min_gap_over_ds": float(cfg.get("min_gap_over_ds", 0.9)),
+         "contact_skip": int(cfg.get("contact_skip", 3)),
+         "max_steps": int(cfg.get("max_steps", 300000)),
+         "long_samples": int(cfg.get("long_samples", 240)),
+-        "replay_policy": "freeze_S40_dt_and_guard_stride_for_base_and_perturbations",
++        "replay_policy": "freeze_S40_dt_guard_stride_and_physical_remap_times_for_base_and_perturbations",
+         "require_native": bool(cfg.get("require_native", True)),
+     }
+     return contract, object_sha256(contract)
+--- v0.3.1/src/sst_seed_falsifier/cli.py
++++ v0.3.2/src/sst_seed_falsifier/cli.py
+@@ -2,19 +2,19 @@
+ from .io import load_json
+ from .candidates import generate
+ from .evidence import validate_frozen_evidence
+-from .workflow import stage_early,stage_refine,stage_resolution,stage_temporal,stage_core,stage_mesh_gauge,stage_mesh_closure,stage_long,stage_rpo,stage_mechanism,reveal
++from .workflow import stage_early,stage_refine,stage_resolution,stage_temporal,stage_core,stage_mesh_gauge,stage_mesh_closure,stage_operator_split,stage_long,stage_rpo,stage_mechanism,reveal
+ 
+ 
+ def main(argv=None):
+     p=argparse.ArgumentParser(); sub=p.add_subparsers(dest='cmd',required=True)
+     a=sub.add_parser('prepare'); a.add_argument('dataset'); a.add_argument('out'); a.add_argument('config')
+-    for n in ['early','refine','resolution','temporal','core','mesh-gauge','mesh-closure','long','rpo','mechanism']:
++    for n in ['early','refine','resolution','temporal','core','mesh-gauge','mesh-closure','operator-split','long','rpo','mechanism']:
+         a=sub.add_parser(n); a.add_argument('out'); a.add_argument('config')
+     a=sub.add_parser('reveal'); a.add_argument('out')
+     q=p.parse_args(argv)
+     if q.cmd=='prepare': generate(q.dataset,q.out,load_json(q.config),config_path=q.config); return 0
+     if q.cmd=='reveal': reveal(q.out); return 0
+-    fn={'early':stage_early,'refine':stage_refine,'resolution':stage_resolution,'temporal':stage_temporal,'core':stage_core,'mesh-gauge':stage_mesh_gauge,'mesh-closure':stage_mesh_closure,'long':stage_long,'rpo':stage_rpo,'mechanism':stage_mechanism}[q.cmd]
++    fn={'early':stage_early,'refine':stage_refine,'resolution':stage_resolution,'temporal':stage_temporal,'core':stage_core,'mesh-gauge':stage_mesh_gauge,'mesh-closure':stage_mesh_closure,'operator-split':stage_operator_split,'long':stage_long,'rpo':stage_rpo,'mechanism':stage_mechanism}[q.cmd]
+     cfg=load_json(q.config); validate_frozen_evidence(q.out,cfg,q.config)
+     fn(q.out,cfg); return 0
+ 
+--- v0.3.1/src/sst_seed_falsifier/campaign.py
++++ v0.3.2/src/sst_seed_falsifier/campaign.py
+@@ -8,7 +8,7 @@
+ from .io import load_json, dump_json
+ from .candidates import generate
+ from .geometry import normalize_length, resample_closed, arclength
+-from .workflow import (stage_early,stage_resolution,stage_temporal,stage_core,stage_mesh_gauge,stage_mesh_closure,
++from .workflow import (stage_early,stage_resolution,stage_temporal,stage_core,stage_mesh_gauge,stage_mesh_closure,stage_operator_split,
+                        stage_long,stage_rpo,stage_mechanism,_rpo_eligibility,reveal)
+ from .phase_b import (FlowContract, floquet_certificate, intervention_panel,
+                      refine_full_state, run_ladders)
+@@ -27,7 +27,7 @@
+     print('PREPARE',load_json(out/'prepare_summary.json')['source_diversity_status'],flush=True)
+     # No adaptive refinement: the six registered test draws are the entire pool.
+     for name,fn in [('early',stage_early),('resolution',stage_resolution),('temporal',stage_temporal),
+-                    ('core',stage_core),('mesh-gauge',stage_mesh_gauge),('mesh-closure-diagnostic',stage_mesh_closure),('long',stage_long),
++                    ('core',stage_core),('mesh-gauge-legacy',stage_mesh_gauge),('mesh-closure-diagnostic',stage_mesh_closure),('operator-split-cert',stage_operator_split),('long',stage_long),
+                     ('projected-rpo',stage_rpo),('predictive-specificity',stage_mechanism)]:
+         validate_frozen_evidence(out,cfg,config)
+         started=time.perf_counter(); print('START',name,flush=True)
+@@ -50,8 +50,7 @@
+         steps=round(t/replay['dt'])
+         if not np.isclose(steps*replay['dt'],t,rtol=1e-10,atol=1e-12): raise ValueError('PHASE_B_REPLAY_GRID_MISMATCH')
+         c=FlowContract(len(x),arclength(x),gamma=cfg['gamma'],core0=cfg['core_fraction'],
+-                       mesh_rate=cfg['mesh_rate'],mesh_method=cfg['mesh_redistribution_method'],
+-                       mesh_cap=cfg['mesh_max_relative_rms'],max_ds_cv=cfg['long_hard_ds_cv'],
++                       mesh_rate=0.0,mesh_method='none',mesh_cap=0.0,remap_interval=float(cfg.get('operator_split_remap_interval',.25)),max_ds_cv=cfg['long_hard_ds_cv'],
+                        min_gap_over_ds=cfg['min_gap_over_ds'],contact_skip=cfg['contact_skip'],
+                        guard_stride=replay['guard_stride'],require_native=cfg['require_native'])
+         item={'candidate_id':row['candidate_id']}
+--- v0.3.1/src/sst_seed_falsifier/floquet.py
++++ v0.3.2/src/sst_seed_falsifier/floquet.py
+@@ -1,6 +1,7 @@
+ import numpy as np
+ from .geometry import fourier_normal_basis,align_cyclic,normalize_length,segment_lengths,tangents
+-from .dynamics import simulate,plan
++from .dynamics import plan
++from .operator_split import simulate_operator_split
+ from .solver import rhs
+ from .evidence import dynamics_contract
+ 
+@@ -36,13 +37,14 @@
+         steps,dt=plan(x0,cfg,T); stride=max(1,int(np.ceil(steps/int(cfg.get('long_samples',240)))))
+     else:
+         dt=float(replay['dt']); stride=int(replay['guard_stride']); steps=int(round(float(T)/dt))
++        if 'remap_interval' in replay and not np.isclose(float(replay['remap_interval']),float(cfg.get('operator_split_remap_interval',.25)),rtol=0,atol=1e-15): raise ValueError('REMAP_INTERVAL_REPLAY_MISMATCH')
+         if not np.isclose(steps*dt,float(T),rtol=1e-12,atol=1e-12): raise ValueError('RETURN_NOT_ON_FROZEN_TIME_GRID')
+-    simkw={'mode':'global_volume','long_mesh':True,'store_samples':int(cfg.get('long_samples',240)),'max_ds_cv_override':float(cfg.get('long_hard_ds_cv',.45)),'integration_plan':(steps,dt),'guard_stride_override':stride}
+-    base=simulate(x0,cfg,T,**simkw); xb=base['x'][-1]; xb_al,d0,sh0,R0,t0=align_cyclic(xb,x0,int(cfg.get('cyclic_stride',4))); M=np.zeros((len(basis),len(basis))); quality=base['stop_reason']=='COMPLETED'
++    simkw={'mode':'global_volume','remap_interval_override':float(cfg.get('operator_split_remap_interval',.25)),'store_samples':int(cfg.get('long_samples',240)),'max_ds_cv_override':float(cfg.get('long_hard_ds_cv',.45)),'integration_plan':(steps,dt),'guard_stride_override':stride}
++    base=simulate_operator_split(x0,cfg,T,**simkw); xb=base['x'][-1]; xb_al,d0,sh0,R0,t0=align_cyclic(xb,x0,int(cfg.get('cyclic_stride',4))); M=np.zeros((len(basis),len(basis))); quality=base['stop_reason']=='COMPLETED'
+     for i,v in enumerate(basis):
+         cols=[]
+         for sign in (+1,-1):
+-            xp=normalize_length(x0+sign*eps*v,2*np.pi); tr=simulate(xp,cfg,T,**simkw); xf=tr['x'][-1]
++            xp=normalize_length(x0+sign*eps*v,2*np.pi); tr=simulate_operator_split(xp,cfg,T,**simkw); xf=tr['x'][-1]
+             # use independent symmetry reduction to x0; central difference cancels most alignment bias
+             xa,di,shi,Ri,ti=align_cyclic(xf,x0,int(cfg.get('cyclic_stride',4))); cols.append(xa)
+             quality &= tr['stop_reason']=='COMPLETED'
+--- v0.3.1/src/sst_seed_falsifier/phase_b.py
++++ v0.3.2/src/sst_seed_falsifier/phase_b.py
+@@ -15,7 +15,7 @@
+ from .geometry import (arclength, segment_lengths, align_cyclic,
+                        min_nonlocal_vertex_distance, tangents, resample_closed)
+ from .solver import velocity_from_cores
+-from .dynamics import tangential_redistribution
++
+ from .evidence import object_sha256
+ from .io import geom_sha
+ 
+@@ -30,6 +30,8 @@
+     mesh_rate: float = 4.0
+     mesh_method: str = 'segment_feedback'
+     mesh_cap: float = 1.0
++    remap_interval: float = .25
++    reparameterization_scheme: str = 'operator_split_uniform_arclength_v1'
+     max_ds_cv: float = .45
+     min_gap_over_ds: float = .85
+     contact_skip: int = 3
+@@ -70,11 +72,7 @@
+         raise ValueError('DEGENERATE_STATE')
+     core = contract.core0 * (contract.reference_length / length) ** (.5 * contract.feedback_alpha)
+     physical = velocity_from_cores(x, contract.gamma, np.full(len(x), core), contract.require_native)
+-    mesh = tangential_redistribution(x, contract.mesh_rate, contract.mesh_method)
+-    pr, mr = np.linalg.norm(physical), np.linalg.norm(mesh)
+-    if contract.mesh_cap > 0 and mr > contract.mesh_cap * max(pr, 1e-15):
+-        mesh *= contract.mesh_cap * max(pr, 1e-15) / mr
+-    return physical + mesh
++    return physical
+ 
+ 
+ def local_quality(x, contract):
+@@ -84,34 +82,31 @@
+ 
+ 
+ def integrate(x0, period, steps, contract, *, samples=16):
+-    """Fixed-step RK4; input perturbations cannot alter volume, dt or guard cadence."""
+-    if period <= 0 or steps < 1:
+-        raise ValueError('INVALID_TIME_GRID')
+-    x = np.asarray(x0, float).copy()
+-    dt = float(period) / int(steps)
+-    frames, times = [], []
+-    worst_cv, worst_gap = 0., float('inf')
+-    stride = max(1, int(steps) // max(1, int(samples)))
+-    f = lambda z: flow_rhs(z, contract)
+-    for k in range(int(steps) + 1):
+-        if k % contract.guard_stride == 0 or k == steps:
+-            quality = local_quality(x, contract)
+-            worst_cv = max(worst_cv, quality['ds_cv'])
+-            worst_gap = min(worst_gap, quality['gap_over_ds'])
+-            if worst_cv > contract.max_ds_cv or worst_gap < contract.min_gap_over_ds:
+-                raise RuntimeError('PHASE_B_GEOMETRY_GUARD_FAILED')
+-        if k % stride == 0 or k == steps:
+-            frames.append(x.copy()); times.append(k * dt)
+-        if k == steps:
+-            break
+-        k1 = f(x); k2 = f(x + .5*dt*k1); k3 = f(x + .5*dt*k2); k4 = f(x + dt*k3)
+-        x += dt * (k1 + 2*k2 + 2*k3 + k4) / 6
+-        if not np.isfinite(x).all():
+-            raise FloatingPointError('NONFINITE_FLOW')
+-    return {'final': x, 'x': np.asarray(frames), 't': np.asarray(times),
+-            'dt': dt, 'steps': int(steps), 'contract_sha256': contract.sha256,
+-            'worst_ds_cv': worst_cv, 'minimum_gap_over_ds': worst_gap,
+-            'return_quality': local_quality(x, contract)}
++    """Fixed base grid RK4 with discrete remaps at frozen physical times."""
++    if period <= 0 or steps < 1: raise ValueError('INVALID_TIME_GRID')
++    x=np.asarray(x0,float).copy(); dt=float(period)/int(steps); frames=[]; times=[]; worst_cv=0.; worst_gap=float('inf')
++    stride=max(1,int(steps)//max(1,int(samples))); interval=float(contract.remap_interval)
++    events=[] if interval<=0 or not np.isfinite(interval) else [j*interval for j in range(1,int(math.floor((period-1e-14)/interval))+1) if j*interval<period-1e-13]
++    evt=0; tol=max(1e-13,1e-11*max(1.0,float(period)))
++    f=lambda z:flow_rhs(z,contract)
++    def r4(z,h):
++        k1=f(z); k2=f(z+.5*h*k1); k3=f(z+.5*h*k2); k4=f(z+h*k3); return z+h*(k1+2*k2+2*k3+k4)/6
++    for k in range(int(steps)+1):
++        if k%contract.guard_stride==0 or k==steps:
++            quality=local_quality(x,contract); worst_cv=max(worst_cv,quality['ds_cv']); worst_gap=min(worst_gap,quality['gap_over_ds'])
++            if worst_cv>contract.max_ds_cv or worst_gap<contract.min_gap_over_ds: raise RuntimeError('PHASE_B_GEOMETRY_GUARD_FAILED')
++        if k%stride==0 or k==steps: frames.append(x.copy()); times.append(k*dt)
++        if k==steps: break
++        t0=k*dt; t1=(k+1)*dt; cursor=t0
++        while evt<len(events) and events[evt]<=t1+tol:
++            te=events[evt]
++            if te>cursor+tol: x=r4(x,te-cursor)
++            x=resample_closed(x,len(x)); cursor=te; evt+=1
++        if cursor<t1-tol: x=r4(x,t1-cursor)
++        if not np.isfinite(x).all(): raise FloatingPointError('NONFINITE_FLOW')
++    return {'final':x,'x':np.asarray(frames),'t':np.asarray(times),'dt':dt,'steps':int(steps),'contract_sha256':contract.sha256,
++            'worst_ds_cv':worst_cv,'minimum_gap_over_ds':worst_gap,'return_quality':local_quality(x,contract),
++            'reparameterization_scheme':contract.reparameterization_scheme,'remap_interval':contract.remap_interval}
+ 
+ 
+ def central_jacobian(mapping, x, epsilon):
+@@ -311,22 +306,22 @@
+ 
+ 
+ def run_ladders(x, period, cfg, protocol, *, refine=False):
+-    """No cherry-picking: enumerate the complete N x dt x core x mesh design.
++    """No cherry-picking: enumerate the complete N x dt x core x remap-interval design.
+ 
+     Each cell has its own fixed reference volume and group action. A certificate
+     is per discretization; this runner does NOT equate different discretizations.
+     """
+     from itertools import product
+     cells = []
+-    for n, dt_multiplier, core, mesh in product(protocol['resolution_ladder'],protocol['dt_multipliers'],
+-                                               protocol['core_ladder'],protocol['mesh_rate_ladder']):
++    for n, dt_multiplier, core, remap_interval in product(protocol['resolution_ladder'],protocol['dt_multipliers'],
++                                               protocol['core_ladder'],protocol['remap_interval_ladder']):
+         y = resample_closed(x,int(n))  # do not renormalize each resolution
+         contract = FlowContract(int(n), arclength(y), gamma=float(cfg.get('gamma',1)), core0=core,
+-                                mesh_rate=mesh, mesh_cap=float(cfg.get('mesh_max_relative_rms',1)),
++                                mesh_rate=0.0, mesh_cap=0.0, remap_interval=float(remap_interval),
+                                 require_native=bool(cfg.get('require_native',True)))
+         dt_max = float(cfg['dt_factor'])*dt_multiplier*float(min(segment_lengths(y)))**2/max(abs(contract.gamma),1e-15)
+         steps = max(8, math.ceil(period/dt_max))
+-        cell = {'n':n,'dt_multiplier':dt_multiplier,'core':core,'mesh_rate':mesh,'steps':steps}
++        cell = {'n':n,'dt_multiplier':dt_multiplier,'core':core,'remap_interval':remap_interval,'steps':steps}
+         try:
+             if steps > int(cfg['max_steps']): raise RuntimeError('MAX_STEPS_EXCEEDED')
+             if refine:
+--- v0.3.1/src/sst_seed_falsifier/__init__.py
++++ v0.3.2/src/sst_seed_falsifier/__init__.py
+@@ -1 +1 @@
+-__version__='0.3.1'
++__version__='0.3.2'
+--- v0.3.1/pyproject.toml
++++ v0.3.2/pyproject.toml
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "sst-trefoil-dynamic-seed-falsifier"
+-version = "0.3.1"
++version = "0.3.2"
+ description = "Evidence-sealed trefoil dynamic seed qualification with explicit numerical and physics verdicts"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=2.0", "pybind11>=3.0", "scipy>=1.14"]
+--- v0.3.1/setup_native.py
++++ v0.3.2/setup_native.py
+@@ -3,4 +3,4 @@
+ extra_compile_args=['/O2','/std:c++17','/openmp','/EHsc','/bigobj'] if sys.platform=='win32' else ['-O3','-std=c++17','-fopenmp']
+ extra_link_args=[] if sys.platform=='win32' else ['-fopenmp']
+ ext=Extension('sst_seed_falsifier._native',['cpp/native.cpp'],include_dirs=[pybind11.get_include()],language='c++',extra_compile_args=extra_compile_args,extra_link_args=extra_link_args)
+-setup(name='sst-trefoil-dynamic-seed-native',version='0.3.1',ext_modules=[ext],package_dir={'':'src'},packages=['sst_seed_falsifier'])
++setup(name='sst-trefoil-dynamic-seed-native',version='0.3.2',ext_modules=[ext],package_dir={'':'src'},packages=['sst_seed_falsifier'])
+--- v0.3.1/config/basic.json
++++ v0.3.2/config/basic.json
+@@ -211,5 +211,26 @@
+     "target_projection": [
+       4.0
+     ]
+-  }
++  },
++  "operator_split_remap_interval": 0.25,
++  "operator_split_remap_intervals": [
++    0.5,
++    0.25,
++    0.125
++  ],
++  "operator_split_resolution_ladder": [
++    64,
++    96,
++    128
++  ],
++  "operator_split_t_final": 1.2,
++  "operator_split_samples": 120,
++  "operator_split_hard_ds_cv": 0.6,
++  "operator_split_max_final_shape_distance": 0.035,
++  "operator_split_max_score_rel_span": 0.12,
++  "operator_split_max_auc_rel_span": 0.2,
++  "operator_split_min_convergence_order": 0.5,
++  "operator_split_min_resolution_levels_for_support": 3,
++  "operator_split_error_floor": 1e-08,
++  "s40_admission_gate": "S37C_OPERATOR_SPLIT_REMAP"
+ }
+--- v0.3.1/config/extended.json
++++ v0.3.2/config/extended.json
+@@ -212,5 +212,26 @@
+     "target_projection": [
+       4.0
+     ]
+-  }
++  },
++  "operator_split_remap_interval": 0.25,
++  "operator_split_remap_intervals": [
++    0.5,
++    0.25,
++    0.125
++  ],
++  "operator_split_resolution_ladder": [
++    64,
++    96,
++    128
++  ],
++  "operator_split_t_final": 2.0,
++  "operator_split_samples": 180,
++  "operator_split_hard_ds_cv": 0.6,
++  "operator_split_max_final_shape_distance": 0.03,
++  "operator_split_max_score_rel_span": 0.1,
++  "operator_split_max_auc_rel_span": 0.16,
++  "operator_split_min_convergence_order": 0.5,
++  "operator_split_min_resolution_levels_for_support": 3,
++  "operator_split_error_floor": 1e-08,
++  "s40_admission_gate": "S37C_OPERATOR_SPLIT_REMAP"
+ }
+--- v0.3.1/config/production.json
++++ v0.3.2/config/production.json
+@@ -215,5 +215,27 @@
+       4.0,
+       5.6
+     ]
+-  }
++  },
++  "operator_split_remap_interval": 0.25,
++  "operator_split_remap_intervals": [
++    0.5,
++    0.25,
++    0.125
++  ],
++  "operator_split_resolution_ladder": [
++    64,
++    96,
++    128,
++    192
++  ],
++  "operator_split_t_final": 3.0,
++  "operator_split_samples": 240,
++  "operator_split_hard_ds_cv": 0.6,
++  "operator_split_max_final_shape_distance": 0.025,
++  "operator_split_max_score_rel_span": 0.08,
++  "operator_split_max_auc_rel_span": 0.12,
++  "operator_split_min_convergence_order": 0.5,
++  "operator_split_min_resolution_levels_for_support": 3,
++  "operator_split_error_floor": 1e-08,
++  "s40_admission_gate": "S37C_OPERATOR_SPLIT_REMAP"
+ }
+--- v0.3.1/config/prospective_atlas.json
++++ v0.3.2/config/prospective_atlas.json
+@@ -222,5 +222,26 @@
+     "target_projection": [
+       4.0
+     ]
+-  }
++  },
++  "operator_split_remap_interval": 0.25,
++  "operator_split_remap_intervals": [
++    0.5,
++    0.25,
++    0.125
++  ],
++  "operator_split_resolution_ladder": [
++    64,
++    96,
++    128
++  ],
++  "operator_split_t_final": 1.2,
++  "operator_split_samples": 120,
++  "operator_split_hard_ds_cv": 0.6,
++  "operator_split_max_final_shape_distance": 0.035,
++  "operator_split_max_score_rel_span": 0.12,
++  "operator_split_max_auc_rel_span": 0.2,
++  "operator_split_min_convergence_order": 0.5,
++  "operator_split_min_resolution_levels_for_support": 3,
++  "operator_split_error_floor": 1e-08,
++  "s40_admission_gate": "S37C_OPERATOR_SPLIT_REMAP"
+ }
+--- v0.3.1/config/workflow_smoke.json
++++ v0.3.2/config/workflow_smoke.json
+@@ -208,5 +208,26 @@
+     "target_projection": [
+       2.4
+     ]
+-  }
++  },
++  "operator_split_remap_interval": 0.05,
++  "operator_split_remap_intervals": [
++    0.1,
++    0.05,
++    0.025
++  ],
++  "operator_split_resolution_ladder": [
++    24,
++    32,
++    40
++  ],
++  "operator_split_t_final": 0.2,
++  "operator_split_samples": 24,
++  "operator_split_hard_ds_cv": 0.6,
++  "operator_split_max_final_shape_distance": 1.0,
++  "operator_split_max_score_rel_span": 10.0,
++  "operator_split_max_auc_rel_span": 10.0,
++  "operator_split_min_convergence_order": 0.5,
++  "operator_split_min_resolution_levels_for_support": 3,
++  "operator_split_error_floor": 1e-08,
++  "s40_admission_gate": "S37C_OPERATOR_SPLIT_REMAP"
+ }
+--- v0.3.1/config/phase_b.json
++++ v0.3.2/config/phase_b.json
+@@ -1,5 +1,5 @@
+ {
+-  "format": "SST-PHASE-B-PROTOCOL-1",
++  "format": "SST-PHASE-B-PROTOCOL-2",
+   "physics_scope": "regularized filament / finite-core surrogate only",
+   "minimum_period": 1.2,
+   "rpo_rms_max": 0.0001,
+@@ -36,11 +36,6 @@
+     0.08,
+     0.1
+   ],
+-  "mesh_rate_ladder": [
+-    2.4,
+-    4.0,
+-    5.6
+-  ],
+   "intervention_arms": [
+     "baseline",
+     "sham",
+@@ -50,5 +45,10 @@
+   "primary_outcome": "fixed_group_return_rms_minus_matched_baseline",
+   "causal_language_allowed": false,
+   "publication_gate": "cross-ladder orbit/spectrum convergence and topology-preservation proof still required",
+-  "topology_publication_gate": "EXTERNAL_PROVIDER_CERTIFICATION_OR_INTERVAL_AMBIENT_ISOTOPY_PROOF_REQUIRED"
++  "topology_publication_gate": "EXTERNAL_PROVIDER_CERTIFICATION_OR_INTERVAL_AMBIENT_ISOTOPY_PROOF_REQUIRED",
++  "remap_interval_ladder": [
++    0.5,
++    0.25,
++    0.125
++  ]
+ }
+--- /dev/null
++++ v0.3.2/src/sst_seed_falsifier/operator_split.py
+@@ -0,0 +1,80 @@
++"""Operator-split physical evolution + discrete uniform-arclength remap.
++
++The physical RK4 RHS contains no tangential mesh controller.  Reparameterisation
++is a discrete numerical operation at frozen physical times.  This separation is
++the central v0.3.2 numerical experiment.
++"""
++from __future__ import annotations
++import math
++import numpy as np
++from .solver import rk4,rhs,backend_name,stretch_rate
++from .dynamics import plan
++from .geometry import segment_lengths,min_nonlocal_vertex_distance,resample_closed,align_cyclic
++
++
++def _rms_points(d):
++    d=np.asarray(d,float); return float(np.sqrt(np.mean(np.sum(d*d,axis=1))))
++
++
++def _shape_distance(a,b,coarse_stride=4):
++    aa=resample_closed(np.asarray(a,float),len(b)); bb=resample_closed(np.asarray(b,float),len(b))
++    return float(align_cyclic(aa,bb,coarse_stride)[1])
++
++
++def remap_event_times(T,interval):
++    T=float(T); interval=float(interval)
++    if not np.isfinite(interval) or interval<=0: return []
++    # Endpoint remaps are excluded: a purely terminal interpolation should not
++    # influence the measured final embedded curve.
++    n=max(0,int(math.floor((T-1e-14)/interval)))
++    return [float(j*interval) for j in range(1,n+1) if j*interval < T-1e-13]
++
++
++def simulate_operator_split(x0,cfg,T,mode='global_volume',*,remap_interval_override=None,
++                            store_samples=None,dt_factor_override=None,max_ds_cv_override=None,
++                            integration_plan=None,guard_stride_override=None):
++    x=np.asarray(x0,float).copy(); ref=segment_lengths(x0); L0=float(np.sum(ref))
++    gamma=float(cfg.get('gamma',1.0)); core0=float(cfg['core_fraction']); req=bool(cfg.get('require_native',True))
++    steps,dt=plan(x,cfg,T,dt_factor_override=dt_factor_override) if integration_plan is None else integration_plan
++    steps=int(steps); dt=float(dt)
++    if steps<1 or steps>int(cfg.get('max_steps',300000)) or not np.isfinite(dt) or dt<=0 or not np.isclose(steps*dt,float(T),rtol=1e-12,atol=1e-12):
++        raise ValueError('INVALID_FROZEN_INTEGRATION_PLAN')
++    ns=int(store_samples or cfg.get('store_samples',96)); stride=max(1,int(math.ceil(steps/ns)))
++    if guard_stride_override is not None: stride=max(1,int(guard_stride_override))
++    hard_cv=float(cfg.get('operator_split_hard_ds_cv',cfg.get('long_hard_ds_cv',.45)) if max_ds_cv_override is None else max_ds_cv_override)
++    interval=float(cfg.get('operator_split_remap_interval',.25) if remap_interval_override is None else remap_interval_override)
++    events=remap_event_times(T,interval)
++    evt=0; tol=max(1e-13,1e-11*max(1.0,float(T)))
++    ts=[]; xs=[]; sig=[]; dscv=[]; gaps=[]; mesh_ratio=[]; physical_speed=[]
++    remap_t=[]; remap_rms=[]; remap_shape=[]; remap_cv_before=[]; remap_cv_after=[]
++    stop='COMPLETED'; actual=0.0
++    def phys_step(z,h):
++        return rk4(z,float(h),gamma,core0,mode,req,ref_lengths=ref,L0=L0)
++    for k in range(steps+1):
++        tgrid=float(k*dt)
++        if k%stride==0 or k==steps:
++            u,_=rhs(x,gamma,core0,mode,req,ref_lengths=ref,L0=L0)
++            ds=segment_lengths(x); cv=float(ds.std()/max(ds.mean(),1e-15)); gap=float(min_nonlocal_vertex_distance(x,int(cfg.get('contact_skip',3)))/max(ds.mean(),1e-15))
++            ts.append(tgrid); xs.append(x.copy()); sig.append(stretch_rate(x,u)); dscv.append(cv); gaps.append(gap); mesh_ratio.append(0.0); physical_speed.append(_rms_points(u)); actual=tgrid
++            if cv>hard_cv: stop='MESH_QUALITY_STOP'; break
++            if gap<float(cfg.get('min_gap_over_ds',.9)): stop='CONTACT_GUARD_STOP'; break
++        if k==steps: break
++        t0=tgrid; t1=float((k+1)*dt); cursor=t0
++        while evt<len(events) and events[evt]<=t1+tol:
++            te=events[evt]
++            if te>cursor+tol: x=phys_step(x,te-cursor)
++            before=x.copy(); ds0=segment_lengths(before); cv0=float(ds0.std()/max(ds0.mean(),1e-15))
++            x=resample_closed(before,len(before))
++            ds1=segment_lengths(x); cv1=float(ds1.std()/max(ds1.mean(),1e-15))
++            remap_t.append(float(te)); remap_rms.append(_rms_points(x-before)); remap_shape.append(_shape_distance(x,before,int(cfg.get('cyclic_stride',4)))); remap_cv_before.append(cv0); remap_cv_after.append(cv1)
++            cursor=te; evt+=1
++        if cursor<t1-tol: x=phys_step(x,t1-cursor)
++        if not np.isfinite(x).all(): raise FloatingPointError('nonfinite geometry')
++    return {'t':np.asarray(ts),'x':np.asarray(xs),'sigma':np.asarray(sig),'ds_cv':np.asarray(dscv),'gap_over_ds':np.asarray(gaps),
++            'mesh_ratio':np.asarray(mesh_ratio),'mesh_speed_rms':np.zeros(len(ts),float),'physical_speed_rms':np.asarray(physical_speed),
++            'dt':dt,'stop_reason':stop,'backend':backend_name(),'integration_steps':steps,'guard_stride':stride,
++            'actual_t_final':float(actual),'target_t_final':float(T),'completed':bool(stop=='COMPLETED' and actual>=float(T)-max(1e-12,2*dt)),
++            'mesh_redistribution_rate':0.0,'mesh_redistribution_method':'none','mesh_max_relative_rms':0.0,
++            'reparameterization_scheme':'operator_split_uniform_arclength_v1','remap_interval':interval,
++            'remap_event_times':np.asarray(remap_t),'remap_rms_displacement':np.asarray(remap_rms),'remap_shape_distance':np.asarray(remap_shape),
++            'remap_ds_cv_before':np.asarray(remap_cv_before),'remap_ds_cv_after':np.asarray(remap_cv_after),'remap_event_count':int(len(remap_t))}
+--- /dev/null
++++ v0.3.2/src/sst_seed_falsifier/operator_split_cert.py
+@@ -0,0 +1,67 @@
++from __future__ import annotations
++import numpy as np
++from .geometry import normalize_length,resample_closed
++from .dynamics import plan
++from .operator_split import simulate_operator_split
++from .metrics import rolling_metrics,shape_distance
++from .shape_ratio import trefoil_shape_ratio_series
++
++
++def _rel_span(a):
++    a=np.asarray(a,float); return float((np.max(a)-np.min(a))/max(abs(np.median(a)),1e-12)) if len(a) else float('inf')
++
++
++def run_resolution(base,cfg,n,T):
++    x=normalize_length(resample_closed(base,int(n)),2*np.pi)
++    frozen=plan(x,cfg,T); hard=float(cfg.get('operator_split_hard_ds_cv',.60))
++    intervals=[float(v) for v in cfg.get('operator_split_remap_intervals',[.5,.25,.125])]
++    arms=[]
++    # physical-only is a diagnostic reference, not a required admission arm.
++    for label,interval in [('physical_only',float('inf'))]+[(f'remap_{v:g}',v) for v in intervals]:
++        tr=simulate_operator_split(x,cfg,T,remap_interval_override=interval,store_samples=int(cfg.get('operator_split_samples',96)),max_ds_cv_override=hard,integration_plan=frozen)
++        m=rolling_metrics(tr,x,cfg); chi=trefoil_shape_ratio_series(tr,x,int(cfg.get('cyclic_stride',4)))
++        arms.append({'label':label,'remap_interval':None if not np.isfinite(interval) else float(interval),'completed':bool(tr['completed']),
++                     'stop_reason':tr['stop_reason'],'final_geometry':tr['x'][-1], 'metrics':m,'chi':chi,
++                     'remap_event_count':int(tr['remap_event_count']),
++                     'max_remap_shape_distance':float(np.max(tr['remap_shape_distance'])) if len(tr['remap_shape_distance']) else 0.0,
++                     'max_ds_cv':float(np.max(tr['ds_cv']))})
++    remap=[a for a in arms if a['label']!='physical_only']
++    pair=[]
++    for i in range(len(remap)):
++        for j in range(i+1,len(remap)):
++            pair.append(shape_distance(remap[i]['final_geometry'],remap[j]['final_geometry'],int(cfg.get('cyclic_stride',4))))
++    sc=[a['metrics']['score'] for a in remap]; auc=[a['metrics']['shape_auc'] for a in remap]
++    maxpair=float(max(pair) if pair else 0.0)
++    row={'n':int(n),'integration_plan':{'steps':int(frozen[0]),'dt':float(frozen[1]),'target_t_final':float(T)},
++         'all_remap_arms_completed':bool(all(a['completed'] for a in remap)),'max_pairwise_remap_shape_distance':maxpair,
++         'score_rel_span':_rel_span(sc),'auc_rel_span':_rel_span(auc),
++         'physical_only_completed':bool(arms[0]['completed']),'physical_only_stop_reason':arms[0]['stop_reason'],
++         'max_event_shape_distance':float(max(a['max_remap_shape_distance'] for a in remap) if remap else 0.0),
++         'arms':[{k:v for k,v in a.items() if k!='final_geometry'} for a in arms]}
++    return row
++
++
++def classify_resolution_ladder(rows,cfg):
++    if not rows: return {'status':'INDETERMINATE_NO_DATA','qualified':False}
++    rows=sorted(rows,key=lambda r:r['n']); finest=rows[-1]
++    err=np.asarray([max(float(r['max_pairwise_remap_shape_distance']),float(cfg.get('operator_split_error_floor',1e-8))) for r in rows],float)
++    ns=np.asarray([r['n'] for r in rows],float); floor=float(cfg.get('operator_split_error_floor',1e-8))
++    if np.all(err<=floor*1.0001): order=float('inf'); conv='FLOOR_LIMITED'
++    elif len(rows)>=3 and np.all(np.isfinite(err)) and np.all(err>0):
++        order=float(-np.polyfit(np.log(ns),np.log(err),1)[0]); conv='ORDER_CONFIRMED' if order>=float(cfg.get('operator_split_min_convergence_order',.5)) else 'ORDER_NOT_CONFIRMED'
++    else: order=None; conv='INSUFFICIENT_RESOLUTION_LEVELS'
++    enough=len(rows)>=int(cfg.get('operator_split_min_resolution_levels_for_support',3))
++    finest_ok=(finest['all_remap_arms_completed'] and
++               finest['max_pairwise_remap_shape_distance']<=float(cfg.get('operator_split_max_final_shape_distance',cfg.get('mesh_gauge_max_final_shape_distance',.035))) and
++               finest['score_rel_span']<=float(cfg.get('operator_split_max_score_rel_span',cfg.get('mesh_gauge_max_score_rel_span',.12))) and
++               finest['auc_rel_span']<=float(cfg.get('operator_split_max_auc_rel_span',cfg.get('mesh_gauge_max_auc_rel_span',.20))))
++    convergence_ok=conv in ('FLOOR_LIMITED','ORDER_CONFIRMED')
++    qualified=bool(enough and finest_ok and convergence_ok)
++    if qualified: status='OPERATOR_SPLIT_REMAP_CERTIFIED'
++    elif not enough: status='INDETERMINATE_INSUFFICIENT_RESOLUTION_LEVELS'
++    elif not finest['all_remap_arms_completed']: status='INDETERMINATE_REMAP_ARM_NUMERICS'
++    elif not finest_ok: status='GEOMETRIC_CENTERLINE_REMAP_CADENCE_COUPLED'
++    else: status='NUMERICALLY_UNRESOLVED_OPERATOR_SPLIT'
++    return {'status':status,'qualified':qualified,'promotion_to_s40_allowed':qualified,'empirical_convergence_order':order,
++            'convergence_status':conv,'finest_resolution':int(finest['n']),'finest_max_pairwise_remap_shape_distance':float(finest['max_pairwise_remap_shape_distance']),
++            'physical_only_is_diagnostic_reference':True,'target_ratio_used':False}
+--- /dev/null
++++ v0.3.2/src/sst_seed_falsifier/shape_ratio.py
+@@ -0,0 +1,73 @@
++"""Target-free trefoil anisotropy observables.
++
++No target constant is used.  The observable is inferred only from the embedded
++centreline after arclength resampling and rigid alignment.
++"""
++from __future__ import annotations
++import numpy as np
++from .geometry import center,resample_closed,align_cyclic
++
++
++def _frame(x):
++    y=center(np.asarray(x,float))
++    cov=(y.T@y)/max(len(y),1)
++    vals,vecs=np.linalg.eigh(cov)
++    order=np.argsort(vals)
++    axis=vecs[:,order[0]]
++    e1=vecs[:,order[-1]]
++    e2=np.cross(axis,e1); e2/=max(np.linalg.norm(e2),1e-30)
++    e1=np.cross(e2,axis); e1/=max(np.linalg.norm(e1),1e-30)
++    return axis,e1,e2,vals[order]
++
++
++def trefoil_shape_ratio(x, *, axis=None, e1=None, e2=None, toroidal_winding=2, poloidal_mode=3):
++    """Estimate R_radial/r_axial from an ordered trefoil centreline.
++
++    The toroidal phase is recovered from the projected azimuth around the PCA
++    axis.  For T(2,3), theta ~= 2 t, hence t=theta/2.  Fourier amplitudes of the
++    m=3 radial and axial modulations then estimate R_radial and r_axial.
++    Returned amplitudes have the same length unit as ``x``; chi is dimensionless.
++    """
++    y=resample_closed(np.asarray(x,float),len(x)); y=center(y)
++    if axis is None or e1 is None or e2 is None:
++        axis,e1,e2,eigs=_frame(y)
++    else:
++        axis=np.asarray(axis,float); axis/=max(np.linalg.norm(axis),1e-30)
++        e1=np.asarray(e1,float); e1-=np.dot(e1,axis)*axis; e1/=max(np.linalg.norm(e1),1e-30)
++        e2=np.asarray(e2,float); e2-=np.dot(e2,axis)*axis+np.dot(e2,e1)*e1; e2/=max(np.linalg.norm(e2),1e-30)
++        eigs=np.linalg.eigvalsh((y.T@y)/max(len(y),1))
++    u=y@e1; v=y@e2; z=y@axis
++    theta=np.unwrap(np.arctan2(v,u))
++    # Remove direction sign; amplitude is phase-invariant.
++    t=(theta-theta[0])/float(toroidal_winding)
++    rho=np.sqrt(u*u+v*v)
++    # Least-squares harmonic amplitudes are used instead of a simple DFT because
++    # uniform arclength samples are generally nonuniform in torus parameter t.
++    w=float(poloidal_mode)*t
++    A=np.c_[np.ones(len(t)),np.cos(w),np.sin(w)]
++    cr,*_=np.linalg.lstsq(A,rho,rcond=None); cz,*_=np.linalg.lstsq(A,z,rcond=None)
++    ar=float(np.hypot(cr[1],cr[2])); az=float(np.hypot(cz[1],cz[2]))
++    chi=float(ar/max(az,1e-30))
++    winding=float((theta[-1]-theta[0])/(2*np.pi)) if len(theta)>1 else 0.0
++    return {'R_radial':float(ar),'r_axial':float(az),'chi_eff':chi,
++            'toroidal_winding_estimate':winding,'pca_eigenvalues':[float(q) for q in np.sort(eigs)],
++            'target_free':True}
++
++
++def trefoil_shape_ratio_series(traj,x0,coarse_stride=4):
++    ref=resample_closed(np.asarray(x0,float),len(x0)); axis,e1,e2,_=_frame(ref)
++    values=[]
++    for x in np.asarray(traj['x']):
++        y=resample_closed(np.asarray(x,float),len(ref))
++        aligned,_,_,_,_=align_cyclic(y,ref,coarse_stride)
++        values.append(trefoil_shape_ratio(aligned,axis=axis,e1=e1,e2=e2))
++    chi=np.asarray([v['chi_eff'] for v in values],float)
++    return {'t':[float(t) for t in np.asarray(traj['t'],float)],
++            'chi_eff':[float(v) for v in chi],
++            'chi_initial':float(chi[0]) if len(chi) else float('nan'),
++            'chi_final':float(chi[-1]) if len(chi) else float('nan'),
++            'chi_median':float(np.median(chi)) if len(chi) else float('nan'),
++            'chi_range':float(np.ptp(chi)) if len(chi) else float('nan'),
++            'R_radial_initial':values[0]['R_radial'] if values else float('nan'),
++            'r_axial_initial':values[0]['r_axial'] if values else float('nan'),
++            'observable_used_in_score':False,'target_free':True}
+--- /dev/null
++++ v0.3.2/tests/test_v032_operator_split.py
+@@ -0,0 +1,29 @@
++import numpy as np
++from sst_seed_falsifier.geometry import resample_closed
++from sst_seed_falsifier.shape_ratio import trefoil_shape_ratio
++from sst_seed_falsifier.operator_split import remap_event_times
++from sst_seed_falsifier import __version__
++
++
++def trefoil(n=2048,R=2.0,a=.6,b=.4):
++    t=np.linspace(0,2*np.pi,n,endpoint=False)
++    return np.c_[(R+a*np.cos(3*t))*np.cos(2*t),(R+a*np.cos(3*t))*np.sin(2*t),b*np.sin(3*t)]
++
++
++def test_version(): assert __version__=='0.3.2'
++
++def test_remap_times_are_physical_and_endpoint_excluded():
++    assert np.allclose(remap_event_times(1.2,.25),[.25,.5,.75,1.0])
++
++def test_resample_preserves_first_marker():
++    x=trefoil(128); y=resample_closed(x,128); assert np.allclose(x[0],y[0])
++
++def test_shape_ratio_recovers_anisotropy():
++    x=trefoil(a=.6,b=.4); q=trefoil_shape_ratio(x)
++    assert abs(q['chi_eff']-1.5)<0.06
++
++def test_shape_ratio_rigid_and_scale_invariant():
++    x=trefoil(a=.6,b=.4); q0=trefoil_shape_ratio(x)['chi_eff']
++    ang=.73; R=np.array([[np.cos(ang),-np.sin(ang),0],[np.sin(ang),np.cos(ang),0],[0,0,1.]])
++    y=3.7*(x@R.T)+np.array([7.,-2.,4.]); q1=trefoil_shape_ratio(y)['chi_eff']
++    assert abs(q0-q1)<2e-3
+--- /dev/null
++++ v0.3.2/tests/test_v032_contracts.py
+@@ -0,0 +1,28 @@
++import inspect, json
++from pathlib import Path
++from sst_seed_falsifier.evidence import dynamics_contract
++from sst_seed_falsifier.release import release_identity
++from sst_seed_falsifier import operator_split
++
++
++def cfg():
++    return {'core_fraction':.08,'operator_split_remap_interval':.25,'long_hard_ds_cv':.45}
++
++def test_contract_is_operator_split():
++    c,h=dynamics_contract(cfg(),96)
++    assert c['format']=='SST-TREFOIL-DYNAMICS-CONTRACT-2'
++    assert c['continuous_mesh_velocity_enabled'] is False
++    assert c['reparameterization_scheme']=='operator_split_uniform_arclength_v1'
++
++def test_operator_split_module_has_no_tangential_controller_dependency():
++    src=inspect.getsource(operator_split)
++    assert 'tangential_redistribution' not in src
++
++def test_release_identity_matches():
++    r=release_identity(); assert r['match']; assert r['runtime_version']=='0.3.2'
++
++def test_configs_do_not_contain_target_ratio():
++    root=Path(__file__).resolve().parents[1]
++    text='\n'.join(p.read_text().lower() for p in (root/'config').glob('*.json'))
++    for token in ('golden','varphi','1.618','target_ratio'):
++        assert token not in text
+--- /dev/null
++++ v0.3.2/docs/OPERATOR_SPLIT_ARCLENGTH_REMAP_v0.3.2.md
+@@ -0,0 +1,21 @@
++# Operator-split arclength remap — v0.3.2
++
++The v0.3.1 long integrator evaluated
++
++\[
++\dot{\mathbf X}=\mathbf u_{\rm phys}(\mathbf X)+\mathbf u_{\rm mesh}(\mathbf X)
++\]
++
++inside every RK4 stage.  Although \(\mathbf u_{\rm mesh}\) was pointwise tangential, a finite polygon and nonlinear RK4 stage evaluation can feed this relabeling back into the evaluated physical field.
++
++v0.3.2 instead applies
++
++\[
++\mathbf X_{n+1}^{-}=\Phi_{\Delta t}^{\rm RK4}[\mathbf X_n],
++\qquad
++\mathbf X_{n+1}=\mathcal R_s[\mathbf X_{n+1}^{-}]
++\]
++
++only when a preregistered physical remap time is reached.  \(\mathcal R_s\) is uniform closed-curve polygonal arclength resampling with fixed point count and preserved first-marker phase anchor.
++
++S37C varies the physical remap interval and asks whether the embedded curve converges as spatial resolution increases.  Existing S37A thresholds are reused for final-shape, score and AUC sensitivity; no looser physics criterion is introduced.
+--- /dev/null
++++ v0.3.2/docs/CHI_EFFECTIVE_v0.3.2.md
+@@ -0,0 +1,17 @@
++# Target-free trefoil shape ratio
++
++For a torus-like trefoil \(T(2,3)\), the projected toroidal azimuth obeys approximately \(\theta\simeq 2t\).  After rigid alignment, the code estimates a PCA torus axis, unwraps \(\theta\), defines \(t=\theta/2\), and measures the poloidal \(m=3\) Fourier amplitudes
++
++\[
++R_{\rm radial}=2\left|\left\langle (\rho-\langle\rho\rangle)e^{-i3t}\right\rangle\right|,
++\qquad
++r_{\rm axial}=2\left|\left\langle (z-\langle z\rangle)e^{-i3t}\right\rangle\right|,
++\]
++
++so that
++
++\[
++\chi_{\rm eff}=R_{\rm radial}/r_{\rm axial}.
++\]
++
++The observable is dimensionless, invariant to translation, rotation and uniform scaling, and is excluded from all discovery scores and promotion gates.  It is intended for post-ranking dynamical-attractor analysis only.
