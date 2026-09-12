@@ -3,8 +3,8 @@ import argparse, json, sys
 from pathlib import Path
 from sst_blind.experiment import run_campaign
 from sst_blind.reporting import make_reports
-DEFAULT_FSERIES=r"C:\workspace\projects\SST-Workbench\KnotPlot\Knots_FourierSeries\3_1\knot.3_1.fseries"
-DEFAULT_KNOTPLOT=r"C:\workspace\projects\SST-Workbench\KnotPlot\knots\final\knot_3.1_final.txt"
+DEFAULT_FSERIES=r"C:\workspace\projects\SST-Workbench\03_data\A_knots\02_fourier\knotplot_legacy\3_1\knot.3_1.fseries"
+DEFAULT_KNOTPLOT=r"C:\workspace\projects\SST-Workbench\03_data\A_knots\04_knotplot\final\knot_3.1_final.txt"
 def main():
     ap=argparse.ArgumentParser(description='Blind SST trefoil coupled torsion-breathing-Kelvin / RPO-Floquet falsifier v0.3.0')
     ap.add_argument('--fseries',default=DEFAULT_FSERIES);ap.add_argument('--knotplot',default=DEFAULT_KNOTPLOT);ap.add_argument('--config',default='configs/basic.json');ap.add_argument('--out-dir',default='outputs_blind')

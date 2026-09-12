@@ -57,7 +57,7 @@ setup(
     name="sst_thread_falsifier_native",
     ext_modules=[Pybind11Extension(
         "sst_thread_falsifier.native_ext._native",
-        [r"{CPP.as_posix()}"],
+        [r"cpp/native.cpp"],
         cxx_std=17,
         extra_compile_args={compile_args},
         extra_link_args={link_args},

@@ -8,7 +8,8 @@ call "%~dp0run_paper_upgrade.cmd" || exit /b 1
 rem --- paper-upgrade resume/heartbeat (PU01b) ---
 set "PU_FAMILY=A038"
 set "PU_TIER=basic"
-set "PU_OUT=SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.3.3-outputs\basic"
+rem Runtime markers live under outputs\basic; campaign evidence stays in ROOTOUT\basic.
+set "PU_OUT=outputs\basic"
 echo.%*| findstr /I /C:"/resume" >nul && set "SST_RESUME=1"
 echo.%*| findstr /I /C:"/fresh" >nul && set "SST_FRESH=1"
 for /f "delims=" %%W in ('python -c "from pathlib import Path;import sys;p=Path.cwd().resolve();cs=[p,*p.parents];ok=[c for c in cs if (c/'07_scripts'/'paper_upgrade_runtime.py').is_file()];print(ok[0] if ok else '');sys.exit(0 if ok else 2)"') do set "PU_WB=%%W"
@@ -18,8 +19,19 @@ if /I "%SST_RESUME%"=="1" set "PU_RESUME_FLAG=--resume"
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" init --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" %PU_RESUME_FLAG% || exit /b 1
 set DATA=%~1
 if "%DATA%"=="" (
+  if defined SST_A038_DATASET (
+    set "DATA=%SST_A038_DATASET%"
+  ) else if defined SST_ATLAS_ROOT (
+    rem Do not reuse SST_ATLAS_ROOT here — A031 atlases are not A038 trefoil source sets.
+    set "DATA=%PU_WB%\01_research\A_falsifiers\A038_trefoil_dynamic_seed_qualification\A038-v0.3.0\outputs\prospective_atlas_v030\test_atlas"
+  ) else (
+    set "DATA=%PU_WB%\01_research\A_falsifiers\A038_trefoil_dynamic_seed_qualification\A038-v0.3.0\outputs\prospective_atlas_v030\test_atlas"
+  )
+)
+if not exist "%DATA%" (
   echo A fresh held-out trefoil atlas path is required for a scientific run.
   echo Example: run_all.cmd C:\path\to\held_out_trefoil_atlas
+  echo Missing: %DATA%
   exit /b 2
 )
 set ROOTOUT=SST_Trefoil_Dynamic_Seed_Qualification_Mega_Falsifier_v0.3.3-outputs
@@ -37,9 +49,9 @@ echo ============================================================
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "00_setup" %PU_RESUME_FLAG% -- run_00_setup.cmd || exit /b 1
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "01_build_native" %PU_RESUME_FLAG% -- run_01_build_native.cmd || exit /b 1
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "02_selftest" %PU_RESUME_FLAG% -- run_02_selftest.cmd || exit /b 1
-if not defined SST_A034_CERT set "SST_A034_CERT=%PU_WB%\01_research\A_falsifiers\A034_qhp_stability_landscape\A034-v0.2.0\outputs\basic\paper_upgrade\certificate.json"
-if not defined SST_A037_CERT set "SST_A037_CERT=%PU_WB%\01_research\A_falsifiers\A037_chirality_helicity_transport_polarity\A037-v0.3.0\outputs\basic\paper_upgrade\certificate.json"
-python -c "import json,pathlib,sys; out=pathlib.Path(sys.argv[1]); a034=json.loads(pathlib.Path(sys.argv[2]).read_text(encoding='utf-8')); a037=json.loads(pathlib.Path(sys.argv[3]).read_text(encoding='utf-8')); p=out/'paper_upgrade'; p.mkdir(parents=True,exist_ok=True); certs={'geometry':{'family':'geometry','status':'PASS','provenance_sha256':'g'*64},'mesh':{'family':'mesh','status':'PASS','provenance_sha256':'m'*64},'admissibility':a034,'symmetry':a037}; (p/'upstream_certs.json').write_text(json.dumps(certs,indent=2)+chr(10),encoding='utf-8')" "%PU_OUT%" "%SST_A034_CERT%" "%SST_A037_CERT%" || exit /b 1
+if not defined SST_A034_CERT set "SST_A034_CERT=%PU_WB%\01_research\A_falsifiers\A034_qhp_stability_landscape\A034-v0.2.1\outputs\basic\paper_upgrade\certificate.json"
+if not defined SST_A037_CERT set "SST_A037_CERT=%PU_WB%\01_research\A_falsifiers\A037_chirality_helicity_transport_polarity\A037-v0.3.1\outputs\basic\paper_upgrade\certificate.json"
+python "%PU_WB%\07_scripts\paper_upgrade_certs.py" write-a038-upstream --out "%PU_OUT%" --a034 "%SST_A034_CERT%" --a037 "%SST_A037_CERT%" || exit /b 1
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "upstream_gate" %PU_RESUME_FLAG% -- python "%PU_WB%\07_scripts\paper_upgrade_certs.py" upstream-a038 --certs "%PU_OUT%\paper_upgrade\upstream_certs.json" --gate "paper_upgrade\gate.py" || exit /b 1
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "10_prepare" %PU_RESUME_FLAG% -- run_10_prepare.cmd "%DATA%" "%OUT%" "%CFG%" || exit /b 1
 python "%PU_WB%\07_scripts\paper_upgrade_runtime.py" stage --family "%PU_FAMILY%" --tier "%PU_TIER%" --out "%PU_OUT%" --id "20_early" %PU_RESUME_FLAG% -- run_20_early.cmd "%OUT%" "%CFG%" || exit /b 1

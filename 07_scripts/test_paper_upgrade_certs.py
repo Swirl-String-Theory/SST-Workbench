@@ -189,3 +189,31 @@ def test_promotion_allowed_cannot_be_spoofed(tmp_path: Path):
     written = json.loads(path.read_text(encoding="utf-8"))
     assert written["promotion_allowed"] is False
     assert not pucc.promotable(written)
+
+
+def test_live_a034_a037_campaign_certs_promotable():
+    a034 = WB / "01_research/A_falsifiers/A034_qhp_stability_landscape/A034-v0.2.1/outputs/basic/paper_upgrade/certificate.json"
+    a037 = WB / "01_research/A_falsifiers/A037_chirality_helicity_transport_polarity/A037-v0.3.1/outputs/basic/paper_upgrade/certificate.json"
+    assert a034.is_file() and a037.is_file()
+    for path in (a034, a037):
+        cert = json.loads(path.read_text(encoding="utf-8"))
+        assert cert["certificate_kind"] == "CAMPAIGN"
+        assert cert["synthetic_inputs"] is False
+        assert cert["numerical_qualification"] == {
+            "temporal": "PASS",
+            "spatial": "PASS",
+            "mesh": "PASS",
+        }
+        assert cert["promotion_allowed"] is True
+        assert pucc.promotable(cert)
+
+
+def test_emit_campaign_cli_rejects_missing_out(tmp_path: Path):
+    proc = _run(
+        "emit-a037-campaign",
+        "--out",
+        str(tmp_path / "missing"),
+        "--gate",
+        str(A037_GATE),
+    )
+    assert proc.returncode != 0

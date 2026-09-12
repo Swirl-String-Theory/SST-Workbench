@@ -266,6 +266,7 @@ def run_stage(
 
     elapsed = time.monotonic() - t0
     if rc == 0:
+        done.parent.mkdir(parents=True, exist_ok=True)
         done.write_text(_utc_now() + "\n", encoding="utf-8")
         append_heartbeat(
             out_p,

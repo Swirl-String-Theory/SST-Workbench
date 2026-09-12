@@ -20,6 +20,6 @@ def write_report(outdir,s):
         '',
         'Projected eigenvalues are explicitly treated as **instantaneous local-response eigenvalues**, not Floquet/stability exponents unless the base curve is independently shown to be a relative equilibrium of the same dynamics.',
         '',
-        'A survived closure is not confirmation of SST. `CLOSURE_FAIL` falsifies the tested closure at the configured thresholds; `INCONCLUSIVE` or `NUMERICALLY_INCONCLUSIVE` requires a better-resolved run before a physical conclusion.'
+        'A survived closure is not confirmation of SST. `CLOSURE_FAIL` falsifies the tested closure at the configured thresholds; `CLOSURE_FAIL_WITH_NUMERICAL_WARNINGS` is the same physical fail when T/S_CONV also failed; `INCONCLUSIVE` or `NUMERICALLY_INCONCLUSIVE` requires a better-resolved run before a physical conclusion.'
     ]
     Path(outdir,'REPORT.md').write_text('\n'.join(lines),encoding='utf-8')

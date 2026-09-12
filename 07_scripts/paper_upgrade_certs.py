@@ -75,6 +75,7 @@ def load_certificate(path: str | Path | None = None, *, env_key: str | None = No
 def run_gate(gate_py: Path, payload: dict[str, Any], output: Path | None = None) -> dict[str, Any]:
     import tempfile
 
+    gate_py = Path(gate_py).resolve()
     with tempfile.TemporaryDirectory() as td:
         inp = Path(td) / "in.json"
         outp = Path(td) / "out.json"
@@ -300,6 +301,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", required=True)
     p.add_argument("--gate", required=True)
 
+    p = sub.add_parser("emit-a034-campaign")
+    p.add_argument("--out", required=True)
+    p.add_argument("--gate", required=True)
+    p.add_argument("--from-out", default=None, help="Campaign output dir (default: --out)")
+    p.add_argument("--payload", default=None, help="Optional JSON payload override")
+
+    p = sub.add_parser("emit-a037-campaign")
+    p.add_argument("--out", required=True)
+    p.add_argument("--gate", required=True)
+    p.add_argument("--from-out", default=None, help="Campaign output dir (default: --out)")
+    p.add_argument("--payload", default=None, help="Optional JSON payload override")
+
     p = sub.add_parser("consume-a034")
     p.add_argument("--cert", required=True)
     p.add_argument("--gate", required=True)
@@ -314,6 +327,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--cert", required=True)
     p.add_argument("--gate", required=True)
     p.add_argument("--output", default=None)
+
+    p = sub.add_parser("write-a038-upstream")
+    p.add_argument("--out", required=True)
+    p.add_argument("--a034", required=True)
+    p.add_argument("--a037", required=True)
 
     p = sub.add_parser("check-promotable")
     p.add_argument("--cert", required=True)
@@ -337,6 +355,103 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(path)
         return 0
+    if ns.cmd == "emit-a034-campaign":
+        from paper_upgrade_campaign_payload import build_a034_dual_and_payload
+        from paper_upgrade_numerics import qualify_a034_from_basic_out
+
+        src = Path(ns.from_out or ns.out)
+        if ns.payload:
+            payload = json.loads(Path(ns.payload).read_text(encoding="utf-8"))
+        else:
+            payload = build_a034_dual_and_payload(src)
+        nq_report = qualify_a034_from_basic_out(src)
+        nq = nq_report["numerical_qualification"]
+        nq_path = Path(ns.out) / "paper_upgrade" / "numerical_qualification.json"
+        nq_path.parent.mkdir(parents=True, exist_ok=True)
+        nq_path.write_text(json.dumps(nq_report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not all(nq.get(k) == "PASS" for k in ("temporal", "spatial", "mesh")):
+            # Still write a non-promotable CAMPAIGN envelope recording INVALID_NUMERICS.
+            path = emit_a034(
+                out=ns.out,
+                gate_py=Path(ns.gate),
+                certificate_kind="CAMPAIGN",
+                numerical_qualification=nq,
+                source_run_id=payload.get("source_run_id"),
+                source_output_sha256=payload.get("source_output_sha256"),
+                gate_input_sha256=payload.get("gate_input_sha256"),
+                g=payload["g"],
+                H=payload["H"],
+                C=payload["C"],
+            )
+            cert = json.loads(path.read_text(encoding="utf-8"))
+            cert["status"] = "FAIL"
+            cert["scientific"] = True
+            cert["invalid_numerics"] = True
+            write_certificate(ns.out, cert)
+            print(path)
+            return 2
+        path = emit_a034(
+            out=ns.out,
+            gate_py=Path(ns.gate),
+            certificate_kind="CAMPAIGN",
+            numerical_qualification=nq,
+            source_run_id=payload.get("source_run_id"),
+            source_output_sha256=payload.get("source_output_sha256"),
+            gate_input_sha256=payload.get("gate_input_sha256"),
+            g=payload["g"],
+            H=payload["H"],
+            C=payload["C"],
+        )
+        print(path)
+        cert = json.loads(path.read_text(encoding="utf-8"))
+        return 0 if promotable(cert) else 1
+    if ns.cmd == "emit-a037-campaign":
+        from paper_upgrade_campaign_payload import build_a037_payload
+        from paper_upgrade_numerics import qualify_a037_from_blind_out
+
+        src = Path(ns.from_out or ns.out)
+        if ns.payload:
+            payload = json.loads(Path(ns.payload).read_text(encoding="utf-8"))
+        else:
+            payload = build_a037_payload(src)
+        nq_report = qualify_a037_from_blind_out(src)
+        nq = nq_report["numerical_qualification"]
+        nq_path = Path(ns.out) / "paper_upgrade" / "numerical_qualification.json"
+        nq_path.parent.mkdir(parents=True, exist_ok=True)
+        nq_path.write_text(json.dumps(nq_report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not all(nq.get(k) == "PASS" for k in ("temporal", "spatial", "mesh")):
+            path = emit_a037(
+                out=ns.out,
+                gate_py=Path(ns.gate),
+                certificate_kind="CAMPAIGN",
+                numerical_qualification=nq,
+                source_run_id=payload.get("source_run_id"),
+                source_output_sha256=payload.get("source_output_sha256"),
+                gate_input_sha256=payload.get("gate_input_sha256"),
+                scientific_status="FAIL",
+                R_out=payload["R_out"],
+                R_drive=payload["R_drive"],
+            )
+            cert = json.loads(path.read_text(encoding="utf-8"))
+            cert["invalid_numerics"] = True
+            write_certificate(ns.out, cert)
+            print(path)
+            return 2
+        path = emit_a037(
+            out=ns.out,
+            gate_py=Path(ns.gate),
+            certificate_kind="CAMPAIGN",
+            numerical_qualification=nq,
+            source_run_id=payload.get("source_run_id"),
+            source_output_sha256=payload.get("source_output_sha256"),
+            gate_input_sha256=payload.get("gate_input_sha256"),
+            scientific_status=payload.get("scientific_status") or "PASS",
+            R_out=payload["R_out"],
+            R_drive=payload["R_drive"],
+        )
+        print(path)
+        cert = json.loads(path.read_text(encoding="utf-8"))
+        return 0 if promotable(cert) else 1
     if ns.cmd == "consume-a034":
         cert = load_certificate(ns.cert)
         result = consume_a034_cert(cert, Path(ns.gate))
@@ -369,6 +484,21 @@ def main(argv: list[str] | None = None) -> int:
         ok, why = require_promotable(cert)
         print(json.dumps({"promotable": ok, "reason": why, "blocked": blocked_reason_code(cert)}, indent=2))
         return 0 if ok else 1
+    if ns.cmd == "write-a038-upstream":
+        out = Path(ns.out)
+        a034 = load_certificate(ns.a034)
+        a037 = load_certificate(ns.a037)
+        certs = {
+            "geometry": campaign_fixture_cert(family="geometry", payload_schema="SST-GEOMETRY-1.0"),
+            "mesh": campaign_fixture_cert(family="mesh", payload_schema="SST-MESH-1.0"),
+            "admissibility": a034,
+            "symmetry": a037,
+        }
+        dest = out / "paper_upgrade" / "upstream_certs.json"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(certs, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(dest)
+        return 0
     return 2
 
 

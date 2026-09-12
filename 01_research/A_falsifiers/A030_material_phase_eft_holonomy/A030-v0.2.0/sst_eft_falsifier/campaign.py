@@ -107,13 +107,15 @@ def run(config_path,dataset_dir,outdir):
     s_enabled=bool(cfg['gates']['spatial_convergence'].get('enabled',False))
     cert_fail=(t_enabled and counts['T_CONV']['FAIL']>0) or (s_enabled and counts['S_CONV']['FAIL']>0)
     physical_fail=counts['G4_DISPERSION']['FAIL']>0
-    physical_inconclusive=counts['G4_DISPERSION']['SKIP']>0
+    physical_inconclusive=counts['G4_DISPERSION']['SKIP']>0 and counts['G4_DISPERSION']['FAIL']==0 and counts['G4_DISPERSION']['PASS']==0
     diagnostic_fail=any(counts[g]['FAIL']>0 for g in ['G1_REPARAM','G2_PHASE','G3_REDUNDANCY'])
 
-    if cert_fail:
+    # Physical closure failure wins over numerical-cert noise: T/S_CONV certify
+    # survived claims, they must not erase an already-failed G4 closure.
+    if physical_fail:
+        overall='CLOSURE_FAIL_WITH_NUMERICAL_WARNINGS' if cert_fail else 'CLOSURE_FAIL'
+    elif cert_fail:
         overall='NUMERICALLY_INCONCLUSIVE'
-    elif physical_fail:
-        overall='CLOSURE_FAIL'
     elif physical_inconclusive:
         overall='INCONCLUSIVE'
     elif t_enabled or s_enabled:
@@ -124,7 +126,7 @@ def run(config_path,dataset_dir,outdir):
     summary={
         'version':__version__,'n_samples':len(records),'gate_counts':counts,
         'overall_status':overall,
-        'diagnostic_warning_present':diagnostic_fail,
+        'diagnostic_warning_present':diagnostic_fail or (cert_fail and physical_fail),
         'verdict_semantics':{
             'G1':'centerline relabeling numerical surrogate',
             'G2':'geometric candidate-phase diagnostic unless physical phase lock is explicitly enabled',
@@ -136,11 +138,20 @@ def run(config_path,dataset_dir,outdir):
     (od/'summary.json').write_text(json.dumps(_j(summary),indent=2))
     write_report(od,summary)
     print(json.dumps(summary,indent=2)); print('[SST-EFT] outputs:',od)
+    return overall
+
+
+def exit_code_for_overall(overall: str) -> int:
+    """Conclusive FAIL/SURVIVED -> 0; inconclusive science -> 2 (A021-compatible)."""
+    if overall in ('INCONCLUSIVE', 'NUMERICALLY_INCONCLUSIVE'):
+        return 2
+    return 0
 
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--config',required=True); ap.add_argument('--dataset',required=True); ap.add_argument('--outdir',required=True)
-    a=ap.parse_args(); run(a.config,a.dataset,a.outdir)
+    a=ap.parse_args(); overall=run(a.config,a.dataset,a.outdir)
+    raise SystemExit(exit_code_for_overall(overall))
 
 
 if __name__=='__main__': main()
