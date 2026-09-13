@@ -333,6 +333,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--a034", required=True)
     p.add_argument("--a037", required=True)
 
+    p = sub.add_parser("emit-a034-bridge")
+    p.add_argument("--out", required=True)
+
+    p = sub.add_parser("emit-a037-blocks")
+    p.add_argument("--out", required=True)
+    p.add_argument("--gate", required=True)
+
     p = sub.add_parser("check-promotable")
     p.add_argument("--cert", required=True)
 
@@ -497,6 +504,42 @@ def main(argv: list[str] | None = None) -> int:
         dest = out / "paper_upgrade" / "upstream_certs.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(json.dumps(certs, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(dest)
+        return 0
+    if ns.cmd == "emit-a034-bridge":
+        pack_src = Path(ns.out).resolve()
+        # Prefer the version directory that owns this output, else the sibling A034-v0.2.2 src.
+        src_candidates = [
+            pack_src / "src",
+            Path(__file__).resolve().parents[1]
+            / "01_research/A_falsifiers/A034_qhp_stability_landscape/A034-v0.2.2/src",
+        ]
+        for src in src_candidates:
+            if (src / "sst_qhp_falsifier" / "modal_bridge.py").is_file():
+                if str(src) not in sys.path:
+                    sys.path.insert(0, str(src))
+                break
+        from sst_qhp_falsifier.modal_bridge import emit_bridge
+
+        result = emit_bridge(ns.out)
+        print(result["json"])
+        return 0 if result["wrapper"]["passed"] else 1
+    if ns.cmd == "emit-a037-blocks":
+        from paper_upgrade_campaign_payload import load_a037_campaign_matrix
+
+        parent = load_a037_campaign_matrix(Path(ns.out))
+        result = run_gate(
+            Path(ns.gate),
+            {
+                "operation": "emit_symmetry_blocks",
+                "selection": parent.get("selection_matrix"),
+                "parent_gate_input_sha256": parent.get("gate_input_sha256"),
+                "parent_provenance_sha256": parent.get("provenance_sha256"),
+            },
+        )
+        dest = Path(ns.out) / "paper_upgrade" / "symmetry_blocks.json"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(dest)
         return 0
     return 2

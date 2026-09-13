@@ -31,6 +31,46 @@ def _parse_complex_eigs(text: str) -> list[float]:
     return out
 
 
+def load_a034_historical_payload(out: Path) -> dict[str, Any]:
+    """Read the already-written dual/cert payload. Never rebuild the proxy here."""
+    dual_path = Path(out) / "analysis" / "dual_branch_record.json"
+    cert_path = Path(out) / "paper_upgrade" / "certificate.json"
+    if not dual_path.is_file():
+        raise FileNotFoundError(dual_path)
+    dual = json.loads(dual_path.read_text(encoding="utf-8"))
+    energetic = dual.get("energetic_admissibility") or {}
+    cert = json.loads(cert_path.read_text(encoding="utf-8")) if cert_path.is_file() else {}
+    return {
+        "g": energetic["g"],
+        "H": energetic["H"],
+        "C": energetic["C"],
+        "gate_input_sha256": cert.get("gate_input_sha256"),
+        "provenance_sha256": cert.get("provenance_sha256"),
+        "classification": cert.get("classification"),
+        "dual_path": str(dual_path),
+    }
+
+
+def load_a037_campaign_matrix(out: Path) -> dict[str, Any]:
+    cert_path = Path(out) / "paper_upgrade" / "certificate.json"
+    if not cert_path.is_file():
+        raise FileNotFoundError(cert_path)
+    cert = json.loads(cert_path.read_text(encoding="utf-8"))
+    sel = cert.get("selection_matrix")
+    if isinstance(sel, dict):
+        sel = sel.get("selection_allowed") or sel.get("selection_matrix")
+    payload = cert.get("payload") or {}
+    if sel is None:
+        sel = payload.get("selection_matrix")
+    return {
+        "selection_matrix": sel,
+        "gate_input_sha256": cert.get("gate_input_sha256"),
+        "provenance_sha256": cert.get("provenance_sha256"),
+        "R_out": [[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        "R_drive": [[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+    }
+
+
 def build_a037_payload(out: Path) -> dict[str, Any]:
     """Protocol mirror R from campaign design + hashes of blind results."""
     results = out / "BLIND_RESULTS.json"

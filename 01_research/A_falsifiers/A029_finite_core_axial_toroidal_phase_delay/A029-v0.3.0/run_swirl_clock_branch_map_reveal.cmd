@@ -1,0 +1,4 @@
+@echo off
+call "%~dp0_common.cmd" || exit /b 1
+cd /d "%ROOT%"
+"%PY%" -m sst_finite_core_falsifier.cli reveal --root . --config config/preset_swirl_clock_branch_map.json --campaign outputs/swirl_clock_branch_map/campaign --blind outputs/swirl_clock_branch_map/blind --out outputs/swirl_clock_branch_map/reveal
