@@ -1,4 +1,4 @@
-"""Tests for falsifier_registry.py."""
+"""Tests for falsifier_registry.py (schema v1 legacy + schema v2 root)."""
 
 from __future__ import annotations
 
@@ -13,10 +13,13 @@ if str(SCRIPTS) not in sys.path:
 
 from falsifier_registry import (  # noqa: E402
     FAMILIES,
+    LEGACY_REGISTRY,
     NUMERICS_STATUSES,
     PHYSICS_STATUSES,
     WB,
     discover_unregistered,
+    entries_source_path,
+    is_registry_v2,
     load_entries,
     load_registry,
     parse_version,
@@ -26,6 +29,7 @@ from falsifier_registry import (  # noqa: E402
 )
 
 REGISTRY = WB / "falsifier_registry.yaml"
+A_FALSIFIERS = WB / "01_research" / "A_falsifiers"
 
 
 class TestParseVersion(unittest.TestCase):
@@ -42,26 +46,87 @@ class TestParseVersion(unittest.TestCase):
         )
 
 
-class TestValidateRegistry(unittest.TestCase):
+class TestValidateRegistryV2(unittest.TestCase):
     def test_live_registry_valid(self) -> None:
         errs = validate_registry(path=REGISTRY)
         self.assertEqual(errs, [], msg="\n".join(errs))
 
-    def test_all_families_present(self) -> None:
+    def test_root_is_schema_v2(self) -> None:
         data = load_registry(REGISTRY)
+        self.assertTrue(is_registry_v2(data))
+        self.assertEqual(str(data.get("schema_version")), "2.0")
+
+    def test_unique_catalog_ids(self) -> None:
+        data = load_registry(REGISTRY)
+        ids = [e["catalog_id"] for e in data["families"]]
+        self.assertEqual(len(ids), len(set(ids)))
+
+    def test_physical_ids_match_registry(self) -> None:
+        data = load_registry(REGISTRY)
+        reg_ids = sorted(e["catalog_id"] for e in data["families"])
+        physical = sorted(
+            p.name.split("_", 1)[0]
+            for p in A_FALSIFIERS.iterdir()
+            if p.is_dir() and p.name.startswith("A") and (p / "FAMILY.yaml").is_file()
+        )
+        self.assertEqual(reg_ids, physical)
+
+    def test_no_stars_or_emoji_as_canonical_evidence(self) -> None:
+        data = load_registry(REGISTRY)
+        for fam in data["families"]:
+            self.assertNotIn("stars", fam)
+            self.assertNotIn("physics_emoji", fam)
+
+    def test_repro_gate_pass_is_not_physics_pass(self) -> None:
+        data = load_registry(REGISTRY)
+        for fam in data["families"]:
+            rg = fam.get("repro_gate") or {}
+            sci = fam.get("scientific") or {}
+            if str(rg.get("status", "")).lower() != "pass":
+                continue
+            overall = str(sci.get("overall") or "").upper()
+            self.assertNotEqual(
+                overall,
+                "PASS",
+                msg=f"{fam.get('catalog_id')}: repro_gate pass must not imply scientific PASS",
+            )
+
+
+class TestLegacyEntries(unittest.TestCase):
+    """v1 pack_glob / physics_status rows live in the archived legacy registry."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if not LEGACY_REGISTRY.is_file():
+            raise unittest.SkipTest(f"legacy archive missing: {LEGACY_REGISTRY}")
+
+    def test_entries_source_redirects_to_legacy(self) -> None:
+        self.assertEqual(entries_source_path(REGISTRY), LEGACY_REGISTRY)
+
+    def test_legacy_valid(self) -> None:
+        errs = validate_registry(path=LEGACY_REGISTRY)
+        self.assertEqual(errs, [], msg="\n".join(errs))
+
+    def test_all_families_present(self) -> None:
+        data = load_registry(LEGACY_REGISTRY)
         fams = {e["family"] for e in data["entries"]}
         self.assertEqual(fams, FAMILIES)
 
     def test_unique_ids(self) -> None:
-        data = load_registry(REGISTRY)
+        data = load_registry(LEGACY_REGISTRY)
         ids = [e["id"] for e in data["entries"]]
         self.assertEqual(len(ids), len(set(ids)))
 
     def test_physics_numerics_enums(self) -> None:
-        data = load_registry(REGISTRY)
+        data = load_registry(LEGACY_REGISTRY)
         for e in data["entries"]:
             self.assertIn(e["physics_status"], PHYSICS_STATUSES)
             self.assertIn(e["numerics_status"], NUMERICS_STATUSES)
+
+    def test_entry_count_near_45(self) -> None:
+        data = load_registry(LEGACY_REGISTRY)
+        self.assertGreaterEqual(len(data["entries"]), 43)
+        self.assertLessEqual(len(data["entries"]), 50)
 
 
 class TestResolvePack(unittest.TestCase):
@@ -76,6 +141,8 @@ class TestResolvePack(unittest.TestCase):
         self.assertGreaterEqual(resolved.version, (0, 2, 0))
 
     def test_physics_and_numerics_independent_fields(self) -> None:
+        if not LEGACY_REGISTRY.is_file():
+            self.skipTest("legacy archive missing")
         entries = load_entries(REGISTRY)
         for e in entries:
             if e.numerics_status == "PASS" and e.physics_status == "PASS":
@@ -88,10 +155,14 @@ class TestResolvePack(unittest.TestCase):
                 )
 
     def test_at_least_40_entries(self) -> None:
+        if not LEGACY_REGISTRY.is_file():
+            self.skipTest("legacy archive missing")
         entries = load_entries(REGISTRY)
         self.assertGreaterEqual(len(entries), 40)
 
     def test_most_entries_resolve(self) -> None:
+        if not LEGACY_REGISTRY.is_file():
+            self.skipTest("legacy archive missing")
         entries = load_entries(REGISTRY)
         unresolved = [e.id for e in entries if e.resolved is None]
         self.assertLessEqual(len(unresolved), 2, msg=str(unresolved))
@@ -108,20 +179,11 @@ class TestDiscoverUnregistered(unittest.TestCase):
         reset_pack_index()
 
     def test_discover_returns_list(self) -> None:
+        if not LEGACY_REGISTRY.is_file():
+            self.skipTest("legacy archive missing")
         entries = load_entries(REGISTRY, resolve=False)
         gaps = discover_unregistered(entries)
         self.assertIsInstance(gaps, list)
-
-
-class TestRegistryEntryCount(unittest.TestCase):
-    def test_entry_count_near_45(self) -> None:
-        data = load_registry(REGISTRY)
-        self.assertGreaterEqual(len(data["entries"]), 43)
-        self.assertLessEqual(len(data["entries"]), 50)
-
-
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestJunctionPruning(unittest.TestCase):
@@ -154,3 +216,7 @@ class TestJunctionPruning(unittest.TestCase):
             walked = [d for d, _dn, _fn in _walk_pruned(root)]
             self.assertNotIn(link, walked, "walk descended into the junction")
             self.assertIn(real / "deep", walked, "walk missed the real tree")
+
+
+if __name__ == "__main__":
+    unittest.main()

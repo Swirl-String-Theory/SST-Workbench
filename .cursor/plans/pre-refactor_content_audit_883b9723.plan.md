@@ -4,22 +4,22 @@ overview: "Audit tracked/ignored content t.o.v. main-sept-4 en de SP00-freeze, d
 todos:
   - id: audit-script
     content: "Schrijf audit_pre_refactor_content_loss.py: blob-set vs main-sept-4 + freeze, path_map remap, Drive (1)-classificatie"
-    status: pending
+    status: completed
   - id: audit-tests
     content: Tests voor rename-geen-verlies, echte delete, hash-match delete, en unique (1) quarantine
-    status: pending
+    status: completed
   - id: run-git-disk
     content: Draai git blob-vergelijking en freeze checksums-vs-disk; schrijf JSON/CSV
-    status: pending
+    status: completed
   - id: drive-classify
     content: "Classificeer untracked spatie-(N) paden: duplicate_of_kept vs unique_content"
-    status: pending
+    status: completed
   - id: drive-cleanup
     content: "Hash-match wissen; unique (1) files/dirs verplaatsen naar 09_archive/drive_conflicts/<origineel pad>; ledger schrijven"
-    status: pending
+    status: completed
   - id: report-tests
     content: Schrijf audit+cleanup rapport en draai de nieuwe plus bestaande integrity-tests
-    status: pending
+    status: completed
 isProject: false
 ---
 

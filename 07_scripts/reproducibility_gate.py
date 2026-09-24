@@ -3,7 +3,7 @@
 Default is a dry inventory. ``--apply`` writes:
   - ``10_docs/migration/reproducibility_gate.md``
   - ``10_docs/migration/reproducibility_gate.csv``
-  - optional ``gate:`` block updates in each ``FAMILY.yaml`` (``--write-family-gate``)
+  - optional ``repro_gate:`` block updates in each ``FAMILY.yaml`` (``--write-family-gate``)
 
 Statuses: ``pass``, ``fail``, ``skipped``, ``structural``.
 """
@@ -418,20 +418,27 @@ def classify_and_gate(
 
 
 def write_family_gate_block(fam: cm.Family, row: GateRow) -> None:
+    """Write/replace the ``repro_gate:`` block (legacy ``gate:`` is migrated away)."""
     path = fam.path / "FAMILY.yaml"
     if not path.is_file():
         return
     text = path.read_text(encoding="utf-8")
+    semantic = "Migration/reproducibility gate only; not a scientific verdict."
+    note = row.note or ""
+    if semantic not in note:
+        note = f"{note} | {semantic}" if note else semantic
     block = (
-        "gate:\n"
+        "repro_gate:\n"
         f"  status: {row.status}\n"
         f"  tier: {row.tier}\n"
         f"  version: {row.version}\n"
         f"  equivalence: {row.equivalence}\n"
         f"  tolerance: {row.tolerance!r}\n"
-        f"  note: {json.dumps(row.note)}\n"
+        f"  note: {json.dumps(note)}\n"
     )
-    if re.search(r"^gate:\s*$", text, re.M):
+    if re.search(r"^repro_gate:\s*$", text, re.M):
+        text = re.sub(r"^repro_gate:\n(?:  .*\n)*", block, text, count=1, flags=re.M)
+    elif re.search(r"^gate:\s*$", text, re.M):
         text = re.sub(r"^gate:\n(?:  .*\n)*", block, text, count=1, flags=re.M)
     else:
         if not text.endswith("\n"):

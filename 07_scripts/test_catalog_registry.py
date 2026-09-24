@@ -126,11 +126,16 @@ class TestProjectJson:
 
 
 class TestRegistrySync:
-    def test_every_entry_has_a_catalog_id(self):
-        text = REGISTRY.read_text(encoding="utf-8")
-        globs = len(re.findall(r"^\s*pack_glob:", text, re.M))
-        ids = len(re.findall(r"^\s*catalog_id:\s*\S", text, re.M))
-        assert ids == globs, f"{globs} pack_glob entries but {ids} catalog_id values"
+    def test_v2_registry_lists_every_physical_a_family(self):
+        data = __import__("yaml").safe_load(REGISTRY.read_text(encoding="utf-8"))
+        assert str(data.get("schema_version")) == "2.0"
+        reg_ids = {f["catalog_id"] for f in data["families"]}
+        physical = {
+            f.catalog_id
+            for f in _families()
+            if f.domain == "01_research" and f.letter == "A_falsifiers"
+        }
+        assert reg_ids == physical
 
     def test_registry_ids_exist_in_the_catalog(self):
         text = REGISTRY.read_text(encoding="utf-8")
@@ -140,11 +145,21 @@ class TestRegistrySync:
         unknown = used - known - {"A005"}
         assert unknown == set(), f"registry references unknown ids: {sorted(unknown)}"
 
-    def test_pack_glob_is_kept_for_archive_lookup(self):
+    def test_legacy_pack_glob_preserved_in_archive(self):
         """Zip filenames in 09_archive/restore keep the historical naming forever."""
-        text = REGISTRY.read_text(encoding="utf-8")
+        legacy = (
+            WB
+            / "10_docs"
+            / "migration"
+            / "registry_evidence_patch_v0.1.0"
+            / "falsifier_registry.legacy.yaml"
+        )
+        assert legacy.is_file(), f"missing legacy archive: {legacy}"
+        text = legacy.read_text(encoding="utf-8")
         assert "pack_glob:" in text
-
+        globs = len(re.findall(r"^\s*pack_glob:", text, re.M))
+        ids = len(re.findall(r"^\s*catalog_id:\s*\S", text, re.M))
+        assert ids == globs, f"{globs} pack_glob entries but {ids} catalog_id values"
 
 class TestCatalogIndex:
     def test_index_matches_a_fresh_walk(self):

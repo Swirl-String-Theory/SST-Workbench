@@ -1,0 +1,152 @@
+{
+  "schema": "sst.independent-calibration-plan.v1",
+  "status": "PLAN_REQUIRES_MICROSCOPIC_RESPONSE_DATA",
+  "purpose": "Determine finite-core response coefficients without using alpha, the alpha-derived target correction, the elementary charge, or an SST swirl speed calibrated through alpha.",
+  "response_definition_required": {
+    "symbol": "R_micro",
+    "calibration_target": "y_n = R_micro[geometry_n, core_n] - (8*pi/3)*L_D,n",
+    "warning": "Energy, ring velocity, or Kelvin dispersion may constrain the same core model, but they cannot be inserted as y_n unless a forward derivation maps them to this exact response operator."
+  },
+  "recommended_model": {
+    "equation": "Delta = c_kappa*I_kappa2 + c_Omega*I_Omega2 + c_C*C_contact",
+    "renormalization_condition": "c_L = 0",
+    "reason": "A free length coefficient is degenerate with the leading 8*pi/3 coefficient and can trivially absorb the trefoil discrepancy.",
+    "features": {
+      "I_kappa2": "integral (D*kappa)^2 ds/D",
+      "I_Omega2": "integral (D*Omega_3)^2 ds/D",
+      "C_contact": "declared finite-core nonlocal contact functional"
+    }
+  },
+  "normalization": {
+    "D": 1.0,
+    "rho_f": 1.0,
+    "Gamma": 1.0,
+    "notes": "Use a dimensionless solver. Physical SST constants are not needed for determining dimensionless response coefficients."
+  },
+  "campaigns": [
+    {
+      "id": "CAL-BEND",
+      "role": "calibration",
+      "geometry": "isolated circular vortex rings",
+      "parameters": {
+        "R_over_D": [
+          3.0,
+          4.0,
+          6.0,
+          8.0
+        ]
+      },
+      "isolates": [
+        "c_kappa"
+      ],
+      "required_outputs": [
+        "R_micro",
+        "numerical uncertainty",
+        "I_kappa2",
+        "convergence versus grid/core resolution"
+      ],
+      "exclusions": [
+        "self-contact",
+        "material twist"
+      ]
+    },
+    {
+      "id": "CAL-TWIST",
+      "role": "calibration",
+      "geometry": "straight periodic finite-core tube with material twist",
+      "parameters": {
+        "D_Omega3": [
+          0.05,
+          0.1,
+          0.2,
+          0.3
+        ]
+      },
+      "isolates": [
+        "c_Omega"
+      ],
+      "required_outputs": [
+        "R_micro",
+        "numerical uncertainty",
+        "I_Omega2",
+        "frame/gauge definition of Omega_3"
+      ],
+      "exclusions": [
+        "curvature",
+        "nonlocal contact"
+      ]
+    },
+    {
+      "id": "CAL-CONTACT",
+      "role": "calibration",
+      "geometry": "two antiparallel finite-core tube segments",
+      "parameters": {
+        "separation_over_D": [
+          1.0,
+          1.05,
+          1.1,
+          1.2,
+          1.5
+        ]
+      },
+      "isolates": [
+        "c_C or contact-kernel parameters"
+      ],
+      "required_outputs": [
+        "R_micro",
+        "numerical uncertainty",
+        "C_contact",
+        "core-profile sensitivity"
+      ],
+      "exclusions": [
+        "curvature away from end closures",
+        "material twist"
+      ]
+    },
+    {
+      "id": "HOLD-MIXED-1",
+      "role": "holdout",
+      "geometry": "twisted circular vortex ring",
+      "parameters": {
+        "R_over_D": 5.0,
+        "D_Omega3": 0.15
+      },
+      "tests": [
+        "additivity",
+        "bend-twist cross terms"
+      ],
+      "fit_allowed": false
+    },
+    {
+      "id": "HOLD-MIXED-2",
+      "role": "holdout",
+      "geometry": "curved antiparallel near-contact pair",
+      "parameters": {
+        "R_over_D": 5.0,
+        "separation_over_D": 1.05
+      },
+      "tests": [
+        "bend-contact cross terms",
+        "kernel transferability"
+      ],
+      "fit_allowed": false
+    },
+    {
+      "id": "FINAL-3_1",
+      "role": "final_test",
+      "geometry_source": "Brian Gilbert ideal_favorites.txt record 3:1:1",
+      "reported_L_D": 16.371637,
+      "target_used_only_here": "Delta_target = alpha_inverse - (8*pi/3)*16.371637",
+      "fit_allowed": false
+    }
+  ],
+  "minimum_gates": [
+    "No forbidden alpha-derived inputs in calibration provenance",
+    "At least two independent points per fitted coefficient",
+    "Full-rank design matrix",
+    "Resolution convergence",
+    "Leave-one-out success",
+    "Mixed holdout success",
+    "Frozen trefoil prediction"
+  ]
+}

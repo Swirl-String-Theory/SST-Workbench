@@ -139,6 +139,16 @@ def build_a034_dual_and_payload(out: Path) -> dict[str, Any]:
     except ValueError:
         proj = 0.0
 
+    # PC03 vocabulary: weak manifold is not ordinary FAIL_STABILITY.
+    if proj < 0.05:
+        energetic_label = "REDUCED_MANIFOLD_BREAKDOWN"
+    elif field_norm > 1e-3:
+        energetic_label = "ENERGETIC_NONSTATIONARY"
+    elif min(eigs) < 0:
+        energetic_label = "ENERGETIC_STATIONARY_SADDLE"
+    else:
+        energetic_label = "ENERGETIC_STATIONARY_STABLE"
+
     energetic = {
         "candidate_id": best.get("candidate_id"),
         "projection_fraction": proj,
@@ -147,7 +157,8 @@ def build_a034_dual_and_payload(out: Path) -> dict[str, Any]:
         "g": g,
         "H": H,
         "C": C,
-        "label_pending_gate": True,
+        "status": energetic_label,
+        "label_pending_gate": False,
     }
 
     dual = {

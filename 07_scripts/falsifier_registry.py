@@ -20,6 +20,13 @@ except ImportError:  # pragma: no cover
 
 WB = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY = WB / "falsifier_registry.yaml"
+LEGACY_REGISTRY = (
+    WB
+    / "10_docs"
+    / "migration"
+    / "registry_evidence_patch_v0.1.0"
+    / "falsifier_registry.legacy.yaml"
+)
 RESTORE = WB / "Restore_Archives"
 
 PHYSICS_STATUSES = frozenset(
@@ -302,6 +309,30 @@ def load_registry(path: Path | None = None) -> dict[str, Any]:
     return data
 
 
+def is_registry_v2(data: dict[str, Any]) -> bool:
+    """True for schema 2.0 tree-derived registries (families[], no entries[])."""
+    if str(data.get("schema_version") or "") == "2.0":
+        return True
+    return isinstance(data.get("families"), list) and "entries" not in data
+
+
+def entries_source_path(path: Path | None = None) -> Path:
+    """Path that still carries v1 pack_glob entries for resolve/inventory.
+
+    After the registry evidence mega patch the root file is schema 2.0; historical
+    pack_glob rows live in the archived legacy registry under 10_docs/migration.
+    """
+    path = path or DEFAULT_REGISTRY
+    data = load_registry(path)
+    if not is_registry_v2(data):
+        return path
+    if LEGACY_REGISTRY.is_file():
+        return LEGACY_REGISTRY
+    raise FileNotFoundError(
+        f"root registry is schema 2.0 but legacy archive missing: {LEGACY_REGISTRY}"
+    )
+
+
 def _entry_from_raw(raw: dict[str, Any]) -> RegistryEntry:
     ht = raw.get("hypothesis_table")
     return RegistryEntry(
@@ -328,7 +359,9 @@ def _entry_from_raw(raw: dict[str, Any]) -> RegistryEntry:
 
 
 def load_entries(path: Path | None = None, *, resolve: bool = True) -> list[RegistryEntry]:
-    data = load_registry(path)
+    """Load v1 pack_glob entries (auto-redirects to legacy archive when root is v2)."""
+    src = entries_source_path(path)
+    data = load_registry(src)
     raw_entries = data.get("entries") or []
     entries = [_entry_from_raw(r) for r in raw_entries]
     if resolve:
@@ -340,9 +373,7 @@ def load_entries(path: Path | None = None, *, resolve: bool = True) -> list[Regi
     return entries
 
 
-def validate_registry(data: dict[str, Any] | None = None, path: Path | None = None) -> list[str]:
-    if data is None:
-        data = load_registry(path)
+def validate_registry_v1(data: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     entries = data.get("entries")
     if not isinstance(entries, list) or not entries:
@@ -393,6 +424,56 @@ def validate_registry(data: dict[str, Any] | None = None, path: Path | None = No
             errors.append(f"no entries for family {fam}")
 
     return errors
+
+
+def validate_registry_v2(data: dict[str, Any]) -> list[str]:
+    """Validate schema 2.0 tree-derived registry (no stars/emoji as evidence)."""
+    errors: list[str] = []
+    if str(data.get("schema_version")) != "2.0":
+        errors.append("schema_version must be '2.0'")
+    families = data.get("families")
+    if not isinstance(families, list) or not families:
+        errors.append("families must be a non-empty list")
+        return errors
+
+    seen: set[str] = set()
+    for i, raw in enumerate(families):
+        prefix = f"families[{i}]"
+        if not isinstance(raw, dict):
+            errors.append(f"{prefix}: must be mapping")
+            continue
+        cid = raw.get("catalog_id")
+        if not isinstance(cid, str) or not re.fullmatch(r"A\d{3}", cid):
+            errors.append(f"{prefix}: invalid catalog_id {cid!r}")
+            continue
+        if cid in seen:
+            errors.append(f"{prefix}: duplicate catalog_id {cid}")
+        seen.add(cid)
+        if "repro_gate" not in raw:
+            errors.append(f"{prefix}: missing repro_gate")
+        if "scientific" not in raw:
+            errors.append(f"{prefix}: missing scientific")
+        if "execution" not in raw:
+            errors.append(f"{prefix}: missing execution")
+        # Stars/emoji must not be canonical evidence fields on v2 rows.
+        for banned in ("stars", "physics_emoji"):
+            if banned in raw:
+                errors.append(f"{prefix}: forbidden evidence field {banned}")
+        sci = raw.get("scientific") or {}
+        if isinstance(sci, dict):
+            overall = sci.get("overall")
+            if overall is not None and not isinstance(overall, str):
+                errors.append(f"{prefix}: scientific.overall must be string")
+
+    return errors
+
+
+def validate_registry(data: dict[str, Any] | None = None, path: Path | None = None) -> list[str]:
+    if data is None:
+        data = load_registry(path)
+    if is_registry_v2(data):
+        return validate_registry_v2(data)
+    return validate_registry_v1(data)
 
 
 def discover_unregistered(
