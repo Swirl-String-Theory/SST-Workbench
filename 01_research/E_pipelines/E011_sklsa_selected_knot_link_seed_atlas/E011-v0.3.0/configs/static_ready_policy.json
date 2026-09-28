@@ -1,0 +1,112 @@
+{
+  "schema": "E011-SKLSA-STATIC-READY-POLICY-1",
+  "policy_version": "0.3.0",
+  "static_ready": {
+    "required_core_observables": [
+      "Wr",
+      "ACN",
+      "dcsd",
+      "kappa_rms"
+    ],
+    "required_observable_status": "RESOLVED",
+    "require_literature_hard_gate_pass": true,
+    "exclude_evidence_classes": [
+      "MIRROR",
+      "UNCLASSIFIED"
+    ],
+    "primary_evidence_classes": [
+      "UPSTREAM_INDEPENDENT"
+    ],
+    "secondary_evidence_classes": [
+      "QUALIFIED_NONMIRROR",
+      "DERIVED_NUMERICAL"
+    ],
+    "control_evidence_classes": [
+      "GENERATED_OR_CONTROL"
+    ],
+    "mirror_never_static_ready": true,
+    "note": "STATIC_READY certifies suitability as a provenance-clean static centerline seed. It is not DYNAMICS_READY and is not a particle/SST claim."
+  },
+  "capabilities": {
+    "writhe_ready": [
+      "Wr"
+    ],
+    "acn_ready": [
+      "ACN"
+    ],
+    "ropelength_ready": [
+      "Rop"
+    ],
+    "thickness_ready": [
+      "Thi"
+    ],
+    "reach_ready": [
+      "reach",
+      "dcsd"
+    ],
+    "curvature_rms_ready": [
+      "kappa_rms"
+    ],
+    "curvature_shape_ready": [
+      "kappa_rms",
+      "sigma_kappa"
+    ],
+    "curvature_extrema_ready": [
+      "kappa_max"
+    ],
+    "torsion_rms_ready": [
+      "tau_rms"
+    ],
+    "chirality_ready": [
+      "Wr"
+    ]
+  },
+  "provider_agreement": {
+    "scope": "strict_upstream_STATIC_READY_primary_seeds_grouped_by_provider_median",
+    "required_for_cross_provider_robust": [
+      "ACN",
+      "Wr_abs",
+      "kappa_rms",
+      "dcsd"
+    ],
+    "metrics": [
+      "Rop",
+      "Thi",
+      "Wr",
+      "Wr_abs",
+      "ACN",
+      "dcsd",
+      "reach",
+      "kappa_max",
+      "kappa_rms",
+      "sigma_kappa",
+      "tau_rms"
+    ],
+    "bands": {
+      "default": {
+        "strong_max_relative_span": 0.05,
+        "acceptable_max_relative_span": 0.15,
+        "weak_max_relative_span": 0.3
+      },
+      "dcsd": {
+        "strong_max_relative_span": 0.1,
+        "acceptable_max_relative_span": 0.3,
+        "weak_max_relative_span": 0.5
+      }
+    },
+    "orientation_rule": "Wr_abs is used for shape agreement. Signed Wr is retained separately to expose orientation/chirality changes.",
+    "threshold_note": "These bands are transparent analysis-policy tolerances, not physical constants and not fitted to SST predictions.",
+    "provider_weighting_rule": "Each provider contributes one median per observable. Within-provider variant spread is retained separately; a provider with many variants never gets extra votes.",
+    "anchor_rule": "Provider anchors are convenience seeds selected only by provenance/source-stage/capability completeness/resolution/stable ID; anchors do not determine provider agreement."
+  },
+  "topology_static_status": {
+    "CROSS_PROVIDER_ROBUST": "At least two independent primary providers, all required agreement observables resolved for >=2 providers, and all inside acceptable policy bands.",
+    "CROSS_PROVIDER_SENSITIVE": "At least two independent primary providers but one or more required observables exceed the acceptable policy band.",
+    "CROSS_PROVIDER_INCOMPLETE": "At least two independent primary providers but one or more required agreement observables lack >=2 resolved values.",
+    "SINGLE_PROVIDER_QUALIFIED": "Exactly one independent primary STATIC_READY provider; usable for static falsifiers with an explicit single-provider limitation.",
+    "STATIC_NOT_READY_NO_UPSTREAM_REFERENCE": "No independent upstream primary seed passes the STATIC_READY core gate.",
+    "STATIC_NOT_READY_E010_EXCLUDED": "No carrier survived the authoritative E010 carrier-level admission for this selected topology.",
+    "STATIC_NOT_READY_CORE_OBSERVABLES": "An independent upstream carrier exists but its v0.3.0 static core observables are not all RESOLVED.",
+    "STATIC_NOT_READY_MIRROR_ONLY": "Only a mirror/provenance fallback remains; mirrors can never become STATIC_READY."
+  }
+}
