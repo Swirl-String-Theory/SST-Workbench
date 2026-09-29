@@ -1,0 +1,157 @@
+{
+  "dataset": {
+    "require_core_release_gates": true,
+    "strict_raw_hash": true,
+    "strict_geometry_hash": true,
+    "selection": {
+      "literature_gate_policy": "exclude_hard_fail",
+      "duplicate_policy": "geometry_and_raw_unique",
+      "source_families": "all",
+      "exclude_evidence_classes": [
+        "BYTE_IDENTICAL_MIRROR_NOT_INDEPENDENT",
+        "MIRROR_NOT_INDEPENDENT"
+      ],
+      "max_per_independence_group": 0
+    }
+  },
+  "parent_selection": {
+    "max_geometries": 8,
+    "policy": "one max-growth representative per anonymous v0.3 independence group, then best-fit, earliest-future-tstar and max-growth anomaly slots; deterministic controls fill overlaps"
+  },
+  "base": {
+    "L": 6.283185307179586,
+    "core_sigma": 0.22,
+    "target_rms_radius": 1.0,
+    "centerline_samples": 384,
+    "sample_every": 4,
+    "energy_drift_limit": 5e-05,
+    "div_rms_limit": 1e-10,
+    "packet_k": 3.0,
+    "packet_sigma": 0.7,
+    "packet_epsilon": 0.0
+  },
+  "seed_gates": {
+    "cells_per_sigma_min": 4.0,
+    "three_sigma_kappa_max": 0.5,
+    "periodic_clearance_sigma_min": 3.0,
+    "spectral_outer_fraction": 0.8,
+    "spectral_tail_fraction_max": 0.08
+  },
+  "inverse_fit": {
+    "r2_min": 0.98,
+    "candidate_horizon_factor": 1.5
+  },
+  "model_competition": {
+    "late_fractions": [
+      0.35,
+      0.45,
+      0.55
+    ],
+    "delta_aicc_min": 10.0,
+    "gamma_min": 0.9,
+    "tstar_relative_spread_max": 0.15,
+    "tstar_max_factor": 5.0
+  },
+  "stages": {
+    "spatial": {
+      "profiles": [
+        {
+          "id": "highres_N64",
+          "N": 64,
+          "dt": 0.001,
+          "T": 0.24
+        },
+        {
+          "id": "highres_N96",
+          "N": 96,
+          "dt": 0.00044444444444444447,
+          "T": 0.24
+        },
+        {
+          "id": "highres_N128",
+          "N": 128,
+          "dt": 0.00025,
+          "T": 0.24
+        }
+      ],
+      "gate": {
+        "observables": [
+          "omega_growth",
+          "bkm_integral"
+        ],
+        "finest_relative_change_max": 0.05,
+        "observed_order_min": 1.0
+      }
+    },
+    "temporal": {
+      "enabled": true,
+      "require_seed_certification": true,
+      "profiles": [
+        {
+          "id": "temporal128_dt",
+          "N": 128,
+          "dt": 0.0005,
+          "T": 0.24
+        },
+        {
+          "id": "temporal128_dt2",
+          "N": 128,
+          "dt": 0.00025,
+          "T": 0.24
+        },
+        {
+          "id": "temporal128_dt4",
+          "N": 128,
+          "dt": 0.000125,
+          "T": 0.24
+        }
+      ],
+      "gate": {
+        "observables": [
+          "omega_growth",
+          "bkm_integral"
+        ],
+        "observed_order_min": 2.8,
+        "relative_numerical_floor": 1e-07
+      }
+    },
+    "long": {
+      "enabled": true,
+      "allow_spatial_only_if_temporal_disabled": false,
+      "profile": {
+        "id": "long_N128",
+        "N": 128,
+        "dt": 0.00025,
+        "T": 0.9,
+        "sample_every": 32
+      },
+      "mechanism_gate": {
+        "decomposition_error_max": 1e-10,
+        "detF_error_max": 0.08,
+        "cauchy_error_max": 0.2,
+        "alpha_logstretch_error_max": 0.2
+      }
+    },
+    "robustness": {
+      "enabled": true,
+      "profile": {
+        "id": "robust_N128",
+        "N": 128,
+        "dt": 0.00025,
+        "T": 0.24,
+        "sample_every": 16
+      },
+      "centerline_samples": [
+        256,
+        384,
+        512
+      ],
+      "sigma_multipliers": [
+        0.85,
+        1.0,
+        1.15
+      ],
+      "omega_growth_relative_spread_max": 0.12
+    }
+  }
+}
