@@ -77,11 +77,12 @@ def _load_e010_modules(release_root: Path):
         sys.path.insert(0,root)
     io=importlib.import_module('pklsa_builder.io_geometry')
     hashing=importlib.import_module('pklsa_builder.hashing')
+    gilbert=importlib.import_module('pklsa_builder.gilbert')
     try:
         native=importlib.import_module('pklsa_builder._native')
     except Exception:
         native=None
-    return io,hashing,native
+    return io,hashing,native,gilbert
 
 
 def _remap_source_path(recorded: str, workbench: Path) -> Path:
@@ -178,7 +179,7 @@ class PKLSARepository:
     def __init__(self, workbench: Path, release_root: Path, release_meta: dict):
         self.workbench=Path(workbench).resolve(); self.release_root=Path(release_root).resolve(); self.release_meta=release_meta
         self.out=outputs_dir(self.release_root)
-        self.io,self.hashing,self.native=_load_e010_modules(self.release_root)
+        self.io,self.hashing,self.native,self.gilbert=_load_e010_modules(self.release_root)
 
     @classmethod
     def open(cls, workbench=None, release=None):
@@ -270,7 +271,16 @@ class PKLSARepository:
         raw=_sha256_file(p)
         if raw.lower()!=carrier.raw_sha256.lower():
             raise ValueError(f'raw SHA mismatch for carrier {carrier.carrier_id}')
-        comps=self.io.load_geometry(p,representation=carrier.representation,fseries_n=fseries_n)
+        # E010's source-native Gilbert carriers point at a compressed catalogue, not at
+        # an XYZ file.  Mirror E010 campaign.py semantics exactly: select the record by
+        # canonical topology_id and reconstruct its Fourier components before hashing.
+        # Sending a `gilbert_ab_record` through io_geometry.load_geometry() would instead
+        # fall through to the generic .gz guard and fail every valid Gilbert carrier.
+        if carrier.representation == 'gilbert_ab_record':
+            rec=self.gilbert.find_gilbert_record(p,carrier.topology_id)
+            comps=self.gilbert.sample_gilbert_components(rec,n=max(4096,int(fseries_n)))
+        else:
+            comps=self.io.load_geometry(p,representation=carrier.representation,fseries_n=fseries_n)
         comps=[np.ascontiguousarray(np.asarray(c,float)[:,:3]) for c in comps]
         gh=self.hashing.geometry_sha256(comps)
         if gh.lower()!=carrier.geometry_sha256.lower():
