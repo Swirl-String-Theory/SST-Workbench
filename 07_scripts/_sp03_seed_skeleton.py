@@ -40,7 +40,7 @@ LEAVES = {
     "10_docs/registry": "Catalog registry and FAMILY index (SP08).",
 }
 
-DOMAIN_READMES = {
+DOMAIN_NAMESPACE_DOCS = {
     "01_research": (
         "Research catalog: falsifiers, closures, dynamics, benchmarks, "
         "pipelines, exploratory."
@@ -57,22 +57,22 @@ def main() -> None:
     for rel, purpose in LEAVES.items():
         d = ROOT / rel
         d.mkdir(parents=True, exist_ok=True)
-        readme = d / "README.md"
-        if not readme.exists():
-            readme.write_text(purpose.strip() + "\n", encoding="utf-8")
-            created.append(str(readme.relative_to(ROOT)))
+        namespace_doc = d / "_NAMESPACE.md"
+        if not namespace_doc.exists():
+            namespace_doc.write_text(purpose.strip() + "\n", encoding="utf-8")
+            created.append(str(namespace_doc.relative_to(ROOT)))
         keep = d / ".gitkeep"
         if not keep.exists():
             keep.write_text("", encoding="utf-8")
             created.append(str(keep.relative_to(ROOT)))
 
-    for rel, purpose in DOMAIN_READMES.items():
+    for rel, purpose in DOMAIN_NAMESPACE_DOCS.items():
         d = ROOT / rel
         d.mkdir(parents=True, exist_ok=True)
-        readme = d / "README.md"
-        if not readme.exists():
-            readme.write_text(purpose.strip() + "\n", encoding="utf-8")
-            created.append(str(readme.relative_to(ROOT)))
+        namespace_doc = d / "_NAMESPACE.md"
+        if not namespace_doc.exists():
+            namespace_doc.write_text(purpose.strip() + "\n", encoding="utf-8")
+            created.append(str(namespace_doc.relative_to(ROOT)))
 
     marker = ROOT / ".sst-workbench-root"
     marker.write_text("catalog_schema: 1\n", encoding="utf-8")

@@ -3,35 +3,35 @@ name: SP06 container splits
 todos:
   - id: t00
     content: "Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe"
-    status: pending
+    status: completed
   - id: t01
     content: "Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)"
-    status: pending
+    status: completed
   - id: t02
     content: "Reveal keys under `keys/`; multi-junction roots where needed"
-    status: pending
+    status: completed
   - id: t03
     content: "Record `sst_trefoil_biot_py` diffs (no dedupe)"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches"
-    status: pending
+    status: completed
 ---
 # SP06 — Ambiguous container splits
 
-Status: `PLANNED` · Priority: P2 · Risk: medium · Depends on: SP05
+Status: `DONE` · Priority: P2 · Risk: medium · Depends on: SP05
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe
-- [ ] Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)
-- [ ] Reveal keys under `keys/`; multi-junction roots where needed
-- [ ] Record `sst_trefoil_biot_py` diffs (no dedupe)
-- [ ] Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches
+- [x] Split Maxwell / Einstein / Kelvin / Swirl Clock / Threaded Hole / Trefoil Lobe
+- [x] Split remaining mixed roots (Hopf, routes, horn, GUI, Knot_Library, 3D, …)
+- [x] Reveal keys under `keys/`; multi-junction roots where needed
+- [x] Record `sst_trefoil_biot_py` diffs (no dedupe)
+- [x] Done-criteria: all children accounted; provisional taxonomy resolved; baseline matches
 
-**Next:** Blocked on SP05
+**Next:** 191 rows verified; 7 collapsed containers re-split into 16 families.
 
 Seventeen roots that each hold more than one thing. This is the phase that cannot be automated: a
 script cannot tell a new hypothesis from a new software release. Every split below is a judgement,
@@ -270,7 +270,7 @@ lineage, not two.
 | `sst_chi_phase_package`, `_v2` … `_v6` | `R/C/C001_chi_phase_track_b/` (early versions) |
 | `sst_taxonomy_starter_v2`, `_v3b` | `R/F/F004_taxonomy_starter/` |
 | `multisector_fit_results/`, `exports/`, `phi-3_1/` | `03_data/D_generated/` |
-| `build/` | delete (SP11) |
+| `build/` | `git mv` → `DELETE/SST_Trefoil_Closure/build/` (SP11) |
 | `_dashboard_conflict/`, `archive/` | `09_archive/` |
 
 C001 therefore spans two current roots and is assembled from both in the same commit. Its version
@@ -352,7 +352,7 @@ this is a filesystem move with no index change. Verify before assuming.
 | From | To |
 |------|-----|
 | `experiments/sycl/*.cpp` | `04_tools/D_compute/sycl_probes/` |
-| `experiments/derive_constants/`, `experiments/trefoil/` | stubs — delete in SP11 |
+| `experiments/derive_constants/`, `experiments/trefoil/` | stubs — `git mv` → `DELETE/experiments/...` in SP11 |
 
 ---
 

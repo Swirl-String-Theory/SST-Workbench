@@ -43,7 +43,7 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] `FREEZE.md` written with SHA + inventory numbers
 - [x] Done-criteria met — SP00 closed
 
-**Next:** Proceed to SP01
+**Next:** Freeze closed; provenance artifacts under 10_docs/migration/.
 
 Nothing moves in this sub-plan. Its only job is to make every later move reversible and to resolve
 three questions that would otherwise be discovered mid-migration.

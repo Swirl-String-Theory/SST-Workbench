@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sst-workbench.local/schemas/SST_MODAL_PHASE_CONTRACT-1.0.json",
+  "title": "SST_MODAL_PHASE_CONTRACT-1.0",
+  "description": "Discriminated modal/phase records. Canonical hash source is JSON, not Parquet.",
+  "oneOf": [
+    { "$ref": "#/$defs/curvature_bridge" },
+    { "$ref": "#/$defs/symmetry_blocks" },
+    { "$ref": "#/$defs/dispersion_branch" },
+    { "$ref": "#/$defs/phase_observation" }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "required": [
+        "schema",
+        "schema_version",
+        "record_type",
+        "source_id",
+        "parent_hashes",
+        "code_hash",
+        "blind_status"
+      ],
+      "properties": {
+        "schema": { "const": "SST_MODAL_PHASE_CONTRACT-1.0" },
+        "schema_version": { "const": "1.0" },
+        "record_type": {
+          "enum": [
+            "curvature_bridge",
+            "symmetry_blocks",
+            "dispersion_branch",
+            "phase_observation"
+          ]
+        },
+        "source_id": { "type": "string", "minLength": 1 },
+        "provider_id": { "type": ["string", "null"] },
+        "carrier_group_token": { "type": ["string", "null"] },
+        "geometry_group_token": { "type": ["string", "null"] },
+        "parent_hashes": { "type": "object", "additionalProperties": { "type": ["string", "null"] } },
+        "code_hash": { "type": "string", "minLength": 8 },
+        "blind_status": {
+          "enum": [
+            "unblinded",
+            "pair_identity_blind",
+            "prediction_locked",
+            "retrospective_prediction_locked",
+            "not_applicable"
+          ]
+        }
+      }
+    },
+    "eigen_convention": {
+      "type": "object",
+      "required": ["eigenvalue_raw", "sigma", "omega", "canonical_complex"],
+      "properties": {
+        "eigenvalue_raw": {
+          "type": "object",
+          "required": ["real", "imag", "convention"],
+          "properties": {
+            "real": { "type": "number" },
+            "imag": { "type": "number" },
+            "convention": { "const": "lambda_raw = sigma - i*omega" }
+          }
+        },
+        "sigma": { "type": "number" },
+        "omega": { "type": "number" },
+        "canonical_complex": {
+          "type": "object",
+          "required": ["real", "imag", "convention"],
+          "properties": {
+            "real": { "type": "number" },
+            "imag": { "type": "number" },
+            "convention": { "const": "mu = sigma + i*omega" }
+          }
+        }
+      }
+    },
+    "target_independence": {
+      "type": "object",
+      "required": ["class", "predicted_omega_used_in_extraction"],
+      "properties": {
+        "class": {
+          "enum": [
+            "fully_model_independent_time_domain",
+            "independent_time_domain_given_frozen_spatial_mode",
+            "derived_from_predictors",
+            "unavailable"
+          ]
+        },
+        "temporal_frequency_source": { "type": ["string", "null"] },
+        "return_phase_source": { "type": ["string", "null"] },
+        "spatial_mode_basis_source": { "type": ["string", "null"] },
+        "temporal_frequency": { "type": ["string", "null"] },
+        "return_phase": { "type": ["string", "null"] },
+        "spatial_mode_basis": { "type": ["string", "null"] },
+        "spatial_basis_hash": { "type": ["string", "null"] },
+        "predicted_omega_used_in_extraction": { "type": "boolean" },
+        "predicted_vg_used_in_extraction": { "type": "boolean" },
+        "predicted_omega_used_for_demodulation": { "type": "boolean" },
+        "predicted_omega_used_for_bandpass": { "type": "boolean" },
+        "predicted_vg_used": { "type": "boolean" }
+      }
+    },
+    "tau_return_independence": {
+      "type": "object",
+      "required": ["class"],
+      "properties": {
+        "class": {
+          "enum": [
+            "raw_trajectory_phase_blind",
+            "model_conditioned",
+            "derived_from_predicted_dispersion",
+            "unavailable"
+          ]
+        },
+        "search_window_source": { "type": ["string", "null"] },
+        "detector_hash": { "type": ["string", "null"] },
+        "window_hash": { "type": ["string", "null"] },
+        "predicted_omega_used": { "type": "boolean" },
+        "predicted_group_velocity_used": { "type": "boolean" },
+        "synthetic_wavepacket_used": { "type": "boolean" },
+        "l_over_vg_used": { "type": "boolean" },
+        "l_over_vg_sensitivity_only": { "type": "boolean" }
+      }
+    },
+    "curvature_bridge": {
+      "allOf": [
+        { "$ref": "#/$defs/identity" },
+        {
+          "type": "object",
+          "required": [
+            "record_type",
+            "operator_semantics",
+            "dynamic_stability_claim",
+            "physical_energy_hessian_claim",
+            "parent_classification",
+            "parent_classification_semantics",
+            "eigenvalues",
+            "cluster_ids",
+            "basis_is_unique",
+            "reconstruction_rel_error",
+            "certifies",
+            "does_not_certify"
+          ],
+          "properties": {
+            "record_type": { "const": "curvature_bridge" },
+            "operator_semantics": { "const": "abs_real_jacobian_curvature_proxy" },
+            "dynamic_stability_claim": { "const": false },
+            "physical_energy_hessian_claim": { "const": false },
+            "parent_classification": { "type": "string" },
+            "parent_classification_semantics": { "const": "historical_parent_only" },
+            "eigenvalues": { "type": "array", "items": { "type": "number" } },
+            "cluster_ids": { "type": "array", "items": { "type": "integer" } },
+            "cluster_means": { "type": "array", "items": { "type": "number" } },
+            "basis_is_unique": { "type": "boolean" },
+            "projector_sha256": { "type": "string" },
+            "restricted_operator_sha256": { "type": "string" },
+            "reconstruction_rel_error": { "type": "number" },
+            "certifies": { "type": "object" },
+            "does_not_certify": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "symmetry_blocks": {
+      "allOf": [
+        { "$ref": "#/$defs/identity" },
+        {
+          "type": "object",
+          "required": [
+            "record_type",
+            "selection_matrix",
+            "blocks",
+            "channel_ids",
+            "channel_labels",
+            "basis_order",
+            "measured_response_claim"
+          ],
+          "properties": {
+            "record_type": { "const": "symmetry_blocks" },
+            "selection_matrix": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "integer", "enum": [0, 1] } }
+            },
+            "blocks": { "type": "array", "items": { "type": "array", "items": { "type": "integer" } } },
+            "channel_ids": { "type": "array", "items": { "type": "integer" } },
+            "channel_labels": { "type": "array", "items": { "type": "string" } },
+            "basis_order": { "type": "string" },
+            "mirror_matrix": { "type": "array" },
+            "block_membership": { "type": "object" },
+            "permutation_to_provider_basis": { "type": "array", "items": { "type": "integer" } },
+            "provider_basis_hash": { "type": ["string", "null"] },
+            "measured_response_claim": { "const": false }
+          }
+        }
+      ]
+    },
+    "dispersion_branch": {
+      "allOf": [
+        { "$ref": "#/$defs/identity" },
+        { "$ref": "#/$defs/eigen_convention" },
+        {
+          "type": "object",
+          "required": [
+            "record_type",
+            "k_hat",
+            "k_ref",
+            "k_closed",
+            "L_hat",
+            "m",
+            "n",
+            "theta_B",
+            "holonomy_representation",
+            "branch_id",
+            "branch_overlap",
+            "ambiguity_status"
+          ],
+          "properties": {
+            "record_type": { "const": "dispersion_branch" },
+            "k_hat": { "type": "number" },
+            "k_ref": { "type": "number" },
+            "k_closed": { "type": "number" },
+            "L_hat": { "type": "number" },
+            "kL": { "type": "number" },
+            "m": { "type": "integer" },
+            "n": { "type": "integer" },
+            "theta_B": { "type": "number" },
+            "holonomy_representation": { "enum": ["embedded_in_k", "explicit_phase"] },
+            "phi_holonomy_explicit": { "type": "number" },
+            "branch_id": { "type": "string" },
+            "branch_overlap": { "type": "number" },
+            "ambiguity_status": { "enum": ["unique", "DISPERSION_BRANCH_AMBIGUOUS", "unavailable"] },
+            "group_velocity": { "type": ["number", "null"] },
+            "omega_second": { "type": ["number", "null"] },
+            "dispersion_r2": { "type": ["number", "null"] }
+          }
+        }
+      ]
+    },
+    "phase_observation": {
+      "allOf": [
+        { "$ref": "#/$defs/identity" },
+        {
+          "type": "object",
+          "required": [
+            "record_type",
+            "phi_loop",
+            "phi_envelope",
+            "phi_carrier_derived",
+            "holonomy_representation",
+            "return_time_representation",
+            "target_independence",
+            "tau_return_independence"
+          ],
+          "properties": {
+            "record_type": { "const": "phase_observation" },
+            "phi_loop": { "type": ["number", "null"] },
+            "phi_envelope": { "type": ["number", "null"] },
+            "phi_carrier_derived": { "type": ["number", "null"] },
+            "phi_target_independent": { "type": ["number", "null"] },
+            "phase_uncertainty_rad": { "type": ["number", "null"] },
+            "holonomy_representation": { "enum": ["embedded_in_k", "explicit_phase"] },
+            "return_time_representation": { "type": "string" },
+            "tau_return_synthetic": { "type": ["number", "null"] },
+            "tau_return_independent": { "type": ["number", "null"] },
+            "target_independence": { "$ref": "#/$defs/target_independence" },
+            "tau_return_independence": { "$ref": "#/$defs/tau_return_independence" },
+            "target_dependency_dag": { "type": "array", "items": { "type": "string" } },
+            "predictions": { "type": "object" },
+            "residuals": { "type": "object" },
+            "split_hash": { "type": ["string", "null"] },
+            "prediction_hash": { "type": ["string", "null"] }
+          }
+        }
+      ]
+    }
+  }
+}

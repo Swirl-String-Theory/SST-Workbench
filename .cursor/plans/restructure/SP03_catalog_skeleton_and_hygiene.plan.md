@@ -28,21 +28,21 @@ isProject: false
 
 # SP03 — Catalog skeleton and repo hygiene
 
-Status: `PLANNED` · Priority: P1 · Risk: low · Depends on: SP00
+Status: `DONE` · Priority: P1 · Risk: low · Depends on: SP00
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Create 10-domain + letter skeleton (`.gitkeep` / README per leaf)
-- [ ] Write `.sst-workbench-root` marker (`catalog_schema: 1`)
-- [ ] Ensure `core.longpaths` / Windows LongPathsEnabled
-- [ ] Confirm/fix `gui` casing (SP00 Q3: already lowercase — verify no-op)
-- [ ] Extend `.gitignore` for `*-outputs*` and `keys/`
-- [ ] Tests for skeleton / marker / gitignore
-- [ ] Done-criteria: skeleton present; hygiene tests green
+- [x] Create 10-domain + letter skeleton (`.gitkeep` / README per leaf)
+- [x] Write `.sst-workbench-root` marker (`catalog_schema: 1`)
+- [x] Ensure `core.longpaths` / Windows LongPathsEnabled
+- [x] Confirm/fix `gui` casing (SP00 Q3: already lowercase — verify no-op)
+- [x] Extend `.gitignore` for `*-outputs*` and `keys/`
+- [x] Tests for skeleton / marker / gitignore
+- [x] Done-criteria: skeleton present; hygiene tests green
 
-**Next:** Can run in parallel with SP01 after SP00
+**Next:** Skeleton seeded; placeholders are _NAMESPACE.md; longpaths global.
 
 Creates the empty target structure and fixes three repo-level problems that would otherwise
 corrupt the first move. **No research pack moves in this sub-plan.**

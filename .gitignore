@@ -280,3 +280,40 @@ __marimo__/
 # Knot_Library: regenerable full inventory (run: python -m sst_knotlib inventory-sources)
 Knot_Library/Registry/inventory_unmigrated.json
 
+
+# Test residue from scripts/test_paths_cmd.py (probe is written into the tree it probes)
+_probe_paths.cmd
+
+# RidgeRunner solver output after the SP07 move. The old rules were anchored to
+# KnotPlot/, so relocating ridgerunner silently un-ignored ~4 GB including nine files
+# over GitHub's 100 MB hard limit. Note *.A.dat does NOT match a file literally named
+# A.dat, so the directory rules are what actually protect this.
+**/ridgerunner/out/
+03_data/D_generated/knotplot_campaign_outputs/
+A.dat
+A.mat
+
+# KnotPlot campaign solver output after the SP07 move. The old rule was anchored to
+# KnotPlot/**/out/, so relocating the campaigns into 01_research silently un-ignored
+# their out/ trees (~70 MB across 18 directories).
+01_research/E_pipelines/E002_knotplot_multidynamics_relaxation_matrix/**/out/
+01_research/E_pipelines/E003_knotplot_trefoil_seed_campaign/**/out/
+01_research/E_pipelines/E004_trefoil_balance_point_campaign/**/out/
+01_research/E_pipelines/E006_knotplot_multitopology_qhp_sweep/**/out/
+01_research/D_benchmarks/D008_knotplot_missingparameter_certification/**/out/
+01_research/D_benchmarks/D009_knotplot_parameter_atlas/**/out/
+
+# RidgeRunner output is reachable through the KnotPlot/ridgerunner compat junction,
+# which physically lands inside A002_ridgerunner. .git/info/exclude covers it once
+# bootstrap_junctions has run, but that file is machine-local; a fresh clone needs the
+# rule here too, before any junction exists.
+04_tools/A_geometry/A002_ridgerunner/out/
+
+# VortexLab spec-clock-proxy-decomposition campaign (2026-07-15..18, ~512 MB).
+# Run output lives in the catalog where it belongs but stays out of git history, per
+# the restructure invariant that outputs are runtime artifacts. Register a specific run
+# explicitly if it becomes scientifically load-bearing.
+03_data/D_generated/vortexlab_spec_clock_runs/
+
+# rclone Drive bundles (generated locally; not source of truth)
+03_data/_rclone_bundles/

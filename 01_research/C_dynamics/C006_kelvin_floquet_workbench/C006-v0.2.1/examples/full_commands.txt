@@ -1,0 +1,20 @@
+:: Environment
+cmd\00_SETUP_VENV.cmd
+
+:: Native build and checks
+cmd\01_BUILD_CPP.cmd
+.venv\Scripts\python.exe run_native_preflight.py
+cmd\02_TEST.cmd
+
+:: Four phases
+run_phase1.cmd full
+run_phase2.cmd full
+run_phase3.cmd full
+run_phase4.cmd full
+
+:: Complete timestamped native run
+run_all.cmd full
+
+:: Python fallback diagnostics
+python run_all.py --preset quick --force-python --out-dir audit_out_python_quick
+python run_all.py --preset full --force-python --out-dir audit_out_python_full

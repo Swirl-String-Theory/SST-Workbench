@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl-String Theory Dynamics Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&family=Inter:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px #06b6d4;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Custom Toggle */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake-intense {
+            animation: shake 0.2s infinite;
+            filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.8));
+        }
+
+        .glow-cyan { filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6)); }
+        .glow-emerald { filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.8)); }
+        .glow-red { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.8)); }
+
+        .panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-8">
+
+    <header class="mb-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">SST Dynamics Simulator</h1>
+        <p class="text-slate-400 max-w-3xl mx-auto text-sm md:text-base">
+            Interactive exploration of Reduced Delay-Loop Dynamics in Swirl-String Theory. 
+            Tune the parameters to achieve <strong>Branch Selection</strong>, apply <strong>Saturation</strong> to prevent runaway growth, and pass the <strong>Positivity Filter</strong> to achieve <strong>Topological Realization</strong> (a stable knot).
+        </p>
+    </header>
+
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Controls Panel -->
+        <div class="panel rounded-2xl p-6 flex flex-col gap-6">
+            <h2 class="text-xl font-semibold text-white border-b border-slate-600 pb-2">Control Sector</h2>
+
+            <!-- Delay Loop -->
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <label class="text-sm text-slate-300 font-medium">Loop Return Time ($\tau$)</label>
+                    <span id="val-delay" class="mono text-cyan-400 text-sm">5.0</span>
+                </div>
+                <input type="range" id="ctrl-delay" min="1" max="10" step="0.1" value="5">
+                <p class="text-xs text-slate-500">Affects branch selection. Must sync with rhythm.</p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <label class="text-sm text-slate-300 font-medium">Phase Rhythm ($\omega_0$)</label>
+                    <span id="val-freq" class="mono text-cyan-400 text-sm">1.0</span>
+                </div>
+                <input type="range" id="ctrl-freq" min="0.5" max="3" step="0.1" value="1.2">
+                <p class="text-xs text-slate-500">Base frequency of the ripple.</p>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <!-- Amplitude & Saturation -->
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <label class="text-sm text-slate-300 font-medium">Linear Gain ($\mu$)</label>
+                    <span id="val-gain" class="mono text-yellow-400 text-sm">0.5</span>
+                </div>
+                <input type="range" id="ctrl-gain" min="0" max="5" step="0.1" value="0.5">
+                <p class="text-xs text-slate-500">Drives amplitude growth.</p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <label class="text-sm text-slate-300 font-medium">Cubic Saturation ($\beta$)</label>
+                    <span id="val-sat" class="mono text-emerald-400 text-sm">0.2</span>
+                </div>
+                <input type="range" id="ctrl-sat" min="0" max="2" step="0.05" value="0.2">
+                <p class="text-xs text-slate-500">The "brake" preventing runaway growth.</p>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <!-- Positivity Filter -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <label class="text-sm text-slate-300 font-medium block">Positivity Filter</label>
+                    <p class="text-xs text-slate-500">Reject isolated fast-growing sectors.</p>
+                </div>
+                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="ctrl-filter" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 z-10 top-0 left-0"/>
+                    <label for="ctrl-filter" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-600 cursor-pointer transition-colors duration-300"></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Panel -->
+        <div class="panel rounded-2xl p-6 lg:col-span-2 flex flex-col items-center justify-center relative overflow-hidden min-h-[400px]">
+            
+            <!-- Status Overlay -->
+            <div id="status-badge" class="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-600 transition-colors duration-300">
+                Initializing...
+            </div>
+
+            <!-- Main SVG Canvas -->
+            <svg id="canvas" viewBox="-200 -200 400 400" class="w-full h-full max-w-[500px] max-h-[500px] overflow-visible">
+                <defs>
+                    <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#06b6d4" />
+                        <stop offset="100%" stop-color="#3b82f6" />
+                    </linearGradient>
+                    <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#10b981" />
+                        <stop offset="100%" stop-color="#059669" />
+                    </linearGradient>
+                    <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ef4444" />
+                        <stop offset="100%" stop-color="#b91c1c" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- The Loop / Knot Path -->
+                <path id="string-path" d="" fill="none" stroke="url(#grad-cyan)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300 glow-cyan" />
+                
+                <!-- The Ripple / Particle -->
+                <circle id="particle" cx="0" cy="0" r="8" fill="#fff" class="glow-cyan" />
+                
+                <!-- Secondary Particle (for knot topology) -->
+                <circle id="particle2" cx="0" cy="0" r="6" fill="#fde047" class="opacity-0 transition-opacity duration-500" />
+            </svg>
+
+            <!-- Explanation Text -->
+            <div class="mt-6 w-full bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                <p id="explanation-text" class="text-sm text-slate-300 mono leading-relaxed">
+                    Adjust parameters to begin simulation.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // DOM Elements
+        const ctrls = {
+            delay: document.getElementById('ctrl-delay'),
+            freq: document.getElementById('ctrl-freq'),
+            gain: document.getElementById('ctrl-gain'),
+            sat: document.getElementById('ctrl-sat'),
+            filter: document.getElementById('ctrl-filter')
+        };
+        const vals = {
+            delay: document.getElementById('val-delay'),
+            freq: document.getElementById('val-freq'),
+            gain: document.getElementById('val-gain'),
+            sat: document.getElementById('val-sat')
+        };
+        const svgPath = document.getElementById('string-path');
+        const particle = document.getElementById('particle');
+        const particle2 = document.getElementById('particle2');
+        const statusBadge = document.getElementById('status-badge');
+        const explanationText = document.getElementById('explanation-text');
+        const canvas = document.getElementById('canvas');
+
+        // Simulation State
+        let time = 0;
+        let pathPoints = [];
+        const numPoints = 150;
+
+        // Physics Logic & Rendering Loop
+        function updateSimulation() {
+            // Read Inputs
+            const tau = parseFloat(ctrls.delay.value);
+            const omega = parseFloat(ctrls.freq.value);
+            const mu = parseFloat(ctrls.gain.value);
+            const beta = parseFloat(ctrls.sat.value);
+            const filterOn = ctrls.filter.checked;
+
+            // Update UI Labels
+            vals.delay.innerText = tau.toFixed(1);
+            vals.freq.innerText = omega.toFixed(1);
+            vals.gain.innerText = mu.toFixed(1);
+            vals.sat.innerText = beta.toFixed(2);
+
+            // --- Core Physics Logic (Abstracted for Gamification) ---
+
+            // 1. Branch Selection (Resonance)
+            // A branch is selected if omega * tau is close to an integer multiple of 2*PI
+            const phaseShift = (omega * tau) % (2 * Math.PI);
+            const distanceToResonance = Math.min(phaseShift, (2 * Math.PI) - phaseShift);
+            const isResonant = distanceToResonance < 0.5;
+            const branchNumber = Math.round((omega * tau) / (2 * Math.PI));
+
+            // 2. Amplitude & Saturation
+            // A_dot = mu*A - beta*A^3. Equilibrium A = sqrt(mu/beta)
+            let amplitude = 100; // Base visual radius
+            let isRunaway = false;
+            let isRejected = false;
+
+            if (mu > 0) {
+                if (beta === 0) {
+                    isRunaway = true;
+                    amplitude = 250; // Explode visually
+                } else {
+                    const eqAmp = Math.sqrt(mu / beta);
+                    amplitude = 100 + (eqAmp * 20); // Scale for visuals
+                    if (eqAmp > 3.5) { // Arbitrary threshold for "too fast growth"
+                        if (filterOn) {
+                            isRejected = true;
+                        } else {
+                            isRunaway = true; // Without filter, it just gets messy
+                        }
+                    }
+                }
+            } else {
+                amplitude = 50; // Decays
+            }
+
+            // 3. Topological Realization
+            const isKnot = isResonant && !isRunaway && !isRejected && mu > 0.5;
+
+            // --- Visual Updates ---
+
+            // Update Status & Text
+            let statusClass = "bg-slate-800 text-slate-400 border-slate-600";
+            let statusText = "Searching...";
+            let expText = "The ripple is traveling around the loop. The rhythm ($\omega_0$) and delay ($\tau$) do not match, causing destructive interference. No stable branch selected.";
+            let pathStroke = "url(#grad-cyan)";
+            let pathGlow = "glow-cyan";
+
+            canvas.classList.remove('shake-intense');
+            particle2.classList.add('opacity-0');
+
+            if (isRejected) {
+                statusText = "FILTERED";
+                statusClass = "bg-red-900/50 text-red-400 border-red-500";
+                expText = "<strong>Positivity Filter Triggered:</strong> The amplitude growth ($\mu$) is too high relative to saturation ($\beta$). The sector is isolated and rejected as unphysical.";
+                pathStroke = "url(#grad-red)";
+                pathGlow = "glow-red";
+                amplitude = 50; // Suppressed
+            } else if (isRunaway) {
+                statusText = "RUNAWAY GROWTH";
+                statusClass = "bg-red-600 text-white border-red-400";
+                expText = "<strong>Instability:</strong> Linear gain ($\mu$) is unchecked by cubic saturation ($\beta$). The amplitude explodes. Apply the 'brake' (increase $\beta$).";
+                pathStroke = "url(#grad-red)";
+                pathGlow = "glow-red";
+                canvas.classList.add('shake-intense');
+            } else if (isKnot) {
+                statusText = "TOPOLOGICAL REALIZATION";
+                statusClass = "bg-emerald-900/80 text-emerald-300 border-emerald-500";
+                expText = `<strong>Stable Knot Formed!</strong> Branch $n=${branchNumber}$ selected. Amplitude is saturated and stable. The loop folds into a topologically protected state.`;
+                pathStroke = "url(#grad-emerald)";
+                pathGlow = "glow-emerald";
+                particle2.classList.remove('opacity-0');
+            } else if (isResonant) {
+                statusText = "BRANCH SELECTED";
+                statusClass = "bg-cyan-900/50 text-cyan-300 border-cyan-500";
+                expText = `<strong>Resonance:</strong> Rhythm matches loop delay (Branch $n=${branchNumber}$). Increase gain ($\mu$) to establish a persistent mode.`;
+            }
+
+            statusBadge.className = `absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${statusClass}`;
+            statusBadge.innerText = statusText;
+            explanationText.innerHTML = expText;
+
+            svgPath.setAttribute('stroke', pathStroke);
+            svgPath.className.baseVal = `transition-all duration-300 ${pathGlow}`;
+            particle.className.baseVal = pathGlow;
+
+            // --- Geometry Generation ---
+            
+            // Morph target: 0 = Circle, 1 = Trefoil Knot
+            // Smoothly transition to knot if conditions met
+            window.knotMorph = window.knotMorph || 0;
+            if (isKnot) {
+                window.knotMorph = Math.min(1, window.knotMorph + 0.05);
+            } else {
+                window.knotMorph = Math.max(0, window.knotMorph - 0.05);
+            }
+
+            let d = "";
+            let pX = 0, pY = 0;
+            let p2X = 0, p2Y = 0;
+
+            for (let i = 0; i <= numPoints; i++) {
+                let t = (i / numPoints) * Math.PI * 2;
+                
+                // Base Circle
+                let cx = Math.cos(t);
+                let cy = Math.sin(t);
+
+                // Trefoil Knot (Lissajous approximation for 2D)
+                // x = sin(t) + 2sin(2t), y = cos(t) - 2cos(2t)
+                let kx = (Math.sin(t) + 2 * Math.sin(2 * t)) * 0.4;
+                let ky = (Math.cos(t) - 2 * Math.cos(2 * t)) * 0.4;
+
+                // Interpolate shape
+                let x = cx * (1 - window.knotMorph) + kx * window.knotMorph;
+                let y = cy * (1 - window.knotMorph) + ky * window.knotMorph;
+
+                // Add noise if runaway
+                if (isRunaway) {
+                    x += (Math.random() - 0.5) * 0.2;
+                    y += (Math.random() - 0.5) * 0.2;
+                }
+
+                // Scale by amplitude
+                x *= amplitude;
+                y *= amplitude;
+
+                if (i === 0) d += `M ${x} ${y} `;
+                else d += `L ${x} ${y} `;
+
+                // Particle position (moves with time * omega)
+                // Find the point on the path corresponding to current phase
+                let phase = (time * omega) % (Math.PI * 2);
+                let phaseIdx = Math.floor((phase / (Math.PI * 2)) * numPoints);
+                if (i === phaseIdx) {
+                    pX = x; pY = y;
+                }
+                
+                // Secondary particle for knot
+                let phase2 = (time * omega + Math.PI) % (Math.PI * 2);
+                let phaseIdx2 = Math.floor((phase2 / (Math.PI * 2)) * numPoints);
+                if (i === phaseIdx2) {
+                    p2X = x; p2Y = y;
+                }
+            }
+
+            svgPath.setAttribute('d', d);
+            particle.setAttribute('cx', pX);
+            particle.setAttribute('cy', pY);
+            
+            if(isKnot) {
+                particle2.setAttribute('cx', p2X);
+                particle2.setAttribute('cy', p2Y);
+            }
+
+            time += 0.05;
+            requestAnimationFrame(updateSimulation);
+        }
+
+        // Initialize checkboxes styling logic
+        document.getElementById('ctrl-filter').addEventListener('change', function() {
+            if(this.checked) {
+                this.nextElementSibling.classList.replace('bg-slate-600', 'bg-emerald-500');
+            } else {
+                this.nextElementSibling.classList.replace('bg-emerald-500', 'bg-slate-600');
+            }
+        });
+        // trigger initial state
+        document.getElementById('ctrl-filter').dispatchEvent(new Event('change'));
+
+        // Start Loop
+        updateSimulation();
+
+    </script>
+</body>
+</html>

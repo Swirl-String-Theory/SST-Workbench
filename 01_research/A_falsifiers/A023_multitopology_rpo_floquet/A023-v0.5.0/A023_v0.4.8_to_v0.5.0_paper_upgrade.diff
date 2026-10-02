@@ -1,0 +1,109 @@
+diff --git a/PAPER_UPGRADE.md b/PAPER_UPGRADE.md
+new file mode 100644
+--- /dev/null
++++ b/PAPER_UPGRADE.md
+@@ -0,0 +1,22 @@
++# Paper-driven upgrade stage
++
++This additive stage is intentionally isolated from the existing solver implementation.
++It is designed to be applied to the canonical migrated family directory and validated independently before wiring into the primary run chain.
++
++Scientific policy:
++- do not import Hall-effect microphysics into SST; only symmetry-selection methodology is transferred;
++- do not import a string-theory swampland bound into SST; only admissibility/no-go methodology is transferred;
++- all thresholds remain preregistered/numerically certified, not tuned to obtain a positive SST outcome;
++- existing blind/reveal and output-archive conventions remain authoritative.
++
++Family: **A023 — MultiTopology RPO/Floquet**
++Base: `v0.4.8`
++Target: `v0.5.0`
++Priority: `P1`
++Paper inspiration: arXiv:2505.06829 + 1806.08362 — upstream certificates and downstream qualification.
++
++## Added gates
++Require A034 admissibility before RPO search; construct true monodromy only around a periodic/relative-periodic base state; compare mirror-related monodromy spectra under the preregistered symmetry transform.
++
++## Falsification discipline
++A paper-inspired gate is considered useful only if it can return FAIL/NULL/INDETERMINATE independently of SST expectations. Absolute threshold values must be preregistered or certified using target-free synthetic/numerical benchmarks.
+diff --git a/paper_upgrade/contract.json b/paper_upgrade/contract.json
+new file mode 100644
+--- /dev/null
++++ b/paper_upgrade/contract.json
+@@ -0,0 +1,15 @@
++{
++  "additive_patch": true,
++  "base_version": "v0.4.8",
++  "certificate_schema": "SST-FLOQUET-PARITY-1.0",
++  "consumes": [
++    "A034:SST-ADMISSIBILITY-1.0"
++  ],
++  "drive_base_folder_id": "1iRt5BPpEvmsbvqsenXoXfD6c5KOJa17E",
++  "family": "A023",
++  "must_not_override_existing_blind_reveal_policy": true,
++  "paper": "2505.06829 + 1806.08362",
++  "priority": "P1",
++  "schema": "SST-PAPER-UPGRADE-CONTRACT-1.0",
++  "target_version": "v0.5.0"
++}
+diff --git a/paper_upgrade/gate.py b/paper_upgrade/gate.py
+new file mode 100644
+--- /dev/null
++++ b/paper_upgrade/gate.py
+@@ -0,0 +1,47 @@
++from __future__ import annotations
++import argparse, json, math
++from pathlib import Path
++import numpy as np
++
++def _write(obj, path):
++    text=json.dumps(obj, indent=2, sort_keys=True)
++    if path: Path(path).write_text(text+"\n", encoding="utf-8")
++    else: print(text)
++
++def _arr(x): return np.asarray(x, dtype=float)
++
++def floquet_multipliers(M): return np.linalg.eigvals(np.asarray(M,complex))
++
++def mirror_monodromy(M,R,conjugate=False):
++    M=np.asarray(M,complex); R=np.asarray(R,complex); Ri=np.linalg.inv(R)
++    X=R@M@Ri
++    return np.conj(X) if conjugate else X
++
++def spectrum_match(a,b,conjugate=False):
++    a=np.asarray(a,complex); b=np.asarray(b,complex); target=np.conj(a) if conjugate else a
++    used=set(); errs=[]
++    for z in target:
++        js=[j for j in range(len(b)) if j not in used]; j=min(js,key=lambda k:abs(b[k]-z)); used.add(j); errs.append(abs(b[j]-z))
++    return float(max(errs,default=0.0))
++
++def require_admissibility(cert):
++    return bool(isinstance(cert,dict) and cert.get('status') in ('PASS','QUALIFIED') and cert.get('provenance_sha256'))
++
++def selftest():
++    M=np.array([[1.1,.2],[0.,.8]],complex); R=np.diag([-1.,1.])
++    Mm=mirror_monodromy(M,R)
++    e=spectrum_match(floquet_multipliers(M),floquet_multipliers(Mm)); assert e<1e-12
++    assert require_admissibility({'status':'PASS','provenance_sha256':'a'*64})
++    return {"status":"PASS","spectrum_match_error":e}
++
++def main():
++    ap=argparse.ArgumentParser(); ap.add_argument('--selftest',action='store_true'); ap.add_argument('--input'); ap.add_argument('--output')
++    ns=ap.parse_args()
++    if ns.selftest: return _write(selftest(),ns.output)
++    if not ns.input: ap.error('--input required unless --selftest')
++    data=json.loads(Path(ns.input).read_text(encoding='utf-8'))
++    # Generic dispatch: JSON may specify operation and args.
++    op=data.pop('operation',None)
++    if not op or op not in globals() or not callable(globals()[op]): raise SystemExit(f'unknown operation: {op}')
++    _write(globals()[op](**data),ns.output)
++if __name__=='__main__': main()
+diff --git a/run_paper_upgrade.cmd b/run_paper_upgrade.cmd
+new file mode 100644
+--- /dev/null
++++ b/run_paper_upgrade.cmd
+@@ -0,0 +1,5 @@
++@echo off
++setlocal
++python paper_upgrade\gate.py --selftest
++if errorlevel 1 exit /b 1
++echo [A023] paper-upgrade selftest PASS

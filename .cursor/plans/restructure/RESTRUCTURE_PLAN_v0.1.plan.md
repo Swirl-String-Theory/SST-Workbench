@@ -18,26 +18,26 @@ todos:
     status: completed
   - id: t05
     content: "SP04: 18 simple moves executed (`git mv` + junctions)"
-    status: pending
+    status: completed
   - id: t06
     content: "SP05: clean family moves executed (pilot A038 first)"
-    status: pending
+    status: completed
   - id: t07
     content: "SP06: container splits executed"
-    status: pending
+    status: completed
   - id: t08
     content: "SP07: KnotPlot tool/data/campaign/result split executed"
-    status: pending
+    status: completed
   - id: t09
     content: "SP09: version dirs renamed to `<ID>-v…`"
-    status: pending
+    status: completed
   - id: t10
     content: "SP11: stubs soft-retired under `DELETE/`"
-    status: pending
+    status: completed
 ---
 # RESTRUCTURE PLAN v0.1 — all 73 roots to exact destinations
 
-Status: `PLANNED` · Baseline: 2026-09-03
+Status: `DONE` · Baseline: 2026-09-03
 
 ## Todos
 
@@ -48,14 +48,14 @@ Progress tracker — checkboxes include completed work so status is obvious at a
 - [x] 01_research / 02_libraries / 03_data destinations frozen to inventory tables
 - [x] Soft-delete rule: former deletes → `DELETE/<original/relative/path>`
 - [x] JSON restructure map regenerated from CATALOG + path_map
-- [ ] SP04: 18 simple moves executed (`git mv` + junctions)
-- [ ] SP05: clean family moves executed (pilot A038 first)
-- [ ] SP06: container splits executed
-- [ ] SP07: KnotPlot tool/data/campaign/result split executed
-- [ ] SP09: version dirs renamed to `<ID>-v…`
-- [ ] SP11: stubs soft-retired under `DELETE/`
+- [x] SP04: 18 simple moves executed (`git mv` + junctions)
+- [x] SP05: clean family moves executed (pilot A038 first)
+- [x] SP06: container splits executed
+- [x] SP07: KnotPlot tool/data/campaign/result split executed
+- [x] SP09: version dirs renamed to `<ID>-v…`
+- [x] SP11: stubs soft-retired under `DELETE/`
 
-**Next:** SP01 (no physical moves until resolver + junctions)
+**Closed:** SP11 soft-retire + junction teardown recorded in `sp11_decommission.md`.
 
 The one-time mapping. Every current top-level directory appears exactly once. When the migration
 finishes, this document is history; [CATALOG_v0.1.md](CATALOG_v0.1.md) is what remains.

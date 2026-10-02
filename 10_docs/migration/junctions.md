@@ -20,7 +20,10 @@ They are a **local, recreate-on-clone** layer — not repository content.
    `junction_registry.csv`.
 3. Hardcoded references keep working until packs are converted to
    `sst_workbench_paths` / `07_scripts/paths.cmd`.
-4. **SP11** removes junctions after conversion; targets are never deleted by `remove`.
+4. **SP11** removed the live junctions (`sp11_decommission.py remove-junctions`).
+   Targets were never deleted. Registry CSVs remain as provenance.
+   **Do not run `bootstrap_junctions.cmd` on the live tree unless you intentionally
+   want the compat layer back** (tests must not invoke it against the real root).
 
 ## Recreate after clone
 

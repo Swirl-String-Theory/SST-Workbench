@@ -3,35 +3,35 @@ name: SP07 knotplot refactor
 todos:
   - id: t00
     content: "Archive zips → `09_archive/restore/KnotPlot/`"
-    status: pending
+    status: completed
   - id: t01
     content: "Move qhp* → `03_data/D_generated/qhp/`"
-    status: pending
+    status: completed
   - id: t02
     content: "Move Fourier / campaigns / ridgerunner out / tool scripts"
-    status: pending
+    status: completed
   - id: t03
     content: "Move `knots/` last after `SST_KNOT_DATASET` + ≥3 pack conversions"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: old KnotPlot is junction scaffold; ≥5 packs run unmodified; file count conserved"
-    status: pending
+    status: completed
 ---
 # SP07 — KnotPlot tool / data / campaign / result split
 
-Status: `PLANNED` · Priority: P2 · Risk: **high** · Depends on: SP05
+Status: `DONE` · Priority: P2 · Risk: **high** · Depends on: SP05
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Archive zips → `09_archive/restore/KnotPlot/`
-- [ ] Move qhp* → `03_data/D_generated/qhp/`
-- [ ] Move Fourier / campaigns / ridgerunner out / tool scripts
-- [ ] Move `knots/` last after `SST_KNOT_DATASET` + ≥3 pack conversions
-- [ ] Done-criteria: old KnotPlot is junction scaffold; ≥5 packs run unmodified; file count conserved
+- [x] Archive zips → `09_archive/restore/KnotPlot/`
+- [x] Move qhp* → `03_data/D_generated/qhp/`
+- [x] Move Fourier / campaigns / ridgerunner out / tool scripts
+- [x] Move `knots/` last after `SST_KNOT_DATASET` + ≥3 pack conversions
+- [x] Done-criteria: old KnotPlot is junction scaffold; ≥5 packs run unmodified; file count conserved
 
-**Next:** Blocked on SP05 (can parallel SP06 after SP05)
+**Next:** 21 rows verified; 12.4 GB split into tool, geometry, campaigns, results.
 
 The highest-risk sub-plan. `KnotPlot/` is ~12.4 GB, 12,979 tracked files, and roughly 1,458 files
 elsewhere in the repo reference it by name. It is also the only root where four conceptually

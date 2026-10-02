@@ -1,0 +1,141 @@
+\documentclass[tikz,border=1pt]{standalone}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{tikz}
+\usetikzlibrary{decorations.markings,hobby,topaths}
+
+\newcommand{\MakeStrandCoords}[5]{\pgfmathtruncatemacro{\Ns}{#2}
+  \def\Phase{0}\ifx#5B\def\Phase{0.5}\fi
+  \foreach \i in {0,...,\Ns}{
+    \pgfmathsetmacro{\s}{\i/\Ns}
+    \pgfmathsetmacro{\y}{#3*sin(360*(#4*\s + \Phase))}
+    \path[postaction={decorate, decoration={markings,
+      mark=at position \s with {\coordinate (#5\i) at (0,\y);}}}] #1;
+  }}
+\newcommand{\drawSeg}[4]{\ifnum#4=1
+    \draw[preaction={draw=\Core, line width=\Mask}, fat strand=#3]
+      (#1#2) .. (#1\the\numexpr#2+1\relax);
+  \else
+    \draw[fat strand=#3]
+      (#1#2) .. (#1\the\numexpr#2+1\relax);
+  \fi}
+\newcommand{\Amp}{0.13}
+\newcommand{\Turns}{4}
+\newcommand{\Samples}{400}
+\newcommand{\Wth}{2.5pt}
+\newcommand{\Core}{black}
+\newcommand{\Mask}{5.0pt}
+\newcommand{\ClrA}{black!60!black}
+\newcommand{\ClrB}{red!70!black}
+\newcommand{\KPATH}{([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)}
+\newcommand{\Phase}{0}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.markings,hobby}
+
+\usetikzlibrary{
+    spath3,
+    intersections,
+    arrows,
+    knots,
+    calc,
+    hobby,
+    decorations.pathreplacing,
+    shapes.geometric,
+}
+
+% ---------------- Global styles (safe for 'knots') ----------------
+\tikzset{
+    knot diagram/every strand/.append style={
+        line cap=round,
+        line join=round,
+        ultra thick,
+        black
+    },
+    every knot/.style={line cap=round,line join=round,very thick},
+    strand/.style={line cap=round,line join=round,line width=3pt,draw=black},
+    over/.style={preaction={draw=white,line width=6.5pt}},
+% DO NOT set a global "every path" here; it breaks internal clip paths.
+}
+% ------- TikZ Guide Lines -------
+\newcommand{\SSTGuidesPoints}[2]{% #1=basename (e.g. P), #2=last index
+    \foreach \i in {1,...,#2}{
+      \fill[blue] (#1\i) circle (1.2pt);
+      \node[blue,font=\scriptsize,above] at (#1\i) {\i};
+    }
+    \draw[gray!40, dashed]
+    \foreach \i [remember=\i as \lasti (initially 1)] in {2,...,#2,1} { (#1\lasti)--(#1\i) };
+}
+\providecommand{\swirlarrow}{\rightsquigarrow}
+\begin{document}
+\begin{tikzpicture}[use Hobby shortcut, line cap=round, line join=round, scale=1.05]
+\def0.13{0.13}
+\def4{4}        
+\def400{400}
+\def2.5pt{2.5pt}
+\defblack{black}     
+\def5.0pt{5.0pt}
+\defblack!60!black{black!60!black}
+\defred!70!black{red!70!black}
+
+\tikzset{
+  fat strand/.style={
+    draw=#1, line width=2.5pt,
+    double=black, double distance=1.2*2.5pt
+  }
+}
+
+
+\coordinate (P1) at (-2.0,-2.0);
+\coordinate (P2) at (-2.0, 2.0);
+\coordinate (P3) at ( 1.0,-0.5);
+\coordinate (P4) at (-1.0,-0.5);
+\coordinate (P5) at ( 2.0, 2.0);
+\coordinate (P6) at ( 2.0,-2.0);
+\coordinate (P7) at (-1.0, 0.5);
+\coordinate (P8) at ( 1.0, 0.5);
+\coordinate (P9) at (-2.0,-2.0); 
+\def([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9){([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)}
+
+
+\newcommand{\MakeStrandCoords}[5]{
+  \pgfmathtruncatemacro{\Ns}{#2}
+  \def0{0}\ifx#5B\def0{0.5}\fi
+  \foreach \i in {0,...,\Ns}{
+    \pgfmathsetmacro{\s}{\i/\Ns}
+    \pgfmathsetmacro{\y}{#3*sin(360*(#4*\s + 0))}
+    \path[postaction={decorate, decoration={markings,
+      mark=at position \s with {\coordinate (#5\i) at (0,\y);}}}] #1;
+  }
+}
+\MakeStrandCoords{([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)}{400}{0.13}{4}{A}
+\MakeStrandCoords{([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)}{400}{0.13}{4}{B}
+
+
+\newcommand{\drawSeg}[4]{
+  \ifnum#4=1
+    \draw[preaction={draw=black, line width=5.0pt}, fat strand=#3]
+      (#1#2) .. (#1\the\numexpr#2+1\relax);
+  \else
+    \draw[fat strand=#3]
+      (#1#2) .. (#1\the\numexpr#2+1\relax);
+  \fi
+}
+
+
+\pgfmathtruncatemacro{\Last}{400-1}
+\foreach \k in {0,...,\Last}{
+  \pgfmathsetmacro{\s}{\k/400}
+  
+  \pgfmathtruncatemacro{\blk}{floor(2*4*\s + 0.5)}
+  \ifodd\blk
+    
+    \drawSeg{A}{\k}{black!60!black}{0}
+    \drawSeg{B}{\k}{red!70!black}{1}
+  \else
+    
+    \drawSeg{B}{\k}{red!70!black}{0}
+    \drawSeg{A}{\k}{black!60!black}{1}
+  \fi
+}
+\end{tikzpicture}
+\end{document}

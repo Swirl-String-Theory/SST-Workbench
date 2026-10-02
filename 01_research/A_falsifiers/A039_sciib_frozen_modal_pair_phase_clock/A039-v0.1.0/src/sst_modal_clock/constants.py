@@ -1,0 +1,4 @@
+import math
+R_C=1.40897017e-15
+V_SWIRL=1.09384563e6
+GAMMA_CANON=2*math.pi*R_C*V_SWIRL

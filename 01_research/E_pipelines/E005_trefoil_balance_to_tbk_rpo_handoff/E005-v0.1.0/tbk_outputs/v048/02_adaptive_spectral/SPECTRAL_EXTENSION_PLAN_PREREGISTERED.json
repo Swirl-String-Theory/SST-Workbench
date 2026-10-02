@@ -1,0 +1,87 @@
+{
+  "version": "0.4.8",
+  "name": "Adaptive High-k DD32 Spectral Convergence Extension",
+  "backend_default": "sycl-dd32",
+  "N": 720,
+  "baseline_kmax": 16,
+  "baseline_config": "configs/hr_ladder/04_R4_N720_K16_SPECTRAL.json",
+  "reference_eps": 0.004,
+  "eps_convergence": [
+    0.001,
+    0.002,
+    0.004,
+    0.008
+  ],
+  "rungs": [
+    {
+      "index": 1,
+      "name": "S1_N720_K24",
+      "k_max": 24,
+      "config": "configs/spectral_extension/01_S1_N720_K24.json",
+      "mandatory": true
+    },
+    {
+      "index": 2,
+      "name": "S2_N720_K32",
+      "k_max": 32,
+      "config": "configs/spectral_extension/02_S2_N720_K32.json",
+      "mandatory": true
+    },
+    {
+      "index": 3,
+      "name": "S3_N720_K48",
+      "k_max": 48,
+      "config": "configs/spectral_extension/03_S3_N720_K48.json",
+      "mandatory": false,
+      "only_if_unresolved": true
+    },
+    {
+      "index": 4,
+      "name": "S4_N720_K64",
+      "k_max": 64,
+      "config": "configs/spectral_extension/04_S4_N720_K64.json",
+      "mandatory": false,
+      "only_if_unresolved": true
+    }
+  ],
+  "policy": {
+    "growth_threshold": 0.12,
+    "tail_contraction_ratio_max": 0.75,
+    "spectral_relative_tail_max": 0.03,
+    "dominant_kmax_boundary_weight_max": 0.1,
+    "high_k_fraction": 0.75,
+    "high_k_fraction_within_kelvin_max": 0.05,
+    "kelvin_total_weight_min_for_tail_gate": 0.05,
+    "extrapolation_p_min": 0.25,
+    "extrapolation_p_max": 6.0,
+    "extrapolation_p_grid": 1151,
+    "fp64_confirmation_margin": 0.02,
+    "spectral_nyquist_fraction_max": 0.75
+  },
+  "decision_triplets": {
+    "k32": [
+      16,
+      24,
+      32
+    ],
+    "k48": [
+      24,
+      32,
+      48
+    ],
+    "k64": [
+      32,
+      48,
+      64
+    ]
+  },
+  "interpretation": [
+    "Every dataset is evaluated at k_max=24 and 32. Only unresolved datasets continue to 48 and then 64.",
+    "A convergence stop requires measured-tail contraction and quasi-monotonicity, <=3% last relative growth step, stable P2 verdict, no threshold overlap under the diagnostic extrapolation uncertainty proxy, a surviving k_max basis, <=10% exact k_max boundary weight, and decay of the highest-quarter Kelvin-mode energy.",
+    "The high-k tail gate is waived only when the entire Kelvin-family weight of the dominant eigenvector is below 5%, because high-k Kelvin truncation then cannot control the mode.",
+    "The g(k_max)=g_inf+c*k_max^{-p} fit is diagnostic only and cannot establish convergence by itself.",
+    "A geometry still unresolved at k_max=64 is reported as SPECTRAL_UNRESOLVED_AT_K64, not coerced into a PASS/FAIL convergence claim.",
+    "All rungs are linear-only and retain epsilon_ref=0.004; nonlinear ringdown/RPO/Floquet is intentionally not repeated at every high-k rung.",
+    "Convergence is refused when requested k_max exceeds 75% of the least-sampled component Nyquist limit."
+  ]
+}

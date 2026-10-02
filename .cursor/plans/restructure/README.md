@@ -26,23 +26,26 @@ files, ~11.9 GB tracked content, measured 2026-09-03.
 | ID | Title | Status | Progress | Priority | Risk |
 |----|-------|--------|----------|----------|------|
 | [SP00](SP00_freeze_and_provenance.plan.md) | Freeze and provenance | `DONE` | 8/8 | P0 | low |
-| [SP01](SP01_path_resolver.plan.md) | Central path resolver | `PLANNED` | 0/10 | P0 | low |
-| [SP02](SP02_compat_junction_layer.plan.md) | Compatibility junction layer, stage 1 | `PLANNED` | 0/6 | P0 | low |
-| [SP03](SP03_catalog_skeleton_and_hygiene.plan.md) | Catalog skeleton and repo hygiene | `PLANNED` | 0/7 | P1 | low |
-| [SP04](SP04_low_risk_moves.plan.md) | Low-risk moves | `PLANNED` | 0/5 | P1 | low |
-| [SP05](SP05_clean_family_moves.plan.md) | Clean family moves | `PLANNED` | 0/6 | P1 | medium |
-| [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `PLANNED` | 0/5 | P2 | medium |
-| [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `PLANNED` | 0/5 | P2 | high |
-| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `PLANNED` | 0/5 | P3 | medium |
-| [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `PLANNED` | 0/5 | P3 | medium |
-| [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `PLANNED` | 0/5 | P3 | medium |
-| [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `PLANNED` | 0/6 | P4 | high |
+| [SP01](SP01_path_resolver.plan.md) | Central path resolver | `DONE` | 10/10 | P0 | low |
+| [SP02](SP02_compat_junction_layer.plan.md) | Compatibility junction layer, stage 1 | `DONE` | 6/6 | P0 | low |
+| [SP03](SP03_catalog_skeleton_and_hygiene.plan.md) | Catalog skeleton and repo hygiene | `DONE` | 7/7 | P1 | low |
+| [SP04](SP04_low_risk_moves.plan.md) | Low-risk moves | `DONE` | 5/5 | P1 | low |
+| [SP05](SP05_clean_family_moves.plan.md) | Clean family moves | `DONE` | 6/6 | P1 | medium |
+| [SP06](SP06_container_splits.plan.md) | Ambiguous container splits | `DONE` | 5/5 | P2 | medium |
+| [SP07](SP07_knotplot_refactor.plan.md) | KnotPlot tool/data/campaign/result split | `DONE` | 5/5 | P2 | high |
+| [SP08](SP08_catalog_metadata_and_registry.plan.md) | Catalog metadata and registry | `DONE` | 7/7 | P3 | medium |
+| [SP09](SP09_version_rename_stage2.plan.md) | Version-directory rename, stage 2 | `DONE` | 5/5 | P3 | medium |
+| [SP10](SP10_reproducibility_gate.plan.md) | Reproducibility gate | `DONE` | 5/5 | P3 | medium |
+| [SP11](SP11_decommission.plan.md) | Soft-retire (`DELETE/`) + decommission | `DONE` | 6/6 | P4 | high |
 
-Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (5/12 planning done) ·
-[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (5/11 mapping freeze done).
+Also tracked: [RESTRUCTURE_EPIC](RESTRUCTURE_EPIC.plan.md) (12/12) ·
+[RESTRUCTURE_PLAN](RESTRUCTURE_PLAN_v0.1.plan.md) (11/11).
 Each file has a **Todos** section (checked = done) and YAML frontmatter todos for Cursor.
 
-**Resume here:** SP01 path resolver (SP00 is closed).
+**Resume here:** migration closed (SP00–SP11). Provenance:
+`10_docs/migration/` (`path_map.csv`, checksums, junction registries, SP10 gate,
+`sp11_decommission.md`). New work registers via the catalog; restore junctions with
+`07_scripts/bootstrap_junctions.cmd` if a legacy path is needed temporarily.
 
 
 ## Status legend
@@ -54,9 +57,7 @@ Each sub-plan carries a status line at the top:
 - `DONE` — completed and verified against its done-criteria
 - `BLOCKED` — waiting on a dependency or a decision, with the blocker named
 
-All twelve were `PLANNED` at the time of writing. **SP00 is `DONE`** (see
-`10_docs/migration/FREEZE.md`); the rest remain `PLANNED`. Open each file’s **Todos**
-section to see what is already checked off versus what remains.
+SP00–SP11 are `DONE`. Open each file’s **Todos** section for the checklist history.
 
 ## Hard rules that apply to every sub-plan
 

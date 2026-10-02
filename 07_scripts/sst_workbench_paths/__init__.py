@@ -207,8 +207,25 @@ def _load_catalog_index(root: Path) -> dict | None:
 def _family_from_catalog_index(
     index: dict, catalog_id: str, *, domain: str | None
 ) -> Path | None:
-    """SP08+ index: ``{ "A042": {"path": "01_research/...", ...}, ... }`` or list."""
-    entries = index.get("families") or index.get("by_id") or index
+    """Read ``by_domain[domain][catalog_id].path`` from catalog_index.json."""
+    by_domain = index.get("by_domain")
+    if isinstance(by_domain, dict):
+        if domain:
+            domains = [domain] if domain in by_domain else []
+        else:
+            domains = [d for d in _DOMAIN_PREF if d in by_domain]
+            domains += [d for d in by_domain if d not in domains]
+        for d in domains:
+            bucket = by_domain.get(d) or {}
+            if not isinstance(bucket, dict):
+                continue
+            item = bucket.get(catalog_id)
+            if isinstance(item, dict):
+                rel = item.get("path")
+                if rel:
+                    return Path(rel)
+
+    entries = index.get("by_id")
     candidates: list[dict] = []
     if isinstance(entries, dict) and catalog_id in entries:
         item = entries[catalog_id]

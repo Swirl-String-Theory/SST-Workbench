@@ -3,35 +3,35 @@ name: SP04 low risk moves
 todos:
   - id: t00
     content: "Preconditions: SP02 + SP03 done"
-    status: pending
+    status: completed
   - id: t01
     content: "Move 18 low-risk roots least-referenced-first (`git mv` only)"
-    status: pending
+    status: completed
   - id: t02
     content: "Per move: path_map row → git mv → junction → SHA verify → commit"
-    status: pending
+    status: completed
   - id: t03
     content: "Update docs/tests for `07_scripts/` path"
-    status: pending
+    status: completed
   - id: t04
     content: "Done-criteria: 18 rows `verified`; baseline matches SP00; old paths work via junctions"
-    status: pending
+    status: completed
 ---
 # SP04 — Low-risk moves
 
-Status: `PLANNED` · Priority: P1 · Risk: low · Depends on: SP02, SP03
+Status: `DONE` · Priority: P1 · Risk: low · Depends on: SP02, SP03
 
 ## Todos
 
 Progress tracker — checkboxes include completed work so status is obvious at a glance.
 
-- [ ] Preconditions: SP02 + SP03 done
-- [ ] Move 18 low-risk roots least-referenced-first (`git mv` only)
-- [ ] Per move: path_map row → git mv → junction → SHA verify → commit
-- [ ] Update docs/tests for `07_scripts/` path
-- [ ] Done-criteria: 18 rows `verified`; baseline matches SP00; old paths work via junctions
+- [x] Preconditions: SP02 + SP03 done
+- [x] Move 18 low-risk roots least-referenced-first (`git mv` only)
+- [x] Per move: path_map row → git mv → junction → SHA verify → commit
+- [x] Update docs/tests for `07_scripts/` path
+- [x] Done-criteria: 18 rows `verified`; baseline matches SP00; old paths work via junctions
 
-**Next:** Blocked on SP02 + SP03
+**Next:** 24 rows verified, 17 junctions. scripts/ is now 07_scripts/.
 
 Eighteen roots that need no semantic decision. This phase exists to prove the machinery — the
 mover, the junctions, the manifest, the verification — on material where a mistake is cheap,

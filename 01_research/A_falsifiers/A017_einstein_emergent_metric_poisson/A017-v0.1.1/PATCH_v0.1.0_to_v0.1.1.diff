@@ -1,0 +1,228 @@
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/.gitignore Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/.gitignore
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/.gitignore	2026-08-13 23:16:27.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/.gitignore	1970-01-01 00:00:00.000000000 +0000
+@@ -1,2 +0,0 @@
+-# Created by pytest automatically.
+-*
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/CACHEDIR.TAG Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/CACHEDIR.TAG
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/CACHEDIR.TAG	2026-08-13 23:16:27.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/CACHEDIR.TAG	1970-01-01 00:00:00.000000000 +0000
+@@ -1,4 +0,0 @@
+-Signature: 8a477f597d28d172789f06886806bc55
+-# This file is a cache directory tag created by pytest.
+-# For information about cache directory tags, see:
+-#	https://bford.info/cachedir/spec.html
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/README.md Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/README.md
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/README.md	2026-08-13 23:16:27.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/README.md	1970-01-01 00:00:00.000000000 +0000
+@@ -1,8 +0,0 @@
+-# pytest cache directory #
+-
+-This directory contains data from the pytest's cache plugin,
+-which provides the `--lf` and `--ff` options, as well as the `cache` fixture.
+-
+-**Do not** commit this to version control.
+-
+-See [the docs](https://docs.pytest.org/en/stable/how-to/cache.html) for more information.
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/v/cache/nodeids Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/v/cache/nodeids
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/.pytest_cache/v/cache/nodeids	2026-08-13 23:18:02.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/.pytest_cache/v/cache/nodeids	1970-01-01 00:00:00.000000000 +0000
+@@ -1,6 +0,0 @@
+-[
+-  "tests/test_cpp_parity.py::test_cpp_python_field_parity",
+-  "tests/test_geometry.py::test_resample_circle_length",
+-  "tests/test_geometry.py::test_thickness_positive",
+-  "tests/test_identities.py::test_pressure_poisson_identity"
+-]
+\ No newline at end of file
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/CHANGELOG_v0.1.1.md Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/CHANGELOG_v0.1.1.md
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/CHANGELOG_v0.1.1.md	1970-01-01 00:00:00.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/CHANGELOG_v0.1.1.md	2026-08-14 00:13:30.688344919 +0000
+@@ -0,0 +1,11 @@
++# v0.1.1 — MSVC / pybind11 shape-constructor compatibility fix
++
++## Fixed
++
++- Fixes MSVC C2665 in `cpp/einstein_sst_fast.cpp` when constructing multidimensional `py::array_t<double>` objects with mixed `py::ssize_t` and `int` dimensions.
++- All NumPy array-shape dimensions are now explicitly cast to `py::ssize_t`, compatible with the stricter `pybind11::array::ShapeContainer` constructor resolution seen with Python 3.14 / current pybind11.
++- Applies the same explicit typing to the resampling output shape to prevent the same class of failure there.
++
++## Scope
++
++No numerical equations, blind thresholds, gate definitions, or datasets were changed. This is a build-compatibility patch only.
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/README.md Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/README.md
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/README.md	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/README.md	2026-08-14 00:14:40.416279180 +0000
+@@ -1,4 +1,4 @@
+-# Einstein–SST Emergent Metric and Poisson Closure Gates v0.1.0
++# Einstein–SST Emergent Metric and Poisson Closure Gates v0.1.1
+ 
+ Blind Python/C++ workbench for relaxed-knot centerlines. The load-bearing tests are:
+ 
+@@ -53,3 +53,10 @@
+ \]
+ 
+ is not supported for the preregistered regularized closed-filament reconstruction. It does **not** automatically exclude a separate/nonlocal SST long-range gravitational closure.
++
++
++## v0.1.1 build compatibility
++
++This release fixes the MSVC/pybind11 `C2665` error produced by mixed integer types in NumPy shape initializer lists. All native array dimensions are explicitly `py::ssize_t`. The numerical model, preregistered thresholds, blind protocol, and gate definitions are unchanged from v0.1.0.
++
++For a compiler-only diagnostic without OpenMP, run `run_build_cpp_noomp.cmd`.
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/basic.json Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/basic.json
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/basic.json	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/basic.json	2026-08-14 00:13:30.687177132 +0000
+@@ -1,5 +1,5 @@
+ {
+-  "version": "0.1.0",
++  "version": "0.1.1",
+   "runtime": {
+     "require_cpp": true
+   },
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/extended.json Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/extended.json
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/extended.json	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/extended.json	2026-08-14 00:13:30.687086397 +0000
+@@ -1,5 +1,5 @@
+ {
+-  "version": "0.1.0",
++  "version": "0.1.1",
+   "runtime": {
+     "require_cpp": true
+   },
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/normal.json Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/normal.json
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/config/normal.json	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/config/normal.json	2026-08-14 00:13:30.687269349 +0000
+@@ -1,5 +1,5 @@
+ {
+-  "version": "0.1.0",
++  "version": "0.1.1",
+   "runtime": {
+     "require_cpp": true
+   },
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/cpp/einstein_sst_fast.cpp Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/cpp/einstein_sst_fast.cpp
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/cpp/einstein_sst_fast.cpp	2026-08-13 23:18:01.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/cpp/einstein_sst_fast.cpp	2026-08-14 00:13:30.681519866 +0000
+@@ -28,7 +28,7 @@
+ static double closed_length_vec(const std::vector<Vec>&p){double L=0;for(size_t i=0;i<p.size();++i)L+=norm(sub(p[(i+1)%p.size()],p[i]));return L;}
+ py::array_t<double> resample_closed(py::array_t<double,py::array::c_style|py::array::forcecast> arr,int nout){
+  auto p=to_vecs(arr); if(nout<8)throw std::runtime_error("nout>=8 required"); size_t n=p.size(); std::vector<double> cum(n+1,0);
+- for(size_t i=0;i<n;++i)cum[i+1]=cum[i]+norm(sub(p[(i+1)%n],p[i])); double L=cum[n]; py::array_t<double> out({nout,3}); auto o=out.mutable_unchecked<2>();
++ for(size_t i=0;i<n;++i)cum[i+1]=cum[i]+norm(sub(p[(i+1)%n],p[i])); double L=cum[n]; py::array_t<double> out({static_cast<py::ssize_t>(nout), static_cast<py::ssize_t>(3)}); auto o=out.mutable_unchecked<2>();
+  #pragma omp parallel for if(nout>256)
+  for(int j=0;j<nout;++j){double s=L*(double)j/(double)nout; auto it=std::upper_bound(cum.begin(),cum.end(),s); size_t i=(size_t)std::max<long long>(0,(long long)(it-cum.begin())-1); if(i>=n)i=n-1; double ds=cum[i+1]-cum[i]; double f=ds>0?(s-cum[i])/ds:0; Vec q=add(mul(p[i],1-f),mul(p[(i+1)%n],f)); o(j,0)=q[0];o(j,1)=q[1];o(j,2)=q[2];}
+  return out;
+@@ -44,7 +44,7 @@
+ }
+ py::dict velocity_gradient(py::array_t<double,py::array::c_style|py::array::forcecast> parr,py::array_t<double,py::array::c_style|py::array::forcecast> qarr,double gamma,double core){
+  auto p=to_vecs(parr); auto qb=qarr.request(); if(qb.ndim!=2||qb.shape[1]!=3)throw std::runtime_error("queries must be Mx3"); const double* q=(const double*)qb.ptr; size_t M=(size_t)qb.shape[0],N=p.size();
+- py::array_t<double> va({(py::ssize_t)M,3}); py::array_t<double> ga({(py::ssize_t)M,3,3}); auto V=va.mutable_unchecked<2>(); auto G=ga.mutable_unchecked<3>(); double C=gamma/(4.0*PI),a2=core*core;
++ py::array_t<double> va({static_cast<py::ssize_t>(M), static_cast<py::ssize_t>(3)}); py::array_t<double> ga({static_cast<py::ssize_t>(M), static_cast<py::ssize_t>(3), static_cast<py::ssize_t>(3)}); auto V=va.mutable_unchecked<2>(); auto G=ga.mutable_unchecked<3>(); double C=gamma/(4.0*PI),a2=core*core;
+  #pragma omp parallel for schedule(static) if(M>64)
+  for(long long mm=0;mm<(long long)M;++mm){Vec x={q[3*mm],q[3*mm+1],q[3*mm+2]};double vv[3]={0,0,0};double gg[3][3]={{0,0,0},{0,0,0},{0,0,0}};
+   for(size_t s=0;s<N;++s){Vec a=p[s],b=p[(s+1)%N],dl=sub(b,a),mid=mul(add(a,b),0.5),r=sub(x,mid);double D=dot(r,r)+a2,inv3=1.0/(D*std::sqrt(D)),inv5=inv3/D;Vec cr=cross(dl,r);for(int i=0;i<3;++i)vv[i]+=C*cr[i]*inv3;
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/pyproject.toml Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/pyproject.toml
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/pyproject.toml	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/pyproject.toml	2026-08-14 00:13:30.682324682 +0000
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "einstein-sst-emergent-metric-poisson-gates"
+-version = "0.1.0"
++version = "0.1.1"
+ description = "Blind Python/C++ falsifier for Einstein-SST emergent metric, 1/r monopole, and pressure-Poisson closure on relaxed knots"
+ requires-python = ">=3.10"
+ dependencies = ["numpy>=2.0", "scipy>=1.13", "pandas>=2.2", "matplotlib>=3.9", "tabulate>=0.9"]
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_basic.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_basic.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_basic.cmd	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_basic.cmd	2026-08-14 00:13:30.682421086 +0000
+@@ -5,7 +5,7 @@
+ set "INPUT=%~1"
+ set "OUT=%~2"
+ echo ============================================================
+-echo Einstein-SST Emergent Metric + Poisson Gates v0.1.0 [BASIC]
++echo Einstein-SST Emergent Metric + Poisson Gates v0.1.1 [BASIC]
+ echo INSTALL - BUILD - SELFTEST - BLIND CAMPAIGN - REVEAL
+  echo ============================================================
+ call run_install.cmd
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_extended.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_extended.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_extended.cmd	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_extended.cmd	2026-08-14 00:13:30.685522352 +0000
+@@ -5,7 +5,7 @@
+ set "INPUT=%~1"
+ set "OUT=%~2"
+ echo ============================================================
+-echo Einstein-SST Emergent Metric + Poisson Gates v0.1.0 [EXTENDED]
++echo Einstein-SST Emergent Metric + Poisson Gates v0.1.1 [EXTENDED]
+ echo INSTALL - BUILD - SELFTEST - BLIND CAMPAIGN - REVEAL
+  echo ============================================================
+ call run_install.cmd
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_normal.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_normal.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_all_normal.cmd	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_all_normal.cmd	2026-08-14 00:13:30.682137354 +0000
+@@ -5,7 +5,7 @@
+ set "INPUT=%~1"
+ set "OUT=%~2"
+ echo ============================================================
+-echo Einstein-SST Emergent Metric + Poisson Gates v0.1.0 [NORMAL]
++echo Einstein-SST Emergent Metric + Poisson Gates v0.1.1 [NORMAL]
+ echo INSTALL - BUILD - SELFTEST - BLIND CAMPAIGN - REVEAL
+  echo ============================================================
+ call run_install.cmd
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_build_cpp.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_build_cpp.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_build_cpp.cmd	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_build_cpp.cmd	2026-08-14 00:14:40.416156308 +0000
+@@ -4,6 +4,8 @@
+ if not exist ".venv\Scripts\python.exe" (echo [SST] .venv missing. Run run_install.cmd first.& exit /b 1)
+ echo ============================================================
+ echo [SST] Building optimized C++/pybind11 backend
++".venv\Scripts\python.exe" -c "import sys, pybind11; print('[SST] Python',sys.version.split()[0],'pybind11',pybind11.__version__)"
++if errorlevel 1 exit /b 1
+ echo ============================================================
+ ".venv\Scripts\python.exe" setup.py build_ext --inplace
+ if errorlevel 1 exit /b 1
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_build_cpp_noomp.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_build_cpp_noomp.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_build_cpp_noomp.cmd	1970-01-01 00:00:00.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_build_cpp_noomp.cmd	2026-08-14 00:14:40.416206082 +0000
+@@ -0,0 +1,9 @@
++@echo off
++setlocal
++cd /d "%~dp0"
++set "SST_DISABLE_OPENMP=1"
++echo ============================================================
++echo [SST] Diagnostic native build WITHOUT OpenMP
++ echo ============================================================
++call run_build_cpp.cmd
++exit /b %errorlevel%
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_install.cmd Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_install.cmd
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/run_install.cmd	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/run_install.cmd	2026-08-14 00:14:40.416032904 +0000
+@@ -2,7 +2,7 @@
+ setlocal
+ cd /d "%~dp0"
+ echo ============================================================
+-echo [SST] Installing Einstein-SST Closure Gates v0.1.0
++echo [SST] Installing Einstein-SST Closure Gates v0.1.1
+ echo ============================================================
+ if not exist ".venv\Scripts\python.exe" (
+   echo [SST] Creating local virtual environment...
+@@ -14,9 +14,12 @@
+ if errorlevel 1 exit /b 1
+ "%VPY%" -m pip install -r requirements.txt
+ if errorlevel 1 exit /b 1
++echo [SST] Toolchain versions:
++"%VPY%" -c "import sys, pybind11; print('  Python   :', sys.version.split()[0]); print('  pybind11 :', pybind11.__version__)"
++if errorlevel 1 exit /b 1
+ "%VPY%" -m pip install -e . --no-build-isolation
+ if errorlevel 1 (
+- echo [SST] Install/build failed. Prefer Visual Studio 2022 Build Tools with Desktop C++.
++ echo [SST] Native extension build failed. Check the first C++ error above.
+  echo [SST] For a no-OpenMP diagnostic build: set SST_DISABLE_OPENMP=1 and rerun.
+  exit /b 1
+ )
+diff -ruN '--exclude=PACKAGE_MANIFEST.sha256' Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/src/einstein_sst_gates/__init__.py Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/src/einstein_sst_gates/__init__.py
+--- Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.0/src/einstein_sst_gates/__init__.py	2026-08-13 23:16:16.000000000 +0000
++++ Einstein_SST_Emergent_Metric_Poisson_Closure_Gates_v0.1.1/src/einstein_sst_gates/__init__.py	2026-08-14 00:13:30.688001658 +0000
+@@ -1 +1 @@
+-__version__ = "0.1.0"
++__version__ = "0.1.1"

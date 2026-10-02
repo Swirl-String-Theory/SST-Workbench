@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrodynamic Phase-Crossover Explorer</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --border: #334155;
+            --font-main: system-ui, -apple-system, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+        }
+
+        .value-display {
+            font-family: var(--font-mono);
+            color: var(--accent-blue);
+            float: right;
+        }
+
+        canvas {
+            background-color: #000;
+            border-radius: 8px;
+            width: 100%;
+            height: 250px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .math-block {
+            background: #000;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--accent-purple);
+            border: 1px solid var(--border);
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-row input[type="number"] {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .badge.slice {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge.not-slice {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Knot SVG styling */
+        .knot-path {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Constrained Quantum Fluid Explorer</h1>
+        <h2>Interactive models based on "Hydrodynamic Phase-Crossover and the Origin of the Pseudogap"</h2>
+    </header>
+
+    <div class="grid-container">
+        
+        <!-- Panel 1: Phase Crossover Simulator -->
+        <div class="card">
+            <div class="card-header">
+                <span>🌊</span> Phase-Crossover Simulator
+            </div>
+            <p class="desc">Observe the transition from a hot, unconstrained gas to a pseudogap regime where particles lock into delayed synchronization loops.</p>
+            
+            <canvas id="fluidCanvas" width="400" height="250"></canvas>
+            
+            <div class="control-group">
+                <label>
+                    Temperature (T / T*)
+                    <span class="value-display" id="tempVal">1.50</span>
+                </label>
+                <input type="range" id="tempSlider" min="0" max="2" step="0.01" value="1.5">
+            </div>
+            <div class="math-block">
+                τ = L / v ≈ 4 × 10⁻¹⁶ s<br>
+                θ̇(t) = Ω - κ sin(θ(t) - θ(t-τ))
+            </div>
+        </div>
+
+        <!-- Panel 2: Spectral Weight & Scaling -->
+        <div class="card">
+            <div class="card-header">
+                <span>📈</span> Variational Scaling
+            </div>
+            <p class="desc">In the hydrodynamic regime, excitation energies scale with √n rather than the unconstrained 1/n² or n².</p>
+            
+            <div class="svg-container" id="chartContainer">
+                <svg width="100%" height="100%" viewBox="0 0 300 200" preserveAspectRatio="none">
+                    <!-- Grid -->
+                    <line x1="20" y1="180" x2="280" y2="180" stroke="#334155" stroke-width="2"/>
+                    <line x1="20" y1="20" x2="20" y2="180" stroke="#334155" stroke-width="2"/>
+                    
+                    <!-- Paths drawn by JS -->
+                    <path id="pathUnconstrained" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="4"/>
+                    <path id="pathHydro" fill="none" stroke="#38bdf8" stroke-width="3"/>
+                    
+                    <!-- Marker -->
+                    <circle id="chartMarker" cx="20" cy="180" r="5" fill="#c084fc"/>
+                    
+                    <!-- Legend -->
+                    <text x="30" y="30" fill="#38bdf8" font-size="10" font-family="monospace">Hydrodynamic (√n)</text>
+                    <text x="30" y="45" fill="#f87171" font-size="10" font-family="monospace">Unconstrained (n²)</text>
+                </svg>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    Mode Number (n)
+                    <span class="value-display" id="nVal">5</span>
+                </label>
+                <input type="range" id="nSlider" min="0" max="20" step="1" value="5">
+            </div>
+            <div class="math-block">
+                ΔEₙ ∝ √(K_S(T) n / χ_S)
+            </div>
+        </div>
+
+        <!-- Panel 3: Topology Shielding Classifier -->
+        <div class="card">
+            <div class="card-header">
+                <span>🪢</span> Double Twist Knot Classifier
+            </div>
+            <p class="desc">Determine the shielding exponent σ(K_{m,n}) for a double twist knot based on rational-sliceness.</p>
+            
+            <div class="svg-container" style="display: flex; justify-content: center; align-items: center;">
+                <svg width="150" height="150" viewBox="0 0 100 100">
+                    <!-- Abstract knot representation -->
+                    <path class="knot-path" id="knotVisual" d="M30,50 C30,20 70,20 70,50 C70,80 30,80 30,50 C30,35 45,30 50,50 C55,70 70,65 70,50" stroke="#4ade80"/>
+                </svg>
+            </div>
+
+            <div class="input-row">
+                <div>
+                    <label>Twists (m)</label>
+                    <input type="number" id="mInput" value="2">
+                </div>
+                <div>
+                    <label>Twists (n)</label>
+                    <input type="number" id="nInput" value="-2">
+                </div>
+            </div>
+            
+            <div id="knotResult" class="badge slice">
+                Rationally Slice (σ = 0)
+            </div>
+
+            <div class="math-block" style="margin-top: 1rem; margin-bottom: 0;">
+                K_{m,n} slice ⟺<br>
+                (mn=0) ∨ (n=-m) ∨ (n=-m±1)
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Panel 1: Phase-Crossover Simulator ---
+        const canvas = document.getElementById('fluidCanvas');
+        const ctx = canvas.getContext('2d');
+        const tempSlider = document.getElementById('tempSlider');
+        const tempVal = document.getElementById('tempVal');
+
+        let particles = [];
+        const numParticles = 150;
+        const centers = [
+            {x: 100, y: 125, dir: 1},
+            {x: 200, y: 125, dir: -1},
+            {x: 300, y: 125, dir: 1}
+        ];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.centerIndex = Math.floor(Math.random() * centers.length);
+                this.orbitRadius = 20 + Math.random() * 30;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+
+            update(T) {
+                // T* is around 1.0. 
+                // High T: Random walk (gas)
+                // Low T: Phase locked loops (hydrodynamic)
+                
+                let targetCenter = centers[this.centerIndex];
+                
+                if (T > 1.0) {
+                    // Unconstrained / Hot
+                    this.vx += (Math.random() - 0.5) * T;
+                    this.vy += (Math.random() - 0.5) * T;
+                    
+                    // Friction
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                } else {
+                    // Constrained / Pseudogap regime
+                    // Force towards orbit
+                    let dx = this.x - targetCenter.x;
+                    let dy = this.y - targetCenter.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    // Phase locking mechanism (simplified visually)
+                    let targetAngle = Math.atan2(dy, dx) + (0.05 * targetCenter.dir);
+                    let targetX = targetCenter.x + Math.cos(targetAngle) * this.orbitRadius;
+                    let targetY = targetCenter.y + Math.sin(targetAngle) * this.orbitRadius;
+                    
+                    // Interpolate based on how far below T* we are
+                    let lockStrength = (1.0 - T) * 0.1;
+                    
+                    this.vx += (targetX - this.x) * lockStrength;
+                    this.vy += (targetY - this.y) * lockStrength;
+                    
+                    // Add slight thermal jitter
+                    this.vx += (Math.random() - 0.5) * T * 0.5;
+                    this.vy += (Math.random() - 0.5) * T * 0.5;
+                    
+                    this.vx *= 0.9;
+                    this.vy *= 0.9;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off walls
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                
+                // Keep in bounds
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(56, 189, 248, ${Math.min(1, Math.abs(this.vx) + Math.abs(this.vy))})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateFluid() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Trail effect
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            let T = parseFloat(tempSlider.value);
+            tempVal.innerText = T.toFixed(2);
+
+            // Draw loop centers faintly if T < 1
+            if (T < 1.0) {
+                ctx.strokeStyle = `rgba(192, 132, 252, ${1 - T})`;
+                ctx.lineWidth = 1;
+                centers.forEach(c => {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 35, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+            }
+
+            particles.forEach(p => {
+                p.update(T);
+                p.draw();
+            });
+
+            requestAnimationFrame(animateFluid);
+        }
+        animateFluid();
+
+
+        // --- Panel 2: Variational Scaling Chart ---
+        const nSlider = document.getElementById('nSlider');
+        const nVal = document.getElementById('nVal');
+        const pathHydro = document.getElementById('pathHydro');
+        const pathUnconstrained = document.getElementById('pathUnconstrained');
+        const chartMarker = document.getElementById('chartMarker');
+
+        function updateChart() {
+            let n = parseInt(nSlider.value);
+            nVal.innerText = n;
+
+            // Chart dimensions: x: 20 to 280 (width 260), y: 180 to 20 (height 160)
+            const maxN = 20;
+            const maxE = Math.sqrt(maxN); // Normalize to sqrt(20)
+            
+            let dHydro = "M 20 180 ";
+            let dUnc = "M 20 180 ";
+
+            for (let i = 0; i <= maxN; i++) {
+                let x = 20 + (i / maxN) * 260;
+                
+                // Hydrodynamic: E ∝ √n
+                let yHydro = 180 - (Math.sqrt(i) / maxE) * 160;
+                dHydro += `L ${x} ${yHydro} `;
+                
+                // Unconstrained: E ∝ n^2 (scaled down for visibility)
+                let yUnc = 180 - (Math.pow(i, 2) / Math.pow(maxN, 2)) * 160;
+                dUnc += `L ${x} ${yUnc} `;
+                
+                if (i === n) {
+                    chartMarker.setAttribute('cx', x);
+                    chartMarker.setAttribute('cy', yHydro);
+                }
+            }
+
+            pathHydro.setAttribute('d', dHydro);
+            pathUnconstrained.setAttribute('d', dUnc);
+        }
+
+        nSlider.addEventListener('input', updateChart);
+        updateChart();
+
+
+        // --- Panel 3: Topology Shielding Classifier ---
+        const mInput = document.getElementById('mInput');
+        const nInput = document.getElementById('nInput');
+        const knotResult = document.getElementById('knotResult');
+        const knotVisual = document.getElementById('knotVisual');
+
+        function checkKnot() {
+            let m = parseInt(mInput.value) || 0;
+            let n = parseInt(nInput.value) || 0;
+
+            // Theorem from paper: (mn=0) or (n=-m) or (n=-m±1)
+            let isSlice = (m * n === 0) || 
+                          (n === -m) || 
+                          (n === -m + 1) || 
+                          (n === -m - 1);
+
+            if (isSlice) {
+                knotResult.className = 'badge slice';
+                knotResult.innerText = 'Rationally Slice (σ = 0)';
+                knotVisual.style.stroke = 'var(--accent-green)';
+                // Smooth, closed looking knot
+                knotVisual.setAttribute('d', 'M30,50 C30,20 70,20 70,50 C70,80 30,80 30,50 C30,35 45,30 50,50 C55,70 70,65 70,50');
+            } else {
+                knotResult.className = 'badge not-slice';
+                knotResult.innerText = 'Not Slice (σ = 1)';
+                knotVisual.style.stroke = 'var(--accent-red)';
+                // Tangled, broken looking knot
+                knotVisual.setAttribute('d', 'M20,20 Q50,80 80,20 T80,80 Q50,20 20,80 T20,20');
+            }
+        }
+
+        mInput.addEventListener('input', checkKnot);
+        nInput.addEventListener('input', checkKnot);
+        checkKnot();
+
+    </script>
+</body>
+</html>
