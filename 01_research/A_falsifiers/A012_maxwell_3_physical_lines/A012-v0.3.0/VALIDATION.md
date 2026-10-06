@@ -37,3 +37,15 @@ The hosted build environment did not contain pybind11 headers, so the included C
 ## 2026-09-29 build hotfix
 
 The Windows linker failure reported for the deeply nested A012 path was traced to an absolute C++ source path being replicated under setuptools `build\temp`, producing a 275-character `.exp` path. The build helper now uses `cpp/native.cpp` relative to the release root and short `build\t` / `build\l` directories. Pure-Python regression after this change: **6/6 PASS**. Windows/MSVC rebuild is pending execution on the Workbench host. No scientific logic changed.
+
+## buildfix3 — repeated BASIC -> EXTENDED orchestration
+
+The user Windows log showed that E010 C++ compilation and linking both succeeded, then the second
+editable installation failed only while replacing an already-installed
+`pklsa_builder\\_native.cp314-win_amd64.pyd` (`Access is denied`).  This is a repeat-install DLL
+lock, not a compiler/linker or scientific failure.
+
+Hotfix3 adds a fail-closed installation probe.  If the selected E010 release, distribution version,
+and native module all match and the native binary is not older than its C++ source, the install
+stage is reused.  Otherwise the original editable/native rebuild path remains mandatory.  No
+scientific code or preregistration changed.

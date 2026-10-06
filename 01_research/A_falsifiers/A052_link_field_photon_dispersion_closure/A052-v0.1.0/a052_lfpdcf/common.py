@@ -1,0 +1,13 @@
+from __future__ import annotations
+import hashlib, json
+from pathlib import Path
+
+def sha256_file(path: Path) -> str:
+    h=hashlib.sha256()
+    with path.open('rb') as f:
+        for b in iter(lambda:f.read(1<<20), b''): h.update(b)
+    return h.hexdigest()
+
+def dump_json(path: Path, obj) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, indent=2, sort_keys=True)+"\n", encoding='utf-8')
