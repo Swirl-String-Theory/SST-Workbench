@@ -1,0 +1,148 @@
+{
+  "version": "v0.3.1",
+  "blind": true,
+  "analysis_stage": "extended_nonstationary_phase_drift_replication",
+  "seed": 26092930,
+  "curve_points": 96,
+  "grid_n": 22,
+  "box_half_extent": 3.4,
+  "core_ratio": 0.1,
+  "time_step": 0.02,
+  "reparameterize_every": 2,
+  "field_chunk": 4096,
+  "window_radii_cells": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "fit_min_radius_cells": 2,
+  "probe_radius_cells": 2,
+  "probe_count": 128,
+  "sample_every": 4,
+  "spatial_gate_steps": 80,
+  "temporal_memory_steps": 1024,
+  "modal_persistence_steps": 2048,
+  "null_shuffle_repeats": 4,
+  "power_fit_r2_min": 0.78,
+  "null_gap_min": 0.3,
+  "minimum_spatial_bases": 3,
+  "kelvin_gate": {
+    "mode_min": 2,
+    "mode_max": 8,
+    "energy_floor": 1e-08,
+    "dominant_fraction_min": 0.24,
+    "phase_r2_min": 0.55,
+    "phase_cycles_min": 0.1
+  },
+  "temporal_memory_gate": {
+    "max_lag_samples": 8,
+    "shuffle_repeats": 12,
+    "memory_ratio_min": 1.35,
+    "lag1_excess_min": 0.12
+  },
+  "temporal_memory_convergence_gate": {
+    "window_steps": [
+      80,
+      160,
+      320,
+      640,
+      1024
+    ],
+    "max_lag_fraction": 0.25,
+    "max_lag_cap": 64,
+    "bootstrap_repeats": 128,
+    "bootstrap_ci": 0.95,
+    "relative_change_max": 0.25,
+    "require_bootstrap_ci_overlap": true,
+    "require_phase_randomized_surrogate": true,
+    "minimum_present_bases": 3,
+    "minimum_converged_bases": 2
+  },
+  "modal_persistence_gate": {
+    "checkpoints": [
+      320,
+      640,
+      1024,
+      1536,
+      2048
+    ],
+    "late_checkpoints": [
+      640,
+      1024,
+      1536,
+      2048
+    ],
+    "minimum_qualified_checkpoints": 3,
+    "require_final_checkpoint_qualified": true,
+    "frequency_cv_max": 0.15
+  },
+  "external_geometry_gate": {
+    "staged_manifest": "data/STAGED_EXTENDED_MANIFEST.json",
+    "primary_base_count": 5,
+    "diagnostic_base_count": 2,
+    "holdout_replicates_per_primary_base": 5,
+    "perturbation_rms": 0.00125,
+    "minimum_same_branch_holdouts": 4,
+    "source_group_minimum_robust_bases": {
+      "S01": 2,
+      "S02": 1
+    },
+    "minimum_source_groups_confirmed": 2,
+    "require_baseline_persistence": true,
+    "forbid_synthetic_fallback": true
+  },
+  "modal_numerical_convergence_gate": {
+    "enabled": true,
+    "reference_checkpoint": 1024,
+    "curve_resolution_ladder": [
+      56,
+      72,
+      96
+    ],
+    "time_step_ladder": [
+      0.02,
+      0.01
+    ],
+    "frequency_relative_span_max": 0.15,
+    "representative_rule": "lowest_anonymous_id_robust_base_per_source_group"
+  },
+  "floquet_policy": {
+    "active": false,
+    "reason": "No qualified RPO was established in v0.2.x; v0.3.0 is a real-geometry transfer test, not an adaptive recurrence search."
+  },
+  "observation_protocol": {
+    "parent_versions": [
+      "v0.3.0",
+      "v0.2.2",
+      "v0.2.3"
+    ],
+    "policy": "nonprimary_high_resolution_phase_diagnostic_replication",
+    "legacy_modal_thresholds_retuned": false,
+    "target_branch_mode_fixed": false,
+    "mode_number_is_descriptive_not_a_hard_target": true,
+    "source_selection_uses_dynamics": false,
+    "parent_primary_verdict_is_frozen": true,
+    "nonstationary_analysis_diagnostic_only": true
+  },
+  "nonstationary_phase_gate": {
+    "active": true,
+    "diagnostic_only": true,
+    "branch_policy": "persistence_winner_else_full_horizon_energy_max",
+    "amplitude_floor_fraction": 0.15,
+    "minimum_active_fraction": 0.5,
+    "minimum_active_samples": 128,
+    "minimum_phase_cycles": 0.1,
+    "stationary_linear_r2_min": 0.9,
+    "stationary_segment_frequency_relative_span_max": 0.15,
+    "quadratic_r2_min": 0.9,
+    "quadratic_delta_bic_min": 6.0,
+    "segment_count": 4,
+    "minimum_segment_samples": 32,
+    "instantaneous_frequency_sign_consistency_min": 0.9,
+    "residual_acf_lags": 8,
+    "residual_acf_sigma": 2.5,
+    "minimum_coherent_primary_bases": 3
+  }
+}

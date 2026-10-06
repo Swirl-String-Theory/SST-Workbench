@@ -157,3 +157,17 @@ A PASS means that the admitted source-native PKLSA geometry obeys the preregiste
 ## Build hotfix 2026-09-29
 
 On deeply nested Windows Workbench paths, the original v0.3.0 generated setuptools build used an absolute `cpp/native.cpp` path. MSVC/setuptools mirrored that absolute path beneath `build\\temp...`, which could make the linker `.exp` path exceed the legacy Windows `MAX_PATH` limit and fail with `LNK1104`. The hotfix uses the repository-relative `cpp/native.cpp` path plus short `build\\t` and `build\\l` directories. The `run_all_*.cmd` wrappers were also corrected to propagate a failed install/preflight exit code instead of accidentally returning 0. No scientific gate, threshold, blind commitment, or numerical kernel was changed.
+
+### Windows repeat-run note (buildfix3)
+
+`run_all_basic.cmd`, `run_all_extended.cmd`, and `run_all_certification.cmd` are safe to run in
+sequence with the same local `.venv`.  The installer now detects an already-active E010-v0.3.x
+editable install with its matching native module and reuses it instead of rebuilding the same
+Windows `.pyd`.  Force an E010 rebuild only when required with:
+
+```bat
+run_00_install.cmd --force-pklsa-reinstall
+```
+
+or set `SST_PKLSA_FORCE_REBUILD=1`.  If a forced rebuild reports `Access is denied` for
+`pklsa_builder\_native*.pyd`, close any Python console/process that has loaded that venv and rerun.

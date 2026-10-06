@@ -1,0 +1,919 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 8ea0276..8f5bc4b 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,5 +1,13 @@
+ # Changelog
+ 
++## v0.3.1
++- Adds a blind, diagnostic nonstationary phase/frequency analysis without changing the v0.3.0 primary acceptance logic.
++- Selects the analyzed branch from blind dynamics; no hard-coded mode number is introduced.
++- Adds linear-versus-quadratic phase model comparison using BIC, segmented-frequency stability, instantaneous-frequency sign consistency, and residual autocorrelation screening.
++- Adds per-carrier `nonstationary_phase_carriers.csv` output and primary-baseline diagnostic aggregation.
++- Adds synthetic stationary/chirp/random-phase unit tests.
++- Adds `SEAL_v0.3.1.json`; v0.3.0 source-panel provenance remains unchanged.
++
+ ## v0.3.0
+ - Replaces generated primary geometry with a frozen PKLSA-qualified external source panel.
+ - Adds raw-source SHA verification and anonymous staging.
+diff --git a/PACKAGE_MANIFEST.json b/PACKAGE_MANIFEST.json
+index 19ebb56..35d4cd1 100644
+--- a/PACKAGE_MANIFEST.json
++++ b/PACKAGE_MANIFEST.json
+@@ -1,11 +1,11 @@
+ {
+   "catalog_id": "A050",
+-  "file_count": 47,
++  "file_count": 50,
+   "files": [
+     {
+-      "bytes": 522,
++      "bytes": 1165,
+       "path": "CHANGELOG.md",
+-      "sha256": "cbeba525d8a9de09554229f306baf92df2c89999e19bcc98cb46b24bb53ddbd8"
++      "sha256": "f62a372ae83956102101fec7c1bb288e64947986392c8d351b4726d008fa9fc9"
+     },
+     {
+       "bytes": 565,
+@@ -13,24 +13,24 @@
+       "sha256": "aacf539b9771c1c8736e168d91a9098c13b13902f973efc94a38fd40fc218ae1"
+     },
+     {
+-      "bytes": 1869,
++      "bytes": 2024,
+       "path": "PREREGISTRATION.md",
+-      "sha256": "43740734e5194bf0b3d448e829de112bb0fc3e47e591f444cf88a03a94096bd4"
++      "sha256": "148ff35517d3bbce15417928861aee65c05608109e170e4842559c493c041abb"
+     },
+     {
+-      "bytes": 2919,
++      "bytes": 2534,
+       "path": "README.md",
+-      "sha256": "d89fd31d9ae60a883349f8e5a1a3b93ced0a217e0b235ac27176a79876a5a3a9"
++      "sha256": "bd048b3f84954d01653df0a3ae935b6b0dfdf36925edff3f05de613e789ed8e1"
+     },
+     {
+-      "bytes": 798,
++      "bytes": 956,
+       "path": "REFERENCES.tex",
+-      "sha256": "a364e16a599c975f92234c1a46b9a292410f35530031c0566d6321e6269bf148"
++      "sha256": "db0932b975f9a61f402dd8e6f440d751733e59d59a6ceeef6d94c0c1118aaca8"
+     },
+     {
+-      "bytes": 387,
++      "bytes": 590,
+       "path": "VALIDATION.md",
+-      "sha256": "617bebf5617b6da2bbee35a5b54777b70abd59f9ea53836eca23f28e4df4b2ed"
++      "sha256": "3e3b02a67b031a92e51d7a281ff70d082b12a7b3f06d5189020e08a00d16f8c1"
+     },
+     {
+       "bytes": 2234,
+@@ -38,14 +38,19 @@
+       "sha256": "cacfcc0c39c909888b9d75b28be27f29032e10ac3297367e789d64f3e2e19ea1"
+     },
+     {
+-      "bytes": 3070,
++      "bytes": 2583,
++      "path": "config/SEAL_v0.3.1.json",
++      "sha256": "578c65eb7c8bc63b5bdf7c63b93cc3b4f6b7f1a9119683a2da99b2e18e054719"
++    },
++    {
++      "bytes": 3866,
+       "path": "config/default.json",
+-      "sha256": "3c73ff2015854f75fbcfaf0ff944c73d5b558833dac658d22be0783e112dc2c4"
++      "sha256": "236f9fb61dabdc3f1f99283f854ea0c8e2f3934455f83737002dcadff61256d4"
+     },
+     {
+-      "bytes": 3059,
++      "bytes": 3877,
+       "path": "config/extended.json",
+-      "sha256": "be026b4769dd79083f58ebbc28462b2e3e1a3fbd930a827b1a1b72ab1966cd01"
++      "sha256": "cda65614e06c1b47dd37415072fecf51a72ff00d90b30d6ff19e2a7029acb308"
+     },
+     {
+       "bytes": 1018,
+@@ -58,9 +63,9 @@
+       "sha256": "536808132fd2941b8f49d9b8e8adb5330621fc3e92134d3074f6350e8863e7ce"
+     },
+     {
+-      "bytes": 453,
++      "bytes": 437,
+       "path": "project.json",
+-      "sha256": "4d6071bfa51495e8dedc15df3f684d5618fd88ceaea9d50c24a3839f611b9955"
++      "sha256": "c5e8b41ab6375dcd1b0113f0077bbb4fd0a22a144ca1780a4b8ca52a51b5b5cc"
+     },
+     {
+       "bytes": 198,
+@@ -88,19 +93,19 @@
+       "sha256": "2d7899c9d234086a53d1549ac9068e669c10f76af1fc69dd8028d01bce07ce43"
+     },
+     {
+-      "bytes": 1343,
++      "bytes": 1641,
+       "path": "reveal/interpret.py",
+-      "sha256": "ecfb68c76b209bdc4bd691e4d4c5c360e5e2225f072d921b0cbc7c493b1f7dce"
++      "sha256": "9d34753f50f6f73712398c8674d2584ca386c4235a2ac8cdbb122bac5ab1825b"
+     },
+     {
+-      "bytes": 1369,
++      "bytes": 1426,
+       "path": "run_all.cmd",
+-      "sha256": "0dc81b63be1baf0e027fce2b98c1cac379b189ade656403871d726e399cced6d"
++      "sha256": "856b291d9499f87f468ee199c2c884a9983f893874bc5999e34015e8f326ff66"
+     },
+     {
+-      "bytes": 1380,
++      "bytes": 1377,
+       "path": "run_all_extended.cmd",
+-      "sha256": "a761319fa0234f2009a7d37e62111a68b39d2b93f8ce7da4ef8c9e7d677e2aae"
++      "sha256": "98dfe6055af9fb1cbe96c10ee1b7bf2fe2c0bdcbe8d34504d58fb73bfe938242"
+     },
+     {
+       "bytes": 96,
+@@ -108,9 +113,9 @@
+       "sha256": "8e953fd0f8fd0d76ebf5321f431cf5a651e530f134039d6bf23ba1b8b22f83a8"
+     },
+     {
+-      "bytes": 136,
++      "bytes": 139,
+       "path": "run_reveal.cmd",
+-      "sha256": "60c74aa65f82a96e0fde62d2eb25d137ae8cc33bbfade9389d3db26ab4860937"
++      "sha256": "f3691e7c3fdf7561e2cadd86d574cada538458d6a1157db866f0a0d8a85eaf21"
+     },
+     {
+       "bytes": 133,
+@@ -177,6 +182,11 @@
+       "path": "sst_gfcc_blind/native_ext/__init__.py",
+       "sha256": "b3c8ed560b3d34b5a2e56bdba67440f500f32b8cd047376d99ec7ef0d20f4989"
+     },
++    {
++      "bytes": 6142,
++      "path": "sst_gfcc_blind/nonstationary.py",
++      "sha256": "71492f116bbb46b5153a73f03019dd17cdd68871ba5af05871f0497a9b2a8835"
++    },
+     {
+       "bytes": 4961,
+       "path": "sst_gfcc_blind/persistence.py",
+@@ -188,9 +198,9 @@
+       "sha256": "b9241d84ca62bb53921abc61d2f93bf75ec4849aba036fdad9dc632d1922bb12"
+     },
+     {
+-      "bytes": 12605,
++      "bytes": 15401,
+       "path": "sst_gfcc_blind/transfer.py",
+-      "sha256": "2547ab43aee609b5220852605b0163d7806d7cdeb1d05a934eb34ba13c31f007"
++      "sha256": "93ccd4b4aea6308e168998ec6ec95f1d28dcffe4a7b266c62050f73ade005cac"
+     },
+     {
+       "bytes": 771,
+@@ -207,6 +217,11 @@
+       "path": "tests/test_v030.py",
+       "sha256": "8959738b1dacea767bd71185df4f801bcf5d756348af0c835ee06b5c2433cc28"
+     },
++    {
++      "bytes": 1407,
++      "path": "tests/test_v031.py",
++      "sha256": "0a957478404d08a69bdd9f6c86d382169b5ab236bfef36516730a080e073436a"
++    },
+     {
+       "bytes": 0,
+       "path": "tools/__init__.py",
+@@ -218,9 +233,9 @@
+       "sha256": "959dc1d692473c6edf43f7b452bca4988fdec8fa54cbc9e453c0a31522d79353"
+     },
+     {
+-      "bytes": 1395,
++      "bytes": 1798,
+       "path": "tools/make_report.py",
+-      "sha256": "9716fd8a689eb580b4d4450d44a04aba36a6def987ee8124c492ac55c94893d1"
++      "sha256": "0c22bff7cd1f33c25119075493124a1091e4054efc54f38694f8377e171246c4"
+     },
+     {
+       "bytes": 5052,
+@@ -230,7 +245,7 @@
+     {
+       "bytes": 924,
+       "path": "tools/preflight.py",
+-      "sha256": "ee7828280e68c0fed5439174318d47a08b67d0371f5b810d356ed8012e9f7a6b"
++      "sha256": "b8be2446e2a29ad3692fd3c4aba019917a6f0e8c57e12eb1dc788908e0fa8a7a"
+     },
+     {
+       "bytes": 4630,
+@@ -238,7 +253,7 @@
+       "sha256": "3e01d858eedafdf2de47b05600f5cdd04dc6bed15aab9ab02c48c7ee35248a5f"
+     }
+   ],
+-  "name": "PKLSA Real-Geometry Transfer + Source-Independence Gate",
++  "name": "PKLSA Real-Geometry Transfer + Nonstationary Phase Diagnostic",
+   "schema": "A050-PACKAGE-MANIFEST-1",
+-  "version": "v0.3.0"
++  "version": "v0.3.1"
+ }
+diff --git a/PREREGISTRATION.md b/PREREGISTRATION.md
+index 053ca67..7546ecd 100644
+--- a/PREREGISTRATION.md
++++ b/PREREGISTRATION.md
+@@ -1,32 +1,30 @@
+-# A050 v0.3.0 preregistration — frozen before dynamics
++# A050 v0.3.1 preregistration — diagnostic phase/frequency drift extension
+ 
+ ## Status
+ 
+-Confirmatory external-geometry transfer test. The v0.2.2 result `MODAL_PERSISTENCE_NOT_REPRODUCED` and the v0.2.3 diagnostic `ISOLATED_M3_TRAJECTORY_BEHAVIOR` remain historical results and are not overwritten.
++Diagnostic follow-up to the completed A050 v0.3.0 real-geometry transfer run. The v0.3.0 primary verdict is immutable. This release is not a confirmatory test of a fixed m=3 hypothesis and may not rescue the parent verdict.
+ 
+-## Frozen source-selection rule
++## Frozen parent components
+ 
+-Primary external geometry: four deterministic quantile representatives from nonduplicate A001 upstream-reference carriers that pass the PKLSA v0.3.1 hard literature gates, plus the single A004 independent ideal-reference carrier. A003 QHP endpoints are diagnostic only. Source/provider identity is reveal-only during dynamics.
++The following are inherited unchanged from v0.3.0: PKLSA-qualified source panel and raw SHA-256 checks; anonymous source groups; 72-point primary curves; core ratio 0.1; time step 0.02; 2048-step modal horizon; modal qualification and persistence thresholds; five RMS-0.00125 holdouts per primary base; temporal-memory gate; spatial/divergence gates; numerical-convergence gate; and inactive Floquet/RPO policy.
+ 
+-No synthetic fallback is allowed if any frozen primary raw source is absent or has a SHA-256 mismatch.
++## Frozen v0.3.1 diagnostic
+ 
+-## Frozen dynamics/gates
++- branch selection: existing persistence winner when available, otherwise full-horizon modal-energy maximum;
++- no fixed mode number;
++- active amplitude floor: 15% of trajectory maximum;
++- minimum active support: 50% of samples and at least 128 samples;
++- minimum total phase advance: 0.10 cycles;
++- stationary linear-fit threshold: \(R^2\ge 0.90\);
++- four equal phase segments, at least 32 active samples per segment;
++- stationary segmented-frequency relative span: <=0.15;
++- drifting quadratic-fit threshold: \(R^2\ge 0.90\);
++- quadratic-over-linear BIC improvement: \(\Delta\mathrm{BIC}\ge 6\);
++- instantaneous-frequency sign consistency: >=0.90;
++- residual autocorrelation screen: lags 1..8, maximum absolute residual ACF <= \(2.5/\sqrt{N}\);
++- primary diagnostic support threshold: coherent classification on at least 3/5 primary baselines;
++- holdouts remain within-base robustness diagnostics and are not counted as independent baselines.
+ 
+-- curve samples: 72;
+-- dimensionless core ratio: 0.1;
+-- time step: 0.02;
+-- modal horizon: 2048 steps;
+-- checkpoints: 320, 640, 1024, 1536, 2048;
+-- late checkpoints: 640, 1024, 1536, 2048;
+-- persistent carrier: >=3 qualified late checkpoints, qualified final checkpoint, frequency CV <=0.15;
+-- modal qualification thresholds inherited unchanged: dominant fraction >=0.24, phase R^2 >=0.55, phase advance >=0.10 cycles;
+-- five transverse holdouts per primary base, RMS 0.00125;
+-- robust base: baseline persistent and >=4/5 holdouts persistent on the same branch;
+-- anonymous source-group requirements: S01 >=2 robust bases; S02 >=1 robust base;
+-- no hard target mode number;
+-- temporal-memory horizon: 1024 steps, nested windows 80/160/320/640/1024;
+-- memory present on >=3/5 primary bases; converged on >=2/5;
+-- numerical modal convergence, if source transfer succeeds: N={56,72,96}, dt={0.02,0.01}, same end time, relative frequency span <=0.15;
+-- Floquet/RPO inactive.
++The classifier reports `STATIONARY_COHERENT`, `COHERENT_DRIFTING`, or `INCOHERENT_OR_UNRESOLVED`. These labels are diagnostic and do not enter the v0.3.0 primary PASS/FAIL logic.
+ 
+-The exact source panel, raw hashes, analysis code and configuration are cryptographically sealed in `config/SEAL_v0.3.0.json`.
++The v0.3.1 operative files are cryptographically sealed in `config/SEAL_v0.3.1.json` before the diagnostic rerun.
+diff --git a/README.md b/README.md
+index b7ee61c..12661cb 100644
+--- a/README.md
++++ b/README.md
+@@ -1,39 +1,38 @@
+-# A050 v0.3.0 — PKLSA Real-Geometry Transfer + Source-Independence Gate
++# A050 v0.3.1 — Nonstationary Phase/Frequency Drift Diagnostic
+ 
+-This release replaces the synthetic primary carrier used in v0.2.x with provenance-qualified external geometry staged from the SST-Workbench PKLSA evidence graph.
++This release is a copy-on-write diagnostic extension of A050 v0.3.0. It keeps the frozen PKLSA real-geometry source panel, dynamics, modal-persistence thresholds, pressure-memory thresholds, numerical-convergence logic, and source-blindness rules unchanged.
+ 
+ ## Scientific question
+ 
+-Does the long-horizon transverse-mode / pressure-memory structure survive transfer from generated reference curves to independently sourced, real 3-D embeddings of one fixed knot topology?
++The v0.3.0 transfer run repeatedly selected the same transverse branch while failing the strict persistence criterion on frequency stability. v0.3.1 asks a narrower question: is the apparent branch genuinely incoherent, or is it a coherent but nonstationary phase trajectory whose instantaneous frequency drifts over the 2048-step window?
+ 
+-The primary panel is frozen before dynamics. Source identity is hidden from the blind runner. Four PKLSA-qualified historical KnotPlot relaxation states and the one available independent Gilbert ideal reference form the primary upstream panel. Two QHP carriers are diagnostic only and do not count as an independent upstream provider.
++The diagnostic does **not** hard-code a mode number. The branch is chosen blind from the existing persistence winner when available, otherwise from the full-horizon modal-energy maximum. Any later observation that this branch is often m=3 is descriptive, not an acceptance target.
+ 
+-The current PKLSA v0.3.1 source snapshot reports 189 qualified carriers and two strict upstream provider groups. It reports no admitted Ridgerunner carrier, so v0.3.0 does **not** pretend to contain a Ridgerunner cross-check.
++## Diagnostic classifier
+ 
+-## Primary gate
++For the selected complex modal coefficient \(z(t)\), the active-amplitude phase \(\phi(t)=\operatorname{unwrap}(\arg z(t))\) is compared under two nested descriptions:
+ 
+-Each external base geometry is run for 2048 dimensionless steps. Five fixed transverse holdouts at RMS amplitude 0.00125 are generated per primary base. A base is robust only when the unperturbed baseline passes the inherited modal-persistence gate and at least 4/5 holdouts preserve the same persistent branch. The anonymous source groups must satisfy 2 robust bases in S01 and 1 robust base in S02.
++\[
++\phi_{\rm lin}(t)=a_0+a_1 t,\qquad
++\phi_{\rm quad}(t)=b_0+b_1 t+b_2 t^2.
++\]
+ 
+-No mode number is targeted. In particular, the prior m=3 observation is descriptive only and is not a v0.3.0 acceptance criterion.
++The quadratic model is treated as evidence for coherent drift only when it gives a material Bayesian-information-criterion improvement, the phase remains directionally consistent, segmented frequency is inconsistent with the stationary tolerance, and the quadratic residual passes the frozen autocorrelation screen. A stationary classification requires a strong linear fit, frequency consistency across four segments, and a corresponding residual screen.
+ 
+-Pressure-field temporal memory is evaluated on the five primary baselines over 1024 steps. The prior memory thresholds are unchanged. At least 3/5 bases must retain memory and at least 2/5 must meet the convergence criterion.
++The three output classes are `STATIONARY_COHERENT`, `COHERENT_DRIFTING`, and `INCOHERENT_OR_UNRESOLVED`.
+ 
+-## What a PASS means
++## Integrity rule
+ 
+-A PASS would show that the effect is not confined to the synthetic G0002 parametrization: robust modal persistence would have transferred across two independent upstream geometry providers while temporal memory also survived on a majority of the real-geometry panel. This is substantially stronger structural evidence, but it is still **not** a validation of SST or an identification of an absolute Kelvin-wave speed.
++v0.3.1 is diagnostic because its question was motivated by the observed v0.3.0 failure pattern. It cannot convert a v0.3.0 modal-transfer FAIL into PASS. `blind_results.json` therefore replays the v0.3.0 primary acceptance logic unchanged and stores the new result separately under `nonstationary_phase_diagnostic`.
+ 
+-## What a FAIL means
+-
+-A modal-transfer failure would support the interpretation that the v0.2.x coherent branch was representation/trajectory-specific rather than a robust property of externally sourced knot geometry. A memory-only survival with modal failure would separate the pressure-memory mechanism from a coherent phase-clock mechanism.
++Primary aggregation uses only the five independent primary baselines; perturbation holdouts are reported per carrier but are not counted as independent evidence for the diagnostic majority.
+ 
+ ## Run
+ 
+-From this version directory inside SST-Workbench:
++From `A050-v0.3.1`:
+ 
+ ```bat
+ run_all.cmd
+ ```
+ 
+-The script auto-detects the Workbench root. Alternatively set `SST_WORKBENCH_ROOT` or pass the root as the first argument.
+-
+-`run_all_extended.cmd` is a non-primary high-resolution replication. Do not use it to replace or rescue the frozen primary verdict.
++The output folder is `SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs`. Freeze/hash the BLIND archive before `run_reveal.cmd`.
+diff --git a/REFERENCES.tex b/REFERENCES.tex
+index dd47abb..e71d5b8 100644
+--- a/REFERENCES.tex
++++ b/REFERENCES.tex
+@@ -3,4 +3,5 @@
+ \bibitem{Cantarella2004} J.~Cantarella, ``On Comparing the Writhe of a Smooth Curve to the Writhe of an Inscribed Polygon,'' \emph{SIAM J. Numer. Anal.} \textbf{42}, 1846--1861 (2004). doi:10.1137/S0036142902403164.
+ \bibitem{PrzybylPieranski2014} S.~Przybyl and P.~Piera\'nski, ``High resolution portrait of the ideal trefoil knot,'' \emph{J. Phys. A} \textbf{47}, 285201 (2014). doi:10.1088/1751-8113/47/28/285201.
+ \bibitem{Hasimoto1972} H.~Hasimoto, ``A soliton on a vortex filament,'' \emph{J. Fluid Mech.} \textbf{51}, 477--485 (1972). doi:10.1017/S0022112072002307.
++\bibitem{Schwarz1978} G.~Schwarz, ``Estimating the Dimension of a Model, \emph{Annals of Statistics} \textbf{6}, 461--464 (1978). doi:10.1214/aos/1176344136.
+ \end{thebibliography}
+diff --git a/VALIDATION.md b/VALIDATION.md
+index 996b584..353764f 100644
+--- a/VALIDATION.md
++++ b/VALIDATION.md
+@@ -1,5 +1,7 @@
+ # Validation
+ 
+-Before a production run, `run_all.cmd` verifies the sealed package, runs unit tests, stages the exact frozen external geometry panel with raw SHA-256 checks, re-runs preflight including staged hashes, and audits blind code/config for source identity and SST-target leakage.
++Before a v0.3.1 run, `run_all.cmd` verifies the v0.3.1 seal, runs unit tests, stages the exact frozen v0.3.0 external geometry panel with raw SHA-256 checks, re-runs preflight including staged hashes, and audits blind code/config for source identity and SST-target leakage.
++
++The new phase/frequency classifier is tested against deterministic stationary, chirped, and random-phase synthetic series. The diagnostic is explicitly excluded from the parent v0.3.0 acceptance logic.
+ 
+ The package contains no primary geometry fallback. Missing or changed external files fail closed.
+diff --git a/config/SEAL_v0.3.1.json b/config/SEAL_v0.3.1.json
+new file mode 100644
+index 0000000..06d2dbe
+--- /dev/null
++++ b/config/SEAL_v0.3.1.json
+@@ -0,0 +1,30 @@
++{
++  "files": {
++    "PREREGISTRATION.md": "148ff35517d3bbce15417928861aee65c05608109e170e4842559c493c041abb",
++    "config/default.json": "236f9fb61dabdc3f1f99283f854ea0c8e2f3934455f83737002dcadff61256d4",
++    "config/extended.json": "cda65614e06c1b47dd37415072fecf51a72ff00d90b30d6ff19e2a7029acb308",
++    "config/frozen_gate_thresholds_v0.2.0.json": "4be765dda65fb38bc301985cd244db1dd4d86a0ba2bfb234b47cadb10d0e3785",
++    "provenance/PARENT_EVIDENCE.json": "bad871bb3cbf747ffd8c09de6865b8727cdc544134788b979a999a380112fa1e",
++    "provenance/PKLSA_V031_SOURCE_SNAPSHOT.json": "b069633559eea37175f96507a9a090171a51ed5323f8e2d5057b6f117d083802",
++    "reveal/SOURCE_PANEL_v0.3.0.json": "2d7899c9d234086a53d1549ac9068e669c10f76af1fc69dd8028d01bce07ce43",
++    "sst_gfcc_blind/analysis.py": "7291defc3be68dcd57af46a077dc3c0982d64cb22b28918eaec3e82b45b98fc3",
++    "sst_gfcc_blind/cli.py": "318566008434654c1fb5e9e4d509f09e7bda0a3accd44ecfdf46badc83c0dfb0",
++    "sst_gfcc_blind/field.py": "3e5ca4201e153a7aed25a9407666d13ffa842da6089586ee33cdc77017c1b3f8",
++    "sst_gfcc_blind/filament.py": "160f317f28c7165eda70e3d756cba52e1f618da635af3178c5ce276e882d0c95",
++    "sst_gfcc_blind/geometry.py": "4cee4246ed17e56a483980e5a23a35e9ecaebca3d899598f2898c16db82bee34",
++    "sst_gfcc_blind/modes.py": "f733c7f56c7bf6b7e730e0f797862c11ecf294dcbcbfe7c2263171acd449781b",
++    "sst_gfcc_blind/nonstationary.py": "71492f116bbb46b5153a73f03019dd17cdd68871ba5af05871f0497a9b2a8835",
++    "sst_gfcc_blind/persistence.py": "ef12e9831e94bd00fec8deb750df7caa56e6d828cd32aaad6e02ab646f847613",
++    "sst_gfcc_blind/temporal.py": "b9241d84ca62bb53921abc61d2f93bf75ec4849aba036fdad9dc632d1922bb12",
++    "sst_gfcc_blind/transfer.py": "93ccd4b4aea6308e168998ec6ec95f1d28dcffe4a7b266c62050f73ade005cac",
++    "tools/audit_blind.py": "959dc1d692473c6edf43f7b452bca4988fdec8fa54cbc9e453c0a31522d79353",
++    "tools/pklsa_stage_lib.py": "0364c9668c1a37565fe75eb588e2f33bcf94f29f015e144a1922329ca13fc3e4",
++    "tools/preflight.py": "b8be2446e2a29ad3692fd3c4aba019917a6f0e8c57e12eb1dc788908e0fa8a7a",
++    "tools/stage_external_geometry.py": "3e01d858eedafdf2de47b05600f5cdd04dc6bed15aab9ab02c48c7ee35248a5f"
++  },
++  "frozen_before_diagnostic_rerun": true,
++  "parent_primary_verdict_policy": "A050 v0.3.0 acceptance logic is immutable; v0.3.1 nonstationary phase analysis is diagnostic only.",
++  "runtime_external_geometry_policy": "Raw files must match frozen SHA-256 values in the reveal-side source panel; staged anonymous files receive runtime hashes before analysis.",
++  "schema": "A050-V031-SEAL-1",
++  "version": "v0.3.1"
++}
+diff --git a/config/default.json b/config/default.json
+index ea7ead7..3dc97ad 100644
+--- a/config/default.json
++++ b/config/default.json
+@@ -1,7 +1,7 @@
+ {
+-  "version": "v0.3.0",
++  "version": "v0.3.1",
+   "blind": true,
+-  "analysis_stage": "confirmatory_external_geometry_transfer",
++  "analysis_stage": "diagnostic_nonstationary_phase_drift",
+   "seed": 26092930,
+   "curve_points": 72,
+   "grid_n": 18,
+@@ -114,13 +114,35 @@
+   },
+   "observation_protocol": {
+     "parent_versions": [
++      "v0.3.0",
+       "v0.2.2",
+       "v0.2.3"
+     ],
+-    "policy": "real_geometry_transfer_with_anonymous_source_groups",
++    "policy": "v030_gate_replay_plus_blind_nonstationary_phase_diagnostic",
+     "legacy_modal_thresholds_retuned": false,
+     "target_branch_mode_fixed": false,
+     "mode_number_is_descriptive_not_a_hard_target": true,
+-    "source_selection_uses_dynamics": false
++    "source_selection_uses_dynamics": false,
++    "parent_primary_verdict_is_frozen": true,
++    "nonstationary_analysis_diagnostic_only": true
++  },
++  "nonstationary_phase_gate": {
++    "active": true,
++    "diagnostic_only": true,
++    "branch_policy": "persistence_winner_else_full_horizon_energy_max",
++    "amplitude_floor_fraction": 0.15,
++    "minimum_active_fraction": 0.5,
++    "minimum_active_samples": 128,
++    "minimum_phase_cycles": 0.1,
++    "stationary_linear_r2_min": 0.9,
++    "stationary_segment_frequency_relative_span_max": 0.15,
++    "quadratic_r2_min": 0.9,
++    "quadratic_delta_bic_min": 6.0,
++    "segment_count": 4,
++    "minimum_segment_samples": 32,
++    "instantaneous_frequency_sign_consistency_min": 0.9,
++    "residual_acf_lags": 8,
++    "residual_acf_sigma": 2.5,
++    "minimum_coherent_primary_bases": 3
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/config/extended.json b/config/extended.json
+index 94bafec..38c96a8 100644
+--- a/config/extended.json
++++ b/config/extended.json
+@@ -1,7 +1,7 @@
+ {
+-  "version": "v0.3.0",
++  "version": "v0.3.1",
+   "blind": true,
+-  "analysis_stage": "extended_external_geometry_robustness",
++  "analysis_stage": "extended_nonstationary_phase_drift_replication",
+   "seed": 26092930,
+   "curve_points": 96,
+   "grid_n": 22,
+@@ -114,13 +114,35 @@
+   },
+   "observation_protocol": {
+     "parent_versions": [
++      "v0.3.0",
+       "v0.2.2",
+       "v0.2.3"
+     ],
+-    "policy": "nonprimary_high_resolution_replication",
++    "policy": "nonprimary_high_resolution_phase_diagnostic_replication",
+     "legacy_modal_thresholds_retuned": false,
+     "target_branch_mode_fixed": false,
+     "mode_number_is_descriptive_not_a_hard_target": true,
+-    "source_selection_uses_dynamics": false
++    "source_selection_uses_dynamics": false,
++    "parent_primary_verdict_is_frozen": true,
++    "nonstationary_analysis_diagnostic_only": true
++  },
++  "nonstationary_phase_gate": {
++    "active": true,
++    "diagnostic_only": true,
++    "branch_policy": "persistence_winner_else_full_horizon_energy_max",
++    "amplitude_floor_fraction": 0.15,
++    "minimum_active_fraction": 0.5,
++    "minimum_active_samples": 128,
++    "minimum_phase_cycles": 0.1,
++    "stationary_linear_r2_min": 0.9,
++    "stationary_segment_frequency_relative_span_max": 0.15,
++    "quadratic_r2_min": 0.9,
++    "quadratic_delta_bic_min": 6.0,
++    "segment_count": 4,
++    "minimum_segment_samples": 32,
++    "instantaneous_frequency_sign_consistency_min": 0.9,
++    "residual_acf_lags": 8,
++    "residual_acf_sigma": 2.5,
++    "minimum_coherent_primary_bases": 3
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/project.json b/project.json
+index 0457aac..449a641 100644
+--- a/project.json
++++ b/project.json
+@@ -1,15 +1,14 @@
+ {
+   "catalog_id": "A050",
+   "slug": "geometry_field_clock_covariance",
+-  "version": "v0.3.0",
++  "version": "v0.3.1",
+   "name": "SST Geometry Field Clock Covariance Blind Falsifier",
+   "kind": "falsifier",
+   "blind": true,
+-  "status": "confirmatory_external_geometry_transfer",
++  "status": "diagnostic_nonstationary_phase_drift",
+   "parent_versions": [
+-    "v0.2.2",
+-    "v0.2.3"
++    "v0.3.0"
+   ],
+   "primary_entrypoint": "run_all.cmd",
+-  "expected_output_zip": "SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs_BLIND.zip"
+-}
+\ No newline at end of file
++  "expected_output_zip": "SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs_BLIND.zip"
++}
+diff --git a/reveal/interpret.py b/reveal/interpret.py
+index 7f7fd73..e1b22f1 100644
+--- a/reveal/interpret.py
++++ b/reveal/interpret.py
+@@ -1,10 +1,10 @@
+ from pathlib import Path
+ import json,sys
+ ROOT=Path(__file__).resolve().parents[1]
+-out=Path(sys.argv[1] if len(sys.argv)>1 else 'SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs')
++out=Path(sys.argv[1] if len(sys.argv)>1 else 'SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs')
+ r=json.loads((out/'blind_results.json').read_text()); panel=json.loads((ROOT/'reveal/SOURCE_PANEL_v0.3.0.json').read_text()); mp={e['anonymous_base_id']:e for e in panel['entries']}
+ rows=[]
+ for b in r['primary_bases']:
+- e=mp[b['group_id']]; rows.append({'anonymous_id':b['group_id'],'carrier_id':e['carrier_id'],'catalog_id':e['catalog_id'],'source_family':e['source_family'],'provider_group':e['provider_group'],'robust':b['robust'],'baseline_mode':b['baseline']['persistent_mode'],'same_branch_holdouts':b['same_branch_holdout_count'],'memory_present':b['field_memory']['memory_convergence'].get('present_final_two'),'memory_converged':b['field_memory']['memory_convergence'].get('converged')})
+-rev={'version':'v0.3.0','blind_verdict_unchanged':r['verdict'],'rows':rows,'source_snapshot':panel['source_snapshot'],'interpretation_guard':'Reveal attaches source identity only. It does not alter the frozen blind verdict or promote a numerical transverse mode to a theory-specific physical identification.'}
++ e=mp[b['group_id']]; pd=b.get('phase_drift') or {}; rows.append({'anonymous_id':b['group_id'],'carrier_id':e['carrier_id'],'catalog_id':e['catalog_id'],'source_family':e['source_family'],'provider_group':e['provider_group'],'robust':b['robust'],'baseline_mode':b['baseline']['persistent_mode'],'phase_selected_mode':pd.get('selected_mode'),'phase_class':pd.get('classification'),'same_branch_holdouts':b['same_branch_holdout_count'],'memory_present':b['field_memory']['memory_convergence'].get('present_final_two'),'memory_converged':b['field_memory']['memory_convergence'].get('converged')})
++rev={'version':'v0.3.1','blind_verdict_unchanged':r['verdict'],'nonstationary_phase_diagnostic':r.get('nonstationary_phase_diagnostic'),'rows':rows,'source_snapshot':panel['source_snapshot'],'source_panel_version':'v0.3.0 inherited unchanged','interpretation_guard':'Reveal attaches source identity only. It does not alter the frozen blind verdict, convert the v0.3.1 diagnostic into a confirmatory test, or promote a numerical transverse mode to a theory-specific physical identification.'}
+ (out/'REVEALED_INTERPRETATION.json').write_text(json.dumps(rev,indent=2,sort_keys=True),encoding='utf-8'); print(json.dumps(rev,indent=2))
+diff --git a/run_all.cmd b/run_all.cmd
+index c96d075..b8982e5 100644
+--- a/run_all.cmd
++++ b/run_all.cmd
+@@ -1,27 +1,27 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-set "OUT=SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs"
+-set "WB=%~1"
+-echo ============================================================
+-echo A050 v0.3.0 PKLSA Real-Geometry Transfer + Source-Independence Gate
+-echo PRIMARY CONFIRMATORY RUN -- frozen external source panel
+-echo ============================================================
+-call run_setup.cmd || exit /b 1
+-call .venv\Scripts\activate.bat
+-set "OPENBLAS_NUM_THREADS=1"
+-set "OMP_NUM_THREADS=1"
+-set "MKL_NUM_THREADS=1"
+-set "NUMEXPR_NUM_THREADS=1"
+-python tools\preflight.py || exit /b 1
+-if defined WB (python tools\stage_external_geometry.py --workbench-root "%WB%" --config config/default.json) else (python tools\stage_external_geometry.py --config config/default.json)
+-if errorlevel 1 exit /b 1
+-python tools\preflight.py || exit /b 1
+-python tools\audit_blind.py || exit /b 1
+-python -m pytest -q || exit /b 1
+-python -m sst_gfcc_blind.cli --config config/default.json --out "%OUT%" || exit /b 1
+-python tools\make_report.py "%OUT%" || exit /b 1
+-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '..\SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs_BLIND.zip'"
+-echo.
+-echo v0.3.0 PRIMARY campaign complete. Run run_reveal.cmd only after freezing the BLIND output archive/hash.
+-endlocal
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++set "OUT=SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs"
++set "WB=%~1"
++echo ============================================================
++echo A050 v0.3.1 Nonstationary Phase/Frequency Drift Diagnostic
++echo DIAGNOSTIC BLIND RERUN -- parent v0.3.0 verdict frozen
++echo ============================================================
++call run_setup.cmd || exit /b 1
++call .venv\Scripts\activate.bat
++set "OPENBLAS_NUM_THREADS=1"
++set "OMP_NUM_THREADS=1"
++set "MKL_NUM_THREADS=1"
++set "NUMEXPR_NUM_THREADS=1"
++python tools\preflight.py || exit /b 1
++if defined WB (python tools\stage_external_geometry.py --workbench-root "%WB%" --config config/default.json) else (python tools\stage_external_geometry.py --config config/default.json)
++if errorlevel 1 exit /b 1
++python tools\preflight.py || exit /b 1
++python tools\audit_blind.py || exit /b 1
++python -m pytest -q || exit /b 1
++python -m sst_gfcc_blind.cli --config config/default.json --out "%OUT%" || exit /b 1
++python tools\make_report.py "%OUT%" || exit /b 1
++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '..\SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs_BLIND.zip'"
++echo.
++echo v0.3.1 DIAGNOSTIC campaign complete. Parent v0.3.0 verdict remains frozen. Run run_reveal.cmd only after freezing the BLIND output archive/hash.
++endlocal
+diff --git a/run_all_extended.cmd b/run_all_extended.cmd
+index 4ff3a83..704d766 100644
+--- a/run_all_extended.cmd
++++ b/run_all_extended.cmd
+@@ -1,27 +1,27 @@
+-@echo off
+-setlocal EnableExtensions
+-cd /d "%~dp0"
+-set "OUT=SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs_EXTENDED"
+-set "WB=%~1"
+-echo ============================================================
+-echo A050 v0.3.0 PKLSA Real-Geometry Transfer + Source-Independence Gate
+-echo NON-PRIMARY HIGH-RESOLUTION REPLICATION -- frozen external source panel
+-echo ============================================================
+-call run_setup.cmd || exit /b 1
+-call .venv\Scripts\activate.bat
+-set "OPENBLAS_NUM_THREADS=1"
+-set "OMP_NUM_THREADS=1"
+-set "MKL_NUM_THREADS=1"
+-set "NUMEXPR_NUM_THREADS=1"
+-python tools\preflight.py || exit /b 1
+-if defined WB (python tools\stage_external_geometry.py --workbench-root "%WB%" --config config/extended.json) else (python tools\stage_external_geometry.py --config config/extended.json)
+-if errorlevel 1 exit /b 1
+-python tools\preflight.py || exit /b 1
+-python tools\audit_blind.py || exit /b 1
+-python -m pytest -q || exit /b 1
+-python -m sst_gfcc_blind.cli --config config/extended.json --out "%OUT%" || exit /b 1
+-python tools\make_report.py "%OUT%" || exit /b 1
+-powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '..\SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs_EXTENDED_BLIND.zip'"
+-echo.
+-echo v0.3.0 EXTENDED replication complete; it does not replace the primary verdict.
+-endlocal
++@echo off
++setlocal EnableExtensions
++cd /d "%~dp0"
++set "OUT=SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs_EXTENDED"
++set "WB=%~1"
++echo ============================================================
++echo A050 v0.3.1 Nonstationary Phase/Frequency Drift Diagnostic
++echo NON-PRIMARY HIGH-RESOLUTION DIAGNOSTIC REPLICATION
++echo ============================================================
++call run_setup.cmd || exit /b 1
++call .venv\Scripts\activate.bat
++set "OPENBLAS_NUM_THREADS=1"
++set "OMP_NUM_THREADS=1"
++set "MKL_NUM_THREADS=1"
++set "NUMEXPR_NUM_THREADS=1"
++python tools\preflight.py || exit /b 1
++if defined WB (python tools\stage_external_geometry.py --workbench-root "%WB%" --config config/extended.json) else (python tools\stage_external_geometry.py --config config/extended.json)
++if errorlevel 1 exit /b 1
++python tools\preflight.py || exit /b 1
++python tools\audit_blind.py || exit /b 1
++python -m pytest -q || exit /b 1
++python -m sst_gfcc_blind.cli --config config/extended.json --out "%OUT%" || exit /b 1
++python tools\make_report.py "%OUT%" || exit /b 1
++powershell -NoProfile -Command "Compress-Archive -Force -Path '%OUT%\*' -DestinationPath '..\SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs_EXTENDED_BLIND.zip'"
++echo.
++echo v0.3.1 EXTENDED replication complete; it does not replace the primary verdict.
++endlocal
+diff --git a/run_reveal.cmd b/run_reveal.cmd
+index b2fa818..6ab62a7 100644
+--- a/run_reveal.cmd
++++ b/run_reveal.cmd
+@@ -1,3 +1,3 @@
+-@echo off
+-call .venv\Scripts\activate.bat
+-python reveal\interpret.py SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.0-outputs
++@echo off
++call .venv\Scripts\activate.bat
++python reveal\interpret.py SST_Geometry_Field_Clock_Covariance_Blind_Falsifier_v0.3.1-outputs
+diff --git a/sst_gfcc_blind/nonstationary.py b/sst_gfcc_blind/nonstationary.py
+new file mode 100644
+index 0000000..ad18f61
+--- /dev/null
++++ b/sst_gfcc_blind/nonstationary.py
+@@ -0,0 +1,105 @@
++from __future__ import annotations
++import numpy as np
++from .modes import transverse_mode_series
++
++
++def _polyfit_summary(t, phase, degree):
++    t=np.asarray(t,float); phase=np.asarray(phase,float)
++    coeff=np.polyfit(t,phase,int(degree))
++    pred=np.polyval(coeff,t)
++    resid=phase-pred
++    rss=float(np.sum(resid*resid))
++    centered=phase-float(np.mean(phase))
++    sst=float(np.sum(centered*centered))
++    r2=float(1.0-rss/sst) if sst>0 else 1.0
++    n=max(len(t),1); k=int(degree)+1
++    scale=max(rss/n,np.finfo(float).tiny)
++    bic=float(n*np.log(scale)+k*np.log(n))
++    return {'degree':int(degree),'coefficients':coeff.tolist(),'r2':r2,'rss':rss,'bic':bic,'residual':resid}
++
++
++def _residual_whiteness(residual, lags, sigma):
++    x=np.asarray(residual,float)
++    x=x-np.mean(x) if len(x) else x
++    denom=float(np.dot(x,x))
++    bound=float(sigma)/np.sqrt(max(len(x),1))
++    if len(x)<3 or denom<=1e-20:
++        return {'pass':True,'max_abs_acf':0.0,'bound':bound,'lags_used':0,'acf':[]}
++    vals=[]
++    for lag in range(1,min(int(lags),len(x)-2)+1):
++        vals.append(float(np.dot(x[:-lag],x[lag:])/denom))
++    mx=float(max(map(abs,vals))) if vals else 0.0
++    return {'pass':bool(mx<=bound),'max_abs_acf':mx,'bound':bound,'lags_used':len(vals),'acf':vals}
++
++
++def _segment_frequencies(t, phase, count, minimum_segment_samples):
++    idx=np.arange(len(t),dtype=int)
++    rows=[]
++    for j,part in enumerate(np.array_split(idx,int(count))):
++        if len(part)<int(minimum_segment_samples):
++            continue
++        slope,intercept=np.polyfit(t[part],phase[part],1)
++        rows.append({'segment':int(j),'frequency':float(slope),'sample_count':int(len(part))})
++    f=np.asarray([r['frequency'] for r in rows],float)
++    if len(f)>=2 and np.all(np.isfinite(f)):
++        mean=float(np.mean(f)); span=float((np.max(f)-np.min(f))/max(abs(mean),1e-12)); cv=float(np.std(f)/max(abs(mean),1e-12))
++    else:
++        mean=float('nan'); span=float('inf'); cv=float('inf')
++    return {'rows':rows,'mean_frequency':mean,'relative_span':span,'cv':cv}
++
++
++def phase_drift_from_series(times, coeff, cfg):
++    t=np.asarray(times,float); z=np.asarray(coeff,complex); amp=np.abs(z)
++    max_amp=float(np.nanmax(amp)) if len(amp) else 0.0
++    floor=max(1e-14,float(cfg['amplitude_floor_fraction'])*max_amp)
++    mask=np.isfinite(amp)&(amp>=floor)&np.isfinite(t)
++    active=int(np.sum(mask)); active_fraction=float(active/max(len(t),1))
++    if active<int(cfg['minimum_active_samples']) or active_fraction<float(cfg['minimum_active_fraction']):
++        return {'status':'INSUFFICIENT_PHASE_SUPPORT','classification':'INCOHERENT_OR_UNRESOLVED','pass':False,'active_samples':active,'active_fraction':active_fraction,'amplitude_floor':floor}
++    tt=t[mask]; ph=np.unwrap(np.angle(z[mask])); cycles=float(abs(ph[-1]-ph[0])/(2*np.pi)) if len(ph)>1 else 0.0
++    lin=_polyfit_summary(tt,ph,1); quad=_polyfit_summary(tt,ph,2)
++    delta_bic=float(lin['bic']-quad['bic'])
++    seg=_segment_frequencies(tt,ph,cfg['segment_count'],cfg['minimum_segment_samples'])
++    inst=np.gradient(ph,tt)
++    finite=inst[np.isfinite(inst)]
++    if len(finite):
++        sign=1.0 if float(np.median(finite))>=0 else -1.0
++        sign_consistency=float(np.mean(sign*finite>=0.0))
++    else: sign_consistency=0.0
++    lw=_residual_whiteness(lin.pop('residual'),cfg['residual_acf_lags'],cfg['residual_acf_sigma'])
++    qw=_residual_whiteness(quad.pop('residual'),cfg['residual_acf_lags'],cfg['residual_acf_sigma'])
++    qcoef=quad['coefficients']; a2,a1=float(qcoef[0]),float(qcoef[1])
++    omega_start=float(a1+2*a2*tt[0]); omega_end=float(a1+2*a2*tt[-1]); omega_mean=float(0.5*(omega_start+omega_end))
++    drift_rel=float(abs(omega_end-omega_start)/max(abs(omega_mean),1e-12))
++    stationary=bool(cycles>=float(cfg['minimum_phase_cycles']) and lin['r2']>=float(cfg['stationary_linear_r2_min']) and seg['relative_span']<=float(cfg['stationary_segment_frequency_relative_span_max']) and lw['pass'])
++    drifting=bool(cycles>=float(cfg['minimum_phase_cycles']) and quad['r2']>=float(cfg['quadratic_r2_min']) and delta_bic>=float(cfg['quadratic_delta_bic_min']) and seg['relative_span']>float(cfg['stationary_segment_frequency_relative_span_max']) and sign_consistency>=float(cfg['instantaneous_frequency_sign_consistency_min']) and qw['pass'])
++    if stationary:
++        classification='STATIONARY_COHERENT'
++    elif drifting:
++        classification='COHERENT_DRIFTING'
++    else:
++        classification='INCOHERENT_OR_UNRESOLVED'
++    return {
++        'status':'PHASE_DIAGNOSTIC_COMPLETE','classification':classification,'pass':bool(stationary or drifting),
++        'active_samples':active,'active_fraction':active_fraction,'amplitude_floor':floor,'phase_cycles':cycles,
++        'linear_fit':lin,'quadratic_fit':quad,'delta_bic_quadratic_over_linear':delta_bic,
++        'segmented_frequency':seg,'instantaneous_frequency_sign_consistency':sign_consistency,
++        'quadratic_frequency_start':omega_start,'quadratic_frequency_end':omega_end,'quadratic_frequency_relative_change':drift_rel,
++        'linear_residual_whiteness':lw,'quadratic_residual_whiteness':qw,
++    }
++
++
++def phase_drift_metrics(frames, dt, persistence, kelvin_cfg, cfg):
++    modes,coeff=transverse_mode_series(frames,frames[0],kelvin_cfg['mode_min'],kelvin_cfg['mode_max'])
++    energy=np.mean(np.abs(coeff)**2,axis=0) if len(coeff) else np.zeros(len(modes),float)
++    preferred=persistence.get('persistent_mode')
++    if preferred is not None and int(preferred) in set(map(int,modes)):
++        selected=int(preferred); policy='persistence_winner'
++    elif len(modes):
++        selected=int(modes[int(np.argmax(energy))]); policy='full_horizon_energy_max'
++    else:
++        return {'status':'NO_MODE_AVAILABLE','classification':'INCOHERENT_OR_UNRESOLVED','pass':False,'selected_mode':None,'selection_policy':'none'}
++    ix=int(np.where(modes==selected)[0][0]); times=np.arange(len(frames),dtype=float)*float(dt)
++    out=phase_drift_from_series(times,coeff[:,ix],cfg)
++    out['selected_mode']=selected; out['selection_policy']=policy; out['selected_mode_energy_fraction']=float(energy[ix]/max(float(np.sum(energy)),1e-30))
++    return out
+diff --git a/sst_gfcc_blind/transfer.py b/sst_gfcc_blind/transfer.py
+index ef600f4..0c7e294 100644
+--- a/sst_gfcc_blind/transfer.py
++++ b/sst_gfcc_blind/transfer.py
+@@ -8,6 +8,7 @@ from .field import normalized_velocity_on_grid,pressure_like,divergence_rms,grad
+ from .analysis import variance_scaling_scalar,variance_scaling_vector,shuffled_scaling,fit_power,radial_autocorrelation,smooth_periodic,temporal_integrated_variance,fit_temporal
+ from .temporal import memory_metrics,shuffled_memory_null,memory_convergence
+ from .persistence import modal_persistence_metrics,numerical_convergence
++from .nonstationary import phase_drift_metrics
+ from .io import write_json,write_csv,sha256
+ ROOT=Path(__file__).resolve().parents[1]
+ 
+@@ -52,7 +53,9 @@ def field_memory(points,cfg,label):
+ 
+ def run_modal(points,cfg):
+  fr=evolve_curve(points,float(cfg['core_ratio']),float(cfg['time_step']),int(cfg['modal_persistence_steps']),int(cfg['reparameterize_every']),int(cfg['field_chunk']))
+- return modal_persistence_metrics(fr,float(cfg['time_step']),cfg['modal_persistence_gate'],cfg['kelvin_gate'])
++ pm=modal_persistence_metrics(fr,float(cfg['time_step']),cfg['modal_persistence_gate'],cfg['kelvin_gate'])
++ pd=phase_drift_metrics(fr,float(cfg['time_step']),pm,cfg['kelvin_gate'],cfg['nonstationary_phase_gate']) if cfg.get('nonstationary_phase_gate',{}).get('active',False) else None
++ return pm,pd
+ 
+ def main_run(config_path,out_dir):
+  cfg=json.loads(Path(config_path).read_text(encoding='utf-8')); man=load_manifest(cfg); out=Path(out_dir); out.mkdir(parents=True,exist_ok=True); write_json(out/'config_used.json',cfg); write_json(out/'environment.json',env()); write_json(out/'staged_manifest_used.json',man)
+@@ -60,22 +63,31 @@ def main_run(config_path,out_dir):
+  for e in man['entries']: groups.setdefault(e['group_id'],[]).append(e)
+  base_rows=[]; carrier_rows=[]; diagnostic=[]
+  for gid,ents in sorted(groups.items()):
+-  base_e=next(e for e in ents if e['role']=='baseline'); base=load_entry(base_e); pm=run_modal(base,cfg); fm=field_memory(base,cfg,gid) if base_e['primary'] else None
++  base_e=next(e for e in ents if e['role']=='baseline'); base=load_entry(base_e); pm,pd=run_modal(base,cfg); fm=field_memory(base,cfg,gid) if base_e['primary'] else None
+   holds=[]
+   for e in sorted([x for x in ents if x['role']=='holdout'],key=lambda x:x['carrier_id']):
+-   hp=run_modal(load_entry(e),cfg); holds.append({'carrier_id':e['carrier_id'],'persistence':hp,'perturbation_rms':e['perturbation_rms']}); carrier_rows.append({'carrier_id':e['carrier_id'],'group_id':gid,'role':'holdout','pass':hp['pass'],'persistent_mode':hp['persistent_mode'],'qualified_late_checkpoints':hp['qualified_late_checkpoints'],'frequency_cv':hp['frequency_cv'],'final_checkpoint_qualified':hp['final_checkpoint_qualified']})
++   hp,hd=run_modal(load_entry(e),cfg); holds.append({'carrier_id':e['carrier_id'],'persistence':hp,'phase_drift':hd,'perturbation_rms':e['perturbation_rms']}); carrier_rows.append({'carrier_id':e['carrier_id'],'group_id':gid,'role':'holdout','pass':hp['pass'],'persistent_mode':hp['persistent_mode'],'qualified_late_checkpoints':hp['qualified_late_checkpoints'],'frequency_cv':hp['frequency_cv'],'final_checkpoint_qualified':hp['final_checkpoint_qualified'],'phase_class':hd['classification'] if hd else None,'phase_selected_mode':hd['selected_mode'] if hd else None,'phase_delta_bic':hd.get('delta_bic_quadratic_over_linear') if hd else None,'phase_segment_frequency_relative_span':hd.get('segmented_frequency',{}).get('relative_span') if hd else None})
+   if not base_e['primary']:
+-   diagnostic.append({'group_id':gid,'persistence':pm}); carrier_rows.append({'carrier_id':base_e['carrier_id'],'group_id':gid,'role':'diagnostic_baseline','pass':pm['pass'],'persistent_mode':pm['persistent_mode'],'qualified_late_checkpoints':pm['qualified_late_checkpoints'],'frequency_cv':pm['frequency_cv'],'final_checkpoint_qualified':pm['final_checkpoint_qualified']}); print(f'[v0.3.0] {gid} diagnostic done',flush=True); continue
++   diagnostic.append({'group_id':gid,'persistence':pm,'phase_drift':pd}); carrier_rows.append({'carrier_id':base_e['carrier_id'],'group_id':gid,'role':'diagnostic_baseline','pass':pm['pass'],'persistent_mode':pm['persistent_mode'],'qualified_late_checkpoints':pm['qualified_late_checkpoints'],'frequency_cv':pm['frequency_cv'],'final_checkpoint_qualified':pm['final_checkpoint_qualified'],'phase_class':pd['classification'] if pd else None,'phase_selected_mode':pd['selected_mode'] if pd else None,'phase_delta_bic':pd.get('delta_bic_quadratic_over_linear') if pd else None,'phase_segment_frequency_relative_span':pd.get('segmented_frequency',{}).get('relative_span') if pd else None}); print(f'[v0.3.1] {gid} diagnostic done',flush=True); continue
+   same=[h for h in holds if pm['pass'] and h['persistence']['pass'] and h['persistence']['persistent_mode']==pm['persistent_mode']]
+   robust=bool(pm['pass'] and len(same)>=int(cfg['external_geometry_gate']['minimum_same_branch_holdouts']))
+-  row={'group_id':gid,'source_group_id':base_e['source_group_id'],'baseline':pm,'holdouts':holds,'same_branch_holdout_count':len(same),'holdout_count':len(holds),'robust':robust,'field_memory':fm}; base_rows.append(row)
+-  carrier_rows.append({'carrier_id':base_e['carrier_id'],'group_id':gid,'role':'baseline','pass':pm['pass'],'persistent_mode':pm['persistent_mode'],'qualified_late_checkpoints':pm['qualified_late_checkpoints'],'frequency_cv':pm['frequency_cv'],'final_checkpoint_qualified':pm['final_checkpoint_qualified']})
+-  print(f'[v0.3.0] {gid} primary done robust={robust}',flush=True)
++  row={'group_id':gid,'source_group_id':base_e['source_group_id'],'baseline':pm,'phase_drift':pd,'holdouts':holds,'same_branch_holdout_count':len(same),'holdout_count':len(holds),'robust':robust,'field_memory':fm}; base_rows.append(row)
++  carrier_rows.append({'carrier_id':base_e['carrier_id'],'group_id':gid,'role':'baseline','pass':pm['pass'],'persistent_mode':pm['persistent_mode'],'qualified_late_checkpoints':pm['qualified_late_checkpoints'],'frequency_cv':pm['frequency_cv'],'final_checkpoint_qualified':pm['final_checkpoint_qualified'],'phase_class':pd['classification'] if pd else None,'phase_selected_mode':pd['selected_mode'] if pd else None,'phase_delta_bic':pd.get('delta_bic_quadratic_over_linear') if pd else None,'phase_segment_frequency_relative_span':pd.get('segmented_frequency',{}).get('relative_span') if pd else None})
++  print(f'[v0.3.1] {gid} primary done robust={robust} phase={pd["classification"] if pd else None}',flush=True)
+  # Anonymous source group gate.
+  sg=[]
+  for sid,need in sorted(cfg['external_geometry_gate']['source_group_minimum_robust_bases'].items()):
+   rr=[r for r in base_rows if r['source_group_id']==sid]; n=sum(r['robust'] for r in rr); sg.append({'source_group_id':sid,'robust_base_count':int(n),'base_count':len(rr),'minimum_required':int(need),'pass':bool(n>=int(need))})
+  modal_transfer=sum(x['pass'] for x in sg)>=int(cfg['external_geometry_gate']['minimum_source_groups_confirmed'])
++ phase_counts={'STATIONARY_COHERENT':0,'COHERENT_DRIFTING':0,'INCOHERENT_OR_UNRESOLVED':0}
++ for r in base_rows:
++  c=(r.get('phase_drift') or {}).get('classification','INCOHERENT_OR_UNRESOLVED'); phase_counts[c]=phase_counts.get(c,0)+1
++ coherent=int(phase_counts.get('STATIONARY_COHERENT',0)+phase_counts.get('COHERENT_DRIFTING',0)); need_phase=int(cfg['nonstationary_phase_gate']['minimum_coherent_primary_bases'])
++ if coherent<need_phase: phase_status='NO_COHERENT_PHASE_CLASS_DOMINATES'
++ elif phase_counts.get('COHERENT_DRIFTING',0)>phase_counts.get('STATIONARY_COHERENT',0): phase_status='COHERENT_NONSTATIONARY_PHASE_DOMINANT'
++ elif phase_counts.get('STATIONARY_COHERENT',0)>phase_counts.get('COHERENT_DRIFTING',0): phase_status='STATIONARY_COHERENT_PHASE_DOMINANT'
++ else: phase_status='MIXED_COHERENT_PHASE_CLASSES'
++ phase_diag={'diagnostic_only':True,'status':phase_status,'primary_base_count':len(base_rows),'minimum_coherent_primary_bases':need_phase,'coherent_primary_base_count':coherent,'class_counts':phase_counts,'does_not_modify_primary_verdict':True}
+  present=sum(bool(r['field_memory']['memory_convergence'].get('present_final_two',False)) for r in base_rows); converged=sum(bool(r['field_memory']['memory_convergence'].get('converged',False)) for r in base_rows)
+  mem_present=present>=int(cfg['temporal_memory_convergence_gate']['minimum_present_bases']); mem_conv=converged>=int(cfg['temporal_memory_convergence_gate']['minimum_converged_bases'])
+  spatial=sum(bool(r['field_memory']['spatial_pass']) for r in base_rows); spatial_ok=spatial>=int(cfg['minimum_spatial_bases']); div_ok=all(r['field_memory']['mean_divergence_ratio']<1e-10 for r in base_rows)
+@@ -92,10 +104,11 @@ def main_run(config_path,out_dir):
+  elif not mem_present: verdict='MODAL_TRANSFERRED_MEMORY_NOT_TRANSFERRED'
+  elif not mem_conv: verdict='MODAL_TRANSFERRED_MEMORY_NOT_CONVERGED'
+  else: verdict='REAL_GEOMETRY_STRUCTURED_MEMORY_AND_MODAL_TRANSFER_CONFIRMED'
+- result={'stage':'blind_complete','blind':True,'version':'v0.3.0','verdict':verdict,'modal_transfer_gate':{'pass':modal_transfer,'numerically_converged':modal_conv,'source_groups':sg},'temporal_memory_transfer_gate':{'present':mem_present,'present_base_count':int(present),'converged':mem_conv,'converged_base_count':int(converged),'base_count':len(base_rows)},'spatial_gate':{'pass':spatial_ok,'qualified_base_count':int(spatial),'base_count':len(base_rows)},'divergence_gate':bool(div_ok),'primary_bases':base_rows,'diagnostic_bases':diagnostic,'modal_numerical_convergence':conv,'floquet_policy':cfg['floquet_policy'],'limitations':['Primary dynamics are dimensionless and use externally staged geometry; no absolute theory-specific constants enter the blind verdict.','Source/provider identities are hidden behind anonymous source groups until reveal.','A robust transverse mode is a numerical filament-dynamics result; it is not by itself proof of a physical Kelvin wave.','The primary panel samples a finite subset of qualified external embeddings and does not establish a theorem for all embeddings of the topology.','No recurrence was preregistered, so no Floquet/RPO inference is made.']}
++ result={'stage':'blind_complete','blind':True,'version':'v0.3.1','verdict':verdict,'parent_primary_verdict_policy':'v0.3.0 acceptance logic replayed unchanged; nonstationary phase analysis is diagnostic only','modal_transfer_gate':{'pass':modal_transfer,'numerically_converged':modal_conv,'source_groups':sg},'nonstationary_phase_diagnostic':phase_diag,'temporal_memory_transfer_gate':{'present':mem_present,'present_base_count':int(present),'converged':mem_conv,'converged_base_count':int(converged),'base_count':len(base_rows)},'spatial_gate':{'pass':spatial_ok,'qualified_base_count':int(spatial),'base_count':len(base_rows)},'divergence_gate':bool(div_ok),'primary_bases':base_rows,'diagnostic_bases':diagnostic,'modal_numerical_convergence':conv,'floquet_policy':cfg['floquet_policy'],'limitations':['Primary dynamics are dimensionless and use externally staged geometry; no absolute theory-specific constants enter the blind verdict.','Source/provider identities are hidden behind anonymous source groups until reveal.','The nonstationary phase classification is a v0.3.1 diagnostic motivated by the v0.3.0 outcome and is not allowed to rescue or overwrite the parent primary verdict.','The selected branch is chosen from blind dynamics; no fixed mode number is a v0.3.1 acceptance target.','A coherent phase trajectory is a numerical filament-dynamics result; it is not by itself proof of a physical Kelvin wave.','The primary panel samples a finite subset of qualified external embeddings and does not establish a theorem for all embeddings of the topology.','No recurrence was preregistered, so no Floquet/RPO inference is made.']}
+  result=clean(result); write_json(out/'blind_results.json',result)
+  # Flat summaries.
+  write_csv(out/'modal_persistence_carriers.csv',carrier_rows)
++ write_csv(out/'nonstationary_phase_carriers.csv',carrier_rows)
+  write_csv(out/'source_group_gate.csv',sg)
+  brows=[]; mrows=[]
+  for r in base_rows:
+diff --git a/tests/test_v031.py b/tests/test_v031.py
+new file mode 100644
+index 0000000..54239d8
+--- /dev/null
++++ b/tests/test_v031.py
+@@ -0,0 +1,30 @@
++import numpy as np
++from sst_gfcc_blind.nonstationary import phase_drift_from_series
++
++CFG={
++ 'amplitude_floor_fraction':0.15,'minimum_active_fraction':0.50,'minimum_active_samples':128,
++ 'minimum_phase_cycles':0.10,'stationary_linear_r2_min':0.90,
++ 'stationary_segment_frequency_relative_span_max':0.15,
++ 'quadratic_r2_min':0.90,'quadratic_delta_bic_min':6.0,
++ 'segment_count':4,'minimum_segment_samples':32,
++ 'instantaneous_frequency_sign_consistency_min':0.90,
++ 'residual_acf_lags':8,'residual_acf_sigma':2.5,
++}
++
++def test_stationary_phase_is_classified_stationary():
++ t=np.linspace(0.0,40.0,2049); z=np.exp(1j*(0.7*t+0.2))
++ r=phase_drift_from_series(t,z,CFG)
++ assert r['classification']=='STATIONARY_COHERENT'
++ assert r['segmented_frequency']['relative_span']<1e-10
++
++def test_quadratic_phase_is_classified_drifting():
++ t=np.linspace(0.0,40.0,2049); z=np.exp(1j*(0.35*t+0.012*t*t+0.1))
++ r=phase_drift_from_series(t,z,CFG)
++ assert r['classification']=='COHERENT_DRIFTING'
++ assert r['delta_bic_quadratic_over_linear']>CFG['quadratic_delta_bic_min']
++ assert r['quadratic_frequency_relative_change']>CFG['stationary_segment_frequency_relative_span_max']
++
++def test_random_phase_is_not_promoted_to_coherent():
++ rng=np.random.default_rng(31031); t=np.linspace(0.0,40.0,2049); z=np.exp(1j*rng.uniform(-np.pi,np.pi,len(t)))
++ r=phase_drift_from_series(t,z,CFG)
++ assert r['classification']=='INCOHERENT_OR_UNRESOLVED'
+diff --git a/tools/make_report.py b/tools/make_report.py
+index 89ae234..bf0a81b 100644
+--- a/tools/make_report.py
++++ b/tools/make_report.py
+@@ -1,7 +1,8 @@
+ from pathlib import Path
+ import json,sys
+ p=Path(sys.argv[1]); r=json.loads((p/'blind_results.json').read_text())
+-lines=['# A050 v0.3.0 BLIND Run Report','',f'**Verdict:** `{r["verdict"]}`','',f'- Modal source-transfer: **{r["modal_transfer_gate"]["pass"]}**',f'- Modal numerical convergence: **{r["modal_transfer_gate"]["numerically_converged"]}**',f'- Temporal memory present: **{r["temporal_memory_transfer_gate"]["present"]}** ({r["temporal_memory_transfer_gate"]["present_base_count"]}/{r["temporal_memory_transfer_gate"]["base_count"]})',f'- Temporal memory converged: **{r["temporal_memory_transfer_gate"]["converged"]}** ({r["temporal_memory_transfer_gate"]["converged_base_count"]}/{r["temporal_memory_transfer_gate"]["base_count"]})',f'- Spatial gate: **{r["spatial_gate"]["pass"]}** ({r["spatial_gate"]["qualified_base_count"]}/{r["spatial_gate"]["base_count"]})',f'- Divergence gate: **{r["divergence_gate"]}**','','## Anonymous source groups']
++d=r.get('nonstationary_phase_diagnostic',{})
++lines=[f'# A050 {r.get("version","v0.3.1")} BLIND Run Report','',f'**Primary verdict (v0.3.0 logic):** `{r["verdict"]}`','',f'- Modal source-transfer: **{r["modal_transfer_gate"]["pass"]}**',f'- Modal numerical convergence: **{r["modal_transfer_gate"]["numerically_converged"]}**',f'- Temporal memory present: **{r["temporal_memory_transfer_gate"]["present"]}** ({r["temporal_memory_transfer_gate"]["present_base_count"]}/{r["temporal_memory_transfer_gate"]["base_count"]})',f'- Temporal memory converged: **{r["temporal_memory_transfer_gate"]["converged"]}** ({r["temporal_memory_transfer_gate"]["converged_base_count"]}/{r["temporal_memory_transfer_gate"]["base_count"]})',f'- Spatial gate: **{r["spatial_gate"]["pass"]}** ({r["spatial_gate"]["qualified_base_count"]}/{r["spatial_gate"]["base_count"]})',f'- Divergence gate: **{r["divergence_gate"]}**','','## v0.3.1 nonstationary phase diagnostic',f'- Diagnostic status: **{d.get("status")}**',f'- Coherent primary baselines: **{d.get("coherent_primary_base_count")}/{d.get("primary_base_count")}**',f'- Class counts: `{d.get("class_counts",{})}`','','This diagnostic does not modify or rescue the parent primary verdict.','','## Anonymous source groups']
+ for s in r['modal_transfer_gate']['source_groups']: lines.append(f'- {s["source_group_id"]}: {s["robust_base_count"]}/{s["base_count"]} robust (required {s["minimum_required"]}) -> {s["pass"]}')
+-lines+=['','Source identities remain reveal-only. This report is dimensionless and does not interpret a coherent transverse mode as an absolute physical wave speed.']
++lines+=['','Source identities remain reveal-only. The selected modal branch is determined from blind dynamics; no fixed mode number is an acceptance target.']
+ (p/'BLIND_RUN_REPORT.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+diff --git a/tools/preflight.py b/tools/preflight.py
+index e9fa43c..22dcb8e 100644
+--- a/tools/preflight.py
++++ b/tools/preflight.py
+@@ -3,7 +3,7 @@ import json,hashlib,sys,re
+ ROOT=Path(__file__).resolve().parents[1]
+ def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def main():
+- seal=json.loads((ROOT/'config/SEAL_v0.3.0.json').read_text(encoding='utf-8')); bad=[]
++ seal=json.loads((ROOT/'config/SEAL_v0.3.1.json').read_text(encoding='utf-8')); bad=[]
+  for rel,h in seal['files'].items():
+   p=ROOT/rel
+   if not p.exists() or sha(p)!=h: bad.append(rel)
