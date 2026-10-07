@@ -1,0 +1,32 @@
+--- a/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py
++++ b/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py
+@@ -140,7 +140,28 @@
+     expected_geo=loc.get('geometry_sha256')
+     got_geo=e010_geometry_sha256(raw_comps)
+     if expected_geo and got_geo!=expected_geo:
+-        raise PKLSAError(f"PKLSA geometry SHA-256 mismatch for {anchor.get('static_seed_id')}: {got_geo} != {expected_geo}")
++        if rep=='gilbert_ab_record':
++            # Gilbert coordinates are procedurally sampled from exact Fourier coefficients.
++            # Bitwise float output from np.sin/np.cos is platform/libm dependent, so the
++            # sampled-coordinate SHA-256 is not portable across Windows/Linux. Preserve a
++            # fail-closed provenance gate by requiring: exact raw catalogue bytes, exact
++            # record id, and exact E010-v0.3.1 loader/hash source files per its own manifest.
++            ref=loc.get('reference_id')
++            if ref and str(rec.get('attrs',{}).get('Id'))!=str(ref):
++                raise PKLSAError(f"Gilbert reference-id mismatch for {anchor.get('static_seed_id')}")
++            manifest=e010/'MANIFEST_SHA256.txt'
++            if not manifest.is_file():
++                raise PKLSAError('E010 MANIFEST_SHA256.txt required for cross-platform Gilbert validation')
++            expected={}
++            for line in manifest.read_text(encoding='utf-8',errors='strict').splitlines():
++                parts=line.strip().split(None,1)
++                if len(parts)==2: expected[parts[1].replace('\\','/')]=parts[0]
++            for rel in ('pklsa_builder/gilbert.py','pklsa_builder/hashing.py'):
++                fp=e010/rel
++                if rel not in expected or not fp.is_file() or _sha256_file(fp)!=expected[rel]:
++                    raise PKLSAError(f"E010 manifest validation failed for {rel}")
++        else:
++            raise PKLSAError(f"PKLSA geometry SHA-256 mismatch for {anchor.get('static_seed_id')}: {got_geo} != {expected_geo}")
+     if len(raw_comps)!=1:
+         raise PKLSAError(f"component seed {anchor.get('topology_id')} unexpectedly has {len(raw_comps)} components")
+     return resample_closed_curve(np.asarray(raw_comps[0],float),n)

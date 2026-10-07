@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0 hotfix — Windows/MSVC native build preference
+
+Packaging/build fix only; scientific gates and metrics unchanged.
+
+- On Windows, `build_ext_if_needed.py` prefers setuptools/MSVC instead of the first generic `c++` on `PATH` (often Strawberry/MinGW).
+- MinGW remains available only with `SST_KELVIN_ALLOW_MINGW=1`.
+- Build stamp now records `builder`, so a prior MinGW `.pyd` is treated as stale under the MSVC path.
+
 ## v0.3.0 — 2026-09-25 — spectral certification + Darboux eligibility
 
 Copy-on-write scientific extension from C006-v0.2.2.

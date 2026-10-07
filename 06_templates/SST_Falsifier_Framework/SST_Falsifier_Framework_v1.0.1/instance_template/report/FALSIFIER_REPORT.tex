@@ -1,0 +1,287 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% -----------------------------------------------------------------------------
+% SST notation macros. Define notation here; only enter numerical constants when
+% the blind protocol explicitly permits them.
+% -----------------------------------------------------------------------------
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\newcommand{\SSTTODO}[1]{\ifmmode\text{\color{red}\bfseries TODO}\else\textcolor{red}{\textbf{[REPLACE BEFORE FREEZE: #1]}}\fi}
+
+\title{@@CATALOG-ID@@ --- @@FALSIFIER-NAME@@\\Falsification Protocol and Final Report}
+\author{SST-Workbench}
+\date{Version @@VERSION@@}
+
+\begin{document}
+\maketitle
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, and status}
+\begin{longtable}{p{0.30\linewidth}p{0.62\linewidth}}
+\toprule
+Field & Value \\
+\midrule
+Catalog ID & @@CATALOG-ID@@ \\
+Falsifier & @@FALSIFIER-NAME@@ \\
+Version & @@VERSION@@ \\
+Framework & SST Falsifier Framework v1.0.1 / SST-FALSIFIER-RUNTIME-2 \\
+Profile & @@PROFILE@@ \\
+Scientific status & \SSTTODO{DRAFT / FROZEN / BLIND-RUN / REVEALED and the applicable date.} \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Purpose of this document.}
+This document is part of the preregistration bundle. It must describe what the code is intended to test \emph{before} target-bearing results are inspected. The frozen SHA-256 bundle therefore covers this file together with the machine-readable science, source, gate, and blindness contracts. After the run, automatically generated provenance and gate results are included without modifying the frozen scientific text.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+\subsection{Single falsifiable research question}
+\SSTTODO{Write one precise question. State the independent variable(s), dependent observable(s), admissible system/domain, and the condition that would count against the proposed mechanism.}
+
+\subsection{Scientific objective}
+\SSTTODO{Explain what ambiguity this falsifier resolves. Distinguish discovery, confirmation, numerical certification, and physical interpretation. State explicitly what this experiment cannot establish.}
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses and allowed conclusions}
+\paragraph{Null hypothesis $H_0$.}
+\SSTTODO{Give the quantitative null, including expected distribution/range and nuisance parameters.}
+
+\paragraph{Alternative hypothesis $H_1$.}
+\SSTTODO{Give the competing quantitative prediction. Avoid encoding private reveal targets into blind discovery.}
+
+\paragraph{Falsification semantics.}
+\SSTTODO{State exactly which preregistered gate or statistic falsifies $H_1$, which result fails to reject $H_0$, and which outcomes are merely unresolved. A numerical/backend failure is not physical evidence.}
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions, domain of validity, and known edge cases}
+\begin{enumerate}[label=A\arabic*.]
+\item \SSTTODO{Physical assumption; give its domain and how it could fail.}
+\item \SSTTODO{Geometric/topological assumption.}
+\item \SSTTODO{Numerical/discretization assumption.}
+\item \SSTTODO{Statistical independence assumption.}
+\end{enumerate}
+
+\paragraph{Known limits.}
+\SSTTODO{State small/large parameter limits, continuum/discrete limits, singular limits, and any Newtonian/relativistic or other comparison limits relevant to this falsifier.}
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, units, and dimensional consistency}
+\begin{longtable}{p{0.18\linewidth}p{0.45\linewidth}p{0.14\linewidth}p{0.14\linewidth}}
+\toprule
+Symbol & Meaning & SI unit & Dimensions \\
+\midrule
+\SSTTODO{symbol} & \SSTTODO{definition} & \SSTTODO{unit} & \SSTTODO{dimensions} \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Dimensional audit.}
+\SSTTODO{For every nontrivial equation below, show that both sides have the same dimensions. If normalized variables are used, define the dimensional scale that was divided out.}
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Exact mathematical model and observables}
+\subsection{Equation register}
+Every equation used by the code must have an identifier matching \texttt{science\_contract.json}. Do not write only prose such as ``compute the spectrum'': specify the actual operator, normalization, estimator, or discretization.
+
+\paragraph{E1 --- primary model equation.}
+\begin{equation}
+\SSTTODO{Insert the exact continuous equation, with all coefficients and boundary/closure assumptions defined.}
+\label{eq:E1}
+\end{equation}
+\noindent Inputs: \SSTTODO{variables/data}. Output: \SSTTODO{observable/intermediate quantity}.\\
+Dimensional check: \SSTTODO{show dimensions explicitly}.
+
+\paragraph{E2 --- discrete/numerical form.}
+\begin{equation}
+\SSTTODO{Insert the actual discrete estimator/operator evaluated by Python/C++/SYCL.}
+\label{eq:E2}
+\end{equation}
+\noindent State the grid/segment convention, indexing, regularization, normalization, quadrature rule, and floating-point precision.
+
+\paragraph{E3 --- decision statistic.}
+\begin{equation}
+T(D)=\SSTTODO{Define the target-free test statistic as a function of data $D$.}
+\label{eq:E3}
+\end{equation}
+
+\paragraph{E4 --- null/uncertainty model.}
+\begin{equation}
+\SSTTODO{Define the null distribution, resampling estimator, likelihood, confidence interval, or error model.}
+\label{eq:E4}
+\end{equation}
+
+\subsection{Machine-readable equation/step register}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{\emph{AUTO\_SCIENCE\_CONTRACT.tex is generated at FREEZE/run time from science\_contract.json.}}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Exact algorithm: equation-to-code mapping}
+Write the full causal sequence. Every step must say what enters, what mathematical transformation occurs, what implementation performs it, what leaves the step, and which gate consumes it.
+
+\begin{enumerate}[label=S\arabic*.]
+\item \SSTTODO{Load source(s); list parser and canonical units. No scientific value is inspected before provenance/admissibility checks.}
+\item \SSTTODO{Geometry/topology preprocessing. Give exact formulas/transforms and tolerances.}
+\item \SSTTODO{Compute the registered reference observable in Python FP64; cite E-equation IDs.}
+\item \SSTTODO{Apply the target-free discovery statistic and null model; state random seed/stopping rule.}
+\item \SSTTODO{Run held-out/independent confirmation without retuning discovery choices.}
+\item \SSTTODO{Run strict C++ FP64 certification. State what happens if the C++ build is unavailable: certification must fail/unresolve, never silently pass via Python.}
+\item \SSTTODO{If enabled, run SYCL screening and CPU--GPU parity. FP32 screening cannot become confirmatory merely because it agrees.}
+\item \SSTTODO{Run convergence/refinement and cross-source replication.}
+\item \SSTTODO{Only after blind gates, verify reveal commitment and perform target comparison.}
+\end{enumerate}
+
+\paragraph{Pseudocode contract.}
+\begin{verbatim}
+verify_frozen_protocol()
+resolve_and_hash_sources()
+G0_protocol_integrity()
+G1_source_admissibility()
+G2_reference_numerics()
+G3_target_free_discovery()
+G4_independent_confirmation()
+G5_strict_cpu_native_certification()
+G6_optional_gpu_parity_screening()
+G7_cross_source_replication()
+G8_mechanism_provider()
+G9_reveal_only_after_blind_chain()
+\end{verbatim}
+\SSTTODO{Modify this pseudocode only if the gate plan is changed before freezing. Explain all deviations.}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Source, provenance, and independence contract}
+\SSTTODO{List every admissible library/dataset/provider, version/catalog ID, source role (discovery/confirmation), parser/translator, and provenance family. Explain why claimed independent units are genuinely independent and why mesh refinements, seeds, encodings, or reruns are not counted as new samples.}
+
+\paragraph{Exclusion rules.}
+\SSTTODO{State objective source exclusion rules before outcome scoring.}
+
+% SST-REPORT-SECTION:GATES
+\section{Gate DAG and decision semantics}
+The default causal order is
+\begin{equation}
+G_0\rightarrow G_1\rightarrow G_2\rightarrow G_3\rightarrow G_4\rightarrow G_5\rightarrow G_6\rightarrow G_7\rightarrow G_8\rightarrow G_9.
+\end{equation}
+A gate may not report \texttt{PASS}, \texttt{FAIL}, or \texttt{UNRESOLVED} unless all declared prerequisites are \texttt{PASS}; otherwise it is \texttt{NOT\_RUN\_PREREQUISITE}. Profile-disabled gates are \texttt{NOT\_APPLICABLE}.
+
+\begin{longtable}{p{0.08\linewidth}p{0.38\linewidth}p{0.22\linewidth}p{0.22\linewidth}}
+\toprule
+Gate & Scientific question & PASS criterion & FAIL/UNRESOLVED criterion \\
+\midrule
+$G_0$ & Protocol/runtime integrity & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_1$ & Source provenance/admissibility & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_2$ & Reference numerical validity & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_3$ & Blind discovery & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_4$ & Independent confirmation & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_5$ & Native CPU certification & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_6$ & GPU parity/screening & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_7$ & Cross-source replication & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_8$ & Mechanism/provider & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+$G_9$ & Reveal integrity/comparison & \SSTTODO{criterion} & \SSTTODO{criterion} \\
+\bottomrule
+\end{longtable}
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical certification, convergence, and error budget}
+\subsection{Discretization and refinement}
+\SSTTODO{Define the refinement sequence, e.g. $N,2N,4N$, time-step relation, fixed final physical time, interpolation/reparameterization rules, and order-of-convergence estimator.}
+
+If three resolutions are used, a typical observed order estimator is
+\begin{equation}
+ p_{\mathrm{obs}}=\frac{\ln\!\left(\|Q_N-Q_{2N}\|/\|Q_{2N}-Q_{4N}\|\right)}{\ln 2},
+\end{equation}
+but use this equation only when its assumptions apply; otherwise replace it with the registered estimator.
+
+\subsection{Error budget}
+\begin{longtable}{p{0.30\linewidth}p{0.25\linewidth}p{0.35\linewidth}}
+\toprule
+Error source & Bound/estimator & Acceptance threshold \\
+\midrule
+Discretization & \SSTTODO{estimator} & \SSTTODO{threshold} \\
+Floating-point/backend & \SSTTODO{estimator} & \SSTTODO{threshold} \\
+Source/parser & \SSTTODO{estimator} & \SSTTODO{threshold} \\
+Statistical & \SSTTODO{estimator} & \SSTTODO{threshold} \\
+\bottomrule
+\end{longtable}
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority and parity}
+The backend contract must distinguish \emph{requested} from \emph{actual} execution. For candidate vector $\mathbf q_b$ and authoritative reference $\mathbf q_r$, the default parity diagnostic is
+\begin{equation}
+\epsilon_{b/r}=\frac{\|\mathbf q_b-\mathbf q_r\|_2}{\max(\|\mathbf q_r\|_2,\epsilon_0)}.
+\end{equation}
+\SSTTODO{State the registered $\epsilon_0$, C++/Python tolerance, GPU/CPU tolerance, dtype of each backend, and whether each backend has REFERENCE, CERTIFICATION, SCREENING\_ONLY, or DEVELOPMENT authority.}
+
+\paragraph{No silent fallback.}
+If a gate requires C++/OpenMP or SYCL and the actual backend is Python, that backend gate cannot pass. A fallback may keep development code runnable but has no certification authority.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness, opaque identifiers, and reveal}
+Opaque identifiers use HMAC-SHA256 with a private key, not a public salt:
+\begin{equation}
+\mathrm{ID}=\operatorname{Trunc}_n\!\left(\operatorname{HMAC}_{\mathrm{SHA256}}(K_{\mathrm{private}},\mathrm{label})\right).
+\end{equation}
+The reveal commitment is nonced:
+\begin{equation}
+C=\operatorname{SHA256}(\texttt{SST-REVEAL-COMMIT-2}\,\|\,N_{\mathrm{private}}\,\|\,R),
+\end{equation}
+where $R$ is the exact reveal payload and $N_{\mathrm{private}}$ is disclosed only when reveal is allowed.
+
+\SSTTODO{List what information is blinded, who/what can access the private mapping, which terms are forbidden in blind artifacts, and the exact condition permitting reveal.}
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical/null model and multiplicity}
+\SSTTODO{Define the null ensemble, randomization/bootstrap/permutation procedure, number of trials or stopping rule, confidence level, effect-size measure, multiple-testing correction, and the independent sampling unit.}
+
+\paragraph{Selection effects.}
+\SSTTODO{Explain how hyperparameter search, knot/library screening, seed selection, and post-hoc thresholds are prevented from leaking into confirmation.}
+
+% SST-REPORT-SECTION:RESULTS
+\section{Results and automatic run provenance}
+This section is populated after execution. The frozen scientific text above must not be rewritten to match the outcome.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{AUTO\_RESULTS.tex is generated after a run.}}
+
+\subsection{Primary numerical result}
+The numerical result, uncertainty, gate status, protocol hash, backend identity, and source provenance are inserted by \texttt{AUTO\_RESULTS.tex}. The frozen protocol text is never rewritten to match the outcome.
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation, limits, falsifiable predictions, and minimal follow-up experiments}
+\paragraph{Preregistered interpretation rule.}
+\SSTTODO{State in advance how PASS, FAIL, UNRESOLVED, backend failure, and source failure will be interpreted without moving thresholds after seeing the result.}
+
+\paragraph{Preregistered uncertainty/edge-case rule.}
+\SSTTODO{List the dominant anticipated uncertainty sources and conditions under which the planned conclusion would not be valid.}
+
+\paragraph{Falsifiable predictions reserved for independent checks.}
+\SSTTODO{List predictions not used for fitting/selection and the experiment that could falsify each prediction.}
+
+\subsection{Post-run discussion}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{\emph{Optional post-run discussion is kept outside the frozen protocol in POST\_RUN\_DISCUSSION.tex.}}
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility and exact commands}
+\begin{verbatim}
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd FULL
+run_all.cmd CERTIFY
+run_all.cmd REVEAL
+\end{verbatim}
+\SSTTODO{Add any required Workbench root, source overrides, random seeds, compiler/oneAPI setup, thread counts, and hardware constraints.}
+
+\section{References}
+For every external/non-original equation, comparison model, numerical method, or dataset definition used by the falsifier, add a complete \verb|\bibitem| entry with authors, year, title, venue, and DOI/permalink where available.
+
+\begin{thebibliography}{99}
+\bibitem{replace_reference}
+\SSTTODO{Authors (year), ``Title,'' Venue, DOI/permalink.}
+\end{thebibliography}
+
+\end{document}

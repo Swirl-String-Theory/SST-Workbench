@@ -1,0 +1,712 @@
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/CHANGELOG.md a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/CHANGELOG.md
+--- a054_v011_diff_old/A054-v0.1.1-r1/CHANGELOG.md	2026-10-06 07:51:38.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/CHANGELOG.md	2026-10-06 10:37:08.528651803 +0000
+@@ -1,5 +1,13 @@
+ # Changelog
+ 
++## v0.1.1-r1 — 2026-10-06
++
++- Hotfix only: robust canonical/marker-based E010/E011 discovery.
++- `run_all.cmd` now requires `PREPARED_FULL` and stops before a partial control campaign can be mistaken for the full factorial tournament.
++- Added `run_controls.cmd` for intentionally running only diagnostic analytic controls.
++- UPSTREAM_PLAN records resolved E010/E011 paths relative to the Workbench root.
++- No scientific thresholds, factor levels, polarity gates, or physics operators changed.
++
+ ## v0.1.1 — 2026-10-06
+ 
+ - Full-factorial skeleton × binary twist-knot × polarity design.
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/MANIFEST_SHA256.txt a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/MANIFEST_SHA256.txt
+--- a054_v011_diff_old/A054-v0.1.1-r1/MANIFEST_SHA256.txt	2026-10-06 07:57:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/MANIFEST_SHA256.txt	2026-10-06 10:37:53.294879996 +0000
+@@ -1,50 +1,53 @@
+-3149013c627fe6edf7c095862a5210ae0fdef1267533ba057b165e1075da8cba  A054-v0.1.1/CHANGELOG.md
+-a0d52590dd1ddc805ae95cc207e6c56790bb13a64cb9627de432f964430cb893  A054-v0.1.1/PACKAGE_MANIFEST.json
+-7f94b415d62f618e2b4ad1184e7ef97ad7276c2c0c568661329d9d4db5b1141d  A054-v0.1.1/README.md
+-2aadadabdf9e64b229565d7ed2018eb0813d8fe45349f380711a7adda426abfd  A054-v0.1.1/REFERENCES.tex
+-632aba2342af19622cb7e4d9a89b271787c6c61fbd5ec29603e189954c0af581  A054-v0.1.1/REGISTRY_CANDIDATE.yaml
+-6065f115723ab42098c321389db50dc16808ee1d8523de7c079c8b98a1cb22a4  A054-v0.1.1/UPGRADE_v0.1.0_TO_v0.1.1.md
+-f9d73b2ba36f0c50b4ca15073b5a9ec043d428ead8ecfdaac73a7295b4ccdabc  A054-v0.1.1/VALIDATION.md
+-6804b46ba0c86a2197f90d30dc27183cddb182f5a43b4ea097acfc7ddfd3e1ca  A054-v0.1.1/configs/THRESHOLDS_FROZEN.json
+-ed3c09bf3f8167c913d9757bb8c31af7c0814418d929a3632973a205ad8dc15b  A054-v0.1.1/configs/basic.json
+-24ad096ba792439cef9903664af7f66a0a3673f9f12da5cc68ed698ca9a285bf  A054-v0.1.1/configs/extended.json
+-7b2cbe54a0acea7f1028544cdc0e1e42abdb8824014f90a17a745a4963caf793  A054-v0.1.1/cpp/native.cpp
+-b57f3096b7ef41122b9617e16ff78488e3f8e3b487aec4baefc0e814785b4668  A054-v0.1.1/data/UPSTREAM_STATUS_SNAPSHOT_20261006.json
+-ba5df3491df8b73b1fcbcf82e10a95ee5adc17c073a7427d3b538d16d6c87b89  A054-v0.1.1/data/V010_DISCOVERY_PREREGISTRATION.json
+-d849f0580caca6e5cec93f4acb2b234ff2e567594a7d336719048ffac0523a68  A054-v0.1.1/docs/BLIND_PROTOCOL.md
+-417a9b131d43483d3361bf385e0f1e12b3d5342d0001151c85dd267789222fb5  A054-v0.1.1/docs/FACTORIAL_DESIGN.md
+-dff5caafe9f6ce79cb90b9654f6c61bda406e96ccdd4c048eb29c1075275049f  A054-v0.1.1/docs/PKLSA_CONTRACT.md
+-ee4bff202ab28f20b5f9e30a674c8f9bc0ec6791b4b02c0351f835e6703b097e  A054-v0.1.1/docs/SCIENTIFIC_SCOPE.md
+-b811fb4083b7e8e69d142d90d66489b52b2e10db11cfb13cb508bf254244863d  A054-v0.1.1/project.json
+-0531fcb77917b8678ea7e98fff76f3a6f42a801aa4a434eb8509ecc0ea05141e  A054-v0.1.1/pyproject.toml
+-3fed29b91e3289b76facd893011d87803cd0d5d8869e324d52ecfa97ceb6e8a7  A054-v0.1.1/requirements.txt
+-807b11d495ad50c2c90b47392aa84978702e3a3d796157b6e8188270edeb62bc  A054-v0.1.1/run_00_install.cmd
+-5844040e72490c49c35112db8e7412dc9c3a65b6f18ccc2b6b53d48ce58ad3b9  A054-v0.1.1/run_01_selftest.cmd
+-5e59ee50925c2abcf0bac0df8032c2fb707f7c2833d0649c63e9fbd083c0f63e  A054-v0.1.1/run_02_prepare_blind.cmd
+-3c37a40b448b905fca89b732eee7f31eab16f01cf0fd271a49901bbacb39d814  A054-v0.1.1/run_03_blind.cmd
+-45ff085b07720e0d33db4bbfea870487bd293b08a8991e1481f8dfa863e0449e  A054-v0.1.1/run_90_pack_blind.cmd
+-ebe073381ddbb0274e9c58d00d079f159e8a7b067e1a7e957280dbbc30ccbf9e  A054-v0.1.1/run_99_reveal.cmd
+-87f7ad7b4d98d86f3e1ae483f5d9932331e3b0aa91859477a0ba39cd9eb8c2fc  A054-v0.1.1/run_all.cmd
+-867f4e6840673fbe5b32c7d5f15d773e7a3376a1462372d7ea0b3288210707ac  A054-v0.1.1/run_all_extended.cmd
+-a92273e604ccaa034fa00022af89c8e15cd908ac2a90bf7a662e018b37913cd1  A054-v0.1.1/setup.py
+-e4b5de24e0ef7fe53cffd12eface437726bfe423041d5a618ba282df10ed5eff  A054-v0.1.1/src/a054_ntaf/__init__.py
+-6780fb36bfe68c817b9752067a0ff699191fb488255a2e4afe8857d98cd64ffd  A054-v0.1.1/src/a054_ntaf/blind.py
+-357b16b3f11177419de62d293f15e85a643d48e88174fbf70a5a385e753ca519  A054-v0.1.1/src/a054_ntaf/blind_geometry.py
+-e21b7f6d0829c7aaf37aa60bc04f6eba06b48a13159edfb6a561893ad65dfe85  A054-v0.1.1/src/a054_ntaf/cli.py
+-b1a25cd6da0fbb99a0d6d586adbb45d6559e649f8bfe07f610de2effe2d7496d  A054-v0.1.1/src/a054_ntaf/composite.py
+-99d5778019a4450d2e773cc84e7a93b2ddf979b050dd6a02216dc480a92eb584  A054-v0.1.1/src/a054_ntaf/geometry.py
+-29a5ae9ff3a567cd6cd2979e2e0b7efc4162bd16fc81c47c904b93c4905ccd06  A054-v0.1.1/src/a054_ntaf/physics.py
+-86be5169df04b9bba635e8217ef0e43bc08094a9bb383443db956fc0933cee20  A054-v0.1.1/src/a054_ntaf/pklsa.py
+-79014e6849b311c23576287be03be724591e71a1f9d7e4c147a1bf7a5fdd4b06  A054-v0.1.1/src/a054_ntaf/prepare.py
+-95bc70f46581c763de22875c2119cc2ee87bf141828a1e0b89e4b5debdb73f3d  A054-v0.1.1/src/a054_ntaf/reveal.py
+-e8d1fa2674bfcf01415a4821258fad6523595c351c6161f55a39dc8c177302cb  A054-v0.1.1/src/a054_ntaf/seal.py
+-66302c52ca3d9ac9c4972a388ac67a7b28bb1f34a814c5e96d0c4471d36afb52  A054-v0.1.1/tests/test_blind.py
+-fcb20171a8f15a0a0283e0cedc5392cfbaeda0d38408ed3cc9aa544173024bd7  A054-v0.1.1/tests/test_geometry.py
+-4cd7468e716d3abaf35345a2eb197d7d0b8fc006464ccf6b54f3252963104347  A054-v0.1.1/tests/test_native_reference.py
+-14ea5a60e72cd7d8217b19db5ae2ae22111beae905b97c145e26233dfa4e5ca5  A054-v0.1.1/tests/test_pack_outputs.py
+-da03b70d523553d2eccbd13f2521dd47f4e31efa58157c4fd575e2609071c0fc  A054-v0.1.1/tests/test_physics.py
+-411bbf2692d7a10dbf868b8413a08f13041c1f117ab9816c05caac1f42bed7f8  A054-v0.1.1/tests/test_prepare_factorial.py
+-56ba2e8f2094aa68e006e2e0401dca6bf129cdc49b48c3217406e586992a58c6  A054-v0.1.1/tools/build_blind_runner.py
+-3bf996824ffbc2829688397faf12cda357a9d0e0137e3d8fd64b90bcb2d39956  A054-v0.1.1/tools/pack_outputs.py
+-fd112444225346d5fa36e09b32124234dd6340b931785411f21d2b89618c2e14  A054-v0.1.1/tools/timestamp.py
+-ce07665adf28f36e13688357b40cbd926d5609a4cc4d622d9ce9b5d8c837024b  FAMILY.yaml
++3b67bc75c3a7ad616778b4d6859ff21e6f9aa7eabe3d4bca06e7d463f8871692  A054-v0.1.1-r1/CHANGELOG.md
++e8a0285ac4515c44d898847d9a52108eec4d520875e492c3830b775822ebbfeb  A054-v0.1.1-r1/PACKAGE_MANIFEST.json
++f9e4fffe112440982a7f531dfb256acca9235c174f68e70c67a362b76fa7f071  A054-v0.1.1-r1/README.md
++2aadadabdf9e64b229565d7ed2018eb0813d8fe45349f380711a7adda426abfd  A054-v0.1.1-r1/REFERENCES.tex
++632aba2342af19622cb7e4d9a89b271787c6c61fbd5ec29603e189954c0af581  A054-v0.1.1-r1/REGISTRY_CANDIDATE.yaml
++6065f115723ab42098c321389db50dc16808ee1d8523de7c079c8b98a1cb22a4  A054-v0.1.1-r1/UPGRADE_v0.1.0_TO_v0.1.1.md
++f9d73b2ba36f0c50b4ca15073b5a9ec043d428ead8ecfdaac73a7295b4ccdabc  A054-v0.1.1-r1/VALIDATION.md
++6804b46ba0c86a2197f90d30dc27183cddb182f5a43b4ea097acfc7ddfd3e1ca  A054-v0.1.1-r1/configs/THRESHOLDS_FROZEN.json
++ed3c09bf3f8167c913d9757bb8c31af7c0814418d929a3632973a205ad8dc15b  A054-v0.1.1-r1/configs/basic.json
++24ad096ba792439cef9903664af7f66a0a3673f9f12da5cc68ed698ca9a285bf  A054-v0.1.1-r1/configs/extended.json
++7b2cbe54a0acea7f1028544cdc0e1e42abdb8824014f90a17a745a4963caf793  A054-v0.1.1-r1/cpp/native.cpp
++b57f3096b7ef41122b9617e16ff78488e3f8e3b487aec4baefc0e814785b4668  A054-v0.1.1-r1/data/UPSTREAM_STATUS_SNAPSHOT_20261006.json
++ba5df3491df8b73b1fcbcf82e10a95ee5adc17c073a7427d3b538d16d6c87b89  A054-v0.1.1-r1/data/V010_DISCOVERY_PREREGISTRATION.json
++d849f0580caca6e5cec93f4acb2b234ff2e567594a7d336719048ffac0523a68  A054-v0.1.1-r1/docs/BLIND_PROTOCOL.md
++417a9b131d43483d3361bf385e0f1e12b3d5342d0001151c85dd267789222fb5  A054-v0.1.1-r1/docs/FACTORIAL_DESIGN.md
++dff5caafe9f6ce79cb90b9654f6c61bda406e96ccdd4c048eb29c1075275049f  A054-v0.1.1-r1/docs/PKLSA_CONTRACT.md
++ee4bff202ab28f20b5f9e30a674c8f9bc0ec6791b4b02c0351f835e6703b097e  A054-v0.1.1-r1/docs/SCIENTIFIC_SCOPE.md
++262ea184c6a351722e29133907bf757c8b3cb2c0f1f6ccca1cdd01d563b58740  A054-v0.1.1-r1/project.json
++0531fcb77917b8678ea7e98fff76f3a6f42a801aa4a434eb8509ecc0ea05141e  A054-v0.1.1-r1/pyproject.toml
++3fed29b91e3289b76facd893011d87803cd0d5d8869e324d52ecfa97ceb6e8a7  A054-v0.1.1-r1/requirements.txt
++807b11d495ad50c2c90b47392aa84978702e3a3d796157b6e8188270edeb62bc  A054-v0.1.1-r1/run_00_install.cmd
++5844040e72490c49c35112db8e7412dc9c3a65b6f18ccc2b6b53d48ce58ad3b9  A054-v0.1.1-r1/run_01_selftest.cmd
++fb516a7aab3a19e68aa532cb69b3c5163b2a95cc798a52c1d8dde7c12e451085  A054-v0.1.1-r1/run_02_prepare_blind.cmd
++3c37a40b448b905fca89b732eee7f31eab16f01cf0fd271a49901bbacb39d814  A054-v0.1.1-r1/run_03_blind.cmd
++45ff085b07720e0d33db4bbfea870487bd293b08a8991e1481f8dfa863e0449e  A054-v0.1.1-r1/run_90_pack_blind.cmd
++ebe073381ddbb0274e9c58d00d079f159e8a7b067e1a7e957280dbbc30ccbf9e  A054-v0.1.1-r1/run_99_reveal.cmd
++5500977bf54572e475996fff74a3502694f5d87cb38bb6b840384a670fa70c42  A054-v0.1.1-r1/run_all.cmd
++3e6d4d3a7b4f9db705d48dca492dc1adc19756993134acedd16b51fede98ef94  A054-v0.1.1-r1/run_all_extended.cmd
++991de6af411368b59b3143697ae84ce1e9a1889a87e7fc0a5f2f5c660679a376  A054-v0.1.1-r1/run_controls.cmd
++a92273e604ccaa034fa00022af89c8e15cd908ac2a90bf7a662e018b37913cd1  A054-v0.1.1-r1/setup.py
++e4b5de24e0ef7fe53cffd12eface437726bfe423041d5a618ba282df10ed5eff  A054-v0.1.1-r1/src/a054_ntaf/__init__.py
++6780fb36bfe68c817b9752067a0ff699191fb488255a2e4afe8857d98cd64ffd  A054-v0.1.1-r1/src/a054_ntaf/blind.py
++357b16b3f11177419de62d293f15e85a643d48e88174fbf70a5a385e753ca519  A054-v0.1.1-r1/src/a054_ntaf/blind_geometry.py
++e21b7f6d0829c7aaf37aa60bc04f6eba06b48a13159edfb6a561893ad65dfe85  A054-v0.1.1-r1/src/a054_ntaf/cli.py
++b1a25cd6da0fbb99a0d6d586adbb45d6559e649f8bfe07f610de2effe2d7496d  A054-v0.1.1-r1/src/a054_ntaf/composite.py
++99d5778019a4450d2e773cc84e7a93b2ddf979b050dd6a02216dc480a92eb584  A054-v0.1.1-r1/src/a054_ntaf/geometry.py
++29a5ae9ff3a567cd6cd2979e2e0b7efc4162bd16fc81c47c904b93c4905ccd06  A054-v0.1.1-r1/src/a054_ntaf/physics.py
++98c291967a315010b296ba8bafe9fc6dc9c07f0689433415ef87ea7afe49433d  A054-v0.1.1-r1/src/a054_ntaf/pklsa.py
++79014e6849b311c23576287be03be724591e71a1f9d7e4c147a1bf7a5fdd4b06  A054-v0.1.1-r1/src/a054_ntaf/prepare.py
++95bc70f46581c763de22875c2119cc2ee87bf141828a1e0b89e4b5debdb73f3d  A054-v0.1.1-r1/src/a054_ntaf/reveal.py
++e8d1fa2674bfcf01415a4821258fad6523595c351c6161f55a39dc8c177302cb  A054-v0.1.1-r1/src/a054_ntaf/seal.py
++66302c52ca3d9ac9c4972a388ac67a7b28bb1f34a814c5e96d0c4471d36afb52  A054-v0.1.1-r1/tests/test_blind.py
++fcb20171a8f15a0a0283e0cedc5392cfbaeda0d38408ed3cc9aa544173024bd7  A054-v0.1.1-r1/tests/test_geometry.py
++4cd7468e716d3abaf35345a2eb197d7d0b8fc006464ccf6b54f3252963104347  A054-v0.1.1-r1/tests/test_native_reference.py
++14ea5a60e72cd7d8217b19db5ae2ae22111beae905b97c145e26233dfa4e5ca5  A054-v0.1.1-r1/tests/test_pack_outputs.py
++da03b70d523553d2eccbd13f2521dd47f4e31efa58157c4fd575e2609071c0fc  A054-v0.1.1-r1/tests/test_physics.py
++265f39f1d9aa1bedbfc689710cc1714c18a322fa1c76e30290496d71dc0de242  A054-v0.1.1-r1/tests/test_pklsa_discovery.py
++411bbf2692d7a10dbf868b8413a08f13041c1f117ab9816c05caac1f42bed7f8  A054-v0.1.1-r1/tests/test_prepare_factorial.py
++e708df31183631ca4ce25324e66cb6a3ae50faed727277f466d0054de4ae5c95  A054-v0.1.1-r1/tools/assert_full_prepare.py
++56ba2e8f2094aa68e006e2e0401dca6bf129cdc49b48c3217406e586992a58c6  A054-v0.1.1-r1/tools/build_blind_runner.py
++3bf996824ffbc2829688397faf12cda357a9d0e0137e3d8fd64b90bcb2d39956  A054-v0.1.1-r1/tools/pack_outputs.py
++fd112444225346d5fa36e09b32124234dd6340b931785411f21d2b89618c2e14  A054-v0.1.1-r1/tools/timestamp.py
++fbf8a7eb3e017b75149625821173a9e3aec40402a3f0069e86c64cd309ff7aa8  FAMILY.yaml
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/PACKAGE_MANIFEST.json a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/PACKAGE_MANIFEST.json
+--- a054_v011_diff_old/A054-v0.1.1-r1/PACKAGE_MANIFEST.json	2026-10-06 07:57:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/PACKAGE_MANIFEST.json	2026-10-06 10:37:53.292297804 +0000
+@@ -1,254 +1,265 @@
+ {
+   "package": "A054_nucleon_topology_architecture_blind_falsifier",
+-  "version": "0.1.1",
++  "version": "0.1.1-r1",
+   "catalog_id": "A054",
+   "catalog_id_status": "candidate_confirm_local_registry",
+   "generated_date": "2026-10-06",
++  "revision_scope": "upstream-discovery/provenance hotfix; frozen scientific design unchanged",
+   "files": [
+     {
+-      "path": "A054-v0.1.1/CHANGELOG.md",
+-      "size": 507,
+-      "sha256": "3149013c627fe6edf7c095862a5210ae0fdef1267533ba057b165e1075da8cba"
++      "path": "A054-v0.1.1-r1/CHANGELOG.md",
++      "size": 1001,
++      "sha256": "3b67bc75c3a7ad616778b4d6859ff21e6f9aa7eabe3d4bca06e7d463f8871692"
+     },
+     {
+-      "path": "A054-v0.1.1/README.md",
+-      "size": 9402,
+-      "sha256": "7f94b415d62f618e2b4ad1184e7ef97ad7276c2c0c568661329d9d4db5b1141d"
++      "path": "A054-v0.1.1-r1/README.md",
++      "size": 9695,
++      "sha256": "f9e4fffe112440982a7f531dfb256acca9235c174f68e70c67a362b76fa7f071"
+     },
+     {
+-      "path": "A054-v0.1.1/REFERENCES.tex",
++      "path": "A054-v0.1.1-r1/REFERENCES.tex",
+       "size": 2020,
+       "sha256": "2aadadabdf9e64b229565d7ed2018eb0813d8fe45349f380711a7adda426abfd"
+     },
+     {
+-      "path": "A054-v0.1.1/REGISTRY_CANDIDATE.yaml",
++      "path": "A054-v0.1.1-r1/REGISTRY_CANDIDATE.yaml",
+       "size": 472,
+       "sha256": "632aba2342af19622cb7e4d9a89b271787c6c61fbd5ec29603e189954c0af581"
+     },
+     {
+-      "path": "A054-v0.1.1/UPGRADE_v0.1.0_TO_v0.1.1.md",
++      "path": "A054-v0.1.1-r1/UPGRADE_v0.1.0_TO_v0.1.1.md",
+       "size": 1207,
+       "sha256": "6065f115723ab42098c321389db50dc16808ee1d8523de7c079c8b98a1cb22a4"
+     },
+     {
+-      "path": "A054-v0.1.1/VALIDATION.md",
++      "path": "A054-v0.1.1-r1/VALIDATION.md",
+       "size": 1566,
+       "sha256": "f9d73b2ba36f0c50b4ca15073b5a9ec043d428ead8ecfdaac73a7295b4ccdabc"
+     },
+     {
+-      "path": "A054-v0.1.1/configs/THRESHOLDS_FROZEN.json",
++      "path": "A054-v0.1.1-r1/configs/THRESHOLDS_FROZEN.json",
+       "size": 1343,
+       "sha256": "6804b46ba0c86a2197f90d30dc27183cddb182f5a43b4ea097acfc7ddfd3e1ca"
+     },
+     {
+-      "path": "A054-v0.1.1/configs/basic.json",
++      "path": "A054-v0.1.1-r1/configs/basic.json",
+       "size": 922,
+       "sha256": "ed3c09bf3f8167c913d9757bb8c31af7c0814418d929a3632973a205ad8dc15b"
+     },
+     {
+-      "path": "A054-v0.1.1/configs/extended.json",
++      "path": "A054-v0.1.1-r1/configs/extended.json",
+       "size": 957,
+       "sha256": "24ad096ba792439cef9903664af7f66a0a3673f9f12da5cc68ed698ca9a285bf"
+     },
+     {
+-      "path": "A054-v0.1.1/cpp/native.cpp",
++      "path": "A054-v0.1.1-r1/cpp/native.cpp",
+       "size": 1823,
+       "sha256": "7b2cbe54a0acea7f1028544cdc0e1e42abdb8824014f90a17a745a4963caf793"
+     },
+     {
+-      "path": "A054-v0.1.1/data/UPSTREAM_STATUS_SNAPSHOT_20261006.json",
++      "path": "A054-v0.1.1-r1/data/UPSTREAM_STATUS_SNAPSHOT_20261006.json",
+       "size": 540,
+       "sha256": "b57f3096b7ef41122b9617e16ff78488e3f8e3b487aec4baefc0e814785b4668"
+     },
+     {
+-      "path": "A054-v0.1.1/data/V010_DISCOVERY_PREREGISTRATION.json",
++      "path": "A054-v0.1.1-r1/data/V010_DISCOVERY_PREREGISTRATION.json",
+       "size": 3803,
+       "sha256": "ba5df3491df8b73b1fcbcf82e10a95ee5adc17c073a7427d3b538d16d6c87b89"
+     },
+     {
+-      "path": "A054-v0.1.1/docs/BLIND_PROTOCOL.md",
++      "path": "A054-v0.1.1-r1/docs/BLIND_PROTOCOL.md",
+       "size": 1907,
+       "sha256": "d849f0580caca6e5cec93f4acb2b234ff2e567594a7d336719048ffac0523a68"
+     },
+     {
+-      "path": "A054-v0.1.1/docs/FACTORIAL_DESIGN.md",
++      "path": "A054-v0.1.1-r1/docs/FACTORIAL_DESIGN.md",
+       "size": 1517,
+       "sha256": "417a9b131d43483d3361bf385e0f1e12b3d5342d0001151c85dd267789222fb5"
+     },
+     {
+-      "path": "A054-v0.1.1/docs/PKLSA_CONTRACT.md",
++      "path": "A054-v0.1.1-r1/docs/PKLSA_CONTRACT.md",
+       "size": 1354,
+       "sha256": "dff5caafe9f6ce79cb90b9654f6c61bda406e96ccdd4c048eb29c1075275049f"
+     },
+     {
+-      "path": "A054-v0.1.1/docs/SCIENTIFIC_SCOPE.md",
++      "path": "A054-v0.1.1-r1/docs/SCIENTIFIC_SCOPE.md",
+       "size": 1311,
+       "sha256": "ee4bff202ab28f20b5f9e30a674c8f9bc0ec6791b4b02c0351f835e6703b097e"
+     },
+     {
+-      "path": "A054-v0.1.1/project.json",
+-      "size": 741,
+-      "sha256": "b811fb4083b7e8e69d142d90d66489b52b2e10db11cfb13cb508bf254244863d"
++      "path": "A054-v0.1.1-r1/project.json",
++      "size": 867,
++      "sha256": "262ea184c6a351722e29133907bf757c8b3cb2c0f1f6ccca1cdd01d563b58740"
+     },
+     {
+-      "path": "A054-v0.1.1/pyproject.toml",
++      "path": "A054-v0.1.1-r1/pyproject.toml",
+       "size": 112,
+       "sha256": "0531fcb77917b8678ea7e98fff76f3a6f42a801aa4a434eb8509ecc0ea05141e"
+     },
+     {
+-      "path": "A054-v0.1.1/requirements.txt",
++      "path": "A054-v0.1.1-r1/requirements.txt",
+       "size": 37,
+       "sha256": "3fed29b91e3289b76facd893011d87803cd0d5d8869e324d52ecfa97ceb6e8a7"
+     },
+     {
+-      "path": "A054-v0.1.1/run_00_install.cmd",
++      "path": "A054-v0.1.1-r1/run_00_install.cmd",
+       "size": 664,
+       "sha256": "807b11d495ad50c2c90b47392aa84978702e3a3d796157b6e8188270edeb62bc"
+     },
+     {
+-      "path": "A054-v0.1.1/run_01_selftest.cmd",
++      "path": "A054-v0.1.1-r1/run_01_selftest.cmd",
+       "size": 96,
+       "sha256": "5844040e72490c49c35112db8e7412dc9c3a65b6f18ccc2b6b53d48ce58ad3b9"
+     },
+     {
+-      "path": "A054-v0.1.1/run_02_prepare_blind.cmd",
+-      "size": 655,
+-      "sha256": "5e59ee50925c2abcf0bac0df8032c2fb707f7c2833d0649c63e9fbd083c0f63e"
++      "path": "A054-v0.1.1-r1/run_02_prepare_blind.cmd",
++      "size": 658,
++      "sha256": "fb516a7aab3a19e68aa532cb69b3c5163b2a95cc798a52c1d8dde7c12e451085"
+     },
+     {
+-      "path": "A054-v0.1.1/run_03_blind.cmd",
++      "path": "A054-v0.1.1-r1/run_03_blind.cmd",
+       "size": 614,
+       "sha256": "3c37a40b448b905fca89b732eee7f31eab16f01cf0fd271a49901bbacb39d814"
+     },
+     {
+-      "path": "A054-v0.1.1/run_90_pack_blind.cmd",
++      "path": "A054-v0.1.1-r1/run_90_pack_blind.cmd",
+       "size": 258,
+       "sha256": "45ff085b07720e0d33db4bbfea870487bd293b08a8991e1481f8dfa863e0449e"
+     },
+     {
+-      "path": "A054-v0.1.1/run_99_reveal.cmd",
++      "path": "A054-v0.1.1-r1/run_99_reveal.cmd",
+       "size": 381,
+       "sha256": "ebe073381ddbb0274e9c58d00d079f159e8a7b067e1a7e957280dbbc30ccbf9e"
+     },
+     {
+-      "path": "A054-v0.1.1/run_all.cmd",
+-      "size": 476,
+-      "sha256": "87f7ad7b4d98d86f3e1ae483f5d9932331e3b0aa91859477a0ba39cd9eb8c2fc"
++      "path": "A054-v0.1.1-r1/run_all.cmd",
++      "size": 547,
++      "sha256": "5500977bf54572e475996fff74a3502694f5d87cb38bb6b840384a670fa70c42"
+     },
+     {
+-      "path": "A054-v0.1.1/run_all_extended.cmd",
+-      "size": 992,
+-      "sha256": "867f4e6840673fbe5b32c7d5f15d773e7a3376a1462372d7ea0b3288210707ac"
++      "path": "A054-v0.1.1-r1/run_all_extended.cmd",
++      "size": 995,
++      "sha256": "3e6d4d3a7b4f9db705d48dca492dc1adc19756993134acedd16b51fede98ef94"
+     },
+     {
+-      "path": "A054-v0.1.1/setup.py",
++      "path": "A054-v0.1.1-r1/run_controls.cmd",
++      "size": 518,
++      "sha256": "991de6af411368b59b3143697ae84ce1e9a1889a87e7fc0a5f2f5c660679a376"
++    },
++    {
++      "path": "A054-v0.1.1-r1/setup.py",
+       "size": 724,
+       "sha256": "a92273e604ccaa034fa00022af89c8e15cd908ac2a90bf7a662e018b37913cd1"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/__init__.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/__init__.py",
+       "size": 20,
+       "sha256": "e4b5de24e0ef7fe53cffd12eface437726bfe423041d5a618ba282df10ed5eff"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/blind.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/blind.py",
+       "size": 13139,
+       "sha256": "6780fb36bfe68c817b9752067a0ff699191fb488255a2e4afe8857d98cd64ffd"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/blind_geometry.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/blind_geometry.py",
+       "size": 1755,
+       "sha256": "357b16b3f11177419de62d293f15e85a643d48e88174fbf70a5a385e753ca519"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/cli.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/cli.py",
+       "size": 1256,
+       "sha256": "e21b7f6d0829c7aaf37aa60bc04f6eba06b48a13159edfb6a561893ad65dfe85"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/composite.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/composite.py",
+       "size": 7193,
+       "sha256": "b1a25cd6da0fbb99a0d6d586adbb45d6559e649f8bfe07f610de2effe2d7496d"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/geometry.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/geometry.py",
+       "size": 8291,
+       "sha256": "99d5778019a4450d2e773cc84e7a93b2ddf979b050dd6a02216dc480a92eb584"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/physics.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/physics.py",
+       "size": 11916,
+       "sha256": "29a5ae9ff3a567cd6cd2979e2e0b7efc4162bd16fc81c47c904b93c4905ccd06"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/pklsa.py",
+-      "size": 5321,
+-      "sha256": "86be5169df04b9bba635e8217ef0e43bc08094a9bb383443db956fc0933cee20"
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/pklsa.py",
++      "size": 7530,
++      "sha256": "98c291967a315010b296ba8bafe9fc6dc9c07f0689433415ef87ea7afe49433d"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/prepare.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/prepare.py",
+       "size": 8700,
+       "sha256": "79014e6849b311c23576287be03be724591e71a1f9d7e4c147a1bf7a5fdd4b06"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/reveal.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/reveal.py",
+       "size": 10603,
+       "sha256": "95bc70f46581c763de22875c2119cc2ee87bf141828a1e0b89e4b5debdb73f3d"
+     },
+     {
+-      "path": "A054-v0.1.1/src/a054_ntaf/seal.py",
++      "path": "A054-v0.1.1-r1/src/a054_ntaf/seal.py",
+       "size": 460,
+       "sha256": "e8d1fa2674bfcf01415a4821258fad6523595c351c6161f55a39dc8c177302cb"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_blind.py",
++      "path": "A054-v0.1.1-r1/tests/test_blind.py",
+       "size": 2258,
+       "sha256": "66302c52ca3d9ac9c4972a388ac67a7b28bb1f34a814c5e96d0c4471d36afb52"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_geometry.py",
++      "path": "A054-v0.1.1-r1/tests/test_geometry.py",
+       "size": 1219,
+       "sha256": "fcb20171a8f15a0a0283e0cedc5392cfbaeda0d38408ed3cc9aa544173024bd7"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_native_reference.py",
++      "path": "A054-v0.1.1-r1/tests/test_native_reference.py",
+       "size": 541,
+       "sha256": "4cd7468e716d3abaf35345a2eb197d7d0b8fc006464ccf6b54f3252963104347"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_pack_outputs.py",
++      "path": "A054-v0.1.1-r1/tests/test_pack_outputs.py",
+       "size": 937,
+       "sha256": "14ea5a60e72cd7d8217b19db5ae2ae22111beae905b97c145e26233dfa4e5ca5"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_physics.py",
++      "path": "A054-v0.1.1-r1/tests/test_physics.py",
+       "size": 952,
+       "sha256": "da03b70d523553d2eccbd13f2521dd47f4e31efa58157c4fd575e2609071c0fc"
+     },
+     {
+-      "path": "A054-v0.1.1/tests/test_prepare_factorial.py",
++      "path": "A054-v0.1.1-r1/tests/test_pklsa_discovery.py",
++      "size": 1591,
++      "sha256": "265f39f1d9aa1bedbfc689710cc1714c18a322fa1c76e30290496d71dc0de242"
++    },
++    {
++      "path": "A054-v0.1.1-r1/tests/test_prepare_factorial.py",
+       "size": 1252,
+       "sha256": "411bbf2692d7a10dbf868b8413a08f13041c1f117ab9816c05caac1f42bed7f8"
+     },
+     {
+-      "path": "A054-v0.1.1/tools/build_blind_runner.py",
++      "path": "A054-v0.1.1-r1/tools/assert_full_prepare.py",
++      "size": 886,
++      "sha256": "e708df31183631ca4ce25324e66cb6a3ae50faed727277f466d0054de4ae5c95"
++    },
++    {
++      "path": "A054-v0.1.1-r1/tools/build_blind_runner.py",
+       "size": 2438,
+       "sha256": "56ba2e8f2094aa68e006e2e0401dca6bf129cdc49b48c3217406e586992a58c6"
+     },
+     {
+-      "path": "A054-v0.1.1/tools/pack_outputs.py",
++      "path": "A054-v0.1.1-r1/tools/pack_outputs.py",
+       "size": 2179,
+       "sha256": "3bf996824ffbc2829688397faf12cda357a9d0e0137e3d8fd64b90bcb2d39956"
+     },
+     {
+-      "path": "A054-v0.1.1/tools/timestamp.py",
++      "path": "A054-v0.1.1-r1/tools/timestamp.py",
+       "size": 78,
+       "sha256": "fd112444225346d5fa36e09b32124234dd6340b931785411f21d2b89618c2e14"
+-    },
+-    {
+-      "path": "FAMILY.yaml",
+-      "size": 513,
+-      "sha256": "ce07665adf28f36e13688357b40cbd926d5609a4cc4d622d9ce9b5d8c837024b"
+     }
+   ]
+ }
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/README.md a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/README.md
+--- a054_v011_diff_old/A054-v0.1.1-r1/README.md	2026-10-06 07:56:34.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/README.md	2026-10-06 10:37:08.528757159 +0000
+@@ -1,5 +1,8 @@
+ # A054 — Full-Factorial Skeleton × Twist-Knot × Polarity Blind Falsifier v0.1.1
+ 
++> **v0.1.1-r1 provenance hotfix.** This revision does not change the preregistered scientific design. It fixes E010/E011 discovery and makes `run_all.cmd` require `PREPARED_FULL`. If upstream discovery is unavailable, use `run_controls.cmd` only for explicitly diagnostic analytic controls.
++
++
+ ## Research question
+ 
+ Can the strong `2+1` circulation-polarity effect observed in the sealed A054-v0.1.0 campaign survive a prospective, full-factorial test in which **collective skeleton**, **local twist-knot identity**, **component position**, **circulation polarity**, **circulation normalization**, and **PKLSA provider stratum** are varied independently?
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/project.json a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/project.json
+--- a054_v011_diff_old/A054-v0.1.1-r1/project.json	2026-10-06 07:51:38.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/project.json	2026-10-06 10:37:08.528434884 +0000
+@@ -1,12 +1,17 @@
+ {
+   "catalog_id": "A054",
+   "catalog_id_status": "candidate_allocation_confirm_against_local_registry_before_merge",
+-  "version": "v0.1.1",
++  "version": "v0.1.1-r1",
+   "title": "A054 Full-Factorial Skeleton x Twist-Knot x Polarity Blind Falsifier",
+   "mode": "blind-first, fail-closed, prospective polarity gate, no weighted winner score",
+-  "upstream": ["E010-v0.3.1", "E011-v0.3.0", "A054-v0.1.0 sealed discovery campaign"],
++  "upstream": [
++    "E010-v0.3.1",
++    "E011-v0.3.0",
++    "A054-v0.1.0 sealed discovery campaign"
++  ],
+   "python_package": "a054_ntaf",
+   "native_backend": "C++17/pybind11/OpenMP preferred for basic and required for extended",
+   "factor_design": "3 skeletons x 2^3 component assignments x 8 circulation sectors x provider envelope",
+-  "scientific_boundary": "architecture/twist/polarity tournament; no mass, charge or particle-identity fit"
++  "scientific_boundary": "architecture/twist/polarity tournament; no mass, charge or particle-identity fit",
++  "revision_scope": "provenance/discovery hotfix only; scientific design and frozen thresholds unchanged"
+ }
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/run_02_prepare_blind.cmd a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_02_prepare_blind.cmd
+--- a054_v011_diff_old/A054-v0.1.1-r1/run_02_prepare_blind.cmd	2026-10-06 07:42:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_02_prepare_blind.cmd	2026-10-06 10:37:09.166722502 +0000
+@@ -8,7 +8,7 @@
+ set "OUT=%~2"
+ if "!OUT!"=="" (
+   for /f %%i in ('python tools\timestamp.py') do set "TS=%%i"
+-  set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-outputs\basic_!TS!"
++  set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-r1-outputs\basic_!TS!"
+ )
+ a054-ntaf prepare --workbench "!WB!" --output "!OUT!" --n 144
+ if errorlevel 1 exit /b !errorlevel!
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/run_all.cmd a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_all.cmd
+--- a054_v011_diff_old/A054-v0.1.1-r1/run_all.cmd	2026-10-06 07:42:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_all.cmd	2026-10-06 10:37:09.166562847 +0000
+@@ -4,8 +4,9 @@
+ call run_00_install.cmd || exit /b !errorlevel!
+ call run_01_selftest.cmd || exit /b !errorlevel!
+ for /f %%i in ('python tools\timestamp.py') do set "TS=%%i"
+-set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-outputs\basic_!TS!"
++set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-r1-outputs\basic_!TS!"
+ call run_02_prepare_blind.cmd "%~1" "!OUT!" || exit /b !errorlevel!
++python tools\assert_full_prepare.py "!OUT!" || exit /b !errorlevel!
+ call run_03_blind.cmd "!OUT!" || exit /b !errorlevel!
+ echo.
+ echo STOPPED BEFORE REVEAL by design.
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/run_all_extended.cmd a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_all_extended.cmd
+--- a054_v011_diff_old/A054-v0.1.1-r1/run_all_extended.cmd	2026-10-06 07:42:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_all_extended.cmd	2026-10-06 10:37:09.166677606 +0000
+@@ -9,7 +9,7 @@
+ if "!WB!"=="" if defined SST_WORKBENCH_ROOT set "WB=!SST_WORKBENCH_ROOT!"
+ if "!WB!"=="" set "WB=C:\workspace\projects\SST-Workbench"
+ for /f %%i in ('python tools\timestamp.py') do set "TS=%%i"
+-set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-outputs\extended_!TS!"
++set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-r1-outputs\extended_!TS!"
+ a054-ntaf prepare --workbench "!WB!" --output "!OUT!" --n 192 || exit /b !errorlevel!
+ python tools\build_blind_runner.py --campaign "!OUT!" || exit /b !errorlevel!
+ python "!OUT!\blind_runner\run_blind.py" --campaign "!OUT!" --config configs\extended.json || exit /b !errorlevel!
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/run_controls.cmd a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_controls.cmd
+--- a054_v011_diff_old/A054-v0.1.1-r1/run_controls.cmd	1970-01-01 00:00:00.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/run_controls.cmd	2026-10-06 10:37:08.025893048 +0000
+@@ -0,0 +1,12 @@
++@echo off
++setlocal EnableDelayedExpansion
++cd /d "%~dp0"
++call run_00_install.cmd || exit /b !errorlevel!
++call run_01_selftest.cmd || exit /b !errorlevel!
++for /f %%i in ('python tools\timestamp.py') do set "TS=%%i"
++set "OUT=A054_Nucleon_Topology_Architecture_Blind_Falsifier_v0.1.1-r1-outputs\controls_!TS!"
++call run_02_prepare_blind.cmd "%~1" "!OUT!" || exit /b !errorlevel!
++call run_03_blind.cmd "!OUT!" || exit /b !errorlevel!
++echo.
++echo CONTROL/DIAGNOSTIC run complete. PREPARED_FULL is NOT required here.
++exit /b 0
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py
+--- a054_v011_diff_old/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py	2026-10-06 07:42:12.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/src/a054_ntaf/pklsa.py	2026-10-06 10:37:06.980715350 +0000
+@@ -5,19 +5,70 @@
+ class PKLSAError(RuntimeError): pass
+ 
+ 
++def _valid_e011_output(p: Path) -> bool:
++    return (p.is_dir() and (p / "STATIC_READY_INDEX.json").is_file()
++            and (p / "STATIC_READY_PROVIDER_ANCHORS.jsonl").is_file())
++
++
++def _valid_e010_version(p: Path) -> bool:
++    return (p.is_dir() and (p / "pklsa_builder" / "io_geometry.py").is_file()
++            and (p / "pklsa_builder" / "gilbert.py").is_file()
++            and (p / "pklsa_builder" / "hashing.py").is_file())
++
++
++def _relative_candidates(root: Path, paths):
++    out=[]
++    for p in paths:
++        try: out.append(str(p.resolve().relative_to(root.resolve())))
++        except Exception: out.append(str(p))
++    return sorted(out)
++
++
+ def find_e011_output(root: Path) -> Path:
+-    hits=list(root.glob("01_research/E_pipelines/**/E011-v0.3.0/E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs"))
+-    if not hits: hits=list(root.glob("**/E011-v0.3.0/E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs"))
+-    if len(hits)!=1: raise PKLSAError(f"expected exactly one E011-v0.3.0 output, found {len(hits)}")
+-    return hits[0]
++    root=Path(root)
++    canonical=(root / "01_research" / "E_pipelines" /
++               "E011_sklsa_selected_knot_link_seed_atlas" / "E011-v0.3.0" /
++               "E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs")
++    if _valid_e011_output(canonical):
++        return canonical
++
++    # Marker-based fallback: do not depend on a family-folder spelling, but require the
++    # exact E011 output name plus both contract files. This is provenance discovery only.
++    hits=[p for p in root.rglob("E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs")
++          if _valid_e011_output(p)]
++    # Deduplicate equivalent resolved paths.
++    uniq=[]; seen=set()
++    for p in hits:
++        try: k=str(p.resolve()).lower()
++        except Exception: k=str(p).lower()
++        if k not in seen: seen.add(k); uniq.append(p)
++    if len(uniq)!=1:
++        rel=_relative_candidates(root,uniq)
++        raise PKLSAError(
++            f"expected exactly one qualified E011-v0.3.0 output, found {len(uniq)}; "
++            f"canonical_checked={canonical}; candidates={rel}")
++    return uniq[0]
+ 
+ 
+ def find_e010_version(root: Path) -> Path:
+-    hits=list(root.glob("01_research/E_pipelines/**/E010-v0.3.1"))
+-    if not hits: hits=list(root.glob("**/E010-v0.3.1"))
+-    hits=[p for p in hits if (p/'pklsa_builder').is_dir()]
+-    if len(hits)!=1: raise PKLSAError(f"expected exactly one E010-v0.3.1 source tree, found {len(hits)}")
+-    return hits[0]
++    root=Path(root)
++    canonical=(root / "01_research" / "E_pipelines" /
++               "E010_pklsa_parametric_knot_link_seed_atlas" / "E010-v0.3.1")
++    if _valid_e010_version(canonical):
++        return canonical
++
++    hits=[p for p in root.rglob("E010-v0.3.1") if _valid_e010_version(p)]
++    uniq=[]; seen=set()
++    for p in hits:
++        try: k=str(p.resolve()).lower()
++        except Exception: k=str(p).lower()
++        if k not in seen: seen.add(k); uniq.append(p)
++    if len(uniq)!=1:
++        rel=_relative_candidates(root,uniq)
++        raise PKLSAError(
++            f"expected exactly one qualified E010-v0.3.1 source tree, found {len(uniq)}; "
++            f"canonical_checked={canonical}; candidates={rel}")
++    return uniq[0]
+ 
+ 
+ def read_jsonl(path: Path):
+@@ -103,7 +154,12 @@
+     else:
+         try:
+             aud=audit_required_topologies(root)
++            e011=find_e011_output(root); e010=find_e010_version(root)
+             payload["status"]="AUDITED"
++            try: payload["resolved_e011_output"]=str(e011.resolve().relative_to(root.resolve()))
++            except Exception: payload["resolved_e011_output"]=str(e011)
++            try: payload["resolved_e010_version"]=str(e010.resolve().relative_to(root.resolve()))
++            except Exception: payload["resolved_e010_version"]=str(e010)
+             payload["topologies"]={k:{"static_ready":v["index"].get("static_ready"),"static_status":v["index"].get("static_status"),
+                 "provider_agreement_reasons":v["index"].get("provider_agreement_reasons"),"provider_anchor_seed_ids":v["index"].get("provider_anchor_seed_ids"),
+                 "anchor_count":len(v["anchors"])} for k,v in aud.items()}
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/tests/test_pklsa_discovery.py a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/tests/test_pklsa_discovery.py
+--- a054_v011_diff_old/A054-v0.1.1-r1/tests/test_pklsa_discovery.py	1970-01-01 00:00:00.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/tests/test_pklsa_discovery.py	2026-10-06 10:37:08.026766984 +0000
+@@ -0,0 +1,37 @@
++from pathlib import Path
++from a054_ntaf.pklsa import find_e011_output, find_e010_version, PKLSAError
++
++
++def _mk_e011(p: Path):
++    p.mkdir(parents=True)
++    (p/'STATIC_READY_INDEX.json').write_text('[]', encoding='utf-8')
++    (p/'STATIC_READY_PROVIDER_ANCHORS.jsonl').write_text('', encoding='utf-8')
++    return p
++
++
++def _mk_e010(p: Path):
++    q=p/'pklsa_builder'; q.mkdir(parents=True)
++    for f in ('io_geometry.py','gilbert.py','hashing.py'): (q/f).write_text('',encoding='utf-8')
++    return p
++
++
++def test_exact_canonical_discovery(tmp_path):
++    e011=_mk_e011(tmp_path/'01_research'/'E_pipelines'/'E011_sklsa_selected_knot_link_seed_atlas'/'E011-v0.3.0'/'E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs')
++    e010=_mk_e010(tmp_path/'01_research'/'E_pipelines'/'E010_pklsa_parametric_knot_link_seed_atlas'/'E010-v0.3.1')
++    assert find_e011_output(tmp_path)==e011
++    assert find_e010_version(tmp_path)==e010
++
++
++def test_marker_fallback_discovery(tmp_path):
++    e011=_mk_e011(tmp_path/'moved_family'/'E011-v0.3.0'/'E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs')
++    e010=_mk_e010(tmp_path/'moved_pklsa'/'E010-v0.3.1')
++    assert find_e011_output(tmp_path)==e011
++    assert find_e010_version(tmp_path)==e010
++
++
++def test_duplicate_fallback_fails_closed(tmp_path):
++    _mk_e011(tmp_path/'a'/'E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs')
++    _mk_e011(tmp_path/'b'/'E011_SKLSA_Static_Ready_Seed_Atlas_v0.3.0-outputs')
++    try: find_e011_output(tmp_path)
++    except PKLSAError as e: assert 'found 2' in str(e)
++    else: raise AssertionError('duplicate E011 outputs must fail closed')
+diff -ruN a054_v011_diff_old/A054-v0.1.1-r1/tools/assert_full_prepare.py a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/tools/assert_full_prepare.py
+--- a054_v011_diff_old/A054-v0.1.1-r1/tools/assert_full_prepare.py	1970-01-01 00:00:00.000000000 +0000
++++ a054_v011_r1/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.1.1-r1/tools/assert_full_prepare.py	2026-10-06 10:37:07.259005194 +0000
+@@ -0,0 +1,20 @@
++from __future__ import annotations
++import json, sys
++from pathlib import Path
++
++if len(sys.argv) != 2:
++    raise SystemExit('usage: assert_full_prepare.py <campaign-dir>')
++p=Path(sys.argv[1])/'PREPARE_STATUS.json'
++if not p.is_file():
++    print(f'ERROR: missing {p}', file=sys.stderr); raise SystemExit(20)
++obj=json.loads(p.read_text(encoding='utf-8'))
++if obj.get('status') != 'PREPARED_FULL':
++    up=Path(sys.argv[1])/'UPSTREAM_PLAN.json'
++    print('ERROR: full-factorial preparation was not achieved.', file=sys.stderr)
++    print(json.dumps(obj,indent=2), file=sys.stderr)
++    if up.is_file():
++        print('UPSTREAM_PLAN:', file=sys.stderr)
++        print(up.read_text(encoding='utf-8'), file=sys.stderr)
++    print('Use run_controls.cmd only if you intentionally want the three analytic control diagnostics.', file=sys.stderr)
++    raise SystemExit(20)
++print('PREPARED_FULL confirmed.')

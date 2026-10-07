@@ -1,0 +1,2 @@
+__version__ = "1.0.1"
+RUNTIME_SCHEMA = "SST-FALSIFIER-RUNTIME-2"

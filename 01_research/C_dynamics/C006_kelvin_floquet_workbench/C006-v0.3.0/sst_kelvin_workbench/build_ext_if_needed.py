@@ -168,33 +168,48 @@ def build_if_needed(force: bool = False, verbose: bool = True) -> bool:
             print(f"{LOG_PREFIX} missing source: {CPP}", file=sys.stderr)
         return out.exists()
 
+    is_windows = platform.system().lower() == "windows"
     compiler = os.environ.get("CXX") or shutil.which("c++") or shutil.which("g++") or shutil.which("clang++")
     if not have_pybind11():
         if verbose:
             print(f"{LOG_PREFIX} pybind11 unavailable; using Python fallback.", file=sys.stderr)
         return out.exists()
 
+    # Official CPython on Windows is built with MSVC.  A generic `c++` found on
+    # PATH may actually be Strawberry/MinGW; such a command can successfully
+    # write a .pyd while leaving unresolved MinGW runtime/ABI dependencies that
+    # make CPython fail at import time.  Prefer setuptools/MSVC on Windows.
+    allow_mingw = os.environ.get("SST_KELVIN_ALLOW_MINGW", "").strip().lower() in {"1", "true", "yes"}
+    builder = "setuptools-msvc" if (is_windows and not allow_mingw) else (compiler or "setuptools/default")
+
     src_hash = _hash_files([CPP])
-    meta = {"hash": src_hash, "compiler": compiler or "setuptools/default", "ext": out.name, "cpp": str(CPP_REL)}
+    meta = {"hash": src_hash, "compiler": compiler or "setuptools/default",
+            "builder": builder, "ext": out.name, "cpp": str(CPP_REL)}
     if not force and out.exists() and STAMP.exists():
         try:
-            if json.loads(STAMP.read_text(encoding="utf-8")).get("hash") == src_hash:
+            stamp = json.loads(STAMP.read_text(encoding="utf-8"))
+            if stamp.get("hash") == src_hash and stamp.get("builder") == builder:
                 if verbose:
-                    print(f"{LOG_PREFIX} up to date: {out.name}", file=sys.stderr)
+                    print(f"{LOG_PREFIX} up to date: {out.name} [{builder}]", file=sys.stderr)
                 return True
         except Exception:
             pass
 
     ok = False
-    if compiler:
+    if is_windows and not allow_mingw:
+        if verbose:
+            print(f"{LOG_PREFIX} Windows detected; building extension with setuptools/MSVC.", file=sys.stderr)
+        ok = _build_with_setuptools(out, verbose)
+    elif compiler:
         includes = subprocess.check_output([sys.executable, "-m", "pybind11", "--includes"], text=True).split()
         base = [compiler, "-O3", "-std=c++17", "-shared"]
-        if platform.system().lower() != "windows":
+        if not is_windows:
             base.append("-fPIC")
         cmd = [*base, *includes, str(CPP), "-o", str(out), *_python_link_args_for_windows()]
         ok = _run(cmd, ROOT, verbose) and out.exists()
     elif verbose:
         print(f"{LOG_PREFIX} direct c++/g++/clang++ not found; trying setuptools/MSVC.", file=sys.stderr)
+
     if not ok:
         ok = _build_with_setuptools(out, verbose)
 

@@ -1,0 +1,37 @@
+[framework]
+schema = "SST-FALSIFIER-RUNTIME-2"
+version = "1.0.2"
+[backends.python]
+enabled = true
+authority = "REFERENCE"
+precision = "float64"
+[backends.cpp]
+enabled = true
+required_for_certify = true
+accepted_actual = ["openmp", "serial"]
+authority = "CERTIFICATION"
+precision = "float64"
+[backends.sycl]
+enabled = true
+required_for_certify = false
+authority = "SCREENING_ONLY"
+precision = "float32"
+allow_fp32_screening = true
+
+[backends.sycl_dd32]
+enabled = true
+required_for_certify = false
+authority = "SCREENING_ONLY"
+precision = "dd32-fp32x2"
+not_ieee_fp64 = true
+nominal_significand_bits = 48
+
+[parity]
+cpp_vs_python_relative_l2 = 1e-10
+gpu_vs_cpu_relative_l2 = 5e-4
+gpu_dd32_vs_cpu_relative_l2 = 1e-8
+gpu_dd32_directional_relative_l2 = 2e-6
+gpu_dd32_min_improvement_vs_fp32 = 20.0
+[sources]
+multilibrary_required = false
+independent_confirmation_required = true

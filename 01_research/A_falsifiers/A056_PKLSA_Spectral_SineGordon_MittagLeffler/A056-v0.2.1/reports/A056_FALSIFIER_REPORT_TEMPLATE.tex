@@ -1,0 +1,143 @@
+\documentclass[11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,hyperref}
+\title{A056 v0.2.1: PKLSA Spectral--Sine-Gordon--Mittag-Leffler Falsifier\\Framework Audit Report}
+\author{SST-Workbench}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Framework snapshot}
+This run targets SST Falsifier Framework \texttt{{{FRAMEWORK_VERSION}}} with consumer patch level \texttt{{{FRAMEWORK_PATCH_LEVEL}}}. The patch level separates synthetic-control recovery from physical cross-source replication.
+
+\section{Objective}
+This falsifier asks whether an independently generated phase observable $\varphi(s,t)$ on a perturbed vortex filament requires (i) an effective Sine--Gordon restoring law and/or (ii) Mittag--Leffler fractional-memory relaxation.  The test is adversarial: the target models compete against preregistered alternatives, and discovery cannot certify itself.
+
+\section{Source contract}
+A real input case contains monotone grids $t_i$ and $s_j$, a finite array $\varphi_{ij}=\varphi(t_i,s_j)$, and optional relaxation amplitude $R(t)$.  Metadata freeze the phase definition, perturbation, solver/provider version, upstream geometry SHA-256, carrier SHA-256, and independent source group.  Static XYZ geometry alone is inadmissible. Metadata additionally freeze the evidence class used for replication accounting.
+
+\section{Exact derivatives tested by code}
+For uniform spacings $\Delta t$ and $\Delta s$, the Python and C++ kernels compute
+\begin{align}
+\varphi_{tt}(t_i,s_j)&\approx\frac{\varphi_{i+1,j}-2\varphi_{i,j}+\varphi_{i-1,j}}{(\Delta t)^2},\\
+\varphi_{ss}(t_i,s_j)&\approx\frac{\varphi_{i,j+1}-2\varphi_{i,j}+\varphi_{i,j-1}}{(\Delta s)^2}.
+\end{align}
+Periodic indexing is used only when the provider declares a periodic spatial boundary.
+
+\section{Phase-model competition}
+The discovery fit compares
+\begin{align}
+H_W &: \varphi_{tt}=a\varphi_{ss},\\
+H_{KG} &: \varphi_{tt}=a\varphi_{ss}-b\varphi,\\
+H_D &: \varphi_{tt}=a\varphi_{ss}-b\varphi-c\varphi^3,\\
+H_{SG} &: \varphi_{tt}=a\varphi_{ss}-b\sin\varphi.
+\end{align}
+The first 65\% of time samples define discovery.  Parameters are obtained by least squares.  The Bayesian information criterion is
+\begin{equation}
+\mathrm{BIC}=n\ln(\mathrm{RSS}/n)+k\ln n.
+\end{equation}
+Sine--Gordon discovery requires positive $a,b$, acceptable design conditioning, and $\Delta\mathrm{BIC}_{SG}\ge10$.  The remaining 35\% of time samples are never used to fit the coefficients; confirmation requires its normalized RMSE to beat the best competitor by the frozen ratio threshold.
+
+\section{Spectral qualification}
+The centered phase matrix $X$ is decomposed by singular-value decomposition,
+\begin{equation}
+X=U\Sigma V^{\mathsf T}.
+\end{equation}
+The test records leading modal energy, orthogonality residual, numerical rank, and the principal-subspace overlap between discovery and confirmation time blocks.  This is a numerical qualification layer, not a claim that POD modes are quantum states.
+
+\section{Relaxation-model competition}
+The relaxation models are
+\begin{align}
+R_{\exp}(t)&=e^{-t/\tau},\\
+R_{\mathrm{stretch}}(t)&=e^{-(t/\tau)^\beta},\\
+R_{2\exp}(t)&=w e^{-t/\tau_1}+(1-w)e^{-t/\tau_2},\\
+R_{ML}(t)&=E_{\alpha,1}\!\left[-(t/\tau)^\alpha\right],
+\end{align}
+where
+\begin{equation}
+E_{\alpha,\beta}(z)=\sum_{k=0}^{\infty}\frac{z^k}{\Gamma(\alpha k+\beta)}.
+\end{equation}
+The identity
+\begin{equation}
+E_{1,1}(-t/\tau)=e^{-t/\tau}
+\end{equation}
+is an explicit null limit.  Therefore fractional-memory support additionally requires $0.48<\alpha<0.97$.
+
+\section{Numerical certification}
+A confirmed phase case is recomputed after deterministic twofold coarsening in both $t$ and $s$.  For the Sine--Gordon coefficient vector $\mathbf c=(a,b)$ the reported convergence diagnostic is
+\begin{equation}
+\delta_c=\frac{\|\mathbf c_{\rm fine}-\mathbf c_{\rm coarse}\|_2}{\max(\|\mathbf c_{\rm fine}\|_2,10^{-30})}.
+\end{equation}
+A confirmed memory case is independently re-fit after twofold time decimation and must retain its fitted fractional order and timescale within frozen tolerances,
+\begin{equation}
+\delta_\alpha=|\alpha_{\rm fine}-\alpha_{\rm coarse}|,
+\qquad
+\delta_\tau=\frac{|\tau_{\rm fine}-\tau_{\rm coarse}|}{\max(|\tau_{\rm fine}|,10^{-30})}.
+\end{equation}
+This candidate-specific split prevents a memory-only case from being rejected because an irrelevant Sine--Gordon coefficient is resolution-sensitive.  Production profiles also require the corresponding C++/OpenMP kernel to agree with the CPU/Python reference within the preregistered parity tolerance.  SYCL is screening-only. DD32/FP32x2 is an experimental two-float screening format and is explicitly not IEEE binary64.
+
+\section{Gate logic}
+The framework enforces
+\[
+G0\rightarrow G1\rightarrow G2\rightarrow G3\rightarrow G4\rightarrow G5_{\rm control}\rightarrow G5_{\rm physical}\rightarrow G6\rightarrow\mathrm{REVEAL}.
+\]
+Synthetic-control recovery is separated from physical cross-source replication. Only evidence classes `independent\_source` and `experimental` may satisfy the physical Gate 5. A downstream physics PASS is prohibited unless all declared physical prerequisites passed.
+
+\begin{longtable}{ll}
+\toprule Gate & Status\\\midrule
+{{GATE_ROWS}}
+\bottomrule
+\end{longtable}
+
+\section{Blind case summary}
+\begin{longtable}{lllll}
+\toprule Case & Evidence class & Phase winner & Ringdown winner & Numerical certification\\\midrule
+{{CASE_ROWS}}
+\bottomrule
+\end{longtable}
+
+\section{Blind conclusion}
+\textbf{{{CONCLUSION}}}.  This conclusion is meaningful only within the admitted provider population and the frozen gates above.  Synthetic-control results validate the implementation rather than SST physics.
+
+\section{Code-to-equation audit map}
+\begin{itemize}
+\item `a056\_falsifier/numeric.py` and `cpp/native.cpp`: finite differences and Mittag--Leffler evaluator.
+\item `a056\_falsifier/models.py`: all preregistered phase and relaxation competitors, fitting, BIC, and holdout errors.
+\item `a056\_falsifier/spectral.py`: SVD/POD qualification and subspace-overlap check.
+\item `a056\_falsifier/certification.py`: resolution and CPU/native parity checks.
+\item `a056\_falsifier/pipeline.py`: no new physics formula; it executes the gate dependency graph and writes blinded results.
+\item `sst\_falsifier\_framework/`: shared blindness, provenance, compiler/build fingerprint, backend selftest, evidence-aware replication, gate, source-contract, output, and reporting infrastructure.
+\end{itemize}
+
+\begin{thebibliography}{99}
+\bibitem{ScottChuMcLaughlin1973}
+A.~C.~Scott, F.~Y.~F.~Chu, and D.~W.~McLaughlin,
+``The soliton: A new concept in applied science,''
+\emph{Proceedings of the IEEE} \textbf{61} (1973), 1443--1483.
+\href{https://doi.org/10.1109/PROC.1973.9296}{doi:10.1109/PROC.1973.9296}.
+
+\bibitem{Podlubny1999}
+I.~Podlubny,
+\emph{Fractional Differential Equations},
+Academic Press, 1999.
+\href{https://www.sciencedirect.com/bookseries/mathematics-in-science-and-engineering/vol/198/suppl/C}{permalink}.
+
+\bibitem{Gorenflo2014}
+R.~Gorenflo, A.~A.~Kilbas, F.~Mainardi, and S.~V.~Rogosin,
+\emph{Mittag-Leffler Functions, Related Topics and Applications}, Springer, 2014.
+\href{https://doi.org/10.1007/978-3-662-43930-2}{doi:10.1007/978-3-662-43930-2}.
+
+\bibitem{Jolliffe2002}
+I.~T.~Jolliffe,
+\emph{Principal Component Analysis}, 2nd ed., Springer, 2002.
+\href{https://doi.org/10.1007/b98835}{doi:10.1007/b98835}.
+\bibitem{Dekker1971}
+T.~J.~Dekker, 1971, ``A floating-point technique for extending the available precision,''
+\emph{Numerische Mathematik} \textbf{18}, 224--242.
+\href{https://doi.org/10.1007/BF01397083}{doi:10.1007/BF01397083}.
+
+\bibitem{DaGracaDefour2006}
+G.~Da~Graça and D.~Defour, 2006, ``Implementation of float-float operators on graphics hardware,'' arXiv:cs/0603115.
+\href{https://arxiv.org/abs/cs/0603115}{arXiv:cs/0603115}.
+\end{thebibliography}
+\end{document}
