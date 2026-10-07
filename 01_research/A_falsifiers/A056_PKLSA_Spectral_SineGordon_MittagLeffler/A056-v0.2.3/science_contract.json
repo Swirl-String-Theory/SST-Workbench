@@ -1,0 +1,389 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Do provider-native vortex-filament phase dynamics require an effective Sine-Gordon restoring law and/or Mittag-Leffler fractional-memory relaxation after held-out confirmation, numerical certification and evidence-class-aware replication?",
+  "objective": "Blindly compare preregistered phase and relaxation model families on provider-native dynamic fields while separating implementation controls, simulations and physically independent evidence.",
+  "null_hypothesis": "H0: Sine-Gordon and Mittag-Leffler descriptions do not achieve the preregistered discovery, held-out, numerical-certification and independent-replication thresholds beyond the registered alternatives.",
+  "alternative_hypothesis": "H1: one or both candidate mechanisms outperform the registered alternatives, survive held-out and numerical certification, and replicate across eligible independent physical evidence.",
+  "assumptions": [
+    "The provider freezes the phase observable before A056 model scoring; A056 does not infer a favorable phase definition after seeing outcomes.",
+    "The time and arclength-like coordinates are monotone and approximately uniform within the registered tolerance.",
+    "Python/NumPy FP64 is the reference numerical lane and C++/OpenMP FP64 is the certification lane; SYCL FP32/DD32 remains screening-only.",
+    "For conservative inviscid dynamics, a decreasing projected ringdown observable is interpreted as transfer/dephasing unless a separate dissipative mechanism is supplied."
+  ],
+  "symbols": [
+    {
+      "symbol": "\\varphi(s,t)",
+      "meaning": "provider-declared phase/torsion observable",
+      "si_unit": "rad (dimensionless)",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "a",
+      "meaning": "phase-wave coefficient c_phi^2",
+      "si_unit": "m^2 s^-2 when s is metres",
+      "dimensions": "L^2 T^-2"
+    },
+    {
+      "symbol": "b",
+      "meaning": "restoring-frequency coefficient",
+      "si_unit": "s^-2",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "c",
+      "meaning": "Duffing cubic restoring coefficient",
+      "si_unit": "s^-2 for dimensionless phase",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "alpha",
+      "meaning": "Mittag-Leffler fractional order",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "tau",
+      "meaning": "relaxation timescale",
+      "si_unit": "s when t is seconds",
+      "dimensions": "T"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Wave null phase model",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a"
+      ],
+      "dimensional_check": "Both sides have dimensions T^{-2} for dimensionless phase when [a]=L^2 T^{-2}."
+    },
+    {
+      "id": "E2",
+      "purpose": "Klein-Gordon competitor",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\varphi",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b"
+      ],
+      "dimensional_check": "[b]=T^{-2}; every term has dimensions T^{-2}."
+    },
+    {
+      "id": "E3",
+      "purpose": "Duffing competitor",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\varphi-c\\varphi^3",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b",
+        "c"
+      ],
+      "dimensional_check": "For dimensionless phase, [b]=[c]=T^{-2}."
+    },
+    {
+      "id": "E4",
+      "purpose": "Sine-Gordon candidate",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\sin\\varphi",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b"
+      ],
+      "dimensional_check": "sin(varphi) is dimensionless and [b]=T^{-2}."
+    },
+    {
+      "id": "E5",
+      "purpose": "Bayesian information criterion used on discovery blocks",
+      "latex": "\\mathrm{BIC}=n\\ln(\\mathrm{RSS}/n)+k\\ln n",
+      "inputs": [
+        "RSS",
+        "n",
+        "k"
+      ],
+      "outputs": [
+        "BIC"
+      ],
+      "dimensional_check": "Model residuals are compared within one observable/scaling; BIC differences are dimensionless."
+    },
+    {
+      "id": "E6",
+      "purpose": "Held-out normalized root-mean-square error",
+      "latex": "\\mathrm{NRMSE}=\\sqrt{n^{-1}\\sum_i(y_i-\\hat y_i)^2}/\\sigma_y",
+      "inputs": [
+        "y",
+        "yhat"
+      ],
+      "outputs": [
+        "NRMSE"
+      ],
+      "dimensional_check": "Numerator and denominator have the same observable units, so NRMSE is dimensionless."
+    },
+    {
+      "id": "E7",
+      "purpose": "Mittag-Leffler function",
+      "latex": "E_{\\alpha,\\beta}(z)=\\sum_{k=0}^{\\infty} z^k/\\Gamma(\\alpha k+\\beta)",
+      "inputs": [
+        "alpha",
+        "beta",
+        "z"
+      ],
+      "outputs": [
+        "E"
+      ],
+      "dimensional_check": "z must be dimensionless."
+    },
+    {
+      "id": "E8",
+      "purpose": "Mittag-Leffler relaxation candidate",
+      "latex": "R_{ML}(t)=E_{\\alpha,1}[-(t/\\tau)^\\alpha]",
+      "inputs": [
+        "t",
+        "tau",
+        "alpha"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E9",
+      "purpose": "Ordinary exponential null limit",
+      "latex": "R_{exp}(t)=\\exp(-t/\\tau)=E_{1,1}(-t/\\tau)",
+      "inputs": [
+        "t",
+        "tau"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E10",
+      "purpose": "Stretched-exponential competitor",
+      "latex": "R_{SE}(t)=\\exp[-(t/\\tau)^\\beta]",
+      "inputs": [
+        "t",
+        "tau",
+        "beta"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E11",
+      "purpose": "Bi-exponential competitor",
+      "latex": "R_{2e}(t)=w e^{-t/\\tau_1}+(1-w)e^{-t/\\tau_2}",
+      "inputs": [
+        "t",
+        "tau1",
+        "tau2",
+        "w"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "Each exponential argument is dimensionless and w is dimensionless."
+    },
+    {
+      "id": "E12",
+      "purpose": "Phase-resolution convergence diagnostic",
+      "latex": "\\delta_c=\\lVert\\mathbf c_f-\\mathbf c_c\\rVert_2/\\max(\\lVert\\mathbf c_f\\rVert_2,10^{-30}),\\quad \\mathbf c=(a,b)",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "outputs": [
+        "delta_c"
+      ],
+      "dimensional_check": "Coefficient vectors are compared componentwise under the same coordinate units; ratio is dimensionless."
+    },
+    {
+      "id": "E13",
+      "purpose": "Memory-resolution convergence diagnostics",
+      "latex": "\\delta_\\alpha=|\\alpha_f-\\alpha_c|,\\qquad \\delta_\\tau=|\\tau_f-\\tau_c|/\\max(|\\tau_f|,10^{-30})",
+      "inputs": [
+        "alpha",
+        "tau"
+      ],
+      "outputs": [
+        "delta_alpha",
+        "delta_tau"
+      ],
+      "dimensional_check": "Both diagnostics are dimensionless."
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Provider-native phase field phi(t,s).",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "unit": "rad or declared dimensionless phase"
+    },
+    {
+      "id": "O2",
+      "definition": "Provided zero-baseline ringdown observable or preregistered derived POD-energy proxy.",
+      "equation_refs": [
+        "E8",
+        "E9",
+        "E10",
+        "E11"
+      ],
+      "unit": "normalized dimensionless amplitude"
+    },
+    {
+      "id": "O3",
+      "definition": "Discovery BIC separation and held-out NRMSE ratio.",
+      "equation_refs": [
+        "E5",
+        "E6"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify frozen protocol/blind commitments and enumerate hashed provider cases.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S2",
+      "operation": "Validate provider metadata, array shapes, monotonicity, finite values and sampling uniformity.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S3",
+      "operation": "Evaluate Python FP64 finite differences, POD spectral stability and the Mittag-Leffler alpha=1 exponential identity.",
+      "formula_refs": [
+        "E4",
+        "E9"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S4",
+      "operation": "Fit Wave/Klein-Gordon/Duffing/Sine-Gordon and exponential/stretched/bi-exponential/Mittag-Leffler families on discovery blocks and evaluate BIC.",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5",
+        "E8",
+        "E9",
+        "E10",
+        "E11"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S5",
+      "operation": "Evaluate frozen held-out temporal blocks with NRMSE ratios.",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S6",
+      "operation": "Apply deterministic coarsening diagnostics and strict C++/OpenMP FP64 parity to confirmed candidates.",
+      "formula_refs": [
+        "E12",
+        "E13"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S7",
+      "operation": "Consume optional canonical-framework SYCL/DD32 smoke evidence as screening-only diagnostics.",
+      "formula_refs": [
+        "E12"
+      ],
+      "gate": "G6"
+    },
+    {
+      "id": "S8",
+      "operation": "Assess evidence-class-aware replication; synthetic/simulation controls cannot close physical cross-source replication.",
+      "formula_refs": [
+        "E5",
+        "E6"
+      ],
+      "gate": "G7"
+    },
+    {
+      "id": "S9",
+      "operation": "Classify joint, phase-only or memory-only physical support only after eligible replication.",
+      "formula_refs": [
+        "E4",
+        "E8"
+      ],
+      "gate": "G8"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "Sine-Gordon fails discovery Delta-BIC >= 10 or the registered held-out NRMSE-ratio threshold.",
+      "conclusion_if_met": "No Sine-Gordon phase support for that case."
+    },
+    {
+      "id": "F2",
+      "criterion": "Mittag-Leffler fails Delta-BIC >= 10, held-out NRMSE ratio, or the support interval 0.48 < alpha < 0.97.",
+      "conclusion_if_met": "No fractional-memory support for that case."
+    },
+    {
+      "id": "F3",
+      "criterion": "A confirmed candidate fails registered resolution convergence or strict Python-FP64/C++-FP64 parity.",
+      "conclusion_if_met": "Candidate is not numerically certified."
+    },
+    {
+      "id": "F4",
+      "criterion": "Only synthetic/simulation evidence or fewer than two eligible independent physical groups support the candidate.",
+      "conclusion_if_met": "Implementation/simulation support only; no physical cross-source claim."
+    }
+  ],
+  "edge_cases": [
+    "The alpha -> 1 boundary is an ordinary exponential null and cannot count as fractional memory.",
+    "A Mittag-Leffler-like tail may approximate a continuum or mixture of ordinary modes; bi-exponential competition and held-out scoring reduce but do not eliminate this identifiability risk.",
+    "Closed filament geometry can have frame/gauge ambiguities; phase_definition_id must be frozen upstream.",
+    "In inviscid conservative dynamics an apparent ringdown need not imply dissipation."
+  ],
+  "predictions": [
+    "If Sine-Gordon closure is physical, positive a and b and held-out superiority should recur across independent provider families.",
+    "If effective fractional memory is physical, an interior alpha estimate should survive coarsening and independent physical providers.",
+    "Synthetic controls should recover implementation behavior while remaining ineligible for physical cross-source closure."
+  ]
+}
