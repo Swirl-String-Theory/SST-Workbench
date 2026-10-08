@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\necho A056 is intentionally manual-phase. Do NOT auto-run all science phases.\r\necho Run run_00_verify.cmd, then run_01... through run_08 one at a time.\r\necho Finally use run_09_finalize_blind.cmd, run_10_reveal_if_allowed.cmd, run_11_post_reveal.cmd.\r\nexit /b 0\r\n

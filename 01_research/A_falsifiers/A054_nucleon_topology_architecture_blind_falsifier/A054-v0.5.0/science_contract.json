@@ -1,0 +1,405 @@
+{
+  "alternative_hypothesis": "H1: the same preregistered selector, without topology/provider-specific retuning, yields provider-convergent stationary and locally stable endpoints for a reproducible subset of topologies.",
+  "assumptions": [
+    "E013 fixes carrier identity; E010 only reloads the exact source bytes and never chooses replacements.",
+    "The variational selector is a mathematical state-selection test, not a claim that physical Euler flow is dissipative.",
+    "Reach normalization fixes the comparison scale; accepted steps are reparameterized and reach-normalized before energy comparison.",
+    "Topology preservation is monitored continuously by a nonlocal-clearance proxy and pairwise linking drift for links; this is not a full knot-polynomial proof.",
+    "A stationary endpoint is not called stable unless its registered reduced Hessian is nonnegative within tolerance and nonlinear reduced ringdown is bounded.",
+    "Legacy A054/A057 scientific results are forbidden as evidence; only methods/equations are reimplemented."
+  ],
+  "edge_cases": [
+    "one-provider topology",
+    "line-search stall before stationarity",
+    "clearance floor blocks descent",
+    "linking drift blocks a step",
+    "stationary saddle point",
+    "provider endpoints with similar energy but different geometry descriptors"
+  ],
+  "equations": [
+    {
+      "dimensional_check": "All lengths are reach-normalized; the kernel is dimensionless.",
+      "id": "E1",
+      "inputs": [
+        "normalized components",
+        "a_hat"
+      ],
+      "latex": "\\widehat H_a=\\sum_{i,j}\\oint\\!\\oint \\frac{d\\widehat{\\mathbf X}_i\\cdot d\\widehat{\\mathbf X}_j}{\\sqrt{\\|\\widehat{\\mathbf X}_i-\\widehat{\\mathbf X}_j\\|^2+\\widehat a^2}}",
+      "outputs": [
+        "H_hat"
+      ],
+      "purpose": "Regularized finite-core comparison Hamiltonian"
+    },
+    {
+      "dimensional_check": "In reach-normalized coordinates both q and B are dimensionless.",
+      "id": "E2",
+      "inputs": [
+        "Bishop frame",
+        "mode index",
+        "q"
+      ],
+      "latex": "\\delta\\mathbf X(q)=\\sum_\\mu q_\\mu\\mathbf B_\\mu,\\qquad \\mathbf B_\\mu\\perp\\mathbf t",
+      "outputs": [
+        "deformed centerline"
+      ],
+      "purpose": "Bishop-Fourier reduced deformation"
+    },
+    {
+      "dimensional_check": "Ratio of dimensionless quantities is dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "H_hat",
+        "finite-difference gradient"
+      ],
+      "latex": "\\sigma=\\frac{\\|\\nabla_q\\widehat H_a\\|_2}{\\max(|\\widehat H_a|,\\epsilon)}",
+      "outputs": [
+        "sigma"
+      ],
+      "purpose": "Stationarity score"
+    },
+    {
+      "dimensional_check": "All operations occur in reach-normalized coordinates.",
+      "id": "E4",
+      "inputs": [
+        "current geometry",
+        "gradient",
+        "global step schedule"
+      ],
+      "latex": "q_n=-\\eta_n\\frac{\\nabla_q\\widehat H_a}{\\|\\nabla_q\\widehat H_a\\|},\\qquad \\mathbf X_{n+1}=\\mathcal N\\!\\left[\\mathcal R(\\mathbf X_n+\\delta\\mathbf X(q_n))\\right]",
+      "outputs": [
+        "next geometry"
+      ],
+      "purpose": "Target-free variational selector with backtracking"
+    },
+    {
+      "dimensional_check": "Energy comparison is dimensionless; distance is compared as a ratio; linking is dimensionless.",
+      "id": "E5",
+      "inputs": [
+        "trial energy",
+        "clearance",
+        "linking"
+      ],
+      "latex": "\\widehat H_{n+1}\\le\\widehat H_n,\\quad d_{\\min,n+1}\\ge f_c d_{\\min,0},\\quad |\\Delta Lk|\\le\\varepsilon_{Lk}",
+      "outputs": [
+        "accepted step"
+      ],
+      "purpose": "Accepted-step integrity conditions"
+    },
+    {
+      "dimensional_check": "Coefficient of variation and relative spans are dimensionless.",
+      "id": "E6",
+      "inputs": [
+        "provider endpoint energies",
+        "provider descriptors"
+      ],
+      "latex": "CV_H(K)=\\frac{s(H_K^*)}{|\\overline H_K^*|},\\qquad \\Delta_R(K)=\\frac{R_{\\max}^*-R_{\\min}^*}{|\\overline R^*|}",
+      "outputs": [
+        "provider agreement metrics"
+      ],
+      "purpose": "Cross-provider endpoint agreement"
+    },
+    {
+      "dimensional_check": "Dimensionless in normalized coordinates.",
+      "id": "E7",
+      "inputs": [
+        "selected endpoint",
+        "reduced basis"
+      ],
+      "latex": "K_H=\\left.\\nabla_q^2\\widehat H_a\\right|_{q=0}",
+      "outputs": [
+        "Hessian eigenvalues"
+      ],
+      "purpose": "Endpoint local stability Hessian"
+    },
+    {
+      "dimensional_check": "Normalized time and coordinates make the reduced test dimensionless.",
+      "id": "E8",
+      "inputs": [
+        "lowest Hessian eigenvector",
+        "endpoint potential"
+      ],
+      "latex": "\\ddot z=-\\partial_z U(z),\\qquad U(z)=\\widehat H_a(ze_{\\min})",
+      "outputs": [
+        "amplitude ratio",
+        "Hamiltonian drift"
+      ],
+      "purpose": "Nonlinear reduced ringdown"
+    },
+    {
+      "dimensional_check": "Boolean predicate.",
+      "id": "E9",
+      "inputs": [
+        "provider gate",
+        "stationarity",
+        "Hessian",
+        "ringdown"
+      ],
+      "latex": "Q_K=I[\\mathrm{provider\\ consensus}]I[\\sigma\\le\\sigma_{\\max}]I[K_H\\succeq0]I[\\mathrm{ringdown\\ bounded}]",
+      "outputs": [
+        "handoff eligibility"
+      ],
+      "purpose": "State-selected handoff predicate"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "The fixed selector cannot bring the preregistered carrier fraction to stationary topology-preserved endpoints.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Provider-distinct endpoints of the same topology remain outside the preregistered energy/geometry agreement bands.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Stationary endpoints have materially negative Hessian directions or unbounded nonlinear reduced ringdown.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Source-energy-sensitive topologies do not show preregistered provider-spread collapse after target-free state selection.",
+      "id": "F4"
+    },
+    {
+      "conclusion_if_met": "UNRESOLVED",
+      "criterion": "C++ FP64 fails the registered 1e-10 relative-L2 energy parity threshold.",
+      "id": "F5"
+    }
+  ],
+  "implementation_commitment": {
+    "bundle_sha256": "c2a6b22e8379da6bad35b9cf1a9abc40b68d645305cabe1d83276644f89f696f",
+    "coverage": [
+      "experiment/**/*.py",
+      "a054_state/**/*.py",
+      "native_ext/*.cpp",
+      "native_ext/*.hpp",
+      "native_ext/*.py",
+      "configs/*.json",
+      "requirements.txt",
+      "tests/*.py",
+      "cross_falsifier_contract.json"
+    ],
+    "coverage_note": "Commitment covers experiment/a054_state/native/configs/tests/requirements/cross_falsifier_contract; documentation and generated validation artifacts are excluded.",
+    "rule": "Mismatch is an infrastructure/protocol failure before G0. Scientific FAIL gates otherwise continue diagnostically.",
+    "schema": "A054-IMPLEMENTATION-COMMITMENT-1"
+  },
+  "null_hypothesis": "H0: provider-distinct current PKLSA/SKLSA representatives do not converge under the preregistered selector to a reproducible stationary and stable topology-level state beyond numerical/source variation.",
+  "objective": "Re-run state selection from source-native bytes for exactly the E013 carriers; quantify stationarity, topology preservation, provider-endpoint convergence, local Hessian stability and nonlinear reduced ringdown; freeze only provider-converged stable endpoints as a future A057 handoff.",
+  "observables": [
+    {
+      "definition": "Source and endpoint line-energy kernel for every E013 carrier.",
+      "equation_refs": [
+        "E1"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Initial/final stationarity score and gradient reduction.",
+      "equation_refs": [
+        "E3",
+        "E4"
+      ],
+      "id": "O2",
+      "unit": "1"
+    },
+    {
+      "definition": "Minimum-clearance retention and linking drift over accepted selection steps.",
+      "equation_refs": [
+        "E5"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Cross-provider endpoint energy CV, ropelength span and absolute-writhe span.",
+      "equation_refs": [
+        "E6"
+      ],
+      "id": "O4",
+      "unit": "1"
+    },
+    {
+      "definition": "Endpoint Hessian eigenvalues and nonlinear ringdown amplitude/energy drift.",
+      "equation_refs": [
+        "E7",
+        "E8"
+      ],
+      "id": "O5",
+      "unit": "1"
+    },
+    {
+      "definition": "Per-topology A057 handoff eligibility.",
+      "equation_refs": [
+        "E9"
+      ],
+      "id": "O6",
+      "unit": "1"
+    }
+  ],
+  "predictions": [
+    "If provider dependence is mainly representative-state dependence, provider-sensitive source energies should collapse after the same selector.",
+    "If no topology-level equilibrium exists under the tested Hamiltonian, endpoints will remain nonstationary or provider-separated.",
+    "A stationary saddle must not be promoted to a stable particle-state candidate."
+  ],
+  "research_question": "On one E013-frozen population of current E011 provider anchors, can a fixed target-free variational state-selection procedure map distinct source representatives of the same topology to a common stationary and locally stable finite-core state, without using legacy falsifier results?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0",
+      "id": "S1",
+      "operation": "Verify frozen protocol/implementation and exact E013/E011 source-byte binding."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1",
+      "id": "S2",
+      "operation": "Reload only E013-frozen carriers and recheck geometry hashes."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E4",
+        "E5"
+      ],
+      "gate": "G2",
+      "id": "S3",
+      "operation": "Validate rigid-energy invariance, selector monotonicity and topology-proxy mechanics."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "gate": "G3",
+      "id": "S4",
+      "operation": "Run the fixed variational selector independently on every current carrier."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E4"
+      ],
+      "gate": "G4",
+      "id": "S5",
+      "operation": "Evaluate fixed-selector transfer on registered confirmation topologies."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G5",
+      "id": "S6",
+      "operation": "Certify the common energy kernel against C++/OpenMP FP64."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G6",
+      "id": "S7",
+      "operation": "Record optional GPU/DD32 framework screening without promotion."
+    },
+    {
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G7",
+      "id": "S8",
+      "operation": "Compare independently sourced endpoints topology-by-topology."
+    },
+    {
+      "formula_refs": [
+        "E7",
+        "E8"
+      ],
+      "gate": "G8",
+      "id": "S9",
+      "operation": "Qualify stationary endpoints by Hessian and nonlinear ringdown."
+    },
+    {
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G10",
+      "id": "S10",
+      "operation": "Test whether initially provider-sensitive energy kernels collapse after selection."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G11",
+      "id": "S11",
+      "operation": "Audit clearance/linking topology proxies over all paths."
+    },
+    {
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G12",
+      "id": "S12",
+      "operation": "Freeze only provider-converged stable endpoints as a future A057 handoff."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E6",
+        "E7",
+        "E9"
+      ],
+      "gate": "G22",
+      "id": "S13",
+      "operation": "Assign the blind overall state-selection classification under diagnostic continuation."
+    },
+    {
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G9",
+      "id": "S14",
+      "operation": "Reserve framework reveal integrity gate; v0.5.0 contains no mass target reveal."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "1",
+      "meaning": "reach-normalized regularized line-energy kernel",
+      "si_unit": "1",
+      "symbol": "\\widehat H_a"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "Bishop-frame reduced deformation coordinates",
+      "si_unit": "1",
+      "symbol": "q"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "normalized stationarity score ||grad_q H||/|H|",
+      "si_unit": "1",
+      "symbol": "\\sigma"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "reduced energy Hessian at selected endpoint",
+      "si_unit": "1",
+      "symbol": "K_H"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "cross-provider endpoint energy spread/CV",
+      "si_unit": "1",
+      "symbol": "\\delta_H"
+    }
+  ]
+}

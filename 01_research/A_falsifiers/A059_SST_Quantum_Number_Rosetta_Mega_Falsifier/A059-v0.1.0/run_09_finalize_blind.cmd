@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\ncall run_python.cmd run_instance.py FULL\r\nexit /b %ERRORLEVEL%\r\n

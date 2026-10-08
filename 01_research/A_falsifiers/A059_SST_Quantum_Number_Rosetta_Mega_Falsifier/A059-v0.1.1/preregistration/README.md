@@ -1,0 +1,1 @@
+`FROZEN_PROTOCOL.json` is created once by `run_all.cmd FREEZE`. If any frozen input changes afterwards, certification stops. Create a new falsifier version rather than overwriting the frozen protocol.

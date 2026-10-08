@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\ncall run_python.cmd run_instance.py REVEAL_IF_ALLOWED\r\nexit /b %ERRORLEVEL%\r\n

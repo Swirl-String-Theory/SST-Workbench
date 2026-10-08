@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\ncall run_python.cmd -m mega.phase_runner P03\r\nexit /b %ERRORLEVEL%\r\n

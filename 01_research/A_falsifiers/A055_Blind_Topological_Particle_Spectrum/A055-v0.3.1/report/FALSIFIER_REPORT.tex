@@ -1,0 +1,207 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{A055 --- Blind Topological Particle Spectrum Falsifier\\Signed-Traveling-Wave Certification Protocol}
+\author{SST-Workbench}
+\date{Version v0.3.1 --- SST Falsifier Framework v1.0.4}
+\begin{document}
+\maketitle
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, and status}
+\begin{longtable}{p{0.30\linewidth}p{0.62\linewidth}}
+\toprule Field & Value \\
+\midrule
+Catalog ID & A055 \\
+Version & v0.3.1 \\
+Framework & SST Falsifier Framework v1.0.4, CANONICAL\_FROZEN \\
+Profile & CPU: Python FP64 reference plus C++17/OpenMP FP64 certification \\
+Scientific status & Frozen falsification protocol; physical mechanism not established by implementation validation alone \\
+\bottomrule
+\end{longtable}
+This version is a method-corrected reanalysis of sealed finite-core vortex-filament campaigns. It does not modify the upstream dynamics and does not claim an independent physical replication.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+\subsection{Single falsifiable research question}
+After excluding the automatic complex-conjugate partner of a real projected Jacobian, does any anonymous three-component vortex compound contain two \emph{distinct positive-temporal-frequency} Kelvin-dominated modes with opposite signed spatial propagation, matched in frequency under the frozen threshold, and recurring in at least two circulation sectors?
+
+\subsection{Scientific objective}
+The objective is to replace an algebraically non-discriminating frequency-sign test by a spatial propagation observable. The test reconstructs complex eigenfields in physical space, measures their signed arclength-Fourier content, and then asks whether opposite directions coexist as distinct positive-frequency branches. Linear mode evidence is kept separate from spatial convergence, relative-periodic-orbit (RPO) recurrence, and conditional Floquet evidence.
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses and allowed conclusions}
+\paragraph{Null hypothesis $H_0$.}
+No anonymous compound satisfies the full signed-travel pair rule in at least two circulation sectors.
+
+\paragraph{Alternative hypothesis $H_1$.}
+At least one anonymous compound satisfies the rule in at least two circulation sectors. This establishes only a projected linear traveling-wave sector. Mechanism promotion requires the same sector to satisfy the sealed upstream spatial-convergence and nonlinear RPO gates.
+
+\paragraph{Falsification semantics.}
+If $H_0$ is retained at G3, the corrected counterpropagating mechanism is not observed in the tested ensemble. If G3 passes but G8 fails, a linear signed-travel signal exists without nonlinear mechanism certification. G2 or G5 failure is numerical/backend invalidity, not physical evidence.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions, domain of validity, and known edge cases}
+\begin{enumerate}[label=A\arabic*.]
+\item The upstream projected Jacobian and finite mode basis are admissible diagnostics only within the registered finite-core filament model.
+\item The local normal/binormal frame and arclength phase are deterministic numerical gauges; conclusions are limited to this frozen construction.
+\item Positive temporal frequency selects one representative from each real-matrix complex-conjugate pair.
+\item Historical isolated-centerline results and the compound results share methodology and are not treated as independent physical samples.
+\end{enumerate}
+\paragraph{Known limits.}
+Near-zero temporal frequencies are excluded by a relative floor. Modes with weak tested-harmonic participation or weak directional purity remain unclassified rather than being forced into a direction. No continuum-Euler theorem follows from the finite projected spectrum.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, units, and dimensional consistency}
+\begin{longtable}{p{0.18\linewidth}p{0.48\linewidth}p{0.12\linewidth}p{0.12\linewidth}}
+\toprule Symbol & Meaning & SI unit & Dimensions \\
+\midrule
+$\lambda_j$ & projected-Jacobian eigenvalue & 1 & 1 \\
+$\omega_j$ & $\operatorname{Im}\lambda_j$ in the upstream nondimensional time & 1 & 1 \\
+$P_{j,k}^{\pm}$ & signed spatial harmonic power & 1 & 1 \\
+$\chi_{j,k}$ & signed traveling purity & 1 & 1 \\
+$\eta_{j,k}$ & harmonic participation & 1 & 1 \\
+$A_\omega$ & relative opposite-direction frequency asymmetry & 1 & 1 \\
+\bottomrule
+\end{longtable}
+All decision variables are ratios or normalized projected quantities and are dimensionless. No SST dimensional constant enters the blind directional statistic.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Exact mathematical model and observables}
+For component $c$, the reconstructed complex eigenfield is projected on a deterministic periodic Bishop parallel-transport transverse frame with the closed-loop holonomy distributed continuously over arclength to obtain complex scalar series $a_{n,c}(s)$ and $a_{b,c}(s)$. For arclength phase $\theta_c(s)\in[0,2\pi)$ and harmonic $k$,
+\begin{equation}
+P_{j,k}^{\pm}=\sum_c\left(|\widehat a_{n,c}(\pm k)|^2+|\widehat a_{b,c}(\pm k)|^2\right),
+\label{eq:E1}
+\end{equation}
+with Fourier coefficients computed directly at the arclength phases. Directional purity is
+\begin{equation}
+\chi_{j,k}=\frac{P_{j,k}^{+}-P_{j,k}^{-}}{P_{j,k}^{+}+P_{j,k}^{-}},
+\label{eq:E2}
+\end{equation}
+and harmonic participation is
+\begin{equation}
+\eta_{j,k}=\frac{P_{j,k}^{+}+P_{j,k}^{-}}{P_{j,\perp}}.
+\label{eq:E3}
+\end{equation}
+Two distinct positive-frequency modes of opposite spatial direction at the same $k$ are frequency matched by
+\begin{equation}
+A_\omega=\frac{|\omega_1-\omega_2|}{(\omega_1+\omega_2)/2}.
+\label{eq:E4}
+\end{equation}
+Because the upstream projected basis is orthonormal and carries frozen family labels, the Kelvin-family coefficient fraction is
+\begin{equation}
+\zeta_j=\frac{\sum_{i\in\mathcal K}|v_{ij}|^2}{\sum_i|v_{ij}|^2}.
+\label{eq:E6}
+\end{equation}
+The conjugate-invariant physical direction is equivalently
+\begin{equation}
+d_{j,k}=\operatorname{sgn}(\omega_j\chi_{j,k}).
+\label{eq:E5}
+\end{equation}
+Under conjugation, $\omega\mapsto-\omega$ and $\chi\mapsto-\chi$, so $d$ is unchanged. The implementation uses only the $\omega>0$ representative; an automatic conjugate partner therefore cannot create the opposite direction.
+
+\subsection{Frozen thresholds}
+A traveling candidate must satisfy $\zeta\ge0.50$, $\eta\ge0.50$, $|\chi|\ge0.60$, and $|\operatorname{Re}\lambda|/|\operatorname{Im}\lambda|\le1.0$. A bidirectional pair requires $A_\omega\le0.25$. An anonymous candidate is a blind discovery only if a pair appears in at least two registered circulation sectors. Fine-resolution eigenvalue recomputation must match the sealed stored multiset within relative assignment error $10^{-8}$.
+
+\subsection{Machine-readable equation/step register}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{Machine-readable contract is generated at freeze/run time.}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Exact algorithm: equation-to-code mapping}
+\begin{enumerate}[label=S\arabic*.]
+\item Verify the framework-frozen protocol and both sealed upstream campaigns without reading semantic private mappings.
+\item Load anonymous compound geometry, resample to the sealed finest resolution, reconstruct the exact upstream mode basis, and recompute the projected Jacobian using the isolated upstream blind runner.
+\item Compare the recomputed eigenvalue multiset with the stored sealed spectrum using minimum-cost assignment normalized by spectral scale.
+\item For each positive-frequency eigenmode, reconstruct the physical complex field in the periodic Bishop frame, evaluate Eqs.~\eqref{eq:E1}--\eqref{eq:E3}, and require Eq.~\eqref{eq:E6} for the registered harmonics.
+\item Form opposite-direction pairs only from distinct positive-frequency eigenmodes and apply Eq.~\eqref{eq:E4}.
+\item Apply the anonymous sector-recurrence discovery rule.
+\item Certify the signed-harmonic power implementation with the instance-local C++17/OpenMP FP64 kernel against Python FP64.
+\item Promote a mechanism only when a pair-bearing sector also has sealed upstream spatial convergence and accepted RPO; Floquet remains conditional on that upstream RPO.
+\item After framework reveal commitment verification, attach semantic labels and compute paired reveal contrasts; never retune blind thresholds.
+\end{enumerate}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Source, provenance, and independence contract}
+Two sealed simulation sources are admissible: the authoritative three-component compound campaign and the completed historical isolated-centerline campaign. Both are hashed by the framework source manifest. The latter is a control baseline only, not an independent replication. A missing or invalid seal makes G1 unresolved. v0.3.1 never launches a long upstream campaign automatically.
+
+\paragraph{Exclusion rules.}
+Unsealed, partial, differently configured, or ambiguous upstream campaigns are excluded before scoring. A recomputation/backend mismatch is numerical invalidity. Semantic private mappings are excluded from blind computation.
+
+% SST-REPORT-SECTION:GATES
+\section{Gate DAG and decision semantics}
+\begin{longtable}{p{0.07\linewidth}p{0.42\linewidth}p{0.22\linewidth}p{0.21\linewidth}}
+\toprule Gate & Question & PASS & FAIL / other \\
+\midrule
+G0 & Frozen protocol intact? & framework verification & protocol mismatch aborts \\
+G1 & Sealed upstreams admissible? & both seals valid & missing/invalid is UNRESOLVED \\
+G2 & Reference numerics valid? & analytic selftest and eigenvalue recomputation parity pass & numerical FAIL/UNRESOLVED \\
+G3 & Anonymous signed-travel discovery? & at least one candidate passes in at least two sectors & FAIL if none \\
+G4 & Independent confirmation? & disabled & NOT\_APPLICABLE \\
+G5 & Native CPU metric parity? & C++ FP64 relative L2 $\le10^{-10}$ & FAIL/UNRESOLVED \\
+G6 & GPU screening? & disabled & NOT\_APPLICABLE \\
+G7 & Independent physical replication? & disabled & NOT\_APPLICABLE \\
+G8 & Nonlinear mechanism promotion? & same pair-bearing sector also spatial-converged and RPO-accepted & FAIL if none after G3/G5 pass \\
+G9 & Reveal integrity? & framework commitments verify; paired semantic analysis runs afterward & framework-controlled \\
+\bottomrule
+\end{longtable}
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical certification, convergence, and error budget}
+The upstream resolution ladder, finite-core closure, Jacobian finite-difference steps, spatial-convergence gates, nonlinear integration and RPO/Floquet definitions are not changed by A055 v0.3.1. The new analysis recomputes only the sealed finest-resolution projected Jacobian needed to recover eigenvectors. Minimum-cost eigenvalue assignment to the sealed spectrum must have maximum relative error $\le10^{-8}$. This prevents a changed runner/backend from silently entering the new statistic.
+
+The spatial Fourier projection is evaluated directly at arclength phase rather than assuming uniform vertex index. A periodic Bishop frame is obtained by minimal tangent-to-tangent parallel transport followed by a distributed closed-loop holonomy correction; this avoids Frenet-frame sign flips near low curvature. A candidate must also carry at least half of its orthonormal projected coefficient power in the registered Kelvin family. The C++ certification uses nonuniform deterministic phase grids and mixed signed-harmonic complex signals.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority and parity}
+Python/NumPy FP64 is the reference implementation of the new signed-harmonic statistic. The instance-local C++17/OpenMP FP64 kernel is certification authority for Eq.~\eqref{eq:E1}; the framework records compiler, ABI, flags and build fingerprint. No Python fallback may satisfy G5. The upstream compound Jacobian must use the same backend class recorded by its sealed backend qualification in a production FULL/CERTIFY run.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal boundary}
+Target-bearing semantic architecture/component labels and historical identity hypotheses are confined to the framework-private directory and protected by nonced commitments. The blind computation sees anonymous candidate IDs, registered circulation-sector labels, geometry, sealed numerical records and the frozen thresholds only. The framework scans the public tree for forbidden private terms before BLIND packaging.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and multiplicity}
+G3 is an existence/recurrence mechanism gate, not a population-significance claim: a candidate must reproduce the pair in at least two sectors. Reveal-only architecture comparisons use matched assignment/provider-stratum/sector cells. Binary paired contrasts report the discordant counts and exact McNemar/binomial result. Opposed-component comparisons are performed within candidate before aggregation. Pooled unpaired medians are descriptive only and are not the primary identity statistic.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Results insertion contract}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{Automatic results are inserted after a run.}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+The authoritative values remain the machine-readable gate ledger, signed-travel JSON, backend manifest, source manifest and output manifest.
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Allowed interpretation}
+A G3 PASS means a genuine signed spatial bidirectional sector exists in the finite projected model under the frozen thresholds; it does not identify a physical particle. A G8 PASS is stronger but still restricted to the finite-core filament model. G8 FAIL after G3 PASS means the linear traveling sector did not acquire the registered nonlinear confinement evidence. G3 FAIL falsifies the corrected traveling-pair claim for the tested anonymous ensemble. Numerical or source failures remain unresolved rather than being converted into physical negatives.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility and exact commands}
+Canonical Workbench location:
+\begin{verbatim}
+01_research\A_falsifiers\A055_Blind_Topological_Particle_Spectrum\A055-v0.3.1
+\end{verbatim}
+Canonical framework location:
+\begin{verbatim}
+06_templates\SST_Falsifier_Framework\SST_Falsifier_Framework_v1.0.4
+\end{verbatim}
+Recommended production command:
+\begin{verbatim}
+run_all.cmd full C:\workspace\projects\SST-Workbench
+\end{verbatim}
+Blind-only command:
+\begin{verbatim}
+run_blind_only.cmd FULL C:\workspace\projects\SST-Workbench
+\end{verbatim}
+The instance is shipped already frozen. Re-running FREEZE verifies byte identity and refuses protocol mutation under the same version.
+
+\begin{thebibliography}{9}
+\bibitem{A054Internal} SST-Workbench A054 v0.2.0-r2, sealed finite-core three-component dynamical certification campaign and isolated blind runner, project software and outputs.
+\bibitem{A055v030Internal} SST-Workbench A055 v0.3.0, completed blind topological particle-spectrum campaign, project software and outputs.
+\bibitem{Framework104} SST Falsifier Framework v1.0.4, CANONICAL\_FROZEN, 7 October 2026.
+\end{thebibliography}
+\end{document}

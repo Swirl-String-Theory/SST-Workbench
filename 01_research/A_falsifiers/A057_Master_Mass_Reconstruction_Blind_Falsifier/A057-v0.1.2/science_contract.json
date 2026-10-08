@@ -1,0 +1,582 @@
+{
+  "alternative_hypothesis": "At least one preregistered finite-core energy/dynamical functional is reproducible across independent carriers of the same topology, separates topology classes beyond numerical/source variation, and yields frozen target-free predictions whose post-reveal mass ratios outperform the registered historical/factorized baselines without target-specific fitting.",
+  "assumptions": [
+    "The particle-scale working sector is an incompressible, inviscid, no-external-forcing filament model; reconnection is excluded within a carrier evaluation.",
+    "PKLSA/E010 v0.3.x is geometry/provenance authority only; an E010 topology-level failure does not promote a carrier to topology evidence, but individually admissible carriers may still support carrier-specific diagnostics.",
+    "The operational v0.1.2 energy kernel is a Rosenhead-regularized slender-filament Hamiltonian. It is a reduced finite-core approximation to the three-dimensional kinetic-energy integral, not an assertion that the two are already identical.",
+    "Reach normalization sets the dimensionless core/thickness scale for shape comparison; SI restoration uses r_c only after the dimensionless kernel is frozen.",
+    "Reduced variational dynamics use small topology-preserving Bishop-frame perturbations. A nonstationary base state weakens the interpretation of its Hessian/Jacobian but does not prevent their diagnostic computation.",
+    "Protected observed masses, identity mappings, and historical numerical comparison targets are inaccessible to BLIND code and outputs.",
+    "A scientific FAIL does not imply later gates are meaningless; later gates run independently and carry explicit soft-dependency caveats. Infrastructure/protocol integrity remains fail-closed."
+  ],
+  "edge_cases": [
+    "A topology with only one admissible independence group can produce carrier diagnostics but cannot close cross-source replication.",
+    "A nonstationary carrier can still yield a Hessian/Jacobian diagnostic; such a spectrum is explicitly not promoted as a stability eigen-spectrum.",
+    "Near-zero or negative Hessian eigenvalues may make frequency ratios undefined; these cases remain explicit rather than being regularized into a preferred ratio.",
+    "Multicomponent links with negative mutual energy can yield indefinite coherence matrices; signed eigenvalues and absolute-energy participation are both retained.",
+    "If a scientific gate fails, later gates still execute unless their own required inputs are mathematically unavailable; the output records a soft-dependency caveat rather than framework-level prerequisite skipping."
+  ],
+  "equations": [
+    {
+      "dimensional_check": "(kg m^-3)(m^2 s^-2)/(m^2 s^-2) = kg m^-3.",
+      "id": "E1",
+      "inputs": [
+        "rho_f",
+        "v_swirl",
+        "c"
+      ],
+      "latex": "\\rho_{\\!m}=\\frac{\\rho_{\\!f}\\,\\|\\mathbf{v}_{\\!\\boldsymbol{\\circlearrowleft}}\\|^2}{2c^2}",
+      "outputs": [
+        "rho_m"
+      ],
+      "purpose": "Canonical local mass-equivalent density scale"
+    },
+    {
+      "dimensional_check": "rho Gamma^2 times a length has units (kg m^-3)(m^4 s^-2)(m)=J.",
+      "id": "E2",
+      "inputs": [
+        "rho",
+        "Gamma",
+        "components",
+        "a"
+      ],
+      "latex": "H_a=\\frac{\\rho\\Gamma^2}{8\\pi}\\sum_{i,j}\\oint_{K_i}\\!\\oint_{K_j}\\frac{d\\mathbf{X}_i\\cdot d\\mathbf{X}_j}{\\sqrt{\\|\\mathbf{X}_i-\\mathbf{X}_j\\|^2+a^2}}",
+      "outputs": [
+        "H_a"
+      ],
+      "purpose": "Regularized finite-core filament Hamiltonian"
+    },
+    {
+      "dimensional_check": "All hatted lengths are dimensionless, so the complete kernel is dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "normalized_components",
+        "a_hat"
+      ],
+      "latex": "\\widehat{H}_K=\\sum_{i,j}\\oint\\!\\oint\\frac{d\\widehat{\\mathbf{X}}_i\\cdot d\\widehat{\\mathbf{X}}_j}{\\sqrt{\\|\\widehat{\\mathbf{X}}_i-\\widehat{\\mathbf{X}}_j\\|^2+\\widehat a^2}}",
+      "outputs": [
+        "H_hat"
+      ],
+      "purpose": "Dimensionless line-energy kernel after length-scale normalization"
+    },
+    {
+      "dimensional_check": "Energy divided by energy is dimensionless.",
+      "id": "E4",
+      "inputs": [
+        "energy_matrix"
+      ],
+      "latex": "C_{ij}=\\frac{E_{ij}}{\\sqrt{|E_{ii}E_{jj}|}}",
+      "outputs": [
+        "coherence_matrix"
+      ],
+      "purpose": "Self/mutual coherence matrix"
+    },
+    {
+      "dimensional_check": "The blind reduced lane is nondimensionalized; after restoration both terms carry energy units.",
+      "id": "E5",
+      "inputs": [
+        "q",
+        "qdot",
+        "M",
+        "U"
+      ],
+      "latex": "L(q,\\dot q)=\\tfrac12\\dot q^{\\mathsf T}M\\dot q-U(q)",
+      "outputs": [
+        "L"
+      ],
+      "purpose": "Reduced conservative Lagrangian"
+    },
+    {
+      "dimensional_check": "The blind reduced lane is dimensionless; after restoration H has energy units.",
+      "id": "E6",
+      "inputs": [
+        "q",
+        "p",
+        "M",
+        "U"
+      ],
+      "latex": "H(q,p)=\\tfrac12p^{\\mathsf T}M^{-1}p+U(q),\\qquad p=M\\dot q",
+      "outputs": [
+        "H"
+      ],
+      "purpose": "Reduced Hamiltonian from the Legendre transform"
+    },
+    {
+      "dimensional_check": "Dimensionless in the normalized lane.",
+      "id": "E7",
+      "inputs": [
+        "U",
+        "q"
+      ],
+      "latex": "K_H=\\left.\\nabla_q^2U(q)\\right|_{q=0}",
+      "outputs": [
+        "K_H"
+      ],
+      "purpose": "Energy Hessian at a registered carrier geometry"
+    },
+    {
+      "dimensional_check": "In normalized time J is dimensionless per unit normalized time; a chosen physical time scale restores s^-1.",
+      "id": "E8",
+      "inputs": [
+        "M",
+        "K_H",
+        "G"
+      ],
+      "latex": "J=\\begin{pmatrix}0&I\\\\-M^{-1}K_H&-M^{-1}G\\end{pmatrix}",
+      "outputs": [
+        "J"
+      ],
+      "purpose": "First-order dynamical Jacobian"
+    },
+    {
+      "dimensional_check": "Ratio of equal-frequency units is dimensionless.",
+      "id": "E9",
+      "inputs": [
+        "omega_1",
+        "omega_2"
+      ],
+      "latex": "q_{21}(K)=\\omega_2(K)/\\omega_1(K)",
+      "outputs": [
+        "q21"
+      ],
+      "purpose": "Spectral ratio with no protected target embedded"
+    },
+    {
+      "dimensional_check": "J/(m^2 s^-2)=kg.",
+      "id": "E10",
+      "inputs": [
+        "H_K",
+        "c"
+      ],
+      "latex": "M_K^{(\\rho)}=H_K^{(\\rho)}/c^2",
+      "outputs": [
+        "M_pred"
+      ],
+      "purpose": "SI mass prediction from the regularized Hamiltonian"
+    },
+    {
+      "dimensional_check": "(kg m^-3)(m^2 s^-2)(m^3)/(m^2 s^-2)=kg.",
+      "id": "E11",
+      "inputs": [
+        "rho_K",
+        "v_K",
+        "c"
+      ],
+      "latex": "M_K^{(3D)}=\\frac{1}{2c^2}\\int_{\\mathbb R^3}\\rho_K(\\mathbf x)\\|\\mathbf v_K(\\mathbf x)\\|^2\\,d^3x",
+      "outputs": [
+        "M_3D"
+      ],
+      "purpose": "Three-dimensional kinetic-energy mass functional used as the physical reference object"
+    },
+    {
+      "dimensional_check": "The hatted integral is dimensionless; rho Gamma^2 r_c has units J.",
+      "id": "E12",
+      "inputs": [
+        "normalized_components",
+        "core",
+        "rho",
+        "Gamma",
+        "r_c"
+      ],
+      "latex": "\\widehat E_{\\mathrm{tube}}=\\frac12\\int_{\\widehat\\Omega_{\\mathrm{tube}}}\\|\\widehat{\\mathbf v}(\\widehat{\\mathbf x})\\|^2\\,d^3\\widehat x,\\qquad E_{\\mathrm{tube}}=\\frac{\\rho\\Gamma^2r_c}{32\\pi^2}\\widehat E_{\\mathrm{tube}}",
+      "outputs": [
+        "E_tube_hat",
+        "E_tube"
+      ],
+      "purpose": "Core-tube quadrature kernel used as an independent reduced check on the line Hamiltonian"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "No energy kernel attains carrier-level numerical convergence at the preregistered tolerance in any independently sourced topology with at least two admissible groups.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Within-topology variation of the converged energy kernel is not smaller than between-topology variation under the registered variance-ratio discriminator.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "C++ FP64 differs from Python FP64 by relative L2 above 1e-10 for the certification kernel.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Registered geometry-plus-spectrum surrogates fail to improve protected topology-holdout energy prediction over the simplest geometry baseline by the preregistered improvement threshold.",
+      "id": "F4"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "A protected post-reveal target comparison may not be promoted if its blind prediction was not present in PREDICTIONS_FROZEN.json produced by the prior FULL/CERTIFY run.",
+      "id": "F5"
+    }
+  ],
+  "implementation_commitment": {
+    "bundle_sha256": "11d03d265f165ba7f2c448221d307bb431e1938e753316decf70e923aa8f31eb",
+    "coverage": [
+      "experiment/**/*.py",
+      "master_mass/**/*.py",
+      "native_ext/*.cpp",
+      "native_ext/*.hpp",
+      "native_ext/*.py",
+      "configs/*.json",
+      "requirements.txt",
+      "data/HISTORICAL_MODEL_PUBLIC.json",
+      "post_reveal_analysis.py",
+      "tests/*.py"
+    ],
+    "rule": "Mismatch is an infrastructure/protocol integrity failure and aborts before G0; scientific gate failures remain diagnostic-continuation.",
+    "schema": "A057-IMPLEMENTATION-COMMITMENT-1"
+  },
+  "null_hypothesis": "After numerical convergence and source-independence controls, no registered energy or spectral functional is stable within topology relative to between-topology variation, and added dynamical descriptors do not improve protected holdout prediction of the finite-core energy kernel beyond simple geometry controls.",
+  "objective": "Compute geometry, regularized filament energy, interaction coherence, reduced Lagrangian/Hamiltonian closure, Hessian/Jacobian spectra, and target-free surrogate competition on source-native PKLSA carriers. Freeze all topology-level kernels and anonymous composite predictions before any protected target comparison. Scientific gate failures are diagnostic and do not suppress execution of later scientific gates; only protocol/integrity failures are hard blockers.",
+  "observables": [
+    {
+      "definition": "Within-topology coefficient of variation of each geometry and energy descriptor across admissible carriers.",
+      "equation_refs": [
+        "E3"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Resolution/core-law convergence of the regularized line-energy kernel.",
+      "equation_refs": [
+        "E2",
+        "E3"
+      ],
+      "id": "O2",
+      "unit": "1"
+    },
+    {
+      "definition": "Eigenvalues, participation ratio, and spectral entropy of the coherence matrix, plus line-Hamiltonian versus core-tube energy association.",
+      "equation_refs": [
+        "E2",
+        "E4",
+        "E11",
+        "E12"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Normalized Euler-Lagrange residual and Hamiltonian drift under short reduced trajectories.",
+      "equation_refs": [
+        "E5",
+        "E6"
+      ],
+      "id": "O4",
+      "unit": "1"
+    },
+    {
+      "definition": "Hessian symmetry, gradient norm, Jacobian spectrum, oscillatory frequencies, and direct-integration spectral consistency.",
+      "equation_refs": [
+        "E7",
+        "E8",
+        "E9"
+      ],
+      "id": "O5",
+      "unit": "1"
+    },
+    {
+      "definition": "Protected-holdout log error for geometry-only and geometry-plus-dynamics surrogates of H_hat.",
+      "equation_refs": [
+        "E3",
+        "E9"
+      ],
+      "id": "O6",
+      "unit": "1"
+    },
+    {
+      "definition": "Frozen per-topology dimensionless kernels and SI mass predictions produced before reveal.",
+      "equation_refs": [
+        "E10"
+      ],
+      "id": "O7",
+      "unit": "1 and kg"
+    }
+  ],
+  "predictions": [
+    "If the historical factorization is a low-resolution surrogate of finite-core dynamics, at least some of its structural roles should reappear as topology-stable energy/coherence/spectral observables without target tuning.",
+    "If a universal suppression ratio is genuinely dynamical, a narrow ratio cluster should appear across independently sourced topologies before reveal; otherwise the ratio should be topology-dependent or absent.",
+    "If mass information is predominantly energetic, direct regularized Hamiltonian kernels should generalize at least as well as higher-complexity factorized surrogates after complexity penalization."
+  ],
+  "research_question": "Does a source-independent, topology-stable finite-core vortex Hamiltonian and its local variational spectrum provide a lower-complexity reconstruction of the historical SST mass kernel, with frozen blind mass-scale predictions that generalize across independent PKLSA carriers?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G1",
+      "id": "S1",
+      "operation": "Verify E010 release metadata, locate qualification ledgers, reload original carriers, and recheck raw/geometry hashes when available."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "gate": "G2",
+      "id": "S2",
+      "operation": "Run analytic/synthetic controls, SI scale checks, orientation/rigid-motion/resampling controls."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G3",
+      "id": "S3",
+      "operation": "Compute length, reach-normalized ropelength proxy, curvature, torsion, writhe/linking, Bishop holonomy, and convergence statistics."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G4",
+      "id": "S4",
+      "operation": "Evaluate held-out independent carrier groups without pooling distinct carriers as numerical refinement levels."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E3"
+      ],
+      "gate": "G5",
+      "id": "S5",
+      "operation": "Compare C++/pybind11 FP64 regularized energy matrix with Python/NumPy FP64 reference."
+    },
+    {
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G6",
+      "id": "S6",
+      "operation": "Record framework SYCL/DD32 screening evidence separately from certification authority."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G7",
+      "id": "S7",
+      "operation": "Quantify cross-independence-family replication and pseudo-replication exclusions."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E4",
+        "E11",
+        "E12"
+      ],
+      "gate": "G8",
+      "id": "S8",
+      "operation": "Compute self/mutual energy matrices, coherence spectra, and an independent Bishop-frame core-tube kinetic-energy quadrature for a bounded topology subset."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G10",
+      "id": "S9",
+      "operation": "Evaluate reduced Euler-Lagrange residuals around source-native geometries even when earlier source/geometry gates fail, carrying caveats forward."
+    },
+    {
+      "formula_refs": [
+        "E5",
+        "E6"
+      ],
+      "gate": "G11",
+      "id": "S10",
+      "operation": "Evaluate Legendre-transform closure and reduced Hamiltonian conservation."
+    },
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G12",
+      "id": "S11",
+      "operation": "Construct finite-difference Hessians under Bishop-frame perturbations and test symmetry/refinement."
+    },
+    {
+      "formula_refs": [
+        "E8",
+        "E9"
+      ],
+      "gate": "G13",
+      "id": "S12",
+      "operation": "Construct Jacobians, extract spectra, and compare oscillatory frequencies with direct reduced integration."
+    },
+    {
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G14",
+      "id": "S13",
+      "operation": "Measure topology stability of spectral ratios without accessing the protected historical target."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G15",
+      "id": "S14",
+      "operation": "Cross-validate simple geometry surrogates against the finite-core energy kernel with topology-grouped holdouts."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E9"
+      ],
+      "gate": "G16",
+      "id": "S15",
+      "operation": "Compare preregistered energy-only and geometry-plus-spectrum surrogate families under a complexity penalty."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E10"
+      ],
+      "gate": "G17",
+      "id": "S16",
+      "operation": "Freeze a complete target-free topology prediction table and anonymous composite predictions before reveal."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G18",
+      "id": "S17",
+      "operation": "Evaluate protected topology holdout generalization internal to the geometry/energy task; no observed mass targets are used."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E10"
+      ],
+      "gate": "G19",
+      "id": "S18",
+      "operation": "Restore SI scales using canonical SST constants in two density lanes and write target-free absolute predictions."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E7",
+        "E8"
+      ],
+      "gate": "G20",
+      "id": "S19",
+      "operation": "Stress core regularization, discretization, carrier selection, and perturbation amplitude; quantify sensitivity."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E9"
+      ],
+      "gate": "G21",
+      "id": "S20",
+      "operation": "Jackknife across provider/lineage groups and report whether findings replicate in independent evidence families."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E5",
+        "E6",
+        "E8",
+        "E10"
+      ],
+      "gate": "G22",
+      "id": "S21",
+      "operation": "Assign a blind multi-level classification from all recorded evidence while preserving diagnostic results from failed upstream scientific gates."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "L or 1",
+      "meaning": "centerline of component i",
+      "si_unit": "m before normalization; 1 after normalization",
+      "symbol": "\\mathbf{X}_i(s)"
+    },
+    {
+      "dimensions": "L",
+      "meaning": "canonical SST vortex-core radius used only for SI restoration",
+      "si_unit": "m",
+      "symbol": "r_c"
+    },
+    {
+      "dimensions": "M L^-3",
+      "meaning": "canonical SST core density for the core-localized SI lane",
+      "si_unit": "kg m^-3",
+      "symbol": "\\rho_{\\mathrm{core}}"
+    },
+    {
+      "dimensions": "M L^-3",
+      "meaning": "canonical SST effective background density for the background SI lane",
+      "si_unit": "kg m^-3",
+      "symbol": "\\rho_{\\!f}"
+    },
+    {
+      "dimensions": "L T^-1",
+      "meaning": "canonical characteristic swirl speed",
+      "si_unit": "m s^-1",
+      "symbol": "\\mathbf{v}_{\\!\\boldsymbol{\\circlearrowleft}}"
+    },
+    {
+      "dimensions": "L^2 T^-1",
+      "meaning": "circulation scale 2 pi r_c |v_swirl|",
+      "si_unit": "m^2 s^-1",
+      "symbol": "\\Gamma_0"
+    },
+    {
+      "dimensions": "L",
+      "meaning": "regularization/core radius in the line Hamiltonian",
+      "si_unit": "m or normalized units",
+      "symbol": "a"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "dimensionless regularized line-energy kernel",
+      "si_unit": "1",
+      "symbol": "\\widehat{H}_K"
+    },
+    {
+      "dimensions": "M L^2 T^-2",
+      "meaning": "SI regularized filament Hamiltonian",
+      "si_unit": "J",
+      "symbol": "H_K"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "normalized self/mutual energy coherence matrix",
+      "si_unit": "1",
+      "symbol": "C_{ij}"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "reduced Bishop-frame modal coordinates",
+      "si_unit": "1",
+      "symbol": "q"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "Hessian of reduced potential with respect to q",
+      "si_unit": "1 in blind normalized lane",
+      "symbol": "K_H"
+    },
+    {
+      "dimensions": "T^-1 after time scale restoration",
+      "meaning": "first-order reduced dynamical Jacobian",
+      "si_unit": "normalized inverse time",
+      "symbol": "J"
+    },
+    {
+      "dimensions": "T^-1 after time scale restoration",
+      "meaning": "Jacobian eigenvalue",
+      "si_unit": "normalized inverse time",
+      "symbol": "\\lambda_j"
+    }
+  ]
+}

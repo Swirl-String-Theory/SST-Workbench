@@ -1,0 +1,252 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\vort}{\boldsymbol{\omega}}
+\newcommand{\vel}{\mathbf{u}}
+\newcommand{\Fmat}{\mathbf{F}}
+
+\title{A016 --- Helmholtz Vorticity-Population / Matter--Field Partition Falsifier\\Falsification Protocol and Final Report}
+\author{SST-Workbench}
+\date{Version v0.2.2}
+
+\begin{document}
+\maketitle
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, and status}
+\begin{longtable}{p{0.30\linewidth}p{0.62\linewidth}}
+\toprule
+Field & Value \\
+\midrule
+Catalog ID & A016 \\
+Falsifier & helmholtz\_vorticity\_population\_matter\_field\_partition \\
+Version & v0.2.2 \\
+Framework & SST Falsifier Framework v1.0.6 / SST-FALSIFIER-RUNTIME-2 \\
+Profile & cpu: Python FP64 reference plus strict C++/OpenMP FP64 certification \\
+Status & Frozen protocol is created by \texttt{run\_all.cmd FREEZE}; later results are inserted automatically without editing this text. \\
+\bottomrule
+\end{longtable}
+This version preserves the numerical thresholds of A016 v0.1.1/v0.2.0, replaces the single direct KnotPlot input route by the E011/SKLSA v0.3.0 STATIC\_READY geometry layer derived from E010/PKLSA v0.3.1, and adds a provider-level cross-source consistency gate. A physical/scientific gate failure does not terminate sibling scientific branches.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+Can a smooth incompressible inviscid vortex model simultaneously satisfy: (i) material preservation of the zero/nonzero vorticity population; (ii) material-volume and vorticity-flux conservation; (iii) a locally irrotational but nontrivial exterior velocity field with circulation periods and nonlocal kinetic energy; and (iv) the original static relaxed-centerline relative-equilibrium test?
+
+The objective is not to prove an SST interpretation. It is to make the Helmholtz-to-SST partition testable with explicit observables, provenance, convergence, backend certification, and geometry-provider robustness. The static centerline branch cannot establish actual long-time Euler persistence or reconnection avoidance. The E010/PKLSA -> E011/SKLSA chain is used as a geometry qualification/provenance layer and is not treated as an Euler-stability proof.
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses and allowed conclusions}
+\paragraph{Null hypothesis $H_0$.}
+At least one preregistered consequence fails beyond tolerance, or the H2/H3/P3/P4/P5/P6 classifications are not reproducible across the required distinct upstream E011 provider groups for the same topology. Thus the material controls, exterior-field branch, unchanged centerline branch, and cross-source robustness branch are independently falsifiable.
+
+\paragraph{Alternative hypothesis $H_1$.}
+The exact material controls close numerically; the exterior is locally divergence-free/curl-free but can retain nonzero speed and circulation periods; a resolved energy fraction lies outside the near-core source zone; eligible closed sources have stable far-field scaling; each admitted E011 STATIC\_READY carrier receives an H0--H4/P3--P6 classification; and, wherever at least two distinct upstream provider groups exist for one topology, X0 satisfies its preregistered cross-source agreement criterion.
+
+\paragraph{Falsification semantics.}
+Each H* or P* branch reports independently after G0/G1/G2. Aggregate FAIL means at least one eligible input failed that branch; per-input results remain in \texttt{BLIND\_SAMPLE\_METRICS.json}. X0 is a separate provider-consistency result and does not overwrite the per-carrier classifications. Backend failure is certification evidence only. No threshold may be moved after freeze.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions, domain of validity, and known edge cases}
+\begin{enumerate}[label=A\arabic*.]
+\item Smooth three-dimensional incompressible Euler flow, no viscosity, no external nonconservative forcing.
+\item Source geometries are closed oriented filaments. Finite-core regularization is used only where self-interaction/energy would otherwise be singular.
+\item The blind geometry branch uses E011 STATIC\_READY carriers in source units and unit circulation. No physical density or absolute length calibration participates in blind scoring.
+\item FULL uses deterministic E011 provider anchors; CERTIFY uses all E011 primary STATIC\_READY upstream carriers. Multiple variants from one provider group collapse to one X0 vote, and disagreement is INTERNAL\_INCONSISTENCY.
+\item P3 samples only exterior points. P5 uses a geometric near-core mask and therefore tests nonlocal velocity-energy support, not exact compact vorticity support.
+\item P6 excludes near-zero-vector-area geometries because cancellation may remove the leading localized-source far-field moment.
+\end{enumerate}
+The experiment does not cover viscosity, compressibility, reconnection, singular Euler breakdown, or externally forced vorticity production.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, units, and dimensional consistency}
+\begin{longtable}{p{0.16\linewidth}p{0.48\linewidth}p{0.16\linewidth}p{0.12\linewidth}}
+\toprule
+Symbol & Meaning & SI unit & Dimension \\
+\midrule
+$\mathbf{x}$ & position & m & $L$ \\
+$t$ & flow time & s & $T$ \\
+$\vel$ & velocity & m s$^{-1}$ & $LT^{-1}$ \\
+$\vort$ & vorticity $\nabla\times\vel$ & s$^{-1}$ & $T^{-1}$ \\
+$\Fmat$ & deformation gradient & 1 & 1 \\
+$J$ & $\det\Fmat$ & 1 & 1 \\
+$\Gamma$ & circulation/vorticity flux & m$^2$ s$^{-1}$ & $L^2T^{-1}$ \\
+$a$ & core radius & m after scale choice & $L$ \\
+$\ell_E$ & $E/(\rho\Gamma^2)$ & m & $L$ \\
+$p$ & velocity far-field exponent & 1 & 1 \\
+\bottomrule
+\end{longtable}
+All machine-used equations and dimensional checks are duplicated in the frozen \texttt{science\_contract.json} and rendered below.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Exact mathematical model and observables}
+The central continuum relations are
+\begin{align}
+\vort &= \nabla\times\vel, \\
+\vort(\mathbf{X}(\mathbf{a},t),t) &= \Fmat(\mathbf{a},t)\vort_0(\mathbf{a}), \\
+J&=\det\Fmat=1, \\
+\Phi_\omega&=\int_{S(t)}\vort\cdot d\mathbf{S}=\Gamma=\mathrm{const}. 
+\end{align}
+For the numerical filament reconstruction,
+\begin{equation}
+\vel(\mathbf{x})=\frac{\Gamma}{4\pi}\oint_C
+\frac{d\boldsymbol{\ell}'\times(\mathbf{x}-\mathbf{x}')}{(|\mathbf{x}-\mathbf{x}'|^2+a^2)^{3/2}},
+\end{equation}
+with $a=0$ only for exterior evaluations that remain separated from the filament. The energy-length coefficient is
+\begin{equation}
+E=\rho\Gamma^2\ell_E,\qquad
+\ell_E=\frac{1}{8\pi}\oint\!\oint
+\frac{d\boldsymbol{\ell}\cdot d\boldsymbol{\ell}'}{\sqrt{|\mathbf{x}-\mathbf{x}'|^2+a^2}}.
+\end{equation}
+Relative equilibrium is tested after fitting rigid translation, rigid rotation, and tangential reparameterization. Exterior topology is tested through
+\begin{equation}
+\Gamma^{-1}\oint_\gamma\vel\cdot d\boldsymbol{\ell}\approx \operatorname{Lk}(\gamma,C).
+\end{equation}
+The exterior differential audit tests $\nabla\cdot\vel=0$ and $\nabla\times\vel=0$. The energy partition observable is
+\begin{equation}
+f_{\mathrm{ext}}=
+\frac{\int_{V\setminus V_{\mathrm{core}}}\frac12|\vel|^2\,dV}
+{\int_V\frac12|\vel|^2\,dV}.
+\end{equation}
+Far-field shells fit
+\begin{equation}
+\log u_{\mathrm{rms}}(r)=b-p\log r.
+\end{equation}
+A steady irrotational Bernoulli interpretation maps the frozen velocity exponent to $|\Delta p|\propto r^{-2p}$ and $|\nabla p|\propto r^{-(2p+1)}$; this is a post-fit interpretation, not a fitting constraint.
+For X0, a provider-collapsed classification agreement is
+\begin{equation}
+A_{T,g}=\frac{\max_s n_s(T,g)}{N_{\mathrm{provider}}(T,g)},
+\end{equation}
+where $s$ is one of PASS, FAIL, INELIGIBLE, or INTERNAL\_INCONSISTENCY. The frozen acceptance threshold is $A_{T,g}\ge0.80$ with at least two distinct upstream provider groups.
+
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{\emph{AUTO\_SCIENCE\_CONTRACT.tex is generated at freeze/run time.}}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Exact algorithm: equation-to-code mapping}
+\begin{enumerate}[label=S\arabic*.]
+\item Verify the frozen protocol and resolve the pinned E011-v0.3.0 STATIC\_READY output bundle and its E010-v0.3.1 parent from \texttt{source\_contract.json}, \texttt{SST\_WORKBENCH\_ROOT}.
+\item Execute self-contained Python FP64 circle controls.
+\item Execute the exact diagonal incompressible affine Cauchy-map control for P0--P2.
+\item Parse each centerline, remove a duplicated terminal point, and arclength-resample to the registered resolutions.
+\item Compute the unchanged H0--H4 geometry, convergence, holonomy, relative-equilibrium, and symmetry observables.
+\item Sample an exterior sphere and estimate divergence/curl by centered finite differences of the singular-kernel exterior field.
+\item Estimate exterior kinetic-energy fraction with deterministic Halton-ball samples at two counts.
+\item Fit far-field RMS speed on fixed radius factors for vector-area-eligible geometries.
+\item Group opaque samples by topology and upstream E011 provider group and evaluate X0 across H2/H3/P3/P4/P5/P6; FULL uses provider anchors; CERTIFY detects within-provider primary-carrier disagreement explicitly.
+\item Build the instance-local C++17/OpenMP FP64 kernel and compare it with the Python FP64 reference.
+\item Freeze all blind results before the framework permits reveal.
+\end{enumerate}
+The gate graph is a fan-out graph after infrastructure prerequisites; it is deliberately not a serial scientific pass chain.
+
+% SST-REPORT-SECTION:SOURCES
+\section{Source, provenance, and independence contract}
+The admissible external geometry layer is the real E011/SKLSA v0.3.0 STATIC\_READY atlas, whose authoritative parent is E010/PKLSA v0.3.1. A016 requires E011 schema \texttt{E011-SKLSA-STATIC-READY-ATLAS-1}, \texttt{execution\_gate=PASS}, zero operational errors, E010 parent version 0.3.1, and seed contract \texttt{E011-STATIC-SEED-CONTRACT-1}. E010 may have \texttt{publication\_ready\_geometry\_layer=false} globally; that is not reinterpreted as a failure of E011's explicitly admitted subset. BASIC/FULL use deterministic E011 provider anchors; CERTIFY uses all primary STATIC\_READY upstream carriers. X0 uses one vote per upstream \texttt{provider\_group}; multiple CERTIFY variants from one provider are correlated and disagreement becomes \texttt{INTERNAL\_INCONSISTENCY}. Public outputs expose only HMAC-opaque topology/provider/source identifiers; the identity map is reveal-only.
+
+% SST-REPORT-SECTION:GATES
+\section{Gate DAG and decision semantics}
+The infrastructure spine is $G0\rightarrow G1$ and $G0\rightarrow G2$. H0--H4, P3--P6, and X0 require G0/G1/G2 but do not form a serial pass chain; X0 consumes the completed per-carrier classifications rather than requiring those classifications to PASS. P0--P2 and B0 require G0/G2. Thus H3=FAIL does not prevent P3--P6, X0, or B0 from running.
+
+\begin{longtable}{p{0.08\linewidth}p{0.42\linewidth}p{0.20\linewidth}p{0.22\linewidth}}
+\toprule
+Gate & Question & PASS & FAIL/other \\
+\midrule
+G0 & frozen protocol integrity & verified & process stop before pipeline \\
+G1 & E011 STATIC\_READY source admissibility & E011-v0.3.0 PASS atlas from E010-v0.3.1 with resolvable raw-source provenance & source FAIL; source-dependent gates are not run \\
+G2 & Python reference controls & finite, positive energy; reversal error $\le10^{-12}$ & numerical control FAIL \\
+H0 & closed geometry/thickness & $N\ge32$, closure ratio $\le2.5$, thickness/edge $\ge1.25$ & any eligible input fails \\
+H1 & convergence & energy and RE drift within 0.08 & any eligible input fails \\
+H2 & holonomy/linking & at least two valid loops and max error $\le0.08$ & any eligible input fails \\
+H3 & relative equilibrium & normal NRMSE $\le0.18$ & any eligible input fails \\
+H4 & covariance & both errors $\le10^{-9}$ & any eligible input fails \\
+P0 & vorticity population & Cauchy error $\le10^{-12}$ and no class switch & exact control fails \\
+P1 & material volume & $|J-1|\le10^{-12}$ & exact control fails \\
+P2 & vorticity flux & relative drift $\le10^{-12}$ & exact control fails \\
+P3 & exterior potentiality & valid points $\ge8$; div/curl residuals $\le0.08$ & any eligible input fails \\
+P4 & exterior circulation & H2-valid period plus nonzero exterior speed & any eligible input fails \\
+P5 & exterior energy & $f_{\rm ext}\ge0.01$; refinement drift $\le0.12$ & any eligible input fails \\
+P6 & far-field exponent & $R^2\ge0.97$, $2.4\le p\le3.6$ on eligible inputs & any eligible input fails; none eligible is unresolved \\
+X0 & E011 cross-source consistency & at least 2 upstream providers and $A_{T,g}\ge0.80$ for H2/H3/P3/P4/P5/P6 & provider dependence, internal provider inconsistency, or insufficient providers \\
+B0 & C++ certification & relative L2 $\le10^{-10}$ & build/parity certification FAIL \\
+G9 & reveal commitment & framework verification & reveal denied if policy fails \\
+\bottomrule
+\end{longtable}
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical certification, convergence, and error budget}
+BASIC uses up to eight E011 provider anchors selected by topology/provider round-robin and $N=96,160$; FULL uses all E011 provider anchors with $N=160,256$; CERTIFY uses all E011 primary STATIC\_READY upstream carriers with $N=256,384$. H1 compares finite-core energy and relative-equilibrium residual between the two registered resolutions. Holonomy uses at least 384 source points. P5 uses 1024 and 4096 deterministic Halton-ball samples. P3 uses an exterior centered-difference step $h=0.002R$. P6 uses radius factors $4,6,8,12$ times the source bounding radius.
+
+\begin{longtable}{p{0.31\linewidth}p{0.27\linewidth}p{0.32\linewidth}}
+\toprule
+Error source & Estimator & Acceptance \\
+\midrule
+Centerline discretization & H1 relative differences & $\le0.08$ for registered energy/RE measures \\
+Holonomy quadrature & integer absolute error & $\le0.08$ \\
+Exterior finite difference & dimensionless div/curl residual & $\le0.08$ \\
+Energy sampling & low/high $f_{\rm ext}$ drift & $\le0.12$ \\
+Far-field fit & linear-log $R^2$ & $\ge0.97$ \\
+Backend roundoff/implementation & C++ vs Python relative L2 & $\le10^{-10}$ \\
+\bottomrule
+\end{longtable}
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority and parity}
+Python/NumPy FP64 is REFERENCE authority. The instance-local C++17 kernel is built through Framework v1.0.6 and receives CERTIFICATION authority only when the actual backend is serial or OpenMP FP64 and parity passes. A Python fallback cannot close B0. GPU screening is not enabled in this A016 version.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness, opaque identifiers, and reveal}
+Topology, carrier, source-family, provider-group, provenance-family, and independence identities are replaced in public sample metrics by 16-hex HMAC-SHA256 group identifiers derived from a private key. Raw E011 source paths and geometry/source hashes remain in the private runtime identity map, which is excluded from the blind ZIP. Target-bearing assignment terms listed in the private forbidden-term policy are commitment-protected. Reveal is permitted after FULL or CERTIFY when G2 passed; unresolved scientific branches do not block reveal because the design intentionally preserves informative later measurements after earlier scientific failures.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical/null model and multiplicity}
+This is primarily a deterministic numerical falsifier, not a parameter-fitting study. The FULL per-carrier unit is one deterministic E011 provider anchor; CERTIFY expands to all E011 primary STATIC\_READY upstream carriers. For X0, the vote unit is one upstream provider group within one topology; multiple variants from the same provider are not independent. H*/P* aggregate status is conservative: any eligible per-input failure makes the aggregate branch FAIL. P6 eligibility is fixed by vector-area ratio before exponent acceptance. P5 sampling uses deterministic low-discrepancy points rather than stochastic confidence intervals. No multiplicity correction is used because there is no null-hypothesis p-value family; all per-input values and thresholds are reported directly.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Results and automatic run provenance}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{AUTO\_RESULTS.tex is generated after a run.}}
+The frozen text above is never rewritten to accommodate an outcome.
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation, limits, falsifiable predictions, and minimal follow-up experiments}
+P0--P2 test the exact material-population logic of the smooth incompressible model, not a full time-integrated knot evolution. H3 remains the original strong static-centerline shape test and can fail while the matter--field partition branch remains informative. P3/P4 establish whether the computed exterior is locally potential yet globally circulation-bearing. P5 tests whether velocity-energy support extends beyond the near-core source zone. P6 supplies a frozen far-field exponent for later mechanism comparison. X0 separately determines whether the H2/H3/P3/P4/P5/P6 classifications are robust across distinct upstream E011 provider groups for the same topology; it is a representation-dependence test, not an assertion that topology uniquely fixes dynamics.
+
+A minimal next experiment after v0.2.2 is a genuinely time-dependent Euler/finite-core evolution in which material tracers are initialized both inside and outside a vortex tube, then tested for support-class preservation, circulation conservation, and topology change under simultaneous spatial and temporal refinement. A second independent experiment should reconstruct pressure from the time-dependent velocity field rather than infer pressure solely from a steady exterior relation.
+
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility and exact commands}
+Place the instance under the A016 Workbench family and keep the frozen framework under \texttt{06\_templates/SST\_Falsifier\_Framework/SST\_Falsifier\_Framework\_v1.0.6}. If needed, set \texttt{SST\_WORKBENCH\_ROOT}. Then run:
+\begin{verbatim}
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd FULL
+run_all.cmd CERTIFY
+run_all.cmd REVEAL
+\end{verbatim}
+The first three scientific modes write blind packages; reveal is commitment-verified and separately packaged.
+
+\section{References}
+\begin{thebibliography}{99}
+\bibitem{Helmholtz1858}
+H.~von Helmholtz (1858), ``\"Uber Integrale der hydrodynamischen Gleichungen, welche den Wirbelbewegungen entsprechen,'' \emph{Journal f\"ur die reine und angewandte Mathematik} \textbf{55}, 25--55. DOI: \url{https://doi.org/10.1515/crll.1858.55.25}.
+
+\bibitem{Cauchy1815}
+A.-L. Cauchy (1815), ``Th\'eorie de la propagation des ondes \`a la surface d'un fluide pesant d'une profondeur ind\'efinie,'' historical source for the Lagrangian vorticity invariants; modern formulation summarized in standard vortex-dynamics texts.
+
+\bibitem{Moffatt1969}
+H.~K. Moffatt (1969), ``The degree of knottedness of tangled vortex lines,'' \emph{Journal of Fluid Mechanics} \textbf{35}, 117--129. DOI: \url{https://doi.org/10.1017/S0022112069000991}.
+
+\bibitem{Saffman1992}
+P.~G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press. DOI: \url{https://doi.org/10.1017/CBO9780511624063}.
+
+\bibitem{Batchelor1967}
+G.~K. Batchelor (1967), \emph{An Introduction to Fluid Dynamics}, Cambridge University Press. DOI: \url{https://doi.org/10.1017/CBO9780511800955}.
+\end{thebibliography}
+
+\end{document}

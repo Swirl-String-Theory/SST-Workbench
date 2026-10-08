@@ -1,0 +1,280 @@
+{
+  "alternative_hypothesis": "H1: within a preregistered safe numerical envelope, accepted numerical controls change normalized final geometry by less than the registered tolerances, baseline trajectories plateau, generator/resolution comparisons converge, and export bytes are format-pinned and provenance-complete.",
+  "assumptions": [
+    "KnotPlot relaxation is treated as a geometry-generation algorithm, not as evidence of physical SST self-confinement or particle stability.",
+    "Knot type is expected to be preserved only when collision constraints are active and step size is safely below the close-distance constraint.",
+    "dstep is a display cadence control and is preregistered as a negative-control parameter for geometry.",
+    "The preregistered same-topology dual-generator pair represents generator-family variants, not independent physical sources.",
+    "All gates G1-G8 are evaluated independently after G0 so an early FAIL does not suppress later diagnostics."
+  ],
+  "edge_cases": [
+    "Missing KnotPlot output produces UNRESOLVED for data-dependent gates but does not suppress the remaining diagnostics.",
+    "A parameter that is demonstrably display-only is not interpreted as a dynamical degree of freedom.",
+    "Force-off cases are mechanism ablations and are not part of the accepted production numerical envelope.",
+    "Multi-component links may lack a well-defined single-component Procrustes comparison; scalar and component-safe metrics remain authoritative there.",
+    "Topology preservation and physical SST stability are distinct claims."
+  ],
+  "equations": [
+    {
+      "dimensional_check": "Coordinates are divided by RMS radius before comparison, so D_shape is dimensionless.",
+      "id": "E1",
+      "inputs": [
+        "closed resampled curves x,y"
+      ],
+      "latex": "D_{shape}=\\min_{R,\\delta,\\sigma}\\left[M^{-1}\\sum_{i=1}^{M}\\|\\hat x_i-R\\hat y_{\\sigma i+\\delta}\\|^2\\right]^{1/2}",
+      "outputs": [
+        "D_shape"
+      ],
+      "purpose": "Scale-free shape comparison"
+    },
+    {
+      "dimensional_check": "Ratio of equal-dimension quantities is dimensionless.",
+      "id": "E2",
+      "inputs": [
+        "condition metric",
+        "baseline metric"
+      ],
+      "latex": "\\Delta_m=|m_c-m_0|/\\max(|m_0|,10^{-12})",
+      "outputs": [
+        "relative effect"
+      ],
+      "purpose": "Scalar response effect"
+    },
+    {
+      "dimensional_check": "Length divided by length is dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "closed polygon edge lengths"
+      ],
+      "latex": "C_V(\\ell)=\\sigma(\\ell_i)/\\bar{\\ell}",
+      "outputs": [
+        "edge CV"
+      ],
+      "purpose": "Polygon discretization uniformity"
+    },
+    {
+      "dimensional_check": "Mean of binary indicators; P_prov is dimensionless and lies in [0,1].",
+      "id": "E4",
+      "inputs": [
+        "per-script explicit ASCII/raw save indicator",
+        "per-script explicit relaxation-parameter pinning indicator",
+        "per-script runtime/build-state recording indicator"
+      ],
+      "latex": "P_{\\\\mathrm{prov}}=\\\\frac{1}{N}\\\\sum_{j=1}^{N} I_{j,\\\\mathrm{ascii}} I_{j,\\\\mathrm{dyn}} I_{j,\\\\mathrm{runtime}}",
+      "outputs": [
+        "P_prov"
+      ],
+      "purpose": "Historical export-provenance completeness"
+    },
+    {
+      "dimensional_check": "Count ratio; C_camp is dimensionless and lies in [0,1].",
+      "id": "E5",
+      "inputs": [
+        "number of conditions with all preregistered metric/coordinate checkpoints",
+        "number of preregistered campaign conditions"
+      ],
+      "latex": "C_{\\\\mathrm{camp}}=N_{\\\\mathrm{complete}}/N_{\\\\mathrm{expected}}",
+      "outputs": [
+        "C_camp"
+      ],
+      "purpose": "Campaign artifact completeness"
+    },
+    {
+      "dimensional_check": "Product of binary indicators; Q_hist is dimensionless and binary.",
+      "id": "E6",
+      "inputs": [
+        "P_prov",
+        "registered gate outcomes G3 through G7"
+      ],
+      "latex": "Q_{\\\\mathrm{hist}}=I(P_{\\\\mathrm{prov}}=1)\\\\prod_{g\\\\in\\\\{3,4,5,6,7\\\\}} I(G_g=\\\\mathrm{PASS})",
+      "outputs": [
+        "Q_hist"
+      ],
+      "purpose": "Historical canonical-export eligibility"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "G8_FAIL_NEW_CANONICAL_EXPORT_GENERATION_REQUIRED",
+      "criterion": "Historical scripts do not explicitly pin ASCII/raw export format for every production save.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "G3_FAIL_CONTROL_CONTAMINATION",
+      "criterion": "dstep changes final normalized shape by more than 1e-8 or any scalar geometry metric by more than 1e-10 relative, indicating unexpected control contamination.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "G4_FAIL_PARAMETER_SENSITIVE",
+      "criterion": "Within the accepted numerical envelope, median final scalar effect exceeds 1% or median D_shape exceeds 0.005 across qualified topologies.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "G6_FAIL_NO_RELAXATION_PLATEAU",
+      "criterion": "Baseline 10k-to-15k scalar drift exceeds 1% or D_shape exceeds 0.005 for more than 20% of qualified topologies.",
+      "id": "F4"
+    },
+    {
+      "conclusion_if_met": "G7_FAIL_RESOLUTION_NOT_CONVERGED",
+      "criterion": "Resolution doubling fails to reduce error or final 600-to-1200 normalized effect exceeds 1% / D_shape exceeds 0.01 on the trefoil ladder.",
+      "id": "F5"
+    },
+    {
+      "conclusion_if_met": "G5_FAIL_NATIVE_PARITY",
+      "criterion": "Native C++ FP64 relative error for length, Rg or edge-CV exceeds 1e-12 on any certification curve.",
+      "id": "F6"
+    },
+    {
+      "conclusion_if_met": "G8_FAIL_NEW_CANONICAL_EXPORT_GENERATION_REQUIRED",
+      "criterion": "Historical scripts rely on relaxation-relevant runtime defaults (charge, hooke, power, or timeincr) without explicitly pinning them or recording the KnotPlot build/runtime parameter state.",
+      "id": "F7"
+    }
+  ],
+  "null_hypothesis": "H0: the historical final geometries are materially dependent on undocumented or numerically arbitrary KnotPlot settings, fail plateau/resolution/generator robustness, or are not provenance-complete; therefore they do not qualify as canonical production exports.",
+  "objective": "Separate topological identity from KnotPlot relaxation artefacts, quantify parameter sensitivity and relaxation/resolution convergence, and preregister the decision rule for whether a new canonical export generation is required.",
+  "observables": [
+    {
+      "definition": "Historical-script audit: script count, common parameter values, explicit save-format pinning, checkpoint count and topology/bead metadata.",
+      "equation_refs": [
+        "E4"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "KnotPlot checkpoint metrics: iteration, bead count, length, angle, ACN, linking number, safeness, radius of gyration and energy when available.",
+      "equation_refs": [
+        "E2",
+        "E5"
+      ],
+      "id": "O2",
+      "unit": "mixed"
+    },
+    {
+      "definition": "Normalized coordinate geometry diagnostics: D_shape, edge CV, normalized length and normalized radius of gyration.",
+      "equation_refs": [
+        "E1",
+        "E3"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Plateau and resolution convergence flags over the registered checkpoint and bead ladders.",
+      "equation_refs": [
+        "E1",
+        "E2"
+      ],
+      "id": "O4",
+      "unit": "1"
+    }
+  ],
+  "predictions": [
+    "dstep should be a strict null control for geometry.",
+    "Turning off one or more relaxation forces should generally alter relaxation trajectories, establishing that the pipeline is parameter-live rather than inert.",
+    "If the historical 15k endpoint is arbitrary rather than asymptotic, 10k-to-15k drift will remain measurable.",
+    "The preregistered same-topology dual-generator pair may converge under relaxation; failure to converge exposes generator-family dependence.",
+    "Regardless of geometric robustness, the historical scripts are expected to fail canonical provenance because save format is not explicitly pinned.",
+    "The historical scripts are expected to depend on unpinned relaxation defaults because charge, hooke, power and timeincr are not explicitly set."
+  ],
+  "research_question": "Are KnotPlot-relaxed knot/link exports robust to the relaxation, force, discretization and export parameters used in the historical SST pipeline, and does the historical export protocol qualify as a canonical production geometry source?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G1",
+      "id": "S1",
+      "operation": "Audit every uploaded historical .kpc file and hash the original source scripts."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G2",
+      "id": "S2",
+      "operation": "Generate anonymous topology campaign scripts with explicitly pinned ASCII saves and per-checkpoint CSV metric capture."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G3",
+      "id": "S3",
+      "operation": "Run dstep as a negative control and verify at least one genuine dynamics parameter is live."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G4",
+      "id": "S4",
+      "operation": "Evaluate force ablations plus max-dr, close, bencon and stusplit perturbations without short-circuiting on prior failures."
+    },
+    {
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G5",
+      "id": "S5",
+      "operation": "Compare Python FP64 length/Rg/edge-CV against the pybind11 C++ FP64 implementation on exported coordinates."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G6",
+      "id": "S6",
+      "operation": "Test 10k-to-15k relaxation plateau and trend against 4k-to-10k changes."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "gate": "G7",
+      "id": "S7",
+      "operation": "Test 0.5x/1x/2x/4x resolution response and same-topology dual-generator convergence."
+    },
+    {
+      "formula_refs": [
+        "E4",
+        "E6"
+      ],
+      "gate": "G8",
+      "id": "S8",
+      "operation": "Apply the frozen canonical-export qualification rule; any provenance defect is sufficient to reject the historical protocol as canonical while later scientific gates still run."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "1",
+      "meaning": "cyclic/reversal-aware orthogonal Procrustes RMS distance after centroid and RMS-radius normalization",
+      "si_unit": "1",
+      "symbol": "D_{shape}"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "relative change of scalar geometry observable m against the baseline condition",
+      "si_unit": "1",
+      "symbol": "\\Delta_m"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "coefficient of variation of polygonal edge lengths",
+      "si_unit": "1",
+      "symbol": "C_V(\\ell)"
+    },
+    {
+      "dimensions": "L",
+      "meaning": "radius of gyration of exported vertices",
+      "si_unit": "KnotPlot length unit",
+      "symbol": "R_g"
+    }
+  ]
+}

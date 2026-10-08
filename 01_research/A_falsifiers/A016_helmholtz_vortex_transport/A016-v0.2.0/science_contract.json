@@ -1,0 +1,85 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Within smooth incompressible inviscid vortex dynamics, can a fixed material population carrying nonzero vorticity coexist with an exterior locally irrotational sector that still carries nonzero velocity, circulation periods, kinetic energy, and a reproducible far field, while the original A016 relaxed-centerline relative-equilibrium test remains independently falsifiable?",
+  "objective": "Fuse the v0.1.1 Helmholtz centerline gates with theorem-level Cauchy-map controls and explicit matter-field-partition observables, without retuning the original H0-H4 thresholds and without allowing an early scientific FAIL to suppress later independent measurements.",
+  "null_hypothesis": "At least one registered ideal-flow consequence or centerline condition fails beyond its preregistered tolerance: material zero/nonzero vorticity classification is not preserved by the tested incompressible map, material volume or vorticity flux is not conserved, the exterior is not numerically potential, exterior energy is unresolved or absent, far-field decay is not stable on eligible closed sources, or a relaxed centerline fails its original relative-equilibrium criterion.",
+  "alternative_hypothesis": "The exact material controls satisfy Cauchy/volume/flux invariance, the reconstructed exterior is locally divergence-free and curl-free but nontrivial, a resolved nonzero kinetic-energy fraction lies outside the near-core source zone, eligible closed filaments show a stable localized-source far-field exponent, and each relaxed centerline receives an independent H0-H4 classification without threshold adjustment.",
+  "assumptions": [
+    "The continuum comparison is the smooth three-dimensional incompressible Euler limit with no viscosity and no external nonconservative forcing.",
+    "Each input component is interpreted as a closed oriented vortex-filament centerline; finite-core regularization is a numerical model for self-interaction, not a claim that vorticity is literally singular.",
+    "Blind centerline scoring uses source coordinate units and unit circulation; no SST particle identity, canonical circulation, density, mass, or clock parameter enters H0-H4 or P3-P6.",
+    "The exterior differential audit uses the singular filament kernel only at points separated from the source, where the ideal line-vortex field should be locally curl-free and divergence-free.",
+    "The P5 source-zone mask is a preregistered geometric near-core proxy; it tests energy nonlocality of the reconstructed velocity field, not an exact compact-support vorticity inversion.",
+    "The P6 r^{-p} fit is evaluated only for geometries with non-negligible vector area, so cancellation of the leading far-field moment is not mislabeled as a numerical failure."
+  ],
+  "symbols": [
+    {"symbol":"\\mathbf{x}","meaning":"Eulerian position","si_unit":"m","dimensions":"L"},
+    {"symbol":"t","meaning":"absolute flow time in the ideal-fluid control","si_unit":"s","dimensions":"T"},
+    {"symbol":"\\mathbf{u}","meaning":"fluid velocity","si_unit":"m s^-1","dimensions":"L T^-1"},
+    {"symbol":"\\boldsymbol{\\omega}","meaning":"vorticity curl(u)","si_unit":"s^-1","dimensions":"T^-1"},
+    {"symbol":"\\mathbf{F}","meaning":"deformation gradient dX/da","si_unit":"1","dimensions":"1"},
+    {"symbol":"J","meaning":"determinant of the deformation gradient","si_unit":"1","dimensions":"1"},
+    {"symbol":"\\Gamma","meaning":"circulation/vorticity flux","si_unit":"m^2 s^-1","dimensions":"L^2 T^-1"},
+    {"symbol":"a","meaning":"finite-core radius in the same length unit as the centerline","si_unit":"m after geometric scaling","dimensions":"L"},
+    {"symbol":"\\ell_E","meaning":"finite-core energy-length coefficient E/(rho Gamma^2)","si_unit":"m","dimensions":"L"},
+    {"symbol":"p","meaning":"measured far-field velocity decay exponent |u| proportional to r^{-p}","si_unit":"1","dimensions":"1"}
+  ],
+  "equations": [
+    {"id":"E1","purpose":"Define vorticity","latex":"\\boldsymbol{\\omega}=\\nabla\\times\\mathbf{u}","inputs":["\\mathbf{u}"],"outputs":["\\boldsymbol{\\omega}"],"dimensional_check":"curl contributes L^-1, so [omega]=(L T^-1)L^-1=T^-1."},
+    {"id":"E2","purpose":"Cauchy vorticity map for incompressible Euler","latex":"\\boldsymbol{\\omega}(\\mathbf{X}(\\mathbf{a},t),t)=\\mathbf{F}(\\mathbf{a},t)\\,\\boldsymbol{\\omega}_0(\\mathbf{a}),\\qquad \\mathbf{F}=\\partial\\mathbf{X}/\\partial\\mathbf{a}","inputs":["\\mathbf{F}","\\boldsymbol{\\omega}_0"],"outputs":["\\boldsymbol{\\omega}"],"dimensional_check":"F is dimensionless and both vorticities have T^-1."},
+    {"id":"E3","purpose":"Incompressible material-volume constraint","latex":"J=\\det\\mathbf{F}=1","inputs":["\\mathbf{F}"],"outputs":["J"],"dimensional_check":"determinant of a dimensionless deformation gradient is dimensionless."},
+    {"id":"E4","purpose":"Vorticity-flux/circulation conservation control","latex":"\\Phi_\\omega=\\int_{S(t)}\\boldsymbol{\\omega}\\cdot d\\mathbf{S}=\\Gamma=\\mathrm{const}","inputs":["\\boldsymbol{\\omega}","S(t)"],"outputs":["\\Gamma"],"dimensional_check":"T^-1 times L^2 equals L^2 T^-1."},
+    {"id":"E5","purpose":"Unit-circulation Biot-Savart reconstruction outside and on regularized filament fields","latex":"\\mathbf{u}(\\mathbf{x})=\\frac{\\Gamma}{4\\pi}\\oint_C\\frac{d\\boldsymbol{\\ell}'\\times(\\mathbf{x}-\\mathbf{x}')}{(|\\mathbf{x}-\\mathbf{x}'|^2+a^2)^{3/2}}","inputs":["C","\\Gamma","a","\\mathbf{x}"],"outputs":["\\mathbf{u}"],"dimensional_check":"Gamma L times L divided by L^3 gives L T^-1."},
+    {"id":"E6","purpose":"Finite-core line energy coefficient","latex":"E=\\rho\\Gamma^2\\ell_E,\\qquad \\ell_E=\\frac{1}{8\\pi}\\oint\\!\\oint\\frac{d\\boldsymbol{\\ell}\\cdot d\\boldsymbol{\\ell}'}{\\sqrt{|\\mathbf{x}-\\mathbf{x}'|^2+a^2}}","inputs":["C","a","\\rho","\\Gamma"],"outputs":["E","\\ell_E"],"dimensional_check":"ell_E has L; rho Gamma^2 ell_E gives (M L^-3)(L^4 T^-2)L=M L^2 T^-2."},
+    {"id":"E7","purpose":"Relative-equilibrium decomposition","latex":"\\mathbf{u}_{\\mathrm{ind}}(\\mathbf{X})=\\mathbf{U}+\\boldsymbol{\\Omega}\\times(\\mathbf{X}-\\mathbf{X}_0)+\\lambda(s)\\mathbf{t}(s)+\\mathbf{r}_\\perp(s)","inputs":["\\mathbf{u}_{\\mathrm{ind}}","C"],"outputs":["\\mathbf{U}","\\boldsymbol{\\Omega}","\\mathbf{r}_\\perp"],"dimensional_check":"each term has velocity dimensions L T^-1; lambda has L T^-1."},
+    {"id":"E8","purpose":"Exterior circulation period and linking consistency","latex":"\\frac{1}{\\Gamma}\\oint_\\gamma\\mathbf{u}\\cdot d\\boldsymbol{\\ell}\\approx\\operatorname{Lk}(\\gamma,C)\\in\\mathbb{Z}","inputs":["\\gamma","C","\\mathbf{u}","\\Gamma"],"outputs":["holonomy ratio"],"dimensional_check":"line integral has L^2 T^-1 and division by Gamma is dimensionless."},
+    {"id":"E9","purpose":"Local exterior potential-flow audit","latex":"\\nabla\\cdot\\mathbf{u}=0,\\qquad \\nabla\\times\\mathbf{u}=\\mathbf{0}\\quad\\text{away from vortex support}","inputs":["\\mathbf{u}"],"outputs":["divergence","curl"],"dimensional_check":"both divergence and curl of velocity have T^-1."},
+    {"id":"E10","purpose":"Exterior kinetic-energy fraction proxy","latex":"f_{\\mathrm{ext}}=\\frac{\\int_{V\\setminus V_{\\mathrm{core}}}\\tfrac12|\\mathbf{u}|^2\\,dV}{\\int_V\\tfrac12|\\mathbf{u}|^2\\,dV}","inputs":["\\mathbf{u}","V","V_{\\mathrm{core}}"],"outputs":["f_ext"],"dimensional_check":"identical energy-density-volume factors cancel, leaving a dimensionless fraction."},
+    {"id":"E11","purpose":"Far-field localized-source exponent estimator","latex":"\\log u_{\\mathrm{rms}}(r)=b-p\\log r,\\qquad p=-\\frac{d\\log u_{\\mathrm{rms}}}{d\\log r}","inputs":["r","u_rms"],"outputs":["p"],"dimensional_check":"the slope of logarithms of consistently scaled quantities is dimensionless."},
+    {"id":"E12","purpose":"Post-reveal Bernoulli exponent map for a steady irrotational exterior","latex":"|\\Delta p|\\propto r^{-2p},\\qquad |\\nabla p|\\propto r^{-(2p+1)}","inputs":["p"],"outputs":["pressure exponents"],"dimensional_check":"This equation maps only exponents; dimensional pressure normalization is not inferred by the blind fit."}
+  ],
+  "observables": [
+    {"id":"O1","definition":"Cauchy-map relative error and zero/nonzero population classification","equation_refs":["E2"],"unit":"1"},
+    {"id":"O2","definition":"absolute error |det(F)-1|","equation_refs":["E3"],"unit":"1"},
+    {"id":"O3","definition":"relative vorticity-flux drift","equation_refs":["E4"],"unit":"1"},
+    {"id":"O4","definition":"finite-core energy convergence and relative-equilibrium normal NRMSE","equation_refs":["E6","E7"],"unit":"1"},
+    {"id":"O5","definition":"meridian holonomy integer absolute error","equation_refs":["E8"],"unit":"1"},
+    {"id":"O6","definition":"dimensionless exterior divergence and curl residuals","equation_refs":["E9"],"unit":"1"},
+    {"id":"O7","definition":"exterior kinetic-energy fraction and refinement drift","equation_refs":["E10"],"unit":"1"},
+    {"id":"O8","definition":"far-field velocity exponent p, fit R^2, and derived post-reveal pressure exponents","equation_refs":["E11","E12"],"unit":"1"}
+  ],
+  "steps": [
+    {"id":"S1","operation":"Verify frozen protocol and resolve the exact source directory from source_contract.json plus SST_WORKBENCH_ROOT.","formula_refs":["E1"],"gate":"G0"},
+    {"id":"S2","operation":"Run self-contained Python FP64 circle sanity controls before external source scoring.","formula_refs":["E5","E6"],"gate":"G2"},
+    {"id":"S3","operation":"Evaluate the exact diagonal incompressible Cauchy map for zero/nonzero vorticity populations.","formula_refs":["E2"],"gate":"P0"},
+    {"id":"S4","operation":"Evaluate det(F) and the analytic material cross-section scaling.","formula_refs":["E3"],"gate":"P1"},
+    {"id":"S5","operation":"Evaluate initial/final vorticity flux under the same exact stretch.","formula_refs":["E4"],"gate":"P2"},
+    {"id":"S6","operation":"Resample each closed source geometry, estimate finite-core thickness, and calculate original A016 H0-H4 observables at preregistered resolutions.","formula_refs":["E5","E6","E7","E8"],"gate":"H1"},
+    {"id":"S7","operation":"Sample an exterior sphere and use centered finite differences of singular-kernel Biot-Savart velocity to estimate divergence and curl.","formula_refs":["E5","E9"],"gate":"P3"},
+    {"id":"S8","operation":"Reuse meridian circulation periods together with nonzero exterior speed to test locally irrotational but globally nontrivial exterior flow.","formula_refs":["E8","E9"],"gate":"P4"},
+    {"id":"S9","operation":"Integrate the finite-core velocity-energy proxy with deterministic Halton-ball samples at two sample counts and partition by the preregistered near-core mask.","formula_refs":["E5","E10"],"gate":"P5"},
+    {"id":"S10","operation":"Fit log RMS speed versus log radius on preregistered far-field shells for nonzero-vector-area closed sources.","formula_refs":["E11","E12"],"gate":"P6"},
+    {"id":"S11","operation":"Build the instance-local C++17/OpenMP kernel and compare its FP64 Biot-Savart output against the Python FP64 reference with no fallback authority.","formula_refs":["E5"],"gate":"B0"}
+  ],
+  "falsification_criteria": [
+    {"id":"F1","criterion":"P0 fails if Cauchy-map relative error exceeds 1e-12 or a zero/nonzero population changes class in the exact control.","conclusion_if_met":"FAIL"},
+    {"id":"F2","criterion":"P1 fails if |det(F)-1| exceeds 1e-12; P2 fails if relative vorticity-flux drift exceeds 1e-12.","conclusion_if_met":"FAIL"},
+    {"id":"F3","criterion":"H3 fails per input when normal relative-equilibrium NRMSE exceeds 0.18; this threshold is inherited unchanged from v0.1.1.","conclusion_if_met":"FAIL"},
+    {"id":"F4","criterion":"P3 fails per input if the exterior differential residuals exceed 0.08 or fewer than eight exterior points are valid.","conclusion_if_met":"FAIL"},
+    {"id":"F5","criterion":"P5 fails per input if the refined exterior energy fraction is below 0.01 or its low/high deterministic-sampling drift exceeds 0.12.","conclusion_if_met":"FAIL"},
+    {"id":"F6","criterion":"P6 fails on an eligible input if R^2 is below 0.97 or the fitted velocity exponent lies outside [2.4,3.6]. Ineligible near-zero-vector-area inputs are not forced into this gate.","conclusion_if_met":"FAIL"},
+    {"id":"F7","criterion":"B0 fails if strict native FP64 is unavailable or C++/Python relative L2 error exceeds 1e-10; this is a certification failure, not physical evidence.","conclusion_if_met":"FAIL"}
+  ],
+  "edge_cases": [
+    "Near-zero vector area can remove the leading far-field moment; such inputs are P6-ineligible rather than automatically failed.",
+    "A singular filament has divergent core energy; H1/P5 therefore use the preregistered finite-core regularization while P3 exterior derivatives use the singular kernel away from support.",
+    "A source path or compiler failure is recorded independently and must not be interpreted as evidence for or against the fluid hypothesis.",
+    "Topological reconnection, viscosity, compressibility, external forcing, and singular Euler breakdown lie outside the domain of this version."
+  ],
+  "predictions": [
+    "For the exact incompressible stretch, a fluid element with initial zero vorticity remains zero and a nonzero element remains nonzero while magnitude may change by stretching.",
+    "A locally curl-free exterior can retain nonzero velocity and nonzero circulation around noncontractible loops linked with vortex support.",
+    "Finite-core kinetic energy is not expected to be confined entirely to the near-core geometric source zone.",
+    "Closed localized vortex sources with a nonzero leading vector-area moment should approach a velocity decay exponent near three; the corresponding steady Bernoulli pressure-gradient exponent is derived only after the velocity fit is frozen."
+  ]
+}

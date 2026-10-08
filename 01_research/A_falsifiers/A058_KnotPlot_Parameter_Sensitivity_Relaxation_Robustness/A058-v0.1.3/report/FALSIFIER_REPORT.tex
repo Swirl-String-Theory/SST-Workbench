@@ -1,0 +1,84 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,enumitem,xurl}
+\usepackage[hidelinks]{hyperref}\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\title{A058 --- KnotPlot Parameter Sensitivity and Relaxation Robustness Falsifier}
+\author{SST-Workbench}\date{Version v0.1.3 --- SST Falsifier Framework v1.0.6}
+\begin{document}\maketitle\sloppy
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, and status}
+A058 v0.1.3 is a blind parameter-sensitivity and relaxation-robustness study of the historical KnotPlot export pipeline. It is pinned to SST Falsifier Framework v1.0.6. The v0.1.3 maintenance revision adds the framework-generated 256-bit private key/nonce material required by FREEZE, adds fail-closed private-material preflight, and makes this report conform to the v1.0.6 section-marker contract. Scientific thresholds and KnotPlot parameter ranges are unchanged from v0.1.2.
+% SST-REPORT-SECTION:QUESTION
+\section{Research question}
+Are historical KnotPlot-relaxed exports robust to relaxation, force, discretization and export settings, and do the historical scripts qualify as a canonical production geometry source?
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses}
+$H_0$: the exported geometry is materially dependent on one or more undocumented/default relaxation, numerical, generator, resolution, or output-format choices, so the historical export protocol is not qualified as canonical. $H_1$: after explicit output-format control, the preregistered null control, numerical envelope, relaxation plateau, resolution ladder, and same-topology generator comparison remain within the registered tolerances.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions, scope, and interpretive boundary}
+Relaxation is treated as a geometry-generation algorithm. A relaxed embedding is not evidence of intrinsic SST self-confinement or particle stability. KnotPlot trajectories are simulation evidence, not independent experimental replication. Multi-component links are evaluated with component-safe scalar observables where a single closed-curve Procrustes comparison is not applicable.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols and dimensions}
+All primary sensitivity statistics below are dimensionless after normalization. $m$ denotes a scalar KnotPlot observable, $D_{\rm shape}$ a normalized coordinate-shape discrepancy, $C_V(\ell)$ edge-length coefficient of variation, $P_{\rm prov}$ historical provenance completeness, and $C_{\rm camp}$ campaign completeness.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Registered observables}
+For scalar metric $m$,
+\begin{equation}\Delta_m=\frac{|m_c-m_0|}{\max(|m_0|,10^{-12})}.\end{equation}
+For coordinate curves, a scale-free cyclic/reversal-aware Procrustes diagnostic is
+\begin{equation}
+D_{\rm shape}=\min_{R,\delta,\sigma}\left[\frac1M\sum_i\|\hat x_i-R\hat y_{\sigma i+\delta}\|^2\right]^{1/2}.
+\end{equation}
+Edge discretization is monitored through
+\begin{equation}C_V(\ell)=\sigma(\ell_i)/\bar\ell.\end{equation}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+% SST-REPORT-SECTION:ALGORITHM
+\section{Exact algorithm and campaign}
+The preregistered pilot contains one same-topology dual-generator pair, one symmetry control, two additional single-component cases, and one multi-component link. It tests the full on/off cube of mechanical/electrical/bending forces, \code{max-dr}, \code{close}, \code{bencon}, \code{stusplit}, a bead-resolution ladder, and \code{dstep} as a null control. Checkpoints are 0, 250, 1000, 4000, 10000 and 15000 atomic relaxation iterations. Every generated coordinate export explicitly requests ASCII representation.
+% SST-REPORT-SECTION:SOURCES
+\section{Source, provenance, and independence contract}
+The supplied historical archive contains 50 scripts: 20 knot, 16 link and 14 torus constructions. Their principal relaxation settings are constant across the archive and therefore do not constitute a parameter-sensitivity experiment. Their \code{save} commands do not explicitly pin \code{ascii/raw}; output representation therefore depends on KnotPlot's runtime \code{sformat} state. The new campaign records the KnotPlot executable identity, runtime \code{version}, full \code{parameters} state, generated script hashes, and explicit ASCII coordinate outputs. Generator-family comparisons are controls within the same software family, not independent physical replication.
+% SST-REPORT-SECTION:GATES
+\section{Gate DAG and decision semantics}
+All scientific gates G1--G8 depend only on G0, not on one another. Therefore an early FAIL never prevents later diagnostic gates from running. G8 may reject the historical protocol on provenance while G3--G7 still determine replacement settings.
+\begin{longtable}{L{0.07\linewidth}L{0.70\linewidth}L{0.15\linewidth}}\toprule Gate&Question&Authority\\\midrule
+G0&Framework/protocol integrity&foundational\\
+G1&Historical export provenance&audit\\
+G2&Campaign completeness&simulation\\
+G3&Null control + parameter liveness&simulation\\
+G4&Numerical-envelope robustness&simulation\\
+G5&Python/C++ FP64 parity&certification\\
+G6&Relaxation plateau&simulation\\
+G7&Resolution/generator convergence&simulation\\
+G8&Historical protocol canonical qualification&decision\\
+G9&Reveal integrity&framework\\\bottomrule\end{longtable}
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical certification and preregistered thresholds}
+The \code{dstep} null control must remain below $10^{-10}$ in scalar relative effect. Numerical-envelope median scalar effect must remain at or below $10^{-2}$. Baseline 10k--15k drift must remain at or below $10^{-2}$. Coordinate thresholds are $D_{\rm shape}\le0.005$ for plateau/parameter robustness and $D_{\rm shape}\le0.01$ for the resolution comparison.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority and parity}
+Python/NumPy FP64 is the reference analysis lane. The instance-local C++17/pybind11 FP64 kernel is a certification lane for the registered geometry metrics. Native FP64 relative parity tolerance is $10^{-12}$. No silent backend substitution may close G5.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal boundary}
+Public computation uses anonymous topology identifiers. Construction identities and semantic notes remain under \code{private/}. Framework v1.0.6 creates nonced commitments for the private forbidden-term list and reveal mapping at FREEZE and later verifies the frozen protocol and reveal integrity before disclosure. The private nonce and opaque-ID key are 256-bit instance material generated once for this version and are never regenerated during a run.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and multiplicity}
+A058 is primarily a deterministic sensitivity, convergence, and invariance study rather than a population-significance test. Effect summaries are evaluated against preregistered tolerances; force ablations are diagnostic perturbations and the \code{dstep} sweep is a negative control. Multiple topologies test robustness across geometry classes but do not constitute independent physical samples.
+% SST-REPORT-SECTION:RESULTS
+\section{Results insertion contract}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Allowed interpretation}
+A G8 FAIL means the historical export protocol should not be promoted as canonical. It does not imply that its geometries are unusable. G3--G7 determine whether old geometries can remain comparison/legacy candidates and which parameter envelope should be frozen for a replacement canonical generation. PASS cannot be interpreted as intrinsic vortex stability or as a physical particle-stability result.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility}
+Canonical instance path: \path{01_research/A_falsifiers/A058_KnotPlot_Parameter_Sensitivity_Relaxation_Robustness/A058-v0.1.3}. Canonical framework: \path{06_templates/SST_Falsifier_Framework/SST_Falsifier_Framework_v1.0.6}. The normal pilot entry point is \code{run_pilot_all.cmd}; protocol mutation after FREEZE requires a new A058 version.
+\begin{thebibliography}{9}
+\bibitem{SchareinManual} R.~G. Scharein, 2026, ``KnotPlot: A Program for Viewing Mathematical Knots,'' KnotPlot Manual, \url{https://knotplot.com/doc/KnotPlot-Manual.pdf}.
+\bibitem{SchareinThesis} R.~G. Scharein, 1998, ``Interactive Topological Drawing,'' Ph.D. thesis, University of British Columbia, \url{https://www.knotplot.com/thesis/thesis_a4.pdf}.
+\bibitem{Kabsch1976} W.~Kabsch, 1976, ``A solution for the best rotation to relate two sets of vectors,'' Acta Crystallographica A \textbf{32}, 922--923, doi:10.1107/S0567739476001873.
+\bibitem{Framework} SST-Workbench, 2026, ``SST Falsifier Framework v1.0.6 CANONICAL\_FROZEN,'' internal reproducible framework release.
+\end{thebibliography}
+\end{document}

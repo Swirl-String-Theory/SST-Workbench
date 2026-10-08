@@ -1,0 +1,1 @@
+Recommended path: `01_research/A_falsifiers/A054_nucleon_topology_architecture_blind_falsifier/A054-v0.5.0/`. The catalog ID remains A054; v0.5.0 is the E013 current-carrier state-selection successor.

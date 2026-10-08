@@ -1,0 +1,547 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "For source-native E010/PKLSA-qualified vortex carriers evolved by a preregistered finite-core filament or incompressible Euler provider, do the extracted paired Kelvin residual phase and mode envelope require Sine-Gordon restoring dynamics and/or Mittag-Leffler fractional-memory relaxation?",
+  "objective": "Close the v0.2.3 provider gap by generating phi(s,t) and R(t) directly from qualified E010 carriers under frozen finite-core/Euler dynamics, then apply the canonical A056 blind competition without promoting simulation evidence to physical cross-source support.",
+  "null_hypothesis": "H0: Sine-Gordon and Mittag-Leffler descriptions do not achieve the preregistered discovery, held-out, numerical-certification and independent-replication thresholds beyond the registered alternatives.",
+  "alternative_hypothesis": "H1: one or both candidate mechanisms outperform the registered alternatives, survive held-out and numerical certification, and replicate across eligible independent physical evidence.",
+  "assumptions": [
+    "The provider freezes the phase observable before A056 model scoring; A056 does not infer a favorable phase definition after seeing outcomes.",
+    "The time and arclength-like coordinates are monotone and approximately uniform within the registered tolerance.",
+    "Python/NumPy FP64 is the reference numerical lane and C++/OpenMP FP64 is the certification lane; SYCL FP32/DD32 remains screening-only.",
+    "For conservative inviscid dynamics, a decreasing projected ringdown observable is interpreted as transfer/dephasing unless a separate dissipative mechanism is supplied.",
+    "The real-provider phase is the paired transverse Kelvin residual phase after common rigid-motion registration to the unperturbed material carrier; the seeded Fourier winding is removed before phase scoring.",
+    "The real-provider ringdown R(t) is a normalized Kelvin-mode projection amplitude in conservative dynamics and is not interpreted as thermodynamic dissipation.",
+    "Different numerical resolutions of one carrier are convergence replays, never independent replication."
+  ],
+  "symbols": [
+    {
+      "symbol": "\\varphi(s,t)",
+      "meaning": "provider-declared phase/torsion observable",
+      "si_unit": "rad (dimensionless)",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "a",
+      "meaning": "phase-wave coefficient c_phi^2",
+      "si_unit": "m^2 s^-2 when s is metres",
+      "dimensions": "L^2 T^-2"
+    },
+    {
+      "symbol": "b",
+      "meaning": "restoring-frequency coefficient",
+      "si_unit": "s^-2",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "c",
+      "meaning": "Duffing cubic restoring coefficient",
+      "si_unit": "s^-2 for dimensionless phase",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "alpha",
+      "meaning": "Mittag-Leffler fractional order",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "tau",
+      "meaning": "relaxation timescale",
+      "si_unit": "s when t is seconds",
+      "dimensions": "T"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Wave null phase model",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a"
+      ],
+      "dimensional_check": "Both sides have dimensions T^{-2} for dimensionless phase when [a]=L^2 T^{-2}."
+    },
+    {
+      "id": "E2",
+      "purpose": "Klein-Gordon competitor",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\varphi",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b"
+      ],
+      "dimensional_check": "[b]=T^{-2}; every term has dimensions T^{-2}."
+    },
+    {
+      "id": "E3",
+      "purpose": "Duffing competitor",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\varphi-c\\varphi^3",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b",
+        "c"
+      ],
+      "dimensional_check": "For dimensionless phase, [b]=[c]=T^{-2}."
+    },
+    {
+      "id": "E4",
+      "purpose": "Sine-Gordon candidate",
+      "latex": "\\varphi_{tt}=a\\varphi_{ss}-b\\sin\\varphi",
+      "inputs": [
+        "varphi",
+        "s",
+        "t"
+      ],
+      "outputs": [
+        "a",
+        "b"
+      ],
+      "dimensional_check": "sin(varphi) is dimensionless and [b]=T^{-2}."
+    },
+    {
+      "id": "E5",
+      "purpose": "Bayesian information criterion used on discovery blocks",
+      "latex": "\\mathrm{BIC}=n\\ln(\\mathrm{RSS}/n)+k\\ln n",
+      "inputs": [
+        "RSS",
+        "n",
+        "k"
+      ],
+      "outputs": [
+        "BIC"
+      ],
+      "dimensional_check": "Model residuals are compared within one observable/scaling; BIC differences are dimensionless."
+    },
+    {
+      "id": "E6",
+      "purpose": "Held-out normalized root-mean-square error",
+      "latex": "\\mathrm{NRMSE}=\\sqrt{n^{-1}\\sum_i(y_i-\\hat y_i)^2}/\\sigma_y",
+      "inputs": [
+        "y",
+        "yhat"
+      ],
+      "outputs": [
+        "NRMSE"
+      ],
+      "dimensional_check": "Numerator and denominator have the same observable units, so NRMSE is dimensionless."
+    },
+    {
+      "id": "E7",
+      "purpose": "Mittag-Leffler function",
+      "latex": "E_{\\alpha,\\beta}(z)=\\sum_{k=0}^{\\infty} z^k/\\Gamma(\\alpha k+\\beta)",
+      "inputs": [
+        "alpha",
+        "beta",
+        "z"
+      ],
+      "outputs": [
+        "E"
+      ],
+      "dimensional_check": "z must be dimensionless."
+    },
+    {
+      "id": "E8",
+      "purpose": "Mittag-Leffler relaxation candidate",
+      "latex": "R_{ML}(t)=E_{\\alpha,1}[-(t/\\tau)^\\alpha]",
+      "inputs": [
+        "t",
+        "tau",
+        "alpha"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E9",
+      "purpose": "Ordinary exponential null limit",
+      "latex": "R_{exp}(t)=\\exp(-t/\\tau)=E_{1,1}(-t/\\tau)",
+      "inputs": [
+        "t",
+        "tau"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E10",
+      "purpose": "Stretched-exponential competitor",
+      "latex": "R_{SE}(t)=\\exp[-(t/\\tau)^\\beta]",
+      "inputs": [
+        "t",
+        "tau",
+        "beta"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "t/tau is dimensionless."
+    },
+    {
+      "id": "E11",
+      "purpose": "Bi-exponential competitor",
+      "latex": "R_{2e}(t)=w e^{-t/\\tau_1}+(1-w)e^{-t/\\tau_2}",
+      "inputs": [
+        "t",
+        "tau1",
+        "tau2",
+        "w"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "Each exponential argument is dimensionless and w is dimensionless."
+    },
+    {
+      "id": "E12",
+      "purpose": "Phase-resolution convergence diagnostic",
+      "latex": "\\delta_c=\\lVert\\mathbf c_f-\\mathbf c_c\\rVert_2/\\max(\\lVert\\mathbf c_f\\rVert_2,10^{-30}),\\quad \\mathbf c=(a,b)",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "outputs": [
+        "delta_c"
+      ],
+      "dimensional_check": "Coefficient vectors are compared componentwise under the same coordinate units; ratio is dimensionless."
+    },
+    {
+      "id": "E13",
+      "purpose": "Memory-resolution convergence diagnostics",
+      "latex": "\\delta_\\alpha=|\\alpha_f-\\alpha_c|,\\qquad \\delta_\\tau=|\\tau_f-\\tau_c|/\\max(|\\tau_f|,10^{-30})",
+      "inputs": [
+        "alpha",
+        "tau"
+      ],
+      "outputs": [
+        "delta_alpha",
+        "delta_tau"
+      ],
+      "dimensional_check": "Both diagnostics are dimensionless."
+    },
+    {
+      "id": "E14",
+      "purpose": "Incompressible unforced Euler evolution",
+      "latex": "\\partial_t\\mathbf u+(\\mathbf u\\cdot\\nabla)\\mathbf u=-\\nabla p,\\qquad \\nabla\\cdot\\mathbf u=0",
+      "inputs": [
+        "u",
+        "p",
+        "t"
+      ],
+      "outputs": [
+        "u(t)"
+      ],
+      "dimensional_check": "Each acceleration term has dimensions L T^{-2}; incompressibility has T^{-1}."
+    },
+    {
+      "id": "E15",
+      "purpose": "Finite-core centerline vorticity seed",
+      "latex": "\\boldsymbol\\omega(\\mathbf x,0)\\propto\\sum_j \\mathbf T_j\\exp[-d_{per}(\\mathbf x,\\mathbf X_j)^2/(2\\sigma^2)]",
+      "inputs": [
+        "X",
+        "T",
+        "sigma"
+      ],
+      "outputs": [
+        "omega_0"
+      ],
+      "dimensional_check": "The exponential is dimensionless; normalization fixes the velocity scale."
+    },
+    {
+      "id": "E16",
+      "purpose": "Material-marker transport",
+      "latex": "\\dot{\\mathbf X}(s,t)=\\mathbf u(\\mathbf X(s,t),t)",
+      "inputs": [
+        "u",
+        "X"
+      ],
+      "outputs": [
+        "X(t)"
+      ],
+      "dimensional_check": "Both sides have dimensions L T^{-1}."
+    },
+    {
+      "id": "E17",
+      "purpose": "Frozen Kelvin perturbation",
+      "latex": "\\mathbf X_\\epsilon(s,0)=\\mathbf X_0(s)+\\epsilon[\\cos(m\\theta)\\mathbf e_1+\\sin(m\\theta)\\mathbf e_2]",
+      "inputs": [
+        "X0",
+        "epsilon",
+        "m",
+        "Bishop frame"
+      ],
+      "outputs": [
+        "Xepsilon"
+      ],
+      "dimensional_check": "epsilon has dimensions L; trigonometric factors and frame vectors are dimensionless."
+    },
+    {
+      "id": "E18",
+      "purpose": "Complex paired transverse displacement",
+      "latex": "q(s,t)=\\delta\\mathbf X\\cdot\\mathbf e_1+i\\,\\delta\\mathbf X\\cdot\\mathbf e_2",
+      "inputs": [
+        "delta X",
+        "e1",
+        "e2"
+      ],
+      "outputs": [
+        "q"
+      ],
+      "dimensional_check": "q has dimensions L."
+    },
+    {
+      "id": "E19",
+      "purpose": "Residual Kelvin phase",
+      "latex": "\\varphi(s,t)=\\arg[q(s,t)e^{-im\\theta(s)}]",
+      "inputs": [
+        "q",
+        "m",
+        "theta"
+      ],
+      "outputs": [
+        "varphi"
+      ],
+      "dimensional_check": "The argument is an angle and therefore dimensionless."
+    },
+    {
+      "id": "E20",
+      "purpose": "Projected mode envelope",
+      "latex": "R(t)=|c_m(t)|/|c_m(0)|,\\qquad c_m=N_s^{-1}\\sum_j q(s_j,t)e^{-im\\theta_j}",
+      "inputs": [
+        "q",
+        "m"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "R is dimensionless."
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Provider-native phase field phi(t,s).",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "unit": "rad or declared dimensionless phase"
+    },
+    {
+      "id": "O2",
+      "definition": "Provided zero-baseline ringdown observable or preregistered derived POD-energy proxy.",
+      "equation_refs": [
+        "E8",
+        "E9",
+        "E10",
+        "E11"
+      ],
+      "unit": "normalized dimensionless amplitude"
+    },
+    {
+      "id": "O3",
+      "definition": "Discovery BIC separation and held-out NRMSE ratio.",
+      "equation_refs": [
+        "E5",
+        "E6"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O4",
+      "definition": "Paired material-marker transverse displacement and residual Kelvin phase generated directly from E010 carrier dynamics.",
+      "equation_refs": [
+        "E16",
+        "E17",
+        "E18",
+        "E19"
+      ],
+      "unit": "phase rad; displacement canonical length"
+    },
+    {
+      "id": "O5",
+      "definition": "Projected Kelvin-mode envelope R(t) from the same paired dynamics.",
+      "equation_refs": [
+        "E20"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify frozen protocol/blind commitments and enumerate hashed provider cases.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S0P",
+      "operation": "Resolve and re-hash E010 v0.3.1 strict upstream-provider representatives, construct finite-core base/perturbed carriers, evolve them with the frozen provider, and commit the private carrier reveal before A056 scoring.",
+      "formula_refs": [
+        "E14",
+        "E15",
+        "E16",
+        "E17",
+        "E18",
+        "E19",
+        "E20"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S2",
+      "operation": "Validate provider metadata, array shapes, monotonicity, finite values and sampling uniformity.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S3",
+      "operation": "Evaluate Python FP64 finite differences, POD spectral stability and the Mittag-Leffler alpha=1 exponential identity.",
+      "formula_refs": [
+        "E4",
+        "E9"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S4",
+      "operation": "Fit Wave/Klein-Gordon/Duffing/Sine-Gordon and exponential/stretched/bi-exponential/Mittag-Leffler families on discovery blocks and evaluate BIC.",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5",
+        "E8",
+        "E9",
+        "E10",
+        "E11"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S5",
+      "operation": "Evaluate frozen held-out temporal blocks with NRMSE ratios.",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S6",
+      "operation": "Apply deterministic coarsening diagnostics and strict C++/OpenMP FP64 parity to confirmed candidates.",
+      "formula_refs": [
+        "E12",
+        "E13"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S7",
+      "operation": "Consume optional canonical-framework SYCL/DD32 smoke evidence as screening-only diagnostics.",
+      "formula_refs": [
+        "E12"
+      ],
+      "gate": "G6"
+    },
+    {
+      "id": "S8",
+      "operation": "Assess evidence-class-aware replication; synthetic/simulation controls cannot close physical cross-source replication.",
+      "formula_refs": [
+        "E5",
+        "E6"
+      ],
+      "gate": "G7"
+    },
+    {
+      "id": "S9",
+      "operation": "Classify joint, phase-only or memory-only physical support only after eligible replication.",
+      "formula_refs": [
+        "E4",
+        "E8"
+      ],
+      "gate": "G8"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "Sine-Gordon fails discovery Delta-BIC >= 10 or the registered held-out NRMSE-ratio threshold.",
+      "conclusion_if_met": "No Sine-Gordon phase support for that case."
+    },
+    {
+      "id": "F2",
+      "criterion": "Mittag-Leffler fails Delta-BIC >= 10, held-out NRMSE ratio, or the support interval 0.48 < alpha < 0.97.",
+      "conclusion_if_met": "No fractional-memory support for that case."
+    },
+    {
+      "id": "F3",
+      "criterion": "A confirmed candidate fails registered resolution convergence or strict Python-FP64/C++-FP64 parity.",
+      "conclusion_if_met": "Candidate is not numerically certified."
+    },
+    {
+      "id": "F4",
+      "criterion": "Only synthetic/simulation evidence or fewer than two eligible independent physical groups support the candidate.",
+      "conclusion_if_met": "Implementation/simulation support only; no physical cross-source claim."
+    },
+    {
+      "id": "F5",
+      "criterion": "The real E010 provider fails its numerical-validity or same-carrier cross-resolution convergence criteria.",
+      "conclusion_if_met": "No real-provider A056 support may be promoted from that carrier/solver family."
+    }
+  ],
+  "edge_cases": [
+    "The alpha -> 1 boundary is an ordinary exponential null and cannot count as fractional memory.",
+    "A Mittag-Leffler-like tail may approximate a continuum or mixture of ordinary modes; bi-exponential competition and held-out scoring reduce but do not eliminate this identifiability risk.",
+    "Closed filament geometry can have frame/gauge ambiguities; phase_definition_id must be frozen upstream.",
+    "In inviscid conservative dynamics an apparent ringdown need not imply dissipation.",
+    "The phase is undefined if the paired transverse perturbation amplitude collapses to numerical zero; a preregistered valid-fraction floor rejects that provider case.",
+    "Rigid Kabsch registration removes translation/rotation only; scale and reflection are forbidden."
+  ],
+  "predictions": [
+    "If Sine-Gordon closure is physical, positive a and b and held-out superiority should recur across independent provider families.",
+    "If effective fractional memory is physical, an interior alpha estimate should survive coarsening and independent physical providers.",
+    "Synthetic controls should recover implementation behavior while remaining ineligible for physical cross-source closure.",
+    "If the v0.2.3 synthetic recovery corresponds to real vortex dynamics, the candidate should survive on the finest numerically converged E010 provider representatives without using coarse-resolution replays as independent evidence."
+  ],
+  "provider_preregistration": {
+    "provider_config_sha256": {
+      "provider_e010_filament_basic.json": "f6d27fb67f7cc206d90d0882605e1f8e225a313795c0ecfb91e2c13cd4926361",
+      "provider_e010_euler_smoke.json": "27e238f8253e75ad72274283ec54f05f4510ecd9c3c612d7abd5d00d4894343a",
+      "provider_e010_euler_convergence.json": "7f31bb4fb9ba8e297854f2bf33111833455964b89ef00f3d617ed9af08abf8d2"
+    },
+    "score_config_sha256": {
+      "basic.json": "34c5c1a825cddfcf68da5d72da20cd0f9ef21a7429e7ea4efac8131e6c94cb90",
+      "full.json": "9f609aeee90c88a64c6765619921f1f740963d5fde5010f58957e842dc5c4ee1",
+      "framework_smoke.json": "438c74f5e760fb6bf44d8917414ce8cf1070548961f8d9599fefbc4d6dc7082b",
+      "e010_real_score.json": "5ac7cc6177b260745e2734db4d74d6b2bfdc1241eea5232b53326a67a1d096aa"
+    },
+    "phase_definition_id": "paired_kelvin_residual_phase_v1",
+    "ringdown_definition_id": "paired_kelvin_mode_envelope_v1",
+    "selection_policy": "strict_new_upstream_provider_representatives",
+    "note": "These hashes are inside the frozen SST-SCIENCE-CONTRACT-2 bundle; changing a provider/score config requires a new A056 version."
+  }
+}

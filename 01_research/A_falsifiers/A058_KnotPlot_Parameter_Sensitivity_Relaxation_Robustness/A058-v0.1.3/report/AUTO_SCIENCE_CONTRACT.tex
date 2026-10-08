@@ -1,0 +1,50 @@
+% AUTO-GENERATED. Do not edit; generated from frozen science_contract.json.
+\subsection*{Machine-readable science contract}
+\begin{description}
+\item[Research question] Are KnotPlot-relaxed knot/link exports robust to the relaxation, force, discretization and export parameters used in the historical SST pipeline, and does the historical export protocol qualify as a canonical production geometry source?
+\item[Objective] Separate topological identity from KnotPlot relaxation artefacts, quantify parameter sensitivity and relaxation/resolution convergence, and preregister the decision rule for whether a new canonical export generation is required.
+\item[$H_0$] H0: the historical final geometries are materially dependent on undocumented or numerically arbitrary KnotPlot settings, fail plateau/resolution/generator robustness, or are not provenance-complete; therefore they do not qualify as canonical production exports.
+\item[$H_1$] H1: within a preregistered safe numerical envelope, accepted numerical controls change normalized final geometry by less than the registered tolerances, baseline trajectories plateau, generator/resolution comparisons converge, and export bytes are format-pinned and provenance-complete.
+\end{description}
+\subsubsection*{Registered equations}
+\paragraph{E1: Scale-free shape comparison}
+\begin{equation}
+D_{shape}=\min_{R,\delta,\sigma}\left[M^{-1}\sum_{i=1}^{M}\|\hat x_i-R\hat y_{\sigma i+\delta}\|^2\right]^{1/2}
+\end{equation}
+\noindent\textit{Dimensional check:} Coordinates are divided by RMS radius before comparison, so D\_shape is dimensionless.\\
+\paragraph{E2: Scalar response effect}
+\begin{equation}
+\Delta_m=|m_c-m_0|/\max(|m_0|,10^{-12})
+\end{equation}
+\noindent\textit{Dimensional check:} Ratio of equal-dimension quantities is dimensionless.\\
+\paragraph{E3: Polygon discretization uniformity}
+\begin{equation}
+C_V(\ell)=\sigma(\ell_i)/\bar{\ell}
+\end{equation}
+\noindent\textit{Dimensional check:} Length divided by length is dimensionless.\\
+\paragraph{E4: Historical export-provenance completeness}
+\begin{equation}
+P_{\\mathrm{prov}}=\\frac{1}{N}\\sum_{j=1}^{N} I_{j,\\mathrm{ascii}} I_{j,\\mathrm{dyn}} I_{j,\\mathrm{runtime}}
+\end{equation}
+\noindent\textit{Dimensional check:} Mean of binary indicators; P\_prov is dimensionless and lies in [0,1].\\
+\paragraph{E5: Campaign artifact completeness}
+\begin{equation}
+C_{\\mathrm{camp}}=N_{\\mathrm{complete}}/N_{\\mathrm{expected}}
+\end{equation}
+\noindent\textit{Dimensional check:} Count ratio; C\_camp is dimensionless and lies in [0,1].\\
+\paragraph{E6: Historical canonical-export eligibility}
+\begin{equation}
+Q_{\\mathrm{hist}}=I(P_{\\mathrm{prov}}=1)\\prod_{g\\in\\{3,4,5,6,7\\}} I(G_g=\\mathrm{PASS})
+\end{equation}
+\noindent\textit{Dimensional check:} Product of binary indicators; Q\_hist is dimensionless and binary.\\
+\subsubsection*{Registered code-to-mathematics steps}
+\begin{enumerate}
+\item \textbf{S1} [G1; equations E4]: Audit every uploaded historical .kpc file and hash the original source scripts.
+\item \textbf{S2} [G2; equations E5]: Generate anonymous topology campaign scripts with explicitly pinned ASCII saves and per-checkpoint CSV metric capture.
+\item \textbf{S3} [G3; equations E1, E2]: Run dstep as a negative control and verify at least one genuine dynamics parameter is live.
+\item \textbf{S4} [G4; equations E1, E2]: Evaluate force ablations plus max-dr, close, bencon and stusplit perturbations without short-circuiting on prior failures.
+\item \textbf{S5} [G5; equations E3]: Compare Python FP64 length/Rg/edge-CV against the pybind11 C++ FP64 implementation on exported coordinates.
+\item \textbf{S6} [G6; equations E1, E2]: Test 10k-to-15k relaxation plateau and trend against 4k-to-10k changes.
+\item \textbf{S7} [G7; equations E1, E2, E3]: Test 0.5x/1x/2x/4x resolution response and same-topology dual-generator convergence.
+\item \textbf{S8} [G8; equations E4, E6]: Apply the frozen canonical-export qualification rule; any provenance defect is sufficient to reject the historical protocol as canonical while later scientific gates still run.
+\end{enumerate}

@@ -1,0 +1,157 @@
+--- release/README.md
++++ local/README.md
+@@ -71,6 +71,19 @@
+ 
+ `run_install.cmd` creates/updates the local virtual environment; `run_10_selftest.cmd` runs the instance tests and framework selftests before science.
+ 
++### Local Windows execution adjustments (2026-10-07)
++
++The runtime is stored in the sibling `.a055-v0.3.1-runtime` directory so installed
++third-party packages are outside the public instance blind scan. The selftest
++runner locates the canonical framework relative to this instance. Windows native
++loading uses an extended path for deeply nested isolated upstream runners.
++
++REVEAL follows the supplied framework policy. Frozen scientific inputs and gate
++thresholds are unchanged. A blocked reveal leaves the BLIND package available.
++Execution logs and local source-change hashes are stored in the sibling
++`A055-v0.3.1-execution` directory. The supplied release manifest is retained as
++the original package reference.
++
+ ## Interpretation boundary
+ 
+ A signed bidirectional traveling pair is evidence only for a linear projected traveling-wave sector of the registered finite-core filament model. It is not a particle identification. A mechanism is promoted only if the same sector also passes the frozen upstream spatial-convergence and nonlinear RPO gates. Reused simulation sources are not independent physical replication.
+--- release/a055_science/upstream.py
++++ local/a055_science/upstream.py
+@@ -1,6 +1,6 @@
+ from __future__ import annotations
+ from pathlib import Path
+-import importlib, json, sys
++import importlib, importlib.util, importlib.machinery, json, sys, os
+ from .util import read_json, sha256_file
+ from .workbench import a054_family
+ 
+@@ -74,6 +74,19 @@
+     # If a stale module from another campaign was imported, fail rather than silently mix code.
+     cert=importlib.import_module('a054_blind.certify_v020')
+     geom=importlib.import_module('a054_blind.blind_geometry')
++    # Load the same native artifact with a Windows extended path when the
++    # isolated campaign layout exceeds the legacy DLL loader path limit.
++    if os.name == 'nt' and 'a054_blind._native' not in sys.modules:
++        native_dir = runner / 'a054_blind'
++        for suffix in importlib.machinery.EXTENSION_SUFFIXES:
++            artifact = native_dir / ('_native' + suffix)
++            if artifact.is_file():
++                spec = importlib.util.spec_from_file_location(
++                    'a054_blind._native', '\\\\?\\' + str(artifact.resolve()))
++                module = importlib.util.module_from_spec(spec)
++                spec.loader.exec_module(module)
++                sys.modules['a054_blind._native'] = module
++                break
+     phys=importlib.import_module('a054_blind.physics')
+     modes=importlib.import_module('a054_blind.modes_v020')
+     cert_path=Path(cert.__file__).resolve()
+--- release/run_10_selftest.cmd
++++ local/run_10_selftest.cmd
+@@ -1,8 +1,9 @@
+ @echo off
+ setlocal
+ cd /d "%~dp0"
+-set "PY=.venv\Scripts\python.exe"
+-%PY% -m pytest tests -q
++set "SST_FALSIFIER_FRAMEWORK_ROOT=%~dp0..\..\..\..\06_templates\SST_Falsifier_Framework\SST_Falsifier_Framework_v1.0.4"
++set "PY=%~dp0..\.a055-v0.3.1-runtime\Scripts\python.exe"
++"%PY%" -m pytest tests -q
+ if errorlevel 1 exit /b %ERRORLEVEL%
+-%PY% run_instance.py SELFTEST
++"%PY%" run_instance.py SELFTEST
+ exit /b %ERRORLEVEL%
+--- release/run_all.cmd
++++ local/run_all.cmd
+@@ -6,24 +6,34 @@
+ set "WB=%~2"
+ if "%WB%"=="" set "WB=C:\workspace\projects\SST-Workbench"
+ set "SST_WORKBENCH_ROOT=%WB%"
+-call run_install.cmd || exit /b 1
+-call run_10_selftest.cmd || exit /b 1
+-set "PY=.venv\Scripts\python.exe"
+-%PY% run_instance.py FREEZE || exit /b 1
++call run_install.cmd
++  if errorlevel 1 exit /b 1
++call run_10_selftest.cmd
++  if errorlevel 1 exit /b 1
++set "PY=%~dp0..\.a055-v0.3.1-runtime\Scripts\python.exe"
++"%PY%" run_instance.py FREEZE
++  if errorlevel 1 exit /b 1
+ if /I "%MODE%"=="basic" (
+-  %PY% run_instance.py BASIC || exit /b 1
++  "%PY%" run_instance.py BASIC
++  if errorlevel 1 exit /b 1
+   exit /b 0
+ )
+ if /I "%MODE%"=="full" (
+-  %PY% run_instance.py FULL || exit /b 1
+-  %PY% run_instance.py REVEAL || exit /b 1
+-  %PY% tools\package_outputs.py || exit /b 1
++  "%PY%" run_instance.py FULL
++  if errorlevel 1 exit /b 1
++  "%PY%" run_instance.py REVEAL
++  if errorlevel 1 exit /b 1
++  "%PY%" tools\package_outputs.py
++  if errorlevel 1 exit /b 1
+   exit /b 0
+ )
+ if /I "%MODE%"=="certify" (
+-  %PY% run_instance.py CERTIFY || exit /b 1
+-  %PY% run_instance.py REVEAL || exit /b 1
+-  %PY% tools\package_outputs.py || exit /b 1
++  "%PY%" run_instance.py CERTIFY
++  if errorlevel 1 exit /b 1
++  "%PY%" run_instance.py REVEAL
++  if errorlevel 1 exit /b 1
++  "%PY%" tools\package_outputs.py
++  if errorlevel 1 exit /b 1
+   exit /b 0
+ )
+ echo Usage: run_all.cmd [basic^|full^|certify] [SST-Workbench-root]
+--- release/run_blind_only.cmd
++++ local/run_blind_only.cmd
+@@ -6,9 +6,13 @@
+ set "WB=%~2"
+ if "%WB%"=="" set "WB=C:\workspace\projects\SST-Workbench"
+ set "SST_WORKBENCH_ROOT=%WB%"
+-call run_install.cmd || exit /b 1
+-call run_10_selftest.cmd || exit /b 1
+-set "PY=.venv\Scripts\python.exe"
+-%PY% run_instance.py FREEZE || exit /b 1
+-%PY% run_instance.py %MODE% || exit /b 1
++call run_install.cmd
++  if errorlevel 1 exit /b 1
++call run_10_selftest.cmd
++  if errorlevel 1 exit /b 1
++set "PY=%~dp0..\.a055-v0.3.1-runtime\Scripts\python.exe"
++"%PY%" run_instance.py FREEZE
++  if errorlevel 1 exit /b 1
++"%PY%" run_instance.py %MODE%
++  if errorlevel 1 exit /b 1
+ echo A055 v0.3.1 %MODE% blind run complete; reveal not run.
+--- release/run_install.cmd
++++ local/run_install.cmd
+@@ -1,12 +1,12 @@
+ @echo off
+ setlocal
+ cd /d "%~dp0"
+-if not exist ".venv\Scripts\python.exe" (
+-  py -3 -m venv .venv 2>nul || python -m venv .venv
+-  if errorlevel 1 exit /b %ERRORLEVEL%
++if not exist "%~dp0..\.a055-v0.3.1-runtime\Scripts\python.exe" (
++  py -3 -m venv "%~dp0..\.a055-v0.3.1-runtime" 2>nul || python -m venv "%~dp0..\.a055-v0.3.1-runtime"
++  if errorlevel 1 exit /b 1
+ )
+-set "PY=.venv\Scripts\python.exe"
+-%PY% -m pip install --upgrade pip setuptools wheel
++set "PY=%~dp0..\.a055-v0.3.1-runtime\Scripts\python.exe"
++"%PY%" -m pip install --upgrade pip setuptools wheel
+ if errorlevel 1 exit /b %ERRORLEVEL%
+-%PY% -m pip install -r requirements.txt
++"%PY%" -m pip install -r requirements.txt
+ exit /b %ERRORLEVEL%

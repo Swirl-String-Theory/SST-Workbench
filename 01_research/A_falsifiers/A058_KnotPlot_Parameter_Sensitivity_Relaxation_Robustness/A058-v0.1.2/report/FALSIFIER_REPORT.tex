@@ -1,0 +1,54 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,enumitem,xurl}
+\usepackage[hidelinks]{hyperref}\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\title{A058 --- KnotPlot Parameter Sensitivity and Relaxation Robustness Falsifier}
+\author{SST-Workbench}\date{Version v0.1.2 --- SST Falsifier Framework v1.0.6}
+\begin{document}\maketitle\sloppy
+\section{Research question}
+Are historical KnotPlot-relaxed exports robust to relaxation, force, discretization and export settings, and do the historical scripts qualify as a canonical production geometry source?
+\section{Interpretive boundary}
+Relaxation is treated as a geometry-generation algorithm. A relaxed embedding is not evidence of intrinsic SST self-confinement or particle stability.
+\section{Historical audit}
+The supplied archive contains 50 scripts: 20 knot, 16 link and 14 torus constructions. The principal relaxation settings are constant across the archive; the scripts therefore do not constitute a parameter-sensitivity experiment. Their \code{save} commands do not explicitly pin \code{ascii/raw}, so output representation depends on KnotPlot's \code{sformat} state. The scripts also omit explicit settings for the documented relaxation commands \code{charge}, \code{hooke}, \code{power}, and \code{timeincr}; A058 records the runtime \code{version} and complete \code{parameters} state and treats those defaults as a provenance dependency until qualified.
+\section{Observables}
+For scalar metric $m$,
+\begin{equation}\Delta_m=\frac{|m_c-m_0|}{\max(|m_0|,10^{-12})}.\end{equation}
+For coordinate curves, a scale-free cyclic/reversal-aware Procrustes diagnostic is
+\begin{equation}
+D_{\rm shape}=\min_{R,\delta,\sigma}\left[\frac1M\sum_i\|\hat x_i-R\hat y_{\sigma i+\delta}\|^2\right]^{1/2}.
+\end{equation}
+Edge discretization is monitored through
+\begin{equation}C_V(\ell)=\sigma(\ell_i)/\bar\ell.\end{equation}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+\section{Campaign}
+The preregistered pilot contains one same-topology dual-generator pair, one symmetry control, two additional single-component cases, and one multi-component link. It tests the full on/off cube of mechanical/electrical/bending forces, \code{max-dr}, \code{close}, \code{bencon}, \code{stusplit}, a bead-resolution ladder, and \code{dstep} as a null control. Checkpoints are 0, 250, 1000, 4000, 10000 and 15000 atomic relaxation iterations.
+\section{Gate semantics}
+All scientific gates G1--G8 depend only on G0, not on each other. Therefore an early FAIL never prevents later diagnostic gates from running. G8 may reject the historical protocol on provenance while G3--G7 still determine the appropriate replacement settings.
+\begin{longtable}{L{0.07\linewidth}L{0.70\linewidth}L{0.15\linewidth}}\toprule Gate&Question&Authority\\\midrule
+G0&Framework/protocol integrity&foundational\\
+G1&Historical export provenance&audit\\
+G2&Campaign completeness&simulation\\
+G3&Null control + parameter liveness&simulation\\
+G4&Numerical-envelope robustness&simulation\\
+G5&Python/C++ FP64 parity&certification\\
+G6&Relaxation plateau&simulation\\
+G7&Resolution/generator convergence&simulation\\
+G8&Historical protocol canonical qualification&decision\\
+G9&Reveal integrity&framework\\\bottomrule\end{longtable}
+\section{Pre-registered thresholds}
+The \code{dstep} null control must remain below $10^{-10}$ in scalar relative effect. Numerical-envelope median scalar effect must remain at or below $10^{-2}$. Baseline 10k--15k drift must remain at or below $10^{-2}$. Coordinate thresholds are $D_{\rm shape}\le0.005$ for plateau/parameter robustness and $\le0.01$ for the resolution comparison. Native FP64 parity tolerance is $10^{-12}$ relative.
+\section{Results insertion contract}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+\section{Allowed interpretation}
+A G8 FAIL means the historical export protocol should not be promoted as canonical. It does not imply that its geometries are unusable. G3--G7 determine whether old geometries can remain comparison/legacy candidates and which parameter envelope should be frozen for a replacement canonical generation.
+\begin{thebibliography}{9}
+\bibitem{SchareinManual} R.~G. Scharein, 2026, ``KnotPlot: A Program for Viewing Mathematical Knots,'' KnotPlot Manual, \url{https://knotplot.com/doc/KnotPlot-Manual.pdf}.
+\bibitem{SchareinThesis} R.~G. Scharein, 1998, ``Interactive Topological Drawing,'' Ph.D. thesis, University of British Columbia, \url{https://www.knotplot.com/thesis/thesis_a4.pdf}.
+\bibitem{Kabsch1976} W.~Kabsch, 1976, ``A solution for the best rotation to relate two sets of vectors,'' Acta Crystallographica A \textbf{32}, 922--923, doi:10.1107/S0567739476001873.
+\bibitem{Framework} SST-Workbench, 2026, ``SST Falsifier Framework v1.0.6 CANONICAL\_FROZEN,'' internal reproducible framework release.
+\end{thebibliography}
+\end{document}

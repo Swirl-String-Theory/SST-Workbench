@@ -1,0 +1,182 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,hyperref,xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{A056 v0.4.0\\Circular/Fourier PKLSA--Sine-Gordon--Mittag-Leffler Falsifier}
+\author{SST-Workbench}
+\date{Framework v1.0.6 CANONICAL\_FROZEN}
+\begin{document}\maketitle
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification}
+Catalog A056, release v0.4.0. This is a new preregistered scientific release, not a threshold hotfix to v0.3.0. It replaces the raw-phase split-POD blocking test with a circular/Fourier spectral qualification while retaining the v0.3.0 metric as a non-blocking diagnostic. The release is a thin instance of SST Falsifier Framework v1.0.6 CANONICAL\_FROZEN and does not vendor or patch the framework.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Question}
+For source-native E010/PKLSA-qualified vortex carriers evolved by a preregistered finite-core filament or incompressible Euler provider, does a phase-topology-aware spectral qualifier identify a stable low-dimensional Kelvin residual field, and if so do Sine--Gordon restoring dynamics and/or Mittag--Leffler fractional-memory relaxation survive blind discovery, held-out confirmation and numerical certification?
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Hypotheses}
+The phase null family consists of Wave, Klein--Gordon and Duffing laws; Sine--Gordon is the phase candidate. The relaxation null family consists of exponential, stretched-exponential and bi-exponential laws; Mittag--Leffler is the fractional-memory candidate. Passing G2 is only an admissibility result. A physical conclusion additionally requires canonical-framework eligible independent/experimental replication at G7.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and interpretation boundary}
+The provider freezes the paired Kelvin residual phase before scoring. The phase is circular, $\varphi\equiv\varphi+2\pi$, so the v0.4.0 blocking representation uses $z=e^{i\varphi}$. The v0.3.0 $m=3$ filament run is development/motivation evidence only and cannot close any v0.4.0 gate. Official v0.4.0 E010 campaigns use the preregistered fresh perturbation $m=4$, $\epsilon=0.03$. Python/NumPy FP64 is the reference lane, C++/OpenMP FP64 is certification, and SYCL FP32/DD32 remains screening-only. In conservative inviscid dynamics, projected ringdown is interpreted as transfer/dephasing unless an independent dissipative mechanism is supplied.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols}
+\begin{longtable}{lll}\toprule Symbol & Meaning & Units\\\midrule
+$\varphi(s,t)$ & paired Kelvin residual phase & rad / dimensionless\\
+$z(s,t)$ & circular embedding $e^{i\varphi}$ & 1\\
+$Z_n(t)$ & complex spatial Fourier coefficient of $z$ & 1\\
+$P_n^W$ & normalized non-zero-mode power in time window $W$ & 1\\
+$\mathcal O_F$ & early/late Fourier-power overlap & 1\\
+$\eta_3^{\rm circ}$ & top-three circular-POD energy fraction & 1\\
+$a$ & phase-wave coefficient & $L^2T^{-2}$\\
+$b,c$ & restoring coefficients & $T^{-2}$\\
+$\alpha$ & Mittag--Leffler fractional order & 1\\
+$\tau$ & relaxation timescale & $T$\\\bottomrule\end{longtable}
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Equations}
+\subsection{Phase and relaxation model families}
+\begin{align}
+H_W &: \varphi_{tt}=a\varphi_{ss},\\
+H_{KG} &: \varphi_{tt}=a\varphi_{ss}-b\varphi,\\
+H_D &: \varphi_{tt}=a\varphi_{ss}-b\varphi-c\varphi^3,\\
+H_{SG} &: \varphi_{tt}=a\varphi_{ss}-b\sin\varphi,\\
+R_{\exp}(t)&=e^{-t/\tau},\\
+R_{SE}(t)&=e^{-(t/\tau)^\beta},\\
+R_{2e}(t)&=w e^{-t/\tau_1}+(1-w)e^{-t/\tau_2},\\
+R_{ML}(t)&=E_{\alpha,1}[-(t/\tau)^\alpha].
+\end{align}
+The exact null limit $E_{1,1}(-t/\tau)=e^{-t/\tau}$ remains a protected analytic test, and fractional-memory support still requires the preregistered interior interval $0.48<\alpha<0.97$.
+
+\subsection{Circular/Fourier G2 representation}
+The circular embedding and per-time spatial centering are
+\begin{equation}
+z(s,t)=e^{i\varphi(s,t)},\qquad \widetilde z(s,t)=z(s,t)-\langle z(\cdot,t)\rangle_s.
+\end{equation}
+If $\sigma_j$ are singular values of the time-by-space matrix $\widetilde z$, the top-$k$ circular-POD energy fraction is
+\begin{equation}
+\eta_k^{\rm circ}=\frac{\sum_{j=1}^{k}\sigma_j^2}{\sum_j\sigma_j^2}.
+\end{equation}
+For each time sample,
+\begin{equation}
+Z_n(t)=\frac{1}{N_s}\sum_{j=0}^{N_s-1}e^{i\varphi(s_j,t)}e^{-2\pi i n j/N_s}.
+\end{equation}
+For a time window $W$, excluding the spatial mean mode $n=0$,
+\begin{equation}
+P_n^W=\frac{\langle |Z_n(t)|^2\rangle_{t\in W}}
+{\sum_{m\ne0}\langle |Z_m(t)|^2\rangle_{t\in W}},\qquad n\ne0,
+\end{equation}
+and the discovery/confirmation spectral overlap is the Bhattacharyya coefficient
+\begin{equation}
+\mathcal O_F=\sum_{n\ne0}\sqrt{P_n^{D}P_n^{C}},\qquad 0\le\mathcal O_F\le1.
+\end{equation}
+The blocking G2 thresholds are preregistered as
+\begin{equation}
+\eta_3^{\rm circ}\ge0.95,\qquad
+\epsilon_{\rm orth}^{\rm circ}\le10^{-10},\qquad
+\mathcal O_F\ge0.90.
+\end{equation}
+The historical raw-$\varphi$ early/late POD overlap and the circular-POD early/late subspace overlap are diagnostics only; neither can block or rescue G2 in v0.4.0.
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm}
+The provider resolves and re-hashes E010 source-native carriers, creates paired base/perturbed finite-core evolutions, advects material markers, and extracts $\varphi(s,t)$ and $R(t)$. G1 validates the dynamic-provider contract. G2 applies the circular/Fourier qualifier above plus analytic reference checks. Only G2-qualified cases enter the unchanged phase and relaxation model competition at G3, followed by untouched confirmation blocks at G4, deterministic resolution checks plus C++/OpenMP FP64 certification at G5, evidence-class-aware replication at G7, and mechanism classification at G8. G6 is an optional non-blocking SYCL/DD32 screening branch. The legacy raw-POD diagnostic is written to outputs for longitudinal comparison only.
+
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Sources and provider contract}
+Real inputs satisfy \code{A056-DYNAMIC-PROVIDER-5}. Static knot geometry is not a substitute for $\varphi(t,s)$. E010 supplies qualified geometry/provenance; A056 supplies the perturbation experiment and dynamics. Each real case carries a frozen phase definition, perturbation ID, solver/provider version, carrier and upstream geometry hashes, evidence class, independence unit and provenance family. Resolution levels of one provider case are convergence replays, never independent replication.
+
+\subsection{Real-provider construction}
+The frozen Kelvin perturbation and observables are
+\begin{align}
+\mathbf X_\epsilon(s,0)&=\mathbf X_0(s)+\epsilon[\cos(m\theta)\mathbf e_1+\sin(m\theta)\mathbf e_2],\\
+\dot{\mathbf X}(s,t)&=\mathbf u(\mathbf X(s,t),t),\\
+q(s,t)&=\delta\mathbf X\cdot\mathbf e_1+i\,\delta\mathbf X\cdot\mathbf e_2,\\
+\varphi(s,t)&=\arg[q(s,t)e^{-im\theta(s)}],\\
+R(t)&=\frac{|c_m(t)|}{|c_m(0)|},\qquad c_m=N_s^{-1}\sum_jq(s_j,t)e^{-im\theta_j}.
+\end{align}
+The volumetric lane evolves the 3-D incompressible unforced Euler equations with a 2/3-dealiased pseudo-spectral RK4 method and a Gaussian tangent-tube finite-core seed. The cheaper filament lane evolves a regularized Biot--Savart centerline directly. Both lanes are simulation evidence and cannot by themselves close physical G7.
+
+% SST-REPORT-SECTION:GATES
+\section{Gates}
+\begin{description}
+\item[G0] frozen protocol, score/provider hashes and blind commitments;
+\item[G1] provider/admissibility;
+\item[G2] Python-FP64 analytic plus circular-POD/Fourier-power spectral qualification;
+\item[G3] blind SG/ML discovery against registered competitors;
+\item[G4] held-out temporal confirmation;
+\item[G5] deterministic resolution checks and C++/OpenMP FP64 certification;
+\item[G6] optional SYCL FP32/DD32 screening, non-blocking for G7;
+\item[G7] evidence-class-aware physical cross-source replication;
+\item[G8] joint mechanism classification;
+\item[G9] commitment-verified reveal.
+\end{description}
+A G2 failure is an admissibility failure of the preregistered spectral representation; it is not itself a Sine--Gordon or Mittag--Leffler falsification because G3 is then not run.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerics and convergence}
+Phase support still requires positive Sine--Gordon coefficients, condition number $\le10^8$, discovery $\Delta\mathrm{BIC}\ge10$, and the preregistered held-out NRMSE ratio and absolute ceiling. Memory support uses the same discovery/holdout logic plus $0.48<\alpha<0.97$. Provider and score configuration SHA-256 values are embedded in the frozen science contract.
+
+For $\mathbf c=(a,b)$,
+\[
+\delta_c=\frac{\|\mathbf c_f-\mathbf c_c\|_2}{\max(\|\mathbf c_f\|_2,10^{-30})}.
+\]
+For memory,
+\[
+\delta_\alpha=|\alpha_f-\alpha_c|,\qquad
+\delta_\tau=\frac{|\tau_f-\tau_c|}{\max(|\tau_f|,10^{-30})}.
+\]
+Production profiles additionally require A056 C++ FP64 parity $\le10^{-10}$. The ringdown observable and all downstream model-selection thresholds are unchanged from v0.3.0; only the G2 spectral admission test is scientifically replaced in v0.4.0.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority}
+\begin{longtable}{lll}\toprule Lane & Precision & Authority\\\midrule
+Python/NumPy & FP64 & REFERENCE\\
+C++17/OpenMP & FP64 & CERTIFICATION\\
+SYCL & FP32 & SCREENING\_ONLY\\
+SYCL DD32 / FP32x2 & two FP32 components & SCREENING\_ONLY\\\bottomrule\end{longtable}
+DD32 is not IEEE FP64. The immutable SST Falsifier Framework v1.0.6 supplies the canonical bootstrap, output-integrity, reveal-orchestration, compiler/linker and backend-authority contracts. Its numerical backend implementation is unchanged from the validated v1.0.4 baseline.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal}
+The framework creates nonced commitments for the private forbidden-term list and reveal payload. Blind source/output packaging excludes private/revealed content. Official v0.4.0 real-provider runs use the fresh preregistered $m=4$, $\epsilon=0.03$ perturbation. The observed v0.3.0 $m=3$ cases are development-only and may be inspected only through a read-only diagnostic route. Framework mode \code{REVEAL\_IF\_ALLOWED} preserves blindness when the frozen reveal policy is not satisfied.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and model selection}
+Discovery uses
+\[
+\mathrm{BIC}=n\ln(\mathrm{RSS}/n)+k\ln n.
+\]
+Confirmation uses normalized holdout error. Sine--Gordon and Mittag--Leffler must each improve on the best registered competitor, not merely fit acceptably in isolation. The new G2 thresholds are frozen before the first official v0.4.0 $m=4$ provider run; no threshold is tuned after observing a v0.4.0 outcome.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Results}
+\IfFileExists{A056_SUMMARY.tex}{\input{A056_SUMMARY.tex}}{No A056 v0.4.0 run summary has been generated in this report directory.}
+\IfFileExists{A056_CASE_RESULTS.tex}{\input{A056_CASE_RESULTS.tex}}{}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation}
+A pass of circular/Fourier G2 means only that the residual phase has a stable preregistered low-dimensional/cross-window spectral representation under the selected invariances. A G2 fail supports either genuine Kelvin-sector redistribution or failure of that representation; it does not by itself decide SG/ML. Synthetic-control recovery validates implementation only. E010 finite-core/Euler campaigns can establish replicated simulation conclusions but remain ineligible for physical G7. Physical support requires G5 certification plus eligible independent/experimental replication.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility}
+The frozen protocol bundle hashes \code{falsifier.toml}, science/source/gate/blind contracts, both commitment files and this report. The science contract additionally binds the provider and scoring configuration SHA-256 values. The exact framework pin is v1.0.6 at \code{06\_templates/SST\_Falsifier\_Framework/SST\_Falsifier\_Framework\_v1.0.6}. Run outputs preserve environment, source, backend, gate and output manifests; v1.0.6 verifies output-tree integrity before reveal.
+
+\begin{thebibliography}{99}
+\bibitem{ScottChuMcLaughlin1973} A.~C.~Scott, F.~Y.~F.~Chu, and D.~W.~McLaughlin, ``The soliton: A new concept in applied science,'' \emph{Proceedings of the IEEE} \textbf{61} (1973), 1443--1483. \href{https://doi.org/10.1109/PROC.1973.9296}{doi:10.1109/PROC.1973.9296}.
+\bibitem{Podlubny1999} I.~Podlubny, \emph{Fractional Differential Equations}, Academic Press, 1999.
+\bibitem{Gorenflo2014} R.~Gorenflo, A.~A.~Kilbas, F.~Mainardi, and S.~V.~Rogosin, \emph{Mittag-Leffler Functions, Related Topics and Applications}, Springer, 2014. \href{https://doi.org/10.1007/978-3-662-43930-2}{doi:10.1007/978-3-662-43930-2}.
+\bibitem{Jolliffe2002} I.~T.~Jolliffe, \emph{Principal Component Analysis}, 2nd ed., Springer, 2002. \href{https://doi.org/10.1007/b98835}{doi:10.1007/b98835}.
+\bibitem{Bishop1975} R.~L.~Bishop, ``There Is More Than One Way to Frame a Curve,'' \emph{American Mathematical Monthly} \textbf{82} (1975), 246--251. \href{https://doi.org/10.2307/2319846}{doi:10.2307/2319846}.
+\bibitem{Saffman1992} P.~G.~Saffman, \emph{Vortex Dynamics}, Cambridge University Press, 1992. \href{https://doi.org/10.1017/CBO9780511624063}{doi:10.1017/CBO9780511624063}.
+\bibitem{Dekker1971} T.~J.~Dekker, ``A floating-point technique for extending the available precision,'' \emph{Numerische Mathematik} \textbf{18} (1971), 224--242. \href{https://doi.org/10.1007/BF01397083}{doi:10.1007/BF01397083}.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,1 @@
+@echo off\r\nsetlocal\r\ncall run_python.cmd tools\\verify_package.py\r\nexit /b %ERRORLEVEL%\r\n
