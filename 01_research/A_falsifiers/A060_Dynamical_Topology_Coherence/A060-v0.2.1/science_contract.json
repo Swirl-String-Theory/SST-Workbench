@@ -1,0 +1,247 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Do independent dimensionless analytic reference models satisfy the M00--M04 Euler, pressure, strain, VA-projection and spherical-flux identities within predetermined tolerances?",
+  "objective": "Qualify numerical diagnostic operators using four SHA-locked papers and analytical controls; do not infer SST particle/gravity validity.",
+  "null_hypothesis": "H0: at least one analytic identity, source hash, or native FP64 parity condition fails at its preregistered threshold.",
+  "alternative_hypothesis": "H1: all eligible M00--M04 local mathematical benchmarks converge and strict CPU FP64 parity matches the Python reference.",
+  "assumptions": [
+    "Smooth incompressible three-dimensional velocity fields where analytic benchmarks apply.",
+    "Periodic Fourier fields for Helmholtz projection; nonzero wave numbers inverted, zero-mode removed.",
+    "M04 spherical flux identity is checked on linear velocity fields only, not a universal turbulent flux statistic.",
+    "Paper PDFs are literature/provenance; independent numerical providers or PKLSA stability are not claimed."
+  ],
+  "symbols": [
+    {
+      "symbol": "A",
+      "meaning": "velocity gradient tensor",
+      "si_unit": "s^{-1}",
+      "dimensions": "T^{-1}"
+    },
+    {
+      "symbol": "S",
+      "meaning": "symmetric velocity strain",
+      "si_unit": "s^{-1}",
+      "dimensions": "T^{-1}"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "curl of velocity",
+      "si_unit": "s^{-1}",
+      "dimensions": "T^{-1}"
+    },
+    {
+      "symbol": "Q",
+      "meaning": "second velocity gradient invariant",
+      "si_unit": "s^{-2}",
+      "dimensions": "T^{-2}"
+    },
+    {
+      "symbol": "Phi",
+      "meaning": "scale-space energy flux per mass",
+      "si_unit": "m^{2} s^{-3}",
+      "dimensions": "L^{2}T^{-3}"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Landreman Euler residual",
+      "latex": "\\nabla\\cdot u=0,\\quad (u\\cdot\\nabla)u=-\\nabla Q_L,\\quad Q_L=(x^2+y^2+4z^2)/2",
+      "inputs": [
+        "u",
+        "x"
+      ],
+      "outputs": [
+        "divergence",
+        "momentum_residual"
+      ],
+      "dimensional_check": "nondimensional reference coordinates/velocities"
+    },
+    {
+      "id": "E2",
+      "purpose": "Pressure/Schur tensor invariants",
+      "latex": "Q_A=-\\tfrac12\\mathrm{tr}(A^2),\\quad 2Q_A=\\tfrac12|\\omega|^2-S:S,\\quad m\\leq1-f\\leq3m",
+      "inputs": [
+        "A"
+      ],
+      "outputs": [
+        "Q",
+        "f",
+        "m"
+      ],
+      "dimensional_check": "Q_A and omega^2 both T^-2; f,m dimensionless"
+    },
+    {
+      "id": "E3",
+      "purpose": "Projected VA source",
+      "latex": "\\mathbb P_{\\perp}VA=VA-\\nabla\\nabla^{-2}\\nabla\\cdot VA,\\quad \\nabla\\times g=-\\mathbb P_{\\perp}VA",
+      "inputs": [
+        "VA"
+      ],
+      "outputs": [
+        "projected_VA",
+        "curl_g"
+      ],
+      "dimensional_check": "vorticity source T^-2; spatial operators cancel appropriately"
+    },
+    {
+      "id": "E4",
+      "purpose": "Zhang-Yao angular flux for linear fields",
+      "latex": "\\Phi_\\ell=\\ell^2(3R_s+V_s/4)/10,\\quad R_s=-\\mathrm{tr}(S^3)/3,\\ V_s=\\omega\\cdot S\\omega",
+      "inputs": [
+        "A",
+        "ell"
+      ],
+      "outputs": [
+        "Phi_ell"
+      ],
+      "dimensional_check": "ell^2 times T^-3 gives L^2 T^-3"
+    },
+    {
+      "id": "E5",
+      "purpose": "Strict FP64 cross-backend parity",
+      "latex": "e_{\\infty}=\\max_i|d_i^{Cpp}-d_i^{Py}|/\\max(1,|d_i^{Py}|)\\leq10^{-10}",
+      "inputs": [
+        "A",
+        "C++ diagnostics",
+        "Python diagnostics"
+      ],
+      "outputs": [
+        "parity_error"
+      ],
+      "dimensional_check": "dimensionless normalized relative error"
+    }
+  ],
+  "observables": [
+    {
+      "id": "M00",
+      "definition": "4 file SHA-256 matches; framework 92/92 manifest matches",
+      "equation_refs": [
+        "E1"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "M01",
+      "definition": "max divergence and Euler+Poisson reference residual",
+      "equation_refs": [
+        "E1"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "M02",
+      "definition": "pressure source and Schur wedge residual",
+      "equation_refs": [
+        "E2"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "M03",
+      "definition": "periodic curl inverse-Laplacian projection residual",
+      "equation_refs": [
+        "E3"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "M04",
+      "definition": "spherical-flux exact quadrature residual",
+      "equation_refs": [
+        "E4"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "CPP",
+      "definition": "native strict double-precision tensor parity",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S0",
+      "operation": "Verify four included PDF SHA-256 and original framework package-manifest files",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S1",
+      "operation": "Evaluate three Landreman configurations by central-difference Euler residuals",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S2",
+      "operation": "Evaluate shear/balanced vortex and preregistered random tensor wedge",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Evaluate periodic VA projection and direct sphere quadrature",
+      "formula_refs": [
+        "E3",
+        "E4"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S4",
+      "operation": "Compile dedicated double C++ tensor diagnostics and compare against Python without fallback",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G5"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F0",
+      "criterion": "Any PDF hash mismatch or framework file hash mismatch",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F1",
+      "criterion": "M01 divergence >=3e-7, momentum >=2e-7 or pressure-source residual >=3e-6",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F2",
+      "criterion": "M02 analytic wedge violation >1e-10 or balanced source >1e-12",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F3",
+      "criterion": "M03 projection error >=1e-8 or mean enstrophy source >=1e-9; M04 quadrature relative error >=1e-12",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F4",
+      "criterion": "C++ unavailable or parity above 1e-10",
+      "conclusion_if_met": "UNRESOLVED_NUMERICAL_OR_FAIL_PARITY"
+    }
+  ],
+  "edge_cases": [
+    "zero-vorticity VA undefined",
+    "zero grad tensor normalized f undefined",
+    "matrix eigenvalue degeneracy",
+    "missing compiler",
+    "no LaTeX compiler",
+    "unreconciled A045 registry"
+  ],
+  "predictions": [
+    "M01--M04 are algebraic/numerical controls and do not predict SST masses or gravity.",
+    "Balanced vortex has Q_A=0 but positive vortex stretching; gradients alone cannot infer 3D physical confinement."
+  ]
+}

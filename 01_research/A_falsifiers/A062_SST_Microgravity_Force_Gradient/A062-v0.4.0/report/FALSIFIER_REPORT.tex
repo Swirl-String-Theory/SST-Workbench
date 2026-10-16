@@ -1,0 +1,88 @@
+% SST-REPORT-SECTION:IDENTIFICATION
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+% SST-REPORT-SECTION:SOURCES
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+% SST-REPORT-SECTION:INTERPRETATION
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,booktabs,longtable,hyperref,array}
+\title{A062 - SST Microgravity Source Falsifier\\
+\large v0.4.0: Finite Vortex-Tube Energy, Organized Swirl Transport and Gravitational Closure}
+\author{SST-Workbench -- source-pinned, CPU-reproducible}
+\date{13 October 2026}
+\begin{document}
+\maketitle
+\section{Identification and scope}
+The present instance is an extension of, not a replacement for, A062-v0.1.0 to v0.3.0. Competing hypotheses are isolated: a finite-width Gaussian-vorticity tube with finite kinetic energy; the localized stress double-divergence gravity candidate in SST-73; and a separate postulated bulk gravity/clock mode in SST Canon v0.8.35. A positive energy is not a derivation of a gravitational force.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\section{Source provenance and prerequisites}
+Both E011/SKLSA v0.3.0 STATIC\_READY trefoil carriers are separately authenticated by raw SHA-256: Gilbert ideal Fourier record 3:1:1 and KnotPlot VECT coarse relaxed knot. \texttt{STATIC\_READY} does not mean \texttt{DYNAMICS\_READY}. Opposite signed writhe indications are not erased. See \texttt{inputs/SST\_KNOWLEDGE\_CENSUS.json} for paper-scoped literature provenance; unread articles are not silently used as evidence.
+\section{Resolved smooth vorticity-tube candidate}
+For each closed smooth or piecewise-smooth curve $\gamma$ and Gaussian width $a>0$, define
+\begin{equation}
+\boldsymbol{\omega}_a(\mathbf{x}) =
+\Gamma \oint_\gamma d\mathbf{X}\,
+\frac{\exp[-|\mathbf{x}-\mathbf{X}|^2/(2a^2)]}{(2\pi a^2)^{3/2}}.
+\end{equation}
+This is a three-dimensional smooth, finite-width vorticity distribution; its divergence vanishes exactly for a closed curve because the derivative along the curve is a total derivative. It need not be a stationary Euler or Navier--Stokes solution.
+
+The compatible free-space kinetic energy for constant ambient density is
+\begin{equation}
+E_a=\frac{\rho_f\Gamma^2}{8\pi}\oint_\gamma\oint_\gamma
+\frac{\operatorname{erf}(|\mathbf{X}-\mathbf{Y}|/(2a))}
+{|\mathbf{X}-\mathbf{Y}|}\,d\mathbf{X}\cdot d\mathbf{Y}.
+\end{equation}
+The finite diagonal limit is $1/(a\sqrt\pi)$. This kernel avoids arbitrary grid-cell cutoff and supports independent C++/Python quadrature. Only ambient density $\rho_f$ enters $E_a$. Substituting the much larger $\rho_{\mathrm{core}}$ into the whole bath is \emph{not a valid physical inference}.
+
+For a diagnostic physical length, the code reports $L_{\mathrm{phys}}=r_c/a_{\mathrm{normalized}}$; this \emph{assumes} $a_{\mathrm{core}}=r_c$, whereas SST Canon v0.8.35 distinguishes the two. SI energy and mass under that scale hypothesis must not be reported as a derived electron mass.
+\section{Three candidate gravitational source routes}
+The SST-73 organized transport tensor is $\Sigma_{ij}=\rho_f u_i u_j$. Its preferred source $S_C=\lambda\partial_i\partial_j\Sigma_{ij}$ obeys
+\begin{equation}
+\int_{\mathbb{R}^3}S_C\,d^3x =
+\lambda\lim_{R\rightarrow\infty}\oint_{S_R}n_i\,\partial_j\Sigma_{ij}\,dA=0
+\end{equation}
+under the stated free-space decay assumptions. Changing from pressure to a stress double divergence does not change this obstruction for a localized constant-density Euler velocity field. Non-decaying envelopes, boundary sources and nonlocal constitutive responses are not excluded.
+
+The candidate energy source is instead
+\begin{equation}
+\rho_E(\mathbf{x})=\tfrac12\rho_f|\mathbf{u}(\mathbf{x})|^2,\qquad
+Q_E=\frac{1}{c^2}\int\rho_E\,d^3x>0.
+\end{equation}
+This follows as \emph{energy-equivalent mass} from a nontrivial tube, not as a theorem about active gravity. A separate \emph{postulate}
+$\nabla^2\Phi=4\pi K\rho_E/c^2$
+would generate an inverse-square far field only because that mediator and charge coupling were introduced explicitly. Deriving $K$, universal attraction and the same coupling to a test knot remain open.
+\section{Viscosity, Euler and Navier--Stokes}
+For a smooth unforced incompressible Navier--Stokes flow with sufficient decay,
+\begin{equation}
+\frac{dE}{dt}=-\rho_f\nu\int|\boldsymbol\omega|^2\,d^3x.
+\end{equation}
+The code computes the integral analytically from a Gaussian double-line convolution, returning the coefficient of an \emph{optional} viscosity. This is a screen, not numerical evolution, a dynamical stability claim, or a use of an alleged solved Millennium Problem. Euler is $\nu=0$ in this specific dissipation identity, without guaranteeing stationarity.
+\section{Predeclared numerical gates}
+The maximum last-resolution change for the energy integral must be below $0.007$; the scaled quadrature divergence below $10^{-5}$; normalized provider integral disagreement below $0.20$; and independent native FP64 relative error below $2\times10^{-10}$. G4 may FAIL while later gates run. G6 and G8 remain UNRESOLVED until true dynamic and scalar-gravity qualifications exist. Conditional comparisons do not retroactively redefine the frozen criteria.
+\section{Scientific interpretation}
+A nonzero kinetic energy is a source of nonzero energy-equivalent mass. For isolated locally smooth stress of the SST-73 double-divergence form, the integrated gravity monopole remains zero. A universal gravitational force has therefore neither been derived nor ruled out in every SST variant; the tested local stress-source hypothesis fails, while the energy-source hypothesis is mathematically admissible but constitutively and dynamically underdetermined.
+\section{Blindness and reproducibility}
+Framework v1.0.8 \texttt{LOCAL\_VALIDATED\_CANDIDATE} is bundled unmodified. The instance FREEZE launcher creates 32-byte private nonce/key files only when absent and before any commitments/freeze, never rotates existing files; private secrets are excluded from source ZIP. Unique run IDs prevent rerun overwrite. Public literature and benchmarks do not constitute held-out experimental validation.
+\begin{thebibliography}{9}
+\bibitem{sst18} SST-18, \emph{Unifying Electromagnetism, Gravity and Quantum Geometry via Incompressible Hydrodynamics}.
+\bibitem{sst34} SST-34, \emph{SST-Hydrogen: Short-Range Circulation Coupling (Deprecated as Gravity)}.
+\bibitem{sst59} SST-59, \emph{Mass Hydrodynamic Topology}.
+\bibitem{sst61} SST-61, \emph{Helicity-Constrained Stability Beyond Energy Minimization}.
+\bibitem{sst73} SST-73, \emph{A Poisson-Type Gravity Program from Organized Swirl Transport}, esp. Secs. 9, 13, 16, Appendix B.
+\bibitem{canon} SST Canon v0.8.35, esp. Secs. 11.11, 11.16--11.17; explicit calibrated-$G$ guard.
+\bibitem{prior} A062-v0.1.0 to v0.3.0 scientific gate reports, archived independently.
+\end{thebibliography}
+\end{document}

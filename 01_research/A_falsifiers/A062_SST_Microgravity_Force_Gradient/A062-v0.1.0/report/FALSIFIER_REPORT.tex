@@ -1,0 +1,119 @@
+% SST-REPORT-SECTION:IDENTIFICATION
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+% SST-REPORT-SECTION:SOURCES
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+% SST-REPORT-SECTION:INTERPRETATION
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=21mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,longtable,hyperref,xcolor,enumitem}
+\newcommand{\vswirl}{\mathbf v_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\title{A062 --- SST Microgravity Force-Gradient Falsifier\\\large v0.1.0 Scientific Protocol and Standalone Numerical Report}
+\author{SST-Workbench --- Candidate Model Analysis}
+\date{12 October 2026}
+
+% Rendered from local or framework pipeline with explicit optional measured results.
+
+\newcommand{\AFORCE}{not evaluated}
+
+\newcommand{\AGRAD}{not evaluated}
+
+\newcommand{\ADELTA}{not evaluated}
+
+\newcommand{\AMASS}{not evaluated}
+
+\newcommand{\AMRATIO}{not evaluated}
+
+\newcommand{\ASLOPEX}{not evaluated}
+
+\newcommand{\ASLOPEZ}{not evaluated}
+
+\newcommand{\AFX}{not evaluated}
+
+\newcommand{\AFZ}{not evaluated}
+
+\newcommand{\AREFINEX}{not evaluated}
+
+\newcommand{\AREFINEZ}{not evaluated}
+
+\newcommand{\AGATES}{not evaluated}
+
+\newcommand{\AHASH}{not evaluated}
+\IfFileExists{LOCAL_METRICS.tex}{\input{LOCAL_METRICS.tex}}{}
+\begin{document}
+\maketitle
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\noindent\textbf{Status: restricted model diagnostics, not a test of SST canon as a whole.}
+The target-bearing data of the published article are already public and are therefore \emph{not} scientifically blind. The science-only run is separate from the canonical frozen v1.0.7 pipeline; no framework certification or real reveal is claimed. Protocol SHA-256 (prefix): \texttt{\AHASH}.
+
+\section{Question, provenance and expected falsifiers}
+Can an explicit incompressible, inviscid, localized azimuthal Gaussian vortex yield both a mass-equivalent source and a gravitational far-field force gradient with $F\propto r^{-2}$, without injecting $G$ or fitting its amplitude? The mechanical instrument uses a 100-g test mass and a movable 1.2-g source at 4.2 cm separation, with 1.4 $\mu$m modulation. These are public rounded values reported by Zhu et al.\ \cite{Zhu2026}. The tested candidate is \emph{not} a PKLSA knot and the surrogate source width is a chosen coarse-graining scale $a=3\,\mathrm{mm}$, not the canonical $r_c$.
+
+\paragraph{Null and alternative.} Under H0 the restricted Gaussian mass/pressure closure fails at least one pre-registered scaling/mass test. Under H1 this closure passes both the mass ratio (within 10\%) and the inverse-square slope ($2\pm0.2$), on both source orientations, with zero fitted parameters. No general SST conclusion can be inferred from rejecting H1.
+
+\section{Comparator and mechanical readout}
+The Newtonian benchmark is
+\begin{equation}F_N=\frac{G m_s m_t}{r^2},\qquad
+\left|\frac{d F_N}{dr}\right|=\frac{2Gm_sm_t}{r^3},\qquad \Delta F_N\simeq\left|\frac{d F_N}{dr}\right|\,\Delta r.\end{equation}
+Use $G=6.67430\times10^{-11}\,\mathrm{m^3 kg^{-1}s^{-2}}$ as the \emph{benchmark input only}. The published force values have a Newton-calibrated interpretation and cannot be used as an independent determination of $G$ or $F_{\mathrm{gr}}^{\max}=c^4/(4G)$.
+
+The reproduced static force is $\AFORCE\,\mathrm{N}$; the force gradient is $\AGRAD\,\mathrm{N/m}$ and the first-order modulation is $\ADELTA\,\mathrm{N}$. The reported rounded target is $3.02\times10^{-16}\,\mathrm{N}$. Apparatus response, spatial geometry and detector noise must be modelled independently before inference from raw traces.
+
+\section{Euler pressure source and dimensional audit}
+An exact divergence-free \emph{initial velocity field} (not a claimed stationary Euler solution) is
+\begin{equation}\mathbf v(\mathbf x)=\Omega \exp\!\left(-\frac{x^2+y^2+z^2}{2a^2}\right)(-y,x,0),\quad
+\Omega=\frac{e^{1/2}|\vswirl|}{a}.\end{equation}
+Here $\rhoF=7.0\times10^{-7}\,\mathrm{kg\,m^{-3}}$ and $|\vswirl|=1.09384563\times 10^6\,\mathrm{m\,s^{-1}}$. With $\nabla\cdot\mathbf v=0$, the instantaneous Euler pressure-Poisson source is
+\begin{equation}\nabla^2p=-\rhoF\,\partial_i v_j\,\partial_j v_i
+=2\rhoF\Omega^2e^{-r^2/a^2}\left(1-\frac{x^2+y^2}{a^2}\right)\equiv S(\mathbf x).\end{equation}
+The infinite-domain solution and test-volume approximation used by the code are
+\begin{equation}p(\mathbf x)=-\frac{1}{4\pi}\int_{\mathbb R^3}\frac{S(\mathbf y)}{|\mathbf x-\mathbf y|}\,d^3y,\quad
+\mathbf F_p=-V_t\nabla p,\qquad V_t=\frac{4\pi a^3}{3}.\end{equation}
+This $V_t$ is a deliberately fixed test-volume proxy; it is \emph{not} independently identified with the physical 100-g test mass. $[S]=\mathrm{Pa\,m^{-2}}$ and $[V_t\nabla p]=\mathrm N$.
+
+The Gaussian field has zero integrated monopole $\int S\,d^3x=0$ on the infinite domain. Thus its pressure field has no $1/r$ scalar monopole contribution, and a generic $1/r^2$ force is not expected at large separations. Both axial and equatorial orientations are tested to avoid orientation cherry-picking.
+
+\section{Explicit (candidate) mass closure}
+The proposed \emph{restricted} energy-mass identification is
+\begin{equation}m_E=\frac{1}{2c^2}\rhoF\int_{\mathbb R^3}|\mathbf v|^2\,d^3x
+=\frac{\rhoF\Omega^2\pi^{3/2}a^5}{2c^2}.
+\end{equation}
+No source mass is used to calibrate $\Omega$: it is fully set by the canon's characteristic speed and the fixed $a$. The predicted equivalent mass is $\AMASS\,\mathrm{kg}$ and $m_E/m_s=\AMRATIO$ (experimental source: $1.2\times10^{-3}\,\mathrm{kg}$). Disagreement refutes \emph{this} postulated closure, not every possible vortex mass theory.
+
+\section{Numerics, precision and gate outcomes}
+The instantaneous pressure gradient is evaluated by finite-volume midpoint integration of the free-space Green function over a cube extending to $5.5 a$ in every direction. Both field orientations are computed at six separations from $0.03$ to $0.08\,\mathrm{m}$, with grid sizes $40^3,56^3$ and $80^3$ for the full mode. Refinement is checked independent of the physical gates. Analytic $\nabla\cdot\mathbf v=0$ and units are verified. A separate strict native C++ FP64 implementation checks numerical parity when an actual compiler is available; an unavailable compiler is reported as UNRESOLVED, never as a pass.
+
+\begin{center}\AGATES\end{center}
+Equatorial pressure-force at $0.042\,\mathrm m$: $\AFX\,\mathrm N$; axial: $\AFZ\,\mathrm N$. Fitted $|F_p|\propto r^{-n}$ exponents: equatorial $n=\ASLOPEX$, axial $n=\ASLOPEZ$. Max relative refinement changes: $\AREFINEX$, $\AREFINEZ$. A violation of the mass or slope tolerance is recorded as FAIL even when earlier independent gates failed.
+
+\section{Limits, identifiability and next experiment}
+\begin{enumerate}[nosep]
+\item Published rounded amplitude/force numbers are not independent raw force-series data or a measurement of $G$.
+\item The core scale $r_c=1.40897017\times10^{-15}\,\mathrm m$ does not follow from the chosen millimetre surrogate width $a$. No matched-asymptotic core-to-macro calculation is provided.
+\item The instantaneous Gaussian field is not a vortex knot, pressure-support closure, or an independently proven long-lived Euler solution.
+\item Obtain a calibrated force or displacement sweep at \emph{at least four separations}, repeat with two source materials, record mechanical transfer function and covariance, and withhold confirmation data from model selection.
+\item Replace the Gaussian test provider with genuine PKLSA finite-core knots in a new registered protocol, deriving momentum transfer and test-object geometry rather than assuming $F=-V_t\nabla p$.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{Zhu2026}Y. Zhu, Q. Geng, B. Xue, Y. Sun, R. Zhang, X. Chen, X. Jiang, F. Azeem, M. Tierz and W. Wan (2026), ``Stopped-light-enhanced gravitational force sensing,'' \emph{Nature Nanotechnology}, \url{https://doi.org/10.1038/s41565-026-02298-8}.
+\bibitem{Batchelor1967} G. K. Batchelor (1967), \emph{An Introduction to Fluid Dynamics}, Cambridge University Press, \url{https://doi.org/10.1017/CBO9780511800955}.
+\bibitem{Gibbons2002} G. W. Gibbons (2002), ``The Maximum Tension Principle in General Relativity,'' \emph{Foundations of Physics} \textbf{32}, 1891--1901, \url{https://doi.org/10.1023/A:1022370717626}.
+\bibitem{Cavendish1798} H. Cavendish (1798), ``Experiments to Determine the Density of the Earth,'' \emph{Philosophical Transactions of the Royal Society of London} \textbf{88}, 469--526, \url{https://doi.org/10.1098/rstl.1798.0022}.
+\end{thebibliography}
+\end{document}

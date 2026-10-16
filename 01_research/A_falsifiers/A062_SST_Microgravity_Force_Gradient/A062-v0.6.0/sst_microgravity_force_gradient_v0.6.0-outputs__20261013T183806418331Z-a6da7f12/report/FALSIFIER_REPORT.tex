@@ -1,0 +1,74 @@
+% SST-REPORT-SECTION:IDENTIFICATION
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+% SST-REPORT-SECTION:SOURCES
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+% SST-REPORT-SECTION:INTERPRETATION
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=17mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue}
+\title{A062 --- Gravitational Source and Test-Body Closure\\
+\large v0.6.0: Time-Resolved Vortex Energy, Conditional Free-Space Green Response and Equivalence Gates}
+\author{SST-Workbench | source-pinned, hypothesis-separated falsifier}
+\date{13 October 2026}
+\begin{document}\maketitle
+\section{Status, identification and scientific boundary}
+The original A062-v0.1.0--v0.5.0 results remain separate. Two \emph{independently pinned} E011 trefoil geometries, Gilbert and KnotPlot, initialize a smooth finite Gaussian vorticity tube. A062-v0.5.0 established only short-time \emph{periodic} nonlinear Euler/Navier--Stokes integration, not isolated knot equilibrium. v0.6.0 now tests source integrals and a \emph{conditional} Green-field response for the time-resolved velocity snapshots. The assumed mediator is \textbf{not derived} from Euler, nor is universal gravitation. Numerical agreement with $1/R^2$ must \textbf{not} promote G8 to PASS.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\section{Hydrodynamic active-source candidate}
+The E011 tube is smoothed with $a=0.11$ in a dimensionless periodic box $L=1.2$, whose upstream trefoil geometrical reach is smaller ($\simeq0.025$--$0.028$). Evolve the divergence-free velocity via the projected unforced Euler/NS equations,
+\begin{equation}
+\partial_t\mathbf{u}=\mathbb{P}(\mathbf u\times\boldsymbol\omega)+\nu\Delta\mathbf u,
+\qquad \boldsymbol\omega=\nabla\times\mathbf u,\qquad \nabla\cdot\mathbf u=0.
+\end{equation}
+The cell energy provides a candidate energy-equivalent mass \emph{only after specifying a physical scale},
+\begin{equation}
+\rho_E=\tfrac12\rho_f|\mathbf{u}|^2,\qquad Q_E=\int\rho_E/c^2\,d^3x>0.
+\end{equation}
+For the present numerical source-screen only, set $\rho_f=c=1$ and use $Q=\int_{\mathrm{cell}} |\mathbf u|^2/2\,d^3x$. This is a normalized \emph{kinetic charge}, not SI gravitational mass. Both providers, both $\nu\in\{0,0.005\}$, and snapshots $t\in\{0,0.03\}$ are evaluated; the actual velocity snapshots are regenerated and compared against user-provided Windows v0.5.0 energies.
+\section{Explicitly postulated gravity mediator}
+\textbf{An additional scalar field law is assumed, rather than derived:}
+\begin{equation}
+\nabla^2\Phi=4\pi K q,\qquad q=\tfrac12|\mathbf u|^2,\qquad K=1\quad\text{(dimensionless test)}.
+\end{equation}
+Then in an \emph{isolated free-space lifted-cell proxy},
+\begin{align}
+\Phi(\mathbf R)&=-K\int_{\mathrm{cell}}\frac{q(\mathbf x)}{|\mathbf R-\mathbf x|}\,d^3x,\\
+\mathbf g(\mathbf R)&=-K\int_{\mathrm{cell}}\frac{q(\mathbf x)(\mathbf R-\mathbf x)}{|\mathbf R-\mathbf x|^3}\,d^3x.
+\end{align}
+By construction, when $Q\ne0$, $\Phi\sim-KQ/R$ and $|\mathbf g|\sim KQ/R^2$. \textbf{This slope is imposed by the field equation.} The periodized underlying Euler/NS field has not become an isolated solution by copying one cell into this integral. An independent C++17 numerical kernel and the closed-form Gaussian reference
+\begin{equation}
+|g(r)|=\frac{KQ}{r^2}\left[\operatorname{erf}\left(\frac{r}{\sqrt2\sigma}\right)
+-\sqrt{\frac2\pi}\frac r\sigma e^{-r^2/(2\sigma^2)}\right]
+\end{equation}
+certify the conditional numerical Green calculation only.
+\section{Competing and negative source controls}
+\textbf{SST-73} postulates $S_C=\lambda\partial_i\partial_j(\rho_f u_i u_j)$. For localized smooth stress with adequate decay, $\int_{\mathbb{R}^3} S_C\,dV=0$; on a periodic domain its zero Fourier mode also vanishes. The SST-73 \emph{local stress monopole} hypothesis therefore remains G4 FAIL, despite vortex-tube energy being positive.
+
+A \emph{purely local instantaneous} clock map $S_{\mathrm{loc}}(\mathbf{x})=\sqrt{1-|\mathbf u|^2/c_{\mathrm{ref}}^2}$ returns to a constant outside compact support and cannot by itself make a long-range monopole. G14 FAIL applies \textbf{only} to that narrowly specified local map, not to an independent propagating Swirl-Clock mediator. A periodic Poisson problem with a strictly positive mean source requires background subtraction; its neutralized solution is not identical to the isolated free-space calculation.
+\section{Gravitational test-body and coupling gates}
+The source field does not by itself establish the acceleration of a different material knot. With passive charge $q_B$ and inertial mass $m_B$,
+\begin{equation}
+\mathbf F_B=q_B\mathbf g_A,\qquad\mathbf a_B=\frac{q_B}{m_B}\mathbf g_A.
+\end{equation}
+The universality $q_B/m_B=1$, the SI scale $K=G$, a kinetic/action term for the clock mediator, the fully isolated dynamical limit, and a gram-scale microgravity comparison are \textbf{not obtained} from these calculations. They remain G15/G16/G18 UNRESOLVED and keep G8 UNRESOLVED. The original Canon v0.8.35 $G$ normalization includes the orthodox Planck time, so using it as an independent derivation is excluded.
+\section{Predeclared numerical thresholds and gate discipline}
+G12: Gaussian manufactured relative force error $<0.002$. G13: maximum $|n-2|<0.03$, maximum relative monopole-amplitude error $<0.025$ at $R/L\ge4$, snapshot energy-integral error $<10^{-12}$, and v0.5.0 Windows energy-reference mismatch $<10^{-9}$. G19: independently compiled C++17 Green-gradient parity relative error $<10^{-10}$; compiler missing gives UNRESOLVED, not PASS. G17 verifies the derivative-source zero mode and periodic-neutrality restriction; G14 is a restricted physical FAIL. No failed gate prevents the remaining independent gates from executing. G10 retains the prior short-time Euler/NS solver control and G11 remains unresolved.
+\section{Reproducibility and provenance}
+The original v1.0.8 \texttt{LOCAL\_VALIDATED\_CANDIDATE} framework is included unmodified, with instance-local nonce initialization \emph{only before FREEZE} and unique run-ID exports. Private 32-byte nonce/HMAC files are excluded from released source ZIPs. The known v1.0.8 provisional-manifest hash PDF ordering discrepancy is not repaired by modifying the framework. Both E011 raw-geometry hashes and prior Windows reference snapshots are included and provenance labeled. Public reference papers are not hidden ground truth.
+\section{References and limitations}
+SST-18 (Euler near-field vs mediator); SST-34 (direct pressure deprecated as gravity); SST-47--49 (conditional scalar-field EFT); SST-50 (source--test universality requires a dynamical bridge); SST-59/61 (energy and topological stability); SST-73 (organized stress double divergence); SST Canon v0.8.35 (clock, stress, density and calibrated $G$); A062 v0.1.0--v0.5.0 source-authenticated numerical gates. SST-28 is excluded. The announced Navier--Stokes singularity programme is not used as a substitute for the measured solver controls or as evidence of gravitational closure.
+\end{document}

@@ -1,0 +1,433 @@
+{
+  "alternative_hypothesis": "H1: the same preregistered selector, without topology/provider-specific retuning, yields provider-convergent stationary and locally stable endpoints for a reproducible subset of topologies.",
+  "assumptions": [
+    "E013 fixes carrier identity; E010 only reloads the exact source bytes and never chooses replacements.",
+    "The variational selector is a mathematical state-selection test, not a claim that physical Euler flow is dissipative.",
+    "The canonical constrained objective is Uc(q)=H(N[R(X+deltaX(q))]); every derivative, Armijo acceptance, Hessian and ringdown evaluation uses this same objective.",
+    "Reach normalization and deterministic resampling are part of the objective projection P=N\u2218R, not post-hoc operations outside the differentiated functional.",
+    "Topology preservation is monitored continuously by a nonlocal-clearance proxy and pairwise linking drift for links; this is not a full knot-polynomial proof.",
+    "Legacy A054/A057 scientific results are forbidden as evidence; only methods/equations are reimplemented.",
+    "A scientific FAIL is not issued when the registered numerical ladder cannot demonstrate objective descent or a converged Hessian sign; such cases are UNRESOLVED_NUMERICAL.",
+    "A stationary endpoint is not called stable unless its constrained-objective Hessian sign is consistent over eps, eps/2 and eps/4, the two finest Hessians converge within the frozen tolerance, and nonlinear reduced ringdown is bounded."
+  ],
+  "edge_cases": [
+    "one-provider topology",
+    "no constrained-objective descent demonstrated on the registered step ladder",
+    "Armijo descent exists but is blocked by topology-proxy constraints",
+    "Hessian sign changes across finite-difference scales",
+    "clearance floor blocks descent",
+    "linking drift blocks a step",
+    "stationary saddle point",
+    "provider endpoints with similar energy but different geometry descriptors"
+  ],
+  "equations": [
+    {
+      "dimensional_check": "All lengths are reach-normalized; the kernel is dimensionless.",
+      "id": "E1",
+      "inputs": [
+        "normalized components",
+        "a_hat"
+      ],
+      "latex": "\\widehat H_a=\\sum_{i,j}\\oint\\!\\oint \\frac{d\\widehat{\\mathbf X}_i\\cdot d\\widehat{\\mathbf X}_j}{\\sqrt{\\|\\widehat{\\mathbf X}_i-\\widehat{\\mathbf X}_j\\|^2+\\widehat a^2}}",
+      "outputs": [
+        "H_hat"
+      ],
+      "purpose": "Regularized finite-core comparison Hamiltonian"
+    },
+    {
+      "dimensional_check": "In reach-normalized coordinates both q and B are dimensionless.",
+      "id": "E2",
+      "inputs": [
+        "Bishop frame",
+        "mode index",
+        "q"
+      ],
+      "latex": "\\delta\\mathbf X(q)=\\sum_\\mu q_\\mu\\mathbf B_\\mu,\\qquad \\mathbf B_\\mu\\perp\\mathbf t",
+      "outputs": [
+        "deformed centerline"
+      ],
+      "purpose": "Bishop-Fourier reduced deformation"
+    },
+    {
+      "dimensional_check": "Projection and the reach-normalized Hamiltonian are dimensionless, so U_c and sigma are dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "current geometry",
+        "Bishop-Fourier basis",
+        "deterministic resampling",
+        "reach normalization",
+        "finite-difference gradient"
+      ],
+      "latex": "\\mathcal P=\\mathcal N\\circ\\mathcal R,\\qquad U_c(q;X)=\\widehat H_a\\!\\left(\\mathcal P[X+\\delta X(q)]\\right),\\qquad \\sigma=\\frac{\\|\\nabla_q U_c(0;X)\\|_2}{\\max(|U_c(0;X)|,\\epsilon)}",
+      "outputs": [
+        "U_c",
+        "sigma"
+      ],
+      "purpose": "Canonical constrained objective and stationarity score"
+    },
+    {
+      "dimensional_check": "q, trust radius and U_c are dimensionless in the reach-normalized lane.",
+      "id": "E4",
+      "inputs": [
+        "U_c",
+        "gradient",
+        "global step0",
+        "trust radius",
+        "Armijo c1",
+        "backtrack beta",
+        "minimum step"
+      ],
+      "latex": "d_n=-\\frac{\\nabla U_c}{\\|\\nabla U_c\\|},\\qquad \\eta_{n,k}=\\min(\\Delta_n,\\eta_0)\\beta^k,\\qquad U_c(\\eta_{n,k}d_n)\\le U_c(0)+c_1\\eta_{n,k}\\nabla U_c\\!\\cdot d_n",
+      "outputs": [
+        "accepted projected state",
+        "descent qualification",
+        "numerical status"
+      ],
+      "purpose": "Target-free Armijo/trust-region selector on the constrained objective"
+    },
+    {
+      "dimensional_check": "Energy comparison is dimensionless; distance is compared as a ratio; linking is dimensionless.",
+      "id": "E5",
+      "inputs": [
+        "trial energy",
+        "clearance",
+        "linking"
+      ],
+      "latex": "\\widehat H_{n+1}\\le\\widehat H_n,\\quad d_{\\min,n+1}\\ge f_c d_{\\min,0},\\quad |\\Delta Lk|\\le\\varepsilon_{Lk}",
+      "outputs": [
+        "accepted step"
+      ],
+      "purpose": "Accepted-step integrity conditions"
+    },
+    {
+      "dimensional_check": "Coefficient of variation and relative spans are dimensionless.",
+      "id": "E6",
+      "inputs": [
+        "provider endpoint energies",
+        "provider descriptors"
+      ],
+      "latex": "CV_H(K)=\\frac{s(H_K^*)}{|\\overline H_K^*|},\\qquad \\Delta_R(K)=\\frac{R_{\\max}^*-R_{\\min}^*}{|\\overline R^*|}",
+      "outputs": [
+        "provider agreement metrics"
+      ],
+      "purpose": "Cross-provider endpoint agreement"
+    },
+    {
+      "dimensional_check": "The reduced coordinates and U_c are dimensionless, so all Hessian entries/eigenvalues are dimensionless.",
+      "id": "E7",
+      "inputs": [
+        "U_c",
+        "fd_eps",
+        "hessian_fd_rel_l2_max",
+        "negative-eigenvalue relative tolerance"
+      ],
+      "latex": "K_H^{(j)}=\\nabla_q^2U_c(0;\\epsilon/2^j),\\quad j=0,1,2;\\qquad \\mathrm{promote\\ sign}\\iff s_0=s_1=s_2\\ \\land\\ \\frac{\\|K_H^{(2)}-K_H^{(1)}\\|_F}{\\max(\\|K_H^{(2)}\\|_F,\\epsilon)}\\le\\tau_H",
+      "outputs": [
+        "Hessian sweep",
+        "converged sign class",
+        "authoritative finest-scale Hessian"
+      ],
+      "purpose": "Constrained-objective Hessian with finite-difference sign convergence"
+    },
+    {
+      "dimensional_check": "Normalized time, z and U_c make the reduced test dimensionless.",
+      "id": "E8",
+      "inputs": [
+        "converged nonnegative K_H",
+        "U_c",
+        "registered perturbation amplitude",
+        "normalized timestep"
+      ],
+      "latex": "\\ddot z=-\\partial_z U_c(z\\,e_{\\min}),\\qquad e_{\\min}=\\operatorname*{argmin}_{\\|e\\|=1}e^TK_He",
+      "outputs": [
+        "amplitude ratio",
+        "Hamiltonian drift",
+        "boundedness"
+      ],
+      "purpose": "Nonlinear reduced ringdown on the same constrained objective"
+    },
+    {
+      "dimensional_check": "Boolean predicate.",
+      "id": "E9",
+      "inputs": [
+        "provider gate",
+        "stationarity",
+        "Hessian",
+        "ringdown"
+      ],
+      "latex": "Q_K=I[\\mathrm{provider\\ consensus}]I[\\sigma\\le\\sigma_{\\max}]I[K_H\\succeq0]I[\\mathrm{ringdown\\ bounded}]",
+      "outputs": [
+        "handoff eligibility"
+      ],
+      "purpose": "State-selected handoff predicate"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "After excluding numerically unresolved descent cases, the fixed constrained-objective selector cannot bring the preregistered carrier fraction to stationary topology-preserved endpoints.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Provider-distinct endpoints of the same topology remain outside the preregistered energy/geometry agreement bands.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "For endpoints with a numerically converged constrained Hessian sign, stationary states have materially negative directions or unbounded nonlinear reduced ringdown.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Source-energy-sensitive topologies do not show preregistered provider-spread collapse after target-free state selection.",
+      "id": "F4"
+    },
+    {
+      "conclusion_if_met": "UNRESOLVED",
+      "criterion": "C++ FP64 fails the registered 1e-10 relative-L2 energy parity threshold.",
+      "id": "F5"
+    },
+    {
+      "conclusion_if_met": "UNRESOLVED",
+      "criterion": "The registered step ladder cannot demonstrate constrained-objective descent, or the constrained Hessian sign does not converge across eps, eps/2 and eps/4.",
+      "id": "F6"
+    }
+  ],
+  "implementation_commitment": {
+    "bundle_sha256": "13064338f4d7ef828ed76a58dce9a48e0df055549787a4e6d4bce8e4e0c984af",
+    "coverage": [
+      "experiment/**/*.py",
+      "a054_state/**/*.py",
+      "native_ext/*.cpp",
+      "native_ext/*.hpp",
+      "native_ext/*.py",
+      "configs/*.json",
+      "requirements.txt",
+      "tests/*.py",
+      "cross_falsifier_contract.json"
+    ],
+    "coverage_note": "Commitment covers experiment/a054_state/native/configs/tests/requirements/cross_falsifier_contract; documentation and generated validation artifacts are excluded.",
+    "rule": "Mismatch is an infrastructure/protocol failure before G0. Scientific FAIL gates otherwise continue diagnostically.",
+    "schema": "A054-IMPLEMENTATION-COMMITMENT-1"
+  },
+  "null_hypothesis": "H0: provider-distinct current PKLSA/SKLSA representatives do not converge under the preregistered selector to a reproducible stationary and stable topology-level state beyond numerical/source variation.",
+  "objective": "Re-run state selection from source-native bytes for exactly the E013 carriers using one canonical constrained objective Uc(q)=H(N[R(X+deltaX(q))]) for gradient, Armijo line search, Hessian and ringdown; quantify stationarity, topology preservation, provider-endpoint convergence and local stability; numerical inability to demonstrate descent or Hessian-sign convergence is UNRESOLVED rather than a scientific FAIL; freeze only provider-converged stable endpoints as a future A057 handoff.",
+  "observables": [
+    {
+      "definition": "Source and endpoint line-energy kernel for every E013 carrier.",
+      "equation_refs": [
+        "E1"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Initial/final constrained-objective stationarity, Armijo/descent qualification and numerical-resolution status.",
+      "equation_refs": [
+        "E3",
+        "E4"
+      ],
+      "id": "O2",
+      "unit": "1"
+    },
+    {
+      "definition": "Minimum-clearance retention and linking drift over accepted selection steps.",
+      "equation_refs": [
+        "E5"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Cross-provider endpoint energy CV, ropelength span and absolute-writhe span.",
+      "equation_refs": [
+        "E6"
+      ],
+      "id": "O4",
+      "unit": "1"
+    },
+    {
+      "definition": "Constrained-objective Hessian eps/2/4 convergence/sign class and nonlinear ringdown amplitude/energy drift.",
+      "equation_refs": [
+        "E7",
+        "E8"
+      ],
+      "id": "O5",
+      "unit": "1"
+    },
+    {
+      "definition": "Per-topology A057 handoff eligibility.",
+      "equation_refs": [
+        "E9"
+      ],
+      "id": "O6",
+      "unit": "1"
+    }
+  ],
+  "predictions": [
+    "If provider dependence is mainly representative-state dependence, provider-sensitive source energies should collapse after the same constrained-objective selector.",
+    "If no topology-level equilibrium exists under the tested Hamiltonian, numerically resolved endpoints will remain nonstationary or provider-separated.",
+    "A stationary saddle must not be promoted to a stable particle-state candidate.",
+    "If projection-induced nonsmoothness prevents reliable descent or Hessian-sign convergence, the affected carrier must remain numerically unresolved rather than count against the physical hypothesis."
+  ],
+  "research_question": "On one E013-frozen population of current E011 provider anchors, can a fixed target-free variational state-selection procedure map distinct source representatives of the same topology to a common stationary and locally stable finite-core state, without using legacy falsifier results?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0",
+      "id": "S1",
+      "operation": "Verify frozen protocol/implementation and exact E013/E011 source-byte binding."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1",
+      "id": "S2",
+      "operation": "Reload only E013-frozen carriers and recheck geometry hashes."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "gate": "G2",
+      "id": "S3",
+      "operation": "Validate rigid-energy invariance, exact constrained-objective evaluation, Armijo monotonicity and topology-proxy mechanics."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "gate": "G3",
+      "id": "S4",
+      "operation": "Run the fixed constrained-objective variational selector independently on every current carrier; classify failure to demonstrate numerical descent as UNRESOLVED_NUMERICAL."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E4"
+      ],
+      "gate": "G4",
+      "id": "S5",
+      "operation": "Evaluate fixed-selector transfer on registered confirmation topologies."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G5",
+      "id": "S6",
+      "operation": "Certify the common energy kernel against C++/OpenMP FP64."
+    },
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G6",
+      "id": "S7",
+      "operation": "Record optional GPU/DD32 framework screening without promotion."
+    },
+    {
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G7",
+      "id": "S8",
+      "operation": "Compare independently sourced endpoints topology-by-topology."
+    },
+    {
+      "formula_refs": [
+        "E7",
+        "E8"
+      ],
+      "gate": "G8",
+      "id": "S9",
+      "operation": "Qualify stationary endpoints only after constrained-Hessian eps/2/4 convergence and then nonlinear ringdown on the same U_c."
+    },
+    {
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G10",
+      "id": "S10",
+      "operation": "Test whether initially provider-sensitive energy kernels collapse after selection."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G11",
+      "id": "S11",
+      "operation": "Audit clearance/linking topology proxies over all paths."
+    },
+    {
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G12",
+      "id": "S12",
+      "operation": "Freeze only provider-converged stable endpoints as a future A057 handoff."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E6",
+        "E7",
+        "E9"
+      ],
+      "gate": "G22",
+      "id": "S13",
+      "operation": "Assign the blind overall state-selection classification under diagnostic continuation."
+    },
+    {
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G9",
+      "id": "S14",
+      "operation": "Reserve framework reveal integrity gate; v0.5.1 contains no mass target reveal."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "1",
+      "meaning": "reach-normalized regularized line-energy kernel",
+      "si_unit": "1",
+      "symbol": "\\widehat H_a"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "Bishop-frame reduced deformation coordinates",
+      "si_unit": "1",
+      "symbol": "q"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "normalized stationarity score ||grad_q H||/|H|",
+      "si_unit": "1",
+      "symbol": "\\sigma"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "finite-difference-converged reduced Hessian of U_c at the selected endpoint",
+      "si_unit": "1",
+      "symbol": "K_H"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "cross-provider endpoint energy spread/CV",
+      "si_unit": "1",
+      "symbol": "\\delta_H"
+    }
+  ]
+}

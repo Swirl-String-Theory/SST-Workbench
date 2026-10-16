@@ -1,0 +1,217 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Do the preregistered M00-M04 analytic reference identities satisfy independent numeric implementations without physical SST target fitting?",
+  "objective": "Qualify source provenance, a steady-Euler toroidal reference, pressure silence, VA/VT projection, and a spherical local-flux identity.",
+  "null_hypothesis": "Analytic/numeric agreement alone does not demonstrate any stable particle, gravity or dynamic 3D Euler knot; scientific certification needs native and independent evidence.",
+  "alternative_hypothesis": "A subsequent physical SST claim may be entertained only after independently produced 3D Euler fields pass native and dynamical qualification; not tested here.",
+  "assumptions": [
+    "3D trace-free local velocity gradient in tested algebraic controls",
+    "Landreman field is dimensionless and evaluated strictly inside its smooth toroidal domain",
+    "Pressure Q_L is kinematic Euler pressure, distinct from MHD pressure",
+    "Chiarini force is projected to divergence-free vorticity sector",
+    "Zhang-Yao affine-flow identity does not extend without remainder to turbulent fields",
+    "No physical SST constants are used in blind scoring"
+  ],
+  "symbols": [
+    {
+      "symbol": "A",
+      "meaning": "velocity gradient tensor",
+      "si_unit": "s^-1",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "Q_A",
+      "meaning": "-tr(A^2)/2",
+      "si_unit": "s^-2",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "R_A",
+      "meaning": "-det(A)",
+      "si_unit": "s^-3",
+      "dimensions": "T^-3"
+    },
+    {
+      "symbol": "ell",
+      "meaning": "spherical filter diameter",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "Phi_ell",
+      "meaning": "scale energy transfer per unit mass",
+      "si_unit": "m^2 s^-3",
+      "dimensions": "L^2 T^-3"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E01",
+      "purpose": "steady Euler reference",
+      "latex": "\\nabla\\cdot \\mathbf{B}=0,\\ (\\mathbf{B}\\cdot\\nabla)\\mathbf{B}=-\\nabla Q_L",
+      "inputs": [
+        "B",
+        "Q_L"
+      ],
+      "outputs": [
+        "Euler residual"
+      ],
+      "dimensional_check": "dimensionless normalized Landreman system"
+    },
+    {
+      "id": "E02",
+      "purpose": "pressure Poisson source",
+      "latex": "2Q_A=-\\mathrm{tr}(A^2)=\\omega^2/2-S:S",
+      "inputs": [
+        "A"
+      ],
+      "outputs": [
+        "Q_A"
+      ],
+      "dimensional_check": "T^-2=T^-2"
+    },
+    {
+      "id": "E03",
+      "purpose": "shear wedge",
+      "latex": "m\\le 1-f\\le 3m",
+      "inputs": [
+        "A"
+      ],
+      "outputs": [
+        "f",
+        "m"
+      ],
+      "dimensional_check": "dimensionless"
+    },
+    {
+      "id": "E04",
+      "purpose": "VA VT projected source",
+      "latex": "\\nabla\\times \\mathbf g=-\\mathbb{P}_\\perp\\mathbf{VA}",
+      "inputs": [
+        "A",
+        "omega"
+      ],
+      "outputs": [
+        "g"
+      ],
+      "dimensional_check": "T^-2 after normalized reference"
+    },
+    {
+      "id": "E05",
+      "purpose": "local spherical scale flux",
+      "latex": "\\Phi_\\ell=\\frac{\\ell^2}{10}(3R_s+V_s/4)+\\mathcal O_\\ell",
+      "inputs": [
+        "A",
+        "ell"
+      ],
+      "outputs": [
+        "Phi_ell"
+      ],
+      "dimensional_check": "L^2 T^-3"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O01",
+      "definition": "M01 maximum normalized momentum and pressure residuals",
+      "equation_refs": [
+        "E01",
+        "E02"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O02",
+      "definition": "M02 max non-negative wedge violation",
+      "equation_refs": [
+        "E02",
+        "E03"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O03",
+      "definition": "M03 curl-PVA residual",
+      "equation_refs": [
+        "E04"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O04",
+      "definition": "M04 relative spherical-quadrature discrepancy",
+      "equation_refs": [
+        "E05"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S01",
+      "operation": "Validate SHA256 of original reference PDFs and explicitly log A045 registry mismatch",
+      "formula_refs": [],
+      "gate": "G0"
+    },
+    {
+      "id": "S02",
+      "operation": "Evaluate Landreman analytic field and central differences; compare momentum, divergence and pressure source",
+      "formula_refs": [
+        "E01",
+        "E02"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S03",
+      "operation": "Compute Q,R,Schur fraction f and m on analytic and seeded trace-free tensors",
+      "formula_refs": [
+        "E02",
+        "E03"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S04",
+      "operation": "Use periodic FFT Poisson projection, compare curl force with -PVA, integrate correction",
+      "formula_refs": [
+        "E04"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S05",
+      "operation": "Integrate exact affine velocity increments on sphere and compare with gradient-flux identity",
+      "formula_refs": [
+        "E05"
+      ],
+      "gate": "G2"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F01",
+      "criterion": "Any analytic tensor identity violates its pre-registered numerical tolerance",
+      "conclusion_if_met": "FAIL implementation reference (not physical SST)"
+    },
+    {
+      "id": "F02",
+      "criterion": "PDF hash differs from lock",
+      "conclusion_if_met": "FAIL source integrity; stop formal freeze"
+    }
+  ],
+  "edge_cases": [
+    "A=0 -> undefined normalized invariants",
+    "omega=0 -> VA projector undefined unless masked",
+    "Landreman s=0 or F<=0 outside admissible analytic region",
+    "FFT zero/Nyquist mode needs explicit convention",
+    "General nonlinear flows retain higher spherical modes",
+    "Registry mismatch A045 must be resolved before source independence certification"
+  ],
+  "predictions": [
+    "Analytic Euler residuals converge under finite-difference refinement",
+    "Pressure source cancels in balanced vortex despite nonzero VA",
+    "Projected VA force differs locally from bare -VA",
+    "Spherical quadrature exactly reproduces the L=1 gradient flux for affine fields"
+  ]
+}

@@ -1,0 +1,1 @@
+Place as a separate instance under `01_research/A_falsifiers/A058_KnotPlot_Parameter_Sensitivity_Relaxation_Robustness/A058-v0.2.5`. Do not overwrite v0.2.4. Pin remains on Framework v1.0.8 via `.sst_framework_root`.

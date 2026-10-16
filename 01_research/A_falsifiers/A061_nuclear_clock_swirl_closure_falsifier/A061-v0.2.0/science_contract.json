@@ -1,0 +1,517 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can SST Canon v0.8.36 and the historical SST-28 formulation make independently fixed, distinguishable clock predictions while delayed phase locking and XY/Zq mode selection serve as independently-qualified nulls?",
+  "objective": "Canonical v0.8.36 clock and action-phase mathematical qualification; independent historical SST28 comparator; NiPS3 XY/Zq adversarial controls; experimental signal qualification without target-driven transfer fitting.",
+  "null_hypothesis": "The thorium frequency ratio is compatible with universal-factor cancellation and source-specific crystal, temperature and servo nuisances; no preregistered differential SST signal.",
+  "alternative_hypothesis": "Canon-v0.8.36 independently derived species/geometry-dependent differential transfer, with calibrated uncertainty and predicted sign, survives material, servo and phase-slip nulls on withheld time-resolved clock data.",
+  "assumptions": [
+    "Euclidean radius x>=0 for dimensionless SST reference model",
+    "Do not identify a zero in vorticity with a unity clock factor without velocity proof",
+    "Two laboratories are independent experiments but not synchronous co-timed replicate series",
+    "Trial corrections require actual cadence and source noise qualification",
+    "Missing pybind dependency/real time series produces UNRESOLVED, no fallback",
+    "Canon c-normalized operational Swirl Clock and historical v_swirl-normalized SST28 factor are distinct models",
+    "NiPS3 q-fold anisotropy is a magnetic material reference, not an assumed vortex-particle symmetry",
+    "Phase locking alone does not imply time dilation or a true quantum excitation gap",
+    "SST physical gate remains UNRESOLVED without independent numerical coupling for Th/Yb"
+  ],
+  "symbols": [
+    {
+      "symbol": "x",
+      "meaning": "radius/core radius",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "S",
+      "meaning": "local clock factor",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "f",
+      "meaning": "clock transition frequency",
+      "si_unit": "Hz",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "t",
+      "meaning": "time series coordinate",
+      "si_unit": "s",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "P",
+      "meaning": "periodogram statistic",
+      "si_unit": "1",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Smoothed swirl clock factor",
+      "latex": "S(x)=\\sqrt{1-x^{2}\\exp(-2x)},\\qquad x=r/r_c",
+      "inputs": [
+        "x"
+      ],
+      "outputs": [
+        "S"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E2",
+      "purpose": "Rescaled vorticity",
+      "latex": "\\tilde\\omega_z(x)=\\exp(-x)(2-x)",
+      "inputs": [
+        "x"
+      ],
+      "outputs": [
+        "omega_scaled"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E3",
+      "purpose": "Pole circulation plateau prediction",
+      "latex": "S_n(x)=\\sqrt{1-(n/x)^2},\\qquad x\\ge |n|",
+      "inputs": [
+        "n",
+        "x"
+      ],
+      "outputs": [
+        "S_n"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E4",
+      "purpose": "Common mode ratio null",
+      "latex": "f_{\\rm Th}/f_{\\rm Yb}=(f_{\\rm Th,0}/f_{\\rm Yb,0})(S_{\\rm Th}/S_{\\rm Yb})",
+      "inputs": [
+        "S_Th",
+        "S_Yb",
+        "f_Th0",
+        "f_Yb0"
+      ],
+      "outputs": [
+        "ratio"
+      ],
+      "dimensional_check": "Hz/Hz =1"
+    },
+    {
+      "id": "E5",
+      "purpose": "Published crystal fractional difference",
+      "latex": "\\Delta y=(f_{\\rm TS1}-f_{\\rm S1})/[(f_{\\rm TS1}+f_{\\rm S1})/2]",
+      "inputs": [
+        "f_TS1",
+        "f_S1"
+      ],
+      "outputs": [
+        "delta_y"
+      ],
+      "dimensional_check": "Hz/Hz=1"
+    },
+    {
+      "id": "E6",
+      "purpose": "Feedback-only oscillator control",
+      "latex": "e_{k+1}=e_k-g e_{k-d}+\\epsilon_k",
+      "inputs": [
+        "e",
+        "g",
+        "d"
+      ],
+      "outputs": [
+        "e_next"
+      ],
+      "dimensional_check": "frequency units on both sides"
+    },
+    {
+      "id": "E7",
+      "purpose": "Global trials correction",
+      "latex": "p_{\\rm global}=\\Pr[\\max_{\\nu\\in\\mathcal{G}}P_{\\rm null}(\\nu)\\ge\\max_{\\nu\\in\\mathcal{G}}P_{\\rm obs}(\\nu)]",
+      "inputs": [
+        "series",
+        "frequency grid"
+      ],
+      "outputs": [
+        "p_global"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E8",
+      "purpose": "Numerical parity error",
+      "latex": "\\varepsilon_{\\infty}=\\max_i |S_{\\rm CPP}(x_i)-S_{\\rm Py}(x_i)|",
+      "inputs": [
+        "x_i"
+      ],
+      "outputs": [
+        "epsilon"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E9",
+      "purpose": "Canon 0.8.36 operational clock",
+      "latex": "S_A=\\sqrt{1-u_A^2/c^2}",
+      "inputs": [
+        "u_A",
+        "c"
+      ],
+      "outputs": [
+        "S_A"
+      ],
+      "dimensional_check": "1=1"
+    },
+    {
+      "id": "E10",
+      "purpose": "Action-phase mass shell",
+      "latex": "\\Omega(P)/\\Omega_0=E_0/\\sqrt{E_0^2+P^2 c^2}",
+      "inputs": [
+        "E0",
+        "P",
+        "c"
+      ],
+      "outputs": [
+        "Omega_rel"
+      ],
+      "dimensional_check": "J/J=1"
+    },
+    {
+      "id": "E11",
+      "purpose": "Spectroscopic conversion",
+      "latex": "\\Delta E=h\\nu,\\quad\\delta(\\Delta E)=h\\delta\\nu",
+      "inputs": [
+        "h",
+        "nu"
+      ],
+      "outputs": [
+        "DeltaE"
+      ],
+      "dimensional_check": "J s /s = J"
+    },
+    {
+      "id": "E12",
+      "purpose": "Six-state angular reference",
+      "latex": "U_q(\\phi)=K_q[1-\\cos(q\\phi)]",
+      "inputs": [
+        "K_q",
+        "q",
+        "phi"
+      ],
+      "outputs": [
+        "U_q"
+      ],
+      "dimensional_check": "J=J"
+    },
+    {
+      "id": "E13",
+      "purpose": "Clock-independent mode switch",
+      "latex": "\\phi(t)=2\\pi[f_0t+\\Delta f(t-t_*)_+]\\quad S=1",
+      "inputs": [
+        "f0",
+        "delta_f",
+        "t"
+      ],
+      "outputs": [
+        "phi"
+      ],
+      "dimensional_check": "phase dimensionless"
+    },
+    {
+      "id": "E14",
+      "purpose": "Common-mode cancellation",
+      "latex": "R=R_0 S_{\\mathrm{Th}}/S_{\\mathrm{Yb}},\\ S_{\\mathrm{Th}}=S_{\\mathrm{Yb}}\\Rightarrow R=R_0",
+      "inputs": [
+        "S_Th",
+        "S_Yb"
+      ],
+      "outputs": [
+        "R"
+      ],
+      "dimensional_check": "1=1"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Published S1/TS1 contrast",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "SST28 plateau discrepancy",
+      "equation_refs": [
+        "E1",
+        "E3"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O3",
+      "definition": "Experimental residual periodogram",
+      "equation_refs": [
+        "E7"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O4",
+      "definition": "Reference/native profile parity",
+      "equation_refs": [
+        "E8"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O5",
+      "definition": "Canon-vs-historical clock factors at a declared physical velocity",
+      "equation_refs": [
+        "E9",
+        "E1"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O6",
+      "definition": "Synthetic branch frequency shift at S=1",
+      "equation_refs": [
+        "E13"
+      ],
+      "unit": "Hz"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S0",
+      "operation": "Frozen framework protocol and exact backend pin verified",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S1",
+      "operation": "Published thorium clock summary reconstruction matches claimed contrast",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Does a universal co-located Swirl Clock factor cancel in a frequency ratio?",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Do SST-28 local smooth profile and circulation plateau predictions agree algebraically?",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S4",
+      "operation": "Can two Th-229 crystal measurements distinguish SST effects from environmental shifts?",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S5",
+      "operation": "Does official C++17 pybind FP64 kernel agree with NumPy reference?",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S6",
+      "operation": "Optional SYCL GPU screening (not enabled for CPU certification profile)",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G6"
+    },
+    {
+      "id": "S7",
+      "operation": "Optional multi-library production replication (not enabled for CPU profile)",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G7"
+    },
+    {
+      "id": "S8",
+      "operation": "Does an independently specified nuclear-clock mechanism close under experimental observations?",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G8"
+    },
+    {
+      "id": "S9",
+      "operation": "Reveal-only commitment verification (never completed during blind phase)",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G9"
+    },
+    {
+      "id": "S10",
+      "operation": "Instrument-only delayed feedback generates finite oscillatory structure without SST",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G10"
+    },
+    {
+      "id": "S11",
+      "operation": "Raw Toscani clock time series has a globally trials-calibrated periodic residual",
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G11"
+    },
+    {
+      "id": "S12",
+      "operation": "Does SST predict a numerical Th/Yb differential susceptibility before looking at data?",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G12"
+    },
+    {
+      "id": "S13",
+      "operation": "Are independent matched time-resolved clock families available for confirmation?",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G13"
+    },
+    {
+      "id": "S14",
+      "operation": "Canon v0.8.36 operational clock normalization (c, not v_swirl), domain and low-speed limit",
+      "formula_refs": [
+        "E9"
+      ],
+      "gate": "G14"
+    },
+    {
+      "id": "S15",
+      "operation": "Action-phase mass-shell identity and zero/small/large-momentum limits",
+      "formula_refs": [
+        "E10"
+      ],
+      "gate": "G15"
+    },
+    {
+      "id": "S16",
+      "operation": "SpectroResponse frequency-energy unit closure for Th229 without fitted SST parameters",
+      "formula_refs": [
+        "E11"
+      ],
+      "gate": "G16"
+    },
+    {
+      "id": "S17",
+      "operation": "Canonical Adler-style phase locking as negative/structural control",
+      "formula_refs": [
+        "E12"
+      ],
+      "gate": "G17"
+    },
+    {
+      "id": "S18",
+      "operation": "XY Z_q phase-pinning branches: q=0,2,3,4,5,6,8 and finite-size warning",
+      "formula_refs": [
+        "E12"
+      ],
+      "gate": "G18"
+    },
+    {
+      "id": "S19",
+      "operation": "Synthetic mode switch/phase slip with constant clock factor can mimic spectral frequency change",
+      "formula_refs": [
+        "E13"
+      ],
+      "gate": "G19"
+    },
+    {
+      "id": "S20",
+      "operation": "Matched-species common-mode cancellation vs independent differential susceptibility",
+      "formula_refs": [
+        "E14"
+      ],
+      "gate": "G20"
+    },
+    {
+      "id": "S21",
+      "operation": "Source-independent preregistered differential Th/Yb SST prediction, amplitude and sign available",
+      "formula_refs": [
+        "E14"
+      ],
+      "gate": "G21"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "SST-28 expression Eq E3 at x=1 must coincide with printed plateau ~0.9603 within 1e-10",
+      "conclusion_if_met": "FAIL when discrepancy > 1e-10"
+    },
+    {
+      "id": "F2",
+      "criterion": "An unblinded or uncommitted SST transfer coefficient cannot meet the prediction gate",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F3",
+      "criterion": "Backend unavailable or parity error > 1e-10",
+      "conclusion_if_met": "UNRESOLVED or FAIL"
+    },
+    {
+      "id": "F4",
+      "criterion": "No identification of the two clock normalizations without an independently derived speed map",
+      "conclusion_if_met": "FAIL for numerical equality assertion; only mathematical controls PASS"
+    },
+    {
+      "id": "F5",
+      "criterion": "Any q=6 selection treated as a free physical SST prediction is disallowed",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F6",
+      "criterion": "Absence of a blinded independently predicted Th/Yb coupling with stated sign/amplitude/uncertainty",
+      "conclusion_if_met": "UNRESOLVED"
+    }
+  ],
+  "edge_cases": [
+    "At x=0 pole model is singular; smooth model remains finite",
+    "For |n|>x plateau factor is imaginary; must not clip and call physical clock",
+    "x tends to infinity yields S tends to unity",
+    "Clock null is unidentifiable for equal source coupling",
+    "Missing measured cadence prevents a calibrated search",
+    "u=0 yields S=1; u approaches c from below gives S to zero",
+    "momentum p=0 yields d\u03c4/dT=1; |p| large tends zero",
+    "q=0 anisotropy vanishes",
+    "q=6 branch number is not a topological quantum number"
+  ],
+  "predictions": [
+    "G3 should FAIL for printed plateau formula vs equation",
+    "G2 should PASS as cancellation identity but not as a physics discovery",
+    "G12/G13 expected unresolved absent precommitted SST transfer and synchronous time series",
+    "G14..G20 expected PASS only as mathematical/synthetic controls, not nuclear time physics",
+    "G21 expected UNRESOLVED unless source-independent Th/Yb susceptibility exists"
+  ]
+}

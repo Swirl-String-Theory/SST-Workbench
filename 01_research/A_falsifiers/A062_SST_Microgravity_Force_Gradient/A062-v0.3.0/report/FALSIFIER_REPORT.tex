@@ -1,0 +1,65 @@
+% SST-REPORT-SECTION:IDENTIFICATION
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+% SST-REPORT-SECTION:SOURCES
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+% SST-REPORT-SECTION:INTERPRETATION
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,booktabs,longtable,hyperref,array}
+\title{A062---SST Microgravity Force-Gradient Falsifier\\\large v0.3.0: Euler Pressure Monopole versus Conditional Swirl-Clock EFT}
+\author{SST-Workbench / source-pinned technical protocol}
+\date{13 October 2026}
+\begin{document}\maketitle
+\section{Scientific scope and identification}
+Three hypotheses are independently recorded. H0 is the localized incompressible Euler pressure source; H1 is a \emph{postulated} massless scalar mediator with a normalized nonzero charge; H2 asks whether H0 and authentic E011 trefoil dynamics generate the H1 source and universal physical coupling. The H1 result is a conditional mathematical prediction, not an SST derivation of gravity. E011 \texttt{STATIC\_READY} does not imply dynamically stationary knots.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\section{Research question, hypotheses and isolation}
+Can the pressure-Poisson source of localized 3-D incompressible Euler create a long-range monopole directly? If not, does an independent clock scalar with nonzero charge yield the expected inverse square? Are the scalar charge and coupling determined by PKLSA dynamics without inserting $G$? The H0 and H2 null outcome is closure failure, not a conclusion about SST as a whole.
+\section{Euler-only pressure source (H0)}
+For $\nabla\cdot\mathbf v=0$ with appropriate free-space decay,
+\begin{equation}
+\nabla^2p=-\rho_f\,\partial_i v_j\partial_j v_i=-\rho_f\partial_i\partial_j(v_i v_j), \qquad \int_{\mathbb R^3}\nabla^2p\,d^3x=0.
+\end{equation}
+The final integral vanishes only under the stated boundary and regularity conditions. This excludes a scalar \emph{pressure-source} monopole in this restricted case, not all possible independent clock modes, nonlocal media or externally forced flows. The prior user-supplied A062-v0.2.0 Kelvin exchange shows a distinct $R^{-4}$ observable; it is not automatically a material-particle force.
+\section{Conditional scalar field (H1)}
+Assume, without derivation from SST microphysics,
+\begin{align}
+S[\tau]&=\int d^3x\left(\frac\kappa2|\nabla\tau|^2-\lambda\tau\rho_Q\right),\\
+\kappa\nabla^2\tau&=-\lambda\rho_Q,\qquad \tau(\mathbf r)=\frac\lambda{4\pi\kappa}\int\frac{\rho_Q(\mathbf r')}{|\mathbf r-\mathbf r'|}\,d^3r'.
+\end{align}
+A \emph{separate test-body coupling} is required to define an attraction. For the unit-test convention chosen here, $\kappa=\lambda=Q_A=Q_B=1$ and $L=1$; a two-knot force is evaluated using quadrature over authenticated E011 filament centerlines. All resulting forces are \emph{dimensionless normalized EFT forces}, not Newtons. The normalized far field tends to $|F_z|\simeq1/(4\pi R^2)$.
+\begin{equation}
+T^{\mathrm{cross}}_{ij}=\kappa\left[(\partial_i\tau_A)(\partial_j\tau_B)+(\partial_i\tau_B)(\partial_j\tau_A)-\delta_{ij}\nabla\tau_A\cdot\nabla\tau_B\right].
+\end{equation}
+The cross-stress traction is integrated on a spherical surface enclosing B alone and compared with the scalar action-derived two-body force, with its explicit attraction/sign convention. A scalar Gauss flux $-\kappa\nabla\tau$ must not be described as mechanical momentum flux.
+\section{Unresolved source bridge (H2)}
+The provisional identification $\rho_Q\propto-\rho_f\partial_i\partial_j(v_iv_j)$ integrates to zero; it cannot explain a nonzero Newtonian monopole. To proceed one needs an independently derived SST clock scalar, an admissible nonzero source charge, a physical mass map and a dimensionful $\lambda^2/\kappa$. No such construction was supplied or inferred. Identifying $Q=M$ or fitting $\lambda^2/\kappa$ to $G$ would fail a first-principles closure test.
+\section{Numerics, source qualifications and backends}
+Raw E011-v0.3.0 sources: Gilbert \texttt{Ideal.txt.gz} record \texttt{3:1:1} and KnotPlot \texttt{coarse.final.vect}, both checked by SHA-256 against independent provider anchors. Geometries are resampled at $N=48,96,192$, and each test source has length-normalized line weights summing to one. The scalar H1 pair force is evaluated at $R/L=3,5,8,12,18,27,40$; fits use $R/L\ge 8$. Source direction and a rotated test configuration are recorded. Independent C++17 FP64 pair quadrature is compared against Python; a missing compiler leaves the native gate unresolved. An independent 3-D Euler pressure time integration is \emph{not} claimed.
+\section{Gates, statistics and blindness}
+The unadjusted thresholds are scalar far-field $|n-2|<0.05$, last resolution relative difference $<0.005$, normalized provider-amplitude relative difference $<0.05$, force reciprocity $<0.002$, scalar cross-stress relative error $<0.07$ and C++ parity $<2\times10^{-10}$. A failed gate does not terminate the rest of the run. The published stopped-light experiment is already public and not a withheld confirmation series; this is an exploratory source-pinned computation, not a genuinely blinded experimental prediction. The framework's nonce, commitments, protocol freeze, run-ID separation and reveal restrictions are maintained.
+\section{Results and interpretation}
+The canonical framework v1.0.8 reports run-specific, nonoverwriting ZIP/PDF exports. Numerical H1 conditional success never promotes H2 to a pass. Source modes from the microscopic Euler vortices remain unproven. The physical microgravity experiment uses gram-scale bodies that cannot be identified with single E011 filaments without independent many-body mass closure.
+\section{Reproducibility}
+Within the bundled SST-Workbench structure, run \texttt{run\_all.cmd FREEZE}, then \texttt{run\_all.cmd CERTIFY}. The \texttt{FREEZE} launcher creates missing instance-private 32-byte nonce and HMAC key \emph{only} before any frozen protocol or commitments exist; already present files are never changed. v1.0.8 is included as the original \texttt{LOCAL\_VALIDATED\_CANDIDATE} distribution and must not be represented as canonical-frozen without separate qualification.
+\begin{thebibliography}{9}
+\bibitem{SST47}SST-47, \emph{A First-Principles Origin of the Inverse-Square Law in Swirl--String Theory} (user-provided technical note).
+\bibitem{SST48}SST-48, \emph{Emergent Inverse-Square Law from Hydrodynamic Dynamics} (user-provided technical note; corrected stress-divergence interpretation).
+\bibitem{SST49}SST-49, \emph{A First-Principles Origin of the Inverse-Square Law} (user-provided technical note).
+\bibitem{SST50}SST-50, \emph{Emergent Equivalence Principle from Relational Time and Connection Dynamics} (user-provided technical note).
+\bibitem{Zhu}Y. Zhu et al., \emph{Stopped-light-enhanced gravitational force sensing}, Nature Nanotechnology (2026), doi:10.1038/s41565-026-02298-8.
+\end{thebibliography}
+\end{document}

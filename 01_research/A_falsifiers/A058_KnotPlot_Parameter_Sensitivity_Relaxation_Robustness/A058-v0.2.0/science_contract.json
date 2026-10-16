@@ -1,0 +1,307 @@
+{
+  "alternative_hypothesis": "H1: each active strength axis has a reproducible local robustness basin around its default; the conditional third-axis zero endpoint is equivalent to the reset-all baseline; response curves are smooth enough for registered quadratic diagnostics in log2 multiplier space.",
+  "assumptions": [
+    "The catalogue trefoil loaded by the registered KnotPlot executable is an admissible fixed initial topology for this numerical sensitivity experiment.",
+    "A fixed bead count of 300 is a discretization control, not a swept relaxation variable.",
+    "The zero multiplier is an endpoint control and is excluded from log2 and polynomial fits.",
+    "The third strength axis is disabled by reset-all defaults, so its magnitude sweep is conditional on enabling that force while all non-strength controls remain untouched.",
+    "A PASS is a statement about KnotPlot numerical relaxation robustness only, not physical SST stability."
+  ],
+  "edge_cases": [
+    "m=0 is not assigned a log2 coordinate and is excluded from polynomial fits.",
+    "The conditional third-axis reference uses that force enabled at m=1 and is not interchangeable with reset-all baseline except at the registered m=0 equivalence control.",
+    "Quadratic fit quality is diagnostic and cannot by itself promote KnotPlot relaxation to a physical stability claim.",
+    "A topology-changing or failed KnotPlot run is an acquisition failure even if a coordinate file exists."
+  ],
+  "equations": [
+    {
+      "dimensional_check": "Exponent and multiplier are dimensionless.",
+      "id": "E1",
+      "inputs": [
+        "integer ladder index k"
+      ],
+      "latex": "m_k=2^{k/4},\\quad k\\in\\{-16,\\ldots,16\\},\\qquad m_{-k}=m_k^{-1}",
+      "outputs": [
+        "positive multiplier m_k"
+      ],
+      "purpose": "Quarter-octave log-symmetric strength ladder"
+    },
+    {
+      "dimensional_check": "p_k has the same units/internal parameter dimension as p_0.",
+      "id": "E2",
+      "inputs": [
+        "runtime-declared default p_0",
+        "multiplier m_k"
+      ],
+      "latex": "p_k=p_0 m_k",
+      "outputs": [
+        "condition strength p_k"
+      ],
+      "purpose": "Default-relative strength value"
+    },
+    {
+      "dimensional_check": "Logarithm argument and result are dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "positive multiplier m_k"
+      ],
+      "latex": "x_k=\\log_2 m_k=k/4",
+      "outputs": [
+        "uniform log2 coordinate x_k"
+      ],
+      "purpose": "Log-strength coordinate"
+    },
+    {
+      "dimensional_check": "Both curves are normalized by radius of gyration; D_shape is dimensionless.",
+      "id": "E4",
+      "inputs": [
+        "arclength-resampled centered Rg-normalized closed curves X and Y"
+      ],
+      "latex": "D_{\\mathrm{shape}}(X,Y)=\\min_{R,\\delta,\\sigma}\\left[M^{-1}\\sum_i\\|\\hat X_i-R\\hat Y_{\\sigma i+\\delta}\\|^2\\right]^{1/2}",
+      "outputs": [
+        "shape distance"
+      ],
+      "purpose": "Scale-free trefoil shape response"
+    },
+    {
+      "dimensional_check": "Each ratio compares equal-dimension quantities and is dimensionless.",
+      "id": "E5",
+      "inputs": [
+        "registered scale-free scalar metrics q_j",
+        "reference metrics q_j0"
+      ],
+      "latex": "R_s=\\max_j\\frac{|q_j-q_{j,0}|}{\\max(|q_j|,|q_{j,0}|,\\epsilon)}",
+      "outputs": [
+        "maximum relative scalar response"
+      ],
+      "purpose": "Scale-free scalar relative response"
+    },
+    {
+      "dimensional_check": "x and D_shape are dimensionless; coefficients are dimensionless.",
+      "id": "E6",
+      "inputs": [
+        "log2 coordinate x",
+        "shape response D_shape"
+      ],
+      "latex": "D_{\\mathrm{shape}}(x)\\approx a x^2+b x+c",
+      "outputs": [
+        "quadratic coefficients and R^2_quad"
+      ],
+      "purpose": "Quadratic log-response diagnostic"
+    },
+    {
+      "dimensional_check": "Count ratio is dimensionless.",
+      "id": "E7",
+      "inputs": [
+        "parseable coordinate count",
+        "expected coordinate count"
+      ],
+      "latex": "C_{\\mathrm{coord}}=N_{\\mathrm{parseable}}/N_{\\mathrm{expected}}",
+      "outputs": [
+        "completeness fraction"
+      ],
+      "purpose": "Coordinate acquisition completeness"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "ACQUISITION_INVALID",
+      "criterion": "Any expected campaign coordinate is missing, empty, non-finite or unparsable.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "LADDER_INVALID",
+      "criterion": "The positive multiplier ladder is not exactly quarter-octave spaced or reciprocal about m=1.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "ZERO_STRENGTH_NOT_EQUIVALENT_TO_DISABLED_FORCE",
+      "criterion": "The conditional third-axis m=0 endpoint differs from reset-all baseline by D_shape>1e-8 or registered scale-free scalar relative error>1e-10.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "DEFAULT_NEIGHBORHOOD_NOT_LOCALLY_ROBUST",
+      "criterion": "For either always-active strength axis, a one-step perturbation m=2^(+/-1/4) produces D_shape>0.005 relative to m=1.",
+      "id": "F4"
+    },
+    {
+      "conclusion_if_met": "STRENGTH_PARAMETER_NOT_LIVE",
+      "criterion": "No extreme condition produces D_shape>1e-5 relative to its axis-specific m=1 reference.",
+      "id": "F5"
+    },
+    {
+      "conclusion_if_met": "NATIVE_PARITY_FAIL",
+      "criterion": "C++ FP64 coordinate-metric parity exceeds relative error 1e-12.",
+      "id": "F6"
+    }
+  ],
+  "null_hypothesis": "H0: at least one active strength axis is locally non-robust around its default, or the response cannot be treated as a smooth default-centered strength-response curve under the registered single-trefoil protocol.",
+  "objective": "Measure trefoil shape response to one-at-a-time default-relative strength perturbations on a quarter-octave log2 ladder, distinguish the exact-zero endpoint from finite log-space samples, test the conditional zero-strength equivalence of the otherwise-disabled third axis, certify coordinate-derived metrics in C++ FP64, and classify the local default neighborhood without varying any other relaxation control.",
+  "observables": [
+    {
+      "definition": "Exact 101-condition campaign structure, ladder reciprocity and quarter-octave spacing.",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Coordinate completeness and finite-geometry validity at all six checkpoints.",
+      "equation_refs": [
+        "E7"
+      ],
+      "id": "O2",
+      "unit": "1"
+    },
+    {
+      "definition": "Final shape/scalar response versus each axis-specific m=1 reference, including the zero endpoint.",
+      "equation_refs": [
+        "E4",
+        "E5"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Quadratic response diagnostics on the registered local log2 window |x|<=1.",
+      "equation_refs": [
+        "E3",
+        "E6"
+      ],
+      "id": "O4",
+      "unit": "1"
+    },
+    {
+      "definition": "Python FP64 versus C++ FP64 coordinate metric parity.",
+      "equation_refs": [
+        "E5"
+      ],
+      "id": "O5",
+      "unit": "1"
+    }
+  ],
+  "predictions": [
+    "The quarter-octave ladder will produce uniform x=log2(m) samples from -4 to +4.",
+    "The exact-zero endpoint of the conditional third axis should reproduce reset-all geometry if the enable switch only gates that force term.",
+    "If defaults lie inside a numerical robustness basin, one-step reciprocal perturbations around m=1 should produce small D_shape.",
+    "Strong departures at large |x| may reveal saturation, alternate relaxation basins or interaction with untouched default integrator/displacement controls."
+  ],
+  "research_question": "For a single trefoil geometry, how do three anonymous KnotPlot relaxation-strength axes change the relaxed shape when sampled on an exactly log2-symmetric multiplier ladder around each runtime-declared default while all other relaxation settings remain at reset-all defaults?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G1",
+      "id": "S1",
+      "operation": "Verify the retained historical trefoil script, runtime executable identity, campaign manifest and exactly 101 successful KnotPlot conditions."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E7"
+      ],
+      "gate": "G2",
+      "id": "S2",
+      "operation": "Verify the generated positive ladder has x=k/4, reciprocal pairs and a separate exact-zero endpoint; parse every registered coordinate checkpoint."
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E4",
+        "E5"
+      ],
+      "gate": "G3",
+      "id": "S3",
+      "operation": "Compute final default-relative shape and scale-free scalar responses for every anonymous strength axis and quantify endpoint liveness."
+    },
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G4",
+      "id": "S4",
+      "operation": "Leave independent held-out physical confirmation disabled unless a separate source is introduced in a future version."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G5",
+      "id": "S5",
+      "operation": "Certify registered coordinate-derived scalar metrics with instance-local C++17/pybind11 FP64 against Python FP64."
+    },
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G6",
+      "id": "S6",
+      "operation": "Leave GPU screening to framework profile semantics; do not repurpose the G6 lane."
+    },
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G7",
+      "id": "S7",
+      "operation": "Do not treat conditions from one KnotPlot executable as independent cross-source replication."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E4",
+        "E5",
+        "E6"
+      ],
+      "gate": "G8",
+      "id": "S8",
+      "operation": "Evaluate the local default neighborhood, conditional zero-equivalence control, reciprocal response asymmetry and registered quadratic log-response diagnostics without changing the frozen thresholds."
+    },
+    {
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G9",
+      "id": "S9",
+      "operation": "Reveal strength-axis semantics only after commitment verification; blind multiplier statistics remain unchanged."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "1",
+      "meaning": "default-relative strength multiplier",
+      "si_unit": "1",
+      "symbol": "m"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "log2 multiplier x=log2(m), defined only for m>0",
+      "si_unit": "1",
+      "symbol": "x"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "scale-free cyclic/reversal-aware Procrustes shape distance",
+      "si_unit": "1",
+      "symbol": "D_shape"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "maximum relative difference over registered scale-free scalar metrics",
+      "si_unit": "1",
+      "symbol": "R_s"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "coefficient of determination of registered quadratic response fit",
+      "si_unit": "1",
+      "symbol": "R^2_quad"
+    }
+  ]
+}

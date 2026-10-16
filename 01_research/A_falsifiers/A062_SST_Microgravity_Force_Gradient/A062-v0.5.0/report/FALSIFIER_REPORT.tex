@@ -1,0 +1,75 @@
+% SST-REPORT-SECTION:IDENTIFICATION
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+% SST-REPORT-SECTION:SOURCES
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+% SST-REPORT-SECTION:INTERPRETATION
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue}
+\title{A062 --- Dynamic Vortex-Tube \& Gravitational Source Closure\\
+\large v0.5.0: 3D Periodic Euler/Navier--Stokes Evolution and Constitutive Gravity Gates}
+\author{SST-Workbench | source-pinned technical falsifier}
+\date{13 October 2026}
+\begin{document}
+\maketitle
+\section{Scope and provenance}
+The frozen instance maintains A062-v0.1.0--v0.4.0 as separate historical results and does not promote past physical failures. Two independently pinned E011 \emph{static-ready} trefoil providers (Gilbert Fourier and KnotPlot) supply the initial centerline. Their finite-thickness Gaussian vortex tube is \emph{not} a stationary Euler equilibrium. This v0.5.0 branch performs genuine nonlinear short-time three-dimensional \emph{periodic} Euler and Navier--Stokes time integration. It does \textbf{not} establish long-lived knot dynamics or gravitational mass.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+\section{Equations and numerical method}
+For a bandlimited divergence-free velocity field $\mathbf u$ on a periodic three-torus $\mathbb T^3_L$ with $L=1.2$ dimensionless, solve
+\begin{align}
+\partial_t\mathbf u &=\mathbb P(\mathbf u\times\boldsymbol\omega)+\nu\Delta\mathbf u,\\
+\boldsymbol\omega &= \nabla\times\mathbf u,\qquad\nabla\cdot\mathbf u=0.
+\end{align}
+Here $\mathbb P$ denotes the Helmholtz--Leray Fourier projector. The nonlinear Lamb vector is pseudo-spectral with strict 2/3 de-aliasing; a fourth-order explicit Runge--Kutta integrator advances the field. No unverified external forcing is added.
+
+Initialize each E011 source from the Gaussian-smoothed closed curve,
+\begin{equation}
+\boldsymbol\omega_a(\mathbf x)=\Gamma\oint_\gamma d\mathbf X\,
+(2\pi a^2)^{-3/2}\exp[-|\mathbf x-\mathbf X|^2/(2a^2)],
+\end{equation}
+using $a=0.11$ in a dimensionless box. Importantly, this \textbf{strong smoothing} exceeds the original upstream geometric reaches (roughly 0.025--0.028); thus the run is a \emph{regularized dynamical screen}, not a fully resolved slender SST core. Projection/cutoff error is reported, not silently removed.
+
+\section{Analytic invariants and control solution}
+The discrete solver is measured against an exactly nonlinear-force-free Beltrami field $\nabla\times\mathbf u=\mathbf u$ with $L=2\pi$. For unforced NS with $\nu>0$,
+\begin{equation}
+\mathbf u(t)=\mathbf u(0)\exp(-\nu t).
+\end{equation}
+For the periodic unforced system, in normalized units,
+\begin{equation}
+E=\frac12\int_{\mathbb T^3}|\mathbf u|^2dV,\quad
+\frac{dE}{dt}=-\nu\int_{\mathbb T^3}|\boldsymbol\omega|^2dV.
+\end{equation}
+At $\nu=0$, both energy and helicity must be invariant for smooth solutions. Each E011 provider undergoes $N=24,32,48$ resolution sweeps (FULL/CERTIFY) with $\nu\in\{0,0.005\}$ and $T=0.03$; $\Delta t=0.002$ versus $0.001$ supplies time refinement. The NS viscosity is \emph{only} a screening parameter, not a fundamental SST viscosity.
+
+\section{Gravitational sources remain distinct}
+For localized stress $\Sigma_{ij}=\rho_f u_i u_j$, the SST-73 proposal has
+\begin{equation}
+S_C=\lambda\partial_i\partial_j\Sigma_{ij},\quad
+\int_{\mathbb R^3}S_CdV=0
+\end{equation}
+under adequate decay. On the periodic numerical domain, the same double divergence has exactly zero Fourier mean, $\widehat S_C(\mathbf 0)=0$. A periodic scalar Poisson equation $\Delta\Phi=K\rho_E/c^2$ is \emph{inconsistent} for strictly positive mean source until background neutrality or a different boundary problem is specified. A nonzero hydrodynamic $E/c^2$ is \textbf{not} an independently derived universal gravitational source. No long-range $1/R$, equivalence principle, $G$ normalization or microgravity test-body response has been obtained.
+
+\section{Falsification policy and unresolved gates}
+G10 assesses short-time numerical validity only: exact ABC error $<10^{-10}$, div residual $<10^{-10}$, Euler energy drift $<5\times10^{-4}$, NS budget error $<0.005$, time-refinement energy error $<0.002$, last-grid energy error $<0.02$, and raw-to-projected vorticity change $<0.03$. Any failure triggers G10 FAIL but downstream gates still execute. G4 is an independent physical zero-monopole test. G6 is reserved by the framework for optional SYCL and remains NOT\_APPLICABLE in the CPU profile. G11 requires long-term topology-preserving dynamic stability and remains UNRESOLVED. G8 requires a first-principles clock mediator, passive/source equivalence, free-space response and dimensionful $G$, and must stay UNRESOLVED unless derived. E011 geometry is STATIC\_READY, not DYNAMICS\_READY: topology-preserving transport, finite-core relative equilibria, reduced Floquet spectrum and nonlinear stability are outside the present screen.
+
+\section{Reproduction and integrity}
+The original SST Falsifier Framework v1.0.8 LOCAL\_VALIDATED\_CANDIDATE is included unchanged. FREEZE first creates a 32-byte instance-private nonce and opaque key \emph{only} in a newly unfrozen instance with no prior commitments. Private secrets are never included in source releases. Framework output ZIP/PDF files use unique run IDs. The framework's known provisional-versus-final manifest hash issue is a report-ordering issue; individual final ZIP hashes must be verified separately.
+
+\section{Sources and epistemic scope}
+E011 Gilbert and KnotPlot independent raw sources; SST-18 (Euler vs mediator), SST-34 (short-range pressure interaction deprecated as long-range gravity), SST-59/61 (mass and topology), SST-73 (organized stress source) and SST Canon v0.8.35 (conditional energy/clock bridge, explicitly calibrated $G$). Indexed-only SST manuscripts, the excluded SST-28 model and announced Euler/NS singularity proofs are \emph{not} used as empirical validation of this simulation.
+\end{document}

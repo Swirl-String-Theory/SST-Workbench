@@ -1,0 +1,57 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref}
+\title{A064 v0.3.0: Matrix-Free Euler Eigenmodes and a Two-Packet Propagation Falsifier}
+\author{SST-Workbench --- numerical research note}
+\date{14 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+An independently rerunnable, dimensionless spectral Galerkin implementation uses registered PKLSA/KnotPlot native geometries as vortex-line initial data. The test extracts actual eigenpairs of the frozen tangent-linear incompressible Euler operator and evolves two complex wavepackets with the time-dependent Euler base flow. Spectral residuals and numerical checks pass; neither Kelvin-wave certification nor genuine opposite-direction recombination is demonstrated. No dynamical gauge holonomy or Aharonov--Bohm effect is claimed.
+\end{abstract}
+\section{Euler and the tangent-linear operator}
+With no external forces, for a constant fluid density $\rho_{\!f}$,
+\begin{equation}
+\partial_t\mathbf u +(\mathbf u\cdot\nabla)\mathbf u=-\rho_{\!f}^{-1}\nabla p, \qquad \nabla\cdot\mathbf u=0.
+\end{equation}
+Writing $\mathbf u=\mathbf U(t)+\epsilon\mathbf d+O(\epsilon^2)$ and letting $\mathbb P$ be the periodic Leray projector gives the tangent system:
+\begin{equation}\label{eq:tangent}
+\partial_t\mathbf d=\mathcal L[\mathbf U(t)]\mathbf d,
+\qquad \mathcal L[\mathbf U]\mathbf d=\mathbb P\left[\mathbf d\times(\nabla\times\mathbf U)+\mathbf U\times(\nabla\times\mathbf d)\right].
+\end{equation}
+The exact nonlinear operator used for the base evolution is $\partial_t\mathbf U=\mathbb P[\mathbf U\times(\nabla\times\mathbf U)]$. Both equations use a $2\pi$-periodic cube, Fourier projection, two-thirds de-aliasing and RK4. The initial vortex vorticity is Gaussian-smoothed using a \emph{dimensionless} numerical core parameter, not the SST physical core radius. The total baseline is not a stationary or relative-equilibrium solution.
+\section{Frozen Euler eigenproblem: G6 partial screen}
+For a fixed initial background $\mathbf U_0$, solve the matrix-free eigenproblem
+\begin{equation}
+\mathcal L[\mathbf U_0]\boldsymbol\varphi_j=\lambda_j\boldsymbol\varphi_j,\qquad
+\epsilon_j=\frac{\|\mathcal L\boldsymbol\varphi_j-\lambda_j\boldsymbol\varphi_j\|_2}{\|\mathcal L\boldsymbol\varphi_j\|_2+|\lambda_j|\|\boldsymbol\varphi_j\|_2}.
+\end{equation}
+The Ritz/ARPACK computation applies the \emph{actual} discrete operator at each iteration. Both real and imaginary parts remain solenoidal. In physical units the eigenvalue would have dimension $\mathrm{s}^{-1}$; here the time is normalized and $\lambda_j$ is dimensionless.
+
+The eigenvectors are eigenvectors of the \emph{frozen} linearization, not necessarily Kelvin eigenmodes of an invariant translating/rotating vortex or Floquet modes. A material vortex needs a certified relative equilibrium $\mathbf U(t)=g(t)\mathbf U_*$, a co-moving operator, convergence across discretizations and eigenbranch matching before qualification. In the present run, $\|\partial_t\mathbf U\|/\|\mathbf U\|>0$ and spectral extrema change with grid resolution. Hence G6 cannot pass physically.
+\section{Complex wavepackets: G7 screen}
+Sample filament arclength $s(\mathbf x)$ by nearest-curve-point projection and distance $r_\perp(\mathbf x)$ in the periodic box. Let $L_C$ be the polygonal circumference and $d_L(s,s_0)$ the shortest periodic arclength separation. For each labelled arm $\pm$, construct the complex vector potential
+\begin{equation}
+\mathbf A_\pm(\mathbf x)=\mathbf e_z\,\exp\left[-\frac{r_\perp^2}{2a^2}-\frac{d_L(s,s_{0,\pm})^2}{2\sigma_s^2}\right]\exp\left(\pm i\frac{2\pi m}{L_C}d_L(s,s_{0,\pm})\right).
+\end{equation}
+Take $\mathbf d_\pm(0)=\mathcal N_\pm^{-1}\mathbb P(\nabla\times\mathbf A_\pm)$, where the normalization $\mathcal N_\pm$ is measured numerically. The two initial centers are $s_{0,+}=0.14L_C$, $s_{0,-}=0.86L_C$, the detector is fixed at $s_D=0.5L_C$, and $m=8$. These signs \emph{label intended} propagation directions; they are not imposed transport terms. Real and imaginary quadratures are separately propagated by Eq.~\eqref{eq:tangent}, under the same evolving $\mathbf U(t)$.
+
+At the detector with a positive fixed window $w$, define
+\begin{equation}
+I_\pm(t)=\langle w|\mathbf d_\pm(t)|^2\rangle,\qquad
+\Delta I(t)=2\operatorname{Re}\langle w\mathbf d_+(t)\cdot\mathbf d_-^*(t)\rangle,
+\quad I_\Sigma=I_++I_-+\Delta I.
+\end{equation}
+The complex energy centroid on the filament is $z_\pm(t)=\langle w_{\rm tube}|\mathbf d_\pm|^2 e^{2\pi is/L_C}\rangle/\langle w_{\rm tube}|\mathbf d_\pm|^2\rangle$. Its unwrapped angle measures displacement, and its modulus measures localization. A \emph{verified} opposing-arm collision additionally requires both propagation directions, localization, detector signal gain, temporal peaks and temporal overlap. For the present campaign, none of the four inputs satisfies both arms or recombination. An intensity cross term alone is generic to any coherent superposition and is not Aharonov--Bohm interference.
+\section{Numerical controls and epistemic limits}
+The operator is compared with a centered finite difference of the nonlinear Euler right-hand side. RK4 tangent superposition is explicitly tested. Additional controls are a no-background-flow run, a circulation-sign reversal and a time-step half-run at fixed final time. The no-flow detector does not evolve; the Euler background changes the localized responses. However this does not isolate any knot-type-specific interference law. The registered native geometries share a source group and have no calibrated SI length. No claim is made for a physical SST vortex core, the quantum $\mathbb Z_2$ Wilson loop, or the emergence of a gauge field. Core convergence, eigenbundle parallel transport, independent carrier families, and blind framework v1.0.7 verification remain unqualified.
+\section{Predictions required for a follow-up falsifier}
+A subsequent certified experiment must (i) identify a stationary or relative-periodic filament state and the correct co-moving operator; (ii) follow a convergent isolated Kelvin branch, including modes' dispersion and geometry-dependent localization; (iii) prepare demonstrably positive- and negative-group-velocity wavepackets in the corresponding eigenbundle; (iv) observe independently controlled arrival and recombination at a detector; and (v) distinguish any topology-dependent phase from ordinary classical wave interference after matched local controls. If these fail, claims about a physical gauge/holonomy sector remain closed.
+\begin{thebibliography}{9}
+\bibitem{Saner2026} S.~Saner et al., ``Aharonov--Bohm interference in a $\mathbb Z_2$ lattice gauge theory on a hybrid qubit--oscillator quantum computer,'' \emph{Nature Physics} (2026), \url{https://doi.org/10.1038/s41567-026-03400-6}.
+\bibitem{Moffatt1969} H.~K.~Moffatt, ``The degree of knottedness of tangled vortex lines,'' \emph{Journal of Fluid Mechanics} \textbf{35}, 117--129 (1969), \url{https://doi.org/10.1017/S0022112069000991}.
+\bibitem{Saffman1992} P.~G.~Saffman, \emph{Vortex Dynamics} (Cambridge University Press, 1992), \url{https://doi.org/10.1017/CBO9780511624063}.
+\end{thebibliography}
+\end{document}

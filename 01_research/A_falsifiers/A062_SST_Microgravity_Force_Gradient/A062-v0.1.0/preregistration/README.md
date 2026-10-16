@@ -1,0 +1,1 @@
+Protocol must be frozen before using nonpublic data. The paper's published rounded values are already public and are NOT a valid secret holdout. Use `python -m microgravity.runner FREEZE` and never overwrite freeze after source changes; bump version.

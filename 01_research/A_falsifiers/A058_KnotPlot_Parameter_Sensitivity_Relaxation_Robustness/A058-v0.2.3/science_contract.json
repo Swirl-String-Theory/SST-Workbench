@@ -1,0 +1,278 @@
+{
+  "alternative_hypothesis": "H1: at least one anonymous slider produces a reproducible change in final shape, scale-free scalar geometry, bead parametrization, or iterations-to-convergence above preregistered numerical noise.",
+  "assumptions": [
+    "The actual KnotPlot executable runtime parameter dumps are authoritative for numerical defaults; sliders may only appear after their GUI sector is enabled.",
+    "reset all supplies the requested Damped baseline and collision fast supplies collision avoidance / No Collide.",
+    "Only the sector associated with the currently tested slider is explicitly enabled; unrelated controls remain at reset-all state.",
+    "No fitto, close, max-dr, stusplit, dstep or time increment override is allowed in the scientific campaign.",
+    "The 300-bead catalogue trefoil must be safe under the runtime defaults; otherwise the campaign fails closed rather than rescaling the seed.",
+    "The velocity-dependent sector is enabled with its runtime switch and tested under Damped as requested, even though KnotPlot emits a GUI/load note that Undamped dynamics is intended for velocity-dependent force. S7 is therefore interpreted as a Damped compatibility/response lane, not as the canonical intended Undamped use case."
+  ],
+  "edge_cases": [
+    "Exact-zero endpoints are excluded from logarithmic/quadratic fits.",
+    "A zero runtime default makes multiplicative default-relative sweeping undefined and fails install calibration.",
+    "A slider absent from the bare reset-all parameter dump is not a failure if it appears and is settable after its sector switch is enabled.",
+    "Safety-cap termination is diagnostic non-convergence, not convergence at the cap.",
+    "A slider may change convergence time strongly while leaving final geometry nearly invariant.",
+    "Velocity-dependent-force results are regime-specific because this campaign intentionally retains Damped although the KnotPlot UI/load note recommends Undamped for that force."
+  ],
+  "equations": [
+    {
+      "dimensional_check": "Exponent and multiplier are dimensionless.",
+      "id": "E1",
+      "inputs": [
+        "integer ladder index k"
+      ],
+      "latex": "m_k=2^{k/4},\\qquad k=-16,\\ldots,16",
+      "outputs": [
+        "positive multiplier m_k"
+      ],
+      "purpose": "Quarter-octave ladder"
+    },
+    {
+      "dimensional_check": "Logarithm argument and result are dimensionless.",
+      "id": "E2",
+      "inputs": [
+        "positive multiplier m"
+      ],
+      "latex": "x=\\log_2 m",
+      "outputs": [
+        "x"
+      ],
+      "purpose": "Log response coordinate"
+    },
+    {
+      "dimensional_check": "Normalized coordinate differences are dimensionless.",
+      "id": "E3",
+      "inputs": [
+        "arclength-resampled normalized curves X,Y"
+      ],
+      "latex": "D_{\\rm shape}(X,Y)=\\min_{R,\\delta,\\sigma}\\left[M^{-1}\\sum_i\\|\\hat X_i-R\\hat Y_{\\sigma i+\\delta}\\|^2\\right]^{1/2}",
+      "outputs": [
+        "D_shape"
+      ],
+      "purpose": "Normalized shape response"
+    },
+    {
+      "dimensional_check": "Both comparison metrics are dimensionless.",
+      "id": "E4",
+      "inputs": [
+        "successive adaptive exports",
+        "shape threshold",
+        "scalar threshold",
+        "stable window count q"
+      ],
+      "latex": "D_{\\rm shape}(X_{j-1},X_j)\\le\\epsilon_D\\;\\land\\;\\Delta_s(j)\\le\\epsilon_s\\quad\\text{for }q\\text{ consecutive windows}",
+      "outputs": [
+        "converged flag"
+      ],
+      "purpose": "Adaptive plateau rule"
+    },
+    {
+      "dimensional_check": "Ratio of equal-length quantities is dimensionless.",
+      "id": "E5",
+      "inputs": [
+        "edge lengths"
+      ],
+      "latex": "C_{\\rm edge}=\\sigma(\\Delta s_i)/\\langle\\Delta s_i\\rangle",
+      "outputs": [
+        "edge coefficient of variation"
+      ],
+      "purpose": "Bead parametrization diagnostic"
+    },
+    {
+      "dimensional_check": "Iteration-count ratio is dimensionless.",
+      "id": "E6",
+      "inputs": [
+        "iterations-to-convergence at multiplier m and sector reference"
+      ],
+      "latex": "R_N(m)=N_{\\rm conv}(m)/N_{\\rm conv}(1)",
+      "outputs": [
+        "iteration ratio"
+      ],
+      "purpose": "Convergence-time response"
+    },
+    {
+      "dimensional_check": "Count ratio is dimensionless.",
+      "id": "E7",
+      "inputs": [
+        "valid and registered condition counts"
+      ],
+      "latex": "C=N_{\\rm valid}/N_{\\rm registered}",
+      "outputs": [
+        "completeness fraction"
+      ],
+      "purpose": "Campaign completeness"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "PROTOCOL_INVALID",
+      "criterion": "Any registered sector-enable command is rejected, any slider fails to appear in its enabled sector context, or any setter fails to reproduce the requested numeric value.",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "DEFAULT_REGIME_NOT_ADMISSIBLE",
+      "criterion": "The trefoil is not safe under reset-all Damped defaults plus collision-fast; no rescaling is permitted in v0.2.3.",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "NO_MEASURABLE_SLIDER_EFFECT",
+      "criterion": "No anonymous slider among the eight registered axes produces shape, scalar or convergence-time response above the registered numerical noise floors.",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "ATTRACTOR_NOT_CERTIFIED_FOR_ALL_CONDITIONS",
+      "criterion": "One or more conditions fail to reach the adaptive plateau before the safety cap or finish unsafe.",
+      "id": "F4"
+    }
+  ],
+  "null_hypothesis": "H0: after correct sector-context runtime application and adaptive convergence, none of the eight anonymous slider sweeps produces a response above preregistered numerical noise relative to its sector-matched default reference.",
+  "objective": "Measure one-slider-at-a-time default-relative response curves for eight GUI sliders across six force sectors, using sector-context runtime default interrogation and adaptive convergence rather than a fixed final relaxation count; distinguish shape effects, parametrization effects, damping/timescale effects, and velocity-dependent-force response.",
+  "observables": [
+    {
+      "definition": "Final default-relative normalized shape response for every anonymous slider condition.",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Adaptive convergence trace and iterations-to-convergence.",
+      "equation_refs": [
+        "E4",
+        "E6"
+      ],
+      "id": "O2",
+      "unit": "1"
+    },
+    {
+      "definition": "Edge-spacing coefficient of variation used to separate parametrization response from embedded-shape response.",
+      "equation_refs": [
+        "E5"
+      ],
+      "id": "O3",
+      "unit": "1"
+    },
+    {
+      "definition": "Campaign completeness, command/state verification and final-safety status.",
+      "equation_refs": [
+        "E7"
+      ],
+      "id": "O4",
+      "unit": "1"
+    }
+  ],
+  "predictions": [
+    "Amplitude-like sliders may primarily alter final geometry magnitude; exponent-like sliders may change response-law shape.",
+    "A predominantly tangential redistribution control may change edge-spacing statistics more strongly than arclength-resampled embedded shape.",
+    "A damping-like control may change N_conv more strongly than final D_shape.",
+    "The velocity-dependent control may alter transient and/or final geometry under Damped, but any such response is explicitly conditional on this non-intended regime pairing."
+  ],
+  "research_question": "For one catalogue trefoil in the user-requested Damped + No-Collide regime, how does each of eight anonymous GUI slider parameters change the adaptively converged geometry or convergence timescale relative to its sector-context runtime default, while all unrelated controls remain at reset-all defaults?",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G1",
+      "id": "S1",
+      "operation": "Runtime-probe eight anonymous slider parameters in six enabled sector contexts, verify assignment-form setters and sector switches, verify the Damped + collision-fast regime, and export exactly one safe trefoil during installation."
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G2",
+      "id": "S2",
+      "operation": "Generate six sector-matched default reference conditions and eight default-relative sweeps on the exact quarter-octave ladder plus exact-zero endpoint."
+    },
+    {
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G2",
+      "id": "S3",
+      "operation": "For every condition stream small go-quantum blocks into one persistent KnotPlot process and stop by the preregistered geometry/scalar plateau rule rather than a fixed final iteration count."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E5",
+        "E6"
+      ],
+      "gate": "G3",
+      "id": "S4",
+      "operation": "Compute final shape, scale-free scalar, parametrization and convergence-time responses against the matching sector reference."
+    },
+    {
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G5",
+      "id": "S5",
+      "operation": "Certify coordinate-derived scalar metrics with C++17/pybind11 FP64 against Python FP64."
+    },
+    {
+      "formula_refs": [
+        "E3",
+        "E5",
+        "E6"
+      ],
+      "gate": "G8",
+      "id": "S6",
+      "operation": "Report the anonymous tangential response as parametrization-versus-shape, the damping response as convergence-timescale-versus-final-shape, and the velocity-dependent response as a Damped-regime compatibility diagnostic."
+    },
+    {
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G9",
+      "id": "S7",
+      "operation": "After commitment-verified reveal only, attach GUI slider and sector names to the frozen anonymous response curves, including the registered Damped-regime caveat for the velocity-dependent sector."
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "1",
+      "meaning": "default-relative slider multiplier",
+      "si_unit": "1",
+      "symbol": "m"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "log2 multiplier coordinate",
+      "si_unit": "1",
+      "symbol": "x"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "rigid/cyclic/reversal-aware normalized curve-shape distance",
+      "si_unit": "1",
+      "symbol": "D_shape"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "coefficient of variation of edge lengths",
+      "si_unit": "1",
+      "symbol": "C_edge"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "number of KnotPlot iterations required by adaptive plateau criterion",
+      "si_unit": "1",
+      "symbol": "N_conv"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "successive adaptive-window shape/scalar change diagnostic",
+      "si_unit": "1",
+      "symbol": "delta_t"
+    }
+  ]
+}

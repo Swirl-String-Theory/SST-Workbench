@@ -1,0 +1,149 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array}
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks=true,linkcolor=MidnightBlue,urlcolor=MidnightBlue,citecolor=MidnightBlue]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{parskip}
+\pagestyle{fancy}\fancyhf{}\lhead{A060 v0.2.0 / M00--M04}\rhead{Development design}\cfoot{\thepage}
+\setlist[itemize]{nosep,leftmargin=5mm}
+\renewcommand{\arraystretch}{1.16}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\status}{\textcolor{BrickRed}{\bfseries DEVELOPMENT / NOT CERTIFIED}}
+\title{\vspace{-1em}\textbf{A060 Cross-Paper Vortex Mechanics \& Stability}\\[.4em]\large M00--M04: Analytic Closure and Framework Integration Plan}
+\author{SST-Workbench engineering development package}
+\date{13 October 2026 -- v0.2.0-dev}
+\begin{document}\maketitle
+\begin{center}\status\\\small Not a frozen v1.0.7 scientific protocol; not an official SST falsifier report.
+\end{center}
+\section{Google Drive audit and lineage}
+The existing \textbf{A060 Dynamical Topology \& Coherence} \code{v0.1.0} is present in Google Drive and currently specifies framework \code{v1.0.6}. The proposed \code{v0.2.0} is an \emph{additive} successor, not a destructive overwrite or reinterpretation of earlier verdicts. The frozen \href{https://drive.google.com/drive/folders/1IASDEqmcEQXHyTfppetIGgYnVUsvN5hE}{framework v1.0.7} records status \code{CANONICAL\_FROZEN} (7 October), a 92-file manifest and 56 passed regression tests. Numeric/backend code was not changed from its v1.0.6 parent. The authoritative lanes are Python FP64 reference and C++/pybind11 FP64 certification; SYCL FP32 and DD32 are screening only.
+
+\textbf{Registry blocker.} The accessible \code{falsifier\_registry.yaml} was last modified 25 September 2026 and calls A045 \code{A045\_Two\_Harmonic\_Phase\_Chirality\_Floquet}. More recent Drive materials call it \code{A045 Relative-Vorticity Triadic Geometry}; A054 and A060 do not appear in the older register. This must be reconciled before formal cross-family imports and M00/G1 certification. A054 v0.5.1 is separately present and must retain its own scientific status.
+
+\section{Scope, scientific null and evidence hierarchy}
+The canonical physical comparison model is unforced, incompressible, inviscid three-dimensional Euler flow. No source in tranche M00--M04 establishes a stable particle, nucleon mass, quantum law or emergent gravity. Analytic identities, test fields, numerical control fields and independent physical source evidence must remain separate evidence classes. A precheck \code{REFERENCE\_PASS} is \emph{not} a canonical framework \code{PASS}.
+
+\textbf{Null (H0).} The verified algebraic controls do not establish a self-confined, dynamically stable, free-standing 3D vortex knot. The possible later alternative (H1) is producer-qualified 3D Euler stability and nonlocal interactions beyond matched nulls. M00--M04 may qualify algorithms but cannot reject that physical H0.
+
+\section{M00: source hashes, provenance and blindness}
+The source lock contains PDF SHA-256 hashes for four papers: Chiarini \cite{Chiarini2026}; Massey \cite{Massey2026}; Landreman \cite{Landreman2026}; Zhang--Yao \cite{ZhangYao2026}. Missing files are \code{UNRESOLVED}; a byte mismatch is \code{SOURCE\_HASH\_MISMATCH}. A checked paper is not a second independent experimental provider. Framework pin, taxonomy and upstream family name also require confirmation. A060 v0.1.0, A045 and A054 are read-only upstreams. Blind scoring contains no particle identifiers or canonical SST constants.
+
+\section{M01: Landreman exact Euler family}
+Use the first exact family of \cite{Landreman2026}, written as a dimensionless Euler field, with $0\leq\varepsilon<1$,
+\begin{gather}
+ a=\sqrt{1+\varepsilon},\qquad b=\sqrt{1-\varepsilon},\qquad
+ s=\frac{x^2}{a^2}+\frac{y^2}{b^2},\qquad
+ F=\sqrt{1-(1-s)^2-4z^2},\\
+ \mathbf B=\left(\frac{2zx-(a/b)Fy}{s},\frac{2zy+(b/a)Fx}{s},1-s\right),\qquad
+ Q_L=\frac{x^2+y^2+4z^2}{2}.
+\end{gather}
+The admissible domain has $F>0$, $s>0$. The fraction bars in the original PDF were visually inspected: the denominator $s$ covers the \emph{entire} numerator in the first two components. The complete reference identities are
+\begin{equation}
+ \nabla\cdot\mathbf B=0,\qquad (\mathbf B\cdot\nabla)\mathbf B=-\nabla Q_L,\qquad -\operatorname{tr}[(\nabla\mathbf B)^2]=\nabla^2Q_L=6.
+\end{equation}
+The MHD pressure is not the kinematic Euler pressure. With arbitrary velocity and length scales $U_0,L_0$, the physical Euler pressure is $p_E=\rho_{\!f}U_0^2Q_L(\mathbf x/L_0)+\mathrm{constant}$. Development tests use $\varepsilon=0,0.2,0.5$, centered differences and tolerances $3\cdot10^{-7}$ (divergence), $2\cdot10^{-7}$ (momentum), $3\cdot10^{-6}$ (Poisson). Production extends to volume sampling, $h$-refinement, exact geometry masks and an independent gradient method.
+
+\section{M02: Massey shear, silence, rank and balanced vortices}
+For $A_{ij}=\partial_jv_i$ and $\operatorname{tr}A=0$, let $S=(A+A^T)/2$, $\boldsymbol\omega=\nabla\times\mathbf v$ and
+\begin{align}
+ Q_A&=-\tfrac12\operatorname{tr}A^2,& R_A&=-\det A,& a^2&=\|A\|_F^2,\\
+ f&=1-\frac{\sum_j|\lambda_j|^2}{a^2},&
+ \chi&=\frac{|\omega^2/2-S:S|}{a^2},&
+ m&=\max\left(\frac{2|Q_A|}{a^2},\left(\frac{2|R_A|}{a^3}\right)^{2/3}\right).
+\end{align}
+Massey's exact tests are
+\begin{equation}
+ 2Q_A=\frac12\omega^2-S:S,\qquad m\leq1-f\leq3m.
+\end{equation}
+Sharper constant: $\sup(1-f)/m\simeq2.0434311543$. Controls: rank-one nilpotent shear, rank-two nilpotent shear, balanced vortex, and signed rank-one gate $A_{12}=g, A_{21}=\pm\epsilon$. The expected eigenvalue scaling is $\sqrt{g\epsilon}$ for rank one and $(g^2\epsilon)^{1/3}$ for a rank-two closing gate. A zero tensor has \emph{undefined}, not zero, normalized invariants. Development crosscheck: 2500 seeded real trace-free Gaussian matrices, no violating wedge above $10^{-10}$ tolerance.
+
+\section{M03: VA/VT projector, including Helmholtz closure}
+For $|\boldsymbol\omega|>0$ define
+\begin{equation}
+ \mathbf{VA}=\frac{\boldsymbol\omega^TS\boldsymbol\omega}{|\boldsymbol\omega|^2}\boldsymbol\omega,\quad
+ \mathbf{VT}=S\boldsymbol\omega-\mathbf{VA},\quad
+ \boldsymbol\omega\cdot\mathbf{VT}=0.
+\end{equation}
+For Chiarini's periodic modified forcing $\nabla^2\mathbf g=\nabla\times\mathbf{VA}$, the correct relation is
+\begin{equation}
+ \nabla\times\mathbf g=-\mathbb P_\perp\mathbf{VA},\qquad
+ \mathbb P_\perp=I-\nabla\nabla^{-2}\nabla\cdot.
+\end{equation}
+Since $\nabla\cdot\mathbf{VA}$ need not vanish, an unprojected local VA removal is generally \emph{not} equal to the modified momentum equation. Test on $\mathbf u=(\sin y,\sin z,\sin x)$ using odd-$N$ periodic Fourier grids. The zero-mean condition must be made explicit; vorticity-null points require masking. The volume-integrated correction $\int\boldsymbol\omega\cdot\nabla\phi\,dV$ vanishes with suitable boundary conditions, but its local density need not. Chiarini's modified dynamics is not SST's canonical Euler law.
+
+\section{M04: Zhang--Yao real-space cascade decomposition}
+For the local spherical filter of \cite{ZhangYao2026} with \emph{diameter} $\ell$, let $I_\ell=\frac25(\ell/2)^2=\ell^2/10$, $R_s=-\operatorname{tr}(S^3)/3$ and $V_s=\boldsymbol\omega^TS\boldsymbol\omega$. The dipolar local contribution is
+\begin{equation}
+ \Phi_\ell^{(L=1)}=I_\ell(3R_s+V_s/4),\qquad
+ \Phi_\ell=\Phi_\ell^{(L=1)}+\mathcal O_\ell.
+\end{equation}
+$\mathcal O_\ell$ consists of higher angular modes and \emph{must be retained} for general flows. For affine $\mathbf u=A\mathbf x$ the residual vanishes, allowing independent surface quadrature of
+\begin{equation}
+ \Phi_\ell=-\frac{3}{4\ell}\left\langle|\delta\mathbf u|^2(\delta\mathbf u\cdot\mathbf n)\right\rangle_{S^2},\qquad \delta\mathbf u=\ell A\mathbf n.
+\end{equation}
+An informative analytic test is the balanced vortex
+\begin{equation}
+ A=\begin{pmatrix}-a/2&-\sqrt3a/2&0\\\sqrt3a/2&-a/2&0\\0&0&a\end{pmatrix},\qquad Q_A=0,\quad V_s=3a^3,\quad R_s=-a^3/4,
+\end{equation}
+for which $3R_s+V_s/4=0$ although VA is positive. No inference about general nonlinear turbulence follows from this locally affine control.
+
+\section{Official framework contract and gating}
+\small
+\begin{longtable}{p{0.10\linewidth}p{0.40\linewidth}p{0.37\linewidth}}
+\toprule Gate & Subchecks / objective & Certification status at this development stage\\\midrule
+\endhead
+G0 & Freeze, hash commitments, reproducible protocol (M00) & Unresolved: no framework freeze\\
+G1 & PDF hashes, registry reconciliation, genuine evidence provenance (M00) & Unresolved: A045 identity collision\\
+G2 & M01 Euler; M02 shear; M03 projector; M04 scale flux & Local analytic prechecks only\\
+G3 & Blind discovery on independent producer-qualified fields & Not executed\\
+G4 & Held-out confirmatory source & Not executed\\
+G5 & Strict C++ FP64 native parity and certification & Not executed\\
+G6 & SYCL/DD32 screening (if enabled) & Not executed; screening only\\
+G7 & Independent provenance-group replication & Not executed\\
+G8 & Actual 3D Euler stability/confinement & Not executed\\
+G9 & Strict authorized reveal after sealed ledger & Not executed\\\bottomrule
+\end{longtable}
+\normalsize
+Do not rename the framework's native gate IDs. M00--M04 are internal subchecks mapped into G0/G1/G2. The v1.0.7 \code{FREEZE} mechanism hashes \code{science\_contract.json}, \code{source\_contract.json}, \code{gate\_plan.json}, \code{falsifier.toml}, \code{blind\_policy.json} and \code{report/FALSIFIER\_REPORT.tex}; post-run generated results and discussions are separate. An invalid framework pin, scientific modification after freeze, source mismatch or failed reveal commitment must fail closed. Gate results do not silently fall back to Python if native C++ is unavailable.
+
+\section{Production regression and output protocol}
+\begin{enumerate}[nosep,leftmargin=6mm]
+\item Source and registry hash/timestamp tests, A060 v0.1.0 non-overwrite and schema compatibility.
+\item Euler analytical control under multiple $\varepsilon$, $h$ and independent derivative implementations; invalid-domain rejection.
+\item Massey tensor identity, random Schur wedge, SO(3) invariance, rank-one/two perturbation exponents and nilpotent edge cases.
+\item Fourier projectors with zero-mode policy, VA divergence, correction to local enstrophy budget and energy work of forcing.
+\item Direct spherical quadrature, varying angular resolution and scales; measure the higher-mode remainder on nonaffine fields.
+\item Python FP64 reference and separately strict C++ FP64 certified implementation, no silent fallback. DD32 only screening.
+\item BLIND ledger/manifest self-hashes, report TeX protocol freeze, authorized reveal guards and PDF visual inspection.
+\end{enumerate}
+
+Create the new version folder \code{A060-v0.2.0} inside the existing A060 family under \code{01\_research/A\_falsifiers}; do not overwrite v0.1.0. Framework-generated \code{run\_all.cmd} modes: \code{SELFTEST}, \code{FREEZE}, \code{BASIC}, \code{FULL}, \code{CERTIFY}, \code{REVEAL\_IF\_ALLOWED}. Required artifacts include ledger, summary, output manifest, render status, the frozen TeX protocol, and generated result fragments; the published PDF belongs beside the instance as \code{A060-v0.2.0\_FALSIFIER\_REPORT.pdf}. BLIND/REVEALED ZIP archives are distinct and reveal may not rerun science.
+
+\section{Observed local preflight results (not certification)}
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule Check & Recorded developer-reference result\\\midrule
+Python regression tests & 6/6 passed\\
+M00 PDF SHA-256 & 4/4 matched; registry separate unresolved\\
+M01 maximum divergence & $1.57\times10^{-10}$\\
+M01 maximum momentum residual & $2.74\times10^{-10}$\\
+M01 maximum Poisson residual & $3.37\times10^{-10}$\\
+M02 2500 random trace-free tensors & max wedge violation $2.44\times10^{-15}$\\
+M03 curl/projected-VA error & $3.44\times10^{-15}$\\
+M03 projected divergence & $5.82\times10^{-14}$\\
+M04 18 affine tensor controls & max relative flux mismatch $4.55\times10^{-16}$\\\bottomrule
+\end{tabular}
+\end{center}
+These are dimensionless analytic controls tested in the current environment. They do \emph{not} demonstrate SST gravity, self-confinement, stable quarks/nucleons, parameter independence, frozen-blind compliance or official native FP64 certification.
+
+\section{Immediate implementation decision}
+Keep the working modules and source checks as a \emph{development overlay}. First reconcile A045 and validate registry authority; then generate a new \code{v0.2.0} using \code{tools/new\_falsifier.py} from the frozen \code{v1.0.7} root, migrate scientific modules into the generated instance, preregister thresholds and report, and only then run \code{FREEZE}. A054 v0.5.1 remains independent and is not imported for this tranche.
+
+\input{../docs/REFERENCES.tex}
+\end{document}

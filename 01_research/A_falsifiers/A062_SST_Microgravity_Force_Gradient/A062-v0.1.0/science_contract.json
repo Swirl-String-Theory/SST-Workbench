@@ -1,0 +1,193 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can the preregistered divergence-free Gaussian SST vortex pressure model reproduce a Newtonian microgravity force gradient and material mass without fitting G or a phenomenological source-to-mass map?",
+  "objective": "Separate article-derived Newton benchmark, numerical Euler-Poisson solver qualification and source-independent SST mechanisms.",
+  "null_hypothesis": "The concrete Gaussian local-vortex closure fails source mass or r^-2 scaling and has no independently identified SST constant.",
+  "alternative_hypothesis": "A pre-registered SST pressure and mass closure passes absolute magnitude, mass scaling and r^-2 force scaling without fit.",
+  "assumptions": [
+    "3D incompressible inviscid Euler snapshot, no external body-force",
+    "Gaussian swirling localized velocity field is a restricted candidate, not generic SST",
+    "finite field width a=3 mm is an unverified coarse graining of a femtometre core",
+    "pressure acting on a small test sphere is approximated by -V grad p at the centre",
+    "public article observations are validation benchmarks but cannot constitute target-blind discovery"
+  ],
+  "symbols": [
+    {
+      "symbol": "rho_f",
+      "meaning": "effective SST fluid density",
+      "si_unit": "kg/m^3",
+      "dimensions": "M L^-3"
+    },
+    {
+      "symbol": "a",
+      "meaning": "Gaussian envelope scale",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "p",
+      "meaning": "Euler pressure",
+      "si_unit": "Pa",
+      "dimensions": "M L^-1 T^-2"
+    },
+    {
+      "symbol": "G",
+      "meaning": "Newton gravity constant; comparator only",
+      "si_unit": "m^3 kg^-1 s^-2",
+      "dimensions": "L^3 M^-1 T^-2"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Newton comparator force",
+      "latex": "F_N=G m_s m_t /r^2",
+      "inputs": [
+        "ms,mt,r,G"
+      ],
+      "outputs": [
+        "F_N"
+      ],
+      "dimensional_check": "[M L T^-2] = [L^3 M^-1 T^-2][M^2][L^-2]"
+    },
+    {
+      "id": "E2",
+      "purpose": "Newton gradient",
+      "latex": "|dF_N/dr|=2Gm_sm_t/r^3",
+      "inputs": [
+        "ms,mt,r,G"
+      ],
+      "outputs": [
+        "dF_N/dr"
+      ],
+      "dimensional_check": "[M T^-2]"
+    },
+    {
+      "id": "E3",
+      "purpose": "divergence-free Gaussian swirl",
+      "latex": "v=\\Omega e^{-|x|^2/(2a^2)} (-y,x,0)",
+      "inputs": [
+        "Omega,a,x,y,z"
+      ],
+      "outputs": [
+        "v"
+      ],
+      "dimensional_check": "[L T^-1]"
+    },
+    {
+      "id": "E4",
+      "purpose": "instantaneous Euler pressure Poisson source",
+      "latex": "\\nabla^2p=2\\rho_f\\Omega^2e^{-|x|^2/a^2}[1-(x^2+y^2)/a^2]",
+      "inputs": [
+        "rho_f,Omega,a,x,y,z"
+      ],
+      "outputs": [
+        "laplacian_p"
+      ],
+      "dimensional_check": "[M L^-3 T^-2]"
+    },
+    {
+      "id": "E5",
+      "purpose": "pressure force diagnostic",
+      "latex": "F_p=-V_t \\nabla p",
+      "inputs": [
+        "V_t,grad_p"
+      ],
+      "outputs": [
+        "F_p"
+      ],
+      "dimensional_check": "[L^3] [M L^-2 T^-2]=[M L T^-2]"
+    },
+    {
+      "id": "E6",
+      "purpose": "candidate energy-equivalent source mass",
+      "latex": "m_E=\\rho_f\\Omega^2\\pi^{3/2}a^5/(2c^2)",
+      "inputs": [
+        "rho_f,Omega,a,c"
+      ],
+      "outputs": [
+        "m_E"
+      ],
+      "dimensional_check": "[M L^-3][T^-2][L^5]/[L^2 T^-2]=[M]"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "force gradient in N/m",
+      "equation_refs": [
+        "E2",
+        "E5"
+      ],
+      "unit": "N/m"
+    },
+    {
+      "id": "O2",
+      "definition": "far-field power-law log slope",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O3",
+      "definition": "source energy mass / observed physical mass",
+      "equation_refs": [
+        "E6"
+      ],
+      "unit": "dimensionless"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Generate Newton benchmark",
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "integrate pressure source on midpoint grid, refine resolution",
+      "formula_refs": [
+        "E3",
+        "E4",
+        "E5"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "energy equivalent mass without fit",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G3"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "source mass closure predicted to agree within 10% without fit",
+      "conclusion_if_met": "PASS"
+    },
+    {
+      "id": "F2",
+      "criterion": "far-field force slope must be within 0.2 of 2",
+      "conclusion_if_met": "PASS"
+    }
+  ],
+  "edge_cases": [
+    "r close to a outside point-test approximation",
+    "a is not r_c",
+    "infinite-domain integral quadrature truncation",
+    "source and test not rigid vortices",
+    "published force sensitivity derived partly from Newton baseline"
+  ],
+  "predictions": [
+    "Gaussian pressure multipole force decreases faster than inverse square",
+    "Energy-mass mismatch under fixed coarse graining"
+  ]
+}

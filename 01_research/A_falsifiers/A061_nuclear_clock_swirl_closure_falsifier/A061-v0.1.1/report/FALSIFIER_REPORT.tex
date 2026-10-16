@@ -1,0 +1,84 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=19mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable,array,enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A061 --- Nuclear Clock / Swirl Clock Closure Falsifier\\Version v0.1.1 (SST Framework v1.0.7)}
+\author{SST-Workbench: independent falsification protocol}
+\date{8 October 2026}
+\begin{document}\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification and epistemic status}
+Independent research-family A061, scientific revision v0.1.1. This release migrates the v0.1.0 study to the immutable SST Falsifier Framework 1.0.7. It does not establish SST clock physics. The strict Python FP64 reference and C++17/pybind FP64 certification lanes are distinct. SYCL is disabled in the CPU profile.
+% SST-REPORT-SECTION:QUESTION
+\section{Research question}
+Can the local $S_t^{\circlearrowleft}$ factor proposed in SST-28 predict a species-dependent frequency shift in measured $^{229}$Th/Yb clock comparisons, distinct from known environmental frequency shifts and laser-feedback transfer functions? A universal clock rescaling alone cannot change a frequency ratio.
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Null and alternatives}
+$H_0$: observed differential frequency excursions arise from species-independent time scaling cancellation, transitions' intrinsic energy shifts, thermal/crystalline effects, and feedback dynamics; no independently committed SST transfer law is available. $H_1$: an independently derived SST susceptibility predicts, before observing target data, nonzero signed differential changes and uncertainty bounded by the measured data. Neither mathematical compatibility nor a synthetic reconstruction is empirical support for $H_1$.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and edge cases}
+SST-28 is treated as an explicitly defined, dimensionless geometric ansatz. The $\omega=0$ locus does not imply $v_\varphi=0$. A singular circulation model is never substituted for the smooth finite-core profile without an explicit regularization. The two independent nuclear laboratories are not assumed phase-synchronous. Small/large radius checks: $S(0)=S(\infty)=1$, while at $r=\rc$ the smooth reference has $S=\sqrt{1-e^{-2}}$. Missing time series or native dependencies produce \texttt{UNRESOLVED}; the harness must not synthesize experimental data.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols and units}
+\begin{longtable}{llll}\toprule Symbol & Definition & SI unit & Dimensions\\\midrule
+$x$ & $r/\rc$ & 1 & 1\\
+$S$ & SST clock factor & 1 & 1\\
+$f$ & Nuclear/atomic clock frequency & Hz & $T^{-1}$\\
+$\omega_z$ & Axial vorticity & $\mathrm{s}^{-1}$ & $T^{-1}$\\
+$t$ & Chronological timestamp & s & $T$\\
+$P$ & Normalized periodogram power & 1 & 1\\\bottomrule\end{longtable}
+% SST-REPORT-SECTION:EQUATIONS
+\section{Equations of the testable models}
+Define $x=r/\rc$ and use the smooth reference profile $v_\varphi/\|\vswirl\|=xe^{-x}$:
+\begin{equation}S(x)=\sqrt{1-x^2e^{-2x}},\qquad \tilde{\omega}_z(x)=e^{-x}(2-x).\end{equation}
+The cited circulation-pole identification $\kappa=2\pi\rc\|\vswirl\|$ gives
+\begin{equation}S_n(x)=\sqrt{1-n^2/x^2};\quad S_{n=1}(x=1)=0.\end{equation}
+SST-28 also prints approximately $0.9603$ at that same point. This is an algebraic inconsistency subject to gate G3; it is \emph{not} silently repaired. Likewise, $\omega_z(2\rc)=0$ while $S(2\rc)<1$.
+For a clock transition with an independently defined local Hamiltonian gap:
+\begin{equation} f_i^{\rm obs}=S_i\,\Delta E_i^{\rm loc}/h,\qquad \delta\ln f_i=\delta\ln S_i+\delta\ln\Delta E_i^{\rm loc}.\end{equation}
+Both sides have dimensions $T^{-1}$; the two logarithmic variations are dimensionless. When $S_{\rm Th}=S_{\rm Yb}$ it cancels from $f_{\rm Th}/f_{\rm Yb}$.
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm and computational state}
+Source-pinned published-summary reconstruction; analytic SST-28 checks; structural identifiability; a delayed proportional error-feedback synthetic null; optional generalized least-squares sinusoidal scan with a global block-resampled peak threshold; independent pybind11 C++/NumPy parity; no cross-laboratory pseudo-replication. A measured periodic residual would only be a candidate instrumental/physical anomaly, never SST confirmation without a frozen transfer law. The C++ pass is a numerical-kernel pass, not a clock experiment.
+% SST-REPORT-SECTION:SOURCES
+\section{Sources and provenance}
+Primary experimental PDFs are bundled (arXiv:2606.04997v2 and arXiv:2606.08870v2). Huang and Toscani are independent laboratories, but their data are not treated as contemporaneous co-phased time series. SST-28 is the explicit prior theory. The experimental data repositories (Zenodo 22657608 and Figshare 33386191) are external optional inputs, never auto-invented. Public summary values and synthetic nulls have distinct evidence classes. The framework records actual source paths and file digests.
+% SST-REPORT-SECTION:GATES
+\section{Independent gate plan}
+G0: protocol/source integrity; G1: published frequency reconstruction; G2: universal-factor cancellation; G3: SST-28 algebra; G4: crystal nuisance identifiability; G5: strict C++ FP64 parity; G6: optional GPU; G7: optional multilibrary; G8: physical transfer closure; G9: reveal/deferred; G10: feedback-only null; G11: raw time-series periodogram; G12: theory prediction; G13: cross-lab replication. Gates have no scientific predecessor dependencies so the G3 failure does not stop G4--G13; framework integrity checks remain fatal.
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerics and convergence}
+FP64 Python is the authoritative profile reference. The native C++ gate is a strict, separately compiled double-precision pybind kernel, controlled through framework build provenance. Tolerance for the dimensionless profile: $10^{-11}$. Monte Carlo (if raw timing is valid) uses $160$ block-resampled trials and 240 geometric frequencies, with trial-corrected global threshold 5\%; this exploratory test is not yet a calibrated clock-feedback likelihood.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend qualification}
+Framework v1.0.7 verifies the protocol before importing the scientific pipeline. Compiler/Python ABI details are recorded by the native builder; a missing compiler or pybind11 yields \texttt{UNRESOLVED} instead of silent Python fallback. The native source is included; no precompiled Windows binary is published. GPU lanes are \texttt{NOT\_APPLICABLE} under CPU mode.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and withholding rules}
+The frozen public science contract and the private reveal payload have nonce-backed commitments. Synthetic cases remain anonymous in all public outputs, and are expressly not physics evidence. Reveal requires preregistered G12=PASS in FULL/CERTIFY with no unresolved gates. A routine \texttt{REVEAL\_IF\_ALLOWED} therefore withholds reveal while the SST transfer remains unspecified. The blind-source scan excludes third-party runtime/vendor ownership but examines instance-owned source.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical discrimination}
+Reported frequency differences, standard deviations, Allan instabilities, material shifts, in-loop servo response and global search false-alarm rates must remain separate quantities. Clock and crystal systematic uncertainty cannot be interpreted as a universal local-time effect. An observed peak in a single periodogram is not a cross-laboratory replication. No fitted parameter is allowed to be called an independently predicted SST coupling.
+% SST-REPORT-SECTION:RESULTS
+\section{Automatic run results}
+\IfFileExists{A061_GATES_SUMMARY.tex}{\input{A061_GATES_SUMMARY.tex}}{This immutable protocol is distributed before any production run. Numerical outcomes reside in the framework's gate ledger.}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation boundaries}
+G2=PASS would be a cancellation identity, not positive evidence for SST. G3=FAIL indicates an internally inconsistent source expression. G5=PASS would qualify numerical parity only. Missing raw data, absent a differential SST susceptibility, or an unmatched timebase prevents any claim about nuclear time dilation. Failing one independent scientific gate does not stop later exploratory gates.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Replication and bibliography}
+Run \texttt{run\_all.cmd SELFTEST}, \texttt{run\_all.cmd FREEZE}, \texttt{run\_all.cmd BASIC}, \texttt{run\_all.cmd BUILD\_NATIVE}, \texttt{run\_all.cmd FETCH}, \texttt{run\_all.cmd FULL}, then \texttt{run\_all.cmd REVEAL\_IF\_ALLOWED}. The unmodified canonical framework resides separately in \texttt{06\_templates}.
+\begin{thebibliography}{9}
+\bibitem{SST28} O. Iskandarani (2026), ``Time from Swirl: A Hydrodynamic Origin of Proper Time,'' SST-28, Zenodo, \href{https://doi.org/10.5281/zenodo.17877012}{doi:10.5281/zenodo.17877012}.
+\bibitem{Toscani} L. Toscani De Col et al. (2026), ``A thorium-229 optical nuclear clock with feedback loop,'' arXiv:2606.04997v2, \url{https://arxiv.org/abs/2606.04997}.
+\bibitem{Huang} B. Huang et al. (2026), ``A nuclear clock synchronized to 229Th,'' arXiv:2606.08870v2, \url{https://arxiv.org/abs/2606.08870}.
+\bibitem{Scargle} J. D. Scargle (1982), ``Studies in astronomical time series analysis. II,'' \emph{Astrophysical Journal} \textbf{263}, 835, \href{https://doi.org/10.1086/160554}{doi:10.1086/160554}.
+\end{thebibliography}
+\end{document}

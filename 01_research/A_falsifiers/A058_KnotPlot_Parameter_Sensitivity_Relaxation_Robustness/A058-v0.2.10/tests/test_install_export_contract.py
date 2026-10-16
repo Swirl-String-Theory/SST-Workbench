@@ -1,0 +1,21 @@
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+def test_install_contract_exactly_one_export_and_no_long_fixed_relax():
+    s=(ROOT/'tools/install_test_export.py').read_text()
+    assert "exports!=[geom]" in s
+    assert "'go 1'" in s
+    assert 'ago 1000' not in s.lower() and 'ago 15000' not in s.lower()
+def test_install_uses_sector_context_defaults():
+    s=(ROOT/'tools/install_test_export.py').read_text()
+    assert "sector_defaults" in s
+    assert "f'{sw} = on'" in s
+    assert 'no frozen fallback is registered' in s
+    assert "qualify_numeric" in s
+
+
+def test_reset_sector_state_and_explicit_default_verified_when_reportable():
+    s=(ROOT/'tools/install_test_export.py').read_text()
+    assert "reset_sector=priv['sectors']['R2']" in s
+    assert 'r2_reset_off_confirmed' in s
+    assert "off_lines += [f'{r2_switch} = off'" in s
+    assert "if 'default_value' in axis:" in s

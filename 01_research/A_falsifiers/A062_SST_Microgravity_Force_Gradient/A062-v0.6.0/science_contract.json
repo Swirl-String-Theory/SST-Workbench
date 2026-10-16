@@ -1,0 +1,601 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can time-resolved E011 tube energy (without physical G) generate a finite nonzero conditional active source, and under an independently postulated free-space scalar Poisson mediator yield a reproducible inverse-square far field? Does SST itself predict passive-body coupling or G?",
+  "objective": "Conditional free-space Poisson source lift from actual short-time Euler/NS E011 snapshots, manufactured Gaussian analytic regression, independent C++ potential-gradient parity, explicit clock-locality/active-passive/normalization gates, retained SST-73 zero-source falsifier.",
+  "null_hypothesis": "Hydrodynamic energy and periodic short-time dynamics alone do not close a universal source-test-body gravity law or K=G. Any 1/R^2 from a postulated Poisson Green function is a conditional mathematical result.",
+  "alternative_hypothesis": "Independent SST dynamics derives a propagating clock-mode action, active and passive charge equivalence, and dimensional K without using G in an input (outside scope; UNRESOLVED unless independently established).",
+  "assumptions": [
+    "Two E011 STATIC_READY provider geometries; full DYNAMICS_READY requires much longer tests",
+    "Periodic 3D box L=1.2 dimensionless; zero mean velocity; FFT Helmholtz projection and 2/3 de-aliasing",
+    "Initial Gaussian width a=0.11 dimensionless > original geometry reach (heavily smoothed exploratory tube), not physical rc",
+    "Short-time classical Euler/NS equations; nu=0.005 is screening viscosity, not fundamental SST fluid viscosity",
+    "Positive vortex kinetic energy E and E/c^2 candidate do NOT prove universal gravity or physical electron mass",
+    "Periodic stress double divergence has zero mean; periodic Poisson with nonzero source mean requires neutralizing background",
+    "Gravitational scalar, passive-mass universality, physical units and G remain unclosed",
+    "Full R^3 decay, isolated gravity, Floquet stability, knot topology persistence and body-force measurements NOT simulated",
+    "SST-28 excluded by user and never imported as active hypothesis",
+    "No Newtonian G used to calibrate any simulation",
+    "Original framework CPU profile always disables G6 (reserved for SYCL), so CPU dynamics is registered as independent G10; G11 stability unresolved",
+    "Conditional free-space lift treats the energy within one periodic cell as a finite isolated source without proving an isolated dynamical solution.",
+    "Dimensionless K=1 and rho_f=c=1 are ONLY kernel unit tests, not physical G; original dimensional v0.5 static mass remains comparator.",
+    "Locally algebraic clock factor tau(u) does not define an independently propagated long-range scalar.",
+    "Preregister G12-18: an EFT inverse-square PASS is not a physics closure PASS."
+  ],
+  "symbols": [
+    {
+      "symbol": "r_c",
+      "meaning": "canonical circulation radius; not necessarily vortex core radius",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "a_core",
+      "meaning": "physical tube core Gaussian width",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "Gamma",
+      "meaning": "circulation",
+      "si_unit": "m2/s",
+      "dimensions": "L2/T"
+    },
+    {
+      "symbol": "rho_f",
+      "meaning": "ambient fluid density",
+      "si_unit": "kg/m3",
+      "dimensions": "M/L3"
+    },
+    {
+      "symbol": "rho_core",
+      "meaning": "high density core value, sensitivity only",
+      "si_unit": "kg/m3",
+      "dimensions": "M/L3"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "Gaussian-smoothed solenoidal vorticity",
+      "si_unit": "1/s",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "E",
+      "meaning": "total vortex kinetic energy",
+      "si_unit": "J",
+      "dimensions": "M L2/T2"
+    },
+    {
+      "symbol": "Q_E",
+      "meaning": "candidate energy mass E/c^2",
+      "si_unit": "kg",
+      "dimensions": "M"
+    },
+    {
+      "symbol": "Sigma_ij",
+      "meaning": "organized transport stress rho_f v_i v_j",
+      "si_unit": "Pa",
+      "dimensions": "M/(L T2)"
+    },
+    {
+      "symbol": "nu",
+      "meaning": "kinematic viscosity, optional screening control",
+      "si_unit": "m2/s",
+      "dimensions": "L2/T"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Resolved smooth vortex tube",
+      "latex": "\\\\boldsymbol\\\\omega(\\\\mathbf x)=\\\\Gamma\\\\oint d\\\\mathbf X\\\\,G_a(\\\\mathbf x-\\\\mathbf X),\\\\quad G_a=(2\\\\pi a^2)^{-3/2}e^{-r^2/(2a^2)}",
+      "inputs": [
+        "closed E011 curve",
+        "a",
+        "Gamma"
+      ],
+      "outputs": [
+        "vorticity"
+      ],
+      "dimensional_check": "1/s"
+    },
+    {
+      "id": "E2",
+      "purpose": "Gaussian-consistent kinetic energy",
+      "latex": "E=\\\\frac{\\\\rho_f\\\\Gamma^2}{8\\\\pi}\\\\oint\\\\oint\\\\frac{d\\\\mathbf X\\\\cdot d\\\\mathbf Y}{|\\\\mathbf X-\\\\mathbf Y|}\\\\operatorname{erf}(|\\\\mathbf X-\\\\mathbf Y|/(2a))",
+      "inputs": [
+        "E1"
+      ],
+      "outputs": [
+        "E>0"
+      ],
+      "dimensional_check": "J"
+    },
+    {
+      "id": "E3",
+      "purpose": "Conditional mass source; NOT derived gravity",
+      "latex": "Q_E=E/c^2,\\\\quad (\\\\nabla^2\\\\Phi=4\\\\pi K \\\\rho_E/c^2)\\\\ \\mathrm{is\\\\ postulated}",
+      "inputs": [
+        "E2",
+        "c"
+      ],
+      "outputs": [
+        "candidate Q_E"
+      ],
+      "dimensional_check": "kg"
+    },
+    {
+      "id": "E4",
+      "purpose": "SST-73 stress test",
+      "latex": "S_C=\\\\lambda\\\\partial_i\\\\partial_j(\\\\rho_f v_i v_j),\\\\quad\\\\int S_C\\\\,d^3x=0\\\\ \\mathrm{(localized)}",
+      "inputs": [
+        "localized velocity"
+      ],
+      "outputs": [
+        "zero monopole"
+      ],
+      "dimensional_check": "requires lambda units"
+    },
+    {
+      "id": "E5",
+      "purpose": "Conditional viscous energy loss",
+      "latex": "dE/dt=-\\\\rho_f\\\\nu\\\\int |\\\\boldsymbol\\\\omega|^2 d^3x",
+      "inputs": [
+        "nu",
+        "E1"
+      ],
+      "outputs": [
+        "dissipation coefficient"
+      ],
+      "dimensional_check": "W"
+    },
+    {
+      "id": "E6",
+      "purpose": "3D projected incompressible Euler / Navier-Stokes, velocity Lamb form",
+      "latex": "\\\\partial_t \\\\mathbf{u}=\\\\mathbb{P}(\\\\mathbf{u}\\\\times\\\\boldsymbol\\\\omega)+\\\\nu\\\\Delta\\\\mathbf{u},\\\\quad\\\\boldsymbol\\\\omega=\\\\nabla\\\\times\\\\mathbf{u},\\\\quad\\\\nabla\\\\cdot\\\\mathbf{u}=0",
+      "inputs": [
+        "E011 finite width Gaussian tube",
+        "nu"
+      ],
+      "outputs": [
+        "u(x,t)"
+      ],
+      "dimensional_check": "dimensionless screen"
+    },
+    {
+      "id": "E7",
+      "purpose": "Incompressible NS energy/dissipation identity",
+      "latex": "\\\\frac{d}{dt}\\\\frac12\\\\int |\\\\mathbf{u}|^2dV=-\\\\nu\\\\int |\\\\boldsymbol\\\\omega|^2dV",
+      "inputs": [
+        "E6"
+      ],
+      "outputs": [
+        "energy budget"
+      ],
+      "dimensional_check": "dimensionless screen"
+    },
+    {
+      "id": "E8",
+      "purpose": "Periodic stress zero mean and Poisson neutrality",
+      "latex": "\\\\int_{\\\\mathbb T^3}\\\\partial_i\\\\partial_j(\\\\rho_f u_i u_j)dV=0;\\\\quad\\\\int_{\\\\mathbb T^3}\\\\nabla^2\\\\Phi dV=0",
+      "inputs": [
+        "E6"
+      ],
+      "outputs": [
+        "zero Fourier source mode"
+      ],
+      "dimensional_check": "stress source dimensionless"
+    },
+    {
+      "id": "E9",
+      "purpose": "Conditional active charge from kinetic energy",
+      "latex": "\\rho_E=\\frac{\\rho_f}{2}|\\mathbf u|^2,\\quad Q_E=\\int\\rho_E/c^2\\,d^3x",
+      "inputs": [
+        "time resolved E011 velocity"
+      ],
+      "outputs": [
+        "Q_E"
+      ],
+      "dimensional_check": "kg if c physical"
+    },
+    {
+      "id": "E10",
+      "purpose": "Assumed separate massless scalar Poisson response (not derived from SST)",
+      "latex": "\\nabla^2\\Phi=4\\pi K\\rho_E/c^2,\\quad\\mathbf g=-\\nabla\\Phi",
+      "inputs": [
+        "E9",
+        "postulated K"
+      ],
+      "outputs": [
+        "conditional g"
+      ],
+      "dimensional_check": "K m^3/(kg s^2) if physical"
+    },
+    {
+      "id": "E11",
+      "purpose": "Free-space Green integral and force",
+      "latex": "\\Phi(\\mathbf R)=-K\\int\\frac{\\rho_E(\\mathbf x)}{c^2|\\mathbf R-\\mathbf x|}\\,d^3x,\\quad\\mathbf g(\\mathbf R)=-K\\int\\frac{\\rho_E(\\mathbf x)(\\mathbf R-\\mathbf x)}{c^2|\\mathbf R-\\mathbf x|^3}\\,d^3x",
+      "inputs": [
+        "E9",
+        "postulate E10"
+      ],
+      "outputs": [
+        "far field"
+      ],
+      "dimensional_check": "m/s2 for physical units"
+    },
+    {
+      "id": "E12",
+      "purpose": "Gaussian manufactured gravity reference",
+      "latex": "|g(r)|=KQ r^{-2}[\\operatorname{erf}(r/(\\sqrt2\\sigma))-\\sqrt{2/\\pi}(r/\\sigma)e^{-r^2/(2\\sigma^2)}]",
+      "inputs": [
+        "Gaussian charge"
+      ],
+      "outputs": [
+        "exact test"
+      ],
+      "dimensional_check": "dimensionless"
+    },
+    {
+      "id": "E13",
+      "purpose": "Source-test equivalence guard",
+      "latex": "\\mathbf F_B=q_B\\mathbf g_A,\\quad\\mathbf a_B=(q_B/m_B)\\mathbf g_A",
+      "inputs": [
+        "independent passive q_B"
+      ],
+      "outputs": [
+        "acceleration"
+      ],
+      "dimensional_check": "q_B/m_B must be derived, not set"
+    },
+    {
+      "id": "E14",
+      "purpose": "Local clock map",
+      "latex": "S_{\\mathrm{local}}(\\mathbf x)=\\sqrt{1-|\\mathbf u|^2/c_{\\rm ref}^2};\\ \\nabla S=0\\ \\mathrm{outside\\ compact\\ support}",
+      "inputs": [
+        "local velocity",
+        "free c_ref"
+      ],
+      "outputs": [
+        "no independent long range mode"
+      ],
+      "dimensional_check": "dimensionless"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "finite tube kinetic-energy convergence",
+      "equation_refs": [
+        "E2"
+      ],
+      "unit": "J"
+    },
+    {
+      "id": "O2",
+      "definition": "nonzero Q_E=E/c\u00b2 under optional scale assumption",
+      "equation_refs": [
+        "E3"
+      ],
+      "unit": "kg"
+    },
+    {
+      "id": "O3",
+      "definition": "vanishing localized SST-73 stress monopole",
+      "equation_refs": [
+        "E4"
+      ],
+      "unit": "N/A"
+    },
+    {
+      "id": "O4",
+      "definition": "conditional viscosity dependence",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "W"
+    },
+    {
+      "id": "O5",
+      "definition": "independent C++/Python ratio",
+      "equation_refs": [
+        "E2"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O6",
+      "definition": "relative Fourier div norm and Euler energy/helicity drift",
+      "equation_refs": [
+        "E6",
+        "E7"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O7",
+      "definition": "NS integrated enstrophy dissipation budget",
+      "equation_refs": [
+        "E7"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O8",
+      "definition": "exact ABC Beltrami velocity decay error",
+      "equation_refs": [
+        "E6"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O9",
+      "definition": "Conditional 1/R^2 exponent from E011 energy snapshot after free-space lift",
+      "equation_refs": [
+        "E9",
+        "E10",
+        "E11"
+      ],
+      "unit": "dimensionless"
+    },
+    {
+      "id": "O10",
+      "definition": "Gaussian manufactured kernel and native independent parity",
+      "equation_refs": [
+        "E12"
+      ],
+      "unit": "relative error"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Are E011 Gilbert and KnotPlot independent original geometry SHA256 verified?",
+      "gate": "G1",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S2",
+      "operation": "Is Gaussian finite-width vortex tube energy convergent, positive and vorticity solenoidal?",
+      "gate": "G2",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S3",
+      "operation": "Does integrated kinetic energy yield a finite nonzero energy-equivalent mass candidate without inserting G?",
+      "gate": "G3",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S4",
+      "operation": "Does SST-73 organized stress double-divergence produce a free-space monopole for localized source?",
+      "gate": "G4",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S5",
+      "operation": "Does independent C++17 FP64 reproduce normalized finite Gaussian vortex-tube energy?",
+      "gate": "G5",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S6",
+      "operation": "Evolve authentic E011 smoothed tubes on 3D periodic dealiased spectral Euler/NS grid (N24/32/48) and check exact ABC, energy, dissipation, Helmholtz, time/space convergence",
+      "gate": "G10",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ]
+    },
+    {
+      "id": "S7",
+      "operation": "Do upstream-independent E011 geometries reproduce normalized tube energy within predeclared tolerance?",
+      "gate": "G7",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S8",
+      "operation": "Determine whether physical free-space clock/gravity mediator, universality and G were independently derived; leave UNRESOLVED if not",
+      "gate": "G8",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "S9",
+      "operation": "Long-term knot topology preservation and stable state selection; leave unresolved until computed",
+      "gate": "G11",
+      "formula_refs": [
+        "E6",
+        "E7"
+      ]
+    },
+    {
+      "id": "S12",
+      "operation": "Does an independent free-space Coulomb/Poisson Green-integral kernel reproduce a manufactured Gaussian gravity field?",
+      "gate": "G12",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S13",
+      "operation": "Does the conditional energy-source free-space lift of actually evolved E011 states show converged 1/R^2 far-field and source-energy consistency without inserting physical G?",
+      "gate": "G13",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S14",
+      "operation": "Does purely local instantaneous Swirl-Clock speed mapping alone supply a long-range isolated 1/R mediator?",
+      "gate": "G14",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S15",
+      "operation": "Is passive gravitational test-body response and composition-independent acceleration derived without setting test charge equal to mass?",
+      "gate": "G15",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S16",
+      "operation": "Are physical SI coupling K=G, clock kinetic/action stiffness and the active mass map independently determined without fitting or G-containing Planck units?",
+      "gate": "G16",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S17",
+      "operation": "Are periodic stress source zero mode and periodic energy Poisson incompatibility separately demonstrated?",
+      "gate": "G17",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S18",
+      "operation": "Are isolated dynamics, realistic multi-body mass scale and withheld microgravity raw-data comparisons independently qualified?",
+      "gate": "G18",
+      "formula_refs": [
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14"
+      ]
+    },
+    {
+      "id": "S19",
+      "operation": "Independent C++17 conditional Green force parity",
+      "gate": "G19",
+      "formula_refs": [
+        "E11"
+      ]
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "Finite tube kinetic energy fails refinement relative 0.007 or scaled div residual > 1e-5",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F2",
+      "criterion": "Localized SST-73 stress candidate has zero monopole",
+      "conclusion_if_met": "FAIL for unmodified S_C universal monopole"
+    },
+    {
+      "id": "F3",
+      "criterion": "Provider normalized finite tube energy discrepancy >0.20",
+      "conclusion_if_met": "FAIL provider agreement"
+    },
+    {
+      "id": "F4",
+      "criterion": "C++/Python energy relative error >2e-10",
+      "conclusion_if_met": "FAIL implementation parity"
+    },
+    {
+      "id": "F5",
+      "criterion": "ABC relative error >=1e-10, divergence >=1e-10, Euler drift>=5e-4, NS budget error>=5e-3, time refinement>=.002, space refinement>=.02, projection error>=.03",
+      "conclusion_if_met": "G6 FAIL for this numerical solver screen, NOT SST gravity"
+    }
+  ],
+  "edge_cases": [
+    "a_core distinct from canonical r_c in later canon",
+    "E011 sources have opposite signed writhe; normalization does not erase provider provenance",
+    "passive and gravitational masses not proven by E/c\u00b2",
+    "Gaussian smoothed vorticity is not dynamically stationary knot",
+    "noncompact background and boundary stresses exempt from localized no-monopole theorem",
+    "No hidden G via Planck units allowed",
+    "Historical SST-28 excluded",
+    "Periodic Poisson equation cannot support uncompensated nonzero total gravitational charge",
+    "Fourier projection changes the raw finite Gauss tube and is explicitly quantified",
+    "a=0.11 smooths away fine knot core; short-time topology not certified"
+  ],
+  "predictions": [
+    "Both finite tube providers have positive finite energy at fixed nonzero Gaussian width",
+    "S_C double divergence still has zero monopole with localized boundary conditions",
+    "Conditional scalar Poisson coupling to E/c\u00b2 produces 1/R\u00b2 by construction, not prediction",
+    "Without independent clock-gravity coupling microgravity apparatus force remains unresolved",
+    "Short-time 3D Euler energy preserved, finite viscosity dissipates energy according to integrated enstrophy, gravity remains constitutively unresolved"
+  ],
+  "title": "A062-v0.6.0 Dynamic Vortex-Tube & Gravitational Source Closure",
+  "question": "Can upstream E011 trefoil tubes be evolved with actual short-time 3D incompressible Euler/NS conservation checks? Does any dynamically calculated hydrodynamic source close a universal gravity mediator without inserting G?"
+}

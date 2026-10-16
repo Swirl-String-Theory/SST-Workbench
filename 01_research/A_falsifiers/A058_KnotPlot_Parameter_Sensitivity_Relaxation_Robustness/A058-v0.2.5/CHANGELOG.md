@@ -1,0 +1,16 @@
+# A058 changelog
+
+## v0.2.5 — reset-default correction and binary activation contrast
+
+- Correct private S3 default from 1.00 to **1.40** (user-observed KnotPlot reset state).
+- Register R2 reset switch **OFF**, separate from the R2 **ON** sector reference.
+- Add one matched R2-OFF activation control at identical numeric S3/S4 defaults. It is analyzed independently of strength responses.
+- Campaign now 271 conditions; tests, thresholds, logarithmic ladder and adaptive stopping unchanged.
+- Getter-unreported S3 continues to use explicit `setter_acceptance` evidence classification; do not claim numeric roundtrip without readback.
+- Remove raw GUI setter names from public campaign manifest and parameter-state logs; retain full mappings and runtime trace only in private sources.
+- Extend install preflight to check reset R2 status if reported, verify frozen S3 reset numeric if reported, and exercise a no-export OFF probe.
+- Keep Framework v1.0.8 strict FREEZE and private commitments distinct from prior versions.
+
+## v0.2.4 (archived)
+
+- First getter-unreported S3 fallback, later superseded after default correction.

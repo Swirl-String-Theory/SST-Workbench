@@ -1,0 +1,171 @@
+"""Make standalone TeX snapshot. PDF via pdflatex/latexmk is optional for core execution."""
+import pathlib,json,math,textwrap,shutil,subprocess
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+summary=json.loads((ROOT/'outputs'/'BLIND'/'RUN_SUMMARY.json').read_text())
+parity=json.loads((ROOT/'outputs'/'NATIVE_PARITY.json').read_text())
+d3=json.loads((ROOT/'outputs'/'BLIND'/'D03_TWO_SURFACE.json').read_text())
+seals=json.loads((ROOT/'seals'/'GLOBAL_COMMITMENT.json').read_text())
+
+def tex(s):
+    return str(s).replace('\\','\\textbackslash{}').replace('_','\\_').replace('&','\\&').replace('%','\\%').replace('$','\\$').replace('#','\\#')
+
+def sci(x):return f'{x:.3e}'
+
+gates='\n'.join('\\texttt{'+tex(g['gate'])+'} & '+tex(g['status'])+' & '+tex(str(g['metric'])[:64])+' \\\\' for g in summary['gates'])
+exponents='\n'.join(' / '.join(x['pair']) + f' & {x["temperature"]:.1f} & {x["free_fitted_exponent"]:.5f} \\\\' for x in d3['free_exponents_not_targets'])
+texdoc=r'''\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,left=21mm,right=21mm,top=20mm,bottom=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,longtable,array,hyperref,microtype,graphicx,xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\definecolor{notegray}{rgb}{.20,.23,.27}
+\newcommand{\nogo}{\textsf{NOT PHYSICALLY CERTIFIED}}
+\newcommand{\uvec}{\mathbf u}
+\newcommand{\wvec}{\boldsymbol\omega}
+\begin{document}
+\begin{center}
+{\Large\bfseries Triadic--Casimir Coupled-Response Blind Falsifier}\\[3pt]
+{\large Scientific Implementation Report v0.1.0}\\[8pt]
+\textsf{SYNTHETIC CONTROLS ONLY --- \nogo}\\[4pt]
+14 October 2026
+\end{center}
+
+\begin{abstract}
+This release fuses the historical SST three-observable interpretation (bulk mechanics, clock/optics, and boundary stress) with incompressible Euler kinematics, a candidate gauge-covariant matter--link phase and a classical thermal scalar two-sheet model. It implements exactly three separately SHA-256-committed datasets. The calculations qualify analytic identities and software behavior only: no independent PKLSA-driven material response or zero-temperature Casimir force has been derived.
+\end{abstract}
+
+\section{Scope and provenance}
+\textbf{Source layers.} SST Canon v0.8.36, sections 3.10, 7.1, 11.4, 11.16--11.17, S.2, S.43 and S.52; A046 v0.2.0/v0.3.0 as existing independent velocity--strain--vorticity diagnostics; external frozen framework v1.0.7 as methodology reference. Framework binaries and its official orchestrator are \emph{not} bundled; \texttt{CERTIFY} fails closed. Pure Python standard-library runner and optional C++17 comparison are bundled.
+
+\section{Three-channel state interpretation}
+The observation vector is not a sum of three putative gravity fields:
+\begin{equation}
+\mathcal O[X;a]=\left(\mathbf a_{\mathrm{bulk}}[X;a],\,\Delta\nu/\nu[X;a],\,P_{\mathrm{boundary}}[X;a]\right)^T.
+\end{equation}
+Different projections are allowed to respond differently. A boundary force alone is not evidence for gravitation.
+
+\section{Analytical derivation}
+\subsection{Incompressible Euler and stationary-clock bridge}
+For constant material density $\rho_M$, $\nabla\cdot\uvec=0$, $\wvec=\nabla\times\uvec$, and symmetric strain $S_{ij}=(\partial_i u_j+\partial_j u_i)/2$, the pressure-Poisson identity is
+\begin{equation}
+\nabla^2p=\rho_M\left(\frac12|\wvec|^2-S_{ij}S_{ij}\right).
+\end{equation}
+On a stationary potential-flow branch, $p+\rho_M|\uvec|^2/2=C$. Only conditional on the specific Canon clock-speed identification $N^2=1-|\uvec|^2/c_*^2$ does one obtain
+\begin{equation}
+N^2=1+\frac{2(p-C)}{\rho_Mc_*^2},\qquad \nabla\ln N=\frac{\nabla p}{\rho_Mc_*^2N^2}.
+\end{equation}
+This is not a relativistic gravitational-field derivation. Curl-free flow alone does not imply a uniform $N$.
+
+\subsection{Gauge-covariant clock-path candidate}
+On oriented edges $(i,j)$ let $\vartheta_{ij}\mapsto\vartheta_{ij}+\chi_j-\chi_i$, $\varphi_i\mapsto\varphi_i-\dot\chi_i$, and $E_{ij}=-\dot\vartheta_{ij}-(\varphi_j-\varphi_i)$, following the Canon link formulation. The \emph{additional unproven} atomic-phase assignment $\theta_i\mapsto\theta_i+\chi_i$ with $\dot\theta_i+\varphi_i=\Omega_i^{(0)}N_i$ gives
+\begin{align}
+\Theta_{AB}[\mathcal P]&=\theta_B-\theta_A-\sum_{e\in\mathcal P}\vartheta_e,\\
+\frac{d\Theta_{AB}}{dT}&=\Omega_B^{(0)}N_B-\Omega_A^{(0)}N_A+\sum_{e\in\mathcal P}E_e.
+\end{align}
+D02 checks transformation invariance and two-path holonomy numerically. It cannot show a physical atom carries this assumed link charge.
+
+\subsection{One-body toy response and two-body scalar force}
+D02 specifies a positive two-mode oscillator with mass matrix $M$, Hessian $K$, and drive $b$:
+\begin{equation}
+\chi(i\xi)=b^T(K+\xi^2M)^{-1}b,\quad
+\lambda(i\xi)=\lambda_{\mathrm{bare}}-\chi(i\xi).
+\end{equation}
+A \emph{declared toy} static scalar sheet has $r(k)=\lambda(0)/(2k+\lambda(0))$. The classical, zero-frequency thermal scalar contribution for two such sheets is
+\begin{align}
+\frac{\Delta\mathcal F}{A}&=\frac{T}{4\pi}\int_0^\infty k\,dk\,\log(1-r_1r_2e^{-2ka}),\\
+P_\sigma&=-\frac{T}{2\pi}\int_0^\infty k^2\,dk\,\frac{r_1r_2e^{-2ka}}{1-r_1r_2e^{-2ka}}.
+\end{align}
+These expressions are implementation benchmarks. The scalar reflection coefficients and classical fluctuation ensemble are assumed, not derived from Euler or metallic electrons. A separate fourth-order numerical derivative checks $P_\sigma=-\partial_a(\Delta\mathcal F/A)$.
+
+\section{Three separately sealed datasets}
+\begin{center}
+\begin{tabular}{@{}p{38mm}p{95mm}@{}}\toprule
+Dataset & Blind data and role\\\midrule
+D01\_EULER & Analytic linear steady Euler gradients; irrotational, rotation and shear controls.\\
+D02\_CLOCK\_LINK & Oriented triangle graph with clock phase, holonomy, toy two-mode oscillators, one-body response.\\
+D03\_TWO\_SURFACE & Precommitted seven distances, three surface pairings, two dimensionless temperatures. No target force.\\\bottomrule
+\end{tabular}
+\end{center}
+Each dataset has an independent SHA-256 file-tree manifest with its own self-hash. A global commitment binds the three seals and the hash of a separate target comparator. The BLIND process hashes but does not parse the comparator, seals output hashes and requires intact precommitments before REVEAL. Commitments are tamper-evident only, not signatures, encrypted data, or protection against wholesale malicious reissuance.
+
+\subsection*{Seal roots (first 24 hexadecimal digits)}
+\begin{center}\begin{tabular}{@{}ll@{}}\toprule
+D01 & \texttt{SEAL1}\quad\ldots\\
+D02 & \texttt{SEAL2}\quad\ldots\\
+D03 & \texttt{SEAL3}\quad\ldots\\\bottomrule
+\end{tabular}\end{center}
+Full hashes are preserved in the ZIP under \texttt{seals/}; independently publish the ZIP digest to authenticate the issued version.
+
+\section{Executed numeric results}
+\textbf{Synthetic campaign:} STATUS; 
+\textbf{gates:} GATES of GATES passed. Twelve Python regression tests passed, including a deliberate dataset-tampering control.
+The standalone C++17 comparison evaluated PARITYN parameter points and found maximum relative error PARITYERR. This does not certify the frozen framework's C++/pybind11 backend.
+
+\begin{longtable}{@{}p{80mm}p{15mm}p{58mm}@{}}
+\toprule Gate & Status & Result / metric\\\midrule\endhead
+GATETABLE
+\bottomrule
+\end{longtable}
+
+The maximum relative discrepancy between direct spectral traction and the fourth-order finite-difference free-energy derivative is MAXERR. This is a numerical consistency result within a shared toy Hamiltonian, not two independent experimental channels.
+
+\subsection{Blind fitted two-body pressure exponents}
+\begin{center}\begin{tabular}{@{}lrr@{}}\toprule
+Sheet pair & dimensionless $T$ & free power exponent $n_P$\\\midrule
+EXPONENTS
+\bottomrule\end{tabular}\end{center}
+The toy finite-stiffness exponents must not be interpreted as agreement with any ideal Casimir law. Independent external zero-temperature electromagnetic data are absent.
+
+\section{Revealed control comparison and physical status}
+The post-seal comparator stores the theoretical ideal high-temperature scalar exponent $3$ and ideal zero-temperature electromagnetic exponent $4$, with separate reference coefficients. They are not fitted into D01--D03 and cannot be promoted to measurements. The model's finite-size scalar exponents differ from both ideal limits over the chosen finite distance interval; no claim about a physical SST amplitude is possible.
+
+\textbf{What is established:} analytic Euler/Poisson identities for prescribed fields, a conditional clock algebra, covariant clock-path bookkeeping for an assumed matter-link representation, and a stable classical scalar toy-force numerical implementation.
+
+\textbf{What remains open:} independent PKLSA time-dependent Euler providers, atom--link microcoupling, wall boundary conditions, actual metallic response, zero-point/thermal normalization, independent stress measurements, causal clock transfer and gravity/GR equivalence. Real Casimir data have not been tested.
+
+\section{Reproduction}
+Unpack the self-contained ZIP into any folder and execute on Windows:
+\begin{verbatim}
+run_all.cmd VERIFY
+run_all.cmd SELFTEST
+run_all.cmd PARITY
+run_all.cmd BLIND
+run_all.cmd REVEAL
+run_all.cmd ALL
+\end{verbatim}
+Python 3.10+ standard library is sufficient; a C++17 compiler is optional for PARITY. \texttt{CERTIFY} deliberately fails closed. Inspect \path{docs/DERIVATION.md}, \path{docs/BLIND_PROTOCOL.md}, \path{docs/SOURCE_TRACE.md}, \path{outputs/}.
+
+\section{Open theorem targets and scientific hand-off}
+\begin{enumerate}
+\item \textbf{Physical source qualification:} obtain two independent E011/PKLSA provider trajectories with genuine wall-domain reconstructions, circulation provenance and independent pressure solutions. Analytic linear fields are insufficient for a medium-mediated mechanical prediction.
+\item \textbf{Atomic coupling:} derive the proposed matter phase gauge transformation, temporal connection and a microscopic source/current law by expanding a qualified vortex--link Hamiltonian. Verify that the uncoupled limit restores the Canon material--link separation.
+\item \textbf{One-body response:} extract stable linearized or Floquet modes from real carriers. Compute causality, passivity, conductivity and surface reflection in held-out conditions, before any two-surface force calculation.
+\item \textbf{Fluctuation normalization:} independently establish the equilibrium or quantum state and fluctuation covariance. Classical deterministic Euler dynamics has no mandated half-quantum ground energy; a thermal toy stress cannot be treated as a zero-temperature vacuum prediction.
+\item \textbf{Independent force metrology:} derive stress in the same medium and compare against the total Hamiltonian or thermal free energy, while holding geometry, temperature and source state fixed. Separate electric, magnetic, mechanical, thermal and gravitational confounders.
+\item \textbf{Official framework hand-off:} instantiate with unmodified SST Falsifier Framework v1.0.7, pin each upstream SHA-256 and provider independence group, and rerun the public blinding and native backend qualification protocol before any scientific promotion.
+\end{enumerate}
+
+\section*{References}
+\begin{enumerate}
+\item O. Iskandarani, \emph{SST Canon v0.8.36} (2026), DOI \href{https://doi.org/10.5281/zenodo.21922231}{10.5281/zenodo.21922231}.
+\item A046, \emph{Relative-Vorticity Triadic Geometry Blind Falsifier}, v0.2.0 and v0.3.0, SST-Workbench research files.
+\item SST Falsifier Framework v1.0.7, \emph{CANONICAL\_FROZEN} release and validation record (2026-10-07), external reference only.
+\item H. B. G. Casimir, \emph{Proc. K. Ned. Akad. Wet.} \textbf{51}, 793--795 (1948); E. M. Lifshitz, \emph{Sov. Phys. JETP} \textbf{2}, 73--83 (1956).
+\end{enumerate}
+\end{document}
+'''
+texdoc=texdoc.replace('SEAL1',seals['seals']['D01_EULER'][:24]).replace('SEAL2',seals['seals']['D02_CLOCK_LINK'][:24]).replace('SEAL3',seals['seals']['D03_TWO_SURFACE'][:24])
+texdoc=texdoc.replace('GATETABLE',gates).replace('EXPONENTS',exponents)
+texdoc=texdoc.replace('STATUS',tex(summary['status'])).replace('GATES',str(len(summary['gates']))).replace('PARITYN',str(parity['comparisons'])).replace('PARITYERR',tex(sci(parity['maximum_relative_error']))).replace('MAXERR',tex(sci(max(r['force_energy_relative_residual'] for r in d3['rows']))))
+# remove mistaken escaped command in literal prose from first pass
+texdoc=texdoc.replace('\\\texttt{CERTIFY}', '\texttt{CERTIFY}')
+tex_path=ROOT/'reports'/'TRIADIC_CASIMIR_FALSIFIER_REPORT.tex';tex_path.write_text(texdoc,encoding='utf-8')
+print(tex_path)
+if shutil.which('pdflatex'):
+    build=subprocess.run(['pdflatex','-interaction=nonstopmode','-halt-on-error','-output-directory',str(ROOT/'reports'),str(tex_path)],cwd=str(ROOT/'reports'),capture_output=True,text=True)
+    if build.returncode:
+        print(build.stdout[-5000:]);print(build.stderr);raise SystemExit(1)
+    print('PDF created')

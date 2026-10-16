@@ -1,0 +1,8 @@
+# A061 source registry
+
+1. L. Toscani De Col et al., *A thorium-229 optical nuclear clock with feedback loop*, Nature (2026), doi:10.1038/s41586-026-11084-4; arXiv:2606.04997v2. Data: https://doi.org/10.5281/zenodo.22657608 . Beat datasets `center_beat_frequencies.csv` (time in seconds, eight times IR beat deviation in kHz), `beat_T20s.csv`, `allan_T20s.csv`, `extracted_amplitudes.csv`, `detection_threshold_MC.csv`. Note experimental signal has 3 frequency doublings; factor 8 conversion already applied to centered beat file.
+2. B. Huang et al., *A nuclear clock synchronized to 229Th*, Nature (2026), doi:10.1038/s41586-026-11122-1; arXiv:2606.08870v2. Data + plotting code: https://doi.org/10.6084/m9.figshare.33386191 . Two-crystal absolute line-b center measurement, public figure datasets. Published inter-crystal difference is 560(130) Hz; absolute uncertainties include correlated systematics and should not be blindly combined.
+3. O. Iskandarani, *Time from Swirl: A Hydrodynamic Origin of Proper Time*, SST-28 (January 2026), doi:10.5281/zenodo.17877012; manuscript from user's Google Drive. Reference profile and local clock Hamiltonian.
+4. O. Iskandarani, *Reduced Delay-Loop Dynamics in Swirl-String Theory* (SST-72, 2026), SST internal manuscript; reduced phase/delay model as optional phenomenological competitor, not a derived Thorium response law.
+
+Method references: J. D. Scargle, Astrophysical Journal **263**, 835 (1982), doi:10.1086/160554; D. W. Allan, Proc. IEEE **54**, 221 (1966), doi:10.1109/PROC.1966.4634; A. D. Ludlow et al., Rev. Mod. Phys. **87**, 637 (2015), doi:10.1103/RevModPhys.87.637.

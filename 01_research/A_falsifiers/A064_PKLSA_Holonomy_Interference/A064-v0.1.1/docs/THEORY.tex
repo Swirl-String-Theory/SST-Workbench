@@ -1,0 +1,79 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=26mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref}
+\usepackage[T1]{fontenc}
+\newcommand{\rhof}{\rho_{\!f}}
+\newcommand{\rc}{r_c}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\begin{document}
+\title{A064: PKLSA flow separatrix discovery and material-transport falsifier\\Scientific protocol v0.1.0}
+\author{SST-Workbench -- prototype scientific specification}
+\date{13 October 2026}
+\maketitle
+\section{Scope and inference firewall}
+The E010 PKLSA and E011 SKLSA upstream datasets qualify sampled closed curves and their static provenance. They do \emph{not} by themselves qualify a dynamical velocity field. We distinguish (A) authentic gridded three-dimensional time-resolved velocity snapshots $\mathbf v(\mathbf x,t)$ from (B) a finite-core, frozen-filament \emph{model-derived} velocity reconstructed from real geometric PKLSA centerlines. Neither a level set of enstrophy nor a closed tube enclosing the knot is automatically a dynamical separatrix. The true invariant-manifold gate remains open until the relevant hyperbolic invariant set and its stable/unstable manifolds have been found and verified.
+
+\section{Incompressible Euler hypothesis}
+For unforced, inviscid, incompressible flow at constant effective density $\rhof=7.0\times10^{-7}\,\mathrm{kg\,m^{-3}}$:
+\begin{align}
+\nabla\cdot\mathbf v&=0,\\
+\partial_t\mathbf v+(\mathbf v\cdot\nabla)\mathbf v &=-\frac1{\rhof}\nabla p,\\
+\boldsymbol\omega&=\nabla\times\mathbf v,\quad
+\partial_t\boldsymbol\omega =\nabla\times(\mathbf v\times\boldsymbol\omega).
+\end{align}
+The latter equality includes vortex stretching: $D_t\boldsymbol\omega=(\boldsymbol\omega\cdot\nabla)\mathbf v$, so $|\boldsymbol\omega|^2$ is \emph{not} generally material. The proto-falsifier computes the incompressibility screen, but the full Euler and vorticity-transport residuals are preregistered as UNRESOLVED until real time-resolved fields are available.
+
+\section{Phase I: derive candidates from the velocity field}
+On a regular 3D Cartesian grid, calculate $E_\omega(\mathbf x,t_0)=|\nabla\times\mathbf v|^2\,[\mathrm{s^{-2}}]$. With a preregistered increasing ordered percentile list $P=(65,75,85,92)$, construct
+\begin{equation}
+ S_\lambda(t_0)=\{\mathbf x: F(\mathbf x,t_0)=0\},\qquad F(\mathbf x,t)=E_\omega(\mathbf x,t)-\lambda,
+\end{equation}
+where $\lambda$ is the first percentile yielding a non-trivial, watertight connected surface and the largest-area component is selected. This is a \emph{velocity-derived candidate}, not an identification theorem for separatrices. All candidates and the selected geometry are sealed before computing any transport score; no flux-based tuning of $\lambda$ is permitted. A separate search solves $\mathbf v(\mathbf x_*,t_0)=0$ and examines $\mathrm{spec}(\nabla\mathbf v(\mathbf x_*))$ to locate possible hyperbolic stagnation sets. Even if a hyperbolic saddle is found, continuation of its 2D stable/unstable manifold and its relationship to the candidate surface is still required.
+
+\section{Phase II: independent transport tests}
+For the candidate flow feature $F(\mathbf x,t)=0$, its unit normal is
+\begin{equation}
+\mathbf n=\frac{\nabla F}{|\nabla F|},\qquad
+u_{\rm rel,n}=\frac{\partial_t F+\mathbf v\cdot\nabla F}{|\nabla F|}.
+\end{equation}
+Here $\partial_tF$ has units $\mathrm{s^{-3}}$, $\nabla F$ units $\mathrm{m^{-1}\,s^{-2}}$, and $\nu_{\rm rel,n}$ units $\mathrm{m\,s^{-1}}$. A level-set surface that is material has $\nu_{\rm rel,n}=0$ in exact continuum arithmetic. The code additionally integrates independent material tracers from opposite normal offsets by RK4,
+\begin{equation}
+\dot{\mathbf X}(t)=\mathbf v(\mathbf X(t),t),\qquad
+C_T=\frac{\#\{i:\operatorname{sgn}F(\mathbf X_i(t_0),t_0)\ne\operatorname{sgn}F(\mathbf X_i(t_1),t_1)\}}{N_{\rm valid}}.
+\end{equation}
+Materially \emph{advecting any arbitrary initial mesh} is not positive evidence by itself. Instead, the independent scalar feature is re-evaluated at $t_1$, and feature persistence after advecting initial surface points is reported. The numerical test is explicitly finite-time and conditional on interpolation, spatial resolution and temporal source authority.
+
+\section{A model-derived PKLSA lane}
+Given a finite list of native PKLSA knot vertices $\mathbf X_j$ and line segments $\Delta\mathbf X_j=\mathbf X_{j+1}-\mathbf X_j$, use the regularized segment-midpoint approximation
+\begin{equation}
+\mathbf v_{\rm BS}(\mathbf x)=\frac{\Gamma}{4\pi}\sum_j
+\frac{\Delta\mathbf X_j\times(\mathbf x-\mathbf X_{j+1/2})}
+{\big(|\mathbf x-\mathbf X_{j+1/2}|^2+a^2\big)^{3/2}}-\mathbf U_\mathrm{frame}.
+\end{equation}
+This is a dimensional velocity model, not an Euler evolution. Choose $\Gamma$ [$\mathrm{m^2s^{-1}}$], $a$ [m], the length calibration from KnotPlot native units to meters, orientation and frame velocity \emph{before} running. The canonical example $\Gamma=2\pi r_c |\vswirl|=9.6836192035\times10^{-9}\,\mathrm{m^2s^{-1}}$ uses $r_c=1.40897017\times10^{-15}\,\mathrm m$ and $|\vswirl|=1.09384563\times10^{6}\,\mathrm{m\,s^{-1}}$, but the centerline length unit is not inferred from either constant. The PDF demonstration uses artificial calibration ($1$ source unit $=1$ m), $a=0.8$ m and $\Gamma=10\,\mathrm{m^2s^{-1}}$ and has NO physical SST evidential status.
+
+\section{Evidence gates and falsifiable outcomes}
+\begin{center}\small\begin{tabular}{lll}\toprule
+Gate & Required result & Scope\\\midrule
+G0 & native velocity/provenance + timestamps & direct physical source\\
+G1 & spatial $\nabla\cdot\mathbf v$ convergence & source quality\\
+G2 & closed 3D candidate, sealed before flux & detector geometry\\
+G3 & $\mathrm{p95}|\nu_{\rm rel,n}|/U\le 0.03$ & relative flux screen\\
+G4 & $C_T\le 0.03$ and RK step refinement & transport screen\\
+G5 & grid/time/core/provider error ladders & independent replicability\\
+G6 & invariant manifold / barrier topology & true separatrix\\
+G7 & canonical v1.0.7 FREEZE/CERTIFY/REVEAL & official protocol\\\bottomrule
+\end{tabular}\end{center}
+Failure-continuation is allowed for independent \emph{scientific} diagnostics; missing velocity-source provenance, unqualified units, invalid meshes and blind-integrity failures remain fail-closed. The thresholds are preregistered exploratory cutoffs, not universal physical constants. A materially persistent vortex feature is not yet proof of a stable Euler vortex or an SST particle.
+
+\section{Minimal validation ladder}
+Synthetic analytical controls: steady azimuthal Gaussian swirl (material axisymmetric enstrophy level set); transverse constant drift added to the frozen swirl (permeable); uniform flow (no vorticity feature); translated Gaussian swirl with matching uniform translation (temporally material in the continuous analytic model, a test of temporal interpolation errors). Then apply the same detector, without retuning, to authentic $3_1,5_2,6_1$ provider-qualified geometries with a regularized Biot--Savart model and separately to full time-resolved Euler/vortex-solvers for the same seeds. The final verdict remains UNRESOLVED until G5--G7 are satisfied.
+
+\begin{thebibliography}{99}
+\bibitem{Helmholtz1858} H. Helmholtz (1858), ``\"Uber Integrale der hydrodynamischen Gleichungen, welche den Wirbelbewegungen entsprechen,'' \emph{Journal f\"ur die reine und angewandte Mathematik} \textbf{55}, 25--55. \url{https://doi.org/10.1515/crll.1858.55.25}.
+\bibitem{Batchelor1967} G. K. Batchelor (1967), \emph{An Introduction to Fluid Dynamics}, Cambridge University Press, \url{https://doi.org/10.1017/CBO9780511800955}.
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press, \url{https://doi.org/10.1017/CBO9780511624063}.
+\bibitem{Shadden2005} S. C. Shadden, F. Lekien and J. E. Marsden (2005), ``Definition and properties of Lagrangian coherent structures from finite-time Lyapunov exponents in two-dimensional aperiodic flows,'' \emph{Physica D} \textbf{212}, 271--304, \url{https://doi.org/10.1016/j.physd.2005.10.007}.
+\bibitem{Haller2015} G. Haller (2015), ``Lagrangian Coherent Structures,'' \emph{Annual Review of Fluid Mechanics} \textbf{47}, 137--162, \url{https://doi.org/10.1146/annurev-fluid-010313-141322}.
+\end{thebibliography}
+\end{document}
