@@ -1,0 +1,67 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,longtable,booktabs,hyperref}
+\title{GPE\_EXT\_001 --- Gross--Pitaevskii GPU Numerical Benchmark}
+\author{SST-Workbench, numerical development protocol}
+\date{v0.1.1 / Framework v1.0.10}
+\begin{document}\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Scope}
+This is a numerical GPE benchmark, not an SST/PKLSA gravity, particle, clock or Euler-flow validation. Framework 1.0.10 is not yet canonically promoted. No physical inference from a source checksum is permitted.
+% SST-REPORT-SECTION:QUESTION
+\section{Research question}
+Can periodic dimensionless cubic GPE split-step Fourier dynamics reproduce exact solutions, numerical invariants, second-order temporal convergence and Intel Arc XPU screening parity?
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Hypotheses}
+$H_0$: pre-registered numerical errors or empirical splitting order are unacceptable. $H_1$: the stated numerical thresholds are satisfied. These are engineering hypotheses, not SST confirmations.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions}
+Periodic square computational domain; Fourier spectral discretization; dimensionless real cubic coupling $g>0$; conserved particle norm; no damping or trapping potential; XPU screening complex64 versus independent NumPy complex128. Physical condensate healing length and boundary physics are outside these tests.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols and dimensions}
+Let $\mathbf{x}=\mathbf{x}_{\rm SI}/L_0$, $t=t_{\rm SI}/T_0$, $\psi=\Psi/\Psi_0$; $L_0,T_0,\Psi_0$ are declared normalization scales, so the implemented model is fully dimensionless. No SST constants are fitted here.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Equations and numerical discretization}
+\begin{equation}i\partial_t\psi=-\frac12\nabla^2\psi+g(|\psi|^2-n_0)\psi.\end{equation}
+\begin{equation}\psi_{\rm PW}=A\exp\left[i(\mathbf{k}\cdot\mathbf{x}-\omega t)\right],\quad \omega=\frac{|\mathbf{k}|^2}{2}+g(A^2-n_0).\end{equation}
+\begin{equation}\psi^{n+1}=\exp[-i\tfrac{\Delta t}{2}g(|\psi^{*}|^2-n_0)]\,\mathcal F^{-1}[e^{-i\Delta t |\mathbf{k}|^2/2}\mathcal F\{e^{-i\Delta t g(|\psi^{n}|^2-n_0)/2}\psi^n\}],\end{equation}
+where $\psi^*$ denotes the state after the kinetic substep; $\mathcal F$ is the discrete periodic FFT. Same units appear in each exponential (dimensionless phase).
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm}
+Source download and checksum; NumPy FP64 analytic plane wave; norm and reverse propagation; fixed final-time dt-refinement; Intel XPU complex64 split-step full FFT parity; framework ledger creation and immutability checks. A numerical fine-step solution is used for order estimation and is not a measured physical ground truth.
+% SST-REPORT-SECTION:SOURCES
+\section{External source}
+J. Kwon and Y.-i. Shin, \emph{Data and analysis scripts for ``Dynamic similarity of vortex shedding in a superfluid flowing past a penetrable obstacle''}, Zenodo, 2026, \url{https://doi.org/10.5281/zenodo.20068724}. The 18.7 MB file contains \emph{processed observables}, not complete time-dependent $\psi$ snapshots. Archive MD5 and ZIP CRC are checked; source-field parity is untested.
+% SST-REPORT-SECTION:GATES
+\section{Preregistered gates}
+$G_0$: framework frozen bundle. $G_1$: checksum plus CRC. $G_2$: analytic relative $L^2$ error $<10^{-10}$, norm drift $<10^{-10}$, reverse-step error $<10^{-10}$. $G_3$: temporal convergence observed minimum order $>1.75$ with fixed final time and 128-step surrogate. $G_6$: genuine Torch XPU/NumPy relative $L^2<7\cdot10^{-4}$ and GPU norm drift $<7\cdot10^{-4}$. $G_4,G_5,G_7$ intentionally disabled; $G_8$ unresolved, $G_9$ deferred until separate reveal. $G_6$ is screening only, not SYCL or native whole-solver parity.
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical uncertainties and limits}
+Floating-point effects, FFT conventions, periodic aliasing and GPU driver support. $\Delta t\to0$ convergence is estimated at fixed spatial resolution; temporal and spatial convergence must be separated for later physical tests. Phase winding, reconnection and actual PKLSA data are not currently checked.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority}
+NumPy complex128 is numerical reference; Torch XPU complex64 is screening only. A missing GPU is an unavailable prerequisite, never an implicit CPU parity PASS. DD32/native SYCL whole-solver parity is not claimed.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness}
+Pre-registered numerical gates and thresholds are frozen ahead of validation. No secret labels or target-varying choices are present in this stage. No automatic REVEAL; private commitments retained in framework. The external dataset is not a secret challenge set.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics}
+Deterministic convergence and tolerance tests, not a hypothesis test with random p-values. Independent sampling unit for eventual physical replication must be a genuinely independent simulation/experiment family, not additional timesteps from the same simulation.
+% SST-REPORT-SECTION:RESULTS
+\section{Automatically generated evidence}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{Science contract generated during freeze.}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{No run results yet.}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Permitted interpretation}
+Numerical PASS supports implementation qualification only. Source PASS supports data integrity only. Neither demonstrates the Euler--PKLSA limit nor the emergence of SST gravity/time dilation. Failure of GPE numerical checks is not a falsification of SST.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility}
+Run \texttt{run\_all.cmd BASIC} or \texttt{run\_all.cmd FULL}; use the exact framework v1.0.10 directory. Check GATE\_LEDGER.json, BACKEND\_MANIFEST.json, SOURCE\_MANIFEST.json, independent checksum ledger, PDF and BLIND ZIP. GPE physical units cannot be recovered without specifying $L_0,T_0,\Psi_0$ and a material coupling.
+\begin{thebibliography}{9}
+\bibitem{Gross1961} E. P. Gross (1961), ``Structure of a Quantized Vortex in Boson Systems,'' \emph{Il Nuovo Cimento} \textbf{20}, 454--477. \href{https://doi.org/10.1007/BF02731494}{doi:10.1007/BF02731494}.
+\bibitem{Pitaevskii1961} L. P. Pitaevskii (1961), ``Vortex Lines in an Imperfect Bose Gas,'' \emph{Soviet Physics JETP} \textbf{13}, 451--454. \url{http://www.jetp.ras.ru/cgi-bin/dn/e_013_02_0451.pdf}.
+\bibitem{Bao2003} W. Bao, D. Jaksch, and P. A. Markowich (2003), ``Numerical Solution of the Gross--Pitaevskii Equation for Bose--Einstein Condensation,'' \emph{Journal of Computational Physics} \textbf{187}, 318--342. \href{https://doi.org/10.1016/S0021-9991(03)00102-5}{doi:10.1016/S0021-9991(03)00102-5}.
+\bibitem{KwonShin2026} J. Kwon and Y.-i. Shin (2026), ``Data and analysis scripts for Dynamic similarity of vortex shedding in a superfluid flowing past a penetrable obstacle,'' \emph{Zenodo}. \href{https://doi.org/10.5281/zenodo.20068724}{doi:10.5281/zenodo.20068724}.
+\bibitem{TorchGPE} ETH Zurich Quantum Optics Group, ``TorchGPE,'' research software. \url{https://github.com/qo-eth/TorchGPE}.
+\end{thebibliography}
+\end{document}

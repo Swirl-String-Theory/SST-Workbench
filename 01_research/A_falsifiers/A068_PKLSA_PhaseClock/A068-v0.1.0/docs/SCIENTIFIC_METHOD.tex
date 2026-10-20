@@ -1,0 +1,105 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,geometry,hyperref,xcolor,array}
+\geometry{margin=23mm}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\Omint}{\Omega_{\mathrm{int}}}
+\title{SST / PKLSA Intrinsic Vortex Phase Clock\\\large v0.1.0 -- Scientific preflight and blind-gate preregistration draft}
+\author{Research protocol -- 16 October 2026}
+\date{}
+\begin{document}
+\maketitle
+\noindent\textbf{Status: methodological prototype, not a physics qualification.} The associated Python tests are unblinded synthetic controls. No Kelvin eigenmode, material vortex tube, physical SST time dilation, or independent PKLSA internal clock has been established. The production falsifier must use the frozen SST Falsifier Framework v1.0.7 without changing that template.
+
+\section{Research question and falsifiable claim}
+Can a genuine, dynamically evolved three-dimensional PKLSA vortex create an observable internal phase with a reproducible nonzero frequency, from Euler dynamics alone, without supplying a target frequency or Lorentz/time-dilation law? The \emph{null} includes static vortices, rigid geometric rotation, numerical Euler transients, forced responses, frame drift, and beat signals misidentified as clocks.
+
+\section{Governing dynamics and dimensional scaling}
+For inviscid incompressible flow without forcing,
+\begin{align}
+\frac{\partial\mathbf u}{\partial T}+(\mathbf u\cdot\nabla)\mathbf u&=-\frac{\nabla p}{\rhoF},& \nabla\cdot\mathbf u&=0,\\
+\boldsymbol\omega&=\nabla\times\mathbf u,&\frac{D\boldsymbol\omega}{DT}&=(\boldsymbol\omega\cdot\nabla)\mathbf u.\label{euler}
+\end{align}
+An internal clock requires an observable $q(T)$ with phase $\phi(T)$ and $\Omint=d\phi/dT$, not an identification with $|\boldsymbol\omega|$ or lab-frame angular rotation. A candidate scale is
+\begin{equation}
+ \Omint=\frac{\Gamma}{L^2}\,\mathcal{F}\!\left(\frac{a}{L},\mathcal K,\mathcal I,\ldots\right),\quad [\Gamma]=\mathrm{m^2\,s^{-1}},\quad [\Omint]=\mathrm{s^{-1}},\label{scale}
+\end{equation}
+where $\mathcal F$ is \emph{unknown}, dimensionless and predicted from a qualified Euler operator, not fitted to the claimed clock. $L$ is a resolved geometric scale, $a$ the physical effective core, $\mathcal K$ geometry/topology, and $\mathcal I$ dynamically conserved invariants. Formula (\ref{scale}) is a \emph{dimensional parameterization}, not a successful derivation.
+
+For SST's canonical $\vswirl=1.09384563\times10^6\,\mathrm{m\,s^{-1}}$ and $r_c=1.40897017\times10^{-15}\,\mathrm m$, the comparison scales (\emph{not clock predictions}) are
+\begin{equation}
+\Gamma_c=2\pi r_c\vswirl=9.6836192035\times10^{-9}\,\mathrm{m^2\,s^{-1}},\qquad
+\frac{\vswirl}{r_c}=7.7634406554\times10^{20}\,\mathrm{s^{-1}}.
+\end{equation}
+The corresponding purely rotational cycle scale $\vswirl/(2\pi r_c)=1.2355899557\times10^{20}\,\mathrm{Hz}$ may \emph{not} be inserted as the measured internal clock frequency.
+
+\section{First rotation-invariant candidate observable}
+For a dynamically certified material tube $\mathcal M(T)$, define $w=|\boldsymbol\omega|^2\chi_{\mathcal M}$ and the enstrophy-weighted centroid $X_i$. The symmetric tensor
+\begin{equation}
+C_{ij}(T)=\frac{\int w(\mathbf x,T)[x_i-X_i(T)][x_j-X_j(T)]\,d^3x}
+{\int w(\mathbf x,T)\,d^3x}
+\end{equation}
+has units $\mathrm{m^2}$. If $\lambda_1\ge\lambda_2\ge\lambda_3$ are its eigenvalues, two distinct (but not statistically independent), frame-independent dimensionless shape signals are
+\begin{equation}
+q_1=\frac{\lambda_1-\lambda_2}{\operatorname{tr}C},\qquad
+q_2=\frac{\lambda_2-\lambda_3}{\operatorname{tr}C}.\label{shape}
+\end{equation}
+Translations and rigid rotations do not change the eigenvalues. Thus a moving knot can rotate in the laboratory without creating a phase in these shape observables. However, a genuine internal mode with $\delta q_1=\delta q_2=0$ would be missed; \emph{absence of these signals is not a general no-clock theorem}. Periodic-boundary coordinate branches, overlap of multiple tubes, or uncertified masks invalidate any physical inference from (\ref{shape}).
+
+Only \emph{after} the real scalar signals are computed from 3D flow, a Hilbert-analytic reconstruction may be used:
+\begin{equation}
+ z_j(T)=\delta q_j(T)+i\,\mathcal H[\delta q_j](T),\quad
+ \phi_j(T)=\operatorname{unwrap}\arg z_j(T),\quad
+ \widehat\Omint_j=\frac{d\phi_j}{dT}.
+\end{equation}
+This transform measures signal phase; it does not produce a new physical phase degree of freedom. Current prototype requires at least six central-window cycles, Hilbert-phase RMS fit error $\leq0.20$ rad, instantaneous-frequency CV $\leq0.12$, and two-signal frequency agreement $\leq3\%$. These are \emph{provisional screen thresholds}, to be frozen independently before physical qualification. Long time-series, signal-to-noise, and harmonic controls are necessary.
+
+\section{Operator-side prediction with no target-frequency input}
+From a separately qualified relative equilibrium or periodic orbit $\mathbf U(T)$, form the linearized Euler operator $\mathcal L[\mathbf U]$ and its co-moving tangent propagator $\mathcal P(T_0+P,T_0)$. Predict a held-out mode's phase advance from a converged Floquet multiplier $\mu_j$:
+\begin{equation}
+\mu_j=|\mu_j|\,e^{i\theta_j},\qquad
+\Omega_{\mathrm{int,pred},j}=\frac{\theta_j+2\pi n_j}{P}.\label{floquet}
+\end{equation}
+The integer branch $n_j$ must be disambiguated by \emph{independent} continuation/cycle tracking; neither $P$ nor $n_j$ can be chosen to match a target. The measured $\Omega_{\mathrm{int,obs}}$ is withheld until the operator prediction, branches, convergence window and tolerances are frozen. A true stationary/relative-periodic state is a prerequisite; an instantaneous eigenvalue of a nonstationary Fourier--Galerkin base is insufficient.
+
+\section{Proposed three-seal blind hierarchy}
+\begin{center}\small\begin{tabular}{p{17mm}p{48mm}p{83mm}}\toprule
+Seal & Evidence lane & Allowed claim \\\midrule
+D1 & Analytic/synthetic known-frequency, rigid-body and beat controls & Validate phase extractor only; never physical confirmation.\\
+D2 & Independently evolved 3D incompressible Euler flow & Conditional dynamic model validation after spatial/temporal/core convergence and the relative-orbit gate.\\
+D3 & Provenance-independent native PKLSA geometry $\to$ certified 3D evolution & Candidate SST physical interpretation only after operator holdout, independent provider and topology-preserving mask validation.\\\bottomrule
+\end{tabular}\end{center}
+
+\section{Production gates (none silently short-circuited)}
+\begin{center}\small\begin{tabular}{p{12mm}p{137mm}}\toprule
+Gate & Pre-registered criterion \\\midrule
+G0 & Provenance hashes, immutable D1/D2/D3 separation, operator--observable holdout, physical-source classification.\\
+G1 & Euler solution and invariants: $\nabla\cdot\mathbf u$, kinetic energy, helicity, CFL, boundary and temporal residuals.\\
+G2 & Core/tube survival, topological persistence, material transport and stable or relative-periodic background without imposed frequency.\\
+G3 & Two independent internal observables, sustained phase, ambiguity/beat/null rejection and mode identification.\\
+G4 & Co-moving Euler/Floquet independently predicts the phase frequency without seeing the measured frequency.\\
+G5 & Spatial, temporal, core-regularization and backend convergence with unique branch continuation.\\
+G6 & Independent geometry/source provider replication, including a separately registered trefoil; no two aliases from the same provider count.\\
+G7 & Nulls: rigid translation/rotation, pure advected carrier, superposed beats, Galilean boosts and scaling tests.\\
+G8 & Reveal only after frozen numerical/scientific policy; SST constants and any relativistic clock relation are post-reveal tests.\\\bottomrule
+\end{tabular}\end{center}
+
+\section{Actual preflight against user Drive sources}
+The \href{https://drive.google.com/file/d/1ET-KuARq9_TsgFszuqUflLXPnkW3vGIU/view}{A064 v0.3.0 report} documents 20/20 numeric operator checks passing, 0/8 packet propagation screens passing and a nonstationary Euler background. Trefoil $\operatorname{Im}\lambda$ at $8^3,12^3,16^3$ grids is respectively $0.2643, 0.4444, 0.7901$ in normalized units: these are not a converged Kelvin eigenbranch and are not physical hertz. The included prior A064 machine-readable report is hashed and screened, but contains no qualified paired intrinsic 3D-shape clock signals; hence the physical phase-frequency test is \texttt{NOT\_TESTABLE}.
+
+\noindent\textbf{Executed unblinded code controls:} six Python regression tests passed. Synthetic two-signal oscillator is \texttt{PASS\_NUMERICAL\_ONLY}; constant shape under rigid rotation and a two-tone beating case are \texttt{SCREEN\_FAIL}. Scientific SST status: \texttt{UNRESOLVED}. Neither the frozen v1.0.7 runner nor an independently qualified 3D native-PKLSA evolution has been executed in this prototype.
+
+\section{Falsifiability, limits, and next data contract}
+A production run can legitimately reject a proposed clock mechanism if no persistent internal phase appears in all predeclared complete observables on physically qualified material vortex tubes, across independent converged providers, while positives pass. But failure of only the covariance gaps in (\ref{shape}) is insufficient: invisible internal modes remain possible. A positive phase screen likewise cannot establish SST time dilation. The minimum next input is a time-series NPZ with $T$, divergence-free $\mathbf u(T,x,y,z)$, domain length, material-tube indicator, provenance/qualification ledger and a separately hidden Euler/Floquet prediction. Raw knot coordinates or detector-only CSVs do not qualify.
+
+\begin{thebibliography}{9}
+\bibitem{Helmholtz1858} H.~von Helmholtz, 1858, ``\"Uber Integrale der hydrodynamischen Gleichungen, welche den Wirbelbewegungen entsprechen,'' \emph{Journal f\"ur die reine und angewandte Mathematik} \textbf{55}, 25--55. \href{https://doi.org/10.1515/crll.1858.55.25}{doi:10.1515/crll.1858.55.25}.
+\bibitem{Moffatt1969} H.~K.~Moffatt, 1969, ``The degree of knottedness of tangled vortex lines,'' \emph{Journal of Fluid Mechanics} \textbf{35}, 117--129. \href{https://doi.org/10.1017/S0022112069000991}{doi:10.1017/S0022112069000991}.
+\bibitem{Saffman1992} P.~G.~Saffman, 1992, \emph{Vortex Dynamics}, Cambridge University Press. \href{https://doi.org/10.1017/CBO9780511624063}{doi:10.1017/CBO9780511624063}.
+\bibitem{Gabor1946} D.~Gabor, 1946, ``Theory of communication,'' \emph{Journal of the Institution of Electrical Engineers - Part III} \textbf{93}(26), 429--457. \href{https://doi.org/10.1049/ji-3-2.1946.0074}{doi:10.1049/ji-3-2.1946.0074}.
+\bibitem{ArnoldKhesin1998} V.~I.~Arnold and B.~A.~Khesin, 1998, \emph{Topological Methods in Hydrodynamics}, Springer. \href{https://doi.org/10.1007/978-1-4612-0645-3}{doi:10.1007/978-1-4612-0645-3}.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,146 @@
+{
+  "activation_controls": [
+    {
+      "control_id": "A_R2_OFF",
+      "reference_id": "R2",
+      "sector_id": "R2",
+      "setting_policy": "same numeric defaults as active R2 sector reference",
+      "switch_state": "off"
+    }
+  ],
+  "adaptive_relaxation": {
+    "command": "go",
+    "max_iterations_safety_cap": 32768,
+    "minimum_iterations": 256,
+    "per_block_timeout_seconds": 180,
+    "process_timeout_seconds": 7200,
+    "quantum_iterations": 32,
+    "scalar_delta_threshold": 0.00025,
+    "shape_delta_threshold": 0.00025,
+    "stable_windows_required": 4
+  },
+  "axes": [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7"
+  ],
+  "execution_policy": {
+    "continue_after_sector_incompatibility": true,
+    "do_not_accept_budget_as_convergence": true,
+    "fatal_runtime_tokens": [
+      "freeglut  error:",
+      "freeglut error:"
+    ],
+    "preserve_runs": true,
+    "priority_order": [
+      "BASIC",
+      "2048",
+      "32768"
+    ],
+    "prohibit_full_32768": true,
+    "regime": "Damped + collision fast (No Collide)",
+    "require_runtime_iteration_verification": true,
+    "selection_no_lookahead": true,
+    "timeout_seconds_per_export": 40
+  },
+  "ladder": {
+    "delta_log2": 0.25,
+    "formula": "m=2^(k/4)",
+    "include_zero_endpoint": true,
+    "k_max": 16,
+    "k_min": -16
+  },
+  "references": [
+    "R0",
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5"
+  ],
+  "regime": {
+    "collision": "collision fast",
+    "collision_semantics": "collision avoidance / No Collide",
+    "dynamics": "Damped via reset-all documented/default GUI state; anonymous S7 is intentionally tested in this Damped regime even though KnotPlot notes Undamped is intended for the velocity-dependent force.",
+    "non_slider_controls": "runtime reset-all defaults; one explicit fixed geometric safe-seed normalization BEFORE simulation; no close/max-dr/stusplit/timeincr/force default changes"
+  },
+  "response_budgets": {
+    "2048": {
+      "checkpoints": [
+        32,
+        128,
+        512,
+        2048
+      ],
+      "description": "Extended matched-iteration screen",
+      "max_iterations": 2048,
+      "selection": "all_registered"
+    },
+    "32768": {
+      "checkpoints": [
+        32,
+        128,
+        512,
+        2048,
+        8192,
+        32768
+      ],
+      "description": "Selected expensive robustness follow-up, NOT full 271-condition campaign",
+      "max_conditions": 31,
+      "max_iterations": 32768,
+      "per_axis_selected": 3,
+      "selection": "blind_deterministic_from_previous"
+    },
+    "BASIC": {
+      "checkpoints": [
+        32,
+        128,
+        512
+      ],
+      "description": "Primary matched-iteration screen, no plateau claim",
+      "max_iterations": 512,
+      "selection": "all_registered"
+    }
+  },
+  "schema": "A058-TREFOIL-SLIDER-RESPONSE-8",
+  "seed_preparation": {
+    "allow_close_or_force_default_overrides": false,
+    "minimum_close_default": 0.0,
+    "reuse_mode": "load saved ASCII without refining or additional normalization",
+    "safety_checks": [
+      "prepared",
+      "reload",
+      "post_go1",
+      "condition_start",
+      "condition_final"
+    ],
+    "schema": "A058-SHARED-SAFE-SEED-1",
+    "science_scope": "same geometry scale for all conditions; normalized seed is not claimed to be KnotPlot unmodified catalogue embedding",
+    "shared_export_count": 1,
+    "source": "KnotPlot catalogue T00 refined to 300 beads",
+    "strategy": "once_before_campaign",
+    "target_over_close_default": 1.05,
+    "transform_command": "fitto mindist"
+  },
+  "thresholds": {
+    "coordinate_complete_fraction": 1.0,
+    "effect_iteration_fraction_floor": 0.05,
+    "effect_scalar_noise_floor": 1e-05,
+    "effect_shape_noise_floor": 1e-05,
+    "native_rel": 1e-12,
+    "parameter_state_verified_fraction": 1.0,
+    "quadratic_local_abs_log2": 1.0,
+    "safe_final_verified_fraction": 1.0,
+    "setter_abs_tol": 1e-12,
+    "setter_rel_tol": 1e-09
+  },
+  "topology": {
+    "baseline_n": 300,
+    "topology_id": "T00"
+  }
+}

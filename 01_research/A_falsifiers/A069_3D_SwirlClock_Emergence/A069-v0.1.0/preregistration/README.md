@@ -1,0 +1,1 @@
+Official framework v1.0.7 FREEZE must generate its nonced blind/reveal commitments. This archive is a DRAFT source package, not a frozen official campaign. Do not manually forge the framework output, HMACs or reveal hashes. Physical blind D2/D3 datasets require a new preregistered v0.2.0 after they are available.

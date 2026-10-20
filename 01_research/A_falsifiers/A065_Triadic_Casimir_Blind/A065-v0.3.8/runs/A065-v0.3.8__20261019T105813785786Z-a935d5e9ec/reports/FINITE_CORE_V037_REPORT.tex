@@ -1,0 +1,41 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage{amsmath,booktabs,longtable,hyperref}
+\title{A065-v0.3.7: Finite-Core Inference Falsifier}
+\date{2026-10-19}
+\begin{document}\maketitle
+\section{Hypotheses}
+The null states that the centerline and circulation alone cannot identify a physical vortex-core radius or a unique numerical regularizer. All data below are synthetic analytic controls, not measured PKLSA core-vorticity.
+\section{Two finite-core models}
+\begin{align}
+\omega_G(r)&=\frac{\Gamma}{\pi a^2}e^{-r^2/a^2}, & Z_G&=\frac{\Gamma^2}{2\pi a^2}, & a_G&=\frac{\Gamma}{\sqrt{2\pi Z_G}},\\
+\omega_R(r)&=\frac{\Gamma}{\pi a^2}\mathbf 1_{r\le a}, & Z_R&=\frac{\Gamma^2}{\pi a^2}, & a_R&=\frac{\Gamma}{\sqrt{\pi Z_R}}.\end{align}
+\begin{align}
+ v_\theta(r)&=\frac{\Gamma_{\rm enc}(r)}{2\pi r}, &v_{\rm RM}(r)&=\frac{\Gamma r}{2\pi(r^2+\varepsilon^2)}, &\frac{dp}{dr}&=\rho\frac{v_\theta^2}{r}.
+\end{align}
+Near-axis slope matching fixes $\varepsilon=a$. Half-circulation matching instead yields $\varepsilon=a\sqrt{\ln2}$ for Gaussian and $\varepsilon=a/\sqrt2$ for Rankine. This nonuniqueness is intrinsic to the adopted kernel-equivalence criterion.
+\section{Blind gate outcomes (method-only)}
+\begin{center}\begin{tabular}{ll}\toprule Gate & Outcome \\\midrule
+G22 & PASS \\
+G23 & PASS \\
+G24 & FAIL \\
+G25 & PASS \\
+G26 & PASS \\
+G27 & UNRESOLVED\_NO\_QUALIFIED\_PHYSICAL\_CORE\_PROVIDER \\
+\bottomrule\end{tabular}\end{center}
+\section{Held-out diagnostics}
+\small\begin{longtable}{lrrrr}\toprule Case & $a(\Gamma,Z)$ & $\varepsilon_{50\%}$ & swirl RMS & pressure-gradient RMS\\\midrule\endhead
+gaussian\_1 & 0.075000 & 0.062442 & 16.714\% & 32.016\% \\
+gaussian\_2 & 0.130000 & 0.108232 & 17.538\% & 31.634\% \\
+gaussian\_3 & 0.210000 & 0.174836 & 18.838\% & 31.614\% \\
+rankine\_1 & 0.075000 & 0.053033 & 31.291\% & 61.696\% \\
+rankine\_2 & 0.130000 & 0.091924 & 32.556\% & 61.602\% \\
+rankine\_3 & 0.210000 & 0.148492 & 34.556\% & 61.627\% \\
+\bottomrule\end{longtable}\normalsize
+\section{Qualification boundary}
+The only recovered quantity is a \emph{profile-conditional dimensionless $a$}. The actual PKLSA knots contain no measured transverse $\omega(r)$ or independent radial pressure profiles. No physical $r_c$, finite-core Euler stability, Casimir, or gravity closure is claimed. The synthetic pressure gradient is computed from the synthetic swirl velocity itself, hence does not count as independent physical replication.
+\section{References}
+P. G. Saffman, \emph{Vortex Dynamics}, CUP (1992).\\
+D. D. Holm, M. Nitsche, V. Putkaradze, \emph{J. Fluid Mech.} \textbf{555}, 149--176 (2006), DOI:10.1017/S0022112006008846.\\
+M. Perlman, \emph{J. Comput. Phys.} \textbf{59}, 200--223 (1985), DOI:10.1016/0021-9991(85)90142-1.
+\end{document}

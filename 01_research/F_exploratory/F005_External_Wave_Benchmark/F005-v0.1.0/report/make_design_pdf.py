@@ -1,0 +1,45 @@
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,KeepTogether
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.units import mm
+from pathlib import Path
+output=Path(__file__).with_name('F005_v0.4.0_Design_and_Test_Protocol.pdf')
+styles=getSampleStyleSheet()
+styles.add(ParagraphStyle(name='F005Title', parent=styles['Title'], fontSize=18, leading=23, textColor=colors.HexColor('#102b43'),spaceAfter=14, alignment=TA_LEFT))
+styles.add(ParagraphStyle(name='F005H', parent=styles['Heading2'],fontSize=11.5,textColor=colors.HexColor('#153d57'),spaceBefore=11,spaceAfter=5))
+styles.add(ParagraphStyle(name='F005Body',parent=styles['BodyText'],fontSize=9.2,leading=14,spaceAfter=7))
+styles.add(ParagraphStyle(name='F005Mono',parent=styles['Code'],fontSize=8,leading=11,spaceAfter=8))
+doc=SimpleDocTemplate(str(output),pagesize=(210*mm,297*mm),leftMargin=18*mm,rightMargin=18*mm,topMargin=16*mm,bottomMargin=15*mm)
+items=[]
+P=lambda v,sty='F005Body':Paragraph(v,styles[sty])
+items.append(P('F005 v0.4.0 | Free-run &amp; family audit','F005Title'))
+items.append(P('<b>PRE-RUN SPECIFICATION</b>  |  19 October 2026  |  Development only', 'F005Body'))
+items.append(P('The actual 9,822 x 1,500 measured robot dataset is stored on the user\'s local Windows workstation and has not been accessed by the authoring environment. Results of the v0.4.0 <b>real-data run are pending</b>. Synthetic unit tests and a full-size synthetic end-to-end smoke test have passed.','F005Body'))
+items.append(P('Known input from v0.3.0','F005H'))
+items.append(P('Pre-existing locked ARX(2) parameters were fitted on the 3,500 candidate TRAIN series: A=1.9856661039519918, B=-0.9908696423084401, C=-1.118156917616826. Time increment dt=0.004 s. Earlier one-step validation error: 0.0156504 mm. This <b>does not</b> establish multi-second forecast validity.'))
+items.append(P('Free-run equation and units','F005H'))
+items.append(P('eta[n+1] = A eta[n] + B eta[n-1] + C (dt)^2 a[n]','F005Mono'))
+items.append(P('Elevations eta are in m and the exogenous acceleration a in m/s^2; all coefficients are dimensionless. For each of three predeclared anchors, two observed heights seed the recursion. Thereafter the <b>predicted</b> heights are recycled, without teacher forcing. The full future input acceleration is supplied as known external forcing.'))
+items.append(P('Experimental design (locked before local execution)','F005H'))
+table=Table([['Variable','Predefined values'],['Validation','750 STANDARD_VALIDATION response trajectories'],['Forecast anchor','0.004, 1.5, 2.8 s'],['Forecast horizons','0.1, 0.5, 1.0, 2.0, 3.0 s'],['Comparators','Persistence; linear trend extrapolation'],['Metrics','RMSE in m and mm; max absolute height'],['Family matching','Only input accelerations, exact + 3 multi-resolution fingerprints']],colWidths=[45*mm,125*mm],hAlign='LEFT')
+table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#e7eef3')),('LINEBELOW',(0,0),(-1,0),.8,colors.HexColor('#bac9d6')),('GRID',(0,0),(-1,-1),.22,colors.HexColor('#d2dde4')),('VALIGN',(0,0),(-1,-1),'TOP'),('FONTSIZE',(0,0),(-1,-1),8.4),('BOTTOMPADDING',(0,0),(-1,-1),6),('TOPPADDING',(0,0),(-1,-1),6)]))
+items.append(table)
+items.append(Spacer(1,6*mm))
+items.append(P('P5b - independent trajectory-family screening','F005H'))
+items.append(P('Generate candidate matches from amplitude-normalized acceleration shapes (64 bins / 0.05, 32 bins / 0.1, 16 bins / 0.20). For candidates, require Pearson r &gt;= 0.995 and normalized RMS difference &lt;= 0.075 allowing small timing shifts. Exact binary duplicate inputs are audited separately. Oversized buckets and budget exhaustion remain explicit open issues. <b>No waveform screening can independently establish publisher-grounded trajectory-family IDs.</b>'))
+items.append(P('Holdout protection and scope','F005H'))
+items.append(P('TEST (750) and OOD (4,822) output/elevation rows are never indexed, hashed, plotted, or fitted. Their external input/acceleration rows may be read <b>only for data-leakage screening</b>. No operation opens the ~49.9 GB DATASET.zip file. The current split remains candidate-only / non-blind.'))
+items.append(P('Qualification gates','F005H'))
+for a,b in [('G0','Pre-existing hashes, time vector, dimensions match; else BLOCK'),('G1','Waveform-family candidates computed, provenance remains REVIEW'),('G2','Multiple conditional free-run forecasts evaluated on VALIDATION only'),('G3','Persistence and extrapolation baselines compared at every horizon'),('G4','No TEST/OOD output use; pre-freeze requirements remain OPEN'),('G5','Euler/PKLSA/physical SST validation NOT RUN / UNRESOLVED')]:
+    items.append(P('<b>'+a+':</b> '+b))
+items.append(P('Synthetic qualification completed','F005H'))
+items.append(P('16/16 small synthetic regressions PASS. One 9,822-row synthetic integration test PASS with deliberately NaN-poisoned TEST/OOD elevations and one inserted cross-partition duplicate acceleration. A four-page runtime PDF was generated and visually checked. None of these are empirical validation.'))
+items.append(P('Execute and return','F005H'))
+items.append(P('From your existing F005-v0.1.0 directory:','F005Body'))
+items.append(P('py -3 -m pip install numpy matplotlib<br/>.\\data\\run_f005_v040.cmd','F005Mono'))
+items.append(P('Return outputs/f005_free_run_family_v0.4.0/v040_report.json and V040_SUMMARY.md; optionally CSV/PDF. Keep TEST/OOD sealed until source-defined groups and physics predictions are frozen.'))
+items.append(P('References and status','F005H'))
+items.append(P('Robot-executed sloshing dataset, Zenodo doi:10.5281/zenodo.20039757; L. Ljung, <i>System Identification: Theory for the User</i>, 2nd ed., Prentice Hall (1999), ISBN 9780136566953. Source dataset identification and complete contributor list must be verified for a formal publication. No SST-specific physical claims are implied.'))
+doc.build(items)
+print(output)

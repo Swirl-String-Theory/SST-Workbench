@@ -1,0 +1,1 @@
+A069-v0.4.0: copy-on-write from user-source A069-v0.3.0. Previous frozen output manifests are not copied; new source SHA, cryptographic commitments and protocol are created during FREEZE. v0.3.1 development note is a conceptual predecessor, not a source of falsifier PASS claims. Framework pin v1.0.9.\n

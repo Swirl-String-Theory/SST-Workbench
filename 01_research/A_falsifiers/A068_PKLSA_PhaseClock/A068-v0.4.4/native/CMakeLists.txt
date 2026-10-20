@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(A068_exact_mesh_check LANGUAGES CXX)
+find_package(CGAL REQUIRED)
+add_executable(exact_mesh_check exact_mesh_check.cpp)
+target_compile_features(exact_mesh_check PRIVATE cxx_std_17)
+target_link_libraries(exact_mesh_check PRIVATE CGAL::CGAL)

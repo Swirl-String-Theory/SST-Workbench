@@ -1,0 +1,254 @@
+{
+  "schema": "A068-V044-REGISTERED-CAMPAIGN-MATRIX-1",
+  "classification": "DEVELOPMENT_DIAGNOSTIC_NOT_PHYSICALLY_CERTIFIED",
+  "mesh_sweep": {
+    "BASIC": {
+      "n": 12,
+      "core": 0.4,
+      "dt": 0.04,
+      "T": 0.24,
+      "meshes": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 8,
+      "epsilon": 0.001
+    },
+    "FULL": {
+      "n": 16,
+      "core": 0.4,
+      "dt": 0.04,
+      "T": 0.8,
+      "meshes": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 12,
+      "epsilon": 0.001
+    },
+    "CERTIFY": {
+      "n": 16,
+      "core": 0.4,
+      "dt": 0.02,
+      "T": 0.8,
+      "meshes": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 12,
+      "epsilon": 0.0005
+    }
+  },
+  "vortex_seed_grid": 16,
+  "field_line_seed": {
+    "radius": 0.08,
+    "sections": 64,
+    "sides": 12,
+    "length": 8.0,
+    "closure_limit": 0.1
+  },
+  "shooting": {
+    "tolerance": 0.025,
+    "iterations": 3,
+    "gmres_rtol": 0.05,
+    "gmres_maxiter": 12
+  },
+  "arnoldi": {
+    "k": 3,
+    "ncv": 12,
+    "tol": 1e-05,
+    "maxiter": 100
+  },
+  "gpu_parity": {
+    "grid": 16,
+    "dt": 0.04,
+    "steps": 12
+  },
+  "screening_thresholds": {
+    "volume_drift_max": 0.05,
+    "tangency_mean_max": 0.05,
+    "tangency_pointwise_max": 0.1,
+    "detF_max": 0.05,
+    "mesh_drift_difference_max": 0.01,
+    "rpo_rel_full_velocity_max": 0.025,
+    "gpu_fp64_rel_L2_max": 1e-09
+  },
+  "qualification_note": "Vortex-line closure, material mesh embeddedness, 3D Euler spatial/core convergence, nonlinear free-period RPO and physical provider independence are separate gates. Screens alone cannot certify.",
+  "long_horizon_mesh": {
+    "BASIC": {
+      "n": 8,
+      "core": 0.4,
+      "dt": 0.04,
+      "T": 0.16,
+      "output_every": 2,
+      "mesh_levels": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 8,
+      "epsilon": 0.001,
+      "quality_probes": 16
+    },
+    "FULL": {
+      "n": 16,
+      "core": 0.4,
+      "dt": 0.04,
+      "T": 20.0,
+      "output_every": 25,
+      "mesh_levels": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 12,
+      "epsilon": 0.001,
+      "quality_probes": 96
+    },
+    "CERTIFY": {
+      "n": 16,
+      "core": 0.4,
+      "dt": 0.02,
+      "T": 20.0,
+      "output_every": 50,
+      "mesh_levels": [
+        [
+          32,
+          10
+        ],
+        [
+          64,
+          20
+        ],
+        [
+          128,
+          40
+        ]
+      ],
+      "probe_count": 12,
+      "epsilon": 0.0005,
+      "quality_probes": 96
+    }
+  },
+  "vortex_return_map": {
+    "BASIC": {
+      "n": 8,
+      "core": 0.4,
+      "anchor_indices": [
+        0,
+        20
+      ],
+      "lengths": [
+        4.0
+      ],
+      "steps": 16,
+      "radius": 0.08,
+      "sides": 4
+    },
+    "FULL": {
+      "n": 16,
+      "core": 0.4,
+      "anchor_indices": [
+        0,
+        12,
+        24
+      ],
+      "lengths": [
+        4.0,
+        8.0,
+        12.0
+      ],
+      "steps": 64,
+      "radius": 0.08,
+      "sides": 8
+    },
+    "CERTIFY": {
+      "n": 16,
+      "core": 0.4,
+      "anchor_indices": [
+        0,
+        12,
+        24
+      ],
+      "lengths": [
+        4.0,
+        8.0,
+        12.0
+      ],
+      "steps": 128,
+      "radius": 0.08,
+      "sides": 8
+    }
+  },
+  "gpu_parity_by_mode": {
+    "BASIC": {
+      "grid": 8,
+      "dt": 0.04,
+      "steps": 4
+    },
+    "FULL": {
+      "grid": 16,
+      "dt": 0.04,
+      "steps": 50
+    },
+    "CERTIFY": {
+      "grid": 16,
+      "dt": 0.04,
+      "steps": 500
+    }
+  },
+  "validation_warnings": [
+    "T=20 material meshes sampled every 25 or 50 RK4 steps; extrema between snapshots are not bounded.",
+    "Broadphase surface contact screen is sampled and cannot certify embeddedness.",
+    "The PyTorch XPU Euler lane is independent parity, not acceleration of all CPU pipeline stages.",
+    "A physically qualified clock requires material topology, full RPO shooting and independent provider holdout."
+  ]
+}

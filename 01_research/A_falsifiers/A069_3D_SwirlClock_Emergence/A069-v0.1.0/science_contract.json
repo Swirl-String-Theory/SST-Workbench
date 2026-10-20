@@ -1,0 +1,249 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can the intrinsic temporal phase rate of an independently DYNAMICS_READY 3D vortex be predicted from initial hydrodynamic fields, vorticity transport and source-qualified geometry without inserting any desired clock dilation law?",
+  "objective": "Tranche M00-M01: establish source exclusions, exact affine Euler/Kelvin analytical controls, and standalone numerical phase extraction; reserve D2/D3 and physical conclusion as UNRESOLVED.",
+  "null_hypothesis": "H0: no gauge-robust recurrent physical vortex phase exists or hydrodynamic equations have no held-out predictive frequency advantage beyond registered controls.",
+  "alternative_hypothesis": "H1: with static source and physical 3D dynamics independently qualified, source-blind predictions of signed internal phase rate agree on held-out PKLSA trajectories within preregistered numerical/physical envelopes.",
+  "assumptions": [
+    "D1 is unbounded affine, infinite-energy Euler exact solution used for numerical validation ONLY.",
+    "Incompressible inviscid barotropic Euler with no reconnection and material loop for Kelvin theorem.",
+    "External torsion/clock factor sqrt(1-u^2/c^2) is not used as source, label, parameter or loss.",
+    "Source-qualified E011 STATIC_READY geometry is NOT DYNAMICS_READY.",
+    "Do not infer physical temporal mode from arbitrary local fluid vorticity or numerical mesh spin.",
+    "Older KnotPlot relaxed exports and old VortexLab proxies are only historical negative context, never production input."
+  ],
+  "symbols": [
+    {
+      "symbol": "T",
+      "meaning": "absolute simulation time",
+      "si_unit": "s",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "R",
+      "meaning": "radius of Lagrangian material loop",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "Omega",
+      "meaning": "physical angular tracer rate in positive analytic control",
+      "si_unit": "rad/s",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "fluid vorticity curl u",
+      "si_unit": "1/s",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "Gamma",
+      "meaning": "Kelvin circulation integral",
+      "si_unit": "m^2/s",
+      "dimensions": "L^2 T^-1"
+    },
+    {
+      "symbol": "a",
+      "meaning": "extensional strain rate",
+      "si_unit": "1/s",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "theta",
+      "meaning": "material tracer accumulated azimuth in analytic D1",
+      "si_unit": "rad",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Kelvin",
+      "latex": "\\Gamma=\\oint_{C(T)}\\mathbf{u}\\cdot d\\mathbf{\\ell}=2\\pi R(T)^2\\Omega(T)",
+      "inputs": [
+        "u",
+        "R",
+        "Omega"
+      ],
+      "outputs": [
+        "Gamma"
+      ],
+      "dimensional_check": "m^2/s on both sides"
+    },
+    {
+      "id": "E2",
+      "purpose": "Exact affine 3D Euler",
+      "latex": "\\mathbf{u}=A(T)\\mathbf{x},\\quad A=\\begin{pmatrix}-a/2&-\\Omega&0\\\\\\Omega&-a/2&0\\\\0&0&a\\end{pmatrix},\\quad \\dot\\Omega=a\\Omega",
+      "inputs": [
+        "a",
+        "Omega0",
+        "T",
+        "x"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "1/s times m gives m/s"
+    },
+    {
+      "id": "E3",
+      "purpose": "First-principles analytic control frequency (not knot clock)",
+      "latex": "\\Omega(T)=\\Omega_0e^{aT}=\\Gamma/[2\\pi R(T)^2]",
+      "inputs": [
+        "Omega0",
+        "a",
+        "T",
+        "Gamma",
+        "R"
+      ],
+      "outputs": [
+        "Omega"
+      ],
+      "dimensional_check": "1/s"
+    },
+    {
+      "id": "E4",
+      "purpose": "Tracer phase",
+      "latex": "\\theta(T)=\\int_0^T \\Omega(s)ds=\\Omega_0\\operatorname{expm1}(aT)/a",
+      "inputs": [
+        "Omega0",
+        "a",
+        "T"
+      ],
+      "outputs": [
+        "theta"
+      ],
+      "dimensional_check": "dimensionless"
+    },
+    {
+      "id": "E5",
+      "purpose": "Rotating reference frame identity",
+      "latex": "\\boldsymbol{\\omega}_{abs}=\\boldsymbol{\\omega}_{rel}+2\\boldsymbol{\\Omega}_{frame}",
+      "inputs": [
+        "omega_rel",
+        "Omega_frame"
+      ],
+      "outputs": [
+        "omega_abs"
+      ],
+      "dimensional_check": "1/s"
+    },
+    {
+      "id": "E6",
+      "purpose": "Euler pressure Hessian analytic control",
+      "latex": "\\nabla\\nabla p=-\\rho\\,\\operatorname{sym}(\\dot{A}+A^2)",
+      "inputs": [
+        "A",
+        "a",
+        "Omega",
+        "rho"
+      ],
+      "outputs": [
+        "hessian(p)"
+      ],
+      "dimensional_check": "kg m^-3 s^-2"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "maximum normalized conservation/Euler identity residual",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E5",
+        "E6"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "Cartesian material marker phase error (radians), not independent SST particle clock",
+      "equation_refs": [
+        "E2",
+        "E4"
+      ],
+      "unit": "rad"
+    },
+    {
+      "id": "O3",
+      "definition": "future D2/D3 internal mode phase slope and physical uncertainty",
+      "equation_refs": [
+        "E2"
+      ],
+      "unit": "rad/s"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S0",
+      "operation": "Audit provenance and refuse old relaxed KnotPlot/VortexLab data",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S1",
+      "operation": "Construct divergence-free affine Euler reference and exact pressure Hessian",
+      "formula_refs": [
+        "E2",
+        "E6"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S2",
+      "operation": "Check Kelvin loop transport and rotating reference decomposition",
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E5"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Integrate Cartesian material tracer with RK4 and midpoint, calculate phase via atan2 unwrap",
+      "formula_refs": [
+        "E2",
+        "E4"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S4",
+      "operation": "Require true 3D finite-core dynamic certification before PKLSA prediction and reveal",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G4"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "Any D1 analytic identity residual > 2e-12 OR RK4 tracer phase error > 1e-7 rad",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F2",
+      "criterion": "No DYNAMICS_READY full 3D trajectory or no physical phase observable",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F3",
+      "criterion": "Any physical rate prediction uses desired Lorentz-factor, clock law, unqualified legacy geometry or withheld labels as inputs",
+      "conclusion_if_met": "FAIL"
+    }
+  ],
+  "edge_cases": [
+    "a=0 analytic continuity; a negative axisymmetric expansion; rotating-frame sign and magnitude; zero azimuthal motion; no temporal unwrap ambiguity; RK4 machine-floor order; unbounded affine infinite energy; absent PKLSA files; missing independent providers"
+  ],
+  "predictions": [
+    "D1 only: omega proportional 1/R^2 (Kelvin exact control), no clock physics implied",
+    "D2/D3 prediction and thresholds reserved for new freeze before looking at experimental/held-out time series"
+  ]
+}

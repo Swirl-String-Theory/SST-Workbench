@@ -1,0 +1,26 @@
+from __future__ import annotations
+from pathlib import Path
+from typing import Any
+import json
+from .analysis import analyze
+
+def rec(ledger,gid,status,metrics=None,reason=''):
+    if not ledger.defs[gid].enabled:return ledger.record(gid,'NOT_APPLICABLE',metrics=metrics or {},reason='Disabled by Framework-v1.0.8 profile semantics; A058 does not repurpose this lane.')
+    return ledger.record(gid,status,metrics=metrics or {},reason=reason)
+def run_scientific_pipeline(root:Path,cfg:dict[str,Any],ledger,mode:str)->dict[str,Any]:
+    rec(ledger,'G0','PASS',{'mode':mode,'framework_version':'1.0.8'},'Frozen protocol verified before pipeline entry.')
+    out=root/f"{cfg['project']['name']}_{cfg['project']['version']}-outputs";out.mkdir(exist_ok=True);science_cfg=json.loads((root/'configs/default.json').read_text(encoding='utf-8'));thresholds=science_cfg['thresholds'];a=analyze(root);(out/'A058_SLIDER_ANALYSIS.json').write_text(json.dumps(a,indent=2,sort_keys=True,allow_nan=True)+'\n',encoding='utf-8')
+    prov=a.get('available',False) and a.get('condition_count',0)>0 and a.get('condition_count')==a.get('runlog_entries') and a.get('parameter_state_verified_fraction')==1.0 and bool((a.get('runtime',{}).get('source_executable_sha256') or a.get('runtime',{}).get('executable_sha256'))) and bool(a.get('shared_seed_provenance_verified'));rec(ledger,'G1','PASS' if prov else 'FAIL',{'condition_count':a.get('condition_count'),'runlog_entries':a.get('runlog_entries'),'run_failures':a.get('run_failures'),'parameter_state_verified_fraction':a.get('parameter_state_verified_fraction'),'knotplot_executable_sha256':(a.get('runtime',{}).get('source_executable_sha256') or a.get('runtime',{}).get('executable_sha256')),'shared_seed_sha256':a.get('shared_seed_sha256'),'shared_seed_provenance_verified':a.get('shared_seed_provenance_verified')},'Requires all selected conditions to be attempted from a single shared seed with verified runtime state; explicitly unsupported sectors are reported separately.')
+    g2=bool(a.get('ladder_ok')) and a.get('coordinate_complete_fraction',0)>=thresholds['coordinate_complete_fraction'];rec(ledger,'G2','PASS' if g2 else 'FAIL',{'ladder_ok':a.get('ladder_ok'),'coordinate_complete_fraction':a.get('coordinate_complete_fraction'),'parse_errors':len(a.get('parse_errors',[]))},'Preregistered quarter-octave design and matched-budget coordinate completeness gate.')
+    sums=a.get('axis_summaries',{});effect={};
+    for s,v in sums.items():effect[s]=bool((float(v.get('max_shape',0))>thresholds['effect_shape_noise_floor']) or (float(v.get('max_scalar_rel',0))>thresholds['effect_scalar_noise_floor']) or (float(v.get('max_iteration_fraction_change',0))>thresholds['effect_iteration_fraction_floor']))
+    rec(ledger,'G3','PASS' if any(effect.values()) else 'FAIL',{'effect_detected_by_axis':effect,'axis_summaries':sums,'r2_activation_control':a.get('activation_controls',[])},'PASS means at least one slider exhibits a measurable matched-iteration finite-time response; no convergence or attractor claim.')
+    rec(ledger,'G4','UNRESOLVED',reason='No independent held-out physical confirmation source in this single-build numerical campaign.')
+    try:
+        import kpmetrics_native
+        from .metrics import read_xyz,curve_metrics
+        active=json.loads((root/'campaign/active_run.json').read_text(encoding='utf-8')) if (root/'campaign/active_run.json').exists() else {};source=root/active['run_path'] if active.get('run_path') else root/'campaign';p=next((source/'results').glob('C*/final.txt'));x=read_xyz(p);py=curve_metrics(x);nv=kpmetrics_native.metrics(x);errs={k:abs(float(py[k])-float(nv[k]))/max(abs(float(py[k])),abs(float(nv[k])),1e-15) for k in ('length','rg','edge_cv')};mx=max(errs.values());thr=thresholds['native_rel'];rec(ledger,'G5','PASS' if mx<=thr else 'FAIL',{'max_relative_error':mx,**errs,'threshold':thr},'Strict Python FP64 versus C++/pybind11 FP64 parity.')
+    except Exception as e:rec(ledger,'G5','UNRESOLVED',{'error':str(e)},'Native certification unavailable; no silent fallback.')
+    rec(ledger,'G6','UNRESOLVED',reason='GPU screening follows framework profile semantics only.');rec(ledger,'G7','UNRESOLVED',reason='One KnotPlot executable does not constitute independent cross-source replication.')
+    g8=(a.get('safe_final_verified_fraction',0)==1.0 and a.get('run_failures',1)==0 and a.get('coordinate_complete_fraction',0)==1.0);rec(ledger,'G8','PASS' if g8 else 'FAIL',{'budget':a.get('budget'),'safe_final_verified_fraction':a.get('safe_final_verified_fraction'),'run_failures':a.get('run_failures'),'unsupported_runtime':a.get('unsupported_runtime'),'quadratic_local_fits':a.get('quadratic_local_fits'),'special_diagnostics':a.get('special_diagnostics')},'G8 certifies only safe finite-time observations at the preregistered tier horizon. Fixed-iteration endpoints are NEVER converged attractors.')
+    return {'schema':'SST-BACKEND-MANIFEST-2','python_reference':{'actual_backend':'python-numpy-fp64','precision':'float64','authority':'REFERENCE'},'native_cpu':{'expected_backend':'C++17/pybind11 FP64','authority':'CERTIFICATION','silent_fallback':False},'knotplot_campaign':'single trefoil; 8 anonymous GUI sliders; 6 sector references; conditional sector-context default interrogation; adaptive go-quantum convergence; user-requested Damped + No-Collide'}

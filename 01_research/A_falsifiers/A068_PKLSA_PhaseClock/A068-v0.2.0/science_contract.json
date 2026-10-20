@@ -1,0 +1,225 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can a source-native incompressible three-dimensional PKLSA vortex produce a reproducible intrinsic scalar phase frequency without imposing the desired frequency or time-dilation law?",
+  "objective": "A068 v0.2.0 validates the diagnostic method and upstream A064 provenance. It does not identify a physical clock from geometry-only A064; physical discovery awaits a separately frozen source-qualified dynamic campaign.",
+  "null_hypothesis": "H0: Any apparent periodic phase may be due to rigid-body motion, beating, windowing, translation, instrumental/spectral choices, or nonconverged Euler dynamics. Preflight controls are not physical null rejection.",
+  "alternative_hypothesis": "H1: A certified, materially bounded, source-native Euler vortex exhibits a coherent intrinsic phase that is stable under frame reduction, time/space/core convergence and independent operator prediction. This claim is not tested physically in v0.2.0.",
+  "assumptions": [
+    "Incompressible inviscid Euler flow with no forcing; periodic Cartesian velocity inputs are separate from 3D KnotPlot carrier coordinates.",
+    "Synthetic sinusoidal controls test method implementation only, never an Euler or PKLSA physical prediction.",
+    "A064 v0.3.0 source is from a single KnotPlot geometry-only family, not a qualified independent PKLSA dynamics provider.",
+    "SST constants must not be used to fit a target frequency, and coordinate units may be non-SI.",
+    "The two enstrophy-covariance eigenvalue-gap signals are not independent physical clocks; their agreement is a weak necessary screen only."
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "Euler velocity vector field",
+      "si_unit": "m s^-1",
+      "dimensions": "L T^-1"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "vorticity curl(u)",
+      "si_unit": "s^-1",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "t",
+      "meaning": "simulation time in declared source units",
+      "si_unit": "s if calibrated",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "Cij",
+      "meaning": "enstrophy-weighted position covariance tensor",
+      "si_unit": "m^2",
+      "dimensions": "L^2"
+    },
+    {
+      "symbol": "q1,q2",
+      "meaning": "normalized covariance eigenvalue gaps",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "phi",
+      "meaning": "phase of analytic observable",
+      "si_unit": "rad",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "Omega",
+      "meaning": "phase angular frequency",
+      "si_unit": "rad s^-1 if calibrated",
+      "dimensions": "T^-1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Incompressible inviscid vorticity evolution",
+      "latex": "\\partial_t\\mathbf{u}+(\\mathbf{u}\\cdot\\nabla)\\mathbf{u}=-\\nabla p/\\rho_{\\!f},\\quad\\nabla\\cdot\\mathbf{u}=0",
+      "inputs": [
+        "u",
+        "p",
+        "rho_f"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "Both acceleration and pressure-gradient / density have L T^-2."
+    },
+    {
+      "id": "E2",
+      "purpose": "Compute frame-robust phase-candidate observables",
+      "latex": "q_1=(\\lambda_1-\\lambda_2)/\\operatorname{tr} C,\\quad q_2=(\\lambda_2-\\lambda_3)/\\operatorname{tr} C",
+      "inputs": [
+        "Cij"
+      ],
+      "outputs": [
+        "q1,q2"
+      ],
+      "dimensional_check": "Eigenvalues and trace of C have L^2; ratios dimensionless."
+    },
+    {
+      "id": "E3",
+      "purpose": "Derive measured analytic phase",
+      "latex": "\\phi_j(t)=\\arg\\left[(q_j-\\overline q_j)+i\\mathcal{H}(q_j-\\overline q_j)\\right]",
+      "inputs": [
+        "q1,q2",
+        "t"
+      ],
+      "outputs": [
+        "phi"
+      ],
+      "dimensional_check": "Hilbert transform and phase are dimensionless."
+    },
+    {
+      "id": "E4",
+      "purpose": "Recover measured frequency from linear phase trend",
+      "latex": "(\\widehat a,\\widehat\\Omega)=\\operatorname*{arg\\,min}_{a,b}\\sum_{k\\in W}(\\phi_k-a-b t_k)^2",
+      "inputs": [
+        "phi",
+        "t"
+      ],
+      "outputs": [
+        "Omega"
+      ],
+      "dimensional_check": "Slope has T^-1; normalized source time cannot be reported as SI Hz."
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "q1 and q2 from distinct covariance gaps; correlated weak screen; no independent clock inference",
+      "equation_refs": [
+        "E2"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "Phase RMS residual and instantaneous-frequency coefficient of variation",
+      "equation_refs": [
+        "E3",
+        "E4"
+      ],
+      "unit": "rad and 1"
+    },
+    {
+      "id": "O3",
+      "definition": "Cross-frequency relative difference of q1 and q2",
+      "equation_refs": [
+        "E4"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify user uploaded source hashes and method/simulation evidence classes exactly",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Rerun positive sine, rigid rotation and beating null controls; cross-check archived preflight output",
+      "formula_refs": [
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Assess availability of source-qualified materially bounded and temporally converged PKLSA velocity evolution (none provided)",
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S4",
+      "operation": "Keep Euler linear/Floquet operator holdout noncertified until an actual relative-periodic background exists",
+      "formula_refs": [
+        "E1",
+        "E4"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S5",
+      "operation": "Require C++ FP64 and optional SYCL numerical certification only on a physical, registered dataset",
+      "formula_refs": [
+        "E2",
+        "E4"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S6",
+      "operation": "Require source independent replication and finite-core convergence in a later registered campaign",
+      "formula_refs": [
+        "E1",
+        "E4"
+      ],
+      "gate": "G7"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F0",
+      "criterion": "Any preflight source hash differs from frozen value",
+      "conclusion_if_met": "G1 FAIL: invalid evidence; downstream cannot run."
+    },
+    {
+      "id": "F1",
+      "criterion": "Positive known oscillator is not recovered within abs frequency 1e-5 simulation inverse-time or any negative-control false-pass",
+      "conclusion_if_met": "G2 FAIL: method regression only."
+    },
+    {
+      "id": "F2",
+      "criterion": "No materially bounded 3D PKLSA trajectory with independent numerical/physical qualification exists",
+      "conclusion_if_met": "G3 UNRESOLVED: physical hypothesis not tested."
+    },
+    {
+      "id": "F3",
+      "criterion": "In a future separately frozen physical campaign, registered candidate frequency loses coherence after spatial/core/time refinement",
+      "conclusion_if_met": "FAIL for registered model instance after appropriate source certification."
+    }
+  ],
+  "edge_cases": [
+    "Rigid-body rotation without internal shape change; Hilbert edge transients; nonuniform time; near-degenerate covariance eigenvalues; beating; phase unwrapping; unregistered mask; whole-box enstrophy; nonstationary Euler linearization."
+  ],
+  "predictions": [
+    "No intrinsic frequency can be inferred from static geometry.",
+    "A genuine candidate must provide measurable phase recurrence in source-native Euler evolution with admissible material support.",
+    "A true Kelvin/Floquet frequency prediction must not be selected after inspecting phase-fit results."
+  ]
+}

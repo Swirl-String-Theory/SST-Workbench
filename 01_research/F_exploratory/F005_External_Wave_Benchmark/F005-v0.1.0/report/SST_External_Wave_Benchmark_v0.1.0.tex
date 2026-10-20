@@ -1,0 +1,109 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[dutch]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,graphicx,xcolor,geometry,hyperref,microtype}
+\geometry{margin=21mm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\st}{\textsf}
+\newcommand{\figroot}{../figures}
+\title{\textbf{SST External Wave-Mode Benchmark v0.1.0}\\\large Bron-native fysica, reproduceerbare analytische controles en blind-gate ontwerp}
+\author{SST-Workbench -- onafhankelijke literatuurbenchmark}
+\date{19 oktober 2026\\\small Status: DEVELOPMENT / LITERATURE BASELINE / NOT CERTIFIED}
+\begin{document}
+\maketitle
+\begin{abstract}
+Twee door de gebruiker aangeleverde wetenschappelijke artikelen zijn geregistreerd als onafhankelijke referenties voor Kelvin-golfturbulentie en inertiële golven. De twee bron-PDF's worden met SHA-256 verzegeld. We hebben uitsluitend op de gepubliceerde parameters gebaseerde analytische tabellen gemaakt, plus negen geslaagde regressietests. Er zijn \emph{geen} experimentele punten gedigitaliseerd, geen ruwe PIV-data verwerkt en geen PKLSA-berekeningen uitgevoerd. De empirische validatiegates blijven \texttt{BLOCKED} en de SST-claim blijft \texttt{UNRESOLVED}.
+\end{abstract}
+
+\section{Bronnen, fysische regimes en waarneembare grootheden}
+\begin{tabular}{p{.26\linewidth}p{.32\linewidth}p{.33\linewidth}}
+\toprule
+Bron & Bron-eigen observabele & Interpretatiebeperking\\ \midrule
+Barckicke et al. (2026), PRL \cite{Barckicke2026PRL} & Lateral vortexkernverplaatsing $\eta(z,t)$; $S_\eta(k,\omega)$, spectrale hellingen, pentacoherentie. & Macro-waterwervel met luchtkern, continu gepompt. Kelvin-modi zijn niet gelijk aan SST-torsie.\\
+Jackson--Thomas (2026), JFM \cite{JacksonThomas2026} & PIV-snelheidsvelden van vortexringomgeving, frequentie en golfrichting $\theta$. & Inertiële golven in bijna uniform roterende achtergrond. Uitsluitend een zijaanzicht van belletjes is geen PIV-veld.\\
+\bottomrule
+\end{tabular}
+
+De PRL-bron vermeldt op PDF-p.~5 dat zijn bronmetingen \emph{niet publiek} zijn en op redelijk verzoek verkrijgbaar zijn. De JFM-bron biedt aanvullende video's, maar de ruwe PIV-cubes (orde TB) zitten niet in de meegeleverde PDFs. Het eerdere, aparte Nature Physics-onderzoek \cite{Barckicke2026Nature} verwijst naar een mogelijk bruikbare Figshare-dataset, DOI 10.6084/m9.figshare.30903347; deze is in v0.1.0 \emph{niet} ingelezen.
+
+\section{Kelvin-modus: gepubliceerde parameters en een expliciet alternatieve kernbeschrijving}
+Voor figuur~2 van \cite{Barckicke2026PRL} gelden de gerapporteerde waarden:
+\begin{align}
+a_0&=1.47\times10^{-3}\ \mathrm m,&\Gamma&=0.018\ \mathrm{m^2\,s^{-1}},&v_z&=-0.63\ \mathrm{m\,s^{-1}},\\
+\Omega_0&=\frac{\Gamma}{2\pi a_0^2}=1325.739\ \mathrm{rad\,s^{-1}}.
+\end{align}
+Let op: figuren 3 en 4 in dezelfde paper gebruiken $a_0=1.3$~mm. Die twee geometrieën worden \emph{niet} samengevoegd. Voor de reproduceerbare analytische controle gebruiken we de \emph{hollow-core} benadering uit de aanvullende vergelijking~(7), en niet de impliciete Rankine-dispersie uit vergelijking~(1):
+\begin{equation}
+\omega_{\rm hc}(k,m)=\frac{\Gamma}{2\pi a_0^2}\left[1-\sqrt{1+x\frac{K_{m-1}(x)}{K_m(x)}}\right],\qquad x=a_0|k|,\quad m\ge 1.
+\end{equation}
+Hier is $K_m$ de gemodificeerde Besselfunctie van de tweede soort. Voor $m=1$ en $ka_0\ll1$ volgt de geverifieerde limiet
+\begin{equation}
+\omega_{\rm hc}\simeq -\frac{\Gamma k^2}{4\pi}\left[\ln\frac{2}{ka_0}-\gamma_{\rm E}\right].
+\end{equation}
+Dimensiecontrole: $[\Gamma k^2]=\mathrm{s^{-1}}$, evenals $[\Omega_0]$. Het teken volgt de Fourier-conventie van de bron; het is geen zelfstandig bewijs voor de voortplantingsrichting in een experiment.
+
+\begin{center}\includegraphics[width=.93\linewidth]{\figroot/kelvin_reference.png}\end{center}
+\noindent\textbf{Interpretatie:} de bovenstaande curve is \texttt{THEORY\_ONLY}; het is geen gedigitaliseerde experimentele dispersierelatie en geen PKLSA-voorspelling. De verticale advectie $v_z$ zit niet in deze versimpelde hollow-core uitdrukking. Dit is dus \emph{geen} volledige fit van figuur~2.
+
+\section{Zes-golfturbulentie: falsifieerbare uitkomst, maar nog zonder brondata}
+De bron rapporteert voor de golflengtespectra twee concurrerende voorspellingen:
+\begin{align}
+S_{\eta}^{\rm KS}(k)&\propto k^{-17/5},&S_{\eta}^{\rm KS}(\omega)&\propto\omega^{-11/5},\\
+S_{\eta}^{\rm LN}(k)&\propto k^{-11/3},&S_{\eta}^{\rm LN}(\omega)&\propto\omega^{-7/3}.
+\end{align}
+De auteurs constateren expliciet dat de beide spectra \emph{te dicht bij elkaar} liggen om in hun metingen op basis van alleen de spectrale hellingen te onderscheiden. De zes-golfclaim wordt ondersteund met pentacoherentie op een 75 minuten durende meetreeks, niet alleen door power-law fits \cite{Barckicke2026PRL}. Zonder de complexe Fourier-amplitudes $\eta_k(t)$ kunnen we die onafhankelijke nulhypothesetoets niet reproduceren.
+\begin{center}\includegraphics[width=.87\linewidth]{\figroot/cascade_exponents.png}\end{center}
+
+\section{Inertiële golf: onafhankelijke standaardreferentie}
+Voor bijna uniform roterende vloeistof geeft \cite{JacksonThomas2026} vergelijking~(1.2):
+\begin{equation}
+\omega_{\rm I}=\pm 2\,\Omega\cos\theta,\qquad \Omega=\frac{2\pi\,\mathrm{rpm}}{60},\qquad f_{\max}=\frac{2\Omega}{2\pi}.
+\end{equation}
+Dit is een \emph{intrinsieke} frequentie in het meedraaiende stelsel; in een stilstaande camera kunnen doppler- en azimutale mode-effecten optreden. Bij 12 rpm volgt $\Omega=1.25664\ \mathrm{rad\,s^{-1}}$ en $f_{\max}=0.400\ \mathrm{Hz}$. Bij $\theta=60^\circ$ volgt $f=0.200\ \mathrm{Hz}$. De bron vindt de nauwste overeenkomst met de dispersiecurve bij kleine Rossbygetallen (figuren 10 en 11), en rapporteert dezelfde relatie na onafhankelijke verwerking van axiale en radiale snelheidscomponenten.
+\begin{center}\includegraphics[width=.93\linewidth]{\figroot/inertial_reference.png}\end{center}
+
+\section{Verzegelde gates en onafhankelijk vergelijkingscontract}
+\small
+\begin{tabular}{lll}
+\toprule
+Gate & Status v0.1.0 & Betekenis\\ \midrule
+G0 & PASS & Bronnen en SHA-256 vastgelegd\\
+G1 & PASS & Brongrootheden, context en SI-consistentie\\
+G2 & PASS & Hollow-core Eq.~(7), $ka_0\!\ll\!1$ regressie\\
+G3 & PASS & Inertieel $\omega=2\Omega\cos\theta$ regressie\\
+G4 & BLOCKED & Geen Kelvin-$\eta(z,t)$ of onafhankelijke meetpunten\\
+G5 & BLOCKED & Geen ruwe spectrale onzekerheden voor hellingfit\\
+G6 & BLOCKED & Geen 75-minuten amplitudes voor pentacoherentie\\
+G7 & BLOCKED & Geen bron-native PIV-snelheidscubes\\
+G8 & NOT RUN & Geen blind verzegelde PKLSA-predictor\\
+G9 & UNRESOLVED & Fysische SST-hypothese niet beoordeeld\\
+\bottomrule
+\end{tabular}
+\normalsize
+
+De vooraf vastgelegde meetgates vereisen: onafhankelijke bronmetadata, correcte referentiestelseltransformatie, dezelfde observabelen, objectieve holdouts, geen fit van $\Gamma$ of $a_0$ aan de dispersiedata, en zo mogelijk een 95\%-betrouwbaarheidsinterval van de gerapporteerde onzekerheid. Een model slaagt niet doordat het zijn \emph{eigen} gegenereerde data reproduceert. Voor zes-golfinteracties wordt een fase-gerandomiseerde nulcontrole vereist met FDR $\le0.01$. Deze thresholds zijn \emph{preregistratieconcepten}; zonder ruwe meetonzekerheden nog niet toepasbaar.
+
+\section{SST/PKLSA: minimale volgende stap}
+\begin{enumerate}
+\item Verkrijg $\eta(z,t)$ of de geregistreerde $S_\eta(k,\omega)$ van de Kelvin-golfmetingen en $u_x,u_r$ (plus co\"ordinaten, tijd en rotatiesnelheden) van de PIV-metingen; verifieer hashes en units.
+\item Bevries de bron-native geometrie en randvoorwaarden. Een experimentele luchtkern op millimeterschaal mag niet stilzwijgend geïdentificeerd worden met de SST-canonieke $r_c=1.40897017\times10^{-15}$~m.
+\item Voer een onafhankelijke PKLSA-vortexberekening uit die $\eta$, $\omega(k)$, $m$ en $v_z$ \emph{als output} levert. Geen Swirl-Clock-tijddilatiewet als gedwongen frequentie-input.
+\item Vergelijk eerst met Euler/Rankine en inertiële golftheorie, dan pas met SST, inclusief modelverschil en onzekerheidsmarges.
+\end{enumerate}
+
+\paragraph{Begrensde conclusie.} De literatuur biedt reeds twee sterke, toetsbare referentieregimes. Het huidige product is een uitvoerbare \emph{literatuurbaseline}, geen SST-validatie en geen afgeronde blinde falsifier. De negen regressietests gaan uitsluitend over bronintegriteit en bekende mathematische limieten.
+
+\begin{thebibliography}{9}
+\bibitem{Barckicke2026PRL} J. Barckicke, C. Gissinger, and E. Falcon (2026), ``Experimental Evidence of Kelvin-Wave Turbulence along a Vortex Core'', \emph{Physical Review Letters} \textbf{137}, 134001. DOI: \href{https://doi.org/10.1103/t3bt-m431}{10.1103/t3bt-m431}; preprint \href{https://arxiv.org/abs/2607.07535}{arXiv:2607.07535v1}.
+\bibitem{JacksonThomas2026} O. C. Jackson and P. J. Thomas (2026), ``An experimental study investigating the inertial-wave field accompanying vortex rings translating through a rotating fluid'', \emph{Journal of Fluid Mechanics} \textbf{1029}, A47. DOI: \href{https://doi.org/10.1017/jfm.2026.11199}{10.1017/jfm.2026.11199}.
+\bibitem{Barckicke2026Nature} J. Barckicke, E. Falcon, and C. Gissinger (2026), ``Kelvin wave propagation along vortex cores'', \emph{Nature Physics} \textbf{22}, 409--414. DOI: \href{https://doi.org/10.1038/s41567-026-03175-w}{10.1038/s41567-026-03175-w}. Dataset: \href{https://doi.org/10.6084/m9.figshare.30903347}{10.6084/m9.figshare.30903347}.
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press. DOI: \href{https://doi.org/10.1017/CBO9780511624063}{10.1017/CBO9780511624063}.
+\bibitem{Kelvin1880} W. Thomson (Lord Kelvin) (1880), ``Vibrations of a columnar vortex'', \emph{Philosophical Magazine} \textbf{10}, 155--168. DOI: \href{https://doi.org/10.1080/14786448008626912}{10.1080/14786448008626912}.
+\end{thebibliography}
+\end{document}

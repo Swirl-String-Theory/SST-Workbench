@@ -1,0 +1,126 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable,array,xcolor,hyperref}
+\usepackage{microtype}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\newcommand{\vswirl}{\mathbf{v}_{\!\circlearrowleft}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\newcommand{\unresolved}{\texttt{UNRESOLVED}}
+\title{A069 (provisional): 3D Swirl Clock Emergence\\
+\large Blind Falsifier Protocol and D1 Analytical Benchmark}
+\author{SST-Workbench --- source-independent methodological tranche}
+\date{v0.1.0 draft \quad 16 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We ask whether a resolved finite-core three-dimensional vortex permits an independently predicted intrinsic phase rate from hydrodynamics, rather than from a prescribed relativistic clock factor. This preliminary release qualifies only an exact affine incompressible 3D Euler control (D1), with Kelvin circulation, vortex stretching, rotating-frame decomposition and independent Cartesian Lagrangian tracer integration. No source-qualified fully 3D Euler PKLSA trajectory is included; D2/D3 physical gates remain \unresolved. Legacy visual-relaxation KnotPlot exports and VortexLab clock proxies cannot constitute evidence. The candidate catalog identifier A069 is not yet confirmed against the authoritative workbench registry. Framework v1.0.7 is the required frozen runtime, but its official FREEZE/SELFTEST/CERTIFY runs have not been executed for this draft.
+\end{abstract}
+
+\section{Question, scope and epistemic contracts}
+\textbf{Primary physical question.} Can a source-qualified stable vortex configuration produce a reproducible physical internal mode whose angular frequency is computable from initial Euler fields and boundary conditions without using $d\tau/dT=\sqrt{1-u^2/c^2}$, target clock measurements, or tuned phase-response coefficients as inputs?
+
+\textbf{H0.} No qualifying, mesh-gauge independent recurrent internal mode exists or a preregistered hydrodynamic prediction is not confirmed on independent provider holdouts. \textbf{H1.} Such a phase exists and the independently frozen predictive dynamics reproduce the measured phase evolution and signed frequency across source-independent E011 providers within the predeclared numerical uncertainty. D1 establishes \emph{neither} hypothesis.
+
+The chain uses absolute simulation time $T$. Measured clock time $\tau_i$ and phase $\theta_i$ must remain separate. In the eventual physical test $d\tau_i/dT$ can be operationally defined from a dynamical $\dot\theta_i$ only after an independently qualified recurrent mode and calibration standard have been selected.
+
+\section{Source provenance and scientific admissibility}
+\begin{longtable}{p{.24\linewidth}p{.32\linewidth}p{.37\linewidth}}
+\toprule
+Source & Allowed role & Admissibility guard\\\midrule
+Legacy KnotPlot visual relaxation & Historical only & Never positive physical evidence or model calibration\\
+VortexLab clock proxy experiments & Historical or negative controls only & No physical rate transfer without new independent field derivation\\
+E010 PKLSA v0.3.1 & Static geometry source parent & Verify raw data provenance, SHA-256 and literature gates\\
+E011 SKLSA v0.3.0 & Qualified static seeds & Require \texttt{STATIC\_READY}; robust/sensitive providers treated separately\\
+New 3D Euler provider & D2 physics candidate & Verify finite-core dynamic and PDE/convergence closures\\
+Held-out E011 providers & D3 physical confirmation & Distinct upstream provider families, not mesh refinements or mirrors\\\bottomrule
+\end{longtable}
+E011's actual validated atlas comprises 34 \texttt{STATIC\_READY} topologies, 431 primary seeds, 47 provider anchors and 9 \texttt{CROSS\_PROVIDER\_ROBUST} topologies (including $3_1$). Crucially, static readiness is \emph{not} dynamic readiness. No E011 seed bytes or dynamic trajectories are bundled here. The E010 parent archive SHA-256 recorded for future verification is
+\texttt{b9036620c130b1a2a89b1b0a98c0e088bf2d9b32a661781598806ff40cbfad6b}.
+
+\section{Exact D1 analytical reference (not a vortex-particle model)}
+Take an affine velocity $\mathbf u(\mathbf x,T)=A(T)\mathbf x$ with constant extensional strain $a$ and
+\begin{equation}
+A(T)=\begin{pmatrix}-a/2&-\Omega(T)&0\\\Omega(T)&-a/2&0\\0&0&a\end{pmatrix},\qquad
+\Omega(T)=\Omega_0 e^{aT}.
+\label{eq:affine}
+\end{equation}
+Then $\nabla\cdot\mathbf u=\operatorname{tr}A=0$, and the vorticity is $\bm\omega=\nabla\times\mathbf u=(0,0,2\Omega)$, which obeys $D\bm\omega/DT=(\bm\omega\cdot\nabla)\mathbf u$. The pressure Hessian
+\begin{equation}
+\nabla\nabla p=-\rho\operatorname{sym}(\dot A+A^2)
+\label{eq:pressure}
+\end{equation}
+exactly balances Euler acceleration because $\operatorname{skew}(\dot A+A^2)=0$ when $\dot\Omega=a\Omega$. This example has infinite global energy on $\mathbb R^3$ and is only an exact \emph{local solver-control solution}, not a finite-energy vortex particle.
+
+A material loop in the $z=0$ plane has
+\begin{align}
+R(T)&=R_0 e^{-aT/2}, & \Gamma&=\oint_{C(T)}\mathbf u\cdot d\mathbf\ell
+=2\pi R(T)^2\Omega(T)=\mathrm{const},\label{eq:kelvin}\\
+\Omega_{\mathrm{pred}}(T)&=\frac{\Gamma}{2\pi R(T)^2},&
+\theta_{\mathrm{pred}}(T)&=\int_0^T\Omega(s)ds
+=\Omega_0\frac{e^{aT}-1}{a}.\label{eq:phase}
+\end{align}
+At $a=0$ the continuous limit is $\Omega_0T$. All dimensional quantities have consistent dimensions: $[\Gamma]=\mathrm{m^2/s}$, $[\Omega]=[a]=\mathrm{s^{-1}}$, $[\theta]=1$. The actual executable uses dimensionless normalized numerical values. The phase \emph{measurement} integrates the Cartesian ODE $d\mathbf x/dT=A(T)\mathbf x$ with RK4/midpoint, then unwraps $\operatorname{atan2}(y,x)$. It is independent of equation~\eqref{eq:phase}'s value in the integrator.
+
+For rigidly rotating reference coordinates, independently verify
+\begin{equation}
+\bm\omega_{\rm abs}=\bm\omega_{\rm rel}+2\bm\Omega_{\rm frame}.
+\label{eq:frame}
+\end{equation}
+This is a frame identity; it does not imply that locally measured 3D vorticity is a scalar material invariant.
+
+\section{Algorithm, gate DAG and mandatory next stages}
+\begin{longtable}{p{.085\linewidth}p{.59\linewidth}p{.23\linewidth}}
+\toprule Gate & Requirement & v0.1.0 status\\\midrule
+G0 & Frozen framework protocol integrity & Not executed locally\\
+G1 & Legacy source exclusion, no visual relaxed source as physical evidence & D1 policy check only\\
+G2 & Exact 3D Euler/Kelvin/stretch and frame identities & \texttt{PASS} analytical\\
+G3 & Cartesian tracer phase (RK4 and midpoint) & \texttt{PASS} analytical\\
+G4 & Finite-core, volumetric 3D Euler evolution qualification & \unresolved\\
+G5 & Stable physical phase, materiality and mesh-gauge invariance & \unresolved\\
+G6 & Hash/source E010/E011 gate plus \texttt{DYNAMICS\_READY} & \unresolved\\
+G7 & Frozen, pre-reveal signed frequency prediction & \unresolved\\
+G8 & Convergence, pressure-Poisson, energy/helicity, topology & \unresolved\\
+G9 & Provider-independent PKLSA holdout & \unresolved\\
+G10 & Strict independently built CPU C++ FP64 certification & \unresolved\\
+G11 & Downstream A061 nuclear-clock handoff & \unresolved\\\bottomrule
+\end{longtable}
+All scientific gates declare no inter-gate prerequisites and report their own evidence class; an upstream physical failure does not prevent other diagnostic gates from running. Framework-protocol integrity is nevertheless fatal. All gates G4--G11 must retain \unresolved\ unless actual qualified dynamic sources and numerics are executed. \textbf{No scientific reveal is permitted} while G9 is unresolved or any physical gate remains unresolved; the framework is responsible for the nonced commitments and official ledger.
+
+D2 must use a physical velocity/vorticity/pressure field with at least three independently converged spatial refinements, fixed end-time time-step convergence, two integrators, finite-core sensitivity, divergence, circulation, energy/helicity and mesh-gauge checks. D3 must use provider-stratified held-out E011 carriers and prediction commitments sealed \emph{before} observation. No phase may be inferred from arbitrary remeshing or $\omega_z$ alone.
+
+\section{D1 observed results and limits}
+The local run used NumPy FP64 and 9 independent Python unit/regression tests, all \texttt{PASS}. Three strain rates were checked: $a=-0.3,0,+0.25$ in normalized units. At twelve times, the maximum Kelvin-circulation relative error was $3.33\times10^{-16}$, maximum analytic Euler acceleration residual was zero to reported FP64 precision, maximum rotating-frame reconstruction error zero, maximum tracer phase absolute error $1.72\times10^{-10}\,$rad and maximum tracer radius relative error $7.20\times10^{-11}$. These small residuals are internal algorithm checks; no finite-core PKLSA source or physical temporal data were input. Machine-readable results are in \texttt{results/D1\_ANALYTIC\_CONTROL.json} and \texttt{DRAFT\_GATE\_STATUS.json}.
+
+\textbf{Negative interpretations explicitly forbidden:} positive D1 numerical agreement cannot certify clock dilation, absolute time ontology, electron topology, stable knot dynamics, isotropic light speed, or equivalence to relativity. The strict framework v1.0.7 parity and 56 framework regressions have \emph{not} been executed in this environment; D1's nine science tests are a separate local suite.
+
+\section{Blinding and reproduction}
+Private reveal information stays in \texttt{private/}; all public prediction commitments, source SHA-256 hashes and gate thresholds must be frozen with framework v1.0.7 prior to inspecting D3. The current release contains no observation-bearing D2/D3 holdout and therefore no physically meaningful reveal. The following commands run only the local analytic preflight:
+\begin{verbatim}
+python -m pip install numpy
+python -m unittest discover -s tests -v
+python -m experiment.standalone
+\end{verbatim}
+On the user's Workbench after verifying the A069 slot and installing the separate frozen framework:\begin{verbatim}
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd FULL
+run_all.cmd CERTIFY
+run_all.cmd REVEAL_IF_ALLOWED
+\end{verbatim}
+FREEZE is not executed by this draft. The next scientific tranche is an independent, full 3D Euler finite-core provider; PKLSA seeds qualify geometry, not physics.
+
+\begin{thebibliography}{9}
+\bibitem{kelvin} W. Thomson (Lord Kelvin), ``On Vortex Motion'', \emph{Transactions of the Royal Society of Edinburgh} \textbf{25} (1869), 217--260.
+\bibitem{saffman} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge University Press (1992).
+\bibitem{E010} SST-Workbench, E010 PKLSA production knot/link basis v0.3.1, validated source register (2026), \url{https://drive.google.com/drive/folders/14sNZ0xYoNkI4a-j2HxPoC51xXb0XwVy7}.
+\bibitem{E011} SST-Workbench, E011 SKLSA static ready seed atlas v0.3.0, validation and admission contract (2026), \url{https://drive.google.com/drive/folders/1lnHSQxcmQwvlde4WEJo46CGkoJQxXnlH}.
+\bibitem{canon} SST, \emph{CANON-v0.8.36}, \S3.14 Chronos--Kelvin invariant (2026), \url{https://drive.google.com/file/d/15n8i5dWzHSGA72fU4LZoryRrj7BF3n9n/view}.
+\bibitem{a061} SST-Workbench A061 v0.2.0, nuclear-clock / Swirl-Clock closure falsifier report (2026), \url{https://drive.google.com/file/d/162_Z0xaIjlZF1xe6tdiwAlk5cNi4ZxWY/view}.
+\end{thebibliography}
+\end{document}

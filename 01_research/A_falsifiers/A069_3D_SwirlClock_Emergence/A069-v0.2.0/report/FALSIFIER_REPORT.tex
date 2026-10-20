@@ -1,0 +1,197 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable,array,xcolor,hyperref,microtype,enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\newcommand{\unresolved}{\texttt{UNRESOLVED}}
+\title{A069 (provisional) --- 3D Swirl Clock Emergence\\\large v0.2.0: exact Euler controls and framework v1.0.9}
+\author{SST-Workbench --- source-qualified methodological programme}
+\date{17 October 2026 --- development control campaign}
+\begin{document}\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\begin{abstract}
+The physical target is an independently predicted internal mode frequency from qualified
+three-dimensional vortex dynamics, without a prescribed time dilation factor.
+The v0.2.0 execution covers only two \emph{analytic numerical controls}: D1, an exact
+unbounded affine three-dimensional Euler flow inherited from v0.1.0; and D2A,
+a new steady smooth columnar vortex (two-dimensional motion embedded in three-dimensional
+space). Neither tests a finite-length knotted Euler vortex or an atomic Swirl Clock.
+The test instance is generated with framework v1.0.9 and conservatively prevents
+physical PKLSA and relativity claims. The A069 registry slot remains provisional.
+\end{abstract}
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and scientific scope}
+Can an independently sourced \texttt{DYNAMICS\_READY} finite-core 3D PKLSA vortex
+support a gauge-invariant recurrent internal mode whose angular frequency is predicted
+from initial hydrodynamic fields, not from a predetermined Lorentz factor or observed
+clock frequency? A negative result on preregistered physical holdouts would reject
+the proposed frequency closure \emph{within that qualified dynamical model}. D1 and D2A
+provide implementation qualification only; they cannot settle this question.
+% SST-REPORT-SECTION:HYPOTHESES
+\paragraph{Competing hypotheses.}
+$H_0$: no independently identifiable, numerically convergent recurrent physical
+phase exists, or the frozen predicted rate fails held-out provider comparisons.
+$H_1$: a stable phase is identified without fitting the target, and the frozen
+rate matches independent holdouts with signed, uncertainty-qualified agreement.
+Both physical hypotheses remain \unresolved. The analytic reference cases are
+not statistical samples of distinct physical vortex systems.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and boundary conditions}
+The source medium is considered inviscid, barotropic and incompressible only
+within each specified exact control. D1 has infinite energy in $\mathbb R^3$.
+D2A has a smooth finite core and finite kinetic energy \emph{per unit axial length},
+but is invariant along $z$, so its full three-dimensional energy is infinite.
+Both controls have known trajectories by construction. No knot eigenmode or
+physical time flow is inferred from a Lagrangian tracer's azimuth.
+E010-v0.3.1/E011-v0.3.0 are admitted only as upstream geometry candidates,
+not as dynamics or clock data. Legacy KnotPlot visually relaxed exports and
+VortexLab proxy runs are not admitted as physical science sources.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, dimensions and exact reference equations}
+\begin{tabular}{lll}
+\toprule
+Symbol & Physical meaning & SI dimension\\\midrule
+$T$ & absolute simulation time & s\\
+$\mathbf u$ & continuum velocity & m/s\\
+$R,a$ & material loop radius; column width & m\\
+$\Omega,C,\omega$ & angular rates / vorticity & s$^{-1}$\\
+$\Gamma$ & circulation & m$^2$/s\\
+$\rho,p$ & density; pressure & kg/m$^3$; Pa\\
+$\theta$ & measured tracer angle (not proper time) & rad (dimensionless)\\\bottomrule
+\end{tabular}
+% SST-REPORT-SECTION:EQUATIONS
+\subsection{D1: affine vortex stretching and Kelvin circulation}
+\begin{equation}
+\mathbf u=A(T)\mathbf x,\quad
+A=\begin{pmatrix}-s/2&-\Omega&0\\\Omega&-s/2&0\\0&0&s\end{pmatrix},\quad
+\Omega(T)=\Omega_0 e^{sT},\quad R(T)=R_0e^{-sT/2}.
+\end{equation}
+Its exact 3D incompressible Euler pressure Hessian is
+$\nabla\nabla p=-\rho\operatorname{sym}(\dot A+A^2)$. The Kelvin invariant is
+$\Gamma=2\pi R^2\Omega=\mathrm{const}$; the independently integrated
+Cartesian trajectory is compared with $\theta(T)=\Omega_0(e^{sT}-1)/s$,
+using the continuous $s=0$ limit.
+\subsection{D2A: smooth spatially inhomogeneous columnar Euler vortex}
+\begin{align}
+\mathbf u&=(-y\Omega(r),\ x\Omega(r),0),\quad
+\Omega(r)=C e^{-r^2/a^2},\quad r=\sqrt{x^2+y^2},\\
+\omega_z&=2C\left(1-\frac{r^2}{a^2}\right)e^{-r^2/a^2},\quad
+\Gamma(r)=2\pi r^2\Omega(r),\\
+\frac{dp}{dr}&=\rho r\Omega(r)^2,\quad
+p(r)-p(0)=\frac{\rho C^2a^2}{4}\left(1-e^{-2r^2/a^2}\right),\\
+\frac{E_{\rm kin}}{L_z}&=\frac{\pi\rho C^2a^4}{8},\qquad
+\theta_{\rm pred}(T;r_0)=C e^{-(r_0/a)^2}T.
+\end{align}
+The final line gives the phase of \emph{one fluid tracer} at fixed $r_0$,
+not the proper time of an atom. The Cartesian RK4 and midpoint solvers never
+receive $\theta_{\rm pred}$ or a relativistic slowdown factor. They integrate
+$\dot{\mathbf x}=\mathbf u(\mathbf x)$ and reconstruct angle with an unwrapped
+$\mathrm{atan2}(y,x)$. The finite-difference Euler, curl and pressure gradients
+are independently evaluated. A superposed rigid background rotation is a
+reference-frame decomposition check, not an extra localized particle source.
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm, reproducibility and source qualification}
+Step 1: verify the preregistered byte-exact D1 inherited source hash and exclude
+legacy visualization inputs. Step 2: regenerate the D1 exact Euler/Kelvin/control
+phase and compare with the stored v0.1.0 reference. Step 3: evaluate D2A
+analytically at both orientations and three independent radii. Step 4: integrate
+Cartesian trajectories using RK4 at 160, 320 and 640 steps and midpoint at
+2560 steps with fixed final time. Step 5: independently finite-difference
+velocity and pressure and compare the residuals with fixed thresholds. Step 6:
+report D2B and D3 as unrun, without training on or manufacturing their data.
+% SST-REPORT-SECTION:SOURCES
+\paragraph{Provenance.}
+The A069-v0.1.0 D1 source SHA-256 is checked against
+\texttt{configs/BLIND\_ANALYTIC\_CONTROL\_V020.json}. It remains the
+same analytic-control source, not a new independent scientific provider.
+E010/E011 source metadata and contracts are included as constraints, not as
+an assertion that new E011 physical trajectories were tested.
+% SST-REPORT-SECTION:GATES
+\section{Gate structure and interpretations}
+\begin{longtable}{p{.10\linewidth}p{.66\linewidth}p{.17\linewidth}}
+\toprule Gate & Test & Science interpretation\\\midrule
+G0--G3 & Framework, exclusions, D1 Euler and material tracer & Analytic control only\\
+G4--G9 & Full 3D dynamics, internal mode, qualified PKLSA and holdout & \unresolved/disabled\\
+G10--G11 & Native physical dynamics and A061 handoff & \unresolved\\
+G12 & Smooth columnar stationary Euler field and pressure & Analytic control only\\
+G13 & Tracer time-step convergence and second integrator & Analytic control only\\
+G14 & Exact parent D1 hash and fresh analytic regeneration & Analytic control only\\\bottomrule
+\end{longtable}
+No physical gate can \texttt{PASS} by proxy because an analytic gate passed.
+Framework minimal profile may report its disabled G4--G7 as
+\texttt{NOT\_APPLICABLE}, which never denotes scientific closure.
+% SST-REPORT-SECTION:NUMERICS
+\paragraph{Numerical thresholds and limits.}
+The D2A control uses a fixed final time, two signed rates, three normalized
+radii, a central Cartesian derivative step $10^{-5}a$, an exact pressure law,
+and distinct RK4/midpoint integrators. Acceptance: phase error below $2\times10^{-7}$
+rad; normalized radial error below $2\times10^{-7}$; momentum, divergence and
+curl absolute residuals below $2\times 10^{-8}$; pressure relative error below
+$3\times10^{-9}$. These are analytic-control precision tolerances and do not
+represent uncertainties of a physical SST particle. The full three-dimensional
+spatial resolution, core-model and pressure-Poisson convergence remain untested.
+% SST-REPORT-SECTION:BACKENDS
+\paragraph{Execution and backend authority.}
+Python NumPy FP64 is \texttt{ANALYTIC\_CONTROL\_ONLY}; no C++/SYCL physics
+backend is certified by these calculations. Framework v1.0.9 has official
+72/72 Linux regression validation in its independent upstream release record,
+but target Windows/Arc A770 backend parity is pending. Framework \emph{source}
+v1.0.9 retains scientific kernels/thresholds from v1.0.7; migration changes
+immutability of run history, report publication and proof bookkeeping.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness, replication and scientific hygiene}
+D1 and D2A are fully published \emph{positive controls} and are not meaningful
+blind physical experiments. The actual PKLSA mode rate and reveal targets are
+absent. The official framework still seals and hashes preregistered files and
+produces BLIND provenance artifacts. A full physics claim requires future
+DYNAMICS\_READY provider files with opaque IDs and preregistered held-out
+signed frequency predictions. No reveal may be approved while physical gates
+are unresolved.
+% SST-REPORT-SECTION:STATISTICS
+\paragraph{Independence.}
+Two signs, multiple radii, RK4 step refinements, and replays are correlated
+methodological checks, not four independent physical observations. No p-value,
+Bayes factor, or detection significance is meaningful for D1/D2A. New E011
+physical providers must be stratified by actual upstream family, not cloned
+geometries, common numerical generators or mesh size.
+% SST-REPORT-SECTION:RESULTS
+\section{Executed results and automatic provenance}
+The original D1 reference is embedded as read-only input and is rechecked
+against a SHA-256 before any generated comparison. The new D2A computation
+is independently run using the declared equations; its results are inserted
+below by framework v1.0.9 after execution.\par
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{No official framework run produced AUTO\_RESULTS.tex yet.}}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation and reserved physical next steps}
+Passing D1 or D2A is a \emph{software and exact-solution numerical qualification},
+not a demonstration of time dilation, an emergent atomic clock, independent
+PKLSA knot stability, monometricity, or gravity. D2B must first construct
+and evolve finite-energy, finite-core genuinely 3D fields with validated
+pressure projection, nonzero axial structure, material vs mesh phase,
+converged energy/helicity/circulation, time and mesh refinement, and physically
+meaningful mode lifetime. D3 requires independently held-out E011 providers
+and an outcome-blind transfer law. A061 downstream clock data cannot be
+interpreted as SST until that upstream physics closure exists.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Execution commands and framework retention}
+\begin{verbatim}
+python -m unittest discover -s tests -v
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd REPORT_ONLY
+run_all.cmd REVEAL_IF_ALLOWED
+\end{verbatim}
+The instance is pinned by \texttt{.sst\_framework\_root} to the sibling
+framework v1.0.9 under \texttt{06\_templates}, with no permitted silent
+fallback to v1.0.7. Exact source, report and science contracts are frozen
+before the official run. Nonce-backed reveal material remains private.
+\begin{thebibliography}{9}\small
+\bibitem{kelvin} W. Thomson (Lord Kelvin), ``On Vortex Motion'', \emph{Trans. Royal Society of Edinburgh} \textbf{25} (1869), 217--260.
+\bibitem{saffman} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge University Press (1992).
+\bibitem{E010} SST-Workbench, E010 PKLSA production knot/link basis v0.3.1, \url{https://drive.google.com/drive/folders/14sNZ0xYoNkI4a-j2HxPoC51xXb0XwVy7}.
+\bibitem{E011} SST-Workbench, E011 static ready seed atlas v0.3.0, \url{https://drive.google.com/drive/folders/1lnHSQxcmQwvlde4WEJo46CGkoJQxXnlH}.
+\bibitem{frame} SST Falsifier Framework v1.0.9, CANONICAL\_FROZEN, validation (2026-10-17).
+\bibitem{canon} SST, CANON-v0.8.36, \S3.14 Chronos--Kelvin invariant, \url{https://drive.google.com/file/d/15n8i5dWzHSGA72fU4LZoryRrj7BF3n9n/view}.
+\end{thebibliography}
+\end{document}

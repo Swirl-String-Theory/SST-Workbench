@@ -1,0 +1,133 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=17mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\microtypesetup{expansion=false}
+\setlength{\parskip}{4pt}
+\title{A069 v0.5.0 --- Blind 3D Trefoil GP Dynamics and Independent Mode Controls}
+\author{SST-Workbench / development falsifier, external framework v1.0.9}
+\date{19 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We extend the prior 1D Hasimoto and exact Euler reference calculations with actual three-dimensional, volume-resolved, time-dependent Gross--Pitaevskii simulations of four historical trefoil configurations, together with independent bulk Bogoliubov dispersion and three-dimensional tangent/BdG propagation checks. An oriented spanning two-chain supplies a globally winding, regularized complex vortex field rather than an invalid nearest-centerline phase ansatz. The current evolution is an \emph{initial-value demonstration}, not a certified equilibrated knotted particle, a solution of incompressible Euler, or a measured internal clock. A stable gauge- and frame-independent trefoil eigenfrequency remains \texttt{UNRESOLVED}; frozen physical reveal is prohibited.
+\end{abstract}
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identity and epistemic status}
+A069 (provisional), \texttt{v0.5.0}, with an external version pin to \texttt{SST\_Falsifier\_Framework\_v1.0.9}. This report can be published by the independent shared framework, whose original installed release is the certification authority. Local reconstruction of framework-module snapshots is only a development smoke test. Previous v0.4.0 outputs are neither replaced nor promoted.
+% SST-REPORT-SECTION:QUESTION
+\section{Research question}
+Can true three-dimensional knotted GP dynamics yield a temporally stable, \emph{intrinsic}, model-derived oscillation frequency from knot initial conditions alone? We distinguish: (a) quantized vortex \emph{winding}, (b) numerical 3D time evolution, (c) a genuine reduced linear eigenmode of a stationary or relative-periodic knot, and (d) a further \emph{physical} Swirl Clock. These are four distinct claims.
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Null hypothesis, alternatives, and blindness}
+$H_0$: no stable, gauge/frame-independent, convergent knot eigenmode with cross-provider held-out predicted rate is demonstrated. $H_1$: the uncalibrated rate from a qualified 3D knot eigenmode predicts independent held-out data. Both remain \texttt{UNRESOLVED}. Analytic mode references can pass without promoting either physical hypothesis. Source labels are keyed to opaque case IDs during the official blind run; the historical seeds and their mirrors are correlated test inputs rather than blind physical observations.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Dynamical assumptions and excluded hypotheses}
+Two mutually non-identical theories are retained: classical incompressible Euler in the inherited D1/D2A/D2H reference cases, and the \emph{compressible} GP order parameter for the present 3D knotted initial-value test. GP allows density excitations and reconnection. An arbitrary knot geometry is not a stationary GP solution. No Compton mass, Lorentz factor, delay-mode frequency, observed atomic-clock frequency, golden-ratio constraint, or older visual KnotPlot relaxation is passed to the solver. The original A and B curves are parametrically verified and not assumed to be independent physical providers.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Units and source variables}
+The new calculation uses dimensionless GP units: $\mathbf{x}$ is position, $T$ is evolution time, $\xi$ is an explicitly declared preparatory core length, $\Psi$ is a dimensionless complex field, and $L_b$ is periodic domain length. No conversion to SI seconds or to SST particle masses is inferred. The source has $N=1200$ fixed points per curve. The 3D grid has $N_g^3$ cells, where $N_g$ is independent of filament discretization.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Equations and non-circular predictions}
+\subsection{Finite-volume, fully 3D nonlinear Schrodinger model}
+We integrate the normalized Hamiltonian GP equation,
+\begin{equation}
+ i\partial_T\Psi=-\frac12\nabla^2\Psi+(|\Psi|^2-1)\Psi,
+ \qquad \mathbf{x}\in[-L_b/2,L_b/2)^3.
+\end{equation}
+The modulus of the initialized field vanishes in a finite-width tube about the closed seed curve $K$. The \emph{phase} is constructed instead from the oriented solid angle $\Omega_{\Sigma}(\mathbf{x})$ of a spanning 2-chain $\Sigma$ whose boundary is $K$:
+\begin{equation}
+ \Psi_{\rm raw}(\mathbf{x},0)=\tanh\!\left(\frac{d(\mathbf{x},K)}{\sqrt2\xi}\right)
+ \exp\left[\frac{i\Omega_{\Sigma}(\mathbf{x})}{2}\right].
+\end{equation}
+Because $\Omega_{\Sigma}$ changes by $4\pi$ across a spanning sheet, $\exp(i\Omega_{\Sigma}/2)$ remains single-valued and has local $2\pi$ vortex circulation. A smooth real window $\chi(\mathbf{x})$ supported outside the vortex region interpolates the field to the uniform condensate at the periodic faces:
+\begin{equation}
+ \Psi_0=1+\chi(\Psi_{\rm raw}-1).
+\end{equation}
+The taper is \emph{preparation-dependent}: the resulting $\Psi_0$ is not assumed to be a relaxed stationary GP knot. We require exact periodic-face agreement and nonzero plaquette phase-winding counts.
+
+Split-step spectral Strang integration advances the full $N_g^3$ complex array in absolute dimensionless time $T$; mass $M$, GP energy $E$, and vortical plaquettes are monitored:
+\begin{equation}
+ M=\int|\Psi|^2d^3x,\qquad
+ E=\int\left(\frac12|\nabla\Psi|^2+\frac12(|\Psi|^2-1)^2\right)d^3x.
+\end{equation}
+Plaquette counts are coarse, mesh-dependent indicators, \emph{not} a continuous topological linking invariant. A count change alone does not demonstrate a specific reconnection event.
+
+\subsection{Independent bulk Bogoliubov-mode reference}
+Linearization around the exact uniform state $\Psi=1$ predicts without numerical frequency fitting:
+\begin{equation}
+ \boxed{\omega_B(k)=\sqrt{\varepsilon_k(\varepsilon_k+2)},\quad\varepsilon_k=k^2/2.}
+\end{equation}
+The independent nonlinear GP integrator evolves a small plane-density perturbation. Its observed oscillation frequency is extracted from a numerical FFT peak and fitted from that peak, \emph{not} searched inside a tolerance window centered on the analytic prediction. A minimum of four complete temporal cycles is mandatory before declaring this reference control PASS.
+
+\subsection{Three-dimensional time-dependent BdG tangent response}
+A second and independent perturbation experiment checks the time-dependent real linearization
+\begin{equation}
+ i\partial_T\delta\Psi=-\frac12\nabla^2\delta\Psi+(2|\Psi|^2-1)\delta\Psi+\Psi^2\delta\Psi^*,
+\end{equation}
+by differentiating the nonlinear Strang map (Fr\'{e}chet derivative) and comparing with finite differences of two separately evolved nonlinear 3D fields. This tests a \emph{time-dependent tangent propagator}; it does not establish an intrinsic knot eigenvalue without a qualified stationary/relative-periodic base.
+
+\subsection{Required internal-mode interpretation}
+A candidate shape observable is built from the eigenvalues of a translationally centered, rotation-invariant covariance of the depleted condensate density. Its global $U(1)$ phase is irrelevant. An apparent spectral peak must be independently predicted on unseen later time series, persist over $\ge4$ complete cycles, converge under $N_g$, $\Delta T$, $\xi$, and domain changes, and survive removal of collective translation, rotation, and global-phase modes. None of these conditions can be inferred from the bulk Bogoliubov reference.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+% SST-REPORT-SECTION:ALGORITHM
+\section{Source-locked algorithm}
+(1) Validate the original unrelaxed 2015 source SHA-256 values and analytical $N=1200$ geometry; (2) compute A, mirror(A), B, mirror(B), with two stated grid resolutions for selected non-mirror cases; (3) initialize solid-angle phase and smooth periodic amplitude; (4) integrate all three spatial dimensions; (5) evaluate mass, energy, phase winding and neutral shape diagnostics; (6) validate an independent bulk Bogoliubov reference over multiple cycles; (7) validate real GP tangent dynamics by independent nonlinear perturbation; (8) declare knot eigenfrequency \texttt{UNRESOLVED} until full topological, stability and holdout gates close. A SHA-256 pinned JSON configuration specifies the exact parameters and is itself pinned in the preregistered science contract.
+% SST-REPORT-SECTION:SOURCES
+\section{Provenance and source independence}
+Two closed centerlines originate from one 2015 research notebook, not two independent physical experiments. Exact reflected curves are parity controls. E011 static atlas metadata is not \texttt{DYNAMICS\_READY}; older KnotPlot relaxation remains excluded from physical evidence. The prepared 3D GP initial state is generated \emph{from those supplied centerlines}; no provider-certified 3D time series was used. Analytic bulk modes and tangent tests are software/model checks, not separate physical providers.
+% SST-REPORT-SECTION:GATES
+\section{Blind gate interpretation}
+\begin{longtable}{p{.14\linewidth}p{.58\linewidth}p{.22\linewidth}}\toprule
+Gate&Description&Allowed classification\\\midrule
+G0--G3, G12--G23&Inherited Euler, GP radial and Hasimoto 1D model controls&Reference PASS/FAIL\\
+G24--G25&Prior full physical knot eigenclock and dynamics certification&UNRESOLVED\\
+G26&Actual 3D GP knot initial-value time integration, phase defects, norm and energy&Model PASS/FAIL\\
+G27&Independent bulk Bogoliubov frequency with $\ge4$ resolved cycles&Reference PASS/FAIL\\
+G28&Time-dependent 3D GP tangent/BdG versus independent finite differences&Model PASS/FAIL\\
+G29&True gauge/frame-independent stable trefoil eigenfrequency&UNRESOLVED\\
+G30&Full knot-topology, numerical convergence, Euler/GP bridge&UNRESOLVED\\
+G31&Independent physical clock-source/A061 downstream closure&UNRESOLVED\\
+G4--G11&Inherited physical certification and provenance gates&UNRESOLVED or disabled\\\bottomrule\end{longtable}
+Every explicit model PASS is prevented from promoting a physical claim. An incomplete input fails closed. Physical reveal is blocked when G24, G25, G29, G30 or G31 remains unresolved.
+% SST-REPORT-SECTION:NUMERICS
+\section{Reproducible numerical campaign}
+For this development preflight the preregistered grid sizes are $48^3$ and $64^3$, $L_b=10$, $\xi=0.42$, $\Delta T=0.006$, and $160$ steps (dimensionless $T_{\rm max}=0.96$). A run on each original geometry and its mirror uses $48^3$; an independent spatial refinement on each original geometry uses $64^3$. Mass relative drift must remain below $10^{-9}$, energy relative drift below $10^{-3}$ and nonzero initial vortex winding must be detected. These are conservative \emph{numerical preflight} limits: they do not certify convergence, a stable knotted structure or a clock. The long-duration production profile must use new, immutable run IDs and separately extended time, grid, core and domain ladders.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority}
+Python NumPy/SciPy FP64 with Numba-accelerated phase initialization is the implementation authority for the initial-value demonstration. No C++/SYCL backend parity, pressure-Poisson Euler evolution, or Arc A770 certification is claimed. GP is an order-parameter model, not the incompressible Euler substrate.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness}
+New 32-byte nonces and source keys belong only to the PRIVATE package. Outcome files use opaque HMAC IDs; the correspondence to public seed labels is held separately. Historical source identity is known, so this cannot masquerade as a blinded experimental source; a future genuine held-out provider remains necessary. Reveal requires an official qualified framework run and all prerequisite physical gates.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical epistemics}
+Replaying the same centerline at two grids and reflecting its chirality do not create independent samples. No frequentist significance, independent replication, stable mode detection or physical posterior probability is claimed. A bulk reference eigenfrequency does not count as a knotted internal mode.
+% SST-REPORT-SECTION:RESULTS
+\section{Automatically generated framework results}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{No official framework result injected into this source PDF; local development metrics are in the standalone report.}}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Conclusions and next falsification}
+A genuine 3D complex GP knot field now evolves with finite spatial resolution. This provides an \emph{operational numerical foundation} for investigating whether the original knot survives. The current run is too short for qualified long-term knot topology or an internal eigenfrequency, and the initial field is nonstationary. The central A069 Swirl Clock hypothesis must remain \texttt{UNRESOLVED}, not PASS. In v0.6.0 investigate full vortex-line topology extraction, long-time/mesh/core convergence, relative equilibria, Floquet/Krein tests and independently held-out oscillations. No mass, gravity or relativity inference is warranted.
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Windows reproduction with an actual v1.0.9 installation}
+\begin{verbatim}
+python -m pip install numpy scipy numba pytest
+python -m pytest -q tests
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd REPORT_ONLY
+run_all.cmd REVEAL_IF_ALLOWED
+\end{verbatim}
+The original installed \texttt{SST\_Falsifier\_Framework\_v1.0.9} is required for official certification. \emph{FREEZE} once per new instance; \emph{BASIC} runs the finite 3D preflight. The new campaign does not change any v0.4.0 evidence.
+\begin{thebibliography}{9}
+\bibitem{Saffman} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge University Press (1992).
+\bibitem{GP} C. A. Jones and P. H. Roberts, Motions in a Bose condensate IV, J. Phys. A 15 (1982).
+\bibitem{canon} SST\_CANON-v0.8.36, Sections 1.5, 3.11, 3.14, Appendix P (2026), research programme.
+\bibitem{previous} A069 v0.4.0, blinded Hasimoto and radial-GP analytic preflight (2026).
+\end{thebibliography}
+\end{document}

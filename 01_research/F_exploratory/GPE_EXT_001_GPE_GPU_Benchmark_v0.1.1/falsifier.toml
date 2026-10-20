@@ -1,0 +1,32 @@
+[project]
+id = "GPE_EXT_001"
+name = "GPE_GPU_Benchmark"
+version = "v0.1.1"
+package = "experiment"
+profile = "gpu"
+framework_version = "1.0.10"
+
+[blind]
+enabled = true
+policy_file = "blind_policy.json"
+
+[report]
+tex = "report/FALSIFIER_REPORT.tex"
+require_complete_before_freeze = true
+compile_pdf = true
+pdf_required = true
+publish_to_instance_parent = true
+
+[run]
+seed = 123456789
+
+# GPE uses torch.xpu, NOT the native C++ or framework SYCL GPE solver.
+[backends.cpp]
+enabled = false
+[backends.sycl]
+enabled = true
+authority = "SCREENING_ONLY"
+precision = "float32"
+[sources]
+multilibrary_required = false
+independent_confirmation_required = false

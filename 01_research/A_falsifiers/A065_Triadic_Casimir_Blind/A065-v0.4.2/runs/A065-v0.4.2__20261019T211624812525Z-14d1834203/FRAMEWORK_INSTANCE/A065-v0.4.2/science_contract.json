@@ -1,0 +1,658 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Does a preregistered triadic clock/stress geometry pilot satisfy its analytic controls while independent physical coupling gates remain unresolved?",
+  "objective": "Independently verify three dataset seals, analytic Euler/gauge/sheet controls and one sourced KnotPlot trefoil finite-core geometric response without importing target force.",
+  "null_hypothesis": "No independently qualified source-specific physical two-surface response is established by the present geometry and toy models.",
+  "alternative_hypothesis": "Independently qualified PKLSA Euler motion, boundary conditions and microscopic link coupling produce held-out physical predictions.",
+  "assumptions": [
+    "The 300-node KnotPlot trefoil is real geometric source material, not a fluid-time solution.",
+    "Dimensionless circulation and regularization are diagnostic choices, not calibrated SST constants.",
+    "The scalar sheet reflection model is a toy control, not actual metal response.",
+    "Fremlin A006 raw geometry is external; its separately compiled C++17 time evolution is a testable ODE simulation, not independent Euler-PDE validation.",
+    "v0.3.2 preregistration SHA256=5604d9fba359b3ca5272353ed9a1f99b92acda6cc238c65d22958ce79cf54779; 600 nodes cubic-interpolated from N300",
+    "v0.3.3 preregistered routing SHA256=3856a587779d82df3b11ad1e64c4e4a45b6b4318e30c00676e4015d4df841fd6; G3 requires G1+G10; G2 historical FAIL retained; physical verdict unresolved",
+    "Optional Fremlin C++17 independent simulation kernel SHA256=5bac7f4609c07a578cc174a673cbf3baef96064634d673329ae24f431862636e",
+    "v0.3.4 historical geometry preregistration SHA256=73545eaddc62a3f2eda0553610220812758dc628ad2aa0eb8d4e9177d36207e5; source class historical initial geometry only; no core calibration",
+    "v0.3.5 high-resolution preregistration SHA256=2e36f33e328020fd0942d89573fda8a774f6e41e1e2a8245ef46edf33f23113a; direct analytic N2400/N4800 coordinates, original source seals preserved, numerical only",
+    "v0.3.7 generated-geometry preregistration SHA256=7ca11af33d2e48fdc3293b6153e76ce97be403b250cf54afe382fe89518a15bd; fixed dimensionless epsilon=0.06, formula regenerated coordinates and native RK4 numerical only",
+    "A065 v0.3.7 finite-core methodological synthetic cross-sections only; prereg SHA256=486414f5da90661ca5e13123f44290a3651ccac26ab71d260591656947f88429; G22-G27 cannot promote physical core, Euler or Casimir closure",
+    "A065 v0.4.0 geometry-derived synthetic 3D Gaussian finite-core seed, not source-native dynamic PKLSA; periodic FFT u/p has dependent provenance. Prereg SHA256=2d8e33435bf397cf816bc50aa364c07a636e1c02b0d817e6c6c53d0029d6eb27",
+    "A003 Fourier adapter 0.2.3 pinned SHA256=29c370a358ddf8969357db6eb2469cb526610046b0af3a58075589a3218e75e9; external atlas v0.1.2 is geometry-only. A003-v0.1.2 is not bundled and must be independently authenticated.",
+    "SST Falsifier Framework 1.0.10 RC2 CANONICAL_FROZEN loaded externally; full diagnostic execution does not certify failing upstream physics.",
+    "V041 Arc GPU Level Zero dpnp FFT FP32 numerical screening with CPU FP64 independent parity; no SYCL DD32 FFT claim, no accidental CPU fallback. GPU prereg SHA256=ccee681fd159c1f77d4f94576157cbce99b47d26a266eca0ee1fcb42701a3840",
+    "V040 preregistered A003 seeds, 48/64/96 periodic cubes at fixed L=12, Gaussian a=0.55 and Gamma=1.0; genuine Euler RK4 IVP is still GAUSSIAN-INITIALIZED, not independent PKLSA data. Numerical solver test does NOT qualify physical source or pressure holdout."
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "Material velocity",
+      "si_unit": "m/s",
+      "dimensions": "L/T"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "Material vorticity",
+      "si_unit": "1/s",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "p",
+      "meaning": "Euler pressure",
+      "si_unit": "Pa",
+      "dimensions": "M/(L T^2)"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Incompressible Euler kinematics",
+      "latex": "\\nabla\\cdot\\mathbf u=0,\\quad\\boldsymbol\\omega=\\nabla\\times\\mathbf u",
+      "inputs": [
+        "u"
+      ],
+      "outputs": [
+        "omega"
+      ],
+      "dimensional_check": "divergence and vorticity both inverse seconds"
+    },
+    {
+      "id": "E2",
+      "purpose": "Pressure Poisson source",
+      "latex": "\\nabla^2p=\\rho_M(\\frac12|\\omega|^2-||S||_F^2)",
+      "inputs": [
+        "u",
+        "omega",
+        "p"
+      ],
+      "outputs": [
+        "p"
+      ],
+      "dimensional_check": "kg/(m^3 s^2) on each side"
+    },
+    {
+      "id": "E3",
+      "purpose": "Regularized geometric velocity diagnostic",
+      "latex": "\\mathbf u(\\mathbf x)=\\frac{1}{4\\pi}\\sum_j\\frac{\\Delta\\mathbf X_j\\times(\\mathbf x-\\mathbf X_{j+1/2})}{(|\\mathbf x-\\mathbf X_{j+1/2}|^2+\\varepsilon^2)^{3/2}}",
+      "inputs": [
+        "centerline"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "dimensionless Gamma=1 geometry diagnostic"
+    },
+    {
+      "id": "E4",
+      "purpose": "Profile-dependent cross-sectional enstrophy inverse",
+      "latex": "Z_G=\\Gamma^2/(2\\pi a^2),\\quad Z_R=\\Gamma^2/(\\pi a^2)",
+      "inputs": [
+        "Gamma",
+        "Z"
+      ],
+      "outputs": [
+        "a"
+      ],
+      "dimensional_check": "Gamma^2/Z = L^2 for SI cross-section"
+    },
+    {
+      "id": "E5",
+      "purpose": "Rosenhead regularization swirl and steady radial pressure balance",
+      "latex": "v_{RM}=\\Gamma r/(2\\pi(r^2+\\varepsilon^2)),\\quad \\partial_r p=\\rho v_\\theta^2/r",
+      "inputs": [
+        "Gamma",
+        "r",
+        "epsilon",
+        "rho"
+      ],
+      "outputs": [
+        "velocity",
+        "radial_pressure_gradient"
+      ],
+      "dimensional_check": "pressure gradient M/(L^2 T^2)"
+    },
+    {
+      "id": "E6",
+      "purpose": "3D Gaussian-smoothed closed vortex current",
+      "latex": "\\boldsymbol\\omega(\\mathbf x)=\\Gamma\\oint_C e^{-|\\mathbf x-\\mathbf X|^2/a^2}\\,d\\mathbf X/(\\pi^{3/2}a^3)",
+      "inputs": [
+        "Gamma",
+        "a"
+      ],
+      "outputs": [
+        "omega"
+      ],
+      "dimensional_check": "omega 1/T if Gamma L^2/T"
+    },
+    {
+      "id": "E7",
+      "purpose": "Local cross-section core inference under Gaussian profile",
+      "latex": "\\Gamma_\\perp=\\int_\\Sigma \\omega_\\parallel dA,\\quad Z_\\perp=\\int_\\Sigma\\omega_\\parallel^2dA,\\quad a_G=|\\Gamma_\\perp|/\\sqrt{2\\pi Z_\\perp}",
+      "inputs": [
+        "Gamma",
+        "Z"
+      ],
+      "outputs": [
+        "a"
+      ],
+      "dimensional_check": "Gamma^2 / Z = L^2"
+    },
+    {
+      "id": "E8",
+      "purpose": "Periodic velocity and Poisson pressure diagnostics",
+      "latex": "\\hat{\\mathbf u}=i\\mathbf k\\times\\hat{\\boldsymbol\\omega}/|\\mathbf k|^2,\\quad\\nabla^2 p=-\\rho\\partial_i u_j\\partial_j u_i",
+      "inputs": [
+        "omega",
+        "rho"
+      ],
+      "outputs": [
+        "velocity",
+        "p"
+      ],
+      "dimensional_check": "periodic numerical diagnostics only"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Three independent source SHA256 seals",
+      "equation_refs": [
+        "E1"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "Geometry-convergence and Poisson diagnostic residuals",
+      "equation_refs": [
+        "E2",
+        "E3"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify all three source seals before any scientific result is evaluated",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Evaluate analytic Euler controls and preregistered trefoil geometry resolution scan",
+      "formula_refs": [
+        "E2",
+        "E3"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Withhold physical Casimir claims without independent providers, wall dynamics, and atom-link normalization",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S10",
+      "operation": "Verify direct parametric XYZ N600 to N4800 hashes and nesting",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G15"
+    },
+    {
+      "id": "S11",
+      "operation": "Independent fixed-core 1 percent spatial convergence at baseline epsilon=0.12 across BOTH historical trefoils",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G16"
+    },
+    {
+      "id": "S12",
+      "operation": "Report eps 0.06 0.12 0.24 numerical core sensitivity without physical force normalization",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G17"
+    },
+    {
+      "id": "S13",
+      "operation": "Check C++17 1200 and 4800 time step refinement and Python N150 parity",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G18"
+    },
+    {
+      "id": "S7",
+      "operation": "Audit historical Fourier and torus XYZ hash and analytic geometry",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G12"
+    },
+    {
+      "id": "S8",
+      "operation": "Compare reduced vortex filament RK4 spatial/time resolution on independent geometric seeds",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G13"
+    },
+    {
+      "id": "S9",
+      "operation": "Report fixed core regularization sensitivity without physical force interpretation",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G14"
+    },
+    {
+      "id": "S4",
+      "operation": "Verify fixed-core 150/300/600 convergence, separately retaining original G2 failures",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G10"
+    },
+    {
+      "id": "S6",
+      "operation": "Evaluate G3 only after precommitted G1+G10 and temporal/analytic guard; retain G2=FAIL and physical UNRESOLVED",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S5",
+      "operation": "Verify exact Fremlin raw hash and native C++ time-series refinement; never infer real Euler solution",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G11"
+    },
+    {
+      "id": "S19",
+      "operation": "Regenerate 2015 parametric trefoils inside falsifier, hash-check vs pinned XYZ and original generator",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G19"
+    },
+    {
+      "id": "S20",
+      "operation": "Measure mean segment length divided by fixed regularization epsilon at each resolution without fitting",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G20"
+    },
+    {
+      "id": "S21",
+      "operation": "Test native C++ RK4 fine-mesh spatial convergence for regenerated trefoils at epsilon=0.06",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G21"
+    },
+    {
+      "id": "S22",
+      "operation": "Verify precommitted finite-core analytic source",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G22"
+    },
+    {
+      "id": "S23",
+      "operation": "Invert independently specified Gamma and Z",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G23"
+    },
+    {
+      "id": "S24",
+      "operation": "Hold out vortex and pressure-gradient comparisons, no cutoff refit",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G24"
+    },
+    {
+      "id": "S25",
+      "operation": "Test mapping nonuniqueness",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G25"
+    },
+    {
+      "id": "S26",
+      "operation": "Verify native FP64 kernel parity",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G26"
+    },
+    {
+      "id": "S27",
+      "operation": "Keep physical core unqualified without external vorticity cross section",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G27"
+    },
+    {
+      "id": "S28",
+      "operation": "Generate source-classified 3D surrogate and check solenoidal projection",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G28"
+    },
+    {
+      "id": "S29",
+      "operation": "Reject contaminated transverse sections",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G29"
+    },
+    {
+      "id": "S30",
+      "operation": "Invert Gamma/Z without velocity pressure fitting",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G30"
+    },
+    {
+      "id": "S31",
+      "operation": "Evaluate withheld dependent numerical u and pressure without retrospective calibration",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G31"
+    },
+    {
+      "id": "S32",
+      "operation": "Require upstream native Euler snapshot and independently computed physical holdout",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G32"
+    },
+    {
+      "id": "S33",
+      "operation": "Verify unmodified external A003 adapter implementation",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G33"
+    },
+    {
+      "id": "S34",
+      "operation": "Validate full A003 atlas source manifest and ALL 384 original XYZ records",
+      "formula_refs": [
+        "E3"
+      ],
+      "gate": "G34"
+    },
+    {
+      "id": "S35",
+      "operation": "Generate explicitly synthetic volumetric vortex from separately verified A003 Fourier trefoil and diagnose withheld velocity/pressure",
+      "formula_refs": [
+        "E6",
+        "E7",
+        "E8"
+      ],
+      "gate": "G35"
+    },
+    {
+      "id": "S36",
+      "operation": "Do not promote geometric surrogate to physical source-native 3D Euler without independently qualified time-dependent field",
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G36"
+    },
+    {
+      "id": "S43",
+      "operation": "Validate actual Arc A770 Level Zero device, no iGPU or CPU substitution",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G43"
+    },
+    {
+      "id": "S44",
+      "operation": "Euler RK4 FFT Taylor-Green FP32 GPU vs FP64 CPU parity",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G44"
+    },
+    {
+      "id": "S45",
+      "operation": "Compare 48 64 96 A003 Gaussian-initialized trajectories GPU to CPU FP64",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G45"
+    },
+    {
+      "id": "S46",
+      "operation": "Compare periodic numerical pressure GPU and CPU, no external holdout",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G46"
+    },
+    {
+      "id": "S47",
+      "operation": "Require full ladder and source provenance on device-qualified GPU run",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G47"
+    },
+    {
+      "id": "S48",
+      "operation": "Withhold physical PKLSA core and independent pressure claims",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G48"
+    },
+    {
+      "id": "S37",
+      "operation": "Authenticate same two A003 geometries for all three grids",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G37"
+    },
+    {
+      "id": "S38",
+      "operation": "Volume convergence with fixed Gaussian core, no fit",
+      "formula_refs": [
+        "E6",
+        "E7"
+      ],
+      "gate": "G38"
+    },
+    {
+      "id": "S39",
+      "operation": "Independent Fourier pseudospectral Euler RK4 benchmark, Taylor-Green",
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G39"
+    },
+    {
+      "id": "S40",
+      "operation": "Evolve A003-initialized numerical Euler fields for 48/64/96, test energy and divergence",
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G40"
+    },
+    {
+      "id": "S41",
+      "operation": "Keep PKLSA source-native Euler and independent physical pressure unresolved absent provider",
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G41"
+    },
+    {
+      "id": "S42",
+      "operation": "Compare no-fit numerical Poisson pressure over volumes, distinct from physical holdout",
+      "formula_refs": [
+        "E8"
+      ],
+      "gate": "G42"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "Any source seal mismatch invalidates the run",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F2",
+      "criterion": "Any preregistered analytic benchmark fails its tolerance",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F3",
+      "criterion": "A physical claim cannot be substantiated without two independent dynamic upstream providers",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F8",
+      "criterion": "New source hash or precommitted v0.3.5 numerical rule changed",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F7",
+      "criterion": "Historic XYZ bytes, source formulas or extra-scientific parameters change from precommit",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F4",
+      "criterion": "Changing the v0.3.2 preregistered epsilon, T, gamma or spatial tolerance invalidates the run",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F6",
+      "criterion": "Unexpected analytic failure, changed protected source, G10/time failure or routing prereg mismatch blocks G3 execution",
+      "conclusion_if_met": "NOT_RUN_PREREQUISITE"
+    },
+    {
+      "id": "F5",
+      "criterion": "Missing or hash-mismatched Fremlin source cannot qualify G11 as PASS",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F19",
+      "criterion": "Original analytic seed / pinned generator mismatch, changed generator preregistration or unexpected additional source",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F21",
+      "criterion": "Any regenerated-geometry N1200/N2400 or N2400/N4800 comparison fails 1 percent at fixed epsilon=0.06",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F24",
+      "criterion": "Any held-out velocity or pressure-gradient Rosenhead RMS exceeds 5 percent",
+      "conclusion_if_met": "FAIL_REPRESENTABILITY"
+    },
+    {
+      "id": "F29",
+      "criterion": "Any preregistered station has severe signed circulation cancellation or transverse vorticity leakage",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F31",
+      "criterion": "Any admissible no-fit holdout u/p error exceeds 5 percent",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F32",
+      "criterion": "No independently audited dynamic 3D native PKLSA snapshot",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F33",
+      "criterion": "External A003 adapter or atlas SHA256 differs from preregistered source",
+      "conclusion_if_met": "INVALID"
+    },
+    {
+      "id": "F35",
+      "criterion": "A003 geometry-derived synthetic vortex source does not predict heldout velocity or pressure",
+      "conclusion_if_met": "FAIL_DIAGNOSTIC_ONLY"
+    },
+    {
+      "id": "F45",
+      "criterion": "A003 GPU Euler velocity, vorticity or numerical pressure exceeds frozen parity tolerance",
+      "conclusion_if_met": "FAIL_NUMERICAL_GPU_PARITY"
+    },
+    {
+      "id": "F48",
+      "criterion": "Independent native PKLSA 3D source / physical pressure absent",
+      "conclusion_if_met": "UNRESOLVED_PHYSICS"
+    },
+    {
+      "id": "F38",
+      "criterion": "48/64 or 64/96 relative field RMS exceeds frozen 5 percent tolerance",
+      "conclusion_if_met": "FAIL_NUMERICAL_VOLUME_QUALIFICATION"
+    },
+    {
+      "id": "F40",
+      "criterion": "Euler RK4 energy or divergence exceeds frozen thresholds",
+      "conclusion_if_met": "FAIL_EULER_NUMERICS"
+    },
+    {
+      "id": "F41",
+      "criterion": "No independent source-native Euler physics and pressure reference provided",
+      "conclusion_if_met": "UNRESOLVED_PHYSICAL_SOURCE"
+    }
+  ],
+  "edge_cases": [
+    "Irrotational, nonuniform-clock synthetic flow",
+    "decoupled zero-force sheet",
+    "missing second provider",
+    "unchanged physical results under pure gauge relabeling"
+  ],
+  "predictions": [
+    "Precommitted reference identities and finite geometric velocity fields, no target Casimir amplitude."
+  ]
+}

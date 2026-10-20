@@ -1,0 +1,137 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,bm,booktabs,longtable,array}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A068 --- PKLSA Intrinsic Phase Clock\\Framework v1.0.8 Scientific Falsifier Protocol}
+\author{SST-Workbench}
+\date{Version v0.2.0 --- pre-freeze method qualification}
+\begin{document}\maketitle
+\begin{abstract}
+This protocol incorporates the two user-supplied A068 preflight reports and the immutable A064 v0.3.0 upstream audit into an SST Falsifier Framework v1.0.8 instance. It validates phase-detection numerics and source integrity, \emph{not} a physically generated PKLSA clock. Historical v0.1.0 and the frozen v1.0.7 framework remain untouched. The v1.0.8 runtime owns unique run IDs, blind preservation, report rendering, and fail-closed reveal policy.
+\end{abstract}
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification and status}
+Catalog: A068; instance: A068-v0.2.0; runtime: SST Falsifier Framework v1.0.8 (local release candidate); profile: \texttt{multilibrary\_gpu}. Status: DEVELOPMENT / NOT CERTIFIED. Earlier A068 v0.1.0 is an unblinded method preflight. All physical clock claims remain unresolved.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+Can a source-native, materially bounded three-dimensional PKLSA vortex dynamically produce a reproducible intrinsic phase frequency, without using an imposed clock law, a target oscillation frequency, or a selected frozen-time eigenvalue? This version tests only whether the method and inherited diagnostics are controlled well enough to design a blind physical experiment.
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses}
+$H_0$: Apparent clock coherence may arise from projected rotation, rigid transport, beating, fit-window selection, nonconverged modes, or unqualified Euler evolution. $H_1$: an independently qualified PKLSA Euler vortex has an internal phase with repeatable frequency and predicts a withheld operator frequency. No physical $H_0$ versus $H_1$ discrimination is possible with the present inputs.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Scope and assumptions}
+Three-dimensional, inviscid, unforced incompressible Euler flow in a periodic domain is the model when 3D velocity fields become available. A KnotPlot centreline, a Gaussian-smoothed starting field, or a two-wavepacket detector curve is not itself a measured material-vortex phase clock. The supplied A064 data represent one geometry-only provenance group. The two covariance-gap signals are correlated, not independent physical oscillators. No SI conversion is allowed without a calibrated source length and time scale.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, units and dimensional consistency}
+\begin{longtable}{lll}
+\toprule Symbol & Definition & SI dimension\\\midrule
+$\mathbf u$ & Euler velocity & $\mathrm{m\,s^{-1}}$\\
+$\bm\omega$ & $\nabla\times\mathbf u$ & $\mathrm{s^{-1}}$\\
+$\rhoF$ & Effective fluid density & $\mathrm{kg\,m^{-3}}$\\
+$C_{ij}$ & Enstrophy-weighted position covariance & $\mathrm{m^2}$\\
+$q_1,q_2$ & Normalized covariance eigenvalue gaps & $1$\\
+$\phi_j$ & Unwrapped signal phase & $\mathrm{rad}$\\
+$\Omega_j$ & Phase frequency (calibrated only) & $\mathrm{rad\,s^{-1}}$\\\bottomrule
+\end{longtable}
+Each term of Euler acceleration has units $\mathrm{m\,s^{-2}}$; eigenvalue-gap ratios and Hilbert phases are dimensionless. Source numerical time units cannot be called physical seconds without calibration.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Mathematical model and observables}
+The upstream governing equations are the incompressible Euler system \cite{Saffman1992},
+\begin{equation}\partial_t\mathbf u+(\mathbf u\cdot\nabla)\mathbf u=-\frac{\nabla p}{\rhoF},\qquad \nabla\cdot\mathbf u=0.\tag{E1}\end{equation}
+Vorticity is $\bm\omega=\nabla\times\mathbf u$. From squared-vorticity weights on a registered three-dimensional material region $M(t)$ one may construct the covariance $C_{ij}$. With ordered eigenvalues $\lambda_1\geq\lambda_2\geq\lambda_3$:
+\begin{equation}
+q_1=\frac{\lambda_1-\lambda_2}{\operatorname{tr}C},\qquad q_2=\frac{\lambda_2-\lambda_3}{\operatorname{tr}C}.\tag{E2}
+\end{equation}
+These variables are rotation invariant under a consistently transformed domain and region; they do not prove material-tube transport or a topological state. After centering, define a numerical analytic signal \cite{Gabor1946}
+\begin{equation}
+\phi_j(t)=\operatorname{unwrap}\arg\big[(q_j-\overline q_j)+i\,\mathcal{H}(q_j-\overline q_j)\big].\tag{E3}
+\end{equation}
+The measured slope (only on predeclared fitting intervals) is
+\begin{equation}
+(\widehat a_j,\widehat\Omega_j)=\operatorname*{arg\,min}_{a,b}\sum_{k\in W}\big(\phi_j(t_k)-a-bt_k\big)^2,\qquad \widehat f_j=\widehat\Omega_j/(2\pi).\tag{E4}
+\end{equation}
+In (E4) the notation means the $b$ component of the least-squares minimizer. Without SI-calibrated time, $\widehat f$ is only cycles per numerical time unit. The algorithm is a diagnostic, not a physical oscillator Hamiltonian.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Exact algorithm and equation-to-code mapping}
+\begin{enumerate}
+\item Pin framework v1.0.8; generate a fresh versioned A068 instance, preserving all earlier runs.
+\item Freeze source and science contracts, report, gate graph, forbidden-term commitments; do not freeze any private reveal output in public files.
+\item Verify exact SHA-256 of both preflight JSON files and A064 v0.3.0 JSON (G1).
+\item Rerun the synthetic positive sinusoid and the two preregistered negative controls (rigid rotation; frequency beating) using the unmodified phase extractor (G2).
+\item Audit that A064 has \emph{not} established an Euler relative equilibrium or a source-native material PKLSA clock (G3 unresolved).
+\item Do not run independent operator holdout, native C++ validation, SYCL screening or cross-provider closure without physical G3 success; record the skipped gates, not PASS.
+\item Let the framework publish unique BLIND archives and its machine-generated ledger; a normal run may not reveal when unresolved physical gates remain.
+\end{enumerate}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Provenance and independence}
+\texttt{PREFLIGHT\_RESULTS.json} and \texttt{PREFLIGHT\_WITH\_A064.json} are synthetic unblinded development controls. They are generated by one method family. \texttt{A064-v0.3.0\_results.json} is an upstream KnotPlot-initialized Euler-Galerkin diagnostic, not an independent validated PKLSA dynamic source. The source hashes are frozen in the A068 pipeline. No source is experimental and no provider independence is claimed.
+
+% SST-REPORT-SECTION:GATES
+\section{Blind gate definitions}
+\begin{longtable}{p{0.10\linewidth}p{0.52\linewidth}p{0.28\linewidth}}
+\toprule Gate & Acceptance condition & Present status\\\midrule
+G0 & Framework protocol validates & Runtime conditional\\
+G1 & All three fixed hashes match & Locally reproducible\\
+G2 & Positive and both null controls reproduce & Method-only PASS candidate\\
+G3 & Materially bounded, orbit-qualified 3D PKLSA clock & UNRESOLVED\\
+G4 & Independent held-out Euler/Floquet prediction & BLOCKED by G3\\
+G5 & Native C++ FP64 physical confirmation & BLOCKED by G3/G4\\
+G6 & SYCL FP32/DD32 screening, never physical authority & BLOCKED\\
+G7 & Multiple physically independent qualified PKLSA sources & BLOCKED\\
+G8 & Material transport and space/time/core convergence & BLOCKED\\
+G9 & Valid reveal commitment after all relevant physical gates & WITHHELD\\\bottomrule
+\end{longtable}
+A gate cannot be marked PASS just because a prerequisite is missing, an example control is correct, or a numerical kernel exists.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical and statistical qualification}
+The current synthetic positive control has input $f=0.25$ cycles per artificial time unit and a 16-cycle record. Proposed development regression requires frequency absolute error below $10^{-5}$ for both signals, at least 6 observed cycles, phase-fit RMS below $0.20\,\mathrm{rad}$, frequency coefficient of variation below $0.12$, and relative cross-signal frequency mismatch below $0.03$. These are \emph{method thresholds}, not physical SST acceptance criteria. For the later physical experiment, $N,2N,4N$ meshes, time-step halving, fixed final time and independent core refinement must be separately preregistered.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Numerical backend authority}
+Python/NumPy FP64 is the method reference. Production requires separately executed strict CPU C++ FP64 certification; SYCL FP32 and DD32 are screening-only, even on an Intel Arc A770. No fake fallback may satisfy G5/G6. This instance does not yet execute native physical kernels.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal policy}
+The frozen v1.0.8 runtime owns a nonced private reveal commitment, forbidden-term scans, one run ID per new blind run and non-overwriting PDFs and ZIPs. Unresolved science gates block reveal. Method controls are disclosed as synthetic; source-independent target labels and physical comparison mappings must be registered in \texttt{private/} only for a future qualified source campaign. No post-hoc physical target is read by phase extraction.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical design and multiplicity}
+Synthetic controls are deterministic regression checks, not a population of independent source replicates. Consequently, no physical $p$-value, false-discovery-rate, significance claim, or cross-topology confidence interval is reported. A later discovery/holdout study must choose independent source units, sample sizes, fixed windows and multiplicity corrections before examining outcomes.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Results and output contract}
+Source and method checks are rerun by the scientific overlay and recorded in the framework gate ledger / backend manifest. For each BASIC/FULL/CERTIFY run the v1.0.8 framework archives prior work and publishes a new run-identified BLIND ZIP and PDF when LaTeX is available.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{Current run results are inserted by the framework.}}
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation and falsification limits}
+A synthetic control PASS means the diagnostic is working on that control; it does not validate vortex clocks. A064's instantaneous eigenpairs are not a time-harmonic Kelvin basis, and no observed velocity field has established a material knotted vortex oscillator. Failures of one candidate mode or packet launch cannot falsify every vortex-frequency mechanism. A consistent time-dependent, materially supported and converged field would permit the next physical campaign, not retroactive promotion of these data.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility and references}
+Install using \texttt{install\_A068\_v0.2.0.py} with a real local Workbench containing v1.0.8. The installer invokes the \emph{official generator}, writes a matching relative framework pin, replaces only the new instance files, and refuses an existing target version. Test via \texttt{pytest -q tests}; then \texttt{run\_all.cmd FREEZE}, \texttt{run\_all.cmd BASIC}, and \texttt{run\_all.cmd REVEAL\_IF\_ALLOWED}. The archived SHA-256 inputs and this report are included in the distribution.
+
+\begin{thebibliography}{9}
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press, doi:10.1017/CBO9780511624063.
+\bibitem{Moffatt1969} H. K. Moffatt (1969), ``The degree of knottedness of tangled vortex lines,'' \emph{Journal of Fluid Mechanics} \textbf{35}, 117--129, doi:10.1017/S0022112069000991.
+\bibitem{Gabor1946} D. Gabor (1946), ``Theory of communication,'' \emph{Journal of the Institution of Electrical Engineers}, Part III \textbf{93}, 429--457, doi:10.1049/ji-3-2.1946.0074.
+\end{thebibliography}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+\end{document}

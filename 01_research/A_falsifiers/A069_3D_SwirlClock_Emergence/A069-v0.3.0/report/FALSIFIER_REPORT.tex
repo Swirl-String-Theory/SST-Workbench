@@ -1,0 +1,119 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=19mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\microtypesetup{expansion=false}
+\title{A069 v0.3.0 --- Three-Dimensional Swirl Clock Emergence\\Exact Hill--Euler, Gross--Pitaevskii, and PKLSA-Static Controls}
+\author{SST-Workbench / Development and blind provenance}
+\date{18 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We test numerical implementations of exact Euler and dimensionless nonlinear Schrodinger vortex models, along with provenance-locked static knot geometry access. Our strict target is an independently computed stable internal mode frequency for a dynamically qualified 3D knot; \emph{that target is not reached in this release}. No measured particle clock, Lorentz ratio, Compton frequency or physical mass is provided to the solvers. The v1.0.9 framework protects blind source and output evidence.
+\end{abstract}
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Scope and epistemic status}
+ID A069 (provisional), v0.3.0, framework v1.0.9, minimal Python/NumPy FP64 reference. Analytic controls and E011 static metadata may pass; \textbf{physical Swirl Clock / A061 transfer remain UNRESOLVED}.
+% SST-REPORT-SECTION:QUESTION
+\section{Question and independent physical objective}
+Can an internally observable, gauge-invariant, stable frequency be predicted solely from a fully 3D finite-core vortex initial state and its independently qualified dynamics? The submitted calculations do \emph{not} yet answer this question. They test prerequisite model correctness and static source admission.
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses}
+$H_0$: no stable, identifiable 3D physical phase frequency can be predicted without a target clock fit. $H_1$: a precommitted mode prediction matches a held-out dynamically qualified independent provider. Both physical hypotheses remain \texttt{UNRESOLVED}; exact synthetic controls have no experimental significance.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Models and assumptions}
+Assume incompressible inviscid Euler for D1,D2A,D2H; dimensionless compressible Gross--Pitaevskii for D2N. GP and Euler are separate equations of state. Hill is an exact translating 3D Euler vortex with finite vorticity support; it is not a knotted vortex. The NLS thin-ring limit requires $R/a\gg1$. Historical KnotPlot relaxed data are not physical inputs.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols and dimensions}
+$T$ simulation time [s], $\mathbf u$ velocity [m/s], $\boldsymbol\omega=\nabla\times\mathbf u$ [1/s], $\Gamma$ circulation [m$^2$/s], $p$ pressure [Pa], $\rho$ mass density [kg/m$^3$], $a$ Hill sphere radius [m] or separately NLS ring core scale [m], $R$ ring radius [m], $A_H$ Hill vorticity gradient [1/(m s)], $\Psi$ dimensionless GP order parameter. The nonlinear coupling and phase are dimensionless only in explicitly normalized GP units; they are not calibrated to SST constants.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Exact equations and independent controls}
+\paragraph{D1 and D2A (preserved from v0.2.0).} D1 uses exact affine 3D Euler strain and rotating material loops; $\Gamma=2\pi\Omega R^2$ is constant. D2A uses $u_\theta=Cr\exp(-r^2/a^2)$, Euler radial pressure $dp/dr=\rho r\Omega^2$, and independent Cartesian tracer integration. D2A has finite energy per unit axial length, not finite total three-dimensional energy.
+\paragraph{D2H --- Hill's spherical vortex.}
+In the translating frame ($s^2=x^2+y^2$, $r^2=s^2+z^2$), for $r<a$:
+\begin{align}
+ u_x&=\frac{3Uxz}{2a^2},&u_y&=\frac{3Uyz}{2a^2},&u_z&=\frac{3U}{2}\left(1-\frac{2s^2+z^2}{a^2}\right),\\
+ \boldsymbol\omega&=A_H(-y,x,0),&A_H&=\frac{15U}{2a^2},&\Gamma_H&=\frac{2A_H a^3}{3},\\
+ U&=\frac{\Gamma_H}{5a}=\frac{2a^2A_H}{15}.
+\end{align}
+Outside the sphere, the stationary co-moving flow is uniform $-U\mathbf e_z$ plus a decaying potential dipole:
+\begin{equation}
+ (u_x,u_y)=\frac{3Ua^3z}{2r^5}(x,y),\qquad u_z=-U+Ua^3\left(r^{-3}-\frac{3s^2}{2r^5}\right).
+\end{equation}
+With $\chi=(3A_HU/4)s^2(r^2/a^2-1)$ inside and zero outside, $p=\rho[(U^2-|\mathbf u|^2)/2+\chi]$. Independent centered differences test $\nabla\cdot\mathbf u=0$, $\nabla\times\mathbf u=\boldsymbol\omega$, and $\rho(\mathbf u\cdot\nabla)\mathbf u+\nabla p=0$ away from the interface.
+\paragraph{D2N --- normalized GP/NLS radial core.}
+\begin{align}
+ i\partial_T\Psi&=-\frac12\nabla^2\Psi+(|\Psi|^2-1)\Psi,\quad \Psi=f(r)e^{i\theta},\\
+ 0&=-\frac12\left(f''+f'/r-f/r^2\right)+(f^2-1)f.
+\end{align}
+Boundary $f(0)=0$ and $f(R_{\rm box})=1$. A numerical boundary-value solution is checked on independent radial grids using a separately differenced differential residual. \emph{Global $U(1)$ phase is not an operational clock}. Gauge zero-mode residual is audited, but no independently stable BdG internal mode is claimed.
+\paragraph{D2R --- thin-ring identity.}
+\begin{equation}
+ E=\frac12\rho\Gamma^2R[\ln(8R/a)-\alpha],\quad P=\rho\Gamma\pi R^2,\quad U=\frac{dE}{dP}=\frac{\Gamma}{4\pi R}[\ln(8R/a)-\beta].
+\end{equation}
+For constant $a$, $\beta=\alpha-1$; for $a^2R=\mathrm{const}$, $\beta=\alpha-3/2$. Roberts--Grant $\alpha\simeq1.615$ is a reference value. Substitution $\alpha=\varphi$ is a different unverified hypothesis. The SST-69 fat-core estimate $R/a\simeq0.898$ is \emph{outside} the tested thin-ring regime ($R/a=40$).
+\paragraph{D3 --- real PKLSA static admission.}
+E011-v0.3.0 ZIP must match the pinned byte SHA-256. Its schema, PRIMARY reference status, raw and geometry hashes and geometry capability flags are inspected. A provider whose source family contains KnotPlot, legacy or VortexLab is excluded even when E011 marks it static ready. The only eligible trefoil static family is Gilbert; its full original source bytes are not embedded in the E011 ZIP, and no dynamic knot fields are supplied.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm and software mapping}
+Execute D1 and D2A controls independently, then Hill exact pressure/curl diagnostics, GP radial boundary-value solution on two grids, central finite differences for $dE/dP$, and SHA-locked E011 parser/selector. All results serialize with explicit type (analytic, numerical GP, static geometry only). No rate predictor is fit to existing clocks. The true physics phase gate cannot be closed by a tracer angle or a global complex phase.
+% SST-REPORT-SECTION:SOURCES
+\section{Sources and independence}
+S0 is inherited D1 synthetic source, byte-checked against v0.2.0. S1 is E011 v0.3.0 static atlas output metadata, pinned to archived SHA. Neither is a genuinely independent physical dynamics provider. E011 ``CROSS\_PROVIDER\_ROBUST'' includes a historical KnotPlot family; this campaign disallows such legacy relaxations for physical conclusions. Provider count for potential physical source candidates therefore drops to one (Gilbert). STATIC\_READY is not DYNAMICS\_READY.
+% SST-REPORT-SECTION:GATES
+\section{Blind gate DAG and allowed conclusions}
+\begin{longtable}{p{.13\linewidth}p{.45\linewidth}p{.30\linewidth}}\toprule
+Gates&Meaning&Allowed status\\\midrule
+G0--G3&Protocol and inherited D1 exact controls&Analytic PASS/FAIL\\
+G12--G14&Inherited D2A and replay checks&Analytic PASS/FAIL\\
+G15&Exact Hill sphere field and pressure&Analytic PASS/FAIL\\
+G16&Radial GP stationary core plus gauge-null&Model consistency PASS/FAIL\\
+G17&Thin-ring $dE/dP$ identities&Asymptotic PASS/FAIL\\
+G18&E011 ZIP SHA, source-family filters&Static manifest PASS/FAIL\\
+G19&Stable intrinsic gauge-invariant 3D eigenclock&UNRESOLVED\\
+G4--G11&Physical 3D, PKLSA, CPU and A061 closure&NOT\_APPLICABLE/UNRESOLVED\\\bottomrule\end{longtable}
+Numerical PASS does not imply physics. Invalid source hashes fail closed. Missing genuine dynamics blocks reveal; it does not falsify real physics.
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical error budget}
+D2H differentiates at $2\times10^{-5}a$ and requires $\|\nabla\cdot\mathbf u\|,\|\nabla\times\mathbf u-\boldsymbol\omega\|,\|\rho(\mathbf u\cdot\nabla)\mathbf u+\nabla p\|<3\times10^{-8}$ at interior/exterior points, with $U-\Gamma_H/(5a)<10^{-12}$ and $<5\times10^{-6}$ interface approach jumps. D2N requires independent radial residual $<2\times10^{-5}$ and between-grid profile spread $<6\times10^{-5}$. D2R requires speed relative error $<3\times10^{-8}$; radius ratio held at 40. These are software/model tolerances, not SST physical uncertainty bounds.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend and precision authority}
+NumPy FP64 + SciPy BVP are reference numerical controls only. No C++ native 3D-vortex trajectory, no SYCL certification and no Windows Arc A770 hardware qualification are claimed. DD32 remains SCREENING\_ONLY. A successful Python physics surrogate cannot certify a different backend.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal}
+Framework v1.0.9 generates nonced HMAC blind commitments and verifies immutable science evidence and a final output manifest. The true independent PKLSA mode holdouts do not exist as part of this artifact. Only the analyst-owned private package contains keys/nonces. No eligible physics reveal or post-hoc tuning is allowed.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and source strata}
+All analytic controls are deterministic and correlated; no p-value or significance is assigned. Three numerical radial resolutions or two integrators do not constitute two scientific providers. Historic KnotPlot cannot vote for a physical replication gate. Blind future frequency predictions need independent provider families and a frozen uncertainty metric.
+% SST-REPORT-SECTION:RESULTS
+\section{Automatically recorded v1.0.9 results}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{No official BASIC results available in this build.}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Conclusions and next falsifiers}
+A PASS proves only that the stated numerical implementation reproduces its model's established mathematical identities. Hill supplies a genuine 3D Euler reference; GP supplies a nonlinear radial order parameter reference; neither predicts an intrinsic knot clock. For a later physical release: retrieve and verify original qualified centerlines, initialize finite-core 3D vorticity and pressure, certify long-time Euler/GP dynamics and independent material phase, then freeze an outcome-blind frequency prediction before reading held-out time series. Only then consider A061.
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproduction and publication}
+\begin{verbatim}
+python -m pytest -q tests
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd REPORT_ONLY
+run_pklsa.cmd --topology 3_1
+run_all.cmd REVEAL_IF_ALLOWED
+\end{verbatim}
+This v0.3.0 is a new frozen science contract; v0.2.0 outputs are unchanged.
+\begin{thebibliography}{99}
+\bibitem{Hill} M. J. M. Hill (1894), On a spherical vortex, Phil. Trans. Royal Soc. A.
+\bibitem{Saffman} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press.
+\bibitem{RobertsGrant} P. H. Roberts and J. Grant (1971), Motions in a Bose condensate I: the structure of the large circular vortex, J. Phys. A.
+\bibitem{JonesRoberts} C. A. Jones and P. H. Roberts (1982), Motions in a Bose condensate IV: axisymmetric solitary waves, J. Phys. A.
+\bibitem{E011} SST-Workbench, E011 SKLSA Static-Ready Seed Atlas v0.3.0 (2026), static seed contract.
+\bibitem{SST} SST-69, SST-70, SST-72, user's research manuscripts (2026), model hypotheses not certified physics.
+\end{thebibliography}
+\end{document}

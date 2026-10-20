@@ -1,0 +1,534 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Does a material toroidal surface evolved synchronously with autonomous 3D Euler form an actual vortex tube, and does its full velocity field exhibit a certified relative periodic orbit with an independently calculated Euler tangent/Floquet frequency?",
+  "objective": "Execute genuine Lagrangian material-surface RK4 tracking, require local vorticity tangency and volume transport, search all three velocity components for relative returns over the 24 proper cube rotations and periodic translations, validate the analytic Euler tangent linearization, and condition matrix-free monodromy on validated RPO. Physical PKLSA clock remains UNRESOLVED without convergence and distinct providers.",
+  "null_hypothesis": "H0: current source-initialized Euler dynamics provides no qualified, reproducible material-vortex intrinsic clock; apparent Hilbert phase may be transient deformation, core/mesh artefact or spectral leakage.",
+  "alternative_hypothesis": "H1: after independent material tube, relative periodic orbit and source qualification, the Euler/PKLSA vortex has a coherent recurrent phase stable under mesh, timestep and finite-core changes with a withheld Floquet frequency prediction.",
+  "assumptions": [
+    "A064 original KnotPlot 3_1 source contains uncalibrated coordinates and an unverified physical relaxation; topology label has not independently passed source audit.",
+    "A064 unforced 3D incompressible Euler spectral projection with two-thirds Fourier truncation, RK4, periodic L=2pi computational box and dimensionless circulation gamma=1.",
+    "Geometry is remapped by A064 normalized_components; core regularization is a controllable numerical parameter and is NOT canonically equal to r_c.",
+    "Evolved full 3D velocity is a simulation, not a PKLSA native dynamical provider independent of KnotPlot/A064.",
+    "Measured q_shape and L^2 Z/E are different functionals of the same Euler realization; they are NOT independent experimental sources.",
+    "All historical A064 and A068 preflights are unblinded development evidence. A v1.0.8 BLIND ZIP does not restore epistemic blindness to already inspected sources.",
+    "No Lorentz time law, SST particle mass, SI speed, imposed oscillator frequency or frozen-time A064 eigenfrequency enters Euler right-hand side or phase fit.",
+    "A time-advected toroidal mesh is a material surface by construction, but a vortex tube additionally requires pointwise omega tangent to the surface; net flux zero is not proof.",
+    "Full-state symmetry quotient consists of 3D periodic translations and 24 proper signed permutation cubic rotations; arbitrary SO(3) rotations are not exact symmetries of the cubic periodic lattice.",
+    "RPO candidate search minimizes full-field relative L2 mismatch, but it does not solve a Newton-Krylov periodic shooting boundary-value problem or certify neutral symmetry multipliers.",
+    "The exact A064 tangent linearization is independent of measured q-shape and q-enstrophy phase; matrix-free monodromy/Ritz may run ONLY on a prequalified model RPO candidate.",
+    "A fixed random low-dimensional Ritz subspace is diagnostic; approximate eigenvalues require independent full-space residual and basis refinement before prediction.",
+    "Material geometry and vortex-tube evaluations share one KnotPlot/A064 seed and do not count as independent providers. No SI closure."
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "3D Euler velocity",
+      "si_unit": "m/s if calibrated",
+      "dimensions": "L T^-1"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "curl u",
+      "si_unit": "s^-1 if calibrated",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "L",
+      "meaning": "periodic computational domain length; 2pi in model units",
+      "si_unit": "m if calibrated",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "Gamma",
+      "meaning": "signed source circulation; 1 in model units",
+      "si_unit": "m^2/s if calibrated",
+      "dimensions": "L^2 T^-1"
+    },
+    {
+      "symbol": "a",
+      "meaning": "core smoothing length, variable in model units",
+      "si_unit": "m if calibrated",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "E",
+      "meaning": "volume-mean kinetic energy per unit mass",
+      "si_unit": "m^2/s^2 if calibrated",
+      "dimensions": "L^2 T^-2"
+    },
+    {
+      "symbol": "H",
+      "meaning": "volume-mean helicity",
+      "si_unit": "m/s^2 if calibrated",
+      "dimensions": "L T^-2"
+    },
+    {
+      "symbol": "Z",
+      "meaning": "volume-mean enstrophy",
+      "si_unit": "s^-2 if calibrated",
+      "dimensions": "T^-2"
+    },
+    {
+      "symbol": "C",
+      "meaning": "3D enstrophy-weighted covariance of position",
+      "si_unit": "m^2 if calibrated",
+      "dimensions": "L^2"
+    },
+    {
+      "symbol": "q",
+      "meaning": "rotation/translation-robust scalar shape eigenvalue gap",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "qZ",
+      "meaning": "normalized enstrophy to energy L^2 Z/E",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "phi",
+      "meaning": "measured Hilbert phase, not imposed",
+      "si_unit": "rad",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "Omega",
+      "meaning": "measured phase slope",
+      "si_unit": "rad/s if calibrated",
+      "dimensions": "T^-1"
+    },
+    {
+      "symbol": "X",
+      "meaning": "material tracer position on a closed toroidal surface",
+      "si_unit": "m if calibrated",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "n",
+      "meaning": "outward unit normal to Lagrangian surface",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "T_R",
+      "meaning": "full-field relative return period, not fitted from q",
+      "si_unit": "s if calibrated",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "g",
+      "meaning": "3D translation and proper cubic rotation symmetry",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "M_g",
+      "meaning": "relative monodromy derivative g inverse D Phi^T",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "mu",
+      "meaning": "Floquet multiplier (only meaningful for certified RPO)",
+      "si_unit": "1",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Unforced incompressible 3D Euler in projected Lamb form",
+      "latex": "\\partial_t\\mathbf{u}=\\mathcal{P}[\\mathbf{u}\\times(\\nabla\\times\\mathbf{u})],\\qquad\\nabla\\cdot\\mathbf{u}=0",
+      "inputs": [
+        "u"
+      ],
+      "outputs": [
+        "u(t)"
+      ],
+      "dimensional_check": "Both sides L T^-2; projection is dimensionless."
+    },
+    {
+      "id": "E2",
+      "purpose": "Biot--Savart initialization from source-native line vorticity",
+      "latex": "\\widehat{\\mathbf u}(\\mathbf k,0)=\\frac{i\\mathbf k\\times\\widehat{\\bm\\omega}_a(\\mathbf k)}{|\\mathbf k|^2},\\qquad \\mathbf{k}\\ne0",
+      "inputs": [
+        "native trefoil",
+        "core a",
+        "circulation Gamma"
+      ],
+      "outputs": [
+        "u(0)"
+      ],
+      "dimensional_check": "i k cross omega_hat / k^2 gives velocity dimension L T^-1."
+    },
+    {
+      "id": "E3",
+      "purpose": "Integral diagnostics energy, helicity, enstrophy",
+      "latex": "E=\\frac{1}{2V}\\int_V|\\mathbf u|^2dV,\\quad H=\\frac1V\\int_V\\mathbf u\\cdot\\bm\\omega\\,dV,\\quad Z=\\frac{1}{2V}\\int_V|\\bm\\omega|^2dV",
+      "inputs": [
+        "u(t)",
+        "omega(t)"
+      ],
+      "outputs": [
+        "E",
+        "H",
+        "Z"
+      ],
+      "dimensional_check": "E: L^2 T^-2; H: L T^-2; Z: T^-2."
+    },
+    {
+      "id": "E4",
+      "purpose": "Rotation-invariant shape observable from full 3D vorticity",
+      "latex": "q_{\\rm sh}(t)=\\frac{\\lambda_1[C(t)]-\\lambda_2[C(t)]}{\\operatorname{tr}C(t)}",
+      "inputs": [
+        "omega(t)",
+        "3D weighted covariance C"
+      ],
+      "outputs": [
+        "q"
+      ],
+      "dimensional_check": "Eigenvalue difference and covariance trace both L^2."
+    },
+    {
+      "id": "E5",
+      "purpose": "Distinct dimensionless scalar flow functional",
+      "latex": "q_Z(t)=\\frac{L^2 Z(t)}{E(t)}",
+      "inputs": [
+        "L",
+        "E",
+        "Z"
+      ],
+      "outputs": [
+        "qZ"
+      ],
+      "dimensional_check": "L^2 times T^-2 divided by L^2 T^-2 = 1."
+    },
+    {
+      "id": "E6",
+      "purpose": "Signal-derived Hilbert phase and frequency without injection",
+      "latex": "\\phi_q(t)=\\operatorname{unwrap}\\arg\\bigl(q-\\overline{q}+i\\mathcal{H}[q-\\overline{q}]\\bigr),\\qquad\\widehat\\Omega_q=\\operatorname{slope}_{t\\in W}\\phi_q(t)",
+      "inputs": [
+        "q",
+        "qZ",
+        "time"
+      ],
+      "outputs": [
+        "phi",
+        "Omega"
+      ],
+      "dimensional_check": "q and phase dimensionless, Omega T^-1."
+    },
+    {
+      "id": "E7",
+      "purpose": "Noncommuting temporal, spatial and core convergence probes",
+      "latex": "\\delta_Z(A,B)=\\frac{|Z_A(T)-Z_B(T)|}{\\max(|Z_B(T)|,\\epsilon_Z)}",
+      "inputs": [
+        "Z_A",
+        "Z_B"
+      ],
+      "outputs": [
+        "relative refinement error"
+      ],
+      "dimensional_check": "Ratio of two enstrophy magnitudes dimensionless; epsilon_Z must have same units as Z."
+    },
+    {
+      "id": "E8",
+      "purpose": "Synchronous Lagrangian advection",
+      "latex": "\\dot{\\mathbf X}=\\mathbf u(\\mathbf X,t)",
+      "inputs": [
+        "u(t)",
+        "surface X(t)"
+      ],
+      "outputs": [
+        "material mesh X(t)"
+      ],
+      "dimensional_check": "Both sides L T^-1."
+    },
+    {
+      "id": "E9",
+      "purpose": "Vortex-tube tangency and numerical material volume",
+      "latex": "\\eta_{\\omega}=\\frac{1}{A}\\int_{S}\\frac{|\\bm\\omega\\cdot\\mathbf n|}{\\max(|\\bm\\omega|,\\varepsilon_{\\omega})}\\,dA,\\qquad\\delta_V=\\frac{|V(t)-V(0)|}{|V(0)|}",
+      "inputs": [
+        "omega",
+        "surface mesh",
+        "surface normal"
+      ],
+      "outputs": [
+        "omega surface tangency",
+        "material volume drift"
+      ],
+      "dimensional_check": "Dimensionless ratios; excludes inference from net closed-surface flux."
+    },
+    {
+      "id": "E10",
+      "purpose": "Full-field relative-periodic shooting residual",
+      "latex": "r_{\\rm RPO}(T,g)=\\frac{\\|\\mathbf u(T)-g\\mathbf u(0)\\|_{L^2(V)}}{\\|\\mathbf u(0)\\|_{L^2(V)}},\\quad g\\in\\mathbb T^3\\rtimes O^{+}_{\\rm cube}",
+      "inputs": [
+        "u(t)",
+        "spatial symmetry group"
+      ],
+      "outputs": [
+        "full 3D RPO candidate"
+      ],
+      "dimensional_check": "Same velocity dimensions cancel; T has dimensions of time."
+    },
+    {
+      "id": "E11",
+      "purpose": "Euler tangent equation for independent monodromy",
+      "latex": "\\dot{\\delta\\mathbf u}=\\mathcal P[\\delta\\mathbf u\\times\\bm\\omega+\\mathbf u\\times(\\nabla\\times\\delta\\mathbf u)]",
+      "inputs": [
+        "u",
+        "delta u"
+      ],
+      "outputs": [
+        "delta u(t)"
+      ],
+      "dimensional_check": "Each side L T^-2."
+    },
+    {
+      "id": "E12",
+      "purpose": "Relative monodromy and Floquet frequency",
+      "latex": "M_g=g^{-1}D\\Phi^{T_R}(\\mathbf u_0),\\quad M_g v=\\mu v,\\quad\\Omega_F=|\\arg\\mu|/T_R",
+      "inputs": [
+        "prequalified RPO T",
+        "g",
+        "tangent field"
+      ],
+      "outputs": [
+        "mu",
+        "Omega_F"
+      ],
+      "dimensional_check": "M and mu dimensionless; Omega_F dimension T^-1. Period cannot be fitted from scalar phase."
+    },
+    {
+      "id": "E13",
+      "purpose": "Full-vector Ritz eigen-residual",
+      "latex": "\\epsilon_F=\\frac{\\|M_g v-\\mu v\\|_{L^2}}{\\|M_g v\\|_{L^2}}",
+      "inputs": [
+        "M_g",
+        "v",
+        "mu"
+      ],
+      "outputs": [
+        "epsilon_F"
+      ],
+      "dimensional_check": "Ratio dimensionless, computed on full 3D tangent field."
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Euler energy and helicity drift, divergence, CFL and nontrivial velocity evolution",
+      "equation_refs": [
+        "E1",
+        "E3"
+      ],
+      "unit": "dimensionless screening ratios"
+    },
+    {
+      "id": "O2",
+      "definition": "Full box enstrophy-covariance gap qshape from evolved 3D velocity snapshots",
+      "equation_refs": [
+        "E4"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O3",
+      "definition": "Full-box dimensionless enstrophy-energy ratio qZ from evolved velocity",
+      "equation_refs": [
+        "E3",
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O4",
+      "definition": "Hilbert phase cycles, phase-fit RMS, instantaneous-frequency CV and cross-observable consistency",
+      "equation_refs": [
+        "E6"
+      ],
+      "unit": "rad / time unit"
+    },
+    {
+      "id": "O5",
+      "definition": "Differences in final enstrophy for n16/n24, dt/dt2, and core .32/.48",
+      "equation_refs": [
+        "E7"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Hash 6 source files and exact A064 solver copy, reject mutations",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Unblind method controls positive oscillator, rigid rotation and beating; preserve as method-only",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S3",
+      "operation": "Normalize unchanged native XYZ into periodic 2pi cube; deposit signed circulation; apply Gaussian finite-core and transverse Leray projection",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S4",
+      "operation": "Run genuine unforced spectral 3D Euler/RK4 trajectory to T=20, n16 dt.04 with 251 snapshots; compute energy/helicity/CFL/divergence",
+      "formula_refs": [
+        "E1",
+        "E3"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S5",
+      "operation": "Compute independent functionals qshape and qZ from evolved 3D fields then Hilbert phase, no oscillator injected",
+      "formula_refs": [
+        "E4",
+        "E5",
+        "E6"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S6",
+      "operation": "Rerun n24, n16 dt=.02 and two finite-core branches (.32,.48) to fixed T, report differences even when science gate G5 is blocked",
+      "formula_refs": [
+        "E1",
+        "E7"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S7",
+      "operation": "Do not mark G3 terminal without qualified material tube and relative periodic orbit; do not turn unresolved into fail",
+      "formula_refs": [
+        "E4",
+        "E6"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S8",
+      "operation": "Register future independent Euler/Floquet frequency on a withheld provider before running G4-G8",
+      "formula_refs": [
+        "E1",
+        "E6"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S9",
+      "operation": "Create a closed toroidal polygon mesh from original native trefoil, pre-register radius, sections and sides; keep separate from vortex qualification.",
+      "formula_refs": [
+        "E8",
+        "E9"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S10",
+      "operation": "Evolve material mesh nodes with RK4 positions synchronized to same Euler intermediate stages and evaluate volume and omega-normal diagnostics at all snapshots.",
+      "formula_refs": [
+        "E1",
+        "E8",
+        "E9"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S11",
+      "operation": "Search full 3-component Euler velocity-field return under translations and proper cubic rotations; report minimum residual without scalar phase fit.",
+      "formula_refs": [
+        "E10"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S12",
+      "operation": "Independently compare analytic Euler tangent derivative to centered finite difference and validate manufactured two-mode Floquet operator oracle.",
+      "formula_refs": [
+        "E11",
+        "E12"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S13",
+      "operation": "Only on RPO plus tube screening PASS calculate a finite low-rank relative monodromy Ritz screen with full-state residuals; never claim convergence/physics without shooting and grid/provider gates.",
+      "formula_refs": [
+        "E11",
+        "E12",
+        "E13"
+      ],
+      "gate": "G4"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "If E drift >=1e-5 or helicity drift >=1e-4 or divergence >=1e-9 or CFL >=.25 or dynamics unchanged, G2 FAIL numerical, not physical",
+      "conclusion_if_met": "FAIL_NUMERICAL_ONLY"
+    },
+    {
+      "id": "F2",
+      "criterion": "If full-field 3D material tube and RPO are not independently qualified, G3 UNRESOLVED regardless of Hilbert phase",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F3",
+      "criterion": "Physical clock positive only after >=6 clean cycles from two distinct functionals, RMS <.20rad, CV <.12, cross-frequency difference <.03, withheld operator frequency and three-axis convergence checks; none sufficient alone",
+      "conclusion_if_met": "PASS_ONLY_IF_ALL_PRIORS_PASS"
+    },
+    {
+      "id": "F4",
+      "criterion": "Spatial relative final-Z >=.025 or finite-core response >=.05 is model-screen nonconvergence, not blanket SST falsification",
+      "conclusion_if_met": "SCREEN_FAIL_NUMERICAL_MODEL"
+    },
+    {
+      "id": "F-MATERIAL",
+      "criterion": "Material-volume relative drift <0.05 and area-weighted vorticity tangency mean <0.05 with maximum <0.10 at all retained snapshots; otherwise material-tube qualification blocked.",
+      "conclusion_if_met": "METHOD_SCREEN_ONLY"
+    },
+    {
+      "id": "F-RPO",
+      "criterion": "Full 3D relative L2 return residual <0.025 plus repeated-shooting and independent refinement; a single candidate below threshold never counts as certified RPO.",
+      "conclusion_if_met": "CONDITIONAL_MODEL_ONLY"
+    },
+    {
+      "id": "F-FLOQUET",
+      "criterion": "True matrix-free Euler tangent monodromy eigenpair, basis-refinement and full-state residual <0.05, with frozen withheld phase frequency agreement; absent RPO means NOT_EXECUTED.",
+      "conclusion_if_met": "CONDITIONAL_MODEL_ONLY"
+    }
+  ],
+  "edge_cases": [
+    "Monotonic/transient q can create spurious Hilbert phase",
+    "A rotating 3D vortex need not alter rotationally invariant shape tensor",
+    "Periodic cube disallows arbitrary rigid rotations as physical symmetries",
+    "Even excellent E,H conservation does not imply spatial convergence or material confinement",
+    "The geometry is an initial condition, not source-native time-resolved PKLSA dynamics",
+    "Do not interpret material tube advected by interpolation as an exact vortex tube.",
+    "One short transient relative return does not close an RPO boundary-value problem.",
+    "Ritz 5-vector subspace without convergence cannot be promoted to a Floquet frequency.",
+    "No independent native provider, SI time calibration, or physical SST/relativity claim."
+  ],
+  "predictions": [
+    "Actual evolved velocity differs from t0 without enforced phase input",
+    "Enstrophy may increase while energy/helicity conserve",
+    "Current historical single-provider source cannot close physical clock/reveal gates"
+  ]
+}

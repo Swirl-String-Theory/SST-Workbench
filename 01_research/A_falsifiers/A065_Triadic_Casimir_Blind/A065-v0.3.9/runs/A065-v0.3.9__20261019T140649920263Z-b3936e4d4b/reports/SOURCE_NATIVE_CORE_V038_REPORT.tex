@@ -1,0 +1,33 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable}
+\title{A065 v0.3.8: Source-Native Vorticity Core Closure\\\large Numerical Preparation -- Not Physical Certification}
+\date{2026-10-19}
+\begin{document}\maketitle
+\section*{Explicitly assumed smooth tube}
+\begin{align}
+G_a(R)&=\frac{e^{-R^2/a^2}}{\pi^{3/2}a^3},\\
+\boldsymbol\omega(\mathbf x)&=\Gamma\oint_C G_a(|\mathbf x-\mathbf X(s)|)\,d\mathbf X(s),\\
+\Gamma_\perp&=\int_\Sigma \boldsymbol\omega\cdot\mathbf t\,dA,\quad
+Z_\perp=\int_\Sigma (\boldsymbol\omega\cdot\mathbf t)^2\,dA,\\
+a_G&=\frac{|\Gamma_\perp|}{\sqrt{2\pi Z_\perp}}.
+\end{align}
+The last formula is Gaussian-model-conditional and is not an SST core derivation.
+\section*{Periodic numerical reconstruction}
+\begin{align}
+\hat{\mathbf u}(\mathbf k)&=\frac{i\mathbf k\times\hat{\boldsymbol\omega}(\mathbf k)}{|\mathbf k|^2},\quad \mathbf k\neq0,\\
+\nabla^2p&=-\rho\,\partial_i u_j\,\partial_j u_i,\quad \langle p\rangle=0.
+\end{align}
+These equations use periodic boundaries and do not solve the time-dependent Euler PDE.
+\section*{Gate results}
+\begin{tabular}{ll}\toprule Gate & Status \\\midrule
+G28 & PASS \
+G29 & FAIL \
+G30 & PASS \
+G31 & FAIL \
+G32 & UNRESOLVED\_NO\_AUTHENTICATED\_SOURCE\_NATIVE\_DYNAMIC\_FIELD \
+\bottomrule
+\end{tabular}
+\section*{Interpretation}
+A generated 3D Gaussian vorticity field is only a software control, not a measured source-native 3D Euler field. Transverse planes that fail flux-sign or non-axial-vorticity gates are invalid for core inference. Heldout pressure and velocity are dependent numerical diagnostics. Claims of physical SST core, Casimir, gravity remain unresolved.
+\end{document}

@@ -1,1 +1,1 @@
-Knot datasets: ideal, Fourier, KAtlas, KnotPlot, twist knots.
+Knot datasets: ideal, Fourier, KAtlas, Knotinfo, KnotPlot.

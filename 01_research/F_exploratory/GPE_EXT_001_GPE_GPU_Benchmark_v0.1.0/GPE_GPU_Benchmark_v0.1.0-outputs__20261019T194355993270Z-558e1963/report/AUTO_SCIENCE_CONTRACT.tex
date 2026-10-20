@@ -1,0 +1,36 @@
+% AUTO-GENERATED. Do not edit; generated from frozen science_contract.json.
+\subsection*{Machine-readable science contract}
+\begin{description}
+\item[Research question] Can a periodic dimensionless Gross-Pitaevskii equation split-step Fourier solver reproduce exact and convergent reference dynamics on independent NumPy FP64 and Intel Arc XPU FP32 implementations?
+\item[Objective] Certify numerical checks and XPU screening only; archive downloaded external processed-observable data with provenance. No SST/Euler/PKLSA physical equivalence is asserted.
+\item[$H_0$] At least one preregistered numerical reference or convergence criterion fails; GPE solver numerical qualification is denied.
+\item[$H_1$] All completed CPU reference checks and the temporal convergence check satisfy their independently specified thresholds; optional Intel XPU screening also satisfies parity thresholds.
+\end{description}
+\subsubsection*{Registered equations}
+\paragraph{E1: Continuous dimensionless conservative GPE}
+\begin{equation}
+i\,\partial_t\psi=-\frac12\nabla^2\psi+g(|\psi|^2-n_0)\psi
+\end{equation}
+\noindent\textit{Dimensional check:} All variables dimensionless after xSI/L0 and tSI/T0 normalization\\
+\paragraph{E2: Exact periodic plane wave reference}
+\begin{equation}
+\psi=Ae^{i(\mathbf{k}\cdot\mathbf{x}-\omega t)},\quad\omega=|\mathbf{k}|^2/2+g(A^2-n_0)
+\end{equation}
+\noindent\textit{Dimensional check:} omega and all exponents dimensionless\\
+\paragraph{E3: Relative complex L2 error}
+\begin{equation}
+\epsilon_{2}=\|\psi_{\rm candidate}-\psi_{\rm reference}\|_2/\|\psi_{\rm reference}\|_2
+\end{equation}
+\noindent\textit{Dimensional check:} Ratio of equal-dimension norms is dimensionless\\
+\paragraph{E4: Measured temporal order}
+\begin{equation}
+p=\log_2(\epsilon_{\Delta t}/\epsilon_{\Delta t/2})
+\end{equation}
+\noindent\textit{Dimensional check:} Logarithm of dimensionless error ratio\\
+\subsubsection*{Registered code-to-mathematics steps}
+\begin{enumerate}
+\item \textbf{S1} [G1; equations E1]: Retrieve Zenodo public source and verify published MD5 and all ZIP member CRC
+\item \textbf{S2} [G2; equations E1, E2, E3]: Propagate exact plane wave and reverse a nonuniform complex field using NumPy FP64
+\item \textbf{S3} [G3; equations E1, E3, E4]: Split-step dt refinement at fixed final time with independent fine-step surrogate
+\item \textbf{S4} [G6; equations E1, E3]: Propagate same initial field using Intel XPU complex64 and compare to independent NumPy complex128
+\end{enumerate}

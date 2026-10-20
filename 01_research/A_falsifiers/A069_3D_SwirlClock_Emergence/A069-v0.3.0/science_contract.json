@@ -1,0 +1,509 @@
+{
+  "alternative_hypothesis": "In a future preregistered DYNAMICS_READY holdout, a gauge-invariant recurring phase and blind predicted frequency converge and match across at least two truly independent physical provider families.",
+  "assumptions": [
+    "D1 is unbounded affine, infinite-energy Euler exact solution used for numerical validation ONLY.",
+    "Incompressible inviscid barotropic Euler with no reconnection and material loop for Kelvin theorem.",
+    "External torsion/clock factor sqrt(1-u^2/c^2) is not used as source, label, parameter or loss.",
+    "Source-qualified E011 STATIC_READY geometry is NOT DYNAMICS_READY.",
+    "Do not infer physical temporal mode from arbitrary local fluid vorticity or numerical mesh spin.",
+    "Older KnotPlot relaxed exports and old VortexLab proxies are only historical negative context, never production input.",
+    "D2A is exact columnar (2D-in-3D) steady Euler, finite energy PER AXIAL LENGTH only; global 3D kinetic energy diverges.",
+    "No phase-velocity-to-proper-time identification, no self-confinement or persistent 3D knotted dynamics in D2A.",
+    "Framework v1.0.9 Windows Arc A770 precision parity is pending.",
+    "Hill is a translating steady 3D Euler solution in a comoving frame with compact vorticity support and an external uniform flow, not a knot.",
+    "Dimensionless GP radial vortex is a straight column with global U(1) gauge redundancy and no inferred atomic clock.",
+    "Roberts-Grant alpha=1.615 and beta=.615 are thin-ring reference coefficients; R/a>>1 required; phi closure is conjectural.",
+    "E011 STATIC_READY is never DYNAMICS_READY; KnotPlot relaxed family excluded from admissible providers despite E011 cross-provider robustness."
+  ],
+  "edge_cases": [
+    "a=0 analytic continuity; a negative axisymmetric expansion; rotating-frame sign and magnitude; zero azimuthal motion; no temporal unwrap ambiguity; RK4 machine-floor order; unbounded affine infinite energy; absent PKLSA files; missing independent providers",
+    "Columnar flow has finite kinetic energy only per unit axial length, not full three-dimensional localized finite energy.",
+    "D2A signed total angular motion is a Cartesian tracer angle; it is NOT an independently selected knot eigenfrequency.",
+    "Mass or Compton time appears nowhere in new numerical controls.",
+    "Global NLS phase changes are not operational time measurements.",
+    "No source reconstructs a volumetric finite-core knotted Euler/NLS dynamic state.",
+    "E011 source locator hash does not mean original geometry file byte verification."
+  ],
+  "equations": [
+    {
+      "dimensional_check": "m^2/s on both sides",
+      "id": "E1",
+      "inputs": [
+        "u",
+        "R",
+        "Omega"
+      ],
+      "latex": "\\Gamma=\\oint_{C(T)}\\mathbf{u}\\cdot d\\mathbf{\\ell}=2\\pi R(T)^2\\Omega(T)",
+      "outputs": [
+        "Gamma"
+      ],
+      "purpose": "Kelvin"
+    },
+    {
+      "dimensional_check": "1/s times m gives m/s",
+      "id": "E2",
+      "inputs": [
+        "a",
+        "Omega0",
+        "T",
+        "x"
+      ],
+      "latex": "\\mathbf{u}=A(T)\\mathbf{x},\\quad A=\\begin{pmatrix}-a/2&-\\Omega&0\\\\\\Omega&-a/2&0\\\\0&0&a\\end{pmatrix},\\quad \\dot\\Omega=a\\Omega",
+      "outputs": [
+        "u"
+      ],
+      "purpose": "Exact affine 3D Euler"
+    },
+    {
+      "dimensional_check": "1/s",
+      "id": "E3",
+      "inputs": [
+        "Omega0",
+        "a",
+        "T",
+        "Gamma",
+        "R"
+      ],
+      "latex": "\\Omega(T)=\\Omega_0e^{aT}=\\Gamma/[2\\pi R(T)^2]",
+      "outputs": [
+        "Omega"
+      ],
+      "purpose": "First-principles analytic control frequency (not knot clock)"
+    },
+    {
+      "dimensional_check": "dimensionless",
+      "id": "E4",
+      "inputs": [
+        "Omega0",
+        "a",
+        "T"
+      ],
+      "latex": "\\theta(T)=\\int_0^T \\Omega(s)ds=\\Omega_0\\operatorname{expm1}(aT)/a",
+      "outputs": [
+        "theta"
+      ],
+      "purpose": "Tracer phase"
+    },
+    {
+      "dimensional_check": "1/s",
+      "id": "E5",
+      "inputs": [
+        "omega_rel",
+        "Omega_frame"
+      ],
+      "latex": "\\boldsymbol{\\omega}_{abs}=\\boldsymbol{\\omega}_{rel}+2\\boldsymbol{\\Omega}_{frame}",
+      "outputs": [
+        "omega_abs"
+      ],
+      "purpose": "Rotating reference frame identity"
+    },
+    {
+      "dimensional_check": "kg m^-3 s^-2",
+      "id": "E6",
+      "inputs": [
+        "A",
+        "a",
+        "Omega",
+        "rho"
+      ],
+      "latex": "\\nabla\\nabla p=-\\rho\\,\\operatorname{sym}(\\dot{A}+A^2)",
+      "outputs": [
+        "hessian(p)"
+      ],
+      "purpose": "Euler pressure Hessian analytic control"
+    },
+    {
+      "dimensional_check": "[C]=1/s, [u_theta]=m/s, [omega_z]=1/s",
+      "id": "E7",
+      "inputs": [
+        "C",
+        "r",
+        "a"
+      ],
+      "latex": "u_\\theta(r)=C r e^{-(r/a)^2},\\quad \\omega_z(r)=2C(1-r^2/a^2)e^{-(r/a)^2}",
+      "outputs": [
+        "u_theta",
+        "omega_z"
+      ],
+      "purpose": "Exact smooth finite-core columnar Euler flow"
+    },
+    {
+      "dimensional_check": "Pa/m = (kg/m^3)(m)(s^-2)",
+      "id": "E8",
+      "inputs": [
+        "rho",
+        "r",
+        "C",
+        "a"
+      ],
+      "latex": "\\partial_r p=\\rho r C^2 e^{-2r^2/a^2}",
+      "outputs": [
+        "pressure_gradient"
+      ],
+      "purpose": "Stationary Euler pressure balance"
+    },
+    {
+      "dimensional_check": "dimensionless phase from 1/s times s",
+      "id": "E9",
+      "inputs": [
+        "u",
+        "T",
+        "r0",
+        "a"
+      ],
+      "latex": "\\dot{\\mathbf{x}}=\\mathbf{u}(\\mathbf{x}),\\quad \\theta_{\\mathrm{pred}}(T)=C e^{-(r_0/a)^2}T",
+      "outputs": [
+        "theta"
+      ],
+      "purpose": "Independent material tracer phase check"
+    },
+    {
+      "dimensional_check": "A_H [m^-1 s^-1] * s [m] => [s^-1], a^2*A_H => [m s^-1]",
+      "id": "E15",
+      "inputs": [
+        "a",
+        "A_H"
+      ],
+      "latex": "\\omega_\\phi = A_H s\\; (r<a),\\quad U_H=\\frac{2}{15}a^2 A_H=\\frac{\\Gamma_H}{5a}",
+      "outputs": [
+        "omega_phi",
+        "U_H"
+      ],
+      "purpose": "Hill exact vorticity and propagation identity"
+    },
+    {
+      "dimensional_check": "All terms dimensionless in healing-length and inverse-chemical-potential time units.",
+      "id": "E16",
+      "inputs": [
+        "r",
+        "m=1",
+        "f(0)=0",
+        "f(rmax)=1"
+      ],
+      "latex": "-\\frac12\\left(f^{\\prime\\prime}+\\frac{f^\\prime}{r}-\\frac{f}{r^2}\\right)+(f^2-1)f=0",
+      "outputs": [
+        "f(r)"
+      ],
+      "purpose": "Stationary 2D GP m=1 vortex radial boundary problem"
+    },
+    {
+      "dimensional_check": "E [kg m^2 s^-2]; P [kg m s^-1]; dE/dP [m s^-1].",
+      "id": "E17",
+      "inputs": [
+        "R",
+        "a(R)",
+        "rho",
+        "Gamma",
+        "alpha_ring"
+      ],
+      "latex": "E=\\frac12\\rho\\Gamma^2R(\\ln(8R/a)-\\alpha),\\quad P=\\rho\\Gamma\\pi R^2,\\quad U=\\frac{dE}{dP}",
+      "outputs": [
+        "U",
+        "beta_ring"
+      ],
+      "purpose": "Energy impulse velocity law, with core-size derivative explicitly constrained"
+    },
+    {
+      "dimensional_check": "Logical equality/selection; no physical frequency dimensions.",
+      "id": "E18",
+      "inputs": [
+        "E011 archive SHA",
+        "atlas anchor metadata"
+      ],
+      "latex": "\\mathrm{accept}_{\\rm static}=\\mathrm{SHA256}_{\\rm pinned}\\land\\mathrm{PRIMARY}\\land\\mathrm{capabilities}\\land\\neg\\mathrm{legacy}",
+      "outputs": [
+        "eligible static carriers"
+      ],
+      "purpose": "E011 static gate with immutable hash and legacy family exclusion"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Any D1 analytic identity residual > 2e-12 OR RK4 tracer phase error > 1e-7 rad",
+      "id": "F1"
+    },
+    {
+      "conclusion_if_met": "UNRESOLVED",
+      "criterion": "No DYNAMICS_READY full 3D trajectory or no physical phase observable",
+      "id": "F2"
+    },
+    {
+      "conclusion_if_met": "FAIL",
+      "criterion": "Any physical rate prediction uses desired Lorentz-factor, clock law, unqualified legacy geometry or withheld labels as inputs",
+      "id": "F3"
+    },
+    {
+      "conclusion_if_met": "PASS_ANALYTIC_ONLY",
+      "criterion": "Hill divergence,curl,Euler residual each <3e-8 and U=Gamma/(5a) error <1e-12; boundary jumps <5e-6",
+      "id": "F15"
+    },
+    {
+      "conclusion_if_met": "PASS_ANALYTIC_ONLY",
+      "criterion": "GP independent radial residual <2e-5 and profile resolution delta <6e-5; finite-box m=1",
+      "id": "F16"
+    },
+    {
+      "conclusion_if_met": "PASS_ANALYTIC_ONLY",
+      "criterion": "Both thin-ring beta laws recover dE/dP with relative error <3e-8 at R/a=40",
+      "id": "F17"
+    },
+    {
+      "conclusion_if_met": "PASS_STATIC_MANIFEST_ONLY",
+      "criterion": "E011 archive byte hash equals immutable expected SHA, exactly eligible Gilbert provider for 3_1, legacy KnotPlot excluded, dynamics=false",
+      "id": "F18"
+    }
+  ],
+  "null_hypothesis": "No independently identified and converged 3D physical internal phase-frequency closure exists from supplied sources.",
+  "objective": "Extend reference numerics to genuinely 3D exact Hill Euler and correctly normalized GP radial vortex while adding provenance-qualified E011 static adapter. Never promote exact controls, gross phase or static topology into physical clock evidence.",
+  "observables": [
+    {
+      "definition": "maximum normalized conservation/Euler identity residual",
+      "equation_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E5",
+        "E6"
+      ],
+      "id": "O1",
+      "unit": "1"
+    },
+    {
+      "definition": "Cartesian material marker phase error (radians), not independent SST particle clock",
+      "equation_refs": [
+        "E2",
+        "E4"
+      ],
+      "id": "O2",
+      "unit": "rad"
+    },
+    {
+      "definition": "future D2/D3 internal mode phase slope and physical uncertainty",
+      "equation_refs": [
+        "E2"
+      ],
+      "id": "O3",
+      "unit": "rad/s"
+    },
+    {
+      "definition": "Max divergence, pressure and curl residuals Hill interior/exterior; gamma/5a speed identity",
+      "equation_refs": [
+        "E15"
+      ],
+      "id": "O15",
+      "unit": "SI-normalized"
+    },
+    {
+      "definition": "Independently finite-differenced radial GP stationary residual and resolution comparison",
+      "equation_refs": [
+        "E16"
+      ],
+      "id": "O16",
+      "unit": "dimensionless"
+    },
+    {
+      "definition": "Finite-difference dE/dP versus thin-ring propagation formula for two core-radius laws",
+      "equation_refs": [
+        "E17"
+      ],
+      "id": "O17",
+      "unit": "m/s"
+    },
+    {
+      "definition": "Static E011 eligible providers excluding historical KnotPlot; physical qualification remains false",
+      "equation_refs": [
+        "E18"
+      ],
+      "id": "O18",
+      "unit": "count"
+    }
+  ],
+  "predictions": [
+    "D1 only: omega proportional 1/R^2 (Kelvin exact control), no clock physics implied",
+    "D2/D3 prediction and thresholds reserved for new freeze before looking at experimental/held-out time series",
+    "When a new qualified 3D PKLSA Euler dynamic provider becomes available, fix a physical phase observable and blind holdout before trying rate predictions.",
+    "A future DYNAMICS_READY knot eigenmode predicted frequency must be robust to background frame and U(1) phase.",
+    "Future thick-core NLS should be solved numerically and not inferred by extrapolating R/a=40 ring asymptotics."
+  ],
+  "research_question": "Can full, independently qualified 3D vortex dynamics predict a gauge-invariant stable internal phase frequency from initial Euler/NLS fields alone (without Compton, Lorentz, delay input)? v0.3 tests only exact Hill Euler, radial GP and thin-ring asymptotic controls and SHA-verified E011 static eligibility.",
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "steps": [
+    {
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1",
+      "id": "S0",
+      "operation": "Audit provenance and refuse old relaxed KnotPlot/VortexLab data"
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E6"
+      ],
+      "gate": "G2",
+      "id": "S1",
+      "operation": "Construct divergence-free affine Euler reference and exact pressure Hessian"
+    },
+    {
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E5"
+      ],
+      "gate": "G2",
+      "id": "S2",
+      "operation": "Check Kelvin loop transport and rotating reference decomposition"
+    },
+    {
+      "formula_refs": [
+        "E2",
+        "E4"
+      ],
+      "gate": "G3",
+      "id": "S3",
+      "operation": "Integrate Cartesian material tracer with RK4 and midpoint, calculate phase via atan2 unwrap"
+    },
+    {
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G4",
+      "id": "S4",
+      "operation": "Require true 3D finite-core dynamic certification before PKLSA prediction and reveal"
+    },
+    {
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G14",
+      "id": "S12",
+      "operation": "Load previous D1 raw JSON and compare SHA-256 with fixed signed baseline"
+    },
+    {
+      "formula_refs": [
+        "E7",
+        "E8"
+      ],
+      "gate": "G12",
+      "id": "S13",
+      "operation": "Use smooth columnar Euler exact field to calculate pressure gradient and vorticity with independent Cartesian finite differences"
+    },
+    {
+      "formula_refs": [
+        "E7",
+        "E9"
+      ],
+      "gate": "G13",
+      "id": "S14",
+      "operation": "Evolve Cartesian Lagrangian tracers with midpoint/RK4 at 160/320/640 steps and compare measured azimuth with analytic Euler prediction without introducing any clock factor"
+    },
+    {
+      "formula_refs": [
+        "E15"
+      ],
+      "gate": "G15",
+      "id": "S15",
+      "operation": "Compute exact interior/exterior Hill flow, check Euler residual and boundary continuity"
+    },
+    {
+      "formula_refs": [
+        "E16"
+      ],
+      "gate": "G16",
+      "id": "S16",
+      "operation": "Solve GP radial BVP at two radial grids, differentiate with separate stencil, audit phase-gauge null"
+    },
+    {
+      "formula_refs": [
+        "E17"
+      ],
+      "gate": "G17",
+      "id": "S17",
+      "operation": "Differentiate thin-ring E(R) numerically and compare v=dE/dP to beta laws under frozen core kinematics"
+    },
+    {
+      "formula_refs": [
+        "E18"
+      ],
+      "gate": "G18",
+      "id": "S18",
+      "operation": "SHA256 lock E011 atlas ZIP and select provider anchors by capability; reject KnotPlot and mark dynamics unresolved"
+    }
+  ],
+  "symbols": [
+    {
+      "dimensions": "T",
+      "meaning": "absolute simulation time",
+      "si_unit": "s",
+      "symbol": "T"
+    },
+    {
+      "dimensions": "L",
+      "meaning": "radius of Lagrangian material loop",
+      "si_unit": "m",
+      "symbol": "R"
+    },
+    {
+      "dimensions": "T^-1",
+      "meaning": "physical angular tracer rate in positive analytic control",
+      "si_unit": "rad/s",
+      "symbol": "Omega"
+    },
+    {
+      "dimensions": "T^-1",
+      "meaning": "fluid vorticity curl u",
+      "si_unit": "1/s",
+      "symbol": "omega"
+    },
+    {
+      "dimensions": "L^2 T^-1",
+      "meaning": "Kelvin circulation integral",
+      "si_unit": "m^2/s",
+      "symbol": "Gamma"
+    },
+    {
+      "dimensions": "T^-1",
+      "meaning": "extensional strain rate",
+      "si_unit": "1/s",
+      "symbol": "a"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "material tracer accumulated azimuth in analytic D1",
+      "si_unit": "rad",
+      "symbol": "theta"
+    },
+    {
+      "dimensions": "L^-1 T^-1",
+      "meaning": "Hill azimuthal vorticity coefficient, omega_phi=A_H*s",
+      "si_unit": "1/(m s)",
+      "symbol": "A_H"
+    },
+    {
+      "dimensions": "L T^-1",
+      "meaning": "Hill translating speed",
+      "si_unit": "m/s",
+      "symbol": "U_H"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "dimensionless GP order parameter",
+      "si_unit": "1",
+      "symbol": "Psi_GP"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "dimensionless vortex energy core constant",
+      "si_unit": "1",
+      "symbol": "alpha_ring"
+    },
+    {
+      "dimensions": "1",
+      "meaning": "dimensionless vortex speed core constant",
+      "si_unit": "1",
+      "symbol": "beta_ring"
+    }
+  ]
+}

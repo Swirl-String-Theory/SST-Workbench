@@ -1,0 +1,1 @@
+A069 v0.5.0: actual 3D GP trefoil dynamics and independent bulk/tangent mode CONTROLS. For scientific limits and commands see docs/SCIENCE_V050.md. Requires shared framework v1.0.9. No physical clock is claimed.

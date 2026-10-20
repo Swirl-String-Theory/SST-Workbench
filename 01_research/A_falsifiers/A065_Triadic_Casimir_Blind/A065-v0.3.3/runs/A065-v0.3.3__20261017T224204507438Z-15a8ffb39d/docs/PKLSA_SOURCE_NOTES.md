@@ -1,0 +1,5 @@
+# PKLSA geometry source and numerical diagnostic
+
+Upstream Drive item: `1iOeQe6-jHcBk_NYNwZe3e-N2DQPwohmI`, in the existing KnotPlot-relaxed trefoil family. Geometry is a real 300-point export; it is bundled with its exact byte-hash in `D01_EULER/pklsa` and recomputed every run.
+
+The segment Biot–Savart evaluation uses a regularized midpoint quadrature with Gamma=1 and epsilon=0.12 in raw geometry units; this choice is a numeric *diagnostic*, not a calibrated SST core radius. Points are subsampled to 75, 150 and 300 for resolution sensitivity, and first velocity derivatives are estimated by central difference for the Euler pressure-Poisson source. No time integration, incompressible wall pressure boundary solve, topological knot certification, vortex stability or external Casimir comparison is performed by this geometry bridge. The raw source is from the E010/KnotPlot family but not assumed equivalent to a separate E011-qualified provider or validated physical trajectory. All downstream physical gates are UNRESOLVED.

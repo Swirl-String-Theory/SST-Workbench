@@ -1,0 +1,150 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=21mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,bm,booktabs,longtable,array,xcolor}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A068 v0.3.0 --- PKLSA Intrinsic Phase Clock\\Actual 3D Euler Dynamics Falsifier}
+\author{SST-Workbench | Framework v1.0.8}
+\date{18 October 2026 -- development / physical inference unresolved}
+\begin{document}\maketitle
+\begin{abstract}
+This version \emph{actually evolves} a fully three-dimensional unforced incompressible Euler velocity field initialized from a SHA-256-identified native KnotPlot trefoil, using the unchanged A064 Euler solver, finite-core regularization, Fourier truncation and RK4. Reconstructed 3D vorticity yields an enstrophy-weighted shape coordinate and a separate enstrophy/energy functional; neither has an imposed frequency. Tests cover analytic null controls, conservation, a longer 251-snapshot history, space/time/core refinements and framework provenance. This is a \textbf{numerical model} initialized by PKLSA/KnotPlot geometry; it is \emph{not} a confirmed source-native material vortex or an independent physical PKLSA clock. Results below are an \textbf{unblinded development precheck}; official BLIND packaging does not retroactively restore epistemic blindness.
+\end{abstract}
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification and certification boundaries}
+\begin{tabular}{ll}
+\toprule Field & Value\\\midrule
+Catalog & A068\\ Version & v0.3.0\\ Framework & SST Falsifier Framework v1.0.8 candidate\\
+Profile & \texttt{multilibrary\_gpu}\\ Current authority & \texttt{EULER\_MODEL\_SIMULATION\_ONLY}\\
+Physical clock & \texttt{UNRESOLVED}\\ \bottomrule
+\end{tabular}
+
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+Can an autonomous, unforced 3D Euler vortex initialized from native trefoil geometry generate a reproducible intrinsic phase without inserting a clock frequency? What additional independent tests are needed to claim a \emph{material, physical PKLSA} clock? The present version is a numerical prerequisite, not a physical verification.
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses and decision semantics}
+$H_0$: a numerical transient, slow vortex deformation, rigid-body phase, inadequate sampling, nonconvergent core/mesh effects, or operator-fitting artefact mimics a clock. $H_1$: a genuine source-native material vortex has a stable relative periodic orbit, coherent intrinsic oscillatory phase and independent withheld operator prediction. An unqualified source produces \texttt{UNRESOLVED}, not physical \texttt{FAIL}; a failed numerical discretization is not an SST-theory falsification.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and limiting cases}
+The 47-point \texttt{knot\_3.1.txt} geometry belongs to one KnotPlot-native family. Its numerical centerline has no authenticated Euler-equilibrium relaxation, no independently verified source-native topology and no SI radius. The original A064 centerline is placed in a periodic cubic domain of length $L=2\pi$ after arbitrary normalization; Gaussian smoothing of its line vorticity uses $a=0.4$ nominal units and $\Gamma=1$ model unit. The finite-core filter is a numerical modeling assumption, \emph{not} a derivation of canonical $r_c$. Actual 3D velocity and vorticity evolve without a driving frequency. A Hilbert-transform phase of a transient need not be a stable clock. Any eventual material-tube or relative periodic orbit qualification requires an additional independent calculation; a passive or moving isosurface is not by itself such proof.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, dimensions and units}
+\begin{longtable}{lll}\toprule Symbol & Meaning & SI dimensions if calibrated \\\midrule
+$\mathbf u,\bm\omega$ & velocity, curl of velocity & $LT^{-1},T^{-1}$\\
+$L,a,\Gamma$ & box length, core width, circulation & $L,L,L^2T^{-1}$\\
+$E$ & mean energy per unit mass & $L^2T^{-2}$\\
+$H$ & mean helicity & $LT^{-2}$\\
+$Z$ & mean enstrophy & $T^{-2}$\\
+$C,\lambda_i$ & covariance and its eigenvalues & $L^2$\\
+$q_{\rm sh},q_Z$ & two dimensionless functionals & $1$\\
+$\phi,\widehat\Omega$ & observed phase, angular slope & $1,T^{-1}$\\\bottomrule\end{longtable}
+No dimensional conversion to s, m or kg is made. In particular no SST circulation scale or relativistic time-dilation law is used to set a frequency.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Actual continuous and numerical model}
+The finite-dimensional Galerkin operator implements the projected Lamb form of Euler:
+\begin{equation}\partial_t\mathbf u=\mathcal P[\mathbf u\times\bm\omega],\quad \bm\omega=\nabla\times\mathbf u,\quad \nabla\cdot\mathbf u=0.\label{eq:euler}\end{equation}
+The original A064 code deposits a signed line-current along each polygon edge (cloud-in-cell), applies Gaussian finite-core smoothing and a two-thirds wavenumber cutoff, then constructs the divergence-free Fourier Biot--Savart velocity
+\begin{equation}\widehat{\mathbf u}_0(\mathbf k)=\frac{i\mathbf k\times\widehat{\bm\omega}_a(\mathbf k)}{|\mathbf k|^2}\quad (\mathbf k\ne0).\label{eq:biotsavart}\end{equation}
+RK4 evolves this field without inserted phase. Conservation screens use
+\begin{equation}
+E=\frac{1}{2V}\int_V|\mathbf u|^2\,dV,\quad H=\frac1V\int_V\mathbf u\cdot\bm\omega\,dV,\quad Z=\frac{1}{2V}\int_V|\bm\omega|^2\,dV.\label{eq:ehz}
+\end{equation}
+For the full periodic volume, use enstrophy weights to construct the periodic-centered three-dimensional covariance tensor $C$. Ordered eigenvalues define the shape scalar
+\begin{equation}q_{\rm sh}=\frac{\lambda_1-\lambda_2}{\operatorname{tr}C},\quad q_{\rm sh,2}=\frac{\lambda_2-\lambda_3}{\operatorname{tr}C}.\end{equation}
+These two eigenvalue gaps are correlated. Instead of treating them as independent physical clocks, use the distinct flow functional
+\begin{equation}q_Z=\frac{L^2 Z}{E}.\label{eq:qz}\end{equation}
+Both $q_{\rm sh}$ and $q_Z$ are computed from each actual evolved 3D field, not from imposed oscillators. The analytic-signal phase estimator is
+\begin{equation}
+\phi_q(t)=\operatorname{unwrap}\arg\{[q(t)-\bar q]+i\mathcal H[q(t)-\bar q]\},\qquad \widehat\Omega_q=\operatorname{slope}_{W}\phi_q(t).\label{eq:phase}
+\end{equation}
+This estimator is a screen only; it does not establish a relative periodic orbit or intrinsic clock. Thresholds were specified in method preflight: at least six unwrapped cycles; RMS phase-fit error at most 0.20 radians; instantaneous frequency CV at most 0.12; cross-frequency relative error at most 0.03. A constant shape under rigid rotation is no clock. A few cycles of a windowed transient are not a proof of stability. Time series are uniformly sampled by construction.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Executable algorithm and fixed run matrix}
+\begin{enumerate}
+\item Verify byte-exact historical controls and A064 solver/source hashes; refuse changed or missing sources.
+\item Load 47 native 3D XYZ vertices; normalize and map to the periodic box; deposit vorticity and compute solenoidal $\mathbf u(0)$ from A064.
+\item In \texttt{BASIC}, evolve $N=16$, $a=0.40$, $\Delta t=0.04$, $T=6$, retaining 151 genuine field snapshots.
+\item In \texttt{FULL}/\texttt{CERTIFY}, evolve $N=16$, $a=0.40$, $\Delta t=0.04$, $T=20$, retaining 251 3D fields. Independently evolve $N=24$ at identical $(a,\Delta t,T)$, $N=16$ at $\Delta t=0.02$, and $N=16$ with $a=0.32,0.48$ at fixed $(T,\Delta t)$.
+\item At every retained field, compute $E,H,Z$, divergence, CFL, shape tensor, $q_{\rm sh}$ and $q_Z$. Recover phase only from measured functionals; do not input a theoretical frequency.
+\item Require numerical conservation to close G2; record spatial/time/core diagnostic differences even when downstream physical gates are blocked. Leave G3 unresolved without a material tube, a verified relative periodic orbit, independent providers and independent operator frequency prediction.
+\item Let the official v1.0.8 runtime write unique BLIND ZIPs, PDFs and gate-ledger hashes; do not bypass reveal policy.\end{enumerate}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Source provenance and provider independence}
+\texttt{knot\_3.1.txt}: SHA-256 \texttt{98a628af4ba5d09274f0a1845c351a7a3d633a39ff833a3ae0b78e351bafdabf}. The original A064 Python Euler solver is included byte-for-byte at \texttt{experiment/euler3d.py} and as historical reference. Earlier two A068 preflight JSONs and A064-v0.3.0 results are immutable controls, not independent vortex providers. The finite-core smoothing function, Fourier truncation and normalization are inherited from A064. The expected upstream hashes are enforced in G1, and mesh/core variation does not create distinct provider families. Input XYZ geometry has \emph{unverified} physical vortex equilibrium and no SI units.
+
+% SST-REPORT-SECTION:GATES
+\section{Dependency graph and physical guardrails}
+\begin{longtable}{p{0.07\linewidth}p{0.63\linewidth}p{0.20\linewidth}}
+\toprule Gate & Required decision & Initial status\\\midrule
+G0 & Framework freeze, signed provenance path & runtime\\
+G1 & Native geometry, solver and historical control hashes & source check\\
+G2 & Real Euler 3D evolution plus $E,H,\nabla\cdot\mathbf u$, CFL & numerical PASS/FAIL\\
+G3 & Six clean cycles; \emph{material tube and RPO independently qualified} & UNRESOLVED\\
+G4 & Independent withheld Euler/Floquet prediction & blocked\\
+G5 & Converged space, time and core with physical state fixed & blocked\\
+G6 & Explicit native backend parity/authority & blocked\\
+G7 & Multiple independent qualified PKLSA providers & blocked\\
+G8 & Physical mechanism conclusion if all required gates pass & blocked\\
+G9 & Nonced reveal commitments on allowed frozen gate ledger & withheld\\\bottomrule\end{longtable}
+Gate order is an explicit DAG. A negative numerical screen does not count as a physical hypothesis falsification. A gapped clock phase without an identified finite-core material vortex can \emph{never} close G3 in this release.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical control and exploratory observations}
+For G2 preregistered development thresholds: relative divergence $<10^{-9}$; relative energy drift $<10^{-5}$; relative helicity drift $<10^{-4}$; CFL $<0.25$; finite velocity field, and nontrivial evolution. Comparative tests use
+\begin{equation}\delta_Z(A,B)=\frac{|Z_A(T)-Z_B(T)|}{\max(|Z_B(T)|,10^{-30})}.\end{equation}
+Exploratory, \textbf{unblinded} local FULL prechecks (not an official frozen framework run):
+\begin{center}\begin{tabular}{llrrr}\toprule
+Case & Grid, core, $\Delta t$ & $Z(T)$ & $|\Delta E/E|_{\max}$ & Phase cycles\\\midrule
+Base & $16,0.40,0.04$ & $0.064202$ & $8.34\times10^{-10}$ & $0.646$\\
+Spatial & $24,0.40,0.04$ & $0.121697$ & $6.93\times10^{-9}$ & $0.615$\\
+Temporal & $16,0.40,0.02$ & $0.064202$ & $4.22\times10^{-11}$ & $0.646$\\
+Core low & $16,0.32,0.04$ & $0.094750$ & $1.69\times10^{-9}$ & $0.643$\\
+Core high & $16,0.48,0.04$ & $0.035642$ & $2.04\times10^{-10}$ & $0.723$\\\bottomrule\end{tabular}\end{center}
+$\delta_Z$ under time-step halving is $2.01\times10^{-9}$, while spatial $\delta_Z\simeq0.472$ and core-spread $\simeq0.921$. Thus temporal integration control succeeds but spatial/core physical convergence demonstrably \textbf{does not} qualify. Less than one observed phase cycle fails the method screen's six-cycle minimum; it cannot be extrapolated to a period by assumption. These values are preliminary numerical model diagnostics and will be recomputed on each framework run.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority}
+Actual field integration is the upstream NumPy/SciPy FP64 Euler simulator. Its runs are not equivalent to native C++ FP64 or Intel SYCL parity certification. Framework v1.0.8 backend configuration may disable certain gates; disabled scientific gates do not pass. DD32/FP32 only screen, never physical confirmation. All core/mesh branches here share one upstream mathematical method and source provenance.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness, frozen protocol and reveal}
+The historical source and this exploratory run have already been inspected, so only framework \emph{output confidentiality and audit integrity} are blind. Future provider-independent PKLSA-clock claims must be preregistered on a fresh held-out source before opening it. Frozen v1.0.8 publishes run-specific ZIP/PDF identities and archives previous output roots; \texttt{REVEAL\_IF\_ALLOWED} correctly refuses when a required physical G8 is \texttt{NOT\_RUN\_PREREQUISITE}. Never edit a frozen policy, ledger or HMAC commitment to force a reveal.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and confidence limits}
+The Euler trajectory is one deterministic single-provider numerical realization. Time snapshots, mesh steps and smoothing variants are \emph{not} independent experimental replicates. A Hilbert phase slope on less than one cycle has no established asymptotic period. No physical confidence interval or p-value is computed. Discovery windows and candidate selection are fixed by code; no frequency target, SST phase law or operator eigenvalue is supplied.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Actual runtime results and retained evidence}
+Each official BASIC/FULL/CERTIFY pipeline computes and stores \texttt{EULER\_DYNAMICS\_RESULTS.json}, \texttt{EULER\_3D\_FIELDS\_MODEL\_ONLY.npz} with $t,\mathbf u,\mathbf q$ and conservation tracks, the hashed source manifest, full gate ledger and framework result PDF. The NPZ includes actual evolved velocity on the 3D grid, not just 2D projections or A064 detector curves. Only the \emph{primary} trajectory is retained as full fields; full diagnostics from all refinement branches are in JSON.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{Runtime gate ledger will be inserted by frozen framework execution.}
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation and next falsification step}
+The existence of nonlinear Euler evolution does not demonstrate a stable toroidal material boundary, spectral convergence, global RPO or an intrinsic physical clock. Future v0.4 qualification needs a source-native independent core field, advected material boundary with demonstrated low flux, full-state recurrence modulo allowed symmetries, a separately computed time-dependent Floquet/Koopman prediction and a new source/protocol commitment. Historical A064 spectral eigenpairs at $N=8,12,16$ were nonconvergent and cannot be used as the predicted clock frequency here. Likewise, no comparison to Lorentz time dilation is permitted before a physical intrinsic oscillator is certified.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility and bibliography}
+Install only into a \emph{new} A068-v0.3.0 instance with the official \texttt{tools/new\_falsifier.py} from locally present v1.0.8. Run \texttt{pytest -q tests}, then \texttt{run\_all.cmd FREEZE}, \texttt{run\_all.cmd BASIC}, \texttt{run\_all.cmd FULL}, and optionally \texttt{run\_all.cmd CERTIFY}; no frozen package from v0.2.0 is overwritten. Preserve all v0.2.0 result evidence and commits.\par
+\begin{thebibliography}{9}
+\bibitem{Saffman} P. G. Saffman, \emph{Vortex Dynamics} (Cambridge University Press, 1992), doi:10.1017/CBO9780511624063.
+\bibitem{Moffatt} H. K. Moffatt, J. Fluid Mech. \textbf{35}, 117--129 (1969), doi:10.1017/S0022112069000991.
+\bibitem{Gabor} D. Gabor, J. Inst. Elect. Eng. Part III \textbf{93}, 429--457 (1946), doi:10.1049/ji-3-2.1946.0074.
+\end{thebibliography}
+\IfFileExists{POST_RUN_DISCUSSION.tex}{\input{POST_RUN_DISCUSSION.tex}}{}
+\end{document}

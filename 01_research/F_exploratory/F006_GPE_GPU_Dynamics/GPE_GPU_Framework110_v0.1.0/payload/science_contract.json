@@ -1,0 +1,40 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can a periodic dimensionless Gross-Pitaevskii equation split-step Fourier solver reproduce exact and convergent reference dynamics on independent NumPy FP64 and Intel Arc XPU FP32 implementations?",
+  "objective": "Certify numerical checks and XPU screening only; archive downloaded external processed-observable data with provenance. No SST/Euler/PKLSA physical equivalence is asserted.",
+  "null_hypothesis": "At least one preregistered numerical reference or convergence criterion fails; GPE solver numerical qualification is denied.",
+  "alternative_hypothesis": "All completed CPU reference checks and the temporal convergence check satisfy their independently specified thresholds; optional Intel XPU screening also satisfies parity thresholds.",
+  "assumptions": ["Periodic grid on a dimensionless square of side L=2*pi", "Conservative cubic Gross-Pitaevskii evolution with g>0 and no forcing or dissipation", "Complex128 independent NumPy reference and complex64 actual Intel XPU screening", "External Zenodo archive has processed observables only, not full time-dependent wavefunction fields", "No physical dimension recovery without specifying length, time and wavefunction scales"],
+  "symbols": [
+    {"symbol":"psi", "meaning":"dimensionless condensate order parameter", "si_unit":"1", "dimensions":"1"},
+    {"symbol":"t", "meaning":"normalized evolution time", "si_unit":"1", "dimensions":"1"},
+    {"symbol":"k", "meaning":"dimensionless Fourier wavenumber", "si_unit":"1", "dimensions":"1"},
+    {"symbol":"g", "meaning":"dimensionless nonlinear coupling coefficient", "si_unit":"1", "dimensions":"1"},
+    {"symbol":"N", "meaning":"discrete norm sum of |psi| squared", "si_unit":"1", "dimensions":"1"}
+  ],
+  "equations": [
+    {"id":"E1", "purpose":"Continuous dimensionless conservative GPE", "latex":"i\\,\\partial_t\\psi=-\\frac12\\nabla^2\\psi+g(|\\psi|^2-n_0)\\psi", "inputs":["psi","g","n0"], "outputs":["psi"], "dimensional_check":"All variables dimensionless after xSI/L0 and tSI/T0 normalization"},
+    {"id":"E2", "purpose":"Exact periodic plane wave reference", "latex":"\\psi=Ae^{i(\\mathbf{k}\\cdot\\mathbf{x}-\\omega t)},\\quad\\omega=|\\mathbf{k}|^2/2+g(A^2-n_0)", "inputs":["k","A","g"], "outputs":["omega"], "dimensional_check":"omega and all exponents dimensionless"},
+    {"id":"E3", "purpose":"Relative complex L2 error", "latex":"\\epsilon_{2}=\\|\\psi_{\\rm candidate}-\\psi_{\\rm reference}\\|_2/\\|\\psi_{\\rm reference}\\|_2", "inputs":["psi_candidate","psi_reference"], "outputs":["epsilon2"], "dimensional_check":"Ratio of equal-dimension norms is dimensionless"},
+    {"id":"E4", "purpose":"Measured temporal order", "latex":"p=\\log_2(\\epsilon_{\\Delta t}/\\epsilon_{\\Delta t/2})", "inputs":["epsilon_dt","epsilon_dt2"], "outputs":["order"], "dimensional_check":"Logarithm of dimensionless error ratio"}
+  ],
+  "observables": [
+    {"id":"O1","definition":"Exact plane wave relative complex L2 error", "equation_refs":["E2","E3"],"unit":"1"},
+    {"id":"O2","definition":"Relative discrete particle norm drift and reverse propagation error", "equation_refs":["E1","E3"],"unit":"1"},
+    {"id":"O3","definition":"Minimum observed Strang splitting temporal order at fixed final time", "equation_refs":["E3","E4"],"unit":"1"},
+    {"id":"O4","definition":"Real Intel XPU versus NumPy FP64 relative field L2 error", "equation_refs":["E3"],"unit":"1"}
+  ],
+  "steps": [
+    {"id":"S1","operation":"Retrieve Zenodo public source and verify published MD5 and all ZIP member CRC", "formula_refs":["E1"],"gate":"G1"},
+    {"id":"S2","operation":"Propagate exact plane wave and reverse a nonuniform complex field using NumPy FP64", "formula_refs":["E1","E2","E3"],"gate":"G2"},
+    {"id":"S3","operation":"Split-step dt refinement at fixed final time with independent fine-step surrogate", "formula_refs":["E1","E3","E4"],"gate":"G3"},
+    {"id":"S4","operation":"Propagate same initial field using Intel XPU complex64 and compare to independent NumPy complex128", "formula_refs":["E1","E3"],"gate":"G6"}
+  ],
+  "falsification_criteria": [
+    {"id":"F1","criterion":"G2 fails if plane-wave error, norm drift or reverse error is >=1e-10", "conclusion_if_met":"FAIL"},
+    {"id":"F2","criterion":"G3 fails if minimum temporal order <=1.75 or maximum surrogate error >=0.1", "conclusion_if_met":"FAIL"},
+    {"id":"F3","criterion":"G6 fails if true Intel XPU relative L2 error >=7e-4 or GPU norm drift >=7e-4", "conclusion_if_met":"FAIL"}
+  ],
+  "edge_cases": ["GPU unavailable is a missing execution prerequisite, never CPU fallback", "Complex FFT XPU unsupported kernel raises real execution error", "Published processed observables do not constitute independent full-field confirmation", "Source failure prevents source-integrity claim but should not suppress numerically independent diagnostics"],
+  "predictions": ["Plane wave error at periodic commensurate wavenumbers is near rounding error", "Strang split step is asymptotically second order for smooth periodic fields", "GPU complex64 reference error stays below preset screening threshold on supported Intel Arc GPU"]
+}
