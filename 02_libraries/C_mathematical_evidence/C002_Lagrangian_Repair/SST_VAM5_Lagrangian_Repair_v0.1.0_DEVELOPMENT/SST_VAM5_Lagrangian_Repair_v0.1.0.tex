@@ -1,0 +1,236 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,mathtools,mathrsfs,bm,booktabs,array,longtable,geometry,microtype,xcolor,hyperref,fancyhdr}
+\geometry{left=25mm,right=25mm,top=25mm,bottom=26mm}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,citecolor=blue!45!black,pdftitle={SST-VAM5 Constrained Lagrangian Repair v0.1.0},pdfauthor={Technical reconstruction of the VAM-5 framework}}
+\pagestyle{fancy}\fancyhf{}\lhead{SST / VAM-5 -- mathematical repair}\rhead{v0.1.0 DEVELOPMENT}\cfoot{\thepage}
+\setlength\parskip{5pt}\setlength\parindent{0pt}\setlength{\headheight}{14pt}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\om}{\boldsymbol{\omega}}
+\newcommand{\vv}{\mathbf v}
+\newcommand{\XX}{\mathbf X}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\dev}{\mathrm{D}}
+\newcommand{\status}[1]{\textcolor{red!65!black}{\bfseries #1}}
+\title{\textbf{Constrained Vortex-Fluid Action: A Technical Repair of VAM-5}\\[0.4em]
+\large SST Lagrangian, Hamiltonian and finite-core audit\\[0.4em]
+\normalsize Replacement for the mathematical claims in Sections VI--IX and related benchmarks}
+\author{Mathematical reconstruction of the historical manuscript by O. Iskandarani\\ \small Original VAM-5: \href{https://doi.org/10.5281/zenodo.15772858}{doi:10.5281/zenodo.15772858}}
+\date{20 October 2026 \quad|\quad Version 0.1.0 \quad|\quad \status{DEVELOPMENT / NOT PHYSICALLY CERTIFIED}}
+\begin{document}
+\maketitle
+\begin{abstract}
+The 2025 VAM-5 manuscript proposes a vorticity/helicity Lagrangian intended to reconstruct gravity, electromagnetism, quantum phases and particle masses. Its Euler--Lagrange and Hamiltonian calculations do not follow from the stated field variables; some energy-density terms are dimensionally inconsistent; and a globally potential velocity field cannot represent a smooth, nonzero-vorticity core. This technical repair installs a mathematically valid constrained variational model of incompressible Euler flow, its canonical Hamiltonian in material coordinates, a separately labeled \emph{optional} Euler--Poincar\'e $H^1$-regularized model, and a boundary between hydrodynamic results and still-unverified SST interaction hypotheses. All examples are algebraic or finite-grid regression tests; no PKLSA knot has been dynamically simulated or certified here.
+\end{abstract}
+\setcounter{tocdepth}{1}
+\tableofcontents
+\newpage
+
+\section{Scope, sources and scientific status}
+This is a \emph{new replacement document}, not an in-place edit of the author's original 59-page PDF. The old VAM-5 text remains the historical statement. The present manuscript changes the mathematical assertions summarized below, while preserving the research motivation of a flat three-dimensional incompressible, inviscid medium and vortex-knot excitations.
+\begin{center}\small
+\begin{tabular}{p{26mm}p{50mm}p{67mm}}\toprule
+Old location & Original mathematical issue & Corrective disposition \\ \midrule
+pp.~10--13; (23)--(31) & Euler equations presented as variations of a velocity-only functional; dimensional mismatch & Replace with constrained material-map action (Section~\ref{sec:euler}); label EM and gravity as unresolved.\\
+pp.~14--16; (33)--(38) & $\partial\mathcal L/\partial\dot{\vv}$ given nonzero although $\dot{\vv}$ is absent & Use canonical momentum conjugate to the material position $\XX$, not to an arbitrary velocity field.\\
+pp.~17--19; (39)--(49) & Globally potential velocity with nonzero curl; phase treated as both dimensionless clock and action & Separate physical vortex phase observables from Hamilton--Jacobi action and from circulation quantization.\\
+pp.~3--9; (1)--(22) & Unclosed clock, helicity-charge and gravitational identifications & Preserve as distinct falsifiable hypotheses without presenting them as field equations.\\
+pp.~38--55; benchmarks & Energy presented as mass and fitted factors treated as predictions & Require energy integrals, $E/c^2$ and independent parameter closure.\\ \bottomrule
+\end{tabular}
+\end{center}
+Source: Iskandarani (2025), original VAM-5 PDF, pp.~1--59~\cite{VAM5}.
+
+\section{Canonical notation and dimension audit}
+We use absolute Euclidean time $t$, spatial position $\mathbf x$, fluid velocity $\vv(\mathbf x,t)$, vorticity $\om=\nabla\times\vv$ and incompressible background mass density $\rhoF$. The canonical SST figures are
+\begin{align}
+|\vswirl|&=1.09384563\times10^{6}\ \mathrm{m\,s^{-1}},&\rc&=1.40897017\times10^{-15}\ \mathrm m,\\
+\rhoF&=7.0\times10^{-7}\ \mathrm{kg\,m^{-3}},&\rho_{\mathrm{core}}&=3.8934358266918687\times10^{18}\ \mathrm{kg\,m^{-3}}.
+\end{align}
+Here $\rhoE$ is an \emph{energy density} ($\mathrm{J\,m^{-3}}$) and $\rhoM=\rhoE/c^2$ is a \emph{mass-equivalent density} ($\mathrm{kg\,m^{-3}}$). The background density and an assumed core density must not be substituted for one another without a constitutive model.
+
+Dimensional requirements: $[\vv]=\mathrm{m\,s^{-1}}$, $[\om]=\mathrm{s^{-1}}$, $[p]=[\mathcal L]=\mathrm{J\,m^{-3}}$. Hence
+\begin{align}
+\left[\rhoF|\vv|^2\right]&=\mathrm{J\,m^{-3}},\\
+\left[\rhoE |\om|^2\right]&=\mathrm{J\,m^{-3}\,s^{-2}},\\
+\left[(\vv\cdot\om)^2\right]&=\mathrm{m^2\,s^{-4}}.
+\end{align}
+Consequently the original coefficient of $\rhoE|\om|^2$ needs $[\lambda_g]=\mathrm{s^2}$ and the coefficient of local $(\vv\cdot\om)^2$ needs $[\alpha_e]=\mathrm{kg\,s^2\,m^{-3}}$ if the respective terms are energy densities. The ordinary dimensionless electromagnetic fine-structure constant $\alpha$ cannot itself fulfill the second role. The repaired fluid theory uses no such gravitational or electromagnetic coefficients.
+
+\section{Exact constrained incompressible Euler action}\label{sec:euler}
+\subsection{Material coordinates and incompressibility}
+Choose fixed reference labels $\mathbf a\in\Omega_0$ and a time-dependent fluid-particle diffeomorphism $\XX(\mathbf a,t)$. Define its deformation gradient and Jacobian by
+\begin{equation}
+F_{iA}=\frac{\partial X_i}{\partial a_A},\qquad J=\det F,\qquad \vv(\XX(\mathbf a,t),t)=\partial_t\XX(\mathbf a,t).
+\end{equation}
+Constant reference density $\rhoF$ and $J=1$ imply spatial incompressibility. The correct material-map action (no external forcing) is
+\begin{equation}\label{eq:action}
+\boxed{\quad\mathcal A_{\mathrm{Euler}}[\XX,p]
+=\int_{t_0}^{t_1}\!\dd t\int_{\Omega_0}\!\dd^3a
+\left\{\frac{\rhoF}{2}|\partial_t\XX|^2+p(\mathbf a,t)(J-1)\right\}.\quad}
+\end{equation}
+Here $p(\mathbf a,t)$ is the pullback of a spatial pressure field, serving as a Lagrange multiplier. Variations vanish at the time endpoints and obey periodic or appropriate impermeable-boundary conditions.
+
+\subsection{Explicit variation}
+At fixed labels, the determinant variation and Piola identity read
+\begin{equation}
+\delta J=J(F^{-T})_{Ai}\frac{\partial\delta X_i}{\partial a_A},\qquad
+\partial_{a_A}\!\left[J(F^{-T})_{Ai}\right]=0.
+\end{equation}
+Integrating by parts in time and labels gives
+\begin{align}
+\delta_{\XX}\mathcal A_{\mathrm{Euler}}&=\int\!\dd t\dd^3a
+\left[-\rhoF\partial_t^2X_i-\partial_{a_A}\big(pJ(F^{-T})_{Ai}\big)\right]\delta X_i,\\
+\delta_{p}\mathcal A_{\mathrm{Euler}}&=\int\!\dd t\dd^3a\,(J-1)\,\delta p.
+\end{align}
+At $J=1$, the spatial form of these Euler--Lagrange equations is
+\begin{equation}\label{eq:euler}
+\boxed{\qquad \rhoF\left(\partial_t\vv+(\vv\cdot\nabla)\vv\right)=-\nabla p,
+\qquad \nabla\cdot\vv=0.\qquad}
+\end{equation}
+There is no arbitrary ``swirl gravity'' source in this exact result. Pressure enforces incompressibility and its gradients accelerate \emph{fluid parcels}; an external test object's acceleration needs a separately specified interaction law. The standard variational structure and Hamiltonian framework are discussed in~\cite{Salmon1988,Holm1998EP}.
+
+\subsection{Vorticity, Kelvin circulation, pressure and energy}
+For smooth Euler solutions under suitable boundaries, the pressure satisfies
+\begin{equation}\label{eq:poisson}
+\boxed{\qquad \nabla^2p=-\rhoF\,\partial_i v_j\,\partial_jv_i.\qquad}
+\end{equation}
+Taking the curl of Eq.~\eqref{eq:euler} gives
+\begin{equation}\label{eq:omega}
+\partial_t\om=\nabla\times(\vv\times\om),\qquad\nabla\cdot\om=0.
+\end{equation}
+The Euler kinetic Hamiltonian and inviscid circulation theorem are
+\begin{align}
+E_{\mathrm E}&=\frac{\rhoF}{2}\int_{\Omega}|\vv|^2\dd^3x,\\
+\Gamma_{C(t)}&=\oint_{C(t)}\vv\cdot\dd\boldsymbol\ell=\text{constant}
+\quad\text{for a material loop $C(t)$.}
+\end{align}
+For a moving uniform background in an unbounded domain, a finite \emph{relative} energy and its boundary/impulse terms must be specified rather than integrating a spatially uniform velocity over infinite volume.
+
+\section{Correct canonical Hamiltonian and its interpretation}\label{sec:hamilton}
+The canonical configuration variable is $\XX$, not $\vv$. In label coordinates its conjugate momentum is
+\begin{equation}
+\boxed{\mathbf P(\mathbf a,t)=\frac{\delta L}{\delta(\partial_t\XX)}=\rhoF\partial_t\XX.}
+\end{equation}
+The corresponding \emph{constrained} Hamiltonian is
+\begin{equation}\label{eq:ham}
+\mathscr H[\XX,\mathbf P,p]=\int_{\Omega_0}\dd^3a
+\left[\frac{|\mathbf P|^2}{2\rhoF}-p(J-1)\right],
+\quad\Rightarrow\quad
+\boxed{\mathscr H\big|_{J=1}=\frac{\rhoF}{2}\int_\Omega |\vv|^2\dd^3x.}
+\end{equation}
+The pressure constraint and volume-preserving initial data must be carried through Hamiltonian evolution; writing $\mathscr H$ alone does not eliminate these constraints. This is the repaired counterpart of historical VAM-5 eqs.~(33)--(38). A velocity-only expression with no $\dot{\vv}$ has $\partial\mathcal L/\partial\dot{\vv}=0$ and cannot yield the claimed $\rhoF\vv$ as its canonical time momentum.
+
+\section{Optional H$^1$ finite-core regularization: separate model}\label{sec:alpha}
+A finite vortex-core radius \emph{does not require} altering the Euler equations: a smooth finite-width vorticity distribution is already permitted by Eq.~\eqref{eq:euler}. The following is an independent testable regularization, \emph{not a derivation of SST's fundamental vortex core}.
+
+For constant length $\ell\ge0$, define an Eulerian reduced Lagrangian with \emph{constrained Euler--Poincar\'e variations}:
+\begin{equation}\label{eq:alphaL}
+\boxed{\qquad\ell_{H^1}[\vv]=\frac{\rhoF}{2}\int_\Omega\big(|\vv|^2+\ell^2|\nabla\times\vv|^2\big)\dd^3x,\quad\nabla\cdot\vv=0.\qquad}
+\end{equation}
+The admissible velocity variations are not independent: for divergence-free displacement $\boldsymbol\xi$,
+\begin{equation}
+\delta\vv=\partial_t\boldsymbol\xi+(\vv\cdot\nabla)\boldsymbol\xi-(\boldsymbol\xi\cdot\nabla)\vv.
+\end{equation}
+Then, up to boundary terms,
+\begin{equation}\label{eq:m}
+\boxed{\quad\mathbf m=\frac{1}{\rhoF}\frac{\delta\ell_{H^1}}{\delta\vv}
+=\vv+\ell^2\nabla\times\om=\vv-\ell^2\nabla^2\vv\quad(\nabla\cdot\vv=0).}
+\end{equation}
+Stationarity with these constrained variations gives
+\begin{equation}\label{eq:EP}
+\boxed{\quad\partial_t\mathbf m+(\vv\cdot\nabla)\mathbf m+(\nabla\vv)^T\mathbf m=-\nabla\Pi,
+\qquad\nabla\cdot\vv=0.\quad}
+\end{equation}
+The scalar $\Pi$ is a specific pressure-like multiplier with units $\mathrm{m^2\,s^{-2}}$. For $\ell\rightarrow0$, $\mathbf m\to\vv$ and $(\nabla\vv)^T\vv=\nabla(|\vv|^2/2)$, so Eq.~\eqref{eq:EP} reduces exactly to Eq.~\eqref{eq:euler} after setting $p=\rhoF(\Pi+|\vv|^2/2)$. This is the Euler--alpha family of $H^1$ fluid models described by Holm, Marsden and Ratiu~\cite{Holm1998PRL,Holm1998EP}.
+
+For periodic or boundary conditions permitting integration by parts, the corresponding positive energy is
+\begin{equation}\label{eq:HEP}
+\boxed{\quad E_{H^1}=\frac{\rhoF}{2}\int_\Omega\vv\cdot\mathbf m\,\dd^3x=
+\frac{\rhoF}{2}\int_\Omega\left(|\vv|^2+\ell^2|\om|^2\right)\dd^3x.\quad}
+\end{equation}
+The $\ell^2|\om|^2$ term is a \emph{regularization energy}, not demonstrably an electromagnetic or gravitational field energy. A test case $\ell=\rc$ is permitted, but $\ell$ remains an independent free length until dynamically qualified. Standard Euler helicity conservation should not be automatically transferred to this modified model without deriving its own invariants and boundary terms.
+
+\section{Helicity, field mapping and topology: explicit non-results}
+Under smooth inviscid Euler flow and suitable boundary conditions, helicity
+\begin{equation}\label{eq:helicity}
+H=\int_\Omega\vv\cdot\om\,\dd^3x,\qquad [H]=\mathrm{m^4\,s^{-2}},
+\end{equation}
+is a meaningful global invariant related to linked vortex tubes~\cite{Moffatt1969}. It is not electric charge: $[q]=\mathrm C$ and no universal conversion law is derived. In particular, an independent scaling $\vv\mapsto a\vv$ scales $H\mapsto a^2H$ without necessarily changing knot type.
+
+One may define a local scalar $h=\vv\cdot\om$ with $[h]=\mathrm{m\,s^{-2}}$. Adding $h^2$ to a local action requires a coefficient with units $\mathrm{kg\,s^2\,m^{-3}}$ and is not generically Galilei invariant: under a uniform boost $\vv'=\vv+\mathbf U$ and $\om'=\om$ at corresponding translated coordinates,
+\begin{equation}
+ h'=h+\mathbf U\cdot\om.
+\end{equation}
+On a periodic domain with $\int\om\dd^3x=0$, the \emph{global} helicity can remain invariant even though its local density changes. Thus original VAM-5 local-helicity-squared energy is not included in the repaired baseline.
+
+Likewise, the identification $\mathbf E\sim\nabla\cdot\om$ cannot work as a vector electromagnetic field: $\nabla\cdot\om=0$ identically for smooth $\om=\nabla\times\vv$. Biot--Savart and the $r^{-2}$ kernel are valuable diagnostics, but postulating an electric field as a Coulomb integral of $h$ does not derive Maxwell's equations from the fluid dynamics. The pressure and vorticity equations alone supply neither a physical electric charge nor universal Newtonian attraction.
+
+\section{Phase observables, vortex clocks and non-circular tests}
+The old VAM-5 phase section introduces both a clock phase and the Hamilton--Jacobi action under the letter $S$. A dimensionless clock phase $\theta$ (radians) is \emph{not} an action (joule-seconds). If $\vv\propto\nabla S$ globally with a smooth single-valued $S$, then $\nabla\times\vv=0$ and no finite-core vorticity can be represented. A Helmholtz decomposition may contain a potential component \emph{and} a rotational component, but this does not establish quantum mechanics or circulation quantization.
+
+For a computed time-dependent finite-core vortex, choose a preregistered, independent observable such as a Kelvin-mode projection
+\begin{equation}
+ a_k(t)=\int_\Omega\om(\mathbf x,t)\cdot\boldsymbol\psi_k^*(\mathbf x)\,\dd^3x,
+\quad\theta_k(t)=\arg a_k(t),\quad\Omega_k(t)=\frac{\dd}{\dd t}\operatorname{unwrap}\theta_k(t),
+\end{equation}
+with reference mode $\boldsymbol\psi_k$ independent of target relativistic formulas and $|a_k(t)|$ bounded away from zero in qualified windows. The ratio
+\begin{equation}
+R_k=\frac{\Omega_k^{\mathrm{perturbed}}}{\Omega_k^{\mathrm{reference}}}
+\end{equation}
+is a \emph{measured internal-mode ratio}. It is not automatically the physical proper-time factor. The candidate $R_k\stackrel{?}{=}\sqrt{1-v^2/c^2}$ must be compared only after deriving the dynamics, with full-field Galilean boosts as mandatory null controls.
+
+Euler conserves real-valued circulation set by initial conditions. Integer quantization $\Gamma_n=n\Gamma_0$ requires \emph{additional} microphysics or a phase/order-parameter constraint; it does not follow from Euler circulation conservation alone. Spinors, neutrino mixing, CP/T violation and the Standard Model remain separate unverified closures.
+
+\section{Numerical scale check with canonical SST constants}
+The canonical characteristic circulation and nominal local angular frequencies are
+\begin{align}
+\Gamma_c&=2\pi\rc |\vswirl|=9.68361920349\times10^{-9}\ \mathrm{m^2\,s^{-1}},\\
+\Omega_c&=|\vswirl|/\rc=7.76344065538\times10^{20}\ \mathrm{s^{-1}},\\
+|\om_c|&\simeq2\Omega_c=1.55268813108\times10^{21}\ \mathrm{s^{-1}}
+\quad\text{only for a locally rigid rotating-core approximation}.
+\end{align}
+With spherical volume $V_c=(4\pi/3)\rc^3=1.17163950032\times10^{-44}\ \mathrm{m^3}$ and \emph{assuming} homogeneous core density $\rho_{\mathrm{core}}$, one obtains
+\begin{align}
+E_{\mathrm{core},\,\mathrm{sphere}}&=\frac12\rho_{\mathrm{core}}|\vswirl|^2V_c
+=2.72903497979\times10^{-14}\ \mathrm J,\\
+\frac{E_{\mathrm{core},\,\mathrm{sphere}}}{c^2}&=3.03646092324\times10^{-31}\ \mathrm{kg}.
+\end{align}
+These are diagnostics for a \emph{chosen uniform spherical core}, not dynamically determined energies or measured particle masses. With the background $\rhoF$, the same hypothetical volume has $E\approx4.90653\times10^{-39}\ \mathrm J$. A density closure is mandatory before switching between these values.
+
+At $\ell=\rc$ and $|\om_c|=2|\vswirl|/\rc$, the extra local $H^1$ energy density $\rhoF\ell^2|\om|^2/2$ equals $4$ times the ordinary local kinetic energy density. This demonstrates that the regularization is a substantive dynamical model change at core scale, not a negligible correction.
+
+\section{Verification contract and decision gates}
+The accompanying \texttt{validate\_repair.py} implements \textbf{22 analytical/finite-grid checks}: dimensional bases, steady rigid rotation, Euler pressure--Poisson consistency, exact Galilean covariance under uniform full-field boost, $H^1$ Fourier shear/momentum relation, Euler $\ell\rightarrow0$ limit, a Beltrami ABC helicity check on a periodic grid, and canonical numerical scales. The output is \texttt{validation\_report.json}. None of these tests substitutes for a time-evolution solver.
+
+\begin{center}\small
+\begin{tabular}{p{25mm}p{78mm}p{38mm}}\toprule
+Gate & Requirement & Current qualification \\ \midrule
+G0 Formal algebra & Variational signs, units, dimensions, and limits agree & PASS (analytic checks)\\
+G1 Independent solution & Stationary Euler test + boost null control + pressure Poisson & PASS (symbolic checks)\\
+G2 3D Euler dynamics & 3D time integration, $\nabla\cdot\vv$, energy/helicity drift, mesh/time convergence & NOT RUN\\
+G3 Source-native knots & PKLSA provenance, knot topology, valid physical cross section, no visual-only relaxation & NOT RUN\\
+G4 Optional $H^1$ model & Baseline--regularized parity, $\ell\to0$, convergence and bracket invariants & NOT RUN\\
+G5 Interactions & Independent clock, charge and gravity observables; blind comparisons & UNRESOLVED\\ \bottomrule
+\end{tabular}
+\end{center}
+\textbf{Do not promote} any matching numerical factor, constructed Coulomb field, local clock ansatz, core pressure gradient, or mass-fitting parameter to a certified physical law at the present stage. This repair does not write to the original paper, Google Drive, the canonical SST library or the frozen falsifier framework.
+
+\section{Minimal patch instructions for a future VAM-5 revision}
+Replace original Section VI eqs.~(23)--(26) with Eqs.~\eqref{eq:action}--\eqref{eq:euler}; original Section VII eqs.~(27)--(31) with Euler conservation laws and an explicit ``Maxwell/gravitation unresolved'' statement; original Section VIII eqs.~(32)--(38) with Eq.~\eqref{eq:ham}; and original Section IX eqs.~(39)--(49) with the distinct vortex-phase-observable protocol above. Move the optional $H^1$ model to a separate, \emph{model-hypothesis} appendix and eliminate the ``quantum, gravitation and electromagnetism derived'' language from the title/abstract until independently tested. Keep an unmodified archival version of VAM-5 and issue the revision as a new version with a change log and explicit non-certification status.
+
+\section*{Interpretation for a young reader}
+A toy boat can move with the water or move because the current changes around it. Before calling the boat's motion ``gravity'' or the turning of a whirlpool ``time'', we must write one rule that makes the water move correctly and independently measure what the boat and whirlpool actually do.
+
+\begin{thebibliography}{99}
+\bibitem{VAM5} O. Iskandarani (2025), ``On a Vortex-Based Lagrangian Unification of Gravity and Electromagnetism: From Knotted Aether Vorticity to Standard Model Reconstruction using Swirlclock Dynamics, Topological Charge, and Emergent Mass,'' preprint, \href{https://doi.org/10.5281/zenodo.15772858}{doi:10.5281/zenodo.15772858}.
+\bibitem{Salmon1988} R. Salmon (1988), ``Hamiltonian Fluid Mechanics,'' \emph{Annual Review of Fluid Mechanics} \textbf{20}, 225--256, \href{https://doi.org/10.1146/annurev.fl.20.010188.001301}{doi:10.1146/annurev.fl.20.010188.001301}.
+\bibitem{Holm1998EP} D. D. Holm, J. E. Marsden, and T. S. Ratiu (1998), ``The Euler--Poincar\'e Equations and Semidirect Products with Applications to Continuum Theories,'' \emph{Advances in Mathematics} \textbf{137}, 1--81, \href{https://doi.org/10.1006/aima.1998.1721}{doi:10.1006/aima.1998.1721}.
+\bibitem{Holm1998PRL} D. D. Holm, J. E. Marsden, and T. S. Ratiu (1998), ``Euler--Poincar\'e Models of Ideal Fluids with Nonlinear Dispersion,'' \emph{Physical Review Letters} \textbf{80}, 4173--4176, \href{https://doi.org/10.1103/PhysRevLett.80.4173}{doi:10.1103/PhysRevLett.80.4173}.
+\bibitem{Moffatt1969} H. K. Moffatt (1969), ``The Degree of Knottedness of Tangled Vortex Lines,'' \emph{Journal of Fluid Mechanics} \textbf{35}, 117--129, \href{https://doi.org/10.1017/S0022112069000991}{doi:10.1017/S0022112069000991}.
+\end{thebibliography}
+\end{document}

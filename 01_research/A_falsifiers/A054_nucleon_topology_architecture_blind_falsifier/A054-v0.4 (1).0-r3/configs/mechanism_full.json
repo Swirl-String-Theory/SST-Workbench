@@ -1,0 +1,125 @@
+{
+  "schema": "A054-MECHANISM-INJECTION-CONFIG-4.0",
+  "version": "0.4.0-r1",
+  "arms": [
+    "BASE",
+    "CORE",
+    "ELASTIC",
+    "CORE_ELASTIC"
+  ],
+  "gain_grid": [
+    0.125,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "core_shell": {
+    "sigma_rep_core": 1.5,
+    "sigma_attr_core": 4.0,
+    "attraction_fraction": 0.35
+  },
+  "discovery": {
+    "n_ref": 48,
+    "restore_T": 0.012,
+    "restore_dt": 0.0005,
+    "ring_T": 0.03,
+    "ring_dt": 0.0005,
+    "max_cases": 72
+  },
+  "basic": {
+    "discovery_cases": 12,
+    "confirmation_cases": 3,
+    "gain_grid": [
+      0.25,
+      0.5
+    ]
+  },
+  "confirmation": {
+    "n_ref": 56,
+    "restore_T": 0.02,
+    "restore_dt": 0.0005,
+    "ring_T": 0.06,
+    "ring_dt": 0.0005
+  },
+  "certification": {
+    "schema": "A054-CERT-CONFIG-2.0",
+    "version": "0.2.0",
+    "backend_policy": "require_openmp",
+    "core_ratio": 0.04,
+    "circulation_sectors": [
+      "Q0",
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "n_ref": 72,
+    "n_ladder": [
+      56,
+      72,
+      88
+    ],
+    "kelvin_harmonics": [
+      1,
+      2,
+      3
+    ],
+    "jacobian_eps_values": [
+      0.0025,
+      0.005
+    ],
+    "jacobian_convergence_max": 0.3,
+    "hessian_eps": 0.01,
+    "normalized_growth_max": 0.12,
+    "restoring_amp": 0.01,
+    "restoring_dt_ref": 0.0005,
+    "restoring_T_final": 0.03,
+    "restoring_return_ratio_max": 1.25,
+    "ringdown_amp": 0.01,
+    "ringdown_dt_ref": 0.0005,
+    "ringdown_T_final": 0.12,
+    "ringdown_stride": 4,
+    "ringdown_max_over_initial": 1.75,
+    "max_linking_drift": 0.05,
+    "min_clearance_ratio_min": 0.5,
+    "rpo_amp": 0.004,
+    "rpo_phase_count": 4,
+    "rpo_dt_ref": 0.0005,
+    "rpo_T_final": 0.16,
+    "rpo_stride": 4,
+    "rpo_min_step_fraction": 0.35,
+    "rpo_excursion_min": 0.01,
+    "rpo_recurrence_max": 0.05,
+    "rpo_return_ratio_max": 0.65,
+    "floquet_modes_max": 12,
+    "floquet_eps": 0.0015,
+    "floquet_spectral_radius_max": 1.05,
+    "spatial_normalized_growth_abs_max": 0.08,
+    "spatial_rel_eq_abs_max": 0.03,
+    "spatial_restoring_ratio_abs_max": 0.1,
+    "threshold_provenance": {
+      "jacobian_convergence_max": "A021 trefoil coupled-mode v0.3.0 method threshold",
+      "normalized_growth_max": "A021 trefoil v0.3.0 reduced-stability threshold",
+      "ringdown_max_over_initial": "A021 trefoil v0.3.0 ringdown threshold",
+      "rpo_recurrence/return": "A021 trefoil v0.3.0 RPO criteria",
+      "floquet_spectral_radius_max": "A021 projected nonlinear-return convention; only evaluated after accepted RPO recurrence",
+      "relative_equilibrium_residual_diagnostic_max": "descriptive diagnostic band only; excluded from hard certification to avoid post-hoc tuning to v0.1.1 architecture clusters"
+    },
+    "target_blind": true,
+    "note": "No v0.1.1 effect size, mass, charge, nucleon target, alpha, Bohr radius, or desired Floquet multiplier is encoded. Relative-equilibrium residual is diagnostic only.",
+    "relative_equilibrium_residual_diagnostic_max": 0.75,
+    "kelvin_restricted_normalized_growth_max": 0.12,
+    "floquet_base_recurrence_max": 0.05,
+    "spatial_kelvin_growth_abs_max": 0.08
+  },
+  "selection_rule": [
+    "maximize_recovered_cells",
+    "then_minimize_median_log_restore_plus_ringdown",
+    "then_lower_gain",
+    "then_arm_lexicographic"
+  ],
+  "heldout_pass_rule": {
+    "min_distinct_confirmation_geometries_recovered": 2
+  },
+  "per_candidate_gain_fitting_forbidden": true,
+  "semantic_labels_forbidden_in_blind_scoring": true
+}

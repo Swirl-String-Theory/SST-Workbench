@@ -1,0 +1,129 @@
+%! Author = Omar Iskandarani
+%! Date = 10/20/2026
+%! Affiliation = Independent Researcher, Groningen, The Netherlands
+%! License = © 2025 Omar Iskandarani. All rights reserved. This manuscript is made available for academic reading and citation only. No republication, redistribution, or derivative works are permitted without explicit written permission from the author. Contact: info@omariskandarani.com
+%! ORCID = 0009-0006-1686-3961
+%! DOI = 10.5281/zenodo.xxx
+
+\newcommand{\paperdoi}{10.5281/zenodo.xxx}
+\newcommand{\papertitle}{NEW-PAPER}
+
+%=========================================
+% % PREAMBLE, PACKAGES AND DOCUMENT CONFIGURATION
+%=========================================
+\documentclass[11pt]{article}
+% ------- TikZ Preamble -------
+\usepackage{tikz}
+\usetikzlibrary{knots,hobby,calc,intersections,decorations.pathreplacing,decorations.markings,shapes.geometric,spath3}
+% ------- TikZ Preamble -------
+
+
+\tikzset{ knot diagram/every strand/.append style={ultra thick, black}}
+
+\newcommand{\SSTGuidesPoints}[2]{% #1=basename (e.g. P), #2=last index
+  \ifsstguides
+    \foreach \i in {1,...,#2}{
+      \fill[blue] (#1\i) circle (1.2pt);
+      \node[blue,font=\scriptsize,above] at (#1\i) {\i};
+    }
+    \draw[gray!40, dashed]
+    \foreach \i [remember=\i as \lasti (initially 1)] in {2,...,#2,1} { (#1\lasti)--(#1\i) };
+  \fi
+}
+
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% swirl arrows (context-aware)
+\newcommand{\swirlarrow}{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}
+\newcommand{\vswirl}{\mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\SwirlClock}{S_{(t)}^{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmaxswirl}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\Fmax}{F^{\max}_{\mkern-1mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}} 
+\newcommand{\FmaxEM}{F^{\max}_{\mathrm{EM}}}
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \mathbf{v}_{\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}} \rVert}  swirl speed magnitude
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rhof}{\rho_{\!f}}     % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}\newcommand{\rhoe}{\rho_{\!E}}                           % swirl energy density
+\newcommand{\rhoM}{\rho_{\!m}}\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+
+
+\newcommand{\titlepageOpen}{
+    \begin{titlepage}
+        \thispagestyle{empty}  \centering
+        \Large \bfseries \papertitle \par \vspace{1cm}
+        {\Large \itshape \textbf{Omar Iskandarani}\textsuperscript{\textbf{*}} \par} \vspace{0.5cm}
+        {\today \par}  \vspace{0.5cm}
+}
+
+\newcommand{\titlepageClose}{
+        \vfill \raggedright \null
+        \begin{picture}(0,0)
+            \put(0,-45){  % Shift 200pt left, 40pt down
+                \begin{minipage}[b]{0.7\textwidth} \footnotesize
+                    \renewcommand{\arraystretch}{1.0} \noindent\rule{\textwidth}{0.4pt} \\[0.5em]
+                    \textsuperscript{\textbf{*}} Independent Researcher, Groningen, The Netherlands \\
+                    Email: \texttt{info@omariskandarani.com} \\
+                    ORCID: \texttt{\href{https://orcid.org/0009-0006-1686-3961}{0009-0006-1686-3961}} \\
+                    DOI: \href{https://doi.org/\paperdoi}{\paperdoi}
+                \end{minipage}
+            }
+        \end{picture}
+    \end{titlepage}
+}
+%=========================================
+% Start Document - Title Page
+%=========================================
+\begin{document}
+    \titlepageOpen
+        \begin{abstract}
+    
+        \end{abstract}
+    \titlepageClose
+
+
+
+\resizebox{0.8\linewidth}{!}{%
+\begin{tikzpicture}[use Hobby shortcut]
+\tikzset{knot diagram/every strand/.append style={draw=black}}
+\coordinate (P1) at (0, 2);
+\coordinate (P2) at (-2, 2);
+\coordinate (P3) at (-1.50, -1);
+\coordinate (P4) at (0.50, -2);
+\coordinate (P5) at (-1.50, -2);
+\coordinate (P6) at (-2.50, -0.50);
+\coordinate (P7) at (-2, 1);
+\coordinate (P8) at (0, 3);
+\coordinate (P9) at (2, 1);
+\coordinate (P10) at (2.50, -0.50);
+\coordinate (P11) at (1.50, -2);
+\coordinate (P12) at (-0.50, -2);
+\coordinate (P13) at (1.50, -1);
+\coordinate (P14) at (2, 2);
+
+\begin{knot}[
+    consider self intersections,
+    clip width=5pt, clip radius=3pt,
+    ignore endpoint intersections=false,
+    flip crossing/.list={2,4,6,8,10,12,14,16,18},
+    % ----draft mode=crossings % uncomment to see numbers
+]
+\strand
+([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)..(P10)..(P11)..(P12)..(P13)..(P14);
+\end{knot}
+\SSTGuidesPoints{P}{14}
+\end{tikzpicture}
+}
+
+
+
+
+\end{document}

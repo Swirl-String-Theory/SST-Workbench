@@ -1,0 +1,44 @@
+@echo off
+if /I "%~1"=="BORROMEAN" goto A006_BORROMEAN_V041
+setlocal
+cd /d "%~dp0"
+if "%~1"=="" goto usage
+if /I "%~1"=="BUILD" goto build
+if /I "%~1"=="TEST" goto test
+if /I "%~1"=="PREFLIGHT" goto preflight
+if /I "%~1"=="ANALYZE" goto analyze
+if /I "%~1"=="BASIC" goto campaign
+if /I "%~1"=="SMALL" goto campaign
+if /I "%~1"=="MEDIUM" goto campaign
+if /I "%~1"=="FULL" goto campaign
+goto usage
+:build
+py -3 src\build_v040.py
+exit /b %errorlevel%
+:preflight
+py -3 tools\preflight_windows.py
+exit /b %errorlevel%
+:test
+py -3 tools\verify_release.py
+exit /b %errorlevel%
+:analyze
+py -3 tools\analyze_matrix.py
+exit /b %errorlevel%
+:campaign
+if not exist SEED_MANIFEST.json (
+ py -3 src\build_v040.py
+ if errorlevel 1 exit /b 1
+)
+if /I "%~2"=="PLAN" goto plan
+py -3 tools\run_campaign.py %~1 --execute
+exit /b %errorlevel%
+:plan
+py -3 tools\run_campaign.py %~1 --plan
+exit /b %errorlevel%
+:usage
+echo Usage: run_all.cmd BASIC^|SMALL^|MEDIUM^|FULL [PLAN]
+echo        run_all.cmd BUILD^|TEST^|PREFLIGHT^|ANALYZE
+exit /b 2
+:A006_BORROMEAN_V041
+call "%~dp0extensions\borromean\run_borromean.cmd" %2 %3 %4 %5 %6 %7 %8 %9
+exit /b %errorlevel%

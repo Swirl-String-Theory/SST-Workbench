@@ -1,0 +1,267 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can any preregistered reduced mechanism convert the frozen A054 coherent-but-nonconfining three-filament states into restoring, Kelvin-bounded and nonlinear-ringdown-bounded branches without per-candidate retuning or relaxing the v0.2 hard gates?",
+  "objective": "Identify the minimal registered closure class, if any, that produces held-out dynamical recovery under the original A054-v0.2 thresholds while preserving topology and numerical convergence.",
+  "null_hypothesis": "H0: none of the registered mechanism arms recovers a held-out and numerically certified dynamically confined branch beyond the Biot-Savart baseline.",
+  "alternative_hypothesis": "H1: at least one preregistered mechanism arm and one globally selected gain recovers held-out dynamically confined branches under unchanged v0.2 gates.",
+  "assumptions": [
+    "The frozen v0.2 anonymous geometries are discovery states, not physical particle identifications.",
+    "The source-native KnotPlot three-component links form a held-out geometric/provider confirmation cohort.",
+    "Injected core-stress and elastic terms are reduced effective closures; neither is claimed as a first-principles Euler pressure or shear-modulus derivation.",
+    "A single global dimensionless gain is selected per arm on discovery and reused unchanged on held-out confirmation; per-candidate fitting is forbidden.",
+    "Original A054-v0.2 restoring, Kelvin, ringdown, topology and convergence thresholds remain unchanged."
+  ],
+  "symbols": [
+    {
+      "symbol": "\\mathbf v_{BS}",
+      "meaning": "regularized Biot--Savart filament velocity",
+      "si_unit": "m s^-1",
+      "dimensions": "L T^-1"
+    },
+    {
+      "symbol": "a",
+      "meaning": "finite-core regularization length in normalized geometry units",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "g",
+      "meaning": "global dimensionless mechanism gain",
+      "si_unit": "1",
+      "dimensions": "1"
+    },
+    {
+      "symbol": "\\mathbf w_P",
+      "meaning": "raw finite-core cohesive-stress closure field",
+      "si_unit": "model raw",
+      "dimensions": "normalized before injection"
+    },
+    {
+      "symbol": "\\mathbf w_E",
+      "meaning": "raw curvature-elastic closure field",
+      "si_unit": "model raw",
+      "dimensions": "normalized before injection"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Baseline regularized Biot--Savart velocity",
+      "latex": "\\\\mathbf v_{BS}(\\\\mathbf x)=\\\\sum_j\\\\frac{\\\\Gamma_j}{4\\\\pi}\\\\oint_{C_j}\\\\frac{d\\\\boldsymbol\\\\ell\\\\times(\\\\mathbf x-\\\\mathbf y)}{(\\\\lVert\\\\mathbf x-\\\\mathbf y\\\\rVert^2+a^2)^{3/2}}",
+      "inputs": [
+        "filament geometry",
+        "circulation",
+        "a"
+      ],
+      "outputs": [
+        "v_BS"
+      ],
+      "dimensional_check": "Gamma[L^2/T] times dl[L] times r[L] over length^3 gives L/T."
+    },
+    {
+      "id": "E2",
+      "purpose": "Finite-core cohesive-stress surrogate",
+      "latex": "\\\\mathbf F_P(\\\\mathbf x_i)=\\\\sum_{j\\\\ne i,b}\\\\left[\\\\frac{e^{-r_{ib}^2/(2\\\\sigma_r^2)}}{\\\\sigma_r^2}-\\\\chi\\\\frac{e^{-r_{ib}^2/(2\\\\sigma_a^2)}}{\\\\sigma_a^2}\\\\right](\\\\mathbf x_i-\\\\mathbf y_b),\\\\qquad \\\\mathbf w_P=\\\\mathbf t\\\\times\\\\mathbf F_P",
+      "inputs": [
+        "geometry",
+        "core",
+        "sigma_r",
+        "sigma_a",
+        "chi"
+      ],
+      "outputs": [
+        "w_P"
+      ],
+      "dimensional_check": "The raw field scales as L^-1; it is converted to L/T only by registered RMS normalization E4."
+    },
+    {
+      "id": "E3",
+      "purpose": "Curvature-elastic surrogate",
+      "latex": "E_B=\\\\frac12\\\\sum_i\\\\int_{C_i}\\\\kappa^2 ds,\\\\qquad \\\\mathbf w_E=\\\\mathbf t\\\\times(-\\\\nabla_{\\\\!X}E_B)",
+      "inputs": [
+        "geometry"
+      ],
+      "outputs": [
+        "w_E"
+      ],
+      "dimensional_check": "The discrete variational field is a raw geometric field and is converted to L/T only by E4."
+    },
+    {
+      "id": "E4",
+      "purpose": "Candidate-independent mechanism normalization and injection",
+      "latex": "\\\\widehat{\\\\mathbf w}_m=V_0\\\\,\\\\mathbf w_m/\\\\operatorname{RMS}(\\\\mathbf w_m|_{t=0}),\\\\qquad \\\\dot{\\\\mathbf X}=\\\\mathbf v_{BS}+g\\\\sum_{m\\\\in A}\\\\widehat{\\\\mathbf w}_m",
+      "inputs": [
+        "v_BS",
+        "w_m",
+        "g"
+      ],
+      "outputs": [
+        "Xdot"
+      ],
+      "dimensional_check": "V0 has L/T; normalized mechanism fields and total Xdot therefore have L/T."
+    },
+    {
+      "id": "E5",
+      "purpose": "Hard recovery criterion inherited unchanged from A054-v0.2",
+      "latex": "R_{restore}\\\\le1.25,\\\\quad G_K\\\\le0.12,\\\\quad A_{ring}/A_0\\\\le1.75,\\\\quad \\\\Delta Lk\\\\le0.05",
+      "inputs": [
+        "restoring",
+        "Kelvin",
+        "ringdown",
+        "topology metrics"
+      ],
+      "outputs": [
+        "recovery flag"
+      ],
+      "dimensional_check": "All registered recovery statistics are dimensionless."
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "maximum restoring return ratio over registered separation modes",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "normalized maximum real part of the projected Kelvin-restricted Jacobian spectrum",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O3",
+      "definition": "maximum nonlinear shape-ringdown amplitude divided by initial perturbation amplitude",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O4",
+      "definition": "maximum pairwise linking-number drift over the trajectory",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O5",
+      "definition": "number of candidate-sector cells satisfying every original v0.2 hard recovery gate",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify frozen protocol, public-source blindness and exact input hashes before numerical work.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S2",
+      "operation": "Load exact frozen v0.2 anonymous discovery geometries and opaque source-native confirmation geometries.",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S3",
+      "operation": "Validate analytic null behavior, rigid-objectivity and mechanism-field normalization on the Python FP64 reference.",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S4",
+      "operation": "Blindly evaluate BASE, CORE, ELASTIC and CORE+ELASTIC arms over the preregistered gain grid on discovery; select one global gain per arm without semantic labels.",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S5",
+      "operation": "Apply each selected arm/gain unchanged to the held-out opaque source-native confirmation cohort.",
+      "formula_refs": [
+        "E4",
+        "E5"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S6",
+      "operation": "For confirmed recovery cells, require resolution convergence and C++/OpenMP FP64 parity; RPO/Floquet is evaluated only after restoring/Kelvin/ringdown recovery.",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S7",
+      "operation": "Optional GPU screening remains non-authoritative.",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G6"
+    },
+    {
+      "id": "S8",
+      "operation": "Assess evidence-class eligibility and mechanism minimality without promoting simulation-only evidence to physical support.",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G7"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "No registered arm produces a held-out recovery under unchanged v0.2 hard gates.",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F2",
+      "criterion": "A discovery recovery disappears when the selected gain is transferred unchanged to held-out source-native geometries.",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F3",
+      "criterion": "A held-out recovery fails spatial/temporal convergence or C++/OpenMP FP64 parity.",
+      "conclusion_if_met": "UNRESOLVED"
+    },
+    {
+      "id": "F4",
+      "criterion": "Only a multi-mechanism arm recovers while its registered single-mechanism ablations do not.",
+      "conclusion_if_met": "COMBINED_REQUIRED_SIMULATION_LEVEL"
+    }
+  ],
+  "edge_cases": [
+    "zero raw mechanism RMS",
+    "mechanism causes clearance collapse",
+    "topology change before ringdown horizon",
+    "no oscillatory mode for RPO",
+    "multiple arms tie in recovery count"
+  ],
+  "predictions": [
+    "Baseline reproduces the nonconfining v0.2 behavior within numerical tolerance.",
+    "If finite-core cohesive stress is essential, CORE-containing arms should recover cells that ELASTIC alone does not.",
+    "If transverse/curvature elasticity is essential, ELASTIC-containing arms should recover cells that CORE alone does not.",
+    "If both are required, only CORE+ELASTIC should transfer to held-out geometries."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "artifact_id": "SST_VAM5_SST17_Integrated_Action_v0.2.0",
+  "scientific_status": "FORMAL_ACTION_AND_LINEAR_DIAGNOSTICS_ONLY",
+  "geometry": "Euclidean 3D, absolute time t",
+  "background": {
+    "fluid": "incompressible inviscid constant rho_f",
+    "source_nature": "SST canonical 7.0e-7 kg m^-3 not inferred from fluid data",
+    "reference_frame": "material labels a and map X"
+  },
+  "candidate_independent_field": {
+    "name": "q(a,t)",
+    "units": "meter",
+    "nature": "material vector displacement, not native Euler degree of freedom",
+    "independent_effective_density": "rho_d [kg m^-3]",
+    "effective_stiffness": "K [Pa]",
+    "constraints": [
+      "det(dX/da)=1",
+      "div_x q=0"
+    ]
+  },
+  "action_terms": [
+    "rho_f |Xdot|^2 / 2",
+    "rho_d |qdot|^2 / 2",
+    "-K |curl_x q|^2 / 2",
+    "p (J-1)",
+    "eta div_x q"
+  ],
+  "model_limits": {
+    "Euler": "q=0,eta=0 -> incompressible Euler",
+    "vacuum_transverse": "X=a, prescribed background; c_d^2=K/rho_d",
+    "Maxwell_free": "E=-zeta qdot, B=zeta curl q, zeta^2= rho_d/eps0 =mu0 K",
+    "Cartan_torsion": "fixed u_a and Weitzenbock gauge: F=kappa u_a dtheta^a=dA, hence dF=0"
+  },
+  "optional_not_derived": {
+    "gyro_term": "rho_d (Omega cross q) dot qdot",
+    "magnetooptic": "Omega=beta B is an unverified constitutive relation",
+    "limits": "no electric charge, gravity or quantum spin closure"
+  },
+  "units": {
+    "rho_f": "kg m^-3",
+    "rho_d": "kg m^-3",
+    "K": "Pa",
+    "q": "m",
+    "zeta": "T",
+    "beta": "s^-1 T^-1",
+    "Verdet": "T^-1 m^-1"
+  },
+  "blindness_policy": "No target masses, c, G, alpha, observed EM optical observables may be fit using held-out validation families. c is calibrated explicitly only in reference Maxwell-form test.",
+  "missing_execution": [
+    "3D coupled Euler-director integration",
+    "finite-core PKLSA source-native knot input",
+    "phase observables",
+    "charge-current source closure",
+    "gyroscopic beta(B) microphysics",
+    "full 3D spatial/time convergence"
+  ]
+}

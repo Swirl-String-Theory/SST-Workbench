@@ -1,0 +1,1 @@
+If the KnotPlot executable is not in the normal `%LOCALAPPDATA%\Programs\KnotPlot\KnotPlot.exe` location, create `knotplot_exe.txt` here with the FULL path of the executable on ONE line. Alternatively set environment variable `KNOTPLOT_EXE` before running `run_all.cmd`. The original provided shortcut is copied under `inputs/` for provenance, not edited.

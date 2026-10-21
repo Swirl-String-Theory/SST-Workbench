@@ -1,0 +1,67 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,hyperref,xcolor}
+\hypersetup{colorlinks=true,urlcolor=blue!45!black,linkcolor=blue!35!black}
+\newcommand{\status}[1]{\textsf{#1}}
+\title{\textbf{F005 v0.5.0 --- Independent Linearized-Euler Sloshing Baseline}\\[0.3em]
+\large Development science contract and numerical qualification}
+\author{SST-Workbench / F005 External Wave Benchmark}
+\date{21 October 2026}
+\begin{document}
+\maketitle
+\noindent\textbf{Status:} \textcolor{red!70!black}{\status{GEOMETRY\_UNVERIFIED}} for physical use. The code, analytical tests and synthetic demo are executable. This is a linear potential-flow solution of the \emph{linearized} Euler free-surface problem; it is neither full nonlinear Euler computational fluid dynamics nor source-native PKLSA.
+
+\section{Question and evidence boundary}
+Given the published longitudinal tank acceleration $a(t)$, can an ideal inviscid fluid model derived \emph{ex ante} from the tank's measured geometry predict longitudinal free-surface elevation independently of trained ARX/oscillator parameters? The Zenodo release describes a T75 cell-culture flask, robot-driven acceleration and measured longitudinal wall-elevation trajectories, but the public record does not establish the particular internal wetted dimensions, measurement coordinate, and axis polarity needed for this question \cite{Giulietti2026}. Those inputs therefore remain intentionally blank in the source-provenance contract.
+
+\section{From Euler to a modal initial-value problem}
+Use $x\in[-L/2,L/2]$ and $z\in[-h,0]$, gravity $g$, density $\rho$ and interface tension $\sigma$. In the accelerating container frame, the linear potential-flow equations and conditions are
+\begin{align}
+\nabla^2\phi&=0,& \phi_x(\pm L/2,z,t)&=0, &\phi_z(x,-h,t)&=0,\\
+\eta_t&=\phi_z\big|_{z=0},&
+\phi_t+g\eta-\frac{\sigma}{\rho}\eta_{xx}&=-a(t)x\quad(z=0).
+\end{align}
+For antisymmetric longitudinal modes
+\begin{equation}
+k_n=\frac{(2n+1)\pi}{L},\qquad
+\omega_n^2=\left(gk_n+\frac{\sigma}{\rho}k_n^3\right)\tanh(k_nh),\quad n=0,1,\ldots.
+\end{equation}
+With $\eta(x,t)=\sum_n q_n(t)\sin(k_nx)$ and $x=\sum_n b_n\sin(k_nx)$,
+\begin{equation}
+b_n=\frac{4(-1)^n}{L k_n^2},\qquad
+\boxed{\ddot q_n+\omega_n^2q_n=-k_n\tanh(k_nh)b_n a(t).}
+\end{equation}
+The forcing coefficient multiplying $a$ is dimensionless; $q_n,\eta$ have units m, $k_n$ units m$^{-1}$, and $\omega_n$ units s$^{-1}$. The solver propagates the modes with an exact constant-acceleration propagator per sampling interval rather than a finite-difference Euler time step.
+
+\paragraph{Known limits and falsifiers.} For $kh\ll1$, $\omega^2\sim ghk^2$ (without capillarity). For $kh\gg1$, $\omega^2\sim gk$. For steady acceleration with $\sigma=0$ and enough modes, the equilibrium height at the positive wall approaches $-aL/(2g)$. The solver is \emph{undamped} by construction: any measured attenuation, meniscus response, weak contact-line dynamics, and three-dimensional effects must be handled as identified model inadequacies, never covertly tuned into this Euler baseline \cite{FaltinsenTimokha2009,FaltinsenEtAl2000}.
+
+\section{Input provenance and gate discipline}
+\begin{center}
+\begin{tabular}{@{}lp{11.5cm}@{}}\toprule
+Gate & Qualification meaning\\\midrule
+E0 & Exact wetted $L$, width, fill $h$, sensor $x$, fluid parameters, axis signs, orientation and initial-equilibrium evidence; \textbf{BLOCKED} until verified.\\
+E1 & Derivation limits, modal forcing, exact propagator, physical units, regression tests.\\
+E2 & Locked input NPY and v0.4.3 proxy-development split SHA-256; no TEST/OOD water-height access.\\
+E3 & Independent from-rest forecast across the 850 previously exposed development-validation trajectories (once E0 is met).\\
+E4 & One-mode-only conditional forecast from two measured initial heights; not equivalent to a multimodal initial-state reconstruction.\\
+E5 & Comparison uses strictly matched initial-condition/forcing specifications; otherwise diagnostic only.\\
+E6 & Proxy-family-disjoint DEVELOPMENT only; publisher true-family identifiers unavailable.\\
+E7/E8 & Source-native PKLSA NOT RUN / physical SST claims UNRESOLVED.\\
+E9 & Review of $\max|\eta|/h$, with $>0.20$ flagged as a large-amplitude linearity concern.\\\bottomrule
+\end{tabular}
+\end{center}
+\noindent No frequency is calibrated against the observed $\sim2.9\,\mathrm{Hz}$ oscillator. The primary evaluation uses $q_n(0)=\dot q_n(0)=0$ and measured $a(t)$ alone. The secondary evaluation explicitly consumes two observed heights \emph{at the origin only} to initialize a \emph{single} mode. Their RMSE statistics must never be aggregated.
+
+\section{Execution, provenance and next step}
+Install in the existing \texttt{F005-v0.1.0} root, preserving v0.1.0--v0.4.3 outputs. Run \texttt{run\_all\_v050.cmd DEMO} for nonphysical synthetic verification, then populate \texttt{config/EULER\_GEOMETRY\_REQUIRED.json} from an actual source record and run \texttt{run\_all\_v050.cmd}. Without sourced geometry, expect exit code 2 and \texttt{BLOCKED\_GEOMETRY\_UNVERIFIED}; that is an evidence-integrity \emph{success}, not a failed solver.
+
+Independent geometry/measurement information may be recoverable from the linked Camilotto thesis \cite{Camilotto2026}, but no numerical dimensions were taken from the uninspected thesis. A manufacturer's generic T75 exterior dimensions are not an admissible substitute for the actual internal wetted domain. Only after E0 and E1--E9 are reviewed should one consider a geometry-corrected 3D or viscous Euler/Navier--Stokes benchmark, and later an independent PKLSA comparison.
+
+\begin{thebibliography}{9}
+\bibitem{Giulietti2026} N. Giulietti, M. Bedodi, D. Ghavami, D. Camilotto, and H. Giberti (2026), ``Robot-executed longitudinal sloshing dataset for rectangular tank liquid handling,'' Zenodo v1.0.0, \url{https://doi.org/10.5281/zenodo.20039757}.
+\bibitem{FaltinsenTimokha2009} O. M. Faltinsen and A. N. Timokha (2009), \emph{Sloshing}, Cambridge University Press, ISBN 9780521881111, \url{https://www.cambridge.org/9780521881111}.
+\bibitem{FaltinsenEtAl2000} O. M. Faltinsen, O. F. Rognebakke, I. A. Lukovsky, and A. N. Timokha (2000), ``Multidimensional modal analysis of nonlinear sloshing in a rectangular tank with finite water depth,'' \emph{Journal of Fluid Mechanics} \textbf{407}, 201--234, \url{https://doi.org/10.1017/S0022112099007569}.
+\bibitem{Camilotto2026} D. Camilotto (2026), ``A comprehensive data-driven framework for robotic liquid sloshing control: from extensive experimental model validation and enhancement to trajectory optimization,'' Master's thesis, Politecnico di Milano, \url{https://hdl.handle.net/10589/253216}.
+\end{thebibliography}
+\end{document}
