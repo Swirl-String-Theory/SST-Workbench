@@ -1,0 +1,81 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=19mm,headheight=16pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,array,xcolor,hyperref,fancyhdr}
+\hypersetup{hidelinks}
+\definecolor{navy}{HTML}{193652}
+\definecolor{teal}{HTML}{136C73}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small F005 / External Wave Benchmark}\fancyhead[R]{\small v0.5.0-p2 / DEVELOPMENT}\fancyfoot[C]{\thepage}
+\setlength{\parskip}{4pt}\setlength{\parindent}{0pt}
+\newcommand{\sect}[1]{\par\medskip\noindent{\color{navy}\large\bfseries #1}\par\nobreak\smallskip}
+\begin{document}
+{\Large\bfseries\color{navy} F005 v0.5.0-p2}\par
+{\large Raw Acquisition Provenance \& Initial-State Qualification}\par
+{\small 22 October 2026 \;|\; Evidence-first qualification protocol}\par
+\vspace{4pt}\hrule\vspace{7pt}
+\textbf{Classification:} DEVELOPMENT / E0\_REVIEW\_NOT\_CERTIFIED. This patch is a read-only source and initial-state audit; it does not create a new physical SST/Euler result.
+\sect{1. Problem and input boundary}
+The prior p1 audit checked 3,400 development TRAIN trajectories. Its two relative-polarity hypotheses gave smaller TRAIN-only RMSE for $+1$ at horizons 0.1, 0.3 and 0.5 s. That is a data-dependent relative sign, \emph{not} a physical verification of the two raw coordinate frames. The reported first-sample magnitude was small but cannot certify stationary internal fluid flow.
+
+The thesis supplies geometry $L=0.080$ m, $\ell=0.031$ m, $h=0.043$ m and nominal model density $\rho=998$ kg m$^{-3}$. It documents subtracting a pre-motion optical baseline based on 1,000 recorded samples. The exported NPY data do not in themselves provide the original pre-motion frames.
+\sect{2. What p2 does and does not access}
+\begin{tabular}{p{.32\linewidth}p{.60\linewidth}}
+\toprule
+Reads & Boundaries \\
+\midrule
+Locked v0.4.3 split CSV & SHA-256 locked, 3,400 TRAIN and 850 VALIDATION IDs; zero overlaps in the registered proxy-family graph. No measured heights read.\\
+Existing geometry JSON & Compared to documented thesis values; never overwritten.\\
+Historical p1 JSON & Quoted as TRAIN-only descriptive evidence; never refits or reselects sign.\\
+Acquisition source text & Only from explicit evidence folder, static search and SHA-256; no external code executed.\\
+Small Zenodo archive & Only the short \texttt{load\_dataset.py} member, if available; loader is not raw acquisition proof.\\
+Raw pre-motion CSVs & Only files deliberately mapped to locked TRAIN IDs; no TEST/OOD, DEVELOPMENT VALIDATION, or large \texttt{DATASET.zip}.\\
+\bottomrule
+\end{tabular}
+\sect{3. Central identifiability limit}
+For a linear response operator $\mathcal{L}$,
+\[
+\eta_{\mathrm{obs}}(t)=s_{\eta}\,\mathcal{L}[s_a a_{\mathrm{raw}}](t),
+\qquad s_a,s_{\eta}\in\{-1,+1\}.
+\]
+Only $s_as_{\eta}$ is identified by the measured scalar input/output pair, not the two signs separately. The original code and coordinate-frame chain are required for independent axis verification.
+
+\newpage
+\sect{4. Initial-state evidence and falsifiable checks}
+For each genuinely available original pre-motion record, the audit checks its SHA-256, its registered development TRAIN ID, time monotonicity, the declared actuation start, and the count $N_{\rm pre}$. It records the scalar baseline scatter
+\[
+\sigma_{\eta,\rm pre}=\sqrt{\frac{1}{N_{\rm pre}}\sum_{j=1}^{N_{\rm pre}}(\eta_j-\overline\eta)^2}
+\]
+and the least-squares trend of $\eta(t)$ before actuation. $N_{\rm pre}\ge 1000$ implements the documented optical baseline method as a \emph{screen}; it is not a guarantee of zero vorticity, zero velocity, or equilibrated modal motion.
+\[
+\eta(0)\approx0,\qquad \dot\eta(0)\approx0
+\quad\not\Rightarrow\quad \mathbf v(\mathbf x,0)=\mathbf 0.
+\]
+The audit never sets \texttt{initial\_equilibrium\_confirmed=true} automatically.
+\sect{5. Gate table}
+\renewcommand{\arraystretch}{1.13}
+\begin{tabular}{p{.31\linewidth}p{.60\linewidth}}
+\toprule
+Gate & Requirements and status logic\\\midrule
+P2\_LOCKED\_SPLIT & Exact source hash, valid proxy group and size counts. Fails closed if different.\\
+P2\_GEOMETRY & Source-exact dimensions, model constants and sensor $x=L/2$ verified.\\
+P2\_INPUT\_AXIS & Original exporter and robot axis chain, line-level citation, reviewer semantics.\\
+P2\_HEIGHT\_AXIS & Camera rotation, image coordinate origin, sign transformations and wall mapping traced.\\
+P2\_PREMOTION & Original timestamped pre-motion traces and start-event provenance, per trajectory.\\
+P2\_HYDRO\_REST & Independent physical evidence/protocol for quiescent fluid; not deducible from scalar signal.\\
+E0\_MAIN\_EULER & \textbf{BLOCKED} pending explicit evidence review. The audit is unable to self-certify.\\
+E5 / E7 / E8 & Euler experiment NOT RUN; PKLSA NOT RUN; SST claims UNRESOLVED.\\
+\bottomrule
+\end{tabular}
+\sect{6. Reproduction}
+Unzip into the unchanged F005 root. Run \texttt{run\_all\_v050\_p2.cmd TEST} then \texttt{run\_all\_v050\_p2.cmd}. Review output JSON and markdown summary. Put any original exporter/recording scripts and raw pre-motion traces under \texttt{sources/acquisition\_evidence/}; use the independent \texttt{P2\_EVIDENCE\_MANIFEST.json} file to cite their exact line ranges. Preserved historical outputs are not rewritten.
+\sect{7. Explicit limitations}
+The robot dataset may store commanded rather than directly measured acceleration. The source transformation from command frames to the NPY array and the camera optical sign convention must be traced rather than inferred from a low RMSE. A corrected sign alone is insufficient if the dynamic start state is unverified. No nonlinear Euler, vorticity reconstruction or SST ontology is tested.
+\sect{References}
+\begin{thebibliography}{9}\setlength{\itemsep}{4pt}
+\bibitem{Camilotto2026} D. Camilotto (2026), \emph{A Comprehensive Data-Driven Framework for Robotic Liquid Sloshing Control: From Extensive Experimental Model Validation and Enhancement to Trajectory Optimization}, Master's thesis, Politecnico di Milano. \url{https://hdl.handle.net/10589/253216}.
+\bibitem{Giulietti2026} N. Giulietti et al. (2026), \emph{Robot-executed longitudinal sloshing dataset for rectangular tank liquid handling}, Zenodo. \url{https://doi.org/10.5281/zenodo.20039757}.
+\bibitem{Faltinsen2009} O. M. Faltinsen and A. N. Timokha (2009), \emph{Sloshing}, Cambridge University Press, ISBN 9780521881111.
+\end{thebibliography}
+\end{document}

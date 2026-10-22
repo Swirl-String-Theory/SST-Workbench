@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -45,6 +46,63 @@ def _relative_shortcut_workdir(exe: Path, shortcut: Path, raw: str) -> tuple[Pat
             f'shortcut parent yields {candidate_link}; specify --workdir explicitly.')
     base, directory = candidates[0]
     return _require_workdir(directory, 'Shortcut relative Start-in'), 'relative_start_in_' + base
+
+
+# WScript.Shell returns shortcut Start-in literally, including Windows %VAR%
+# references. Python's os.path.expandvars may leave variables unresolved (e.g.
+# environment not inherited by the process), so resolve them explicitly.
+_ENV_REF = re.compile(r'%([^%\r\n]+)%')
+
+
+def _named_environment_value(name: str) -> str | None:
+    """Windows environment variables are case insensitive; support that in tests."""
+    value = os.environ.get(name)
+    if value is not None:
+        return value
+    for key, val in os.environ.items():
+        if key.casefold() == name.casefold():
+            return val
+    return None
+
+
+def _expand_shortcut_start_in(raw: str, shortcut: Path) -> tuple[str, str]:
+    r"""Resolve %VAR% before interpreting absolute/relative path semantics.
+
+    For missing vars, an exact case-insensitive ancestor *directory name* of
+    the shortcut is an auditable fallback. This covers a copied A058 shortcut
+    with Start in '%SST-Workbench%\01_research\...\A058-v0.3.2'.
+    Unknown variables never silently become relative paths.
+    """
+    names = []
+    fallback_names = []
+    unknown = []
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(1)
+        names.append(name)
+        value = _named_environment_value(name)
+        if value:
+            return value
+        roots = [shortcut.parent, *shortcut.parent.parents]
+        matches = [root for root in roots if root.name.casefold() == name.casefold()]
+        if len(matches) == 1:
+            fallback_names.append(name)
+            return str(matches[0])
+        unknown.append(name)
+        return match.group(0)
+    expanded = _ENV_REF.sub(replace, raw)
+    if unknown or _ENV_REF.search(expanded):
+        names_unresolved = ', '.join(sorted(set(unknown or _ENV_REF.findall(expanded))))
+        raise ValueError(
+            f'Unresolved shortcut Start-in environment variable(s): {names_unresolved}. '
+            'Define the variable for this process or use --workdir. '
+            'The .lnk itself need not be changed.')
+    if fallback_names:
+        source = 'shortcut_start_in_project_ancestor_expansion'
+    elif names:
+        source = 'shortcut_start_in_environment_expansion'
+    else:
+        source = 'shortcut_start_in_literal'
+    return expanded, source
 
 
 @dataclass(frozen=True)
@@ -110,10 +168,12 @@ def resolve_launcher(value: Path | str, *, platform: str | None = None,
         wd = explicit
         source = 'explicit_cli_override'
     elif raw_workdir:
-        start_in = Path(os.path.expandvars(raw_workdir.strip('"'))).expanduser()
+        expanded, expansion_source = _expand_shortcut_start_in(raw_workdir.strip('"'), entry)
+        start_in = Path(expanded).expanduser()
         if start_in.is_absolute():
             wd = _require_workdir(start_in, 'Shortcut Start-in')
-            source = 'shortcut_start_in_absolute'
+            source = ('shortcut_start_in_absolute' if expansion_source == 'shortcut_start_in_literal'
+                      else expansion_source)
         else:
             wd, source = _relative_shortcut_workdir(exe, entry, str(start_in))
     else:

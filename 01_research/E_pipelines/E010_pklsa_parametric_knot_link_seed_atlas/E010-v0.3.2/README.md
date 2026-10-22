@@ -1,109 +1,166 @@
-# E010 — SST Parametric Knot-Link Seed Atlas v0.3.1
+# A058-v0.3.7 — Native Measurement Qualification
 
-Repository-native PKLSA release for the restructured `SST-Workbench`.
+**Status:** ADDITIVE / LOCAL_VALIDATED / NATIVE_2026_NEW_DIAGNOSTIC_NOT_RUN / PHYSICS_UNRESOLVED.
 
-This release is both:
+Version v0.3.7 extends the already-working v0.3.6 A058 runner. It records why the existing `A058_probes3` / `A058_probes4` outputs are **numerically unqualified** even though KnotPlot returned exit code 0: real console and XYZ geometry versus a native CSV containing zeros, plus a failed `KP-alex.exe` helper.
 
-1. an installable Python façade (`sst_pklsa`) for resolving and inspecting the Workbench knot evidence graph; and
-2. the high-resolution geometry qualification pipeline, extended in v0.3.1 with literature-derived geometry-integrity gates.
+This is a diagnostic experiment, not a modification to the original 271 registered blind slider campaign or to an SST claim.
 
-It **does not copy the full knot datasets** into the release. Raw bytes remain in `03_data`; PKLSA records paths, hashes, source roles, lineages, topology references and qualification results.
-
-## Why this release exists
-
-The restructured Workbench now separates:
-
-- raw/reference data under `03_data/A_knots`;
-- generated data under `03_data/D_generated`;
-- reusable knot code under `02_libraries/A_knot_libraries`;
-- producer tools under `04_tools`;
-- research producers such as PTSA/QHP/KAtlas conditioning under `01_research/E_pipelines`.
-
-PKLSA v0.3.1 resolves those layers without flattening them into one pseudo-independent dataset.
-
-## Public Python API
-
-```python
-from sst_pklsa import Workbench
-
-wb = Workbench.open(r"C:\workspace\projects\SST-Workbench")
-print(wb.doctor()["coverage"])
-
-carriers = wb.discover_carriers("3_1")
-for c in carriers[:10]:
-    print(c.source_family, c.carrier_id, c.independence_group)
-```
-
-The core does not require either existing `sst_knotlib` implementation to be imported. This is deliberate: the current Geometry Library and Knot Library both contain a top-level `sst_knotlib` package, so blindly putting both providers on one `PYTHONPATH` is ambiguous. `sst_pklsa bridges` reports that condition instead of silently selecting one.
-
-## Commands
+From the source directory containing your original `KnotPlot.lnk` and `kpdist-23mar2025.zip`:
 
 ```bat
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench doctor
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench resolve --output resolved.json
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench inventory --output inventory.json.gz
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench carriers --topology 3_1 --output carriers_3_1.json
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench qualify --topology 3_1 --config configs\qualification_basic.json --output qualification\3_1
+run_all.cmd SELFTEST
+run_all.cmd QUALIFY_EXISTING --source ".\A058_probes4.zip" --out ".\A058_v037_q4"
+run_all.cmd GENERATE_MEASUREMENTS --dist ".\kpdist-23mar2025.zip" --out ".\A058_v037_native"
+run_all.cmd RUN_MEASUREMENTS --exe ".\KnotPlot.lnk" --out ".\A058_v037_native" --timeout 120
 ```
 
-For a byte-level source snapshot:
+Or use `RUN_MEASUREMENTS --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_v037_fresh" --timeout 120` to generate the inputs only when the destination **does not yet exist**. A native negative result returns exit code 2 **after writing a qualification report**. Never overwrite the old evidence.
+
+New protocol: 4 short real KnotPlot runs, `dstep` 1 or 4 with `data open` before or after `length`/`rog`, exact same 2025 trefoil seed and 32 `go` iterations. Native `parameters` readback is enclosed by markers. The original `KnotPlot.lnk` supplies EXE+working directory and is not modified. All exports use absolute A058 result paths.
+
+For details and gate definitions see `docs/NATIVE_MEASUREMENT_QUALIFICATION.md`. See `CHANGELOG.md` and `VALIDATION.md` for evidence/limitations.
+
+---
+
+## Inherited historical notes
+
+# A058-v0.3.5 — Relative Windows Shortcut Start-in Repair
+
+**Status:** DEVELOPMENT / 38/38 local regressions PASS / native Windows KnotPlot NOT RUN in release environment. This is a launcher-only repair of A058-v0.3.3; blind gates and 271-condition registration remain unchanged.
+
+The v0.3.3 resolver rejected every relative `WorkingDirectory` in the `.lnk` as `RuntimeError Shortcut WorkingDirectory is relative`. This version resolves the folder safely, preserving original KnotPlot resource lookup and absolute A058 probe I/O:
+
+- Empty Start-in: use the target executable's own folder (recorded fallback).
+- `.` or `./`: use the target executable's own folder (explicit behavior, not the current A058 folder).
+- Another relative Start-in: evaluate both the EXE parent and the `.lnk` parent; choose only an unambiguous existing directory. If both differ, stop and request `--workdir`.
+- Absolute Start-in: use that exact existing folder.
+- Optional `--workdir "C:\absolute\KnotPlot-data"`: explicit override if Start-in is ambiguous or unavailable.
+
+The `CHECK_SHORTCUT` command resolves the path without starting KnotPlot:
 
 ```bat
-python -m sst_pklsa --workbench C:\workspace\projects\SST-Workbench inventory --deep-hash --output inventory_deep.json.gz
+run_all.cmd CHECK_SHORTCUT --exe ".\KnotPlot.lnk"
+run_all.cmd RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --out ".\A058_probes" --timeout 120
 ```
 
-## Source resolution order
+If resolution remains ambiguous, choose the real KnotPlot data folder explicitly:
 
-1. live `10_docs/registry/catalog_index.json` and `family_hierarchy.json`;
-2. canonical paths declared in `configs/source_contract_v1.json`;
-3. catalog-family paths for producer/library/tool dependencies;
-4. explicit legacy aliases only when canonical paths are absent;
-5. heuristic repository scan only as **audit output**, never as automatic scientific admission.
-
-The bundled registry snapshot is fallback metadata for portability. A live Workbench registry always wins.
-
-## Scientific guards
-
-- `Quarantine/` is negative/audit evidence only.
-- generated QHP/PTSA/conditioning output is not counted as upstream source evidence;
-- byte-identical mirrors share an independence group;
-- KnotAtlas/KAtlas reference data is not called native metric 3-D geometry;
-- topology naming crosswalks are recorded only when present in upstream reference data;
-- missing or undecodable geometry fails closed;
-- per-observable geometry convergence remains independent.
-
-## High-resolution observables
-
-The qualification core calculates a resolution ladder for:
-
-`L`, `kappa_max`, `kappa_rms`, `sigma_kappa`, `tau_rms`, `Wr`, `ACN`, `d_min`, `dcsd`, `reach`, `Thi`, `Rop`, and `ropelength_reach`.
-
-`Thi = 2*reach` is emitted explicitly as the diameter convention used for direct comparison with historical Gilbert/KnotPlot `L/D` values. `reach` is retained separately.
-
-## v0.3.1 literature gates
-
-The publication qualification now adds three hard geometry-integrity gates: Li--Peters isotopy-safe sampling proxy (`G1`), Cantarella writhe-order convergence (`G2`), and signed Frenet/chirality completeness (`G3`). Contextual ideal-trefoil and torus-knot benchmarks plus Hasimoto/vortex-dynamics handoff diagnostics are also emitted.
-
-`Wr`, `ACN`, and linking number now use exact polygonal segment-pair solid-angle integration in both Python and the C++/OpenMP backend. See `docs/LITERATURE_GATES_V031.md` for formulas, assumptions, thresholds, and references.
-
-## Output convention
-
-Scripts write to:
-
-```text
-./E010_PKLSA_Production_Knot_Link_Basis_v0.3.1-outputs/
+```bat
+run_all.cmd CHECK_SHORTCUT --exe ".\KnotPlot.lnk" --workdir "C:\full\path\to\KnotPlot"
+run_all.cmd RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --workdir "C:\full\path\to\KnotPlot" --out ".\A058_probes" --timeout 120
 ```
 
-and `run_90_pack.cmd` creates:
+The existing `probe.kpc` stays unchanged. A058 generates an explicit `probe.native.kpc` per condition: `load`, `data open`, `save` use absolute paths under `A058_probes/dstep_1` and `A058_probes/dstep_4`. KnotPlot's process cwd remains its normal data folder. Previous `FileNotFoundError` before launch does not require probe regeneration **if no native runtime files were created**; the runner refuses to overwrite any existing native results.
 
-```text
-../E010_PKLSA_Production_Knot_Link_Basis_v0.3.1-outputs.zip
+**Limits:** the provided `.lnk` was not available for real Windows COM testing. `CHECK_SHORTCUT` qualifies paths, not the KnotPlot runtime. Actual v2026 `-stdin -nographics`, getter, iteration and positive `safe` checks remain open. No claims of vortex physics or collision safety follow from these changes.
+
+---
+
+# A058-v0.3.3 — KnotPlot Shortcut / Working-Directory Hotfix
+
+**Release scope:** surgical addition to A058-v0.3.2; still DEVELOPMENT / native Windows NOT_RUN.
+
+The `--exe` option now accepts **the actual `.lnk` file**, and resolves its **Target**, **Start in / WorkingDirectory**, and optional **Arguments** with Windows PowerShell/WScript.Shell. The `.lnk` itself is never passed to CreateProcess (avoids WinError 193). For a direct `.exe`, the fallback CWD is its parent folder, *not* `A058_probes/dstep_*`.
+
+**Important:** KnotPlot is launched with the correct original CWD, but the generated *runtime copy* `probe.native.kpc` contains **absolute paths** for `load A058_seed.kpf`, `data open A058_native_metrics.csv`, and `save A058_final.txt ascii`. Thus A058 exports remain under `A058_probes/dstep_1` and `dstep_4` rather than accidentally filling the KnotPlot installation folder. Original `probe.kpc` is immutable. Private launcher metadata is in `A058_probes/NATIVE_LAUNCH_PRIVATE.json`. A link with an empty **Start in** falls back to the executable directory, recorded explicitly; a malformed nonempty path stops safely.
+
+From the A058-v0.3.3 folder containing the shortcut:
+
+```bat
+run_all.cmd SELFTEST
+run_all.cmd RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --out ".\A058_probes" --timeout 120
 ```
 
-## Release boundary
+`A058_probes` must have been created with `GENERATE_PROBES` and must not contain prior native results or logs; do not overwrite prior runs. If your existing v0.3.2 folder already contains generated probes, copy the hotfix's updated `tools/shortcut_runtime.py` and `tools/distribution_audit.py` there (or install the full release next to it) and run on that fresh probe folder. A shortcut containing nonempty Arguments is passed through verbatim as a Windows CreateProcess command line; the external KnotPlot build must still support appended `-stdin -nographics`.
 
-The package can be validated without the full Workbench via synthetic tests and bundled registry snapshots. That is not equivalent to a full publication qualification over the real local data tree. Run `run_all_publication.cmd` on the local Workbench before treating source coverage and high-resolution metrics as final evidence.
+**NOTE:** the hotfix does not yet certify numeric getters, the `go` iteration counter, or continuous collision safety. No native run was performed in the release environment.
 
-## Packaged release note (2026-09-10)
+---
 
-This distributable includes the repository-native `sst_pklsa` resolver/facade and the tested `pklsa_builder` v0.3.1 qualification core. The resolver uses the live Workbench canonical paths first; bundled registry snapshots are provenance/fallback metadata. The qualification core retains compatibility with the PKLSA v0.2.0 atlas as a base input. A full multi-source publication claim requires executing the included publication pipeline on the actual Workbench; this ZIP does not embed or duplicate the multi-GB raw knot datasets.
+# A058-v0.3.2 — KnotPlot Distribution-Assisted Parameter Audit
+
+**Classification:** ADDITIVE / DEVELOPMENT / OFFLINE AUDIT VALIDATED, NATIVE KNOTPLOT UNVERIFIED.
+**Inherited baseline:** A058-v0.3.1 repair coordinator, preserving A058-v0.3.0 clone and original A058-v0.2.9/v0.2.10 scientific code and historical results.
+**Date:** 2026-10-21.
+
+## Purpose
+
+Audit the user-provided original `kpdist-23mar2025.zip` (KnotPlot distribution build 5093) for actual help/script evidence, independently read 1.0 single-component KnotPlot binary geometries, and generate safe, opt-in dstep comparison scripts. The archive contains utility C/C++ source but *not the complete KnotPlot dynamics solver*. It is **not** repackaged or redistributed with this release. References to its internal files are recorded by relative path and SHA-256.
+
+## Requirements
+
+- Python 3.10+ (no third-party dependencies for v0.3.2 audit tools).
+- The user-supplied, unchanged `kpdist-23mar2025.zip` on your computer.
+- The existing A058-v0.3.0 on Windows only if using the inherited v0.3.1 `--legacy` repair functions.
+- A real Windows KnotPlot executable **only** for optional native probes; this package has none.
+
+## Offline auditable commands — from this extracted release directory
+
+```bat
+run_all.cmd SELFTEST
+run_all.cmd AUDIT_ALL --dist "C:\path\to\kpdist-23mar2025.zip" --out "C:\path\to\NEW_A058_distribution_audit"
+run_all.cmd KPF_AUDIT --dist "C:\path\to\kpdist-23mar2025.zip" --out "C:\path\to\NEW_A058_kpf_audit"
+run_all.cmd GENERATE_PROBES --dist "C:\path\to\kpdist-23mar2025.zip" --out "C:\path\to\NEW_A058_safe_probes"
+```
+
+Each `--out` directory **must not exist**. Static audit outputs: `SOURCE_EVIDENCE.json`, `GUI_CONTROL_MATRIX.json`, `KPF_AUDIT.json`, `KPF_AUDIT.csv`, and `RUN_RECEIPT.json`. KPF audit covers `basic/0_1`, `3.1`, `4.1`, `8.19`, and the multicomponent `6.3.3` as a mandatory **unsupported scope** test; no topological knot certification is implied.
+
+## Optional native test (explicit user action only)
+
+```bat
+run_all.cmd RUN_SAFE_PROBES --exe "C:\path\to\KnotPlot.exe" --out "C:\path\to\NEW_A058_safe_probes" --timeout 120
+```
+
+Runs two independent 32-iteration processes with `dstep = 1` and `dstep = 4`, each from the exact same KPF bytes and `collision fast`. The generated scripts explicitly turn OFF velocity-proportional force (`velforce`), buggy tangential force (`tanf`), gravity (`grav`), and thermal agitation (`therm`); enable `elec`, `mech`; disable `amech`. It records `safe`, `length`, `rog`, `alex -1`, `data format` and an ASCII export. Raw `NATIVE_STDOUT_PRIVATE.log` is **PRIVATE** and may contain local path/parameter data. Native command syntax, successful 3D export and the `safe` check **must** be verified against the user's newer KnotPlot build; unsupported tokens are reported as unsupported, not interpreted as physics. Output is never overwritten. A `dstep` negative-control pass does not certify no crossings *between* checkpoints.
+
+Do **not** run the archived `relaxA-bm.kps` and `relaxB-bm.kps` unchanged for scientific controls: both contain `coll a`, permitting collisions, and `go 9999999`. The v0.3.2 probes are new, short, safer adaptations, not replications of their original execution outcomes.
+
+## Inherited v0.3.1 diagnostics
+
+```bat
+run_all.cmd DIAGNOSE --legacy "C:\path\to\A058-v0.3.0"
+run_all.cmd AUDIT_CONTROLS --legacy "C:\path\to\A058-v0.3.0"
+```
+
+The source-engine/framework locator fix, native PRIVATE logs and old 271-condition frozen protocol preservation are unchanged. No automatic old-gate reinterpretation, reveal, new blind freeze, geometry mutation or A058 private mapping is performed. Scientific changes to force models require a separately preregistered version.
+
+## Evidence labels
+
+- `SOURCE_OBSERVED`: exact documentation/script content in 2025 distribution.
+- `KPF_PARSED`: centerline coordinates obtained independently from 2025 catalog binary.
+- `RUNTIME_UNVERIFIED`: no actual 2026 KnotPlot execution in this environment.
+- `UNSUPPORTED_LINK_OR_ENCODING`: intentional scope restriction, not model falsification.
+- `NUMERICAL_CONTROL_ONLY`: `dstep`, `max-dr`, and collision-guard studies do not establish Euler/vortex dynamics.
+
+See `docs/DISTRIBUTION_AUDIT.md`, `docs/CONTROL_MATRIX.md`, and `VALIDATION.md`.
+
+
+## v0.3.5: Windows shortcut %ENVVAR% correction
+
+A `.lnk` may contain `Start in: %SST-Workbench%\01_research\...\A058-v0.3.2`.
+The previous v0.3.4 runner incorrectly attempted to treat that string as a
+plain relative path. v0.3.5 first expands Windows `%VAR%` placeholders. If a
+variable is unavailable to Python, it may be resolved from a uniquely named
+ancestor directory of the shortcut itself. Unmatched placeholders fail closed.
+
+**The shortcut target and shortcut file are never modified.**
+The KnotPlot process inherits the resolved `Start in` directory, and the
+KnotPlot script references per-probe inputs/outputs by explicit absolute paths
+under `A058_probes/`. This is independent of the executable install folder.
+
+Preflight and run without changing the existing .lnk:
+
+```bat
+run_all.cmd CHECK_SHORTCUT --exe ".\KnotPlot.lnk"
+run_all.cmd RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --out ".\A058_probes" --timeout 120
+```
+
+If older attempted launches have created native output/log files, use a NEW
+output directory to prevent overwriting committed evidence. This fix remains
+locally tested only; final qualification requires the native Windows run.
+
+
+## v0.3.6 — generated seed preflight
+
+`CHECK_PROBES --out <path>` is read-only; for a new path `RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_probes_NEW" --timeout 120` creates its inputs exactly once. The old missing `A058_seed.kpf` exception is identified **before** launching KnotPlot. Do not reuse a partial/native-run output folder. See `docs/PROBE_INPUT_PREFLIGHT_v0.3.6.md`.

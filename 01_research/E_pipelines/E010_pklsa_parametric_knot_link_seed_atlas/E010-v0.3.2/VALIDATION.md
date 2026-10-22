@@ -1,58 +1,22 @@
-# Validation — E010 PKLSA v0.3.1
+# A058-v0.3.7 — Independent release validation
 
-## Regression status
+**22 October 2026 — DEVELOPMENT diagnostic package.** This is neither a physics certificate nor a new native 2026 execution.
 
-- Full pure-Python suite: **41 passed, 1 skipped, 0 failed**.
-- C++/OpenMP Linux build: **compiled and imported successfully**.
-- Full suite with native backend: **41 passed, 1 skipped, 0 failed**.
-- Native exact kernels present: `writhe_acn_exact`, `linking_number_exact`.
+## Actual local tests
 
-The skipped test is the pre-existing optional historical PKLSA-v0.2.0 integration test when its external base package is not supplied.
+- `A058_KPDIST_ZIP=/mnt/data/kpdist-23mar2025.zip python -m unittest discover -s tests -v`: **66/66 PASS**; uses the genuine uploaded 2025 KnotPlot distribution for static tests.
+- Mocked full four-case native diagnostic passed in the regression suite. The mock validates relative vs absolute I/O and receipt writing only; it is **not** proof that the genuine Windows binary accepts or successfully evaluates the new scripts.
+- v0.3.7 read-only historical qualifier executed on **both authentic user-uploaded** `A058_probes3.zip` and `A058_probes4.zip`; generated separate unchanged-source receipts under `evidence/2026_historical_qualification/`.
+- Each archive: 2/2 original run receipt hash chains verified (original console log, native script, ASCII coordinates, original generator script, shared KPF seed). Native CSV `/l`, `/g` both zero while XYZ and console nonzero; **FAIL_MEASUREMENT_QUALIFICATION** for both dstep 1/4. `KP-alex.exe` helper opening failure captured. `dstep` getter **UNRESOLVED**, not PASS.
+- The old 271-condition preregistered blind experiment has **not** been rerun, modified, reinterpreted, or promoted. A058-v0.3.7 inherits original v1.0.8 framework pin from the coordinator; no framework upgrade or physical solver replacement.
 
-## New literature-gate regression cases
+## Open before certification
 
-The v0.3.1 tests include:
+1. Run fresh four-case diagnostic on the real October 2026 KnotPlot version using the `.lnk` and its genuine Start-in; inspect raw logs privately.
+2. Determine whether native `data open` ordering changes `/l` and `/g` zeroing; require numeric CSV/XYZ agreement with bounded tolerance.
+3. Confirm `dstep` is actually in `parameters` output with correct value; otherwise mark state unverified. No assumption that issuing `dstep = 1` proves assignment.
+4. Determine dependency search path for `KP-alex.exe` and verify `alex -1` independently in a *separate* run if needed (not required for core length/Rg qualification).
+5. Positive `safe` on two snapshots and static XYZ nonintersection **do not** certify no crossings during integration.
+6. No SST vortex-fluid/Euler/PKLSA physics inference from KnotPlot relaxations, display-only control, or native data syntax qualification.
 
-- exact polygonal Gauss linking on a synthetic Hopf link: \(|Lk|=1\) to floating-point precision;
-- Cantarella writhe-convergence gate on a smooth \(T(2,3)\) torus trefoil;
-- mirror reflection test showing simultaneous sign reversal of signed torsion integral and signed writhe;
-- Oberti--Ricca analytic torus-knot length against direct high-resolution sampling;
-- Przybyl--Pierański ideal-trefoil benchmark at the literature reference value.
-
-## Bundled Gilbert ideal-trefoil fixture
-
-The bundled `Ideal.txt.gz` `3_1` record has upstream diameter-convention reference
-
-\[
-L/D=16.371637,
-\]
-
-while the high-resolution Przybyl--Pierański target used by `B1` is
-
-\[
-L/D=16.3714672385.
-\]
-
-Their relative difference is
-
-\[
-1.04\times10^{-5},
-\]
-
-so the source reference itself is consistent with the literature benchmark.
-
-For the PKLSA resolution ladder \(N=128,256,512,1024\), the hard gates give:
-
-- `G1_isotopy_safe_sampling`: **PASS**;
-- `G2_writhe_quadratic_convergence`: **PASS**, with estimated orders \(p=1.7366,1.8495\);
-- `G3_signed_frenet_chirality_completeness`: **PASS**.
-
-The contextual `B1_ideal_trefoil_ropelength` is intentionally a **soft FAIL**: the current numerical reach/doubly-critical-distance estimator gives a finest recomputed
-
-\[
-Rop=17.5702443767,
-\]
-
-about \(7.32\%\) above the literature value. This is retained as an explicit estimator-calibration issue. It does **not** invalidate the upstream Gilbert geometry reference and is not hidden by using the source-provided value as the recomputed result.
-
-See `VALIDATION_V031.json` for machine-readable values and `docs/LITERATURE_GATES_V031.md` for gate definitions and references.
+**Result status:** OFFLINE_QUALIFICATION_VALIDATED; NEW_NATIVE_DIAGNOSTIC_NOT_RUN; INDEPENDENT_PHYSICS_UNRESOLVED.

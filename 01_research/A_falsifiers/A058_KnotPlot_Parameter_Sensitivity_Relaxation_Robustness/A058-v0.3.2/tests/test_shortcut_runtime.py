@@ -1,5 +1,6 @@
 """Offline launcher regression (mock KnotPlot only; native Windows still required)."""
 from __future__ import annotations
+import os
 import json, subprocess, sys, tempfile, unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -121,6 +122,58 @@ class ShortcutTest(unittest.TestCase):
    with patch('tools.shortcut_runtime.subprocess.run',return_value=resp):
     with self.assertRaises(FileNotFoundError):resolve_launcher(link,platform='win32')
 
+ def test_start_in_expands_named_environment_variable(self):
+  with tempfile.TemporaryDirectory() as td:
+   root=Path(td);project=root/'SST-Workbench';project.mkdir()
+   a058=project/'01_research'/'A_falsifiers'/'A058-v0.3.2';a058.mkdir(parents=True)
+   link=a058/'KnotPlot.lnk';link.write_bytes(b'lnk')
+   exe=root/'KnotPlotInstall'/'KnotPlot.exe';exe.parent.mkdir();exe.write_bytes(b'exe')
+   raw='%SST-Workbench%'+os.sep+'01_research'+os.sep+'A_falsifiers'+os.sep+'A058-v0.3.2'
+   response=subprocess.CompletedProcess([],0,json.dumps({'target':str(exe),'workdir':raw,'arguments':''}),'')
+   env={**os.environ,'SST-Workbench':str(project)}
+   with patch.dict(os.environ,env,clear=True),patch('tools.shortcut_runtime.subprocess.run',return_value=response):
+    launch=resolve_launcher(link,platform='win32')
+   self.assertEqual(launch.workdir,a058)
+   self.assertEqual(launch.workdir_source,'shortcut_start_in_environment_expansion')
+
+ def test_start_in_uses_project_ancestor_if_env_missing(self):
+  with tempfile.TemporaryDirectory() as td:
+   root=Path(td);project=root/'SST-Workbench';project.mkdir()
+   a058=project/'01_research'/'A_falsifiers'/'A058-v0.3.2';a058.mkdir(parents=True)
+   link=a058/'KnotPlot.lnk';link.write_bytes(b'lnk')
+   exe=root/'KnotPlotInstall'/'KnotPlot.exe';exe.parent.mkdir();exe.write_bytes(b'exe')
+   raw='%SST-Workbench%'+os.sep+'01_research'+os.sep+'A_falsifiers'+os.sep+'A058-v0.3.2'
+   response=subprocess.CompletedProcess([],0,json.dumps({'target':str(exe),'workdir':raw,'arguments':''}),'')
+   env={k:v for k,v in os.environ.items() if k.casefold()!='sst-workbench'}
+   with patch.dict(os.environ,env,clear=True),patch('tools.shortcut_runtime.subprocess.run',return_value=response):
+    launch=resolve_launcher(link,platform='win32')
+   self.assertEqual(launch.workdir,a058)
+   self.assertEqual(launch.workdir_source,'shortcut_start_in_project_ancestor_expansion')
+
+ def test_unrecognized_env_variable_fails_closed(self):
+  with tempfile.TemporaryDirectory() as td:
+   root=Path(td);link=root/'KnotPlot.lnk';link.write_bytes(b'lnk')
+   exe=root/'KnotPlot.exe';exe.write_bytes(b'exe')
+   raw='%A058_REALLY_UNKNOWN_VARIABLE%'+os.sep+'data'
+   response=subprocess.CompletedProcess([],0,json.dumps({'target':str(exe),'workdir':raw,'arguments':''}),'')
+   env={k:v for k,v in os.environ.items() if k!='A058_REALLY_UNKNOWN_VARIABLE'}
+   with patch.dict(os.environ,env,clear=True),patch('tools.shortcut_runtime.subprocess.run',return_value=response):
+    with self.assertRaisesRegex(ValueError,'Unresolved shortcut Start-in environment'):
+     resolve_launcher(link,platform='win32')
+
+ def test_env_var_case_insensitive_resolution(self):
+  with tempfile.TemporaryDirectory() as td:
+   root=Path(td);project=root/'actual';project.mkdir()
+   link=root/'KnotPlot.lnk';link.write_bytes(b'lnk')
+   exe=root/'KnotPlot.exe';exe.write_bytes(b'exe')
+   response=subprocess.CompletedProcess([],0,json.dumps({'target':str(exe),'workdir':'%sst-workbench%','arguments':''}),'')
+   env={k:v for k,v in os.environ.items() if k.casefold()!='sst-workbench'}
+   env['SST-WORKBENCH']=str(project)
+   with patch.dict(os.environ,env,clear=True),patch('tools.shortcut_runtime.subprocess.run',return_value=response):
+    launch=resolve_launcher(link,platform='win32')
+   self.assertEqual(launch.workdir,project)
+   self.assertEqual(launch.workdir_source,'shortcut_start_in_environment_expansion')
+
  def test_shortcut_check_cli_reports_without_exec(self):
   with tempfile.TemporaryDirectory() as td:
    import contextlib,io
@@ -161,7 +214,7 @@ class ShortcutTest(unittest.TestCase):
     wd=out/f'dstep_{val}';wd.mkdir()
     (wd/'A058_seed.kpf').write_bytes(seed)
     (wd/'probe.kpc').write_text(safe_probe_script(val))
-   (out/'PROBES.json').write_text(json.dumps({'dstep_values':[1,4],'seed_sha256':seed_sha}))
+   (out/'PROBES.json').write_text(json.dumps({'schema':'A058-SAFE-NATIVE-PROBES-1','dstep_values':[1,4],'seed_sha256':seed_sha}))
    seen=[]
    def fake_run(cmd,**kw):
     seen.append((cmd,kw['cwd']))

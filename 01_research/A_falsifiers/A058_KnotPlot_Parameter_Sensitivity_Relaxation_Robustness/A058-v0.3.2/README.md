@@ -1,4 +1,31 @@
-# A058-v0.3.4 — Relative Windows Shortcut Start-in Repair
+# A058-v0.3.7 — Native Measurement Qualification
+
+**Status:** ADDITIVE / LOCAL_VALIDATED / NATIVE_2026_NEW_DIAGNOSTIC_NOT_RUN / PHYSICS_UNRESOLVED.
+
+Version v0.3.7 extends the already-working v0.3.6 A058 runner. It records why the existing `A058_probes3` / `A058_probes4` outputs are **numerically unqualified** even though KnotPlot returned exit code 0: real console and XYZ geometry versus a native CSV containing zeros, plus a failed `KP-alex.exe` helper.
+
+This is a diagnostic experiment, not a modification to the original 271 registered blind slider campaign or to an SST claim.
+
+From the source directory containing your original `KnotPlot.lnk` and `kpdist-23mar2025.zip`:
+
+```bat
+run_all.cmd SELFTEST
+run_all.cmd QUALIFY_EXISTING --source ".\A058_probes4.zip" --out ".\A058_v037_q4"
+run_all.cmd GENERATE_MEASUREMENTS --dist ".\kpdist-23mar2025.zip" --out ".\A058_v037_native"
+run_all.cmd RUN_MEASUREMENTS --exe ".\KnotPlot.lnk" --out ".\A058_v037_native" --timeout 120
+```
+
+Or use `RUN_MEASUREMENTS --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_v037_fresh" --timeout 120` to generate the inputs only when the destination **does not yet exist**. A native negative result returns exit code 2 **after writing a qualification report**. Never overwrite the old evidence.
+
+New protocol: 4 short real KnotPlot runs, `dstep` 1 or 4 with `data open` before or after `length`/`rog`, exact same 2025 trefoil seed and 32 `go` iterations. Native `parameters` readback is enclosed by markers. The original `KnotPlot.lnk` supplies EXE+working directory and is not modified. All exports use absolute A058 result paths.
+
+For details and gate definitions see `docs/NATIVE_MEASUREMENT_QUALIFICATION.md`. See `CHANGELOG.md` and `VALIDATION.md` for evidence/limitations.
+
+---
+
+## Inherited historical notes
+
+# A058-v0.3.5 — Relative Windows Shortcut Start-in Repair
 
 **Status:** DEVELOPMENT / 38/38 local regressions PASS / native Windows KnotPlot NOT RUN in release environment. This is a launcher-only repair of A058-v0.3.3; blind gates and 271-condition registration remain unchanged.
 
@@ -107,3 +134,33 @@ The source-engine/framework locator fix, native PRIVATE logs and old 271-conditi
 - `NUMERICAL_CONTROL_ONLY`: `dstep`, `max-dr`, and collision-guard studies do not establish Euler/vortex dynamics.
 
 See `docs/DISTRIBUTION_AUDIT.md`, `docs/CONTROL_MATRIX.md`, and `VALIDATION.md`.
+
+
+## v0.3.5: Windows shortcut %ENVVAR% correction
+
+A `.lnk` may contain `Start in: %SST-Workbench%\01_research\...\A058-v0.3.2`.
+The previous v0.3.4 runner incorrectly attempted to treat that string as a
+plain relative path. v0.3.5 first expands Windows `%VAR%` placeholders. If a
+variable is unavailable to Python, it may be resolved from a uniquely named
+ancestor directory of the shortcut itself. Unmatched placeholders fail closed.
+
+**The shortcut target and shortcut file are never modified.**
+The KnotPlot process inherits the resolved `Start in` directory, and the
+KnotPlot script references per-probe inputs/outputs by explicit absolute paths
+under `A058_probes/`. This is independent of the executable install folder.
+
+Preflight and run without changing the existing .lnk:
+
+```bat
+run_all.cmd CHECK_SHORTCUT --exe ".\KnotPlot.lnk"
+run_all.cmd RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --out ".\A058_probes" --timeout 120
+```
+
+If older attempted launches have created native output/log files, use a NEW
+output directory to prevent overwriting committed evidence. This fix remains
+locally tested only; final qualification requires the native Windows run.
+
+
+## v0.3.6 — generated seed preflight
+
+`CHECK_PROBES --out <path>` is read-only; for a new path `RUN_SAFE_PROBES --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_probes_NEW" --timeout 120` creates its inputs exactly once. The old missing `A058_seed.kpf` exception is identified **before** launching KnotPlot. Do not reuse a partial/native-run output folder. See `docs/PROBE_INPUT_PREFLIGHT_v0.3.6.md`.

@@ -1,29 +1,11 @@
-# Changelog
+# A058 change log
 
-## v0.3.1 — 2026-09-25
+## v0.3.7 (22 October 2026): Native Measurement Qualification
 
-Literature-gate release derived from E010/PKLSA v0.3.0.
-
-### Added
-
-- `G1_isotopy_safe_sampling`: Li--Peters finite numerical isotopy-safety proxy.
-- `G2_writhe_quadratic_convergence`: Cantarella-inspired writhe-order gate.
-- `G3_signed_frenet_chirality_completeness`: preserves signed torsion and signed writhe per Liu et al. (2026).
-- `B1_ideal_trefoil_ropelength`: contextual Przybyl--Pierański benchmark with upstream-reference audit separated from recomputed reach.
-- `B2_torus_analytic_geometry`: Oberti--Ricca torus-knot analytic controls.
-- `D1_hasimoto_phase_holonomy`: signed torsion phase diagnostic.
-- `D2_vortex_dynamics_handoff`: geometry-readiness diagnostic for later finite-core/Biot--Savart work.
-- Regression tests and machine-readable `VALIDATION_V031.json`.
-- `docs/LITERATURE_GATES_V031.md` with equations, assumptions, limits, and citations.
-
-### Changed
-
-- Replaced midpoint Gauss quadrature for `Wr`, `ACN`, and linking number with exact polygonal segment-pair solid-angle integration.
-- Added identical exact kernels to the C++/OpenMP backend.
-- Publication config enables `literature_gate_mode = enforce` for the three hard geometry-integrity gates.
-- Qualification records signed torsion integral, subcurve total-curvature estimate, torsion-sign diagnostics, and Hasimoto phase modulo \(2\pi\).
-- Release schema bumped to `PKLSA-HIGH-RES-QUALIFICATION-3`.
-
-### Known open gate
-
-The bundled Gilbert ideal trefoil passes all hard v0.3.1 gates, but the recomputed `reach/dcsd` ropelength is about 7.32% above the high-resolution ideal-trefoil benchmark. `B1` is therefore soft by default pending a dedicated thickness/contact-set certification upgrade.
+- Added read-only requalification of user-owned A058_probes3/probes4 source ZIP/folders: native scalar CSV cross-check against independent XYZ and console, `/I` iteration value, `safe` markers, `KP-alex.exe` runtime failure, and missing `dstep` getter.
+- Introduced new controlled four-case native diagnostic (dstep 1/4 × `data open` BEFORE/AFTER length/rog) to isolate native `data` zero-value defect. Geometry, working directory, force exclusions, and matched solver budget held fixed.
+- Added Windows `.lnk` support by reusing the v0.3.6 resolver (including literal `%SST-Workbench%` expansion). All test I/O uses absolute A058 paths; no global `cwd` hack.
+- Added fail-closed non-overwrite preflight, SHA-256 input hashes, raw PRIVATE stdout retention, console/CSV/XYZ readback gates; never silently converts missing values into zeros.
+- `alex -1` removed **only from the NEW isolated measurement diagnostic**. Prior historical experiments remain immutable.
+- Existing A058 271 blind-condition protocol, source pin, cloned v0.2.9 engine, gate ledgers, original native results: unchanged.
+- Local regression 66/66 PASS with authentic 2025 distribution; new 2026 Windows native run NOT_PERFORMED.

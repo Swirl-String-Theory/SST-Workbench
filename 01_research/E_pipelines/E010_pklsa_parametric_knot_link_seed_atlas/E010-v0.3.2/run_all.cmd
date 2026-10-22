@@ -1,29 +1,30 @@
 @echo off
-setlocal EnableDelayedExpansion
+setlocal
 cd /d "%~dp0"
-if /I "%~1"=="STATIC" (
-  call run_all_E010_v031.cmd %2 %3 %4
-  exit /b !errorlevel!
-)
-if /I "%~1"=="SELFTEST" (
-  call run_dynamics_v032.cmd SELFTEST
-  exit /b !errorlevel!
-)
-if /I "%~1"=="BASIC" (
-  call run_dynamics_v032.cmd BASIC
-  if errorlevel 3 exit /b 3
-  echo BASIC diagnostic completed. DYNAMICS_NOT_READY is a valid scientific result.
-  exit /b 0
-)
-if /I "%~1"=="FULL" (
-  call run_dynamics_v032.cmd FULL
-  exit /b !errorlevel!
-)
-if /I "%~1"=="ALL" (
-  call run_dynamics_v032.cmd SELFTEST
-  if errorlevel 1 exit /b 1
-  call run_dynamics_v032.cmd FULL
-  exit /b !errorlevel!
-)
-echo Usage: run_all.cmd SELFTEST^|BASIC^|FULL^|ALL^|STATIC
-exit /b 2
+if /I "%~1"=="DIST_AUDIT" goto distribution
+if /I "%~1"=="KPF_AUDIT" goto distribution
+if /I "%~1"=="AUDIT_ALL" goto distribution
+if /I "%~1"=="GENERATE_PROBES" goto distribution
+if /I "%~1"=="RUN_SAFE_PROBES" goto distribution
+if /I "%~1"=="CHECK_PROBES" goto distribution
+if /I "%~1"=="QUALIFY_EXISTING" goto measurement
+if /I "%~1"=="GENERATE_MEASUREMENTS" goto measurement
+if /I "%~1"=="RUN_MEASUREMENTS" goto measurement
+if /I "%~1"=="CHECK_SHORTCUT" goto shortcut
+if /I "%~1"=="SELFTEST" goto alltests
+py -3 bridge.py %*
+exit /b %ERRORLEVEL%
+:measurement
+py -3 tools\native_measurement.py %*
+exit /b %ERRORLEVEL%
+:shortcut
+py -3 tools\shortcut_check.py %*
+exit /b %ERRORLEVEL%
+:distribution
+py -3 tools\distribution_audit.py %*
+exit /b %ERRORLEVEL%
+:alltests
+py -3 -m unittest discover -s tests -v
+if errorlevel 1 exit /b %ERRORLEVEL%
+py -3 bridge.py SELFTEST
+exit /b %ERRORLEVEL%

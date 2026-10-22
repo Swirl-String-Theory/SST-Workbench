@@ -1,0 +1,68 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,xcolor,hyperref}
+\hypersetup{hidelinks}
+\setlength\parskip{3pt}
+\setlength\parindent{0pt}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries F005 v0.5.0-p3}\\[4pt]
+{\large Conditional Euler Development \& Initial-State Sensitivity}\\[5pt]
+\textcolor{red!70!black}{\bfseries DEVELOPMENT / NOT BLIND / E0 BLOCKED / NOT PKLSA}
+\end{center}
+\section*{Objective and evidence locks}
+Quantify the observed free-surface prediction error of the \emph{source-geometry-only} linearized potential-Euler baseline, while distinguishing (i) an explicitly assumed initial rest state, (ii) a one-mode model seeded with two observations, and (iii) a four-mode model whose initial state is underdetermined by the same observations. All prediction conditions use \emph{known future tank acceleration}; none forecasts the external input.
+
+The documented flask geometry is $L=0.080\,\mathrm{m}$, $B=0.031\,\mathrm{m}$, static depth $h=0.043\,\mathrm{m}$, and observation at $x=+0.040\,\mathrm{m}$. The thesis uses $\rho=998\,\mathrm{kg\,m^{-3}}$, $g=9.81\,\mathrm{m\,s^{-2}}$, and neglects capillarity \emph{as a modeling assumption}, not as a measured zero surface tension \cite{Camilotto2026}. These parameters are not adjusted to reproduce any measured sloshing frequency.
+
+The relative acceleration/height sign $+1$ was selected on previous \textsc{train}-only exploratory comparisons, not traced through original acquisition/export coordinates. Absolute sign semantics and proof of hydrodynamic rest are still missing. The source geometry JSON and p2 provenance report must remain unchanged. The original \textsc{test}/\textsc{ood} response rows are never indexed.
+
+\section*{Linearized Euler reference}
+For an idealized 2D rectangular tank with impermeable sides and bottom, irrotational incompressible inviscid flow, and small disturbances,\footnote{This is a linear potential-flow limit of Euler; not a nonlinear Euler CFD or a vortex-filament computation.}
+\begin{align}
+\nabla^2\phi&=0,&\omega_n^2&=\left(gk_n+\frac{\sigma}{\rho}k_n^3\right)\tanh(k_nh),\\
+k_n&=\frac{(2n+1)\pi}{L},&
+\ddot q_n+\omega_n^2q_n&=-k_n\tanh(k_nh)\,b_n\,a(t),\\
+b_n&=\frac{4(-1)^n}{Lk_n^2},&\eta(x,t)&=\sum_{n=0}^{3}q_n(t)\sin(k_nx).
+\end{align}
+Here $q_n$ and $\eta$ have SI unit metres; $b_n$ has unit metres and the acceleration forcing coefficient is dimensionless. The temporal integrator uses the exact solution per sample for piecewise-constant acceleration (zero-order hold), not a fitted oscillator. The gravity-wave eigenfrequencies follow from the documented geometry. The governing assumptions and formulation follow \cite{FaltinsenTimokha2009,Camilotto2026}.
+
+\section*{Three separate predictions}
+\begin{enumerate}
+\item \textbf{Four-mode from assumed rest:} $q_n(0)=\dot q_n(0)=0$ for all modes. No observed height is used to initialize this calculation. It is an unverified hypothesis for the exported experimental trajectories.
+\item \textbf{One-mode conditional:} from two observed heights $\eta(t_0-\Delta t),\eta(t_0)$, with $\Delta t=0.004\,\mathrm{s}$, set one modal initial displacement and velocity, taking account of the preceding known acceleration interval. After $t_0$ the modal height is propagated freely with known external forcing and no measured height feedback.
+\item \textbf{Four-mode minimum seed:} use the same two observed heights, set initial high-mode variables $q_1=q_2=q_3=\dot q_1=\dot q_2=\dot q_3=0$, and solve the two observation equations exactly for $(q_0,\dot q_0)$. This is an \emph{assumed} modal allocation, not a unique inverse solution.
+\end{enumerate}
+
+\section*{Initial-state non-identifiability}
+The four-mode initial state $\mathbf z_0=(q_0,\dots,q_3,\dot q_0,\dots,\dot q_3)$ has eight degrees of freedom. With known forcing, two measured heights impose at most two scalar constraints. Thus at least six independent state directions remain observationally unconstrained at the beginning of each forecast.
+
+At each of the three anchors $t_0=0.004,1.5,2.8\,\mathrm s$, p3 constructs thirteen deterministic scenarios: the minimum seed, and each higher mode $n=1,2,3$ perturbed separately by $\pm0.25\,\mathrm{mm}$ in its \emph{wall-height contribution}, or $\pm5\,\mathrm{mm\,s^{-1}}$ in its wall-height time derivative. The fundamental-mode seed is adjusted so that both observed samples are still exactly reproduced under the same preceding forcing interval. Every resulting trajectory is rescored at horizons $T=0.1,0.5,1,2,3\,\mathrm s$. These perturbations are \textbf{not experimentally measured uncertainty intervals}; their purpose is to exhibit mathematical non-uniqueness.
+
+\section*{Scoring and decision gates}
+With $N$ validation trajectories and $M$ prediction steps, the full-path RMSE is
+\[
+\mathrm{RMSE}_{\mathrm{path}}(T)=\sqrt{\frac{1}{NM}\sum_{i=1}^N\sum_{j=1}^M (\hat\eta_{ij}-\eta_{ij})^2},\qquad [\mathrm{m}],
+\]
+with endpoint RMSE defined using only $j=M$. Scores are reported in millimetres. The 850-row development-validation cohort is taken from the unchanged SHA-256-locked proxy-group split of v0.4.3. The conditional scores may be described next to the archived 0.4.3 ARX/oscillator aggregate metrics at the same anchors and horizons; this is an \emph{exposed development comparison}, not an untouched independent prediction experiment. The from-rest metrics are not pooled with conditionally seeded models.
+
+\begin{center}\begin{tabular}{>{\bfseries}p{20mm}p{111mm}}\toprule
+Gate & Meaning\\\midrule
+E0 & \textcolor{red!70!black}{BLOCKED}: missing physical axis provenance and individual hydrodynamic initial-state proof.\\
+E1--E2 & Analytic solver regression; geometry and input-source locks.\\
+E3 & Four-mode response from explicitly \emph{assumed} rest; exposed development scoring only.\\
+E4 & Conditional one-mode and four-mode minimum-seed forecasts, plus thirteen initial-state scenarios.\\
+E5 & Descriptive development comparison with frozen ARX and independent oscillator; no test reveal.\\
+E6 & Proxy-group-disjoint development split, not true source-family certification.\\
+E7--E8 & PKLSA \texttt{NOT\_RUN}; physical SST assertions \texttt{UNRESOLVED}.\\\bottomrule\end{tabular}\end{center}
+
+\section*{Known failure modes and falsifiable follow-up}
+Observed wall-height amplitudes above $0.2h$ flag a linearization review; small amplitude alone does not prove a small free-surface slope. Viscous damping, curved flask geometry and contact-line effects remain outside the ideal model. Conflicting model predictions under equally compatible initial modal seeds directly demonstrate the need for additional initial-state measurements or a physically justified modal prior. Source-native nonlinear Euler and PKLSA comparisons require independent input provenance and a frozen science contract before any new physical inference.
+
+\begin{thebibliography}{9}
+\bibitem{Camilotto2026} D. Camilotto (2026), \emph{A Comprehensive Data-Driven Framework for Robotic Liquid Sloshing Control: From Extensive Experimental Model Validation and Enhancement to Trajectory Optimization}, Master's thesis, Politecnico di Milano, \url{https://hdl.handle.net/10589/253216}.
+\bibitem{FaltinsenTimokha2009} O. M. Faltinsen and A. N. Timokha (2009), \emph{Sloshing}, Cambridge University Press, ISBN 9780521881111.
+\bibitem{GiuliettiZenodo2026} N. Giulietti, M. Bedodi, D. Ghavami, D. Camilotto, and H. Giberti (2026), \emph{Robot-executed longitudinal sloshing dataset for rectangular tank liquid handling}, Zenodo v1.0.0, \url{https://doi.org/10.5281/zenodo.20039757}.
+\bibitem{Ljung1999} L. Ljung (1999), \emph{System Identification: Theory for the User}, 2nd ed., Prentice Hall, ISBN 9780136566953.
+\end{thebibliography}
+\end{document}

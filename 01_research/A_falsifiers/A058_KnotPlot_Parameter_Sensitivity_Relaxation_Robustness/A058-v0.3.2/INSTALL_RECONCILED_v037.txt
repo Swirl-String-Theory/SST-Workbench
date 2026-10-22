@@ -1,0 +1,18 @@
+A058-v0.3.7 -- Verified deployment overlay for the user-provided A058-v0.3.2.zip
+
+1. Open the REAL local A058-v0.3.2 project folder (the one with run_all.cmd and tools\).
+2. Extract THIS overlay ZIP DIRECTLY INTO THAT PROJECT ROOT. Overwrite run_all.cmd and changed docs when asked.
+   ZIP MEMBERS START with run_all.cmd and tools/native_measurement.py, not A058-v0.3.7/.
+3. Verify:
+     dir tools\native_measurement.py
+     findstr /C:"QUALIFY_EXISTING" run_all.cmd
+     run_all.cmd SELFTEST
+4. Analyze native historical ZIP in a NEW result directory:
+     run_all.cmd QUALIFY_EXISTING --source ".\A058_probes3.zip" --out ".\A058_v037_qual3"
+   Expected: reports written; returncode 2 because invalid cached CSV values; not a launcher crash.
+5. For a NEW measurement control:
+     run_all.cmd RUN_MEASUREMENTS --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_measurement_v037" --timeout 120
+
+Project data, KnotPlot.lnk, historical logs, 271-condition gate records remain untouched by overlay.
+Generated native 2026 measurement control has NOT run in this environment.
+See docs/NATIVE_MEASUREMENT_QUALIFICATION.md for limitations.

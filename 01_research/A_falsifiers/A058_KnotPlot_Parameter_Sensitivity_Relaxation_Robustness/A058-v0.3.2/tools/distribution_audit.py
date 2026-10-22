@@ -177,6 +177,8 @@ def safe_probe_script(dstep:int):
  return '\n'.join(lines)+'\n'
 
 def generate_probes(dist:Path,out:Path):
+ dist=Path(dist).expanduser().resolve()
+ out=Path(out).expanduser().resolve()
  if not dist.is_file():raise FileNotFoundError(dist)
  folder_new(out)
  with zipfile.ZipFile(dist) as z:
@@ -209,13 +211,85 @@ def _read_xyz(path:Path):
  if len(pts)<3:raise ValueError('No plain 3-column exported xyz found')
  return pts
 
-def run_safe_probes(exe:Path,out:Path,timeout:int,workdir:Path|None=None):
+def probe_preflight(out:Path, dist:Path|None=None)->dict:
+ """Read-only qualification of both generator products and previous native evidence.
+
+ Missing/mutated input files are NOT an executable/shortcut failure. The caller
+ must regenerate into a fresh output directory, never repair a partial run in situ.
+ """
+ out=Path(out).expanduser().resolve()
+ doc={'schema':'A058-PROBE-INPUT-PREFLIGHT-1','output_directory':str(out),
+      'status':'NOT_GENERATED','missing':[],'mismatches':[],
+      'native_evidence_present':[],'ready_for_native_execution':False}
+ receipt_path=out/'PROBES.json'
+ if not receipt_path.is_file():
+  doc['missing'].append('PROBES.json')
+  return doc
+ try:
+  receipt=json.loads(receipt_path.read_text(encoding='utf-8'))
+ except (OSError,ValueError) as e:
+  doc['status']='INVALID_MANIFEST'
+  doc['mismatches'].append('PROBES.json: '+type(e).__name__)
+  return doc
+ if receipt.get('schema')!='A058-SAFE-NATIVE-PROBES-1' or receipt.get('dstep_values')!=[1,4]:
+  doc['mismatches'].append('PROBES.json: wrong schema or dstep design')
+ digest=receipt.get('seed_sha256','')
+ if not re.fullmatch(r'[0-9a-f]{64}',str(digest)):
+  doc['mismatches'].append('PROBES.json: invalid seed SHA-256')
+ if dist is not None:
+  source=Path(dist).expanduser().resolve()
+  if not source.is_file():doc['missing'].append(str(source))
+  elif sha_file(source)!=receipt.get('distribution_sha256'):
+   doc['mismatches'].append('Distribution ZIP SHA-256 does not match generated bundle')
+ for name in ('NATIVE_RESULTS.json','NATIVE_LAUNCH_PRIVATE.json'):
+  if (out/name).exists():doc['native_evidence_present'].append(name)
+ for val in [1,4]:
+  directory=out/f'dstep_{val}'
+  seed=directory/'A058_seed.kpf'
+  script=directory/'probe.kpc'
+  for fp in [seed,script]:
+   if not fp.is_file():doc['missing'].append(fp.relative_to(out).as_posix())
+  if seed.is_file() and re.fullmatch(r'[0-9a-f]{64}',str(digest)):
+   if sha_file(seed)!=digest:doc['mismatches'].append(f'dstep_{val}/A058_seed.kpf: wrong SHA-256')
+  if script.is_file():
+   try:
+    if script.read_text(encoding='utf-8')!=safe_probe_script(val):
+     doc['mismatches'].append(f'dstep_{val}/probe.kpc: generator content differs')
+   except (OSError,UnicodeError):doc['mismatches'].append(f'dstep_{val}/probe.kpc: unreadable')
+  for name in ('probe.native.kpc','NATIVE_STDOUT_PRIVATE.log','A058_final.txt','A058_native_metrics.csv'):
+   if (directory/name).exists():doc['native_evidence_present'].append(f'dstep_{val}/{name}')
+ if doc['native_evidence_present']:
+  doc['status']='PREVIOUS_NATIVE_ATTEMPT_PRESENT'
+ elif doc['missing'] or doc['mismatches']:
+  doc['status']='INCOMPLETE_OR_MODIFIED'
+ else:
+  doc['status']='READY'
+ doc['ready_for_native_execution']=doc['status']=='READY'
+ return doc
+
+
+def require_probe_preflight(out:Path,dist:Path|None=None)->dict:
+ doc=probe_preflight(out,dist)
+ if not doc['ready_for_native_execution']:
+  examples=', '.join(doc['missing'][:3]+doc['mismatches'][:2]+doc['native_evidence_present'][:2])
+  raise RuntimeError(f'PROBE_PREFLIGHT_{doc["status"]}: {examples}. '
+     'Do not remove existing evidence. Generate a NEW probe directory with '
+     'GENERATE_PROBES --dist <kpdist.zip> --out <NEW_DIR>, then RUN_SAFE_PROBES '
+     '--exe <KnotPlot.lnk> --out <NEW_DIR>; or use RUN_SAFE_PROBES '
+     '--dist <kpdist.zip> --out <NEW_DIR> for one-command generation.')
+ return doc
+
+
+def run_safe_probes(exe:Path,out:Path,timeout:int,workdir:Path|None=None,dist:Path|None=None):
  if timeout<=0:raise ValueError('Timeout must be positive')
+ out=Path(out).expanduser().resolve()
+ if not out.exists() and dist is not None:
+  # Explicit RUN_SAFE_PROBES plus supplied distribution authorizes generating
+  # inputs in an as-yet NONEXISTENT directory only. Never reconstruct partial evidence.
+  generate_probes(dist,out)
+ require_probe_preflight(out,dist)
  launcher=resolve_launcher(exe,workdir_override=workdir)
- if not (out/'PROBES.json').is_file():raise FileNotFoundError('Generate probes first')
- if (out/'NATIVE_RESULTS.json').exists():raise FileExistsError('Results already present; use a new probe directory')
- if (out/'NATIVE_LAUNCH_PRIVATE.json').exists():raise FileExistsError('Previous launch metadata; use a new probe directory')
- receipt=json.loads((out/'PROBES.json').read_text())
+ receipt=json.loads((out/'PROBES.json').read_text(encoding='utf-8'))
  plan=[]
  # Preflight both probes before executing either: no silent re-use/overwrite.
  for val in receipt['dstep_values']:
@@ -225,7 +299,7 @@ def run_safe_probes(exe:Path,out:Path,timeout:int,workdir:Path|None=None):
   log=wd/'NATIVE_STDOUT_PRIVATE.log'
   if any(p.exists() for p in (runtime,log,wd/'A058_native_metrics.csv',wd/'A058_final.txt')):
    raise FileExistsError(f'Previous native probe evidence present in {wd}; use a new directory')
-  if sha((wd/'A058_seed.kpf').read_bytes()) != receipt['seed_sha256']:
+  if sha_file(wd/'A058_seed.kpf') != receipt['seed_sha256']:
    raise RuntimeError('Protected seed was modified')
   plan.append((val,wd,script,runtime,log,native_probe_script(script.read_text(encoding='utf-8'),wd)))
  savejson(out/'NATIVE_LAUNCH_PRIVATE.json',{
@@ -290,20 +364,24 @@ def run_safe_probes(exe:Path,out:Path,timeout:int,workdir:Path|None=None):
 
 def main():
  ap=argparse.ArgumentParser(description=__doc__)
- ap.add_argument('mode',choices=['DIST_AUDIT','KPF_AUDIT','AUDIT_ALL','GENERATE_PROBES','RUN_SAFE_PROBES'])
+ ap.add_argument('mode',choices=['DIST_AUDIT','KPF_AUDIT','AUDIT_ALL','GENERATE_PROBES','RUN_SAFE_PROBES','CHECK_PROBES'])
  ap.add_argument('--dist',type=Path)
  ap.add_argument('--out',type=Path,required=True)
  ap.add_argument('--exe',type=Path)
  ap.add_argument('--workdir',type=Path,help='Absolute override for shortcut Start-in if ambiguous')
  ap.add_argument('--timeout',type=int,default=120)
  a=ap.parse_args()
- if a.mode!='RUN_SAFE_PROBES' and not a.dist:ap.error('--dist is required')
+ if a.mode in ('DIST_AUDIT','KPF_AUDIT','AUDIT_ALL','GENERATE_PROBES') and not a.dist:ap.error('--dist is required')
  if a.mode=='RUN_SAFE_PROBES' and not a.exe:ap.error('--exe is required')
  try:
+  if a.mode=='CHECK_PROBES':
+   report=probe_preflight(a.out,a.dist)
+   print(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True),flush=True)
+   return 0 if report['ready_for_native_execution'] else 2
   if a.mode in ('DIST_AUDIT','KPF_AUDIT','AUDIT_ALL'):
    do_audit(a.dist,a.out,a.mode)
   elif a.mode=='GENERATE_PROBES':generate_probes(a.dist,a.out)
-  else:run_safe_probes(a.exe,a.out,a.timeout,a.workdir)
+  else:run_safe_probes(a.exe,a.out,a.timeout,a.workdir,a.dist)
   print('A058',a.mode,'COMPLETE: outputs at',a.out,flush=True)
  except Exception as e:
   print('A058',a.mode,'FAIL-CLOSED:',type(e).__name__,str(e),file=sys.stderr)
