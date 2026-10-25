@@ -4,9 +4,9 @@
 
 v0.4.1 replaces the trefoil-only PTSA discovery population of v0.3.x with the complete self-contained **SST Parametric Knot–Link Seed Atlas (PKLSA) v0.1.0**:
 
-\[
+$$
 49\ \text{families}\times48\ \text{variants}=2352\ \text{candidate centerlines}.
-\]
+$$
 
 The Universal-Action branch remains maximally anti-circular: pre-reveal dynamics and scoring use only dimensionless geometry and numerical controls with \(L_{\hat{}}=\Gamma_{\hat{}}=1\). No SST canonical constants, SI scale, \(h\), or \(\hbar\) enter screening, qualification, mode discovery, energy extraction, action scoring, or candidate selection.
 
@@ -43,19 +43,19 @@ The GPU **never issues the final scientific PASS**. It only reduces the broad se
 
 Stage 1 ranks candidates *within each topology family* using the rigid-motion-invariant pair-distance strain rate
 
-\[
+$$
 \dot d_{ij}/d_{ij}
 =\frac{(\mathbf x_j-\mathbf x_i)\cdot(\mathbf u_j-\mathbf u_i)}{|\mathbf x_j-\mathbf x_i|^2},
-\]
+$$
 
 aggregated as RMS over preregistered lags. Rigid translation and rotation give zero strain. Lower strain is preferred; speed-CV and initial mesh-CV are deterministic tie-breakers.
 
 Stage 2 applies a short target-free RK2 screen and measures the RMS log-change of a pair-distance signature,
 
-\[
+$$
 D_{\rm shape}
 =\sqrt{\left\langle \log^2\!\frac{d_{ij}(t_1)}{d_{ij}(t_0)}\right\rangle},
-\]
+$$
 
 plus final mesh CV and edge ratio. These quantities are invariant under global translation and rotation. Stage 2 is still only a coarse screen; v0.3.1's stricter adaptive-RK4 qualification is retained downstream.
 

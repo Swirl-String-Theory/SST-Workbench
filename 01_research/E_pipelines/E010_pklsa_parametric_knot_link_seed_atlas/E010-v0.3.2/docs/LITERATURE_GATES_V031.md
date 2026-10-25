@@ -20,25 +20,25 @@ Li & Peters give sufficient conditions for an inscribed PL approximation to pres
 
 For each sampling interval \(i\),
 
-\[
+$$
 K_i^{\rm est}
 =\frac{\kappa_i+\kappa_{i+1}}{2}\,\Delta s_i
 <\frac{\pi}{2}.
-\]
+$$
 
 The interpolation chord deviation is bounded locally by the circular-arc approximation
 
-\[
+$$
 \delta_i^{\rm chord}\lesssim \frac{\kappa_{\max} h_{\max}^2}{8},
-\]
+$$
 
 and the gate additionally requires
 
-\[
+$$
 \delta_i^{\rm chord}
 <f_{\rm tube}\,\operatorname{reach}(C),
 \qquad f_{\rm tube}=0.5\ \text{by default}.
-\]
+$$
 
 The first condition approximates the subcurve-total-curvature criterion; the second is a numerical containment proxy for staying inside a non-self-intersecting tubular neighborhood. `G1` is therefore explicitly labelled a **sufficient-condition proxy**, not a proof certificate.
 
@@ -48,7 +48,7 @@ v0.3.0 evaluated the Gauss integral with segment-midpoint quadrature. That is no
 
 For one oriented triangle with vectors \(\mathbf a,\mathbf b,\mathbf c\), the implemented stable form is
 
-\[
+$$
 \Omega(\mathbf a,\mathbf b,\mathbf c)
 =2\operatorname{atan2}\!\left(
 \mathbf a\cdot(\mathbf b\times\mathbf c),
@@ -57,17 +57,17 @@ For one oriented triangle with vectors \(\mathbf a,\mathbf b,\mathbf c\), the im
 +(\mathbf b\cdot\mathbf c)|\mathbf a|
 +(\mathbf c\cdot\mathbf a)|\mathbf b|
 \right).
-\]
+$$
 
 The quadrilateral subtended by two straight segments is split into two such spherical triangles. The polygonal Gauss integral is then exact up to floating-point roundoff.
 
 For a quasi-geometric ladder, PKLSA estimates
 
-\[
+$$
 p_i =
 \frac{\ln\!\left(|W_{N_i}-W_{N_{i+1}}|/|W_{N_{i+1}}-W_{N_{i+2}}|\right)}
 {\ln r},
-\]
+$$
 
 with \(r\) the local refinement ratio. Cantarella's result motivates the asymptotic target \(p\to2\); the publication threshold is deliberately looser (`1.5`) to tolerate pre-asymptotic numerical data without pretending that any positive trend is enough.
 
@@ -75,9 +75,9 @@ with \(r\) the local refinement ratio. Cantarella's result motivates the asympto
 
 The qualified carrier now stores at every resolution
 
-\[
+$$
 T_{\tau}=\oint \tau(s)\,ds,
-\]
+$$
 
 plus signed `Wr`. This prevents the identity layer from silently reducing a curve to \(\{\kappa(s),|\tau(s)|\}\).
 
@@ -87,15 +87,15 @@ Liu et al. show that unsigned torsion can lose mirror information and, for non-g
 
 Przybyl & Pierański report the radius-convention ideal-trefoil ropelength
 
-\[
+$$
 L/R = 32.742934477,
-\]
+$$
 
 which in PKLSA's historical diameter convention becomes
 
-\[
+$$
 \boxed{L/D = 16.3714672385}.
-\]
+$$
 
 `B1` deliberately distinguishes two questions:
 
@@ -108,30 +108,30 @@ This separation prevents a good source reference from hiding a biased internal t
 
 For the standard \(T_{p,q}\) parametrization, with
 
-\[
+$$
 w=\frac{q}{p},\qquad \lambda=\frac rR,
-\]
+$$
 
 PKLSA reports the critical aspect ratio
 
-\[
+$$
 \lambda_{\rm cr}=\frac{1}{1+w^2}
-\]
+$$
 
 and the minimum crossing number
 
-\[
+$$
 c_{\min}=\min\{p(q-1),q(p-1)\}.
-\]
+$$
 
 When `torus_major_radius` is also declared, the analytic normalized length
 
-\[
+$$
 \frac{L}{2\pi R}
 =\frac{1}{2\pi}
 \int_0^{2\pi p}
 \sqrt{(1+\lambda\cos w\alpha)^2+\lambda^2w^2}\,d\alpha
-\]
+$$
 
 is compared against the native carrier length before normalization.
 
@@ -139,9 +139,9 @@ is compared against the native carrier length before normalization.
 
 The Hasimoto phase diagnostic is
 
-\[
+$$
 \Phi_H = \oint \tau(s)\,ds \pmod{2\pi}.
-\]
+$$
 
 It is **not** a claim that a generic PKLSA carrier solves the localized-induction equation or the nonlinear Schrödinger equation. Likewise `D2` only declares that geometry contains enough scale/orientation information to be handed to a later finite-core/Biot–Savart calculation; it does not infer circulation, Reynolds number, core profile, reconnection behavior, or stability.
 

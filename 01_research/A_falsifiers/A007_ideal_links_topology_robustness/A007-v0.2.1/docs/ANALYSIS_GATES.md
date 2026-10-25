@@ -9,10 +9,10 @@
 
 ## G1 — Fourier reconstruction
 
-\[
+$$
 \mathbf r(t)=\frac{\mathbf A_0}{2}
 +\sum_{n\geq1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 The first three derivatives are analytic. Periodic closure, integrated length and spectral-tail convergence are checked.
 
@@ -71,11 +71,11 @@ The normal component of the velocity is fitted to a common rigid translation and
 
 The declared Gilbert diameter \(D\) is attainable by the reconstructed centreline only if the tube radius \(a=D/2\) satisfies
 
-\[
+$$
 a \le \min\!\left(\frac{1}{\kappa_{\max}},\; \frac{d_{\mathrm{self}}}{2},\; \frac{d_{\mathrm{mutual}}}{2}\right),
 \qquad
 D_{\mathrm{allowed}} = 2\cdot\min(\cdots).
-\]
+$$
 
 The gate reports the binding constraint, the diameter deficit ratio, the arclength fraction that exceeds the curvature bound \(\kappa D>2\), and the \(n^4\)-weighted curvature spectral tail. A companion ladder `curvature_mode_convergence` recomputes \(\kappa_{\max}\) after truncating Fourier modes; collapse of the overshoot under truncation identifies representation ringing rather than geometric thickness failure.
 

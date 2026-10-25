@@ -6,17 +6,17 @@ This report is alpha-blind. It does not contain or compare against observed fine
 
 Test whether the BEMv17 target exponent
 
-\[
+$$
 b=2
-\]
+$$
 
 is empirically consistent across several knots with different certified lengths.
 
 The canonical normalizer is
 
-\[
+$$
 \mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.
-\]
+$$
 
 ## Targets
 
@@ -55,6 +55,6 @@ If the status is `FAIL_NOT_ENOUGH_KNOTS`, run BEMv18 with at least three target 
 
 ## Next gate
 
-\[
+$$
 \boxed{\text{BEMv19: multi-knot production grid or explicit }q_{-2}\text{ symbolic derivation.}}
-\]
+$$

@@ -6,15 +6,15 @@ This report is alpha-blind. It does not contain or compare against observed alph
 
 BEMv9 scans internal normalizers
 
-\[
+$$
 \Delta F_{\rm phys}^{(q)}=\Delta F_{\rm pair}/\mathcal N_q.
-\]
+$$
 
 A candidate passes the first normalizer gate only if the normalized correction is subleading relative to
 
-\[
+$$
 N_{\rm soft}V_{\rm soft}L_{\rm long}.
-\]
+$$
 
 ## Selected diagnostic candidate
 

@@ -2,29 +2,29 @@
 
 This package implements a strict version of the proposed route
 
-\[
+$$
 \alpha^{-1}
 =
 \frac{8\pi}{3}\mathcal L_D
 +
 \Delta[\kappa,\Omega_3,\mathcal C_{\rm contact},f].
-\]
+$$
 
 The program does **not** fit the trefoil correction to \(\alpha\). It first fits a declared EFT truncation to independent observables, freezes the coefficients, and only then compares the trefoil prediction with
 
-\[
+$$
 \Delta_{\rm target}
 =
 \alpha^{-1}
 -
 \frac{8\pi}{3}\mathcal L_D.
-\]
+$$
 
 ## What it tests
 
 The implemented linear truncation is
 
-\[
+$$
 \Delta
 =
 c_L F_L
@@ -34,15 +34,15 @@ c_\kappa F_\kappa
 c_\Omega F_\Omega
 +
 c_C F_C,
-\]
+$$
 
 with default features
 
-\[
+$$
 F_L=\mathcal L_D,\qquad
 F_\kappa=\int(D\kappa)^2\,\frac{ds}{D},\qquad
 F_\Omega=\int(D\Omega_3)^2\,\frac{ds}{D},
-\]
+$$
 
 and a finite nonlocal contact-shell proxy \(F_C\).
 
@@ -126,9 +126,9 @@ The tolerance must be chosen before examining the trefoil result.
 
 Each row is one independent equation
 
-\[
+$$
 y_n = \sum_a A_{na}c_a+\epsilon_n.
-\]
+$$
 
 Example:
 

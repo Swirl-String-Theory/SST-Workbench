@@ -28,40 +28,40 @@ A genuinely physical longitudinal phase would require additional material struct
 
 Let the nonlinear geometric filament flow be
 
-\[
+$$
 \frac{d\mathbf X}{d\hat t}=\widehat{\mathbf F}(\mathbf X),
 \qquad
 \widehat{\mathbf F}=\frac{\mathbf u_\perp}{\Omega_\Gamma},
 \qquad
 \Omega_\Gamma=\frac{|\Gamma|}{4\pi D^2}.
-\]
+$$
 
 Tangential velocity is removed because it only changes marker parametrisation:
 
-\[
+$$
 \mathbf u_\perp=\mathbf u-(\mathbf u\cdot\mathbf t)\mathbf t.
-\]
+$$
 
 For `M` shooting nodes, v0.5 uses corrected states
 
-\[
+$$
 \mathbf X_j=\mathbf X_j^{(0)}+D\,\mathbf B_j\mathbf a_j,
-\]
+$$
 
 where `B_j` is an alpha-independent transverse Fourier/Kelvin basis. The final segment is compared with the first node after one common cyclic shift and one proper rigid `SE(3)` transformation.
 
 The reduced nonlinear system is solved with Newton steps
 
-\[
+$$
 \mathbf J_F(\mathbf z_k)\,\delta\mathbf z=-\mathbf F(\mathbf z_k),
-\]
+$$
 
 without forming `J_F`. Matrix-vector products use finite differences,
 
-\[
+$$
 \mathbf J_F\mathbf v\approx
 \frac{\mathbf F(\mathbf z+h\mathbf v)-\mathbf F(\mathbf z)}{h},
-\]
+$$
 
 and the linear Newton correction is solved by restarted GMRES. A line-search merit includes both the projected residual and full-state segment defect, preventing a low-dimensional projected false positive from counting as progress.
 
@@ -69,11 +69,11 @@ and the linear Newton correction is solved by restarted GMRES. A line-search mer
 
 A Newton--Krylov candidate is accepted only if all of the following hold:
 
-\[
+$$
 \varepsilon_{\rm RPO}
 =\frac{\|g^{-1}\phi_T(\mathbf X_0)-\mathbf X_0\|_{\rm RMS}}{D}
 <\varepsilon_{\rm gate},
-\]
+$$
 
 plus endpoint-vectorfield compatibility, cross-channel core separation, bounded segment nonuniformity, and multiple-shooting defect control.
 
@@ -116,7 +116,7 @@ The full native campaign gives:
 
 Best alpha-blind seed before Newton--Krylov:
 
-\[
+$$
 \frac{a}{D}=0.25,
 \qquad
 \frac{\epsilon}{D}=0.10,
@@ -124,43 +124,43 @@ Best alpha-blind seed before Newton--Krylov:
 \phi=\frac{\pi}{2},
 \qquad
 \varepsilon_{\rm RPO}^{\rm seed}=0.4173283240.
-\]
+$$
 
 The 4-segment, 10-mode Newton--Krylov refinement gives
 
-\[
+$$
 \hat T=0.1338771061,
-\]
+$$
 
-\[
+$$
 \varepsilon_{\rm RPO}=0.3463310365,
 \qquad
 \varepsilon_f=0.7562101428.
-\]
+$$
 
 Its projected shooting residual improves by
 
-\[
+$$
 0.6442244122\rightarrow0.4559781062,
-\]
+$$
 
 and the maximum full shooting defect improves by
 
-\[
+$$
 0.3897500535\rightarrow0.3561396051.
-\]
+$$
 
 Thus the nonlinear solver makes real progress, but the resulting state is still far outside the preregistered full-RPO closure threshold of `0.05 D`.
 
 For the longitudinal relabelling diagnostic,
 
-\[
+$$
 \epsilon_{\rm relabel}(N=48)=8.7731\times10^{-2},
-\]
+$$
 
-\[
+$$
 \epsilon_{\rm relabel}(N=96)=2.4746\times10^{-2},
-\]
+$$
 
 supporting its interpretation as a finite-discretisation representation of a continuum gauge rather than a new physical degree of freedom.
 

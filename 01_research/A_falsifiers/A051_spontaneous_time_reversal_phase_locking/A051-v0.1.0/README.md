@@ -6,26 +6,26 @@ Can an **unforced, time-reversal-symmetric** knotted finite-core dynamical syste
 
 The primary dimensionless two-mode observable is
 
-\[
+$$
 \chi_T(t)=\frac{2\,\mathrm{Im}[\eta_1^*(t)\eta_2(t)]}
 {|\eta_1(t)|^2+|\eta_2(t)|^2+\varepsilon},\qquad -1\le \chi_T\le 1.
-\]
+$$
 
 It is invariant under a common phase gauge \(\eta_j\mapsto e^{i\theta}\eta_j\). In the default two-mode representation, the producer-supplied antiunitary time-reversal map must reduce to complex conjugation (or explicitly provide its representation map), giving \(\chi_T\mapsto-\chi_T\).
 
 Phase locking is measured independently through
 
-\[
+$$
 Z_{12}=\frac{\sum_t w_t e^{i\phi_{12}(t)}}{\sum_t w_t},\qquad
 R_{12}=|Z_{12}|,\qquad
 \phi_{12}=\arg[\eta_2\eta_1^*],
-\]
+$$
 
 with amplitude weight
 
-\[
+$$
 w_t=\frac{2|\eta_1||\eta_2|}{|\eta_1|^2+|\eta_2|^2+\varepsilon}.
-\]
+$$
 
 A physical PASS requires **all** preregistered critical gates: independent phase observability, no time-odd forcing/bias, nonzero locked order, time-reversed partner antisymmetry, branch degeneracy, symmetry-neutral branch balance, numerical convergence, cross-geometry/source robustness, and producer-level reversibility certification. Missing prerequisites are `INDETERMINATE`, never forced to PASS/FAIL.
 

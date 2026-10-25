@@ -228,42 +228,42 @@ cycle-averaged quadratic energy of that same canonical interior mode family.
 
 ### Derived within the stated reductions
 
-\[
+$$
 N_p=4.
-\]
+$$
 
-\[
+$$
 A_\chi=\chi_R+\frac{N_p}{\chi_R},\qquad \chi_R=2.
-\]
+$$
 
-\[
+$$
 q_\phi=1,\qquad \Lambda_\phi=4\pi R\mathcal K_{\rm cell}.
-\]
+$$
 
-\[
+$$
 \Lambda_\phi=\frac{E_{\rm eff}}{2}
 \quad
 \text{within canonical linearized phase--pressure normal modes}.
-\]
+$$
 
-\[
+$$
 \mathcal K_{\rm cell}=\frac{E_{\rm eff}}{8\pi}
 \quad (R=1).
-\]
+$$
 
 ### Derived with a named normalization gate
 
-\[
+$$
 \frac{11}{48}
 \quad
 \text{within the unweighted isotropic GP/NLS shell reduction}.
-\]
+$$
 
 ### Still open at primitive-equation level
 
-\[
+$$
 w_\perp=1
-\]
+$$
 
 from the full GP/SST core-profile reduction.
 

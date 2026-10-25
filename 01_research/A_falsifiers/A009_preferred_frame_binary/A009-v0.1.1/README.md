@@ -84,18 +84,18 @@ data/IdealLinks.txt.gz
 
 The parser evaluates the database Fourier representation
 
-\[
+$$
 \mathbf X(t)=\frac{\mathbf A_0}{2}+\sum_{i\ge1}
 [\mathbf A_i\cos(it)+\mathbf B_i\sin(it)].
-\]
+$$
 
 Zero coefficients may be omitted in the files. `Ideal.txt` knot lengths are audited at the source 512-point polygon convention. Link strings use 256 points for 2/3-component links and 128 points for 4/5-component links unless `--samples` overrides this.
 
 The database uses tube diameter `D=1`. For SST dynamical runs the default is
 
-\[
+$$
 D_{\rm database}=1 \longmapsto D_{\rm SST}=2r_c,
-\]
+$$
 
 so the coordinate scale factor is `2*r_c/D`. This is an explicit geometry mapping, not a derivation that the Gilbert SONO tube is an SST core profile.
 
@@ -150,7 +150,7 @@ Gamma = 9.683619203488876e-09 m^2 s^-1
 
 The phenomenological observable discussed in the SST analysis is
 
-\[
+$$
 \frac{\Delta E_K}{E_K}
 =
 \chi_{0,K}\frac{W^2}{c^2}
@@ -158,34 +158,34 @@ The phenomenological observable discussed in the SST analysis is
 \chi_{2,K}
 \frac{(\mathbf W\cdot\hat{\mathbf a})^2-W^2/3}{c^2}
 +\cdots.
-\]
+$$
 
 `run_drift_scan.py` does **not** insert this response by default. Instead it evolves a regularized torus-knot filament with
 
-\[
+$$
 \dot{\mathbf X}=\mathbf u_{\rm BS}(\mathbf X)+\mathbf W
-\]
+$$
 
 and checks whether translation-reduced intrinsic energy/shape changes with a uniform background velocity `W`.
 
 For plain incompressible Euler, a uniform `W` is a Galilean boost. Therefore the expected baseline is
 
-\[
+$$
 \chi_0=\chi_2=0
-\]
+$$
 
 up to numerical error. If this baseline fails, the numerical method is suspect. If SST predicts a nonzero drift sensitivity, that term must arise from additional SST structure beyond an unmodified homogeneous Euler filament.
 
 The finite-core energy proxy is
 
-\[
+$$
 E_{\rm fil}
 \approx
 \frac{\rho_f\Gamma^2}{8\pi}
 \oint\!\oint
 \frac{d\mathbf X\cdot d\mathbf X'}
 {\sqrt{|\mathbf X-\mathbf X'|^2+r_c^2}}.
-\]
+$$
 
 This is an audit regularization, not a claim that this expression is the final SST particle mass functional.
 
@@ -220,19 +220,19 @@ This is the route from the baseline harness to a real SST `chi0/chi2` measuremen
 
 Vaglio et al. report the one-sided PSR J1738+0333 constraints
 
-\[
+$$
 \alpha_1>-4.4\times10^{-5}\quad(68\%),
 \qquad
 \alpha_1>-7.2\times10^{-5}\quad(90\%).
-\]
+$$
 
 The same paper quotes the usual Solar-System scales
 
-\[
+$$
 |\alpha_1|\lesssim10^{-4},
 \qquad
 |\alpha_2|\lesssim10^{-7}.
-\]
+$$
 
 `run_pf_gate.py` never maps SST to these parameters on its own. Supply effective values only after a separate derivation:
 
@@ -242,9 +242,9 @@ python run_pf_gate.py --alpha1-eff -5e-5 --alpha2-eff 5e-8
 
 The pack also reports the purely diagnostic scaling coefficients for
 
-\[
+$$
 \alpha_{i,\rm eff}=C_i\left(\frac{\mathbf v_{\!\boldsymbol{\circlearrowleft}}}{c}\right)^2.
-\]
+$$
 
 These are scale diagnostics, not identities.
 
@@ -252,21 +252,21 @@ These are scale diagnostics, not identities.
 
 For a generic radiative/gravitational charge `q_A`, the binary dipole is proportional to
 
-\[
+$$
 \Delta_{12}=\frac{q_1}{m_1}-\frac{q_2}{m_2},
-\]
+$$
 
 so the universal mismatch factor entering dipole power is
 
-\[
+$$
 \Delta_{12}^2.
-\]
+$$
 
 If SST derives
 
-\[
+$$
 q_A/m_A=\lambda\quad\forall A,
-\]
+$$
 
 the dipole mismatch vanishes identically. The package checks this property on arbitrary model outputs:
 
@@ -281,17 +281,17 @@ No physical radiation normalization is invented by the package.
 
 Linearizing
 
-\[
+$$
 \partial_t\mathbf u +(\mathbf u\cdot\nabla)\mathbf u
 =-\frac{1}{\rho_f}\nabla p,
 \qquad \nabla\cdot\mathbf u=0,
-\]
+$$
 
 about homogeneous rest gives, after transverse projection in Fourier space,
 
-\[
+$$
 \partial_t\hat{\mathbf u}_\perp=0.
-\]
+$$
 
 Therefore this baseline has no ordinary propagating free bulk mode. Run:
 
@@ -305,9 +305,9 @@ This does **not** exclude Kelvin waves on vortices or modes supported by a struc
 
 A viable binary-radiation model should independently satisfy
 
-\[
+$$
 \frac{dE_{\rm orbit}}{dt}=-\mathcal F_\infty=P_{\rm RR}.
-\]
+$$
 
 Provide CSV columns
 
@@ -327,17 +327,17 @@ This is designed to catch a mismatch between a far-field flux derivation and an 
 
 From the values reported by Vaglio et al.,
 
-\[
+$$
 \dot P_b^{\rm corr}
 =
 \dot P_b-\dot P_b^{\rm Shk}-\dot P_b^{\rm Gal}.
-\]
+$$
 
 The package reconstructs
 
-\[
+$$
 \dot P_b^{\rm corr}\simeq -2.72\times10^{-14}\;\mathrm{s\,s^{-1}}
-\]
+$$
 
 with a simple independent-Gaussian uncertainty propagation. This is a convenience check only; publication-level inference should use the full timing posterior.
 

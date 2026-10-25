@@ -2,29 +2,29 @@
 
 ## Provenance gate P0
 The legacy chain
-\[
+$$
 \mathbf v_{\!\boldsymbol{\circlearrowleft}}=\alpha c/2,\quad
 F_{\rm swirl}^{\max}=\mathbf v_{\!\boldsymbol{\circlearrowleft}}\hbar/(2r_c^2),\quad
 \rho_{\rm core}=4F_{\rm swirl}^{\max}/(\pi\alpha^2c^2r_c^2)
-\]
+$$
 forces
-\[
+$$
 4\pi^2\rho_{\rm core}\mathbf v_{\!\boldsymbol{\circlearrowleft}}r_c^4=h.
-\]
+$$
 Therefore that identity is provenance, not evidence.
 
 ## Universal Action chain
 A genuine Planck-like result must emerge from free dynamics:
-\[
+$$
 \Delta E = h f = \hbar\omega.
-\]
+$$
 The blind scorer never sees \(h\) or \(\hbar\).
 
 ### U0 target leakage
 No target constants or contaminated action parameters in scorer inputs.
 
 ### U1 frequency convention
-\[\omega=2\pi f.\]
+$$\omega=2\pi f.$$
 
 ### U2 recurrence prerequisite
 A spectral peak must survive the frozen holdout with minimum cycles, spectral concentration, and harmonic fit.
@@ -37,16 +37,16 @@ No action result survives a mesh-degradation failure.
 
 ### U4 classical-continuity null
 For an ordinary linear classical mode, \(E\propto A^2\) so
-\[
+$$
 J_f=\Delta E/f\propto A^2.
-\]
+$$
 A strong smooth amplitude dependence is evidence against a fixed action quantum.
 
 ### U5 amplitude independence
 A Planck-like action requires
-\[
+$$
 \frac{d\ln J_f}{d\ln A}\simeq0.
-\]
+$$
 
 ### U6 universality
 The same action scale must survive different anonymous carriers, modes/preparations and resolutions.
@@ -59,10 +59,10 @@ Only after U0--U7 are frozen is the measured scale compared with \(h\) and \(\hb
 
 ## Energy ledger used by v0.2.0
 The line-filament diagnostic uses the regularized Neumann/Biot--Savart energy proxy
-\[
+$$
 E_{\rm line}=\frac{\rho_{\!f}\Gamma_c^2L}{8\pi}
 \sum_{ij}\frac{\Delta\ell_i\cdot\Delta\ell_j}{\sqrt{|m_i-m_j|^2+a^2}}.
-\]
+$$
 The physical mapping is \(a_{\rm phys}=r_c\), hence \(L=r_c/a_{\rm dimless}\). This is an explicit centerline-model diagnostic, not a solved 3-D finite-core Euler energy functional.
 
 ## Wien field-matter gates

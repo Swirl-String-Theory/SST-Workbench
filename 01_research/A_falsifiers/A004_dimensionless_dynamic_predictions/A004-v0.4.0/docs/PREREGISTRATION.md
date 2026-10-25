@@ -107,8 +107,8 @@ The two tube-count interpretations are frozen before comparison:
 
 Primary gate:
 
-\[
+$$
 \epsilon_{\rm intrinsic}<0.05.
-\]
+$$
 
 A stabilization claim requires an open interval in bundle radius and circulation, not one isolated optimized point. Numerical discretization must converge to the continuum Rankine reference under increasing \(N\). Full three-dimensional tube backreaction is outside v0.3.0 and must not be inferred from frozen-tube results.

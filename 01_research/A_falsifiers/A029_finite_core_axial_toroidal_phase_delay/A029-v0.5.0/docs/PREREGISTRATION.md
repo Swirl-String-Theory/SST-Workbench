@@ -6,17 +6,17 @@ v0.1.2 is a **phase-measurement and branch-identity discovery release**.  It doe
 
 ## Unchanged symmetric closure null
 
-\[
+$$
 k_0L+m\Theta_B=2\pi n,
-\]
+$$
 
 with matched control
 
-\[
+$$
 k_\pm L+m\Theta_B=2\pi(n\pm\delta),
 \qquad
 g_{\rm sym}=\tfrac12[g(k_-)+g(k_+)].
-\]
+$$
 
 Only CLOSED/control pairs for which both eigenmodes pass convergence are eligible for growth comparison.
 
@@ -24,16 +24,16 @@ Only CLOSED/control pairs for which both eigenmodes pass convergence are eligibl
 
 No delay is supplied.  The tracked dispersion branch gives
 
-\[
+$$
 v_g=\frac{d\omega}{dk},\qquad \tau_g=\frac{L}{|v_g|}.
-\]
+$$
 
 The wave packet independently supplies `tau_return_measured`.  Its envelope maximum is refined continuously.  Phase validity additionally requires the numerical uncertainty estimate to pass:
 
-\[
+$$
 \delta\phi=\sqrt{\delta\phi_t^2+\delta\phi_{\rm disp}^2}
 \le \delta\phi_{\max}.
-\]
+$$
 
 Default discovery thresholds:
 
@@ -51,17 +51,17 @@ Clock-focused presets enable overlap continuation from `U_s/V_theta = -1.0` to e
 
 Before reveal:
 
-\[
+$$
 \texttt{FAST\_SWIRL\_LOCKED}:
 0.60\le|\Im\lambda|/\Omega_{swirl}\le1.40,
 \quad |v_g|\ge0.05,
-\]
+$$
 
-\[
+$$
 \texttt{SLOW\_MODE}:
 |\Im\lambda|/\Omega_{swirl}\le0.20,
 \quad |v_g|\le0.05.
-\]
+$$
 
 Everything else is `OTHER_BRANCH`.
 
@@ -71,9 +71,9 @@ The primary `m=1` discovery is restricted to `FAST_SWIRL_LOCKED`.  This is a pre
 
 The phase response is
 
-\[
+$$
 E_g=\frac{g_C-g_S}{|g_C|+|g_S|+2g_0}.
-\]
+$$
 
 Negative means exact CLOSED has lower positive growth.  Neutral/neutral pairs remain ties.
 

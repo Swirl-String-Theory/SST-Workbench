@@ -5,25 +5,25 @@
 Pressure-work integral per sector (spherical cell, dimensionless shape Jacobian
 W_hat = W/R^3), averaged over the N_p = 4 affine H_0 (+) H_1 modes:
 
-\[
+$$
 \overline{W}_a = 4.18524537037
 \qquad(\text{spread }0.00e+00),
 \qquad
 \frac{4\pi}{3} = 4.18879020479.
-\]
+$$
 
 Total over all sectors:
 
-\[
+$$
 W_{\rm tot} = \sum_{a=1}^{N_p} W_a = 16.7409814815,
 \qquad
 \frac{16\pi}{3} = 16.7551608191.
-\]
+$$
 
 Symbolic confirmation of the unit-ball volume Jacobian (sympy):
-\[
+$$
 \int_{\rm ball} dV = 4*pi/3 = 4.18879020479 = \frac{4\pi}{3}.
-\]
+$$
 
 `pass_per_sector = True`, `pass_total = True`.
 

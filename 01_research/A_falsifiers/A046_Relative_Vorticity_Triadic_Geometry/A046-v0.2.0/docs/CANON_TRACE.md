@@ -24,10 +24,10 @@ Critical discipline retained in A046:
    diagnostics rather than as coordinate axes of a local metric.
 
 The organized-transport test also follows the SST-73 research route
-\[
+$$
 \nabla^2\Phi_{\rm grav}\propto
 \partial_i\partial_j(\rho_f u_i u_j),
-\]
+$$
 but removes the dimensional prefactor in the blind structural stage.
 
 

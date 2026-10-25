@@ -1,17 +1,17 @@
 # Interior one-cell phase Hessian
 
 Problem:
-\[
+$$
 
 abla\cdot(n_{eff}(r)
 abla	heta)=0,\quad
 	heta(a)=0,\quad 	heta(R)=\phi.
-\]
+$$
 
 Analytic radial Hessian:
-\[
+$$
 \Lambda_\phi=rac{4\pi}{\int_a^R dr/[n_{eff}(r)r^2]}.
-\]
+$$
 
 Parameters:
 - a = 0.0152703116982
@@ -20,24 +20,24 @@ Parameters:
 - n0 = 1.0
 
 Result:
-\[
+$$
 \Lambda_\phi=0.194730874657.
-\]
+$$
 
 Target:
-\[
+$$
 E_{eff}/2=137.037437828.
-\]
+$$
 
 Ratio:
-\[
+$$
 \Lambda_\phi/(E_{eff}/2)=0.00142100492933.
-\]
+$$
 
 Required n0 if used diagnostically:
-\[
+$$
 n0_{required}=703.727326599.
-\]
+$$
 
 Status: `DIAGNOSTIC_REQUIRED_NORMALIZATION_NOT_DERIVATION`.
 

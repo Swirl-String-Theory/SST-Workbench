@@ -4,14 +4,14 @@
 
 Deze versie werkt het theorem target uit:
 
-\[
+$$
 \boxed{
 \text{deriveer }\eta_A^{\mathrm{SST}}
 \text{ en }
 \delta S_{\mathrm{boundary}}=S_{\mathrm{rel}}
 \text{ uit SST-microstates.}
 }
-\]
+$$
 
 Het pakket levert:
 
@@ -28,7 +28,7 @@ Het pakket levert:
 Voor een stationaire lijnfabric met line-length density \(\mathcal L_v\),
 oriëntatiedistributie \(f\) en \(q\) beschermde toestanden per piercing:
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}(\widehat{\mathbf n})
 =
@@ -38,37 +38,37 @@ oriëntatiedistributie \(f\) en \(q\) beschermde toestanden per piercing:
 \right\rangle_f
 \ln q.
 }
-\]
+$$
 
 Voor isotropie:
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}
 =\frac{\mathcal L_v}{2}\ln q.
 }
-\]
+$$
 
 De discrete Gaussian boundarymicrostates voldoen aan:
 
-\[
+$$
 \boxed{
 D(P_\phi\Vert P_0)
 \longrightarrow
 -2\pi\int U T_{UU}\,dU\,dA
 =S_{\mathrm{rel}}.
 }
-\]
+$$
 
 Met reversibele asymptotische \(q\)-aire encoding:
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}\delta A
 =\delta S_{\mathrm{boundary}}
 =S_{\mathrm{rel}}.
 }
-\]
+$$
 
 ## Cruciale beperking
 
@@ -82,27 +82,27 @@ vereist daarom expliciet de reversibele channel-activation law.
 Voor niet-overlappende isotrope tubes met straal \(r_c\), maximale packing en
 minimale signed-piercing degeneracy \(q=2\):
 
-\[
+$$
 \eta_{A,\max}
 =5.557020457583\times10^{28}\ \mathrm{m^{-2}}.
-\]
+$$
 
 De door de geobserveerde \(G\) vereiste waarde is, uitsluitend als
 post-derivation audit:
 
-\[
+$$
 \eta_A^{\mathrm{GR}}
 =9.570182792895\times10^{68}\ \mathrm{m^{-2}}.
-\]
+$$
 
 Dus:
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{GR}}/\eta_{A,\max}
 =1.722178794544\times10^{40}.
 }
-\]
+$$
 
 De eenvoudige onafhankelijke core-piercing hypothese is daarmee geen geldige
 volledige verklaring van de zwaartekrachtcoëfficiënt.
@@ -156,12 +156,12 @@ De echte volgende stap is niet direct de tensorvergelijking. Eerst moet een
 niet-ad-hoc SST-mechanisme worden afgeleid dat de ontbrekende area-density
 levert:
 
-\[
+$$
 \boxed{
 \text{deriveer }\mathcal L_v,\ q,
 \text{ en piercing-correlaties uit de nonlinear SST vacuum state.}
 }
-\]
+$$
 
 Vervolgens moet worden beslist of de factor \(10^{40}\) ontstaat uit:
 

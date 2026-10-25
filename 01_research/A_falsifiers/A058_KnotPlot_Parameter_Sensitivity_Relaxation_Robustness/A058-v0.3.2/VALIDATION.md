@@ -1,22 +1,17 @@
-# A058-v0.3.7 — Independent release validation
+# A058-v0.3.8 validation — 2026-10-23
 
-**22 October 2026 — DEVELOPMENT diagnostic package.** This is neither a physics certificate nor a new native 2026 execution.
+## Executed in this build container
 
-## Actual local tests
+- All 83 Python unit tests executed: **82 passed, 1 skipped** (the inherited Windows-specific shortcut test cannot run under Linux).
+- Authentic supplied `A058_measurement_v037.zip` audited read-only: **2 positive native scalar conditions confirmed; 2 negative controls reproduced**, with recorded native log, runtime script, seed and coordinate SHA-256 consistency gates. Historical *method* closure = PASS. The two negative *measurement* gates remain FAIL.
+- Original `kpdist-23mar2025.zip` was read to generate and preregister the six new v0.3.8 probe scripts; no native KnotPlot executable is present in this environment.
+- A mocked six-condition end-to-end launcher test passed, verifying absolute export paths, launcher working directory, finite-time row validation, readback and non-overwrite behavior. This is a software test, not a native KnotPlot science run.
+- Every inherited v0.3.7 source file not explicitly changed was checked byte-identical with the archived v0.3.7 release.
 
-- `A058_KPDIST_ZIP=/mnt/data/kpdist-23mar2025.zip python -m unittest discover -s tests -v`: **66/66 PASS**; uses the genuine uploaded 2025 KnotPlot distribution for static tests.
-- Mocked full four-case native diagnostic passed in the regression suite. The mock validates relative vs absolute I/O and receipt writing only; it is **not** proof that the genuine Windows binary accepts or successfully evaluates the new scripts.
-- v0.3.7 read-only historical qualifier executed on **both authentic user-uploaded** `A058_probes3.zip` and `A058_probes4.zip`; generated separate unchanged-source receipts under `evidence/2026_historical_qualification/`.
-- Each archive: 2/2 original run receipt hash chains verified (original console log, native script, ASCII coordinates, original generator script, shared KPF seed). Native CSV `/l`, `/g` both zero while XYZ and console nonzero; **FAIL_MEASUREMENT_QUALIFICATION** for both dstep 1/4. `KP-alex.exe` helper opening failure captured. `dstep` getter **UNRESOLVED**, not PASS.
-- The old 271-condition preregistered blind experiment has **not** been rerun, modified, reinterpreted, or promoted. A058-v0.3.7 inherits original v1.0.8 framework pin from the coordinator; no framework upgrade or physical solver replacement.
+## Scientific qualification boundaries
 
-## Open before certification
+`A058 v0.3.8` has **not** been executed against native Windows KnotPlot. The six new 32/128/512 horizon conditions are **NOT_RUN**. Historical closure only certifies that the positive/negative command-order controls reproduce the observed data-writer behavior. Physics, independent topology preservation between snapshots, fully collision-free trajectories, and converged knot equilibria remain **UNRESOLVED**.
 
-1. Run fresh four-case diagnostic on the real October 2026 KnotPlot version using the `.lnk` and its genuine Start-in; inspect raw logs privately.
-2. Determine whether native `data open` ordering changes `/l` and `/g` zeroing; require numeric CSV/XYZ agreement with bounded tolerance.
-3. Confirm `dstep` is actually in `parameters` output with correct value; otherwise mark state unverified. No assumption that issuing `dstep = 1` proves assignment.
-4. Determine dependency search path for `KP-alex.exe` and verify `alex -1` independently in a *separate* run if needed (not required for core length/Rg qualification).
-5. Positive `safe` on two snapshots and static XYZ nonintersection **do not** certify no crossings during integration.
-6. No SST vortex-fluid/Euler/PKLSA physics inference from KnotPlot relaxations, display-only control, or native data syntax qualification.
+## Core contract
 
-**Result status:** OFFLINE_QUALIFICATION_VALIDATED; NEW_NATIVE_DIAGNOSTIC_NOT_RUN; INDEPENDENT_PHYSICS_UNRESOLVED.
+For each condition, `go N` is followed by native final `parameters`/`safe` readback, then `data open; data format; data header; length; rog; data; data close; save ... ascii`. Every CSV scalar must agree numerically with independent coordinate geometry. Native exit code 0 is necessary but not sufficient. Existing 271 blind cases and their gate ledgers are untouched.

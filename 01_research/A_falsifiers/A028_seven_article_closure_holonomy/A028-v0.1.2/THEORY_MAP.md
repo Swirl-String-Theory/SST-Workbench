@@ -5,23 +5,23 @@
 ### A1. General incompressible pressure closure
 For constant density and incompressibility,
 
-\[
+$$
 \nabla^2\left(\frac{p}{\rho_{\!f}}\right)
 =\frac12|\boldsymbol\omega|^2-S_{ij}S_{ij},
 \qquad
 S_{ij}=\frac12(\partial_jv_i+\partial_iv_j).
-\]
+$$
 
 This is an exact bulk identity of incompressible Euler/Navier--Stokes (constant density). It supersedes use of a local Bernoulli pressure defect as a *general* three-dimensional knot closure. Bernoulli remains valid only under its stated stationary/streamline assumptions.
 
 For a free-space solution with suitable decay,
 
-\[
+$$
 \frac{p(\mathbf x)-p_\infty}{\rho_{\!f}}
 =-\frac{1}{4\pi}\int
 \frac{\frac12|\boldsymbol\omega(\mathbf x')|^2-S:S(\mathbf x')}
 {|\mathbf x-\mathbf x'|}\,d^3x'.
-\]
+$$
 
 For periodic numerical domains the Green solver must instead use the periodic Poisson kernel; this package uses the Fourier representation.
 
@@ -45,9 +45,9 @@ No equality between these objects is assumed.
 ### B2. Phase closure and aliasing
 For a physical phase observable on a closed carrier,
 
-\[
+$$
 W_\Phi=\frac{1}{2\pi}\oint d\Phi\in\mathbb Z
-\]
+$$
 
 must converge under spatial sampling refinement. Finite segmentation generates aliases; a physical mode remains fixed when the number of sampling stations changes, while discretization aliases move with the sampling lattice.
 

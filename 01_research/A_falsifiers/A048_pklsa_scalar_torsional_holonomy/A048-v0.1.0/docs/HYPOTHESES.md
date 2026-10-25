@@ -4,9 +4,9 @@
 
 A bending branch obeys, over the preregistered modal window,
 
-\[
+$$
 \omega_K(k)=\beta k^2.
-\]
+$$
 
 The fitted power exponent should be near \(p=2\).
 
@@ -14,9 +14,9 @@ The fitted power exponent should be near \(p=2\).
 
 An independent phase branch is modeled as
 
-\[
+$$
 \omega_\chi^2(k)=c_\chi^2k^2+\Omega_0^2.
-\]
+$$
 
 In the gapless limit \(\Omega_0\to0\), \(\omega_\chi\propto |k|\), so the power exponent tends to \(p=1\).
 
@@ -35,9 +35,9 @@ This gate qualifies the analysis instrument only.
 
 For a closed phase field,
 
-\[
+$$
 \oint \partial_s\chi\,ds = 2\pi m.
-\]
+$$
 
 Adding a constant gauge offset to \(\chi\) must leave the discrete winding estimate invariant. The test tolerance is \(10^{-10}\) for the analytic fixture.
 
@@ -45,9 +45,9 @@ Adding a constant gauge offset to \(\chi\) must leave the discrete winding estim
 
 For a unit circle the numerical curvature must satisfy
 
-\[
+$$
 \langle\kappa\rangle=1
-\]
+$$
 
 and torsion must vanish within the test tolerances. The periodic resampler and differential geometry routines must return finite values and a right-handed Bishop frame.
 

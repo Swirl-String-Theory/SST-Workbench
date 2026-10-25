@@ -12,22 +12,22 @@ SC-IIb is deliberately distinct from both earlier hypotheses:
 
 For a frozen POD pair \((\Phi_i,\Phi_j)\), the natural response is projected to
 
-\[
+$$
  a_i(t)=\langle X(t)-\bar X_D,\Phi_i\rangle,
  \qquad
  a_j(t)=\langle X(t)-\bar X_D,\Phi_j\rangle .
-\]
+$$
 
 Only a constant modal-pair center estimated in the discovery window is removed;
 **no holdout detrending and no extrapolated discovery slope are allowed.**  The
 orientation is fixed from the sign of discovery-window modal angular momentum.
 The clock phase is
 
-\[
+$$
  \phi_{ij}(t)=\operatorname{unwrap}\operatorname{atan2}(a_j(t),a_i(t)),
  \qquad
  L_{ij}=a_i\dot a_j-a_j\dot a_i .
-\]
+$$
 
 A full-shape return is not required.
 
@@ -140,10 +140,10 @@ Existence and mechanism remain separate hypotheses.  For a certified pair,
 segment stretch is projected onto the two frozen mode-strain fields.  The
 instantaneous **phase-tangent** stretch observable is
 
-\[
+$$
  \sigma_{\rm tan}(t)=
  -\sin\phi(t)\,\sigma_i(t)+\cos\phi(t)\,\sigma_j(t).
-\]
+$$
 
 The material-core branch tests a discovery-selected delay from
 \(\sigma_{\rm tan}\) to residual phase velocity \(\delta\dot\phi\), then checks

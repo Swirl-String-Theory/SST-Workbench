@@ -32,21 +32,21 @@ The mathematical symbol \(\alpha\) is allowed only as the Mittag-Leffler fractio
 
 For the generalized equation
 
-\[
+$$
 \varphi_{tt}=a\varphi_{ss}+F(\varphi),
-\]
+$$
 
 fit the four frozen candidate dictionaries W, KG, Duffing and SG by least squares. Evaluate predictive errors using four contiguous time-block folds. Let
 
-\[
+$$
 \mathrm{BIC}=n\ln(\mathrm{RSS}/n)+k\ln n.
-\]
+$$
 
 Define
 
-\[
+$$
 \Delta\mathrm{BIC}_{\rm SG}=\min_{j\ne SG}\mathrm{BIC}_j-\mathrm{BIC}_{SG}.
-\]
+$$
 
 SG support requires all of:
 

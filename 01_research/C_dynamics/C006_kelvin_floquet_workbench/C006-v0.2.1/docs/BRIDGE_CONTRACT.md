@@ -4,11 +4,11 @@ Frozen in `THRESHOLDS_FROZEN.json` before any scientific trajectory.
 
 ## Scientific amplitude
 
-\[
+$$
 a_m^{\rm raw}(t)=p_m^\dagger W_r B\,\Pi_{m,k}\,P_{\rm BS}[\delta X(t)],
 \qquad
 p_m^\dagger W_r B q_m=1.
-\]
+$$
 
 \(q_m^\dagger B\) is diagnostic only. Do not fall back to it.
 

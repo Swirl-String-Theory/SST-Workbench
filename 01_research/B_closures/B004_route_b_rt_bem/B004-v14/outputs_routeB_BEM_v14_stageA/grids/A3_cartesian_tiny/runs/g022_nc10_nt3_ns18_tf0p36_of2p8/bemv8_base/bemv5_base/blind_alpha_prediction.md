@@ -6,15 +6,15 @@ This report is alpha-blind: it does not contain or compare against CODATA alpha.
 
 BEMv5 separates the candidate action into
 
-\[
+$$
 S_{\rm total}=S_{\rm soft}+S_{\rm RT}^{\rm ren}.
-\]
+$$
 
 The provisional Route-B working map is
 
-\[
+$$
 \alpha_{\rm inv,pred}^{\rm blind}=\frac12 S_{\rm total}.
-\]
+$$
 
 This map is not yet a theorem.
 

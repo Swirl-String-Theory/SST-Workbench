@@ -73,9 +73,9 @@ backend                      cpu
 
 This is a **pipeline traversal test**, not the production ranking result. Production BASIC/EXTENDED/HIGHRES use the preregistered quotas
 
-\[
+$$
 2352\rightarrow 392\;(8/{\rm family})\rightarrow98\;(2/{\rm family}).
-\]
+$$
 
 The full replay confirms that every family can pass through the common adapter, target-free screening metrics, deterministic per-family quota logic, opaque-ID quarantine and Stage-C materialization.
 

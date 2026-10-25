@@ -90,17 +90,17 @@ Er zitten ook diverse goede **kwaliteits- en provenance-tests** in de huidige fa
 
 De huidige run eindigt daarom terecht met
 
-\[
+$$
 \boxed{\texttt{SYNTHETIC\_DISCRIMINATOR\_QUALIFIED}}
-\]
+$$
 
 maar tegelijk met
 
-\[
+$$
 \boxed{
 \texttt{NOT\_YET\_TESTED\_ON\_INDEPENDENT\_DYNAMICAL\_PKLSA\_OBSERVATIONS}
 }
-\]
+$$
 
 Dat tweede label is momenteel wetenschappelijk het belangrijkste.
 
@@ -108,7 +108,7 @@ Dat tweede label is momenteel wetenschappelijk het belangrijkste.
 
 Ik zou niet proberen alle ❌'s tegelijk in één enorme release te stoppen. De volgende tranche kan heel gericht zijn:
 
-\[
+$$
 \boxed{
 \text{PKLSA geometry}
 \rightarrow
@@ -123,24 +123,24 @@ Ik zou niet proberen alle ❌'s tegelijk in één enorme release te stoppen. De 
 \rightarrow
 k^2\ \text{vs}\ k\text{/gapped}
 }
-\]
+$$
 
 Daarvoor zijn volgens mij **acht gates essentieel**: echte 48-trefoil ingest, onafhankelijke finite-core dynamics, transverse perturbation, material-phase perturbation, twee afzonderlijke observables, spectral/coherence analysis, \(N/\Delta t/\)remesh convergence, en tenslotte Kelvin-only versus Kelvin+torsion modelselectie. Pas wanneer die acht staan hebben we voor het eerst een falsifier die de **fysische hypothese zelf** kan afwijzen.
 
 En er is nog één belangrijke aanscherping voor v0.2.0: de vraag moet niet zijn *“vinden we een lineaire branch?”*, maar
 
-\[
+$$
 H_0:
 \quad
 \text{alle waargenomen spectral power wordt verklaard door conventionele vortex dynamics},
-\]
+$$
 
 tegenover
 
-\[
+$$
 H_1:
 \quad
 \text{na alle convergence/leakage controls blijft een onafhankelijke material-phase branch over}.
-\]
+$$
 
 Daarmee is een **negatief resultaat net zo informatief als een positief resultaat**, wat precies is wat we voor deze route willen. 🔬

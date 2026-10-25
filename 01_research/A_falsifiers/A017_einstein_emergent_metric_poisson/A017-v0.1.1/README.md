@@ -48,9 +48,9 @@ Each run writes:
 
 A FAIL of the headline gates means the **direct** chain
 
-\[
+$$
 \mathbf v\to g^{\rm eff}_{\mu\nu}\to\Phi=-v^2/2\to p/\rho_{\!f}\to Q
-\]
+$$
 
 is not supported for the preregistered regularized closed-filament reconstruction. It does **not** automatically exclude a separate/nonlocal SST long-range gravitational closure.
 

@@ -14,11 +14,11 @@ Every background thread is a **closed vortex loop**. One leg passes helically th
 
 The paired null case contains the *identical thread geometry* with exactly zero thread circulation. The active candidate has
 
-\[
+$$
 \Gamma_B = \frac{\beta\,\Gamma_K}{N_B},
 \qquad
 \beta=\frac{N_B\Gamma_B}{\Gamma_K}.
-\]
+$$
 
 Thus geometry/component count do not change between active and null.
 
@@ -32,9 +32,9 @@ Thus geometry/component count do not change between active and null.
 
 `G3` pressure-Poisson: reconstruct
 
-\[
+$$
 \nabla^2 p=-\rho\,\partial_i v_j\partial_j v_i
-\]
+$$
 
 on a coarse grid and test whether active threading makes the central pressure more negative.
 

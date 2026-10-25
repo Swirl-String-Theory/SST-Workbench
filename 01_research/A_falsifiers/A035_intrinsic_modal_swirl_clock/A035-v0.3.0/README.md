@@ -21,9 +21,9 @@ Seed-Provenance + Mesh-Certified Modal Clock release.
 
 Stage A asks:
 
-\[
+$$
 \boxed{\text{Does the same knot/link topology possess a recurrent intrinsic shape mode, and is that result robust to seed provenance?}}
-\]
+$$
 
 The physical vortex evolution remains regularized finite-core Biot-Savart. Stage B is still candidate-only and asks whether material stretching plus a measured delay provides a core-specific causal mechanism.
 
@@ -70,9 +70,9 @@ ax bx ay by az bz
 
 per harmonic `n=1,2,...`, corresponding to
 
-\[
+$$
 \mathbf X(t)=\sum_{n\ge1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 An optional leading 3-column constant vector is accepted as `A0`.
 
@@ -87,9 +87,9 @@ knot_T2.3.fseries     -> T2.3
 
 The Gilbert representation is reconstructed directly:
 
-\[
+$$
 \mathbf X(t)=\frac{\mathbf A_0}{2}+\sum_{n\ge1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 Omitted coefficients remain zero.
 
@@ -182,11 +182,11 @@ mesh_max_relative_rms    = 2.0
 
 A provisional clock is replayed at low/high mesh gauges. Both controller gain and cap are varied:
 
-\[
+$$
 (\kappa,c)_{\rm low}=0.7(\kappa,c)_0,
 \qquad
 (\kappa,c)_{\rm high}=1.3(\kappa,c)_0.
-\]
+$$
 
 The frozen mode must remain recurrent and period/closure/amplitude must remain within the predeclared spread gates.
 

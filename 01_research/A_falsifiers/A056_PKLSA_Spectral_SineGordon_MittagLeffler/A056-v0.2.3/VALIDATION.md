@@ -68,22 +68,22 @@ This is the intended v1.0.4 Gate-5/Gate-7 behavior: synthetic controls may valid
 
 The Mittag-Leffler exponential null limit satisfied
 
-\[
+$$
 \max_t\left|E_{1,1}(-t/\tau)-e^{-t/\tau}\right|
 =1.1102230246251565\times10^{-16}.
-\]
+$$
 
 For the confirmed Sine-Gordon cases, C++/OpenMP FP64 phase-feature parity relative \(L_2\) errors were approximately
 
-\[
+$$
 4.40\times10^{-18},\quad 4.14\times10^{-18},\quad 5.04\times10^{-18},
-\]
+$$
 
 and the confirmed Mittag-Leffler cases gave approximately
 
-\[
+$$
 1.20\times10^{-14},\quad 9.49\times10^{-15},\quad 3.97\times10^{-15},
-\]
+$$
 
 all far below the preregistered \(10^{-10}\) certification tolerance.
 

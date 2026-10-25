@@ -2,9 +2,9 @@
 
 ## Primary observable
 
-\[
+$$
 \Delta\phi=-\frac{m g^2T^3}{3\hbar}.
-\]
+$$
 
 The phase is compared against a separately integrated classical action and against the
 accelerated-frame gauge boundary term. The code must not derive the action closure by

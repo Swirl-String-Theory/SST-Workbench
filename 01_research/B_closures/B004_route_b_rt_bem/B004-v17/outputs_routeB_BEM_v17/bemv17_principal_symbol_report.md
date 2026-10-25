@@ -6,33 +6,33 @@ This report is alpha-blind. It does not contain or compare against observed fine
 
 BEMv17 identifies the exact remaining proof obligation for
 
-\[
+$$
 \mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.
-\]
+$$
 
 The target is to derive the first surviving pair-subtracted residual symbol:
 
-\[
+$$
 q_{-2}(x,\xi).
-\]
+$$
 
 If the residual starts at order -2, then the length exponent is fixed:
 
-\[
+$$
 b=2.
-\]
+$$
 
 Mode extensivity fixes:
 
-\[
+$$
 a=1.
-\]
+$$
 
 Together:
 
-\[
+$$
 \boxed{\mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.}
-\]
+$$
 
 ## Certificate
 
@@ -56,6 +56,6 @@ BEMv17 is stronger than BEMv16 because it localizes the remaining mathematical b
 
 ## Next gate
 
-\[
+$$
 \boxed{\text{BEMv18: either multi-knot }b=2\text{ test or explicit }q_{-2}\text{ symbolic expansion.}}
-\]
+$$

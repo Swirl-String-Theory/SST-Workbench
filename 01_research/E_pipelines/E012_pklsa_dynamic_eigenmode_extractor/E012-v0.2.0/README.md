@@ -40,15 +40,15 @@ The source archives use different coordinate conventions. E012 therefore does no
 compare raw coordinate scales. For every E011 provider anchor it uses the E011
 certified ropelength to define
 
-\[
+$$
 D_{\rm eff,raw}=\frac{L_{\rm raw}}{\mathcal R_{\rm E011}},
-\]
+$$
 
 then rescales the centerline so that \(D_{\rm eff}=1\). Hence
 
-\[
+$$
 \hat k_m=\frac{2\pi m}{\mathcal R_{\rm E011}}.
-\]
+$$
 
 This rule is frozen before the first v0.2.0 scientific run and contains no A044 or
 GRB target value. Provider orientation is canonicalized to positive signed writhe
@@ -61,10 +61,10 @@ At the finest spatial resolution C006 supplies the selected positive-frequency r
 E012 anchors branch identity there and tracks backward over the N-ladder using a
 Hungarian assignment with the frozen cost
 
-\[
+$$
 C_{ij}=\tfrac12 d(\lambda_i,\lambda_j)
       +\tfrac12\left(1-|v_i^\dagger v_j|\right).
-\]
+$$
 
 A selected branch must satisfy both the inherited resolution shift tolerance and
 adjacent eigenvector overlap \(\ge 0.80\). It must also remain genuinely oscillatory,

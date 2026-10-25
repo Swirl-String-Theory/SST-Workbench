@@ -5,15 +5,15 @@ Purpose: determine whether a KnotPlot QHP geometry sweep contains a **vortex-dyn
 ## Primary observable
 For each aligned, arclength-resampled QHP geometry \(\mathbf X(q,h,p)\), compute the regularized finite-core Biot--Savart velocity \(\mathbf U\), remove tangential/reparameterization velocity, estimate local QHP-manifold tangent fields \(\partial_q\mathbf X,\partial_h\mathbf X,\partial_p\mathbf X\), and solve the Gram projection
 
-\[
+$$
 \mathbf U_\perp \approx F_q\partial_q\mathbf X+F_h\partial_h\mathbf X+F_p\partial_p\mathbf X.
-\]
+$$
 
 A candidate fixed point satisfies \(\|F\|\approx0\). A local 3D restoring point additionally requires the Jacobian
 
-\[
+$$
 J_{ij}=\frac{\partial F_i}{\partial \xi_j},\qquad \xi=(q,h,p),
-\]
+$$
 
 to have \(\max\Re\lambda(J)<0\). For one-dimensional Q/H/P slices, a zero crossing is restoring when \(dF_\xi/d\xi<0\).
 

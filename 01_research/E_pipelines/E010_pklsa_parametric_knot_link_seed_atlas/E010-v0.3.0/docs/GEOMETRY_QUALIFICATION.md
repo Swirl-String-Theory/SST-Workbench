@@ -6,9 +6,9 @@ Each closed polygonal carrier is cleaned only for exact/near-exact duplicate clo
 
 The default cross-source normalization is
 
-\[
+$$
 \widehat C = \frac{C-\langle C\rangle}{L(C)}
-\]
+$$
 
 so the total length is one. `scale_context` records native component lengths, native total length and the applied scale factor.
 
@@ -16,11 +16,11 @@ so the total length is one. `scale_context` records native component lengths, na
 
 For a regular curve \(\mathbf r(u)\),
 
-\[
+$$
 \kappa = \frac{\|\mathbf r'\times\mathbf r''\|}{\|\mathbf r'\|^3},
 \qquad
 \tau = \frac{(\mathbf r'\times\mathbf r'')\cdot\mathbf r'''}{\|\mathbf r'\times\mathbf r''\|^2}.
-\]
+$$
 
 The builder stores max/RMS/std curvature and RMS torsion at every resolution.
 
@@ -34,19 +34,19 @@ The builder stores max/RMS/std curvature and RMS torsion at every resolution.
 
 For the reconstructed smooth curve the numerical **reach radius** target is
 
-\[
+$$
 \operatorname{reach}(C)
 =
 \min\left(\frac{1}{\kappa_{\max}},\frac{d_{\rm dc}}{2}\right).
-\]
+$$
 
 PKLSA additionally preserves the historical diameter convention
 
-\[
+$$
 \operatorname{Thi}(C)=2\,\operatorname{reach}(C),
 \qquad
 \operatorname{Rop}=\frac{L}{\operatorname{Thi}}.
-\]
+$$
 
 This makes `Rop` directly comparable to the Gilbert/KnotPlot `D=1` trefoil scale around 16.37. The builder also emits `ropelength_reach=L/reach`, which is twice the diameter-convention value and is useful when comparing literature that defines thickness as a tube radius.
 

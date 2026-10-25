@@ -15,12 +15,12 @@ The same local transverse Fermat diagnostic is now applied from the start to fou
 
 The coefficients are extracted from the uploaded `ideal_favorites.txt` database and bundled in `fermat_ext/data/ideal_knots_subset.json`. The source convention is
 
-\[
+$$
 \boldsymbol\gamma(t)
 =
 \sum_i\left[\mathbf A_i\cos(it)+\mathbf B_i\sin(it)\right],
 \qquad 0\le t<2\pi.
-\]
+$$
 
 The curves are uniformly resampled in arclength before the Biot--Savart calculation. Their source normalization has `D=1`; `--scale-over-rc` applies only a uniform coordinate scale and does not identify `D` with a physical SST core diameter.
 
@@ -28,13 +28,13 @@ The curves are uniformly resampled in arclength before the Biot--Savart calculat
 
 The implemented scan evaluates the regularized filament field at probes in transported normal planes and searches for local minima of
 
-\[
+$$
 R_F(\rho;s,\theta)
 =
 \frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}},
 \qquad
 \boldsymbol\beta=\frac{\mathbf u}{c}.
-\]
+$$
 
 Every detected minimum is labelled only
 

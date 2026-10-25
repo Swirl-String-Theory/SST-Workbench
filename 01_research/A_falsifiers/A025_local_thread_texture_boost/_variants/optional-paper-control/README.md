@@ -8,15 +8,15 @@ This release is based on the user-uploaded v0.2.0 package.  v0.2.0 already had e
 
 The workbench distinguishes
 
-\[
+$$
 \boxed{\text{common translational boost}}
-\]
+$$
 
 from
 
-\[
+$$
 \boxed{\text{objective local vortex-thread texture}}.
-\]
+$$
 
 A uniform common boost of knot + complete local substrate must not create intrinsic deformation after rigid alignment, while gradients, finite source curvature and nonparallel thread bundles may produce local dynamical responses.
 
@@ -30,13 +30,13 @@ The model does **not** assume one globally stationary ether frame.
 
 Instead of the v0.2 midpoint approximation, every straight polygon segment is analytically integrated for the Rosenhead-regularized Biot--Savart kernel:
 
-\[
+$$
 \mathbf v(\mathbf x)=
 \frac{\Gamma}{4\pi}
 \oint
 \frac{d\boldsymbol\ell\times(\mathbf x-\mathbf q)}
 {\left(|\mathbf x-\mathbf q|^2+a^2\right)^{3/2}}.
-\]
+$$
 
 Python and C++ contain independent implementations and `run_selftest.py` compares them.
 
@@ -48,9 +48,9 @@ v0.2 used midpoint RK2.  v0.3 uses classical RK4 and recomputes both knot self-f
 
 The scheduler commits a fixed
 
-\[
+$$
 T_{\rm final}
-\]
+$$
 
 before the run.  Spatial resolution is therefore never compared at different integration durations.
 
@@ -58,9 +58,9 @@ before the run.  Spatial resolution is therefore never compared at different int
 
 When required by the configured numerical certification bound,
 
-\[
+$$
 \Delta t_{\max}=C_{\Delta s^2}\frac{\Delta s^2}{|\Gamma|},
-\]
+$$
 
 an outer RK4 step is subdivided into an integer number of substeps.  `T_final` remains unchanged.
 
@@ -74,23 +74,23 @@ After a complete outer RK4 step, each closed knot/link component can be redistri
 
 Every background thread is a closed polygonal filament:
 
-\[
+$$
 C_a:S^1\rightarrow\mathbb R^3.
-\]
+$$
 
 No vortex line terminates, consistent with the structural requirement
 
-\[
+$$
 \nabla\cdot\boldsymbol\omega=0.
-\]
+$$
 
 The primary local source bundle is approximately parallel, representing the particle-scale patch limit of a much larger Earth-/Sun-sized radial source.  Its transverse lattice phase relative to the knot is hidden and shared in normalized form across topologies, so a central thread is not deliberately pinned to the knot centroid.
 
 v0.3 additionally constructs finite-source radial bundles and verifies that
 
-\[
+$$
 D/R_g\rightarrow\infty
-\]
+$$
 
 converges to the parallel local model.
 
@@ -111,18 +111,18 @@ Both cases use matched total circulation so a response cannot be attributed mere
 
 For each primary case v0.3 measures the minimum centerline clearance
 
-\[
+$$
 d_{\min}
-\]
+$$
 
 and reports
 
-\[
+$$
 \chi_{\rm clear}
 =
 \frac{d_{\min}}
 {a_{\rm knot}+a_{\rm thread}}.
-\]
+$$
 
 When finite cores overlap, covariance/closure tests can still be evaluated, but bridge responses are classified `INDETERMINATE` rather than promoted to evidence.
 
@@ -164,15 +164,15 @@ This is a reproducible **procedural blind**.  It is not cryptographic protection
 
 Extended/high-resolution runs additionally produce:
 
-\[
+$$
 \boxed{C1:\text{ spatial fixed-core convergence}}
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{C2:\text{ independent temporal RK4 convergence}}.
-\]
+$$
 
 ---
 
@@ -234,15 +234,15 @@ run_python_reference.cmd
 
 For a spatial ladder
 
-\[
+$$
 N_1<N_2<N_3,
-\]
+$$
 
 all runs use the same physical core ratios and the same `T_final`.  The highest two resolutions define the spatial certification error.
 
 The highest resolution is then rerun with an additional time-refinement factor while keeping the same
 
-\[
+$$
 N,
 \qquad
 a_{\rm knot},
@@ -250,7 +250,7 @@ a_{\rm knot},
 a_{\rm thread},
 \qquad
 T_{\rm final}.
-\]
+$$
 
 This produces a genuinely separate temporal error estimate.
 

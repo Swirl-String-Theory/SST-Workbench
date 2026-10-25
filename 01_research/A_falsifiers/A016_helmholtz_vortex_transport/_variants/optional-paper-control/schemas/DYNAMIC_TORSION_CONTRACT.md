@@ -11,12 +11,12 @@ Static relaxed centerlines are insufficient to test the Core--Torsion Impedance 
 
 The relevant research-track quantities are
 
-\[
+$$
 \mathcal L_{\rm torsion}=\frac12\rho_{\!f}|\partial_t\mathbf A|^2-\frac12K|\nabla\times\mathbf A|^2,
 \qquad
 c_T^2=K/\rho_{\!f},
 \qquad
 Z_{\rm torsion}=\rho_{\!f}c_T.
-\]
+$$
 
 These quantities are intentionally **not** inferred from static knot centerlines in v0.1.0.

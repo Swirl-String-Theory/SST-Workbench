@@ -5,35 +5,35 @@ non-tautological torsional-stiffness extractor.
 
 v1/v2 used the constitutive assignment
 
-\[
+$$
 \mathcal I_\chi=\rho_f J,
 \qquad
 \mathcal K_\chi=\rho_f v_{\rm swirl}^2 J,
-\]
+$$
 
 so
 
-\[
+$$
 c_\chi=\sqrt{\mathcal K_\chi/\mathcal I_\chi}=v_{\rm swirl}
-\]
+$$
 
 was algebraically guaranteed.  v3 does **not** do that.
 
 Instead, v3 computes
 
-\[
+$$
 \mathcal I_\chi=\rho_f\int_A r_\perp^2\,dA,
 \qquad
 \mathcal K_\chi=\rho_f\int_A v_\theta(r)^2 r_\perp^2\,dA,
-\]
+$$
 
 and therefore
 
-\[
+$$
 c_\chi^2=
 \frac{\int_A v_\theta(r)^2 r_\perp^2\,dA}
      {\int_A r_\perp^2\,dA}.
-\]
+$$
 
 This can differ from \(v_{\rm swirl}^2\).  Thus v3 can fail and is a genuine
 Research Track extractor.
@@ -101,19 +101,19 @@ SST gauge derivation.  It only addresses the local torsional-stiffness problem.
 
 Recommended label:
 
-\[
+$$
 \boxed{\text{Research Track: profile-derived torsional stiffness extractor.}}
-\]
+$$
 
 The canon-worthy target is not the old identity
 \(c_\chi=v_{\rm swirl}\), but the conditional statement:
 
-\[
+$$
 c_\chi^2=\left\langle v_\theta^2\right\rangle_{r^2}
 :=
 \frac{\int_A v_\theta(r)^2 r_\perp^2\,dA}
      {\int_A r_\perp^2\,dA}.
-\]
+$$
 
 Then \(c_\chi=v_{\rm swirl}\) only follows if \(v_{\rm swirl}\) is independently
 defined as the \(r^2\)-weighted RMS swirl speed of the resolved core.

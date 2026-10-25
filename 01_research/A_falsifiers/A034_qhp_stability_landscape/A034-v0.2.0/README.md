@@ -14,12 +14,12 @@ The companion generator defines local geometry coordinates around one source see
 
 The intended local representation is
 
-\[
+$$
 \mathbf X(q,h,p)\simeq \mathbf X_0
 +q\,\partial_q\mathbf X
 +h\,\partial_h\mathbf X
 +p\,\partial_p\mathbf X.
-\]
+$$
 
 ## 2. Family-anchor scale normalization
 
@@ -27,10 +27,10 @@ The intended local representation is
 
 v0.1.3 uses
 
-\[
+$$
 \widetilde{\mathbf X}_{\xi}
 =\frac{\mathbf X_{\xi}-\mathbf X_{\xi,\rm cm}}{R_{g,\rm anchor}},
-\]
+$$
 
 where the same anchor \(R_g\) is used for every candidate of one family/replicate. Thus arbitrary KnotPlot overall scale is removed **once**, while relative Q breathing survives.
 
@@ -46,27 +46,27 @@ Legacy `per_candidate` mode is retained only for auditing and should **not** be 
 
 At the family reference geometry, finite differences construct
 
-\[
+$$
 T_q=\partial_q\mathbf X,\qquad
 T_h=\partial_h\mathbf X,\qquad
 T_p=\partial_p\mathbf X.
-\]
+$$
 
 The same reference basis is transported to every candidate and stripped of the local tangential component. The normal Biot--Savart velocity is then projected through the full Gram system
 
-\[
+$$
 G_{ij}=\langle T_i,T_j\rangle,
 \qquad
 b_i=\langle T_i,\mathbf U_\perp\rangle,
 \qquad
 G\mathbf F=\mathbf b,
-\]
+$$
 
 with
 
-\[
+$$
 \mathbf F=(F_q,F_h,F_p)^T.
-\]
+$$
 
 This is important for the 1-D star sweep: in v0.1.2 an off-axis point could be projected in a 1-D basis while the origin was projected in 3-D, so the resulting coefficients were not directly comparable.
 
@@ -76,31 +76,31 @@ The runner reports both the raw Gram condition number and the scale-free correla
 
 A local candidate must satisfy
 
-\[
+$$
 \|\mathbf F\|\approx0.
-\]
+$$
 
 The local Jacobian is
 
-\[
+$$
 J_{ij}=\frac{\partial F_i}{\partial \xi_j},
 \qquad \boldsymbol\xi=(q,h,p),
-\]
+$$
 
 and linear restoring stability requires
 
-\[
+$$
 \boxed{\max_k\Re\lambda_k(J)<0}.
-\]
+$$
 
 The 1-D star contains enough information for the complete central Jacobian because v0.1.3 evaluates all three \(F\)-components at every Q/H/P axis point in the same reference basis.
 
 A local affine root is estimated by
 
-\[
+$$
 \boldsymbol\xi_\star
 =\boldsymbol\xi_0-J^{-1}\mathbf F_0.
-\]
+$$
 
 It must remain inside the actual neighboring QHP cell.
 
@@ -108,9 +108,9 @@ It must remain inside the actual neighboring QHP cell.
 
 The same candidate is evolved with RK4 under the finite-core Biot--Savart dynamics. After rigid/cyclic alignment, the short-time displacement is projected into the **same** reference basis, giving
 
-\[
+$$
 \mathbf F^{\rm short}.
-\]
+$$
 
 For a 1-D restoring crossing, v0.1.3 now requires all of the following:
 
@@ -130,10 +130,10 @@ For a 3-D point, instantaneous and short-time Jacobians are both required to be 
 
 The QHP manifold is only informative if a non-negligible part of the normal dynamics lies inside it. The runner reports
 
-\[
+$$
 f_{\rm proj}
 =\frac{\|\mathbf U_{\rm QHP}\|^2}{\|\mathbf U_\perp\|^2}.
-\]
+$$
 
 If the entire sampled manifold remains below the configured projection threshold, the result is
 

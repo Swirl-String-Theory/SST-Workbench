@@ -44,9 +44,9 @@ T(2,3)
 
 rather than `2_3` or `3_1`. The component-count hint is
 
-\[
+$$
 \gcd(p,q).
-\]
+$$
 
 Thus `T(2,3)` has one component whereas `T(2,4)` has two.
 

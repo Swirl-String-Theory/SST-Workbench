@@ -2,21 +2,21 @@
 
 ## Mathematical normalization
 
-\[
+$$
 \alpha c r_c=2v_{\circlearrowleft}r_c=\Gamma_0/\pi
-\]
+$$
 
 is a circulation scale. The associated uniform vorticity is
 
-\[
+$$
 \zeta_{\rm bg}=\alpha c/r_c=2v_{\circlearrowleft}/r_c,
-\]
+$$
 
 and in \((r_c,\Gamma_0)\) units:
 
-\[
+$$
 \zeta_{\rm bg}^*=1/\pi=0.3183098861837907.
-\]
+$$
 
 ## Automated tests
 
@@ -31,9 +31,9 @@ and in \((r_c,\Gamma_0)\) units:
 The quick paired campaign contains 96 rows. Comparing `zeta*=0` with
 `zeta*=1/pi` gives:
 
-\[
+$$
 \max |\Delta\epsilon_{\rm intrinsic}|=8.33\times10^{-17}.
-\]
+$$
 
 The old total-velocity-normalized residual changed by as much as approximately
 \(1.20\times10^{-3}\), despite an unchanged absolute residual. Therefore v0.2.0

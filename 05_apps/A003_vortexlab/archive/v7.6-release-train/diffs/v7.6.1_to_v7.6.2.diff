@@ -1,0 +1,173 @@
+--- /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.1/vortexring-lab-v7.6.1.html	2026-07-15 01:44:57.807042084 +0000
++++ /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.2/vortexring-lab-v7.6.2.html	2026-07-15 01:44:57.941591920 +0000
+@@ -3,10 +3,10 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.1 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.1">
++<title>Superfluïde vortexlab v7.6.2 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.2">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.0">
++<meta name="vortexlab-parent" content="7.6.1">
+ <meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+@@ -639,8 +639,10 @@
+             <button type="button" class="seg-btn" data-inter="bs">Biot–Savart</button>
+             <button type="button" class="seg-btn active" data-inter="lia">LIA (lokaal)</button>
+           </div></div>
+-        <div class="ctrl" id="knotRow"><label>ideal knoop</label>
+-          <select id="knotSelect"><option value="">3:1:1 trefoil (ingebouwd)</option></select></div>
++        <div class="ctrl" id="knotRow"><label for="knotSelect">Gilbert ideal/tight</label>
++          <select id="knotSelect" aria-label="Gilbert ideal/tight catalogus"><option value="builtin|">— geen Gilbert-catalogus —</option></select></div>
++        <div class="ctrl" id="fseriesRow"><label for="fseriesSelect">.fseries geometrie</label>
++          <select id="fseriesSelect" aria-label="Fseries-geometrie"><option value="">— geen .fseries —</option></select></div>
+         <div class="ctrl hidden" id="compRow">
+           <label>componenten</label>
+           <div class="ctrls" style="grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+@@ -651,12 +653,12 @@
+         <div class="ctrl hidden" id="idealComponentModeRow">
+           <label for="idealComponentMode">cataloguscomponenten</label>
+           <select id="idealComponentMode">
+-            <option value="all" selected>Volledig ideaal object</option>
++            <option value="all" selected>Volledig catalogusobject</option>
+             <option value="single">Eén component isoleren</option>
+           </select>
+         </div>
+-        <button type="button" id="bResetIdealKnot" class="hidden" title="Herstel uitsluitend de geselecteerde ideale catalogusgeometrie">↺ Ideale vorm</button>
+-        <div class="note" id="idealKnotInfo">Externe geometrieën worden uit ideal_knots_data.js (Gilbert tight/ideal) en fourier_knots_data.js (compacte standaardcurven) geladen. De gekozen filamentdynamica mag de beginvorm daarna vervormen.</div>
++        <button type="button" id="bResetIdealKnot" class="hidden" title="Herstel uitsluitend de geselecteerde catalogusgeometrie">↺ Catalogusvorm</button>
++        <div class="note" id="idealKnotInfo">Gilbert ideal/tight-objecten en compacte .fseries-curven hebben afzonderlijke keuzelijsten. Slechts één externe catalogusbron is tegelijk actief; de gekozen filamentdynamica mag de beginvorm daarna vervormen.</div>
+         <div class="ctrl" id="qualRow"><label>kwaliteit</label>
+           <div class="seg" id="qualSeg">
+             <button type="button" class="seg-btn active" data-qual="laag">Laag</button>
+@@ -1152,7 +1154,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.1 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.2 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1163,7 +1165,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.1';
++const APP_VERSION='7.6.2';
+ const APP_BASE_VERSION='7.5.3';
+ const APP_PATCH_NOTES=[
+   'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
+@@ -4827,7 +4829,7 @@
+ 
+   // RECHTS · VORTEX
+   vlMoveControl('modeSeg',vortex);vlMoveControl('topoSelect',vortex);
+-  ['knotRow','idealComponentModeRow','compRow','bResetIdealKnot','idealKnotInfo'].forEach(id=>{const el=document.getElementById(id);if(el)vortex.appendChild(el);});
++  ['knotRow','fseriesRow','idealComponentModeRow','compRow','bResetIdealKnot','idealKnotInfo'].forEach(id=>{const el=document.getElementById(id);if(el)vortex.appendChild(el);});
+   const paramFlags=document.querySelector('#collParams > .coll-body > .btns');
+   if(paramFlags){
+     ['ccwARow','ccwBRow','mirrorRow','lockVzRow'].forEach(id=>{const el=document.getElementById(id);if(el)vortexFlags.appendChild(el);});
+@@ -5495,18 +5497,37 @@
+ document.getElementById('compB').addEventListener('change',e=>{P.compB=+e.target.value;resetState();});
+ document.getElementById('idealComponentMode').addEventListener('change',e=>{P.idealComponentMode=e.target.value==='single'?'single':'all';syncCompSelects();syncUi();resetState();});
+ document.getElementById('bResetIdealKnot').addEventListener('click',()=>{if(activeKnotEntry())resetState();});
+-// Optionele knopencatalogus (ideal_knots_data.js); de ingebouwde 3:1:1-input blijft altijd zichtbaar.
++// Externe knopencatalogi: Gilbert ideal/tight en .fseries staan bewust in afzonderlijke dropdowns.
+ function syncKnotSel(){
+-  const sel=document.getElementById('knotSelect');
+-  if(!sel)return;
+-  if(P.knotKey)sel.value=`${P.knotSource||'ideal'}|${P.knotKey}`;
+-  else if(P.knotIdx>=0)sel.value=`legacy|${P.knotIdx}`;
+-  else sel.value='builtin|';
++  const idealSel=document.getElementById('knotSelect');
++  const fsSel=document.getElementById('fseriesSelect');
++  if(idealSel){
++    if(P.knotSource==='ideal'&&P.knotKey)idealSel.value=`ideal|${P.knotKey}`;
++    else if(P.knotSource==='legacy'&&P.knotIdx>=0)idealSel.value=`legacy|${P.knotIdx}`;
++    else idealSel.value='builtin|';
++  }
++  if(fsSel)fsSel.value=P.knotSource==='fseries'&&P.knotKey?`fseries|${P.knotKey}`:'';
++}
++function applyCatalogSelection(source,key){
++  P.knotIdx=-1;P.knotKey='';P.knotSource='builtin';
++  if(source==='ideal'&&getIdealKnotCatalog()?.db?.[key]){P.knotSource='ideal';P.knotKey=key;}
++  else if(source==='fseries'&&getFourierKnotCatalog()?.db?.[key]){P.knotSource='fseries';P.knotKey=key;}
++  else if(source==='legacy'){
++    const idx=parseInt(key,10);
++    if(Number.isInteger(idx)&&Array.isArray(window.IDEAL_KNOTS)&&window.IDEAL_KNOTS[idx]){P.knotIdx=idx;P.knotSource='legacy';}
++  }
++  P.topo='trefoil';P.idealComponentMode='all';P.compA=1;P.compB=1;
++  const topo=document.getElementById('topoSelect');if(topo)topo.value='trefoil';
++  syncKnotSel();syncCompSelects();syncUi();updateSubtitle();resetState();
+ }
+ (function initKnots(){
+-  const row=document.getElementById('knotRow'),sel=document.getElementById('knotSelect');if(!row||!sel)return;row.classList.remove('hidden');
++  const idealRow=document.getElementById('knotRow'),idealSel=document.getElementById('knotSelect');
++  const fsRow=document.getElementById('fseriesRow'),fsSel=document.getElementById('fseriesSelect');
++  if(!idealRow||!idealSel||!fsRow||!fsSel)return;
++  idealRow.classList.remove('hidden');fsRow.classList.remove('hidden');
+   const ideal=getIdealKnotCatalog(),fseries=getFourierKnotCatalog();
+-  const groups=['<optgroup label="INGEBOUWD"><option value="builtin|">3:1:1 trefoil (ingebouwd)</option></optgroup>'];
++
++  const idealGroups=['<option value="builtin|">— geen Gilbert-catalogus (gebruik topologie hierboven) —</option>'];
+   if(ideal){
+     const singles=[],links=[];
+     for(const id of ideal.ids){
+@@ -5517,27 +5538,35 @@
+       const label=`${id}${k.conway?' · Conway '+k.conway:''}${Number.isFinite(L)?' · L='+L.toFixed(4):''}${nc>1?' · '+nc+' comp':''}`;
+       (nc>1?links:singles).push(`<option value="ideal|${id}">${label}</option>`);
+     }
+-    groups.push(`<optgroup label="GILBERT IDEAL / TIGHT KNOPEN">${singles.join('')}</optgroup>`);
+-    groups.push(`<optgroup label="GILBERT IDEAL / TIGHT LINKS">${links.join('')}</optgroup>`);
++    idealGroups.push(`<optgroup label="GILBERT IDEAL / TIGHT KNOPEN">${singles.join('')}</optgroup>`);
++    idealGroups.push(`<optgroup label="GILBERT IDEAL / TIGHT LINKS">${links.join('')}</optgroup>`);
++  }else idealGroups.push('<optgroup label="CATALOGUSSTATUS"><option disabled>ideal_knots_data.js niet geladen</option></optgroup>');
++  if(!ideal&&Array.isArray(window.IDEAL_KNOTS)&&window.IDEAL_KNOTS.length){
++    idealGroups.push('<optgroup label="LEGACY IDEALE CATALOGUS">'+window.IDEAL_KNOTS.map((e,i)=>`<option value="legacy|${i}">${knotLabel(i)}</option>`).join('')+'</optgroup>');
+   }
++  idealSel.innerHTML=idealGroups.join('');
++
++  const fsGroups=['<option value="">— geen .fseries-geometrie —</option>'];
+   if(fseries){
+-    const opts=fseries.ids.map(id=>{const k=fseries.db[id],warn=k.warning?' ⚠':'';return `<option value="fseries|${id}">${id} · ${k.components?.[0]?.coeffs?.length||0} harmonischen${warn}</option>`;});
+-    groups.push(`<optgroup label="COMPACTE FSERIES — NIET AUTOMATISCH IDEAL">${opts.join('')}</optgroup>`);
+-  }
+-  if(!ideal&&!fseries&&Array.isArray(window.IDEAL_KNOTS)&&window.IDEAL_KNOTS.length){
+-    groups.push('<optgroup label="LEGACY IDEALE CATALOGUS">'+window.IDEAL_KNOTS.map((e,i)=>`<option value="legacy|${i}">${knotLabel(i)}</option>`).join('')+'</optgroup>');
+-  }
+-  if(!ideal)groups.push('<optgroup label="CATALOGUSSTATUS"><option disabled>ideal_knots_data.js niet geladen</option></optgroup>');
+-  if(!fseries)groups.push('<optgroup label="CATALOGUSSTATUS"><option disabled>fourier_knots_data.js niet geladen</option></optgroup>');
+-  sel.innerHTML=groups.join('');
+-  sel.addEventListener('change',()=>{
+-    const sep=sel.value.indexOf('|'),source=sep>=0?sel.value.slice(0,sep):'builtin',key=sep>=0?sel.value.slice(sep+1):'';
+-    P.knotIdx=-1;P.knotKey='';P.knotSource='builtin';
+-    if(source==='ideal'&&getIdealKnotCatalog()?.db?.[key]){P.knotSource='ideal';P.knotKey=key;}
+-    else if(source==='fseries'&&getFourierKnotCatalog()?.db?.[key]){P.knotSource='fseries';P.knotKey=key;}
+-    else if(source==='legacy'){const idx=parseInt(key,10);P.knotIdx=Number.isInteger(idx)?idx:-1;P.knotSource='legacy';}
+-    P.topo='trefoil';P.idealComponentMode='all';P.compA=1;P.compB=1;document.getElementById('topoSelect').value='trefoil';
+-    syncCompSelects();syncUi();updateSubtitle();resetState();
++    const opts=fseries.ids.map(id=>{
++      const k=fseries.db[id],warn=k.warning?' ⚠':'';
++      return `<option value="fseries|${id}">${id} · ${k.components?.[0]?.coeffs?.length||0} harmonischen${warn}</option>`;
++    });
++    fsGroups.push(`<optgroup label="COMPACTE FSERIES — NIET AUTOMATISCH IDEAL">${opts.join('')}</optgroup>`);
++  }else fsGroups.push('<optgroup label="CATALOGUSSTATUS"><option disabled>fourier_knots_data.js niet geladen</option></optgroup>');
++  fsSel.innerHTML=fsGroups.join('');
++
++  idealSel.addEventListener('change',()=>{
++    const sep=idealSel.value.indexOf('|'),source=sep>=0?idealSel.value.slice(0,sep):'builtin',key=sep>=0?idealSel.value.slice(sep+1):'';
++    applyCatalogSelection(source,key);
++  });
++  fsSel.addEventListener('change',()=>{
++    if(!fsSel.value){
++      if(P.knotSource==='fseries')applyCatalogSelection('builtin','');
++      return;
++    }
++    const sep=fsSel.value.indexOf('|'),source=sep>=0?fsSel.value.slice(0,sep):'fseries',key=sep>=0?fsSel.value.slice(sep+1):fsSel.value;
++    applyCatalogSelection(source,key);
+   });
+   syncKnotSel();syncCompSelects();
+ })();

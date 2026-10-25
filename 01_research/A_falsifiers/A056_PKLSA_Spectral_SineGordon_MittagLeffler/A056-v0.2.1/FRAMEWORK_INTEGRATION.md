@@ -25,9 +25,9 @@ The vendored package is labeled `1.0.2.dev0` because the canonical framework is 
 
 The DD32 lane is a high-precision **screening** backend.  A DD32 scalar is represented as
 
-\[
+$$
 x \approx x_{\mathrm{hi}}+x_{\mathrm{lo}},\qquad x_{\mathrm{hi}},x_{\mathrm{lo}}\in\mathrm{binary32}.
-\]
+$$
 
 It does not have the exponent range or exact semantics of IEEE binary64.  A056 therefore does not allow DD32 to replace CPU/Python or C++ FP64 certification for a final scientific gate.
 

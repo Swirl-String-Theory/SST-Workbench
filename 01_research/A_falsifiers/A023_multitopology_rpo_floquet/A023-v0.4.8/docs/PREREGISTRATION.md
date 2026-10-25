@@ -28,10 +28,10 @@ The critical gates remain exactly:
 
 A discrete tangent/normal/binormal frame is constructed on a uniform arclength centerline. The existing six tilt/breathing modes are augmented with three lobe-windowed binormal torsion-sensitive perturbations and normal/binormal Fourier modes
 
-\[
+$$
 \cos(ks)\mathbf n,\quad \sin(ks)\mathbf n,\quad
 \cos(ks)\mathbf b,\quad \sin(ks)\mathbf b.
-\]
+$$
 
 All modes are projected normal to the filament, stripped of rigid motion, Gram–Schmidt orthogonalized and RMS normalized.
 
@@ -43,11 +43,11 @@ EXTENDED Kelvin harmonics: `k = 2,3,4,5,6`.
 
 Symmetric finite differences are evaluated at the configured `coupled_eps_values`. The maximum relative matrix change is
 
-\[
+$$
 C_J=\max_i
 \frac{\|J(\epsilon_i)-J(\epsilon_{i+1})\|_F}
 {\max(\|J(\epsilon_i)\|_F,\|J(\epsilon_{i+1})\|_F)}.
-\]
+$$
 
 `G12` requires both mixed TBK participation and the preregistered convergence bound.
 
@@ -55,12 +55,12 @@ C_J=\max_i
 
 For each family, all off-diagonal entries connecting that family to other families are removed while within-family blocks are retained. The growth penalty is
 
-\[
+$$
 \Delta g_f=
 \frac{g(J_{\rm decouple\,f})-g(J)}{\rho(J)},
 \qquad
 g(A)=\max\Re\operatorname{eig}(A).
-\]
+$$
 
 A positive \(\Delta g_f\) means the removed coupling had a stabilizing effect in the reduced model.
 
@@ -74,26 +74,26 @@ For every expanded eigenvector the energy-like coefficient participation in tilt
 
 The real and imaginary parts of the selected complex eigenvector define an initial phase family
 
-\[
+$$
 \delta X_\phi=
 A\left[\cos\phi\,\Re\Phi-\sin\phi\,\Im\Phi\right].
-\]
+$$
 
 For each phase the full nonlinear finite-core Biot–Savart shape dynamics is integrated without reconnection or repulsion logic.
 
 A valid candidate requires:
 
-\[
+$$
 R_{\rm excursion}\ge R_{\rm excursion}^{\min},
-\]
+$$
 
 followed by
 
-\[
+$$
 R(T)\le R_{\max},
 \qquad
 \frac{R(T)}{\max_{0<t<T}R(t)}\le\eta_{\max},
-\]
+$$
 
 with no near-core event. This explicit excursion-return requirement rejects monotonic slow drift.
 
@@ -112,9 +112,9 @@ For a valid recurrence, the nonlinear return map is finite-differenced in a dete
 
 The multipliers
 
-\[
+$$
 \mu_i=\operatorname{eig}M(T)
-\]
+$$
 
 are reported. One multiplier nearest unity is treated as the candidate neutral phase multiplier; the diagnostic bound is applied to the remaining multipliers.
 

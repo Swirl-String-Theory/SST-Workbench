@@ -64,46 +64,46 @@ The secret mapping is placed under `secret/semantic_manifest.json`. For a strict
 
 The filament self-velocity uses a regularized Biot--Savart discretization,
 
-\[
+$$
 \mathbf v_i = \frac{\Gamma}{4\pi}
 \sum_j
 \frac{\Delta\boldsymbol\ell_j\times(\mathbf x_i-\mathbf x_{j+1/2})}
 {\left(|\mathbf x_i-\mathbf x_{j+1/2}|^2+a^2\right)^{3/2}}.
-\]
+$$
 
 A common boost is
 
-\[
+$$
 \mathbf v_i\mapsto \mathbf v_i+\mathbf U_0.
-\]
+$$
 
 After one time step,
 
-\[
+$$
 \mathbf x_i' = \mathbf x_i+\Delta t\left(\mathbf v_i+\mathbf U_0\right),
-\]
+$$
 
 so the boost contributes only a rigid translation \(\Delta t\,\mathbf U_0\). The intrinsic Kabsch-aligned RMS shape distance must therefore remain numerically zero.
 
 The source-generated radial proxy is
 
-\[
+$$
 \mathbf v_{\rm src}(\mathbf x)
 = q\frac{\mathbf r}{\left(r^2+a_s^2\right)^{3/2}}
 -\left\langle q\frac{\mathbf r}{\left(r^2+a_s^2\right)^{3/2}}\right\rangle,
 \qquad
 \mathbf r=\mathbf x-\mathbf x_s.
-\]
+$$
 
 Away from the source, the unregularized field \(\mathbf r/r^3\) is divergence-free. The mean is removed deliberately so that the test isolates spatial texture/tidal structure rather than common translation.
 
 A second, explicitly conditional director proxy uses
 
-\[
+$$
 S_{ij}=n_i n_j-\frac13\delta_{ij},
 \qquad
 \mathbf v_{\rm dir}=A\,\mathbf S\frac{\mathbf x-\mathbf x_c}{R_g}.
-\]
+$$
 
 Because \(\mathrm{tr}\,\mathbf S=0\), this affine proxy is incompressible.
 
@@ -126,9 +126,9 @@ A structural PASS is necessary for the proposed "no global absolute velocity, bu
 
 `run_all_extended.cmd` runs a blind resolution ladder
 
-\[
+$$
 N\in\{128,256,512\}
-\]
+$$
 
 and requires both the structural null/covariance gates and convergence of the radial conditional response between the two highest resolutions.
 
@@ -166,11 +166,11 @@ Extended runs additionally write `extended_summary.json` and retain each resolut
 
 Input centerline coordinates may be dimensionless. The campaign therefore uses the geometric velocity scale
 
-\[
+$$
 U_g=\frac{|\Gamma|}{4\pi R_g},
 \qquad
 \Delta t=f_t\frac{R_g}{U_g},
-\]
+$$
 
 so all response thresholds are dimensionless ratios such as `shape_rms / R_g`. SST canonical SI constants are recorded as provenance but are not mixed into dimensionless centerline data unless an explicit physical length/circulation calibration is supplied in a future version.
 

@@ -6,23 +6,23 @@
 
 De huidige finite-cell-kandidaat is:
 
-\[
+$$
 \alpha^{-1}_{\rm lead}
 =
 \frac{8\pi}{3}\mathcal L_{3_1}.
-\]
+$$
 
 Met de gebruikte benchmarkwaarde
 
-\[
+$$
 \mathcal L_{3_1}=16.371637
-\]
+$$
 
 volgt:
 
-\[
+$$
 \alpha^{-1}_{\rm lead}\approx137.15471.
-\]
+$$
 
 Dit ligt ongeveer \(866\) ppm van de gemeten \(\alpha^{-1}\). Het belangrijke positieve punt is dat \(\alpha\) niet in de evaluatie wordt ingevoerd.
 
@@ -49,7 +49,7 @@ Nog niet onafhankelijk:
 
 Een model is niet voorspellend wanneer meerdere vrije correcties één target kunnen repareren. Schrijf algemeen:
 
-\[
+$$
 \alpha^{-1}_{\rm model}
 =
 C_{\rm sector}
@@ -59,13 +59,13 @@ G_{\rm cell}
 \mathcal L_{3_1}
 +
 \Delta_3+\cdots.
-\]
+$$
 
 Wanneer vijf sub-percentparameters afzonderlijk de resterende fout kunnen absorberen, identificeert één getal geen van die parameters.
 
 De gatevolgorde moet daarom zijn:
 
-\[
+$$
 G_0\ (\text{provenance})
 \rightarrow
 G_1\ (\text{identificeerbaarheid})
@@ -73,7 +73,7 @@ G_1\ (\text{identificeerbaarheid})
 G_2\ (\text{operator/Hessian})
 \rightarrow
 G_3\ (\text{numerieke closure}).
-\]
+$$
 
 Een kleine eindfout is irrelevant wanneer \(G_0\) of \(G_1\) faalt.
 
@@ -81,13 +81,13 @@ Een kleine eindfout is irrelevant wanneer \(G_0\) of \(G_1\) faalt.
 
 De factor \(8\pi/3\) moet uit één bevroren operator volgen. Een mogelijke structuur is:
 
-\[
+$$
 \mathcal O_{\rm cell}\psi_{\ell m}
 =
 \lambda_{\ell}\psi_{\ell m},
 \qquad
 \lambda_\ell=\ell(\ell+1)-2,
-\]
+$$
 
 waarbij uitsluitend vooraf gedefinieerde soft/zero/unstable modes worden geteld. Dan moet worden bewezen:
 
@@ -101,7 +101,7 @@ waarbij uitsluitend vooraf gedefinieerde soft/zero/unstable modes worden geteld.
 
 Een ideal-knot ropelength is doorgaans een numerieke upper bound of critical configuration, geen exact analytisch topologisch invariant. Voor een ppm-claim moet de volledige foutketen worden beheerst:
 
-\[
+$$
 \sigma_{\alpha^{-1}}^2
 =
 \left(\frac{8\pi}{3}\sigma_{\mathcal L}\right)^2
@@ -111,7 +111,7 @@ Een ideal-knot ropelength is doorgaans een numerieke upper bound of critical con
 \sigma_{\rm discretisatie}^2
 +
 \sigma_{\rm model}^2.
-\]
+$$
 
 De precision claim mag nooit fijner zijn dan de slechtste van:
 
@@ -155,12 +155,12 @@ De kandidaat wordt verworpen als first-principles route wanneer:
 
 ## 8. Verdedigbare huidige conclusie
 
-\[
+$$
 \boxed{
 \frac{8\pi}{3}\mathcal L_{3_1}
 \text{ is een }\alpha\text{-vrije sub-per-mille coincidentie,}
 \text{ geen unieke afleiding.}
 }
-\]
+$$
 
 De echte researchvraag is niet hoe de resterende \(866\) ppm kan worden weggefit, maar of \(8\pi/3\) en alle correcties vooraf uit één fysische operator kunnen worden bewezen.

@@ -34,22 +34,22 @@ No seed amplitude is automatically tuned in response to safety or outcome data.
 
 For every generated seed \(X_1\), the straight-line homotopy
 
-\[
+$$
 X(u)=(1-u)X_0+uX_1,\qquad u\in[0,1]
-\]
+$$
 
 is sampled at 21 fixed values. At every slice the same fixed 400-sample
 nonlocal-clearance screen is evaluated. Generation aborts if
 
-\[
+$$
 \min_u d_{\rm clear}(X(u)) < 0.30\,d_0
-\]
+$$
 
 or if
 
-\[
+$$
 d_{\rm clear}(X_1)<0.50\,d_0.
-\]
+$$
 
 KnotPlot additionally runs `safe`, `dowker`, and `lnknum` at `i00000` and
 `i10000`; their logs are retained. `alex -1` is intentionally excluded because
@@ -84,9 +84,9 @@ Checkpoints are fixed at 0, 1000, 4000 and 10000 iterations.
 This is not a physics PASS/FAIL test. The dataset is eligible for the separate
 phase-delay v0.2 confirmatory falsifier only if the final set contains at least
 
-\[
+$$
 N_{\rm novel,unique}\ge 8
-\]
+$$
 
 identity-hash geometries not present in the frozen v0.1.7 64-point historical
 registry. The preferred target is at least 12.

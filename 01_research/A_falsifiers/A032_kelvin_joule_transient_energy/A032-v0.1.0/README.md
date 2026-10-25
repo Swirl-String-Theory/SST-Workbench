@@ -43,33 +43,33 @@ The input relaxed-knot coordinates are normally dimensionless. For each resoluti
 
 The hot kernel is the Rosenhead–Moore-type regularized midpoint filament law
 
-\[
+$$
 \mathbf v(\mathbf x)=\frac{\Gamma}{4\pi}\sum_s
 \frac{\Delta\boldsymbol\ell_s\times(\mathbf x-\mathbf m_s)}
 {\left(|\mathbf x-\mathbf m_s|^2+r_c^2\right)^{3/2}}.
-\]
+$$
 
 The matching regularized filament Hamiltonian proxy is
 
-\[
+$$
 H_a=\frac{\rho_{\!f}\Gamma^2}{8\pi}
 \sum_{i,j}
 \frac{\Delta\boldsymbol\ell_i\cdot\Delta\boldsymbol\ell_j}
 {\sqrt{|\mathbf m_i-\mathbf m_j|^2+r_c^2}}.
-\]
+$$
 
 The Kelvin impulse diagnostic is
 
-\[
+$$
 \mathbf I=\frac{\rho_{\!f}\Gamma}{2}
 \sum_i \mathbf x_i\times\mathbf x_{i+1}.
-\]
+$$
 
 The implemented Kelvin-duration-like observable uses the nonnegative modal intensity `S(t)=a(t)^2`:
 
-\[
+$$
 T_K=\frac{\left[\int S(t)\,dt\right]^2}{\int S(t)^2\,dt}.
-\]
+$$
 
 For a pure envelope `a(t)=a_0 exp(-gamma t)`, this tends to `T_K = 1/gamma`. For an undamped persistent response it grows with the observation window; that is reported as `PERSISTENT_OR_UNRESOLVED`, not misclassified as dissipation.
 
@@ -206,9 +206,9 @@ Do not inspect `blind_manifest.private.json` before `results_blind.*` is complet
 
 For every baseline, perturbation, and released constriction:
 
-\[
+$$
 \epsilon_E = \max_t \frac{|H_a(t)-H_a(0)|}{|H_a(0)|}.
-\]
+$$
 
 The threshold is frozen in `configs/*.json` before the source identities are restored.
 
@@ -216,10 +216,10 @@ The threshold is frozen in `configs/*.json` before the source identities are res
 
 For matched `+epsilon` and `-epsilon` runs of the same mode:
 
-\[
+$$
 \delta_\omega =
 \frac{|\omega_+-\omega_-|}{\max(|\omega_+|,|\omega_-|)}.
-\]
+$$
 
 A frequency is extracted from zero crossings when possible; a Hann-window FFT is used only when its dominant spectral peak carries enough power. Otherwise the response is `NA/unresolved`, not forced to PASS.
 
@@ -231,15 +231,15 @@ The workbench reports `T_K` at 50%, 75%, and 100% of the observation window. A t
 
 The synthetic streamtube control imposes
 
-\[
+$$
 A(x)u(x)=Q
-\]
+$$
 
 and checks that
 
-\[
+$$
 p(x)+\frac12\rho_{\!f}u(x)^2
-\]
+$$
 
 is constant to numerical precision. Separately, each knot receives a small volume-preserving affine squeeze with determinant one and is then released into the same no-loss filament dynamics.
 

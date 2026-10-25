@@ -19,21 +19,21 @@ The anonymous pair winner is the sign of the median log-ratio of these costs, su
 
 See `config/preset_kelvin_hole_basic.json` for exact machine-readable values. Key gates are:
 
-\[
+$$
 f_{\rm through}\ge0.50,
 \qquad
 f_{\rm resident}\ge0.72,
 \qquad
 f_{\rm side}\le0.35,
-\]
+$$
 
-\[
+$$
 \frac{c_{\rm final}}{c_{\rm initial}}\ge0.70,
 \qquad
 f_{\rm perturb,robust}\ge0.66,
 \qquad
 f_{\mathrm{perturb,same}}\ge0.66.
-\]
+$$
 
 These are numerical classification thresholds, not fitted SST constants.
 
@@ -42,9 +42,9 @@ These are numerical classification thresholds, not fitted SST constants.
 
 The frozen topology gate uses arclength rather than physical time:
 
-\[
+$$
 \frac{d\mathbf x}{ds}=\frac{\mathbf u_{\rm rel}}{|\mathbf u_{\rm rel}|}.
-\]
+$$
 
 The basic preset fixes `hole_streamline_arclength_scale=8.0` and `hole_streamline_ds_fraction=0.025`; the extended preset uses a longer/finer path budget. These parameters affect connectivity resolution, not the finite carrier-evolution horizon.
 

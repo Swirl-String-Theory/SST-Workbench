@@ -66,7 +66,7 @@ Kelvin-wave and NLSE-core modes are hydrodynamic internal modes whose
 characteristic speeds are controlled by $\vchar$ or
 $c_s=\vchar/\sqrt{2}$.  Substituting either of these speeds into the
 Unruh temperature gives
-\[
+$$
     T_{\vchar}
     =
     \frac{\hbar a}{2\pi k_B\vchar},
@@ -76,26 +76,26 @@ Unruh temperature gives
     \frac{c}{\vchar}
     =
     274.0719986,
-\]
+$$
 and therefore does not reproduce the orthodox Jacobson route \cite{Unruh1976, Jacobson1995}.
 
 The only canon-compatible Route-I heat flux is the boost/horizon energy
 flux of the hyperbolic torsion/shear sector with
-\[
+$$
     c_T=c,
     \qquad
     T_{\rm SST}^{\rm hor}
     =
     \frac{\hbar a}{2\pi c k_B}.
-\]
+$$
 Thus Route I is conditional on two independent results:
-\[
+$$
     c_T=c,
     \qquad
     \mathsf M_{\rm torsion}[K]
     =
     \frac{2E_0[K]}{c_T^2}\,\mathsf I ,
-\]
+$$
 together with an independently derived area-law coefficient.  If the
 thermal response entering $\delta Q$ is instead shown to be controlled
 by the Kelvin/core sector, Route I is falsified as a derivation of

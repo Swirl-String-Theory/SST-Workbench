@@ -2,9 +2,9 @@
 
 Standalone Python + C++17/pybind11 Research-Track harness for the four fixed ideal-knot centerlines
 
-\[
+$$
 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2.
-\]
+$$
 
 The package does **not** import, modify, or patch SSTcore.
 
@@ -12,9 +12,9 @@ The package does **not** import, modify, or patch SSTcore.
 
 v0.4.2 is the clock-domain hotfix and completion release for the v0.4 candidate-certification campaign. It preserves the v0.4.1 command structure while correcting the bifurcation failure that occurred at
 
-\[
+$$
 \epsilon/r_c=0.00180.
-\]
+$$
 
 The v0.4.1 failure came from evaluating
 
@@ -24,42 +24,42 @@ The v0.4.1 failure came from evaluating
 
 before checking whether
 
-\[
+$$
 S^2=1-\lVert\boldsymbol\beta\rVert^2>0.
-\]
+$$
 
 For negative `S2`, Python created a complex value and `max(complex, float)` raised a `TypeError`.
 
 v0.4.2 instead solves the stationary equation through the real-domain numerator
 
-\[
+$$
 G(\rho)
 =
 S^2
 +
 \rho\,\boldsymbol\beta\cdot
 \left(J_\beta\mathbf e_\rho\right),
-\]
+$$
 
 where
 
-\[
+$$
 J_{\beta,ij}=\frac{\partial\beta_i}{\partial x_j}.
-\]
+$$
 
 Only after the explicit gate
 
-\[
+$$
 S^2>0
-\]
+$$
 
 is the derivative
 
-\[
+$$
 \frac{\partial R_F}{\partial\rho}
 =
 \frac{G}{S^3}
-\]
+$$
 
 evaluated. Transitions between invalid and valid clock domains are recorded as
 
@@ -161,9 +161,9 @@ python run_candidate_atlas.py --epsilon 0.0019 --centerline-points 8192 --statio
 
 The solver directly resolves
 
-\[
+$$
 G(\rho;s,\theta)=0,
-\]
+$$
 
 rather than identifying minima solely from sampled values of `rho/S`.
 
@@ -183,25 +183,25 @@ python run_candidate_convergence.py --knots 3_1 4_1 5_2 --epsilon 0.0019 --point
 
 For the final two levels, the reported relative errors are
 
-\[
+$$
 E_\rho,
 \qquad
 E_{R_F},
 \qquad
 E_\beta.
-\]
+$$
 
 The default gates are:
 
-\[
+$$
 \max(E_\rho,E_{R_F},E_\beta)<10^{-3}
-\]
+$$
 
 for weak certification and
 
-\[
+$$
 \max(E_\rho,E_{R_F},E_\beta)<10^{-4}
-\]
+$$
 
 for strong certification. A branch must occur on at least three resolution levels.
 
@@ -213,9 +213,9 @@ python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --resolution
 
 This separates the ideal-knot coordinate scale from the core-softening scale. No physical identification
 
-\[
+$$
 D_{\rm source}=1\Longrightarrow D_{\rm physical}=r_c
-\]
+$$
 
 is assumed.
 

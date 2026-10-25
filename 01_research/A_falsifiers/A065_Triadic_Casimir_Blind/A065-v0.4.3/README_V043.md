@@ -50,12 +50,12 @@ The official v1.0.10 FRAMEWORK can register G49-G54; within an independent new f
 
 For exported `u`, `omega`, `p` with rho=1, the numerical checks recompute independently
 
-\[
+$$
 \nabla\cdot\mathbf u,\qquad \nabla\times\mathbf u-\boldsymbol\omega,\qquad
 q=\frac p\rho+\frac12|\mathbf u|^2,\qquad
 \nabla^2q-\nabla\cdot(\mathbf u\times(\nabla\times\mathbf u)),
 \qquad E=\frac\rho2\int_{[0,L]^3}|\mathbf u|^2\,dV.
-\]
+$$
 
 All Fourier derivatives are re-evaluated in CPU FP64 *from saved rounded voxels*, not copied from on-run residual summaries. This tests **internal numerical consistency**, not independently measured pressure. Time refinement is an IVP check, not long-time Euler convergence or physical PKLSA evidence.
 

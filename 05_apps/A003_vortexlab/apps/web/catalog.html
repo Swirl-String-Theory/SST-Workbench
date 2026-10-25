@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VortexLab catalogus · 3D overzicht</title>
+<meta name="vortexlab-page" content="catalog">
+<meta name="vortexlab-architecture" content="modular-m1">
+<link rel="stylesheet" href="./styles/catalog.css">
+</head>
+<body>
+  <header class="cat-header">
+    <h1>VortexLab catalogus</h1>
+    <p class="note">Alleen geometrie-render (Fourier → tube). Geen Biot–Savart, geen solver.</p>
+    <nav class="cat-nav">
+      <a href="./index.html">← Terug naar lab</a>
+    </nav>
+  </header>
+
+  <div class="cat-toolbar">
+    <div class="cat-tabs" role="tablist" aria-label="Catalogusbron">
+      <button type="button" class="active" data-source="all">Alles</button>
+      <button type="button" data-source="ideal">Ideal</button>
+      <button type="button" data-source="fseries">Fseries</button>
+      <button type="button" data-source="knotplot">KnotPlot</button>
+      <button type="button" data-source="twist">Twist</button>
+    </div>
+    <div class="cat-search">
+      <input id="catSearch" type="search" placeholder="Zoek id, label, topology…" autocomplete="off">
+    </div>
+    <div class="cat-stats" id="catStats">—</div>
+  </div>
+
+  <div id="catalogGrid" aria-live="polite"></div>
+
+  <script src="./vendor/three.min.js"></script>
+  <script src="./data/ideal_knots_data.js" onerror="void 0"></script>
+  <script src="./data/fourier_knots_data.js" onerror="void 0"></script>
+  <script src="./data/knotplot_knots_data.js" onerror="void 0"></script>
+  <script src="./data/twist_knot_data.js" onerror="void 0"></script>
+  <script>
+  // Bridge lexical catalog consts onto window (ideal/fseries lack window.* exports).
+  try { if (typeof IDEAL_KNOT_IDS !== 'undefined') window.IDEAL_KNOT_IDS = IDEAL_KNOT_IDS; } catch (_) {}
+  try { if (typeof IDEAL_KNOT_DB !== 'undefined') window.IDEAL_KNOT_DB = IDEAL_KNOT_DB; } catch (_) {}
+  try { if (typeof FSERIES_KNOT_IDS !== 'undefined') window.FSERIES_KNOT_IDS = FSERIES_KNOT_IDS; } catch (_) {}
+  try { if (typeof FSERIES_KNOT_DB !== 'undefined') window.FSERIES_KNOT_DB = FSERIES_KNOT_DB; } catch (_) {}
+  try { if (typeof KNOTPLOT_KNOT_IDS !== 'undefined') window.KNOTPLOT_KNOT_IDS = KNOTPLOT_KNOT_IDS; } catch (_) {}
+  try { if (typeof KNOTPLOT_KNOT_DB !== 'undefined') window.KNOTPLOT_KNOT_DB = KNOTPLOT_KNOT_DB; } catch (_) {}
+  try { if (typeof TWIST_KNOT_IDS !== 'undefined') window.TWIST_KNOT_IDS = TWIST_KNOT_IDS; } catch (_) {}
+  try { if (typeof TWIST_KNOT_DB !== 'undefined') window.TWIST_KNOT_DB = TWIST_KNOT_DB; } catch (_) {}
+  </script>
+  <script src="./src/catalog-geometry.js"></script>
+  <script src="./src/catalog-viewer.js"></script>
+</body>
+</html>

@@ -11,19 +11,19 @@ The motivation is the frozen v0.3.0 development result: all four real filament c
 
 For the circular embedding
 
-\[
+$$
 z(s,t)=e^{i\varphi(s,t)},\qquad \widetilde z=z-\langle z\rangle_s,
-\]
+$$
 
 v0.4.0 requires:
 
-\[
+$$
 \eta_3^{\rm circ}\ge0.95,
 \qquad
 \epsilon_{\rm orth}^{\rm circ}\le10^{-10},
 \qquad
 \mathcal O_F\ge0.90,
-\]
+$$
 
 where \(\eta_3^{\rm circ}\) is the top-three circular-POD energy fraction and \(\mathcal O_F\) is the Bhattacharyya overlap between discovery- and confirmation-window normalized non-zero spatial Fourier-power spectra of \(e^{i\varphi}\).
 

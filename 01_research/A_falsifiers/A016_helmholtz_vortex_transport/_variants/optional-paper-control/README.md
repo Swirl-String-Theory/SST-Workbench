@@ -95,9 +95,9 @@ Reveal adds identity and secondary SST interpretations. It does not retroactivel
 
 The blind finite-core calculation returns a geometry coefficient `energy_length_reference` such that
 
-\[
+$$
 E=\rho\Gamma^2\ell_E.
-\]
+$$
 
 Blind scoring does not substitute either SST density. Post-freeze reveal reports both:
 
@@ -106,9 +106,9 @@ Blind scoring does not substitute either SST density. Post-freeze reveal reports
 
 The transverse torsion research-track relation is kept separate:
 
-\[
+$$
 c_T^2=K/\rho_{\!f},\qquad Z_{\rm torsion}=\rho_{\!f}c_T.
-\]
+$$
 
 No torsion closure is claimed from static relaxed knots.
 

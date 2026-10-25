@@ -1,3 +1,56 @@
+# A058-v0.3.8 — Native Scalar Export Closure
+
+**Scope:** additive native scalar qualification for KnotPlot, on top of the exact v0.3.7 code. It does not modify the original A058-v0.2.9 scientific runner, registered 271 conditions, Framework v1.0.8 pin, historical blind commits, or any pre-existing native evidence.
+
+## Install in your real A058-v0.3.2 workspace
+
+Use the v0.3.8 **overlay** over the already reconciled v0.3.7 installation. Extract it **directly into the A058-v0.3.2 directory**, so `run_all.cmd` and `tools/scalar_export_closure.py` are side by side at the expected paths. No extra nested folder; do not replace or edit `KnotPlot.lnk`.
+
+From that workspace, run:
+
+```bat
+run_all.cmd SELFTEST
+run_all.cmd AUDIT_SCALAR_CLOSURE --source ".\A058_measurement_v037.zip" --out ".\A058_v038_history"
+run_all.cmd RUN_SCALAR_CLOSURE --exe ".\KnotPlot.lnk" --dist ".\kpdist-23mar2025.zip" --out ".\A058_scalar_v038" --timeout 120
+```
+
+Both output paths must **not already exist**. The historical command is read-only and produces a four-case method audit. The native command generates 6 new runs: `dstep = 1,4` crossed with `go 32,128,512`. It starts KnotPlot through the original `.lnk` and respects its `Start in` workdir while exporting into the requested A058 output folder by absolute paths.
+
+To inspect generated scripts before starting KnotPlot:
+
+```bat
+run_all.cmd GENERATE_SCALAR_CLOSURE --dist ".\kpdist-23mar2025.zip" --out ".\A058_scalar_staging_v038"
+```
+
+And then run the prepared, still-unused staging directory:
+
+```bat
+run_all.cmd RUN_SCALAR_CLOSURE --exe ".\KnotPlot.lnk" --out ".\A058_scalar_staging_v038" --timeout 120
+```
+
+Do not run `RUN_SCALAR_CLOSURE` a second time against a directory containing native log or output evidence; it deliberately fails closed.
+
+## What qualifies numerically?
+
+The exact native command order for each condition is `reset all; collision fast; load; ...; go N; final parameters; safe; data open; data format; data header; length; rog; data; data close; save ... ascii`. The *data initialization must follow the solver step and precede all scalar calculations*. Each condition independently checks:
+
+- native process exit code and absence of fatal KnotPlot diagnostics;
+- start and final positive `safe` markers **at sampled endpoints only**;
+- `dstep` readback both before and after `go N`; iterator readback from `0` to exactly `N`; velocity/tangent/gravity/thermal force switches remain off;
+- exactly one well-formed CSV measurement row with `Nbeads`, `Length`, `RoG`, `iteration`;
+- independently recomputed closed-centerline length and gyration radius from that condition's ASCII XYZ snapshot, matched against the CSV within the explicitly registered v0.3.7 display tolerance;
+- source seed and native script SHA-256 provenance.
+
+`KP-alex.exe` and Alexander topology calculations are not required for this scalar contract. A numerical PASS does **not** establish a continuous collision-free path, convergence, topological invariant preservation between snapshots, hydrodynamical physics, or particle stability.
+
+Exit codes: `0` = successful generation or all relevant method/scalar gates pass; `2` = correctly reported negative scientific/measurement qualification; `3` = operational or preflight error. No previous source artifacts are rewritten.
+
+See `docs/SCALAR_EXPORT_CLOSURE_v0.3.8.md` and `evidence/2026_native_scalar_closure_v038/` for source-bound audit findings.
+
+---
+
+## Preserved v0.3.7 guide
+
 # A058-v0.3.7 — Native Measurement Qualification
 
 **Status:** ADDITIVE / LOCAL_VALIDATED / NATIVE_2026_NEW_DIAGNOSTIC_NOT_RUN / PHYSICS_UNRESOLVED.

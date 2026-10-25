@@ -6,13 +6,13 @@ v0.2.0 adds the **provenance-clean Geometry/Fluid → Action Quantum gate**.
 
 The primary comparison is intentionally performed in **specific-action units**
 
-\[
+$$
 [\text{specific action}]
 =
 \frac{\mathrm{J\,s}}{\mathrm{kg}}
 =
 \mathrm{m^2\,s^{-1}},
-\]
+$$
 
 rather than directly predicting an SI value in J·s.
 
@@ -24,39 +24,39 @@ This eliminates the particle mass and the SI kilogram from the primary blind com
 
 Write the fitted experimental phase as a cubic polynomial in the published horizontal variable
 
-\[
+$$
 t=2T,
 \qquad
 \phi(t)=c_0+c_1t+c_2t^2+c_3t^3.
-\]
+$$
 
 For the QGI cubic term,
 
-\[
+$$
 |c_3|
 =
 \frac{m g_{\rm eff}^{\,2}}{24\hbar}.
-\]
+$$
 
 Therefore the experiment determines
 
-\[
+$$
 \boxed{
 \frac{\hbar}{m}
 =
 \frac{g_{\rm eff}^{\,2}}{24|c_3|}
 }
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \frac{h}{m}
 =
 \frac{\pi g_{\rm eff}^{\,2}}{12|c_3|}
 }
-\]
+$$
 
 without providing the analysis with \(m\), \(h\), or \(\hbar\).
 
@@ -120,45 +120,45 @@ The preregistered first model is a uniform Rankine solid-body vortex core.
 
 For a tube with total mass \(M\), core radius \(a\), length \(L\), and total circulation \(\Gamma\),
 
-\[
+$$
 M=\rho\pi a^2L.
-\]
+$$
 
 For solid-body rotation,
 
-\[
+$$
 \Gamma(r)=\Gamma\frac{r^2}{a^2}.
-\]
+$$
 
 The cross-section averaged intrinsic angular momentum gives
 
-\[
+$$
 \boxed{
 \frac{\hbar_{\rm GF}}{M}
 =
 \frac{\Gamma}{4\pi}
 }
-\]
+$$
 
 and hence one full phase cycle gives
 
-\[
+$$
 \boxed{
 \frac{h_{\rm GF}}{M}
 =
 \frac{\Gamma}{2}.
 }
-\]
+$$
 
 The primary blind gate is therefore
 
-\[
+$$
 \boxed{
 \frac{\Gamma_{\rm fluid}}{2}
 \stackrel{?}{=}
 \left(\frac{h}{m}\right)_{\rm QGI}.
 }
-\]
+$$
 
 This comparison requires neither:
 
@@ -185,11 +185,11 @@ x_m,y_m,z_m,vx_m_s,vy_m_s,vz_m_s
 
 The pipeline computes directly
 
-\[
+$$
 \Gamma
 =
 \oint\mathbf v\cdot d\boldsymbol\ell.
-\]
+$$
 
 A matching
 
@@ -210,54 +210,54 @@ upstream.
 
 For each blind knot carrier the package measures
 
-\[
+$$
 L,\quad
 \kappa_{\max},\quad
 d_{\rm nonlocal},
-\]
+$$
 
 and defines the explicit numerical tube-radius proxy
 
-\[
+$$
 a_{\rm proxy}
 =
 \min\left(
 \frac{1}{\kappa_{\max}},
 \frac{d_{\rm nonlocal}}{2}
 \right).
-\]
+$$
 
 Then
 
-\[
+$$
 \widehat L=\frac{L}{a_{\rm proxy}}
-\]
+$$
 
 is sealed blind.
 
 For the uniform Rankine model,
 
-\[
+$$
 h_{\rm GF}
 =
 \frac{\pi}{2}
 \widehat L\,
 \rho\,\Gamma\,a^3,
-\]
+$$
 
 while
 
-\[
+$$
 \frac{h_{\rm GF}}{M}=\frac{\Gamma}{2}.
-\]
+$$
 
 Thus:
 
-\[
+$$
 \boxed{
 \text{geometry cancels from the leading specific-action prediction.}
 }
-\]
+$$
 
 This is not hidden or patched away. It is reported as a **geometry-null result**.
 
@@ -280,11 +280,11 @@ The shader-derived trefoil set remains a first-class blind source alongside the 
 
 An optional branch computes
 
-\[
+$$
 h_{\rm GF}
 =
 \frac{\pi}{2}\widehat L\rho\Gamma a^3.
-\]
+$$
 
 It requires independently measured \(\rho\), \(\Gamma\), and \(a\).
 
@@ -309,7 +309,7 @@ The new gates are:
 
 The EXTENDED closure threshold is preregistered at 3%:
 
-\[
+$$
 \epsilon_{\rm GF/QGI}
 =
 \left|
@@ -318,7 +318,7 @@ The EXTENDED closure threshold is preregistered at 3%:
 -1
 \right|
 \le 0.03.
-\]
+$$
 
 This is deliberately of the same order as the present experimental QGI sensitivity, rather than
 being tuned after seeing a fluid result.

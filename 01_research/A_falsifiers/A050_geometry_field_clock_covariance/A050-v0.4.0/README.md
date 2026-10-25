@@ -6,9 +6,9 @@ A050 v0.4.0 follows the v0.3.2 result `BRANCH_RETAINED_COHERENT_NONSTATIONARITY_
 
 The selected transverse branch is not well described by a single constant angular phase rate. Instead its phase obeys
 
-\[
+$$
 \phi(t)=\phi_0+\int_0^t \omega(t')\,dt',
-\]
+$$
 
 where the observed drift/reversals arise from one or more low-dimensional mechanisms. v0.4.0 discriminates five candidate mechanisms rather than treating all nonstationarity as one class:
 
@@ -30,10 +30,10 @@ This is prospective perturbation replication, not a new-provider confirmation.
 
 For modal coefficient \(C_m(t)\), the spatial phase action is quotiented as
 
-\[
+$$
 C_m(t)\mapsto C_m(t)e^{-im\theta(t)},\qquad
 \theta(t)=\frac{\arg C_{m_0}(t)}{m_0},
-\]
+$$
 
 where \(m_0\) is the dynamically selected reference branch. Recurrence is assessed in this quotient state. This is stronger than simply subtracting the same complex phase from every mode.
 

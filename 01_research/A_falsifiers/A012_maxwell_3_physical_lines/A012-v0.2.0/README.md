@@ -14,28 +14,28 @@ The heavy Biot--Savart evaluation is implemented in **C++17 + pybind11 + OpenMP*
 
 The centreline route is deliberately narrower than a resolved Euler simulation. Each knot/link is interpreted as the centreline of a regularized vortex tube. The fast kernel evaluates
 
-\[
+$$
 \mathbf u(\mathbf x)
  = \frac{\Gamma}{4\pi}
    \sum_k
    \frac{\Delta\boldsymbol\ell_k\times(\mathbf x-\mathbf x_k^{\rm mid})}
    {\left(\lVert\mathbf x-\mathbf x_k^{\rm mid}\rVert^2+a^2\right)^{3/2}},
-\]
+$$
 
 then samples cross-sections normal to the local centreline tangent and constructs the coarse-grained momentum-flux tensor
 
-\[
+$$
 R_{ij}=\rho_{\!f}\left(\langle u_i u_j\rangle-\langle u_i\rangle\langle u_j\rangle\right).
-\]
+$$
 
 For local tangent \(\mathbf t\), the blind observable is
 
-\[
+$$
 p_{\parallel}=\mathbf t^T R\mathbf t,\qquad
 p_{\perp}=\frac{\operatorname{tr}R-p_{\parallel}}{2},\qquad
 C_{\rm blind}=\frac{p_{\perp}-p_{\parallel}}
 {\rho_{\!f}\lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert^2}.
-\]
+$$
 
 The historical comparison coefficient is **not present in the blind package**. It is stored only in the separate unblind key and can be compared after the blind results are frozen.
 
@@ -129,11 +129,11 @@ outputs\basic_20260813_184500\
 
 The blind code knows the SST input scales
 
-\[
+$$
 \rho_{\!f}=7.0\times10^{-7}\ \mathrm{kg\,m^{-3}},\quad
 \lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert=1.09384563\times10^6\ \mathrm{m\,s^{-1}},\quad
 r_c=1.40897017\times10^{-15}\ \mathrm m,
-\]
+$$
 
 because these set the physical units of the generated surrogate field. It does **not** know the historical Maxwell comparison coefficient or the hidden SST electromagnetic prefactor target used by the reduced-momentum unblind step.
 

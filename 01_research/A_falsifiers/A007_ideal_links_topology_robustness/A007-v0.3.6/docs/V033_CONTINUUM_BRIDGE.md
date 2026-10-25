@@ -8,9 +8,9 @@ regularization.  v0.3.3 replaces that choice in the QM presets by a fixed physic
 For every component, segment midpoints are assigned polygonal arclength coordinates.  A self pair is
 excluded when the minimal cyclic arclength separation obeys
 
-\[
+$$
 \Delta s_{\rm cyc}\le s_{\rm excl}.
-\]
+$$
 
 `self_exclusion_energy_arc_D` and `self_exclusion_velocity_arc_D` are dimensionless fractions of the
 Gilbert diameter `D`.

@@ -21,9 +21,9 @@ A coherent quadratic phase law with no significant reversal. Require quadratic \
 
 ### H2 — two-tone beating
 Model the selected complex coefficient as
-\[
+$$
 z(t)=c_0+A_1e^{i\omega_1t}+A_2e^{i\omega_2t}+\epsilon(t).
-\]
+$$
 Require two-tone-over-one-tone \(\Delta\mathrm{BIC}\ge20\), two-tone NRMSE \(\le0.35\), secondary/primary amplitude ratio \(\ge0.10\), at least 0.5 beat cycles over the horizon, envelope modulation depth \(\ge0.08\), envelope/beat angular-rate agreement within 35%, Reversal clustering at amplitude dips is reported as a secondary consistency diagnostic, not required for support.
 
 ### H3 — phase slip

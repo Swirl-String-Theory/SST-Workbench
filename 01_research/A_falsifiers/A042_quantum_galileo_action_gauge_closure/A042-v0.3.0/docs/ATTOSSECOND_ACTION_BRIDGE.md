@@ -4,27 +4,27 @@
 
 The v0.2.0 primary closure remains untouched:
 
-\[
+$$
 \Gamma_{\rm fluid}/2
 \stackrel{?}{=}
 (h/m)_{\rm QGI}.
-\]
+$$
 
 v0.3.0 adds a downstream, target-blind bridge. If an SST producer supplies a **mass-specific action difference** \(\delta s_{\rm SST}\) with clean provenance, the QGI-derived specific quantum is reused as
 
-\[
+$$
 \left(\frac{\hbar}{m}\right)_{\rm QGI}
 =\frac{1}{2\pi}\left(\frac{h}{m}\right)_{\rm QGI},
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \delta\phi_{\rm SST}
 =\frac{\delta s_{\rm SST}}{(\hbar/m)_{\rm QGI}}
 }.
-\]
+$$
 
 This preserves the blind architecture: neither \(h\), \(\hbar\), particle mass, nor a CODATA target enters the new scorer.
 

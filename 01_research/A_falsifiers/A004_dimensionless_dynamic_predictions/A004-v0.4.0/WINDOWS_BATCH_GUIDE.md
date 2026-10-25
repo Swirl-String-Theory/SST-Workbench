@@ -24,9 +24,9 @@ batch\31_run_C9_positive_control.bat
 
 Expected:
 
-\[
+$$
 \mathcal Q_\Gamma\simeq1.
-\]
+$$
 
 This proves the measurement pipeline can recover solid-body rotation.
 

@@ -12,10 +12,10 @@ The diagnostic does **not** hard-code a mode number. The branch is chosen blind 
 
 For the selected complex modal coefficient \(z(t)\), the active-amplitude phase \(\phi(t)=\operatorname{unwrap}(\arg z(t))\) is compared under two nested descriptions:
 
-\[
+$$
 \phi_{\rm lin}(t)=a_0+a_1 t,\qquad
 \phi_{\rm quad}(t)=b_0+b_1 t+b_2 t^2.
-\]
+$$
 
 The quadratic model is treated as evidence for coherent drift only when it gives a material Bayesian-information-criterion improvement, the phase remains directionally consistent, segmented frequency is inconsistent with the stationary tolerance, and the quadratic residual passes the frozen autocorrelation screen. A stationary classification requires a strong linear fit, frequency consistency across four segments, and a corresponding residual screen.
 

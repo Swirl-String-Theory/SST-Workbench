@@ -2,19 +2,19 @@
 
 ## Falsifiable question
 
-\[
+$$
 \boxed{\text{Is the central threaded hole a robust dynamical structure, or only a visual gap in centerline geometry?}}
-\]
+$$
 
 The falsifier separates three notions that must not be conflated:
 
-\[
+$$
 \mathcal C=\text{core centerline topology},
 \qquad
 \mathcal A=\text{co-moving carried-fluid/atmosphere topology},
 \qquad
 \mathcal F=\text{through-flow topology}.
-\]
+$$
 
 A hole in \(\mathcal C\) is not sufficient evidence for a hole in \(\mathcal A\) or \(\mathcal F\).
 
@@ -22,19 +22,19 @@ A hole in \(\mathcal C\) is not sufficient evidence for a hole in \(\mathcal A\)
 
 The carrier velocity is fit to the best normal-plane rigid motion,
 
-\[
+$$
 \mathbf v_i\simeq
 \mathbf U+\boldsymbol\Omega\times(\mathbf x_i-\mathbf c),
-\]
+$$
 
 with tangential marker sliding quotient out. The sampling field is then
 
-\[
+$$
 \mathbf u_{\rm rel}(\mathbf x)
 =
 \mathbf u(\mathbf x)-\mathbf U-
 \boldsymbol\Omega\times(\mathbf x-\mathbf c).
-\]
+$$
 
 This is essential: a stationary Lagrangian structure of a translating/rotating vortex must be sought in the carrier frame, not in the laboratory frame.
 
@@ -46,9 +46,9 @@ The central axis is estimated from the anonymous carrier centerline only. Determ
 
 For the frozen co-moving field the material trajectory curves are reparameterized by arclength,
 
-\[
+$$
 \frac{d\mathbf x}{ds}=\frac{\mathbf u_{\rm rel}}{|\mathbf u_{\rm rel}|},
-\]
+$$
 
 away from stagnation. This does not change streamline connectivity, but prevents a slow open channel from being called ``captured'' simply because a finite physical-time window was too short. Near-stagnation behavior is handled separately by the axial stagnation/pinch diagnostics.
 
@@ -58,9 +58,9 @@ Two deterministic seed families are used.
 
 Seeds begin on the inferred upstream side of the passage. A through-channel fraction is
 
-\[
+$$
 f_{\rm through}=\frac{N_{\rm downstream\ crossing}}{N_{\rm seeds}}.
-\]
+$$
 
 Lateral escape is tracked separately.
 
@@ -68,9 +68,9 @@ Lateral escape is tracked separately.
 
 Central seeds test a carried/captured atmosphere:
 
-\[
+$$
 f_{\rm resident}=\frac{N_{\rm still\ resident}}{N_{\rm seeds}}.
-\]
+$$
 
 The frozen class is therefore based on actual trajectories, not on centerline clearance.
 
@@ -78,18 +78,18 @@ The frozen class is therefore based on actual trajectories, not on centerline cl
 
 Along the inferred axis,
 
-\[
+$$
 u_{\parallel}(s)=
 \mathbf u_{\rm rel}(\mathbf c+s\hat{\mathbf n})\cdot\hat{\mathbf n}
-\]
+$$
 
 is sampled for sign changes. This supplies a diagnostic proxy for Kelvin-like stagnation/separatrix transitions.
 
 For sufficiently translation-dominated cases the code also reports
 
-\[
+$$
 \chi_{\rm hole}=\frac{u_{\parallel,\rm induced}(0)}{U_{\parallel}},
-\]
+$$
 
 but this is explicitly marked **generic**. It may be interpreted as Kelvin's \(u_c/U\) order parameter only when a single coherent translation axis exists.
 
@@ -99,25 +99,25 @@ The complete anonymous filament state is evolved with the regularized Biot--Sava
 
 Required observables include
 
-\[
+$$
 R_c=\frac{c_{\rm hole,final}}{c_{\rm hole,initial}},
-\]
+$$
 
 and class persistence
 
-\[
+$$
 I_{\rm class}=\mathbf 1(C_{\rm final}=C_{\rm initial}).
-\]
+$$
 
 ## 6. Perturbation persistence
 
 A deterministic normal deformation basis is built from low Fourier modes. For every preregistered mode \(q_j\), both signs are tested:
 
-\[
+$$
 \mathbf X_{j,\pm}
 =
 \mathbf X_0\pm\epsilon q_j.
-\]
+$$
 
 No favorable sign is selected after inspection. The package reports both same-class fraction and robust-class fraction.
 
@@ -125,17 +125,17 @@ No favorable sign is selected after inspection. The package reports both same-cl
 
 The active and null candidates contain identical carrier and closed-thread centerlines. The null has
 
-\[
+$$
 \Gamma_{\rm thread}=0,
-\]
+$$
 
 while the active candidate has hidden non-zero thread circulation.
 
 Hence the pair directly controls the hypothesis
 
-\[
+$$
 \text{``the hole only looks present because the centerlines have a gap.''}
-\]
+$$
 
 ## 8. Verdicts
 

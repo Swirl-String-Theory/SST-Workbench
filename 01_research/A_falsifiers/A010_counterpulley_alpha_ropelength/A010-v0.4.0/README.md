@@ -10,10 +10,10 @@ The central rule is stricter than v0.3:
 
 The package retains the C++17/pybind11 Biot--Savart backend and Python fallback from the SST template, but replaces the frozen local eigenmode interpretation of v0.3 by a nonlinear time-domain search for
 
-\[
+$$
 \mathbf X(\hat T) \simeq g\,\mathbf X(0),
 \qquad g\in SE(3),
-\]
+$$
 
 with one common cyclic relabelling of both closed filaments allowed as a tangential parametrisation gauge.
 
@@ -21,20 +21,20 @@ with one common cyclic relabelling of both closed filaments allowed as a tangent
 
 The raw Biot--Savart velocity is unchanged. For **shape evolution** the orbit integrator removes the local tangential velocity,
 
-\[
+$$
 \mathbf u_\perp
 =\mathbf u-(\mathbf u\cdot\mathbf t)\mathbf t,
-\]
+$$
 
 because tangential motion relabels points along a filament but does not change the embedded centerline shape. This prevents marker clustering from being counted as physical non-recurrence.
 
 Dimensionless time is
 
-\[
+$$
 \hat t=\Omega_\Gamma t,
 \qquad
 \Omega_\Gamma=\frac{\Gamma_{\rm scale}}{4\pi D^2}.
-\]
+$$
 
 No measured value of alpha appears in `orbit.py`, `monodromy.py`, or `blind_gates.py`.
 
@@ -42,7 +42,7 @@ No measured value of alpha appears in `orbit.py`, `monodromy.py`, or `blind_gate
 
 For every eligible snapshot the code minimizes
 
-\[
+$$
 \varepsilon_{\rm RPO}(T)
 =
 \frac{1}{D}
@@ -54,38 +54,38 @@ For every eligible snapshot the code minimizes
  g\,\mathbf X_{a,i+q}(T)-\mathbf X_{a,i}(0)
 \right\|^2
 \right]^{1/2}.
-\]
+$$
 
 The same cyclic shift `q` is applied to both channels. Independent shifts are forbidden because they would tune away their relative phase.
 
 A candidate must also satisfy endpoint vector-field covariance under the *same* fixed group element:
 
-\[
+$$
 \varepsilon_f
 =
 \frac{\|g_* f(\mathbf X(T))-f(\mathbf X(0))\|}
 {\|f(\mathbf X(0))\|}.
-\]
+$$
 
 ## True relative Floquet map
 
 Only if an RPO passes does v0.4 construct
 
-\[
+$$
 \boxed{
 \mathbf M
 =
 D\!\left(g_*^{-1}\circ\phi_T\right)_{\mathbf X_0}
 }
-\]
+$$
 
 by central finite differences of the **full nonlinear time-\(T\) flow map**. This is not the frozen Jacobian `exp(J T)` used diagnostically in v0.3.
 
 The package then checks the time-tangent neutral direction,
 
-\[
+$$
 \frac{\|\mathbf M f_0-f_0\|}{\|f_0\|},
-\]
+$$
 
 finite-difference convergence, complex-conjugate spectral closure of the real monodromy, and a preregistered Kelvin-subspace readout.
 
@@ -124,39 +124,39 @@ The bundled full native reference campaign used 36 preregistered seeds and retur
 
 Canonical full run:
 
-\[
+$$
 \hat T_{\rm best}=0.21,
 \qquad
 \varepsilon_{\rm RPO}=0.7019664,
 \qquad
 \varepsilon_f=1.2224031.
-\]
+$$
 
 The canonical trajectory reached cross-channel core overlap at approximately
 
-\[
+$$
 \hat t=1.59.
-\]
+$$
 
 Best seed from the 36-case full blind scan:
 
-\[
+$$
 \frac{a}{D}=0.30,
 \qquad
 \frac{\epsilon}{D}=0.10,
 \qquad
 \phi=\frac{\pi}{2},
-\]
+$$
 
 with
 
-\[
+$$
 \hat T_{\rm best}=0.20,
 \qquad
 \varepsilon_{\rm RPO}=0.4090415,
 \qquad
 \varepsilon_f=0.5595703.
-\]
+$$
 
 This is not close enough to an RPO. Therefore the bundled reference verdict is
 

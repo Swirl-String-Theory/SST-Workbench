@@ -20,25 +20,25 @@ The modal eigenfrequency `omega_m` is still obtained from the fixed regularized 
 
 For each preregistered carrier mode a localized helical Kelvin packet is constructed in the closed Bishop frame and evolved with the same **unforced** C++ RK4/Biot–Savart dynamics. After Kabsch removal of rigid motion, the perturbation-energy centroid
 
-\[
+$$
 C(t)=\frac{\sum_j w_j(t)e^{i2\pi j/N}}{\sum_jw_j(t)},\qquad
 w_j=\|\delta X_j\|^2
-\]
+$$
 
 is unwrapped around the loop. A linear centroid fit gives
 
-\[
+$$
 v_{g,m}^{packet}=\frac{L}{2\pi}\frac{d\arg C}{dt},\qquad
 \tau_m=\frac{L}{|v_{g,m}^{packet}|}.
-\]
+$$
 
 Packet modes must satisfy all frozen quality thresholds in the selected config (`R^2`, angular span, centroid coherence and velocity floor). A candidate requires at least the configured number of valid packet modes, and at least 80% of blind unique candidates must be valid; otherwise the result is **INCONCLUSIVE**, not a hypothesis failure.
 
 The phase score is
 
-\[
+$$
 \Theta_m=(\omega_m\tau_m)\bmod 2\pi,\qquad D_m=1-\cos\Theta_m,
-\]
+$$
 
 with candidate score `D = median(D_m)` over valid preregistered packet modes.
 
@@ -46,9 +46,9 @@ with candidate score `D = median(D_m)` over valid preregistered packet modes.
 
 The nonlinear measurement does not use packet-delay validity to choose perturbations. It uses the fixed mode list in the config, evolves paired unforced trajectories, Kabsch-aligns them, and fits exponential shape departure. Growth is made dimensionless using
 
-\[
+$$
 t_{char}=\frac{L^2}{|\Gamma|},\qquad \Sigma=\sigma_{obs}t_{char}.
-\]
+$$
 
 The candidate response is the median dimensionless growth over the fixed nonlinear mode list.
 
@@ -61,9 +61,9 @@ The candidate response is the median dimensionless growth over the fixed nonline
 
 With at least 8 valid novel unique candidates, require
 
-\[
+$$
 \rho_S(D,\Sigma)\le -0.5,\qquad p\le0.05.
-\]
+$$
 
 No gain parameter is fitted for this gate.
 

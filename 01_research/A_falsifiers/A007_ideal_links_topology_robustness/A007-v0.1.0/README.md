@@ -13,9 +13,9 @@ therefore run either the requested 18-link preregistered set or the complete dat
 Brian Gilbert's source uses diameter normalization \(D=1\). Its listed lengths are \(L/D\).
 The standard mathematical ropelength uses tube radius \(\operatorname{Thi}=D/2\):
 
-\[
+$$
 \operatorname{Rop}_{\rm standard}=\frac{L}{D/2}=2\frac{L}{D}.
-\]
+$$
 
 The parser also uses the conventional Fourier constant term \(\mathbf A_0/2\).
 

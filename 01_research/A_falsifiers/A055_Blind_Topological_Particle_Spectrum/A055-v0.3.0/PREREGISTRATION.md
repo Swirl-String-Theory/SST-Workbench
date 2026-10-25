@@ -33,9 +33,9 @@ For the requested A054 preset, the population is frozen upstream by A054. FULL i
 
 1. **Linked counter-propagating enrichment**
 
-\[
+$$
 f_{\rm CP}^{G/B,\,2+1} > f_{\rm CP}^{U,\,2+1}
-\]
+$$
 
 is reported descriptively; no post-hoc effect threshold is introduced.
 
@@ -59,17 +59,17 @@ when the corresponding isolated `5_2`/`6_1` S-controls do not qualify.
 Let the spectral scale be \(s=\max_i|\lambda_i|\).
 An eigenvalue counts as oscillatory only when
 
-\[
+$$
 |\Im\lambda| > 10^{-7}s.
-\]
+$$
 
 A counter-propagating pair requires at least one positive- and one negative-imaginary
 eigenvalue. Its best frequency asymmetry is
 
-\[
+$$
 A_\omega=\min_{+,-}
 \frac{|\omega_+-|\omega_-||}{(\omega_++|\omega_-|)/2}.
-\]
+$$
 
 The frozen symmetric tag is \(A_\omega\le0.25\).
 

@@ -4,37 +4,37 @@
 
 The local projected temporal operator is
 
-\[
+$$
 \frac{d q}{d\hat t}=Gq,
 \qquad Gv_j=\lambda_jv_j,
 \qquad \lambda_j=\sigma_j+i\omega_j.
-\]
+$$
 
 Therefore
 
-\[
+$$
 q_j(\hat t)\propto e^{\lambda_j\hat t}
 =e^{\sigma_j\hat t}e^{i\omega_j\hat t}.
-\]
+$$
 
 `Re(lambda)` is growth/decay and `Im(lambda)` is oscillation. This convention must not be confused with a QNM ansatz in which damping may appear in the imaginary part of a complex frequency.
 
 The C006 circulation clock is
 
-\[
+$$
 \hat t=\Omega_\Gamma t,
 \qquad
 \Omega_\Gamma=\frac{\Gamma_{\rm scale}}{4\pi D^2}.
-\]
+$$
 
 ## B. K15 stable-root tracking
 
 For neighboring resolution levels, roots are matched by minimizing total normalized complex-plane distance
 
-\[
+$$
 d_{ij}=\frac{|\lambda_i^{(N_a)}-\lambda_j^{(N_b)}|}
 {\max(|\lambda_i^{(N_a)}|,|\lambda_j^{(N_b)}|,\epsilon)}.
-\]
+$$
 
 The assignment is global and one-to-one. A branch passes persistence only if every step satisfies the pre-registered threshold.
 
@@ -44,14 +44,14 @@ This is the C006 adaptation of the robust-root principle used by Batic & Dutykh 
 
 The reusable QEP form is
 
-\[
+$$
 Q(\lambda)x
 =\left(M_0+\lambda M_1+\lambda^2M_2\right)x=0.
-\]
+$$
 
 It is linearized as
 
-\[
+$$
 \begin{pmatrix}
 0&I\\
 -M_0&-M_1
@@ -61,13 +61,13 @@ It is linearized as
 I&0\\
 0&M_2
 \end{pmatrix}z.
-\]
+$$
 
 The implementation self-test uses
 
-\[
+$$
 \lambda^2+3\lambda+2=0
-\]
+$$
 
 with exact roots \(-1\) and \(-2\). C006 v0.3.0 does not convert its first-order Kelvin generator into a QEP merely to mimic the source paper.
 
@@ -77,11 +77,11 @@ The regularization parameter \(\varepsilon/D\) is varied while all other registe
 
 A temporal-generator eigenvalue is descriptively tagged `overdamped_like` when
 
-\[
+$$
 \chi_{\rm osc}=\frac{|\operatorname{Im}\lambda|}
 {\max(|\lambda|,\lambda_{\rm floor})}
 \leq\chi_{\max}.
-\]
+$$
 
 The tag only means that the finite-dimensional local mode has little oscillatory part under this convention. It is not a claim of viscous damping.
 
@@ -89,9 +89,9 @@ The tag only means that the finite-dimensional local mode has little oscillatory
 
 For each eigenvalue \(\lambda\), K17 measures the nearest-spectrum defects for
 
-\[
+$$
 \lambda^*,\quad -\lambda,\quad -\lambda^*.
-\]
+$$
 
 For a full real Hamiltonian linearization, quartet symmetries can arise under appropriate hypotheses. C006 does not assume those hypotheses survive its four-state projected subspace. Accordingly K17 is diagnostic and cannot by itself falsify the underlying inviscid Euler dynamics.
 
@@ -107,26 +107,26 @@ C006 partitions the 4×4 projected generator into common and differential 2×2 d
 
 The off-block coupling measure is
 
-\[
+$$
 \eta_{\rm coupling}
 =
 \frac{\sqrt{\|G_{cd}\|_F^2+\|G_{dc}\|_F^2}}
 {\|G\|_F}.
-\]
+$$
 
 Only if this is small does a separate-sector spectral comparison become meaningful.
 
 The numerical intertwiner pretest solves
 
-\[
+$$
 BX-XA\approx0
-\]
+$$
 
 by finding the smallest singular vector of
 
-\[
+$$
 I\otimes B-A^T\otimes I.
-\]
+$$
 
 A small residual is necessary for approximate finite-dimensional intertwining, but it is not sufficient for a Darboux claim.
 
@@ -134,19 +134,19 @@ A small residual is necessary for approximate finite-dimensional intertwining, b
 
 For scalar second-order operators, a standard first-order Darboux/supersymmetric factorization has
 
-\[
+$$
 A=\frac{d}{ds}+W(s),
 \qquad
 A^\dagger=-\frac{d}{ds}+W(s),
-\]
+$$
 
 and partner Hamiltonians
 
-\[
+$$
 H_+=AA^\dagger,
 \qquad
 H_-=A^\dagger A.
-\]
+$$
 
 Batic & Dutykh use this structure to prove a specific scalar–vector isospectrality in their Einstein limit. C006 K19 requires an independently derived SST operator pair before this machinery may be promoted from a numerical self-test to physics.
 
@@ -156,15 +156,15 @@ K19 therefore remains `SKIP` under the present centerline model.
 
 If the nonlinear dynamics has an accepted RPO with dimensionless period \(T\), a local constant generator would predict
 
-\[
+$$
 \mu_j^{\rm local}=e^{\lambda_j T}.
-\]
+$$
 
 K20 compares these values with eigenvalues of the actual relative monodromy
 
-\[
+$$
 M=D(g_*^{-1}\circ\phi_T)_{X_0}.
-\]
+$$
 
 The comparison is legal only after K6 accepts the RPO and constructs \(M\). Otherwise K20 is `SKIP`.
 

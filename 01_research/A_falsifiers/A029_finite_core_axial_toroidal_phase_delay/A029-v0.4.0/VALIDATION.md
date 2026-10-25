@@ -114,9 +114,9 @@ A synthetic exactly linear local dispersion relation recovers the predicted loop
 
 The same synthetic packet with deliberately inflated measured dispersion-frequency uncertainty still recovers the group delay but fails `phase_valid` because
 
-\[
+$$
 \delta\phi_{disp}=\sigma_\omega\tau_{ret}
-\]
+$$
 
 exceeds the phase-uncertainty threshold.
 

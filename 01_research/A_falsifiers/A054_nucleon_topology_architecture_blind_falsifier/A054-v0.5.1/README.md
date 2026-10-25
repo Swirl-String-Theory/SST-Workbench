@@ -6,9 +6,9 @@ A054-v0.5.1 is the numerical-consistency successor to the frozen v0.5.0 run. It 
 
 v0.5.0 differentiated the raw reduced Hamiltonian but accepted trial states only after deterministic resampling and reach normalization. v0.5.1 removes that mismatch by defining one canonical constrained objective for the entire variational lane:
 
-\[
+$$
 U_c(q;X)=\widehat H_a\!\left(\mathcal N[\mathcal R(X+\delta X(q))]\right).
-\]
+$$
 
 The finite-difference gradient, Armijo line search, stationarity score, endpoint Hessian and nonlinear reduced ringdown all use exactly this `U_c`.
 

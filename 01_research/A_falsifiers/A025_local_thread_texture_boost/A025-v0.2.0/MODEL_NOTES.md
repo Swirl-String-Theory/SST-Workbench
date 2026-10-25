@@ -4,13 +4,13 @@
 
 The hypothesis under test is
 
-\[
+$$
 \boxed{
 \text{objective local vortex texture}
 \;\not\Rightarrow\;
 \text{globally detectable absolute translational velocity}
 }
-\]
+$$
 
 A common velocity offset of the complete local system is therefore treated as a covariance transformation, whereas gradients/orientation/density of explicit vortex threads are local physical structure.
 
@@ -18,15 +18,15 @@ A common velocity offset of the complete local system is therefore treated as a 
 
 Let a source radius/observation distance be \(R_s\) and a knot scale be \(\ell_k\).  For Earth- or Sun-scale sources and microscopic particle structures,
 
-\[
+$$
 \frac{\ell_k}{R_s}\ll1.
-\]
+$$
 
 Across the knot, a radial source direction changes only by
 
-\[
+$$
 \Delta\theta=O\!\left(\frac{\ell_k}{R_s}\right).
-\]
+$$
 
 The v0.2.1 local bundle therefore uses approximately parallel outgoing legs.  This is more appropriate than placing a source center at \(R_s\sim 10R_g\), which would create artificial curvature across the knot.
 
@@ -34,11 +34,11 @@ The v0.2.1 local bundle therefore uses approximately parallel outgoing legs.  Th
 
 For ordinary smooth incompressible flow,
 
-\[
+$$
 \boldsymbol\omega=\nabla\times\mathbf v,
 \qquad
 \nabla\cdot\boldsymbol\omega=0.
-\]
+$$
 
 A line-vorticity model must therefore not contain free filament endpoints in the fluid domain.  Every v0.2.1 thread is a closed polygonal component.  The remote return path is explicit and its distance is varied to test locality.
 
@@ -48,25 +48,25 @@ The thread substrate is frozen relative to the local source frame during a campa
 
 This is an assumption, not a derivation.  A later version can add fully coupled thread-thread evolution as a stronger test.  v0.2.1 isolates the question:
 
-\[
+$$
 \text{Does a committed closed, source-anchored vortex texture have the required covariance/locality behavior?}
-\]
+$$
 
 ## 5. Common boost
 
 For common boost \(\mathbf U_0\),
 
-\[
+$$
 \mathbf X(t)\rightarrow\mathbf X(t)+\mathbf U_0t,
 \qquad
 \mathbf T_a(t)\rightarrow\mathbf T_a(t)+\mathbf U_0t.
-\]
+$$
 
 All Biot--Savart separations are unchanged.  Therefore an intrinsic shape observable should satisfy
 
-\[
+$$
 \Delta\mathcal O_{\rm intrinsic}=0
-\]
+$$
 
 up to numerical precision.  G1 is primarily an implementation/covariance gate; it is not independent evidence for relativity.
 
@@ -89,11 +89,11 @@ No actual Earth/Sun thread density, circulation, or astronomical falloff is assu
 
 For each source geometry, \(R_{g,\rm ref}\) is computed with the same fixed reference resampling count at every ladder level.  Therefore
 
-\[
+$$
 a_{\rm knot}=\alpha_kR_{g,\rm ref},
 \qquad
 a_{\rm thread}=\alpha_tR_{g,\rm ref}
-\]
+$$
 
 remain fixed as \(N\) changes.
 

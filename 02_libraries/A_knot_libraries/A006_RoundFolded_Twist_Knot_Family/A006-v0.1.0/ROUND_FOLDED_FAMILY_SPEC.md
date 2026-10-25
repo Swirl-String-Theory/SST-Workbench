@@ -6,9 +6,9 @@
 
 Let \(m\in\mathbb N,\;m\ge1\) be the number of signed half-twists in a rational tangle, with the clasp fixed by the Conway presentation
 
-\[
+$$
 T_m\equiv C(m,2),\qquad \frac{p}{q}=[m,2]=m+\frac12=\frac{2m+1}{2}.
-\]
+$$
 
 The mirror chirality depends on crossing convention. This is the **topological** definition of the intended twist-knot family, not a formula for the Euclidean 3D embedding. KnotPlot's `conway {m}2` is provided as a *runtime acquisition candidate*; validate its exact Conway parser on the installed executable before treating the output as authoritative.
 
@@ -23,13 +23,13 @@ The mirror chirality depends on crossing convention. This is the **topological**
 
 The normalized Alexander polynomial targets (up to \(\pm t^k\)) are:
 
-\[
+$$
 \Delta_m(t)=\begin{cases}
 \frac{m+1}{2}(t+t^{-1})-m,&m\text{ odd},\\
 -\frac{m}{2}(t+t^{-1})+(m+1),&m\text{ even}.
 \end{cases}
 \quad\Rightarrow\quad\det(T_m)=|\Delta_m(-1)|=2m+1.
-\]
+$$
 
 These are **target invariants**; they are NOT calculated from the generated XYZ embeddings in this release.
 
@@ -37,25 +37,25 @@ These are **target invariants**; they are NOT calculated from the generated XYZ 
 
 Given a closed polygonal realization \(K_m:S^1\to\mathbb R^3\) of the specified twist knot (with immutable provider hash), start with the nearly circular carrier
 
-\[
+$$
 \mathbf C_R(\theta)=(R\cos\theta,R\sin\theta,0).
-\]
+$$
 
 Choose a short carrier arc \(I\) and a nondegenerate source edge \(e_m\). Delete those arcs/edges, use the cut source open polygon \(K_m\setminus e_m\), and reconnect in order using two cubic Hermite branches \(H_L,H_R\):
 
-\[
+$$
 \boxed{\;
 X_m=\operatorname{close}\left[\mathbf C_R|_{S^1\setminus I}\;\Vert\;H_L\;\Vert\;\mathcal A_{\eta,\lambda}(K_m\setminus e_m)\;\Vert\;H_R\right].\;}
-\]
+$$
 
 Here the anisotropic, *invertible* local fold is
 
-\[
+$$
 \mathcal A_{\eta,\lambda}(\mathbf q)
 =\mathbf p_0+\lambda\left[\mathbf t\mathbf t^\top
 +\eta(I-\mathbf t\mathbf t^\top)\right]Q(\mathbf q-\mathbf q_0),
 \quad 0<\eta\le1,\;\lambda>0,
-\]
+$$
 
 with \(\mathbf t\) the attachment tangent, \(Q\in SO(3)\), and \(\eta\) the fold/compression ratio. The implementation uses piecewise-polynomial Hermite bridges, smooth radial-shoulder corrections, and closed arclength resampling. It records the source-cut edge and source hash.
 
@@ -65,9 +65,9 @@ with \(\mathbf t\) the attachment tangent, \(Q\in SO(3)\), and \(\eta\) the fold
 
 Let \(d_*(X_m)\) be the *nonlocal* minimal segment-to-segment centerline distance (excluding four adjacent beads on each side), \(a\) be the chosen tube radius, and \(\delta\) a clearance margin:
 
-\[
+$$
 \boxed{d_*\ge2a+\delta>0.}
-\]
+$$
 
 The user-desired 'almost touching folded rope' is a **dimensionless relative shape goal**, \((d_*-2a)/R\ll1\), **not** zero centerline clearance. In this release `fold_ratio=0.8` compresses transverse directions of the local knot and an independent global scale factor `7.0` makes its sampling safer relative to KnotPlot's `close` threshold. Neither \(a\) nor the physical SST core radius is calibrated; no numerical SST material claim follows from these units.
 
@@ -75,15 +75,15 @@ The user-desired 'almost touching folded rope' is a **dimensionless relative sha
 
 The base link is the closure of the three-strand braid
 
-\[
+$$
 \beta_B=(\sigma_1\sigma_2^{-1})^3.
-\]
+$$
 
 Three **locally knotted** connected-sum candidates are created by the same decoration operation, at separated braid sectors. Standard preset:
 
-\[
+$$
 \boxed{B(T_3,T_3,T_4)=B(5_2,5_2,6_1).}
-\]
+$$
 
 Each decorated component is **intended** to carry its local twist-knot type, and the base retains a Borromean structural design. However, pairwise linking numbers \(Lk_{ij}=0\) are not a certificate for the Borromean triple invariant \(\bar\mu_{123}\), nor do they certify all proper sublinks or knot summands. An independent 3D isotopy/PD/Jones/Alexander gate is required. The component sources `5_2` are the *same* provider (not independent experimental replicates).
 

@@ -6,23 +6,23 @@ v0.1.4 separates mathematical/topological discovery from SST comparison.
 
 The blind stage is:
 
-\[
+$$
 \text{geometry/topology}
 \rightarrow
 \text{blind observables}
 \rightarrow
 \text{sealed hashes}
-\]
+$$
 
 Only after sealing may the reveal stage read SST hypotheses or physical inputs:
 
-\[
+$$
 \text{sealed blind result}
 +
 \text{post-seal SST reveal}
 \rightarrow
 \text{comparison}.
-\]
+$$
 
 ## Non-negotiable blind rules
 

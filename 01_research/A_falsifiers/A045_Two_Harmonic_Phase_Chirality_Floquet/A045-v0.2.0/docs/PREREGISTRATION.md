@@ -8,9 +8,9 @@ Does the exact threefold dynamical symmetry of the counter-rotating two-colour d
 ## Primary identity
 For the counter-rotating drive,
 
-\[
+$$
 A\!\left(t+\frac{T}{3}\right)=R_z\!\left(\frac{2\pi}{3}\right)A(t)R_z^{-1}\!\left(\frac{2\pi}{3}\right).
-\]
+$$
 
 The co-rotating arm is the positive control that generally lacks this identity.
 

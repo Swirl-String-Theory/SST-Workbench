@@ -39,10 +39,10 @@ A negative Hessian eigenvalue is a direct instability of that selected reduced c
 
 The Research-Track filament two-form is
 
-\[
+$$
 \Omega_{ab}=\sum_i\sigma_i\oint \hat{\mathbf t}_i\cdot
 (\delta\mathbf X_a\times\delta\mathbf X_b)\,ds.
-\]
+$$
 
 The suite checks antisymmetry, rank, nullity and singular values. Full rank after gauge reduction is a
 necessary readiness condition. It is not sufficient until this form is derived from the accepted SST
@@ -52,11 +52,11 @@ action and circulation normalization.
 
 For each energy profile,
 
-\[
+$$
 \Omega\,\dot{\mathbf q}=H\mathbf q,
 \qquad
 A=\Omega^{+}H.
-\]
+$$
 
 The eigenvalues of \(A\) are tested for real unstable parts, Hamiltonian \(\lambda\leftrightarrow-\lambda\)
 pairing and positive dimensionless frequencies. Only frequency ratios are compared. Absolute

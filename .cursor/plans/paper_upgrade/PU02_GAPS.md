@@ -8,7 +8,7 @@ Until `from_outputs` extractors land per family:
 - `paper_upgrade_certs.py emit-*-synthetic` is used to prove the certificate **pipeline**
   (emit → path → consumer) after campaigns.
 - Those emits MUST be marked `certificate_kind=SELFTEST`, `scientific=false`,
-  `promotion_allowed=false`, `status=PIPELINE_PASS` ([PU02b](PU02b_certificate_semantics.plan.md)).
+  `promotion_allowed=false`, `status=PIPELINE_PASS` ([PU02b](complete/PU02b_certificate_semantics.plan.md)).
 - Scientific PASS/FAIL of the new observables still requires extracting real tensors from
   campaign artifacts (PU04b–PU04d).
 

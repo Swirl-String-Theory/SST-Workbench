@@ -4,9 +4,9 @@ v0.1.2 is the **Swirl-Clock phase-integrity upgrade**.  It keeps the finite-core
 
 The hard rule remains:
 
-\[
+$$
 \boxed{\text{no feedback delay and no target phase are supplied to the dynamics.}}
-\]
+$$
 
 ## What changed
 
@@ -26,16 +26,16 @@ See `CHANGELOG.md` for the reason behind every design choice.
 
 ## Swirl-Clock core set
 
-\[
+$$
 \boxed{
 \{\Re\lambda,\Im\lambda,\omega_{intrinsic},\Omega_{swirl},v_g,
 \tau_{loop},\tau_{return},\phi_{loop},\delta\phi\}.
 }
-\]
+$$
 
 The physics question is now sharper:
 
-\[
+$$
 \text{same continued eigenbranch}
 \rightarrow
 \text{measured return}
@@ -43,7 +43,7 @@ The physics question is now sharper:
 \text{numerically certified phase}
 \stackrel{?}{\longrightarrow}
 \Re\lambda\downarrow.
-\]
+$$
 
 ## Recommended order
 
@@ -104,4 +104,3 @@ Adds a dimensionally/provenance-qualified δℓ -> δs producer and explicitly r
 ## v0.6.0 SST specific-Lagrangian kernel
 
 Adds linear-order closure-residual specific-Lagrangian kernel (sst_lagrangian.py) derived from A029 linearized incompressible-Euler eigenstate. See docs/DERIVATION_SST_LAGRANGIAN.tex.
-

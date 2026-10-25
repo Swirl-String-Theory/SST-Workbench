@@ -197,9 +197,9 @@ The blind `*_arrays.npz` also retains expanded modes, expanded Jacobians, and a 
 ### Scientific analysis
 - Preserves v0.1 critical decision rule: `G0/G2/G3/G4/G6` remain the overall PASS/FAIL critical set.
 - Adds exact **biorthogonal left/right eigenmode attribution** for the reduced Jacobian:
-  \[
+  $$
   \lambda_k=\lambda_k^{\rm local}+\lambda_k^{\rm same}+\lambda_k^{\rm cross}+\lambda_k^{\rm transition}.
-  \]
+  $$
   This separates “cross-lobe locally repels” from “cross-lobe stabilizes the unstable eigenmode”.
 - Adds component-ablation spectra: full, without-local, without-same-lobe, without-cross-lobe, without-transition, plus component-only spectra.
 - Adds `C_3` reduced-sector diagnostics for `m=0` versus the real two-dimensional `E` sector and tilt/breathing participation.

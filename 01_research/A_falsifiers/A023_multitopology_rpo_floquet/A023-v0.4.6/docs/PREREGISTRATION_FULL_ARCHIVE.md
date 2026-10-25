@@ -14,9 +14,9 @@ No Fremlin suffix variant may be silently replaced by a single representative.
 
 The v0.4 generic critical set remains
 
-\[
+$$
 P0\land P1\land P2\land P5.
-\]
+$$
 
 `P3`, `P4`, link-only `P6`, `P7` and `P8` are diagnostic/causal gates and do not retroactively change the earlier decision rule.
 

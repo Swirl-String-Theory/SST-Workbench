@@ -4,18 +4,18 @@
 
 Construeer een SST-specifiek complex dubbelveld
 
-\[
+$$
 \Phi(\mathbf x)=
 \begin{pmatrix}\phi_1(\mathbf x)\\\phi_2(\mathbf x)\end{pmatrix}
-\]
+$$
 
 waaruit
 
-\[
+$$
 \Psi=\frac{\Phi}{\sqrt{\Phi^\dagger\Phi}},
 \qquad
 \mathbf n=\Psi^\dagger\boldsymbol\sigma\Psi
-\]
+$$
 
 worden afgeleid.
 
@@ -25,32 +25,32 @@ Primair: **H4**. Voorbereidend op H0–H3.
 
 ## Minimale voorwaarden
 
-\[
+$$
 \Phi^\dagger\Phi>0
-\]
+$$
 
 op het gehele domein,
 
-\[
+$$
 \mathbf n(\mathbf x)\to\mathbf n_\infty
 \quad(|\mathbf x|\to\infty),
-\]
+$$
 
 en
 
-\[
+$$
 \Psi\sim e^{i\chi}\Psi
-\]
+$$
 
 moet dezelfde fysieke configuratie representeren.
 
 ## Eerste SST-ansatz
 
-\[
+$$
 \phi_1=A_1e^{i\theta_{\rm circ}},
 \qquad
 \phi_2=A_2e^{i\theta_{\rm frame}}.
-\]
+$$
 
 Mogelijke interpretatie:
 

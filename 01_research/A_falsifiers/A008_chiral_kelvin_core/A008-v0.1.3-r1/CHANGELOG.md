@@ -26,7 +26,7 @@
 
 The resolved subset is
 
-\[
+$$
 \mathcal E_{\rm resolved}
 =
 \left\{
@@ -34,11 +34,11 @@ n:
 \eta_a^{(N_1)},\eta_a^{(N_2)}\le0.5,\;
 \mathrm{PPW}_n^{(N_1)},\mathrm{PPW}_n^{(N_2)}\ge12
 \right\}.
-\]
+$$
 
 Numerical readiness is evaluated using
 
-\[
+$$
 f_{\rm resolved}
 =
 \frac{
@@ -46,7 +46,7 @@ N_{\rm trackable\cap resolved}
 }{
 N_{\rm resolved}
 }.
-\]
+$$
 
 Physical readiness additionally requires an established
 relative-equilibrium interpretation.
@@ -69,11 +69,11 @@ v0.1.3 resolved-grid audit.
 - Explicit superseded/refined/withdrawn conclusion states.
 - Wavelength-resolution metric
 
-  \[
+  $$
   \mathrm{PPW}
   =
   \frac{N}{m_{\rm dom}}.
-  \]
+  $$
 
 - Wavelength-resolution statuses:
 
@@ -83,34 +83,34 @@ v0.1.3 resolved-grid audit.
 
 - `resolved` resolution preset:
 
-  \[
+  $$
   N=256,\;320,\;384.
-  \]
+  $$
 
 ### Changed
 
 - Removed the fixed `m_max = 24` Fourier-fingerprint ceiling.
 - Fourier fingerprints now use the full Nyquist-safe mode range
 
-  \[
+  $$
   m_{\max}
   =
   \left\lfloor
   \frac{N}{2}
   \right\rfloor-1.
-  \]
+  $$
 
 - Physical interpretation now requires both:
 
-  \[
+  $$
   \eta_a\le0.5
-  \]
+  $$
 
   and
 
-  \[
+  $$
   \mathrm{PPW}\ge12.
-  \]
+  $$
 
 - The frozen torus-trefoil remains explicitly excluded from physical
   interpretation even when numerically converged.

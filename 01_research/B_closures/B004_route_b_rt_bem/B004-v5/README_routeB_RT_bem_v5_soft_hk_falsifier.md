@@ -8,44 +8,44 @@ not require inserting a physical core radius into the numerical BEM score.
 
 For physical interpretation, use the following scale separation:
 
-\[
+$$
 r_c \equiv R_{\rm horn}
-\]
+$$
 
 where \(R_{\rm horn}\) is the horn-torus / return-flow circulation radius.  Do
 not silently identify \(r_c\) with the local ideal-tube radius.  Instead write
 
-\[
+$$
 a_{\rm tube}=\frac{R_{\rm horn}}{\chi_h}=\frac{r_c}{\chi_h},
 \qquad
 \ell_K^{\rm phys}=2a_{\rm tube}L_{\rm cert}.
-\]
+$$
 
 Thus the dimensionless Route-B normalizer remains
 
-\[
+$$
 \mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2},
-\]
+$$
 
 while the physical reconstruction uses
 
-\[
+$$
 L_{\rm phys}^{2}
 =
 4a_{\rm tube}^{2}L_{\rm cert}^{2}
 =
 4\frac{r_c^2}{\chi_h^2}L_{\rm cert}^{2}.
-\]
+$$
 
 Only if \(\chi_h=\chi_h(K)\) is later made topology-dependent should a separate
 horn-effective scan be introduced,
 
-\[
+$$
 \mathcal N_{\rm eff}
 =
 M_{\max}
 \left(\frac{L_{\rm cert}}{\chi_h(K)}\right)^2 .
-\]
+$$
 
 Default BEM mode remains `certified`: do not replace \(L_{\rm cert}\) by a
 horn-effective scale in BEMv1--BEMv19 results unless an explicit
@@ -54,9 +54,9 @@ horn-effective scale in BEMv1--BEMv19 results unless an explicit
 
 BEMv5 extends BEMv4 by explicitly separating the candidate action into:
 
-\[
+$$
 S_{\rm total}=S_{\rm soft}+S_{\rm RT}^{\rm ren}.
-\]
+$$
 
 It still does **not** compare with CODATA alpha and does **not** fit alpha.
 
@@ -85,19 +85,19 @@ idealxml_sampled_ideal_used.txt
 
 The raw R--T spectral action is
 
-\[
+$$
 S_M(K)=-\sum_{j=1}^{M}\log\lambda_j(K),
-\]
+$$
 
 with vacuum subtraction
 
-\[
+$$
 \Delta S_M(K/0_1)=S_M(K)-S_M(0_1).
-\]
+$$
 
 BEMv5 adds heat-kernel-style counterterm fitting:
 
-\[
+$$
 \Delta S_M
 =
 S_{\rm RT}^{\rm ren}
@@ -107,27 +107,27 @@ S_{\rm RT}^{\rm ren}
 +b_1M^{-1/2}
 +b_2M^{-1}
 +\cdots .
-\]
+$$
 
 The soft-sector term is explicit:
 
-\[
+$$
 S_{\rm soft}=N_{\rm soft}V_{\rm soft}.
-\]
+$$
 
 Default:
 
-\[
+$$
 N_{\rm soft}=4,\qquad V_{\rm soft}=\frac{4\pi}{3}.
-\]
+$$
 
 The blind working prediction is
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}
 =
 \frac12\left(S_{\rm soft}+S_{\rm RT}^{\rm ren}\right).
-\]
+$$
 
 This is a Route-B working map, not yet a theorem.
 

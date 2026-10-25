@@ -6,9 +6,9 @@ This report is alpha-blind: it does not contain or compare against observed fine
 
 BEMv15 promotes the repeatedly selected BEMv14 normalizer to a conditional normalizer law:
 
-\[
+$$
 \boxed{\mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.}
-\]
+$$
 
 The claim is conditional: it follows from mode-extensivity plus length-scale covariance. It is not yet a full heat-kernel theorem.
 
@@ -48,9 +48,9 @@ m cert}^{2}\) scale-covariance factor from the R--T boundary operator.
 
 ## Next gate
 
-\[
+$$
 \boxed{\text{BEMv16: heat-kernel / DtN proof of } \mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.}
-\]
+$$
 
 ## Asymptotic subset note
 

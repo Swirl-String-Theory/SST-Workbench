@@ -52,9 +52,9 @@ Each snapshot is re-expressed on uniform normalized arclength, cyclically aligne
 
 Initial rolling is estimated from
 
-\[
+$$
 \mathbf u_\perp(s)=\mathbf V+\boldsymbol\Omega\times(\mathbf X-\mathbf X_c)+\mathbf r(s).
-\]
+$$
 
 A strong candidate has a small normal residual `r`, low symmetry-reduced shape-drift AUC, limited high-k excitation, acceptable contact separation and acceptable mesh quality. A true static relative equilibrium is not penalized merely for having low rigid velocity.
 
@@ -62,15 +62,15 @@ A strong candidate has a small normal residual `r`, low symmetry-reduced shape-d
 
 For each selected candidate at fixed N, run timestep factors
 
-\[
+$$
 f_0,\quad f_0/2,\quad f_0/4.
-\]
+$$
 
 Let `E01` and `E12` be parameterization-invariant final-shape discrepancies. If both are below the absolute floor/tolerance, the case is certified as floor-limited. Otherwise the observed order is
 
-\[
+$$
 p=\log_2(E_{01}/E_{12})
-\]
+$$
 
 and must exceed the frozen minimum.
 
@@ -78,10 +78,10 @@ and must exceed the frozen minimum.
 
 The geometry-only controller is strictly tangential:
 
-\[
+$$
 \alpha_{i+1}-\alpha_i=-k(\ell_i-\bar\ell),\qquad
 \mathbf u_{\rm mesh}=\alpha_i\hat{\mathbf t}_i.
-\]
+$$
 
 Its RMS is capped relative to physical Biot-Savart RMS velocity. Candidate trajectories are replayed with the frozen gauge multipliers. Passing requires completion to the gauge horizon plus bounded pairwise final-shape distance and bounded score/AUC spread.
 
@@ -103,13 +103,13 @@ The monodromy is evaluated on a preregistered finite Fourier-normal perturbation
 
 The tested predictive association is
 
-\[
+$$
 \text{mode-projected material stretch}(t)
 \longrightarrow
 \tau_{\rm measured}
 \longrightarrow
 \ddot a(t+\tau).
-\]
+$$
 
 The same analysis is run on a fixed-core null. A predictive-specificity candidate requires orbital validity in both arms, an absolute held-out material improvement and a material-minus-fixed advantage. The measured loop phase is reported only after the lag is determined. Causal language requires a separately preregistered intervention or ablation.
 

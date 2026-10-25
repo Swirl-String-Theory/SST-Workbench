@@ -60,17 +60,17 @@ For an A054 projected spectrum let positive and negative oscillatory frequencies
 \(\omega_+>0\) and \(|\omega_-|>0\). Pair existence requires both signs. The preregistered
 symmetry diagnostic is
 
-\[
+$$
 A_\omega =
 \frac{|\omega_+-|\omega_-||}
 {\tfrac12(\omega_+ + |\omega_-|)}.
-\]
+$$
 
 A pair is tagged symmetric when
 
-\[
+$$
 A_\omega \le 0.25.
-\]
+$$
 
 This is evaluated for both the full A054 projected spectrum and its Kelvin-restricted block.
 
@@ -90,19 +90,19 @@ Allowed bridge comparisons are categorical only:
 
 These are not visible to the blind bridge:
 
-\[
+$$
 u\leftrightarrow5_2,\qquad d\leftrightarrow6_1.
-\]
+$$
 
 Working compound hypotheses:
 
-\[
+$$
 P_{\rm work}=G(5_2,5_2,6_1),\quad 6_1\ {\rm opposed},
-\]
+$$
 
-\[
+$$
 N_{\rm work}=B(5_2,6_1,6_1),\quad 6_1\ {\rm opposed}.
-\]
+$$
 
 They remain hypotheses, not particle identifications.
 

@@ -2,34 +2,34 @@
 
 The dynamical kernel is the regularized midpoint filament law
 
-\[
+$$
 \mathbf v(\mathbf x)=\frac{\Gamma}{4\pi}\sum_s
 \frac{\Delta\boldsymbol\ell_s\times(\mathbf x-\mathbf m_s)}
 {\left(|\mathbf x-\mathbf m_s|^2+r_c^2\right)^{3/2}}.
-\]
+$$
 
 The matching discrete regularized filament Hamiltonian proxy is
 
-\[
+$$
 H_a=\frac{\rho_{\!f}\Gamma^2}{8\pi}
 \sum_{i,j}
 \frac{\Delta\boldsymbol\ell_i\cdot\Delta\boldsymbol\ell_j}
 {\sqrt{|\mathbf m_i-\mathbf m_j|^2+r_c^2}}.
-\]
+$$
 
 The Kelvin impulse diagnostic is
 
-\[
+$$
 \mathbf I=\frac{\rho_{\!f}\Gamma}{2}
 \sum_i \mathbf x_i\times\mathbf x_{i+1}.
-\]
+$$
 
 The Kelvin-duration-like observable is applied to the nonnegative modal intensity
 \(S(t)=a(t)^2\):
 
-\[
+$$
 T_K=\frac{\left(\int S(t)\,dt\right)^2}{\int S(t)^2\,dt}.
-\]
+$$
 
 For a pure amplitude envelope \(a(t)=a_0e^{-\gamma t}\), this tends to \(T_K=1/\gamma\).
 For a persistent undamped signal it grows with the observation window, which is intentionally classified as

@@ -10,10 +10,10 @@ This package is **not** a numerical proof of Euler regularity or blow-up. It is 
 
 The solver evolves the 3-D incompressible unforced Euler equations in rotational pseudo-spectral form on a periodic cube:
 
-\[
+$$
 \partial_t \mathbf u = \mathbb P(\mathbf u\times\boldsymbol\omega),\qquad
 \boldsymbol\omega=\nabla\times\mathbf u,\qquad \nabla\cdot\mathbf u=0.
-\]
+$$
 
 It uses RK4 and 2/3 de-aliasing. A Gaussian tangent-vorticity tube is placed around a T(2,3) trefoil centerline and Fourier-projected to a solenoidal field. An optional localized divergence-free high-frequency packet is aligned with the local principal strain direction.
 

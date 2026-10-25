@@ -22,9 +22,9 @@ Not validated:
 
 ## Automated tests
 
-\[
+$$
 \boxed{11/11\ \mathrm{unit\ tests\ passed}}
-\]
+$$
 
 The tests cover ring controls, mirror parity, self-induction kernels, solid-body invariance, physical flux scaling, fixed-total discretization, Rankine inside/outside behavior and the clock-rate identity.
 
@@ -32,11 +32,11 @@ The tests cover ring controls, mirror parity, self-induction kernels, solid-body
 
 Protocol: trefoil, resolution 96, fixed sampled reach, \(\epsilon=0.05\), Rankine tube cores,
 
-\[
+$$
 R_{\rm bundle}=R_{\rm hole}^{\rm free},
 \qquad
 |\Gamma_{\rm tube}|=0.25.
-\]
+$$
 
 | sign | \(N\) | \(\Gamma_{\rm hole}\) | intrinsic residual | residual reduction |
 |---:|---:|---:|---:|---:|
@@ -49,9 +49,9 @@ R_{\rm bundle}=R_{\rm hole}^{\rm free},
 
 The isolated baseline is approximately
 
-\[
+$$
 \epsilon_{\rm int}^{(0)}=0.220538375.
-\]
+$$
 
 Increasing \(N\) at fixed tube circulation increases total flux and strongly increases the deformation residual. No smoke-test case passes the 5% equilibrium gate.
 
@@ -59,11 +59,11 @@ Increasing \(N\) at fixed tube circulation increases total flux and strongly inc
 
 Here
 
-\[
+$$
 |\Gamma_{\rm hole}|=1,
 \qquad
 \Gamma_{\rm tube}=\Gamma_{\rm hole}/N.
-\]
+$$
 
 | sign | \(N\) | intrinsic residual | continuum field error | continuum residual error |
 |---:|---:|---:|---:|---:|
@@ -80,11 +80,11 @@ Here
 
 At \(N=61\), averaged over both circulation signs:
 
-\[
+$$
 \delta u_{\rm rms}=0.000176325,
 \qquad
 \delta\epsilon_{\rm int}=0.000563111.
-\]
+$$
 
 The clock-rate error is exactly zero because total circulation and radius are held fixed by construction.
 
@@ -92,29 +92,29 @@ The clock-rate error is exactly zero because total circulation and radius are he
 
 A 98-row exploratory scan varied
 
-\[
+$$
 \frac{R_{\rm bundle}}{R_{\rm hole}^{\rm free}}
 \in
 \{0.25,0.5,0.75,1,1.25,1.5,2\}
-\]
+$$
 
 and signed total circulation up to magnitude 4.
 
 The best case was
 
-\[
+$$
 \frac{R_{\rm bundle}}{R_{\rm hole}^{\rm free}}=2.0,
 \qquad
 \Gamma_{\rm hole}=-0.25,
-\]
+$$
 
 with
 
-\[
+$$
 \epsilon_{\rm int}=0.219211249,
 \qquad
 \mathrm{reduction}=0.602\%.
-\]
+$$
 
 This is only a sub-percent improvement and remains far above the preregistered 5% gate.
 

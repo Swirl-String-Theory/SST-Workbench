@@ -31,20 +31,20 @@ Pair-neighbor distance is Euclidean distance after log-transform and z-standardi
 
 For a positive scalar feature \(X\), only a single free multiplicative scale is allowed when comparing three topology values with a three-particle mass family:
 
-\[
+$$
 m_i \approx s\,X_i,
 \qquad
 \ln s = \frac{1}{3}\sum_i (\ln m_i-\ln X_i).
-\]
+$$
 
 The registered error is
 
-\[
+$$
 \epsilon_{\log}
 =
 \sqrt{\frac{1}{3}\sum_i
 \left[\ln(sX_i)-\ln m_i\right]^2}.
-\]
+$$
 
 No powers, roots, factors of \(\pi\), \(\alpha\), golden-ratio factors, or hand-selected offsets may be added after reveal.
 

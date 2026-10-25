@@ -10,15 +10,15 @@ For source center `c=(c_x,c_y)` and `R>0`, set
 
 The smooth-clasp map is
 
-\[
+$$
 \alpha(\theta)=\alpha_0+(\alpha_b-\alpha_0)
 \exp\left[\frac{\cos(\theta+\pi/2)-1}{\sigma^2}\right],
 \qquad 0<\alpha_0\le\alpha_b.
-\]
-\[
+$$
+$$
 r'=R+\alpha(\theta)(r-R),\qquad
 (x',y',z')=s\bigl(c_x+r'\cos\theta,\;c_y+r'\sin\theta,\;z\bigr),\quad s=30.
-\]
+$$
 
 All lengths are in arbitrary KnotPlot units; angles in radians. At fixed theta, `dr'/dr=alpha(theta)>0`. The map is an injective, smooth, orientation-preserving ambient deformation of an annular domain avoiding its polar axis. Thus the *continuous source curve* retains its knot type under the map; independently discretized polygonal curves require further isotopy qualification.
 

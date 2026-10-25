@@ -4,9 +4,9 @@ Status: `PASS_NONLINEAR_SHAPE_STABILITY_IN_STAR_SHAPED_CLASS`
 
 Boundary model:
 
-\[
+$$
 r(\Omega)=\exp\left(\sum_{\ell=2}^{\ell_{max}}a_{\ell m}Y_{\ell m}(\Omega)\right).
-\]
+$$
 
 The solver rescales volume to \(4\pi/3\) and minimizes \(\Delta A=A-4\pi\).
 

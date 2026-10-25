@@ -4,9 +4,9 @@ v0.1.1 treats the Swirl Clock as a set of measured eigenmode/transport observabl
 
 For a selected finite-core mode
 
-\[
+$$
 \lambda=\Re\lambda+i\Im\lambda,
-\]
+$$
 
 the exported CLOSED-case fields are:
 
@@ -29,9 +29,9 @@ The solver internally writes `omega = -Im(lambda)` because of its normal-mode si
 
 For an inviscid ideal-fluid mechanism the primary target is
 
-\[
+$$
 \boxed{\Re\lambda\approx0,\quad \Im\lambda\neq0,}
-\]
+$$
 
 not an arbitrary negative damping rate.
 
@@ -39,10 +39,10 @@ not an arbitrary negative damping rate.
 
 The measurable hypothesis is
 
-\[
+$$
 \phi_{\rm loop}=\phi(\Im\lambda,\tau_{\rm return})
 \quad\stackrel{?}{\Longrightarrow}\quad
 \Re\lambda\downarrow.
-\]
+$$
 
 No `tau_delay`, `feedback_delay`, preferred return time, or phase controller exists in the dynamics.

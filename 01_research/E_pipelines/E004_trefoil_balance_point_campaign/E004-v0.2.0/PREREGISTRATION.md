@@ -21,9 +21,9 @@ p = 6.0
 
 but K31 still had a positive early response:
 
-\[
+$$
 E'_{100}=+6.849953049959006\times10^{-4}.
-\]
+$$
 
 Therefore v0.2.0 searches beyond that point.
 
@@ -31,15 +31,15 @@ Therefore v0.2.0 searches beyond that point.
 
 ### Lane A — extended joint q/h/p ray, 12 settings
 
-\[
+$$
 q(t)=15+22.27046411874018\,t,
-\]
-\[
+$$
+$$
 h(t)=1+0.3563655804274017\,t,
-\]
-\[
+$$
+$$
 p(t)=5+t.
-\]
+$$
 
 Frozen:
 
@@ -89,19 +89,19 @@ All non-q/h/p assignments are copied exactly from v0.1.0.
 
 ## Checkpoints
 
-\[
+$$
 i=\{0,10,25,50,100,250,500,1000,4000,10000\}.
-\]
+$$
 
 Primary observable:
 
-\[
+$$
 E(i)=\frac12\left[
 \frac{L(i)-L(0)}{L(0)}
 +
 \frac{R_g(i)-R_g(0)}{R_g(0)}
 \right].
-\]
+$$
 
 Primary early slope is an OLS fit through:
 

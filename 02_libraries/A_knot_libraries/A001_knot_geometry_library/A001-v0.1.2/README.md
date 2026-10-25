@@ -9,16 +9,16 @@ It is designed for the recent Trefoil Dynamic Seed Qualification, self-confineme
 The shader examples expose several useful mathematical constructions but mix them with rendering approximations. This package extracts the reusable geometry:
 
 1. **Explicit trigonometric trefoil**
-   \[
+   $$
    \mathbf r(t)=s(\sin t+2\sin2t,\;\cos t-2\cos2t,\;-\sin3t).
-   \]
+   $$
 
 2. **Anisotropic torus/track family**
-   \[
+   $$
    \mathbf X(t)=\mathbf U[R+a\cos(qt)]\cos(pt)
    +\mathbf V[R+a\cos(qt)]\sin(pt)
    +\mathbf N[b\sin(qt)+z_0].
-   \]
+   $$
    For \((p,q)=(2,3)\), this is a controllable trefoil seed. Independent `a` and `b` make radial bulge and axial weave separately sweepable.
 
 3. **S3 lift / SO(4) rotation / stereographic projection** for topology-preserving geometric controls.
@@ -120,9 +120,9 @@ Primary search family. Sweep
 
 The ratio
 
-\[
+$$
 \chi_{ab}=\frac{b}{a}
-\]
+$$
 
 is a useful shape coordinate: low values are flatter; high values are more axially woven.
 
@@ -139,7 +139,7 @@ Use `s3_deform()` as a **nonphysical geometric null/control**. It preserves knot
 
 `qualify_seed()` currently reports:
 
-\[
+$$
 \kappa_{\max}r_c,
 \qquad
 \frac{d_{\min}}{r_c},
@@ -149,7 +149,7 @@ Use `s3_deform()` as a **nonphysical geometric null/control**. It preserves knot
 CV(\Delta s),
 \qquad
 Wr.
-\]
+$$
 
 Default gates are deliberately configurable and dimensionless:
 

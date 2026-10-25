@@ -2,36 +2,36 @@
 
 The final Ridgerunner-level evolution should minimize
 
-\[
+$$
 E_\Omega(V)=E_{\rm rope}(V)+\eta_R\sum_jw_j[\Phi_R(r_j;V)-4\Omega^2]^2
 +\chi_R\sum_jw_j\Phi_R(r_j;V)
-\]
+$$
 
 subject to fixed thickness.
 
 The projection step should follow the standard active-constraint structure:
 
-\[
+$$
 -\nabla E_\Omega = (-\nabla E_\Omega)_R + (-\nabla E_\Omega)_I,
-\]
+$$
 
 where
 
-\[
+$$
 (-\nabla E_\Omega)_R=A\Lambda,\qquad \Lambda\ge0,
-\]
+$$
 
 and the constrained motion is
 
-\[
+$$
 \dot V=(-\nabla E_\Omega)_I=-\nabla E_\Omega-A\Lambda.
-\]
+$$
 
 `A` is the rigidity matrix with active strut and kink gradients as columns. The NNLS solve is
 
-\[
+$$
 \min_{\Lambda\ge0}\|A\Lambda-(-\nabla E_\Omega)\|.
-\]
+$$
 
 ## Implementation stages
 

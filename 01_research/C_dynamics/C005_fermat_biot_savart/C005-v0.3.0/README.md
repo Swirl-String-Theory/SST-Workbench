@@ -4,9 +4,9 @@ Standalone Python + C++17/pybind11 research harness. It does **not** import, mod
 
 This release upgrades the four-knot matrix
 
-\[
+$$
 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2
-\]
+$$
 
 with explicit softening studies and centerline-resolution diagnostics. It is a Research-Track numerical package, not a CANON claim.
 
@@ -14,7 +14,7 @@ with explicit softening studies and centerline-resolution diagnostics. It is a R
 
 1. Adaptive centerline point counts based on
 
-   \[
+   $$
    \frac{\langle\Delta s\rangle}{\epsilon}
    \leq \eta_{\rm target},
    \qquad
@@ -23,7 +23,7 @@ with explicit softening studies and centerline-resolution diagnostics. It is a R
    \left\lceil
    \frac{L_K}{\epsilon\eta_{\rm target}}
    \right\rceil.
-   \]
+   $$
 
 2. A Rosenhead-softening matrix over all four knot classes.
 3. A fixed-probe resolution ladder for direct field-convergence checks.
@@ -37,7 +37,7 @@ with explicit softening studies and centerline-resolution diagnostics. It is a R
 
 The full three-dimensional knot field currently uses only the regularized midpoint Rosenhead kernel
 
-\[
+$$
 \boldsymbol\beta(\mathbf x)
 =
 \frac{\beta_0}{2}
@@ -48,7 +48,7 @@ The full three-dimensional knot field currently uses only the regularized midpoi
 }{
 \left(\lVert\mathbf x-\mathbf x_{i+1/2}\rVert^2+\epsilon^2\right)^{3/2}
 }.
-\]
+$$
 
 Its implementation name is:
 
@@ -62,43 +62,43 @@ The Rankine and Lamb--Oseen models are presently implemented only in the **one-d
 
 For the infinite straight reference profile
 
-\[
+$$
 \beta(\rho)
 =
 \beta_0\frac{\rho}{\rho^2+\epsilon^2},
-\]
+$$
 
 the maximum speed is
 
-\[
+$$
 \beta_{\max}=\frac{\beta_0}{2\epsilon}.
-\]
+$$
 
 Clock degeneracy is avoided when
 
-\[
+$$
 \epsilon>rac{\beta_0}{2}
 =1.8243381393\times10^{-3}.
-\]
+$$
 
 A radial Fermat-critical point can exist only when
 
-\[
+$$
 \epsilon
 \leq
 \sqrt{\frac{8}{27}}\,\beta_0
 =1.9860878042\times10^{-3}.
-\]
+$$
 
 Hence the straight-reference horizon-free critical window is narrow:
 
-\[
+$$
 1.8243381393\times10^{-3}
 <
 \frac{\epsilon}{r_c}
 \leq
 1.9860878042\times10^{-3}.
-\]
+$$
 
 These thresholds are exact only for the infinite straight reference. Curvature and non-local knot contributions can shift a full-knot result.
 
@@ -106,11 +106,11 @@ These thresholds are exact only for the infinite straight reference. Curvature a
 
 The local scan evaluates
 
-\[
+$$
 R_F(\rho;s,\theta)
 =
 \frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}}
-\]
+$$
 
 along transported normal rays. A detected minimum is labelled only:
 
@@ -159,9 +159,9 @@ The audit checks:
 
 At the previously used \(\epsilon/r_c=0.0045\), target
 
-\[
+$$
 \langle\Delta s\rangle/\epsilon\lesssim1
-\]
+$$
 
 requires approximately:
 
@@ -278,10 +278,10 @@ Cross-knot fields include:
 
 After softening and discretization robustness are established, the next non-local stage remains:
 
-\[
+$$
 \text{Hamiltonian Fermat-geodesic shooting}
 \rightarrow
 \text{monodromy/Floquet analysis}
 \rightarrow
 \text{open-wave QSM solver}.
-\]
+$$

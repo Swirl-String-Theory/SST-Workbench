@@ -2,7 +2,7 @@
 
 ## Primary chain
 
-\[
+$$
 \text{E013 frozen E011 carrier}
 \rightarrow
 \widehat H_K
@@ -20,7 +20,7 @@ J
 \Lambda_K
 \rightarrow
 \text{target-free frozen predictions}.
-\]
+$$
 
 The critical methodological change is that **carrier selection is no longer an A057 degree of
 freedom**. E013 freezes it first. A057 cannot replace an inconvenient or unavailable carrier.
@@ -42,12 +42,12 @@ Failure is retained as G1 evidence. No legacy dataset is searched as fallback.
 
 The operational finite-core line Hamiltonian remains
 
-\[
+$$
 H_a=\frac{\rho\Gamma^2}{8\pi}
 \sum_{ij}\oint_{K_i}\!\oint_{K_j}
 \frac{d\mathbf X_i\cdot d\mathbf X_j}
 {\sqrt{\|\mathbf X_i-\mathbf X_j\|^2+a^2}}.
-\]
+$$
 
 It is compared with the independent bounded core-tube quadrature as a reduced 3-D diagnostic.
 
@@ -56,11 +56,11 @@ It is compared with the independent bounded core-tube quadrature as a reduced 3-
 A057 does not assume that a `STATIC_READY` geometry is an equilibrium state. For the reduced
 Bishop perturbation coordinates,
 
-\[
+$$
 \sigma_{\rm stat}
 =
 \frac{\|\nabla U(0)\|}{\max(|U(0)|,\epsilon)}.
-\]
+$$
 
 Only carriers below the profile-frozen threshold are stability candidates. The Hessian/Jacobian
 is still computed for failed carriers under diagnostic-continuation, but those spectra are excluded

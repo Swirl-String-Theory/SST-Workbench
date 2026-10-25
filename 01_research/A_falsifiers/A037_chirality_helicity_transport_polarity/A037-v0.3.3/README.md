@@ -48,7 +48,7 @@ The private mapping is **not present under `outputs\...` during the blind run**.
 
 The native backend evaluates a Rosenhead-type regularized polygonal Biot–Savart field
 
-\[
+$$
 \mathbf v(\mathbf x)
 =
 \frac{\Gamma}{4\pi}
@@ -58,33 +58,33 @@ The native backend evaluates a Rosenhead-type regularized polygonal Biot–Savar
 }{
 \left(|\mathbf x-\mathbf m_j|^2+a^2\right)^{3/2}
 },
-\]
+$$
 
 where \(\mathbf m_j\) is the midpoint of segment \(j\), \(a\) is the finite-core regularization radius and \(\Gamma\) is circulation.
 
 All source geometries are normalized to total arclength
 
-\[
+$$
 L=\sum_\alpha L_\alpha=1,
-\]
+$$
 
 so reported `core_fraction` is \(a/L\).
 
 For the SST canonical values
 
-\[
+$$
 r_c=1.40897017\times10^{-15}\ \mathrm m,
 \qquad
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
 =1.09384563\times10^6\ \mathrm{m\,s^{-1}},
-\]
+$$
 
 one useful circulation scale is
 
-\[
+$$
 \Gamma_c=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
 =9.683619203488876\times10^{-9}\ \mathrm{m^2\,s^{-1}}.
-\]
+$$
 
 The simulations themselves use nondimensional \(L=1\), \(\Gamma=1\); physical times rescale with \(L^2/\Gamma\).
 
@@ -96,15 +96,15 @@ v0.1.0 flattened every source to one closed polygon. That is invalid for links b
 
 v0.2.0 stores geometry as
 
-\[
+$$
 K=\{C_1,C_2,\ldots,C_m\}
-\]
+$$
 
 with a packed coordinate array plus explicit component offsets. Each component closes only onto itself. The velocity is
 
-\[
+$$
 \mathbf v(\mathbf x)=\sum_{\alpha=1}^{m}\mathbf v_\alpha(\mathbf x).
-\]
+$$
 
 Supported component detection, in descending reliability:
 
@@ -121,19 +121,19 @@ A generic filename containing `link` that still parses as one component is rejec
 
 For reflection matrix \(R\) with \(\det R=-1\), every component is reflected and its point orientation is reversed. At fixed positive circulation this implements the correct axial transformation of vorticity:
 
-\[
+$$
 \mathbf v\xrightarrow{P}R\mathbf v,
 \qquad
 \boldsymbol\omega\xrightarrow{P}-R\boldsymbol\omega.
-\]
+$$
 
 The mirror identity is randomly assigned to anonymous labels `A` and `B`.
 
 The primary helicity proxy must satisfy
 
-\[
+$$
 \Xi_H[PK]\simeq-\Xi_H[K].
-\]
+$$
 
 Time reversal is tested separately by reversing component orientation without coordinate reflection. Then both \(\mathbf v\) and \(\boldsymbol\omega\) reverse and helicity remains even.
 
@@ -145,7 +145,7 @@ Time reversal is tested separately by reversing component orientation without co
 
 v0.2.0 uses
 
-\[
+$$
 \boxed{
 \Xi_H^{\mathrm{CL}}
 =
@@ -154,7 +154,7 @@ v0.2.0 uses
 \oint_{C_\alpha}
 \mathbf v_{\mathrm{BS}}\cdot d\boldsymbol\ell
 }
-\]
+$$
 
 with the same finite-core Biot–Savart operator used by the dynamics. For the nondimensional equal-circulation runs, \(\Gamma=1\).
 
@@ -172,15 +172,15 @@ with the same finite-core Biot–Savart operator used by the dynamics. For the n
 
 A relaxed geometric knot is not automatically a dynamical equilibrium. Before a transport claim is accepted, v0.2.0 fits the instantaneous filament velocity to the best global rigid motion
 
-\[
+$$
 \mathbf F_i
 \approx
 \mathbf U+\boldsymbol\Omega\times\mathbf X_i.
-\]
+$$
 
 The weighted residual is
 
-\[
+$$
 \boxed{
 \epsilon_{\mathrm{RE}}
 =
@@ -190,7 +190,7 @@ The weighted residual is
 \|\mathbf F\|_w
 }.
 }
-\]
+$$
 
 A candidate with \(\epsilon_{\mathrm{RE}}\) above the configured tolerance can still be simulated for diagnostic information, but it cannot receive a physical transport `PASS`; it is classified as
 
@@ -206,23 +206,23 @@ This prevents frozen-base amplification from being misreported as a propagation 
 
 The baseline now evolves:
 
-\[
+$$
 \dot{\mathbf X}=\mathbf F(\mathbf X).
-\]
+$$
 
 The perturbation follows the variational equation along that evolving trajectory:
 
-\[
+$$
 \boxed{
 \dot{\delta\mathbf X}
 =
 D\mathbf F[\mathbf X(t)]\,\delta\mathbf X.
 }
-\]
+$$
 
 No full Jacobian is required for the primary run. The Jacobian-vector product is evaluated matrix-free by a symmetric finite difference:
 
-\[
+$$
 D\mathbf F[\mathbf X] \delta\mathbf X
 \approx
 \frac{
@@ -231,7 +231,7 @@ D\mathbf F[\mathbf X] \delta\mathbf X
 \mathbf F(\mathbf X-\varepsilon\widehat{\delta\mathbf X})
 }{2\varepsilon}
 \,\|\delta\mathbf X\|_{\mathrm{RMS}}.
-\]
+$$
 
 The baseline uses RK4 and retains its four RK stage states for every step. Tangent propagation uses those exact same stage states, so the discrete variational update is consistent with the discrete base map. No post-step recentering or other hidden gauge projection is applied. The step size is selected from the finite-core/segment CFL scale and is rejected if the configured maximum step count is insufficient.
 
@@ -243,24 +243,24 @@ No arclength reparameterization is silently applied during this trajectory, beca
 
 A localized transverse standing packet is initialized on one component:
 
-\[
+$$
 a(s,0)
 =
 \exp\!\left[-\frac{d(s,s_0)^2}{2\sigma^2}\right]
 \cos\!\left[2\pi m(s-s_0)\right],
 \qquad
 b(s,0)=0.
-\]
+$$
 
 It contains no imposed one-way propagation preference.
 
 Before observables are evaluated, the best rigid perturbation
 
-\[
+$$
 \delta\mathbf X_{\mathrm{rigid}}
 =
 \delta\mathbf U+\delta\boldsymbol\Omega\times\mathbf X
-\]
+$$
 
 is subtracted. Tangential perturbation energy is also measured separately so gauge/reparameterization contamination cannot masquerade as transverse transport.
 
@@ -272,23 +272,23 @@ is subtracted. Tangential perturbation energy is also measured separately so gau
 
 A hard left/right split on a closed discrete loop can become grid-sensitive when a sample lies exactly on the antipode. v0.2.0 therefore uses a smooth periodic odd weight. For \(\Delta s=s-s_0\), define
 
-\[
+$$
 W(\Delta s)
 =
 \sin(2\pi\Delta s)
 \left[\frac{1+\cos(2\pi\Delta s)}{2}\right]^p,
 \qquad p=2\ \mathrm{by\ default}.
-\]
+$$
 
 The primary directional response is
 
-\[
+$$
 \boxed{
 \Pi_{\mathrm{dir}}
 =
 \frac{\sum_j E_j W(\Delta s_j)}{\sum_j E_j |W(\Delta s_j)|}.
 }
-\]
+$$
 
 Because \(W(-\Delta s)=-W(\Delta s)\), this observable is analytically mirror-odd; it also vanishes at the launch point and at the antipode. The initial numerical offset is subtracted, so the reported `transport_pi` is generated by the dynamics. A hard-window split is retained only as a secondary diagnostic.
 
@@ -296,11 +296,11 @@ Because \(W(-\Delta s)=-W(\Delta s)\), this observable is analytically mirror-od
 
 The transverse-energy centroid is obtained from
 
-\[
+$$
 Z_E=\sum_j E_j e^{2\pi i s_j},
 \qquad
 s_E=\frac{\arg Z_E}{2\pi},
-\]
+$$
 
 and reported as signed circular displacement/velocity.
 
@@ -308,9 +308,9 @@ and reported as signed circular displacement/velocity.
 
 The tangent norm is tracked separately:
 
-\[
+$$
 G=\ln\frac{\|\delta\mathbf X(T)\|}{\|\delta\mathbf X(0)\|}.
-\]
+$$
 
 Large \(G\) does not count as transport. It triggers an amplification-dominated indeterminate gate when it exceeds the configured threshold.
 
@@ -322,7 +322,7 @@ The older positive/negative Fourier-power polarization remains as a secondary di
 
 Because v0.1.0 showed that global \(|\Xi_H|\) did not predict \(|\Pi|\), v0.2.0 records the local parity-odd differential texture
 
-\[
+$$
 \chi_{\mathrm{loc}}(s)
 =
 \mathbf t\cdot
@@ -331,7 +331,7 @@ Because v0.1.0 showed that global \(|\Xi_H|\) did not predict \(|\Pi|\), v0.2.0 
 \times
 \frac{d^2\mathbf t}{ds^2}
 \right).
-\]
+$$
 
 For each launch point, the code stores `local_chirality_at_center` and the candidate-level correlation between local chirality and packet response. This is diagnostic in v0.2.0, not a pass criterion.
 
@@ -361,32 +361,32 @@ FAIL_MIRROR_ODD_TRANSPORT
 
 The fundamental mirror prediction is
 
-\[
+$$
 \Pi[PK]\stackrel{?}{=}-\Pi[K],
 \qquad
 |\Pi[PK]|\stackrel{?}{=}|\Pi[K]|.
-\]
+$$
 
 This is also checked excitation-by-excitation. Because the physical parity construction reverses component parameterization, a launch at \(s_0\) on `A` is paired with \((-s_0)\bmod 1\) on `B`, at fixed component index and carrier mode. A good aggregate average therefore cannot hide a local parity failure.
 
 Racemic cancellation follows as
 
-\[
+$$
 \Pi_{\mathrm{racemic}}
 =
 \frac{\Pi[K]+\Pi[PK]}{2}
 \stackrel{?}{\longrightarrow}0.
-\]
+$$
 
 The pair-invariant coupling diagnostic is
 
-\[
+$$
 \boxed{
 \beta_i
 =
 \frac{\Pi_A-\Pi_B}{\Xi_{H,A}-\Xi_{H,B}},
 }
-\]
+$$
 
 which is unchanged if the hidden labels \(A\leftrightarrow B\) are swapped.
 
@@ -444,31 +444,31 @@ A genuine Floquet/RPO release requires identification of a periodic or relative-
 
 For a single-component knot, the strongest v0.2.0 positive case is:
 
-\[
+$$
 \epsilon_{\mathrm{RE}}\ll1,
-\]
+$$
 
 stable trajectory/mesh gates,
 
-\[
+$$
 \Pi\neq0,
 \qquad
 \Pi[PK]\simeq-\Pi[K],
-\]
+$$
 
 low localization sensitivity, moderate amplification, and convergence of sign/magnitude across \(N\) and \(a/L\).
 
 A much more informative negative outcome is also possible:
 
-\[
+$$
 \Xi_H[PK]=-\Xi_H[K]
-\]
+$$
 
 passes to high precision while
 
-\[
+$$
 \Pi\to0
-\]
+$$
 
 under refinement. That would directly reject this finite-core directional-transport channel even though chirality/helicity itself remains well defined.
 

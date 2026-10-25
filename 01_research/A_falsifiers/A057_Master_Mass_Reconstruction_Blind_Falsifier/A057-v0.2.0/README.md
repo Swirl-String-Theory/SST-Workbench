@@ -43,12 +43,12 @@ energy/dynamics chain.
 The dynamical authority is also stricter. A source geometry is promoted to a local stability
 candidate only when
 
-\[
+$$
 \sigma_{\rm stat}
 =
 \frac{\|\nabla U\|}{\max(|U|,\epsilon)}
 \le \sigma_{\max}.
-\]
+$$
 
 Frozen thresholds:
 

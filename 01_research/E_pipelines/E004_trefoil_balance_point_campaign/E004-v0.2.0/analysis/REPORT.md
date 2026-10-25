@@ -3,7 +3,7 @@
 **Overall: `CONTRACT_REGIME_FOUND_HOOKE_ONLY`**
 
 Primary signed response:
-\[E(i)=\frac12[(L/L_0-1)+(R_g/R_{g0}-1)]\]
+$$E(i)=\frac12[(L/L_0-1)+(R_g/R_{g0}-1)]$$
 
 `NEAR_ZERO` threshold: |early E/100| <= 0.0002.
 

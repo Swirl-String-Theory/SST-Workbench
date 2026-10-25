@@ -25,49 +25,49 @@ Three collective skeletons are used:
 
 For each PKLSA provider stratum, each component position independently receives either `5_2` or `6_1`. Therefore all
 
-\[
+$$
 2^3=8
-\]
+$$
 
 binary assignments are generated:
 
-\[
+$$
 000,001,010,011,100,101,110,111,
-\]
+$$
 
 where, **reveal-only**,
 
-\[
+$$
 0\equiv 5_2,
 \qquad
 1\equiv 6_1.
-\]
+$$
 
 This includes the historical mixed compositions
 
-\[
+$$
 5_2+5_2+6_1
-\]
+$$
 
 and
 
-\[
+$$
 5_2+6_1+6_1,
-\]
+$$
 
 all three position permutations of each, plus the homogeneous controls \(5_2^3\) and \(6_1^3\).
 
 The geometry count is
 
-\[
+$$
 N_{\rm geom}=3+N_{\rm provider}\,(3)(8),
-\]
+$$
 
 where the first three are the analytic all-unknot skeleton controls. With the four provider-anchor pairs present in the v0.1.0 Workbench snapshot this becomes
 
-\[
+$$
 N_{\rm geom}=3+4\times24=99.
-\]
+$$
 
 The runtime E011 evidence graph remains authoritative; the package does not hard-code the provider count.
 
@@ -75,9 +75,9 @@ The runtime E011 evidence graph remains authoritative; the package does not hard
 
 Every three-component geometry is evaluated under four relative circulation patterns modulo global reversal,
 
-\[
+$$
 (+++) ,\qquad (-++),\qquad (+-+),\qquad (++-),
-\]
+$$
 
 crossed with two normalization rules:
 
@@ -88,42 +88,42 @@ Thus each geometry has eight preregistered polarity sectors `Q0`--`Q7`.
 
 The primary interaction observable remains
 
-\[
+$$
 S_{\times}=R_{\rm self}-R_{\rm full},
-\]
+$$
 
 where \(R\) is the rigid-translation/rotation relative-equilibrium residual. Positive \(S_{\times}\) means cross-component Biot--Savart interaction makes the three-component state more coherent under this operator.
 
 For each one-opposed component position \(j\), v0.1.1 forms
 
-\[
+$$
 \Delta_j S_{\times}
 =
 S_{\times}^{(2+1,j)}-S_{\times}^{(+++)}.
-\]
+$$
 
 ### Frozen prospective polarity gate
 
 A geometry is tagged `polarity selection` only when, independently in **both** circulation normalizations:
 
-\[
+$$
 S_{\times}^{(+++) }\le 0,
-\]
+$$
 
 at least two of the three numerically/dynamically qualified `2+1` sectors satisfy
 
-\[
+$$
 S_{\times}^{(2+1,j)}>0,
-\]
+$$
 
 and the median `2+1` sector improves the relative-equilibrium residual:
 
-\[
+$$
 \operatorname{median}_j
 \left(
 R^{(+++) }-R^{(2+1,j)}
 \right)>0.
-\]
+$$
 
 No numeric effect size from v0.1.0 is used as a threshold.
 
@@ -151,7 +151,7 @@ Decorated linked cases are constructed by local connected sum in sampled disjoin
 
 A target-free regularized mutual Hamiltonian proxy is evaluated from inter-component terms only,
 
-\[
+$$
 H_{\times}
 =
 \frac{1}{4\pi}
@@ -159,7 +159,7 @@ H_{\times}
 \oint_{C_i}\oint_{C_j}
 \frac{d\boldsymbol\ell_i\cdot d\boldsymbol\ell_j}
 {\sqrt{|\mathbf r_i-\mathbf r_j|^2+a^2}}.
-\]
+$$
 
 It is used only as a dimensionless comparative diagnostic.
 
@@ -169,12 +169,12 @@ For each component, a centre-of-mass-preserving relative displacement is applied
 
 v0.1.0 used a fixed \(\Delta t\) and fixed step count at different spatial resolutions. v0.1.1 replaces that with
 
-\[
+$$
 \Delta t(N)
 \propto N^{-2},
 \qquad
 T_{\rm final}=\text{constant}.
-\]
+$$
 
 The realized timestep is adjusted so every resolution reaches exactly the same final time. Spatial convergence now includes dynamic shape drift, linking drift and centroid-separation drift. `extended` additionally performs a factor-two temporal refinement at the finest spatial resolution.
 

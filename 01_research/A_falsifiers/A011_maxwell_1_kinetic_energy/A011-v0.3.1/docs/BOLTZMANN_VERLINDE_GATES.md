@@ -10,12 +10,12 @@ The implementation follows the useful three-level distinction emphasized in the 
 
 For occupation numbers `w_i` and declared degeneracies `g_i`, the workbench computes
 
-\[
+$$
 \ln P
 =
 \ln N! - \sum_i \ln w_i! + \sum_i w_i\ln g_i,
 \qquad N=\sum_iw_i .
-\]
+$$
 
 The calculation uses `lgamma` and therefore never explicitly forms factorials.
 
@@ -27,15 +27,15 @@ When multiple candidate distributions share one `macrostate_id`, the workbench v
 
 For measured occupations `n_i` at energies `E_i`,
 
-\[
+$$
 p_i \propto g_i e^{-E_i/(k_BT)}.
-\]
+$$
 
 The package fits
 
-\[
+$$
 \ln\frac{n_i}{g_i} = a - \beta E_i
-\]
+$$
 
 and reports `T_fit`, `R^2`, and the KL divergence of the observed normalized occupations from the distribution at the preregistered `temperature_K`.
 
@@ -51,11 +51,11 @@ was frozen before held-out inspection.
 
 From sampled accessible-state multiplicity,
 
-\[
+$$
 S(E,x)=k_B\ln \mathcal N(E,x),
 \qquad
 \frac{1}{T}=\left(\frac{\partial S}{\partial E}\right)_{x,I_j}.
-\]
+$$
 
 `state_counts.csv` can therefore provide an independent microcanonical temperature diagnostic.  At least three energy values at fixed position are required.
 
@@ -63,7 +63,7 @@ S(E,x)=k_B\ln \mathcal N(E,x),
 
 At fixed energy/invariant sector,
 
-\[
+$$
 F_{\rm ent}(x)
 =
 T_{\rm eff}(x)
@@ -71,14 +71,14 @@ T_{\rm eff}(x)
 =
 k_BT_{\rm eff}(x)
 \frac{\partial \ln\mathcal N}{\partial x}.
-\]
+$$
 
 This is compared with an independent physical reference.  If `hyd_force_N` is absent but the probe mass and pressure gradient are supplied, the SST Euler anchor is evaluated as
 
-\[
+$$
 F_{\rm hyd}
 =-\frac{m}{\rho_{\!f}}\frac{\partial p}{\partial x}.
-\]
+$$
 
 A sign mismatch is an automatic failure.  Magnitude uses a symmetric relative error to avoid privileging either estimator.
 
@@ -88,15 +88,15 @@ A sign mismatch is an automatic failure.  Magnitude uses a symmetric relative er
 
 If the same conservative force is to be represented simultaneously by
 
-\[
+$$
 T\nabla S = -\frac{m}{\rho_{\!f}}\nabla p,
-\]
+$$
 
 then a scalar `S` requires
 
-\[
+$$
 \nabla\!\left(\frac1T\right)\times\nabla p=0.
-\]
+$$
 
 For nonzero gradients this is equivalent to `grad(T)` being parallel or antiparallel to `grad(p)`.  The workbench tests the sine of the angle between those gradients.  Constant `T` satisfies the integrability condition identically.
 
@@ -104,10 +104,10 @@ For nonzero gradients this is equivalent to `grad(T)` being parallel or antipara
 
 The optional audit compares the supplied entropy gradient with
 
-\[
+$$
 \frac{dS}{dx}
 =2\pi k_B\frac{mc}{\hbar}.
-\]
+$$
 
 This is a **conditional comparison**, not an SST identity.
 
@@ -115,21 +115,21 @@ This is a **conditional comparison**, not an SST identity.
 
 For each screen series the package can test:
 
-\[
+$$
 N\propto A,
 \qquad
 N=\frac{Ac^3}{G\hbar},
 \qquad
 E=\frac12Nk_BT.
-\]
+$$
 
 It reports the fitted slope `d log N/d log A`, inferred `G`, and equipartition ratio.
 
 The canonical hierarchy check is always printed but is not a physical failure:
 
-\[
+$$
 \left(\frac{r_c}{\ell_P}\right)^2\approx 7.60\times10^{39}.
-\]
+$$
 
 Consequently a literal identification of one information bit with one SST core area is not silently accepted.
 
@@ -137,17 +137,17 @@ Consequently a literal identification of one information bit with one SST core a
 
 Optional radial data are fitted to
 
-\[
+$$
 |F|\propto r^q,
 \qquad q\stackrel{?}{=}-2.
-\]
+$$
 
 The optional potential relation follows Verlinde's Eq. (3.16):
 
-\[
+$$
 \frac{\Delta S}{n}
 =-\frac{k_B\Delta\Phi}{2c^2}.
-\]
+$$
 
 These gates are activated independently in `research_claims`.
 

@@ -4,14 +4,14 @@
 This package contains two linked but logically separated tests:
 
 1. **Provenance audit** of
-   \[
+   $$
    4\pi^2\rho_{\text{core}}\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}r_c^4 \simeq h.
-   \]
+   $$
 2. **Blind Universal Action / Planck Gate**, which tests measured dynamical spacings
-   \[
+   $$
    \Delta E/f \stackrel{?}{=} h,\qquad
    \Delta E/\omega \stackrel{?}{=} \hbar
-   \]
+   $$
    without giving the blind analyzer access to \(h\), \(\hbar\), carrier family, mode labels,
    or seed identities.
 3. **Wien–Planck field–matter closure gates** for Euler similarity, inertial/energy mass closure,
@@ -21,26 +21,26 @@ This package contains two linked but logically separated tests:
 
 Under the legacy SST dependency chain
 
-\[
+$$
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}=\frac{\alpha c}{2},
-\]
+$$
 
-\[
+$$
 F_{\text{swirl}}^{\max}
 =\frac{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\hbar}{2r_c^2},
-\]
+$$
 
-\[
+$$
 \rho_{\text{core}}
 =\frac{4F_{\text{swirl}}^{\max}}{\pi\alpha^2c^2r_c^2},
-\]
+$$
 
 the relation is algebraically forced:
 
-\[
+$$
 4\pi^2\rho_{\text{core}}\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}r_c^4
 =2\pi\hbar=h.
-\]
+$$
 
 Therefore the numerical agreement is **not an independent prediction** if those equations are the defining provenance of the canonical constants.
 
@@ -48,23 +48,23 @@ Therefore the numerical agreement is **not an independent prediction** if those 
 
 The bare hydrodynamic combination
 
-\[
+$$
 J_c=\rho_{\text{core}}\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}r_c^4
-\]
+$$
 
 satisfies
 
-\[
+$$
 J_c=\frac{h}{4\pi^2}=\frac{\hbar}{2\pi}
-\]
+$$
 
 under that chain. It is therefore **not** itself the Planck action quantum.
 
 A genuine Planck gate must measure the spectrum dynamically:
 
-\[
+$$
 \Delta E=h f=\hbar\omega.
-\]
+$$
 
 ## Run everything
 

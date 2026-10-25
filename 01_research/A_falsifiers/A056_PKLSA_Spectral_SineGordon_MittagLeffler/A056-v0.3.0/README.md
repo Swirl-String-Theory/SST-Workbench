@@ -7,27 +7,27 @@ A056-v0.3.0 is the first A056 release that closes the real-provider gap while re
 
 ## Primary chain
 
-\[
+$$
 \boxed{\text{E010/PKLSA qualified carrier}\rightarrow\text{finite-core / Euler evolution}\rightarrow\{\varphi(s,t),R(t)\}\rightarrow\text{A056 blind SG/ML competition}}
-\]
+$$
 
 Static XYZ geometry is never scored as dynamics. The package resolves E010-v0.3.1 source-native trefoil carriers, verifies raw and PKLSA geometry hashes, selects strict new-upstream-provider representatives, applies a frozen Kelvin perturbation, evolves paired base/perturbed systems, extracts a pre-registered phase and projected mode envelope, and only then invokes the existing A056 model competition.
 
 ### Frozen observables
 
 With a periodic Bishop frame on the initial carrier and a mode-\(m\) perturbation,
-\[
+$$
 \mathbf X_\epsilon(s,0)=\mathbf X_0(s)+\epsilon[\cos(m\theta)\mathbf e_1+\sin(m\theta)\mathbf e_2].
-\]
+$$
 At each sample the unperturbed material carrier is rigidly Kabsch-aligned to its initial geometry; the same rigid transform is applied to the perturbed carrier. No scale or reflection is permitted. Then
-\[
+$$
 q=\delta\mathbf X\cdot\mathbf e_1+i\,\delta\mathbf X\cdot\mathbf e_2,\qquad
 \varphi=\arg(qe^{-im\theta}),
-\]
+$$
 and
-\[
+$$
 R(t)=\frac{|c_m(t)|}{|c_m(0)|},\qquad c_m=N_s^{-1}\sum_j q_j e^{-im\theta_j}.
-\]
+$$
 `R(t)` is a projected conservative-mode envelope, not a dissipation claim.
 
 ## Dynamic lanes

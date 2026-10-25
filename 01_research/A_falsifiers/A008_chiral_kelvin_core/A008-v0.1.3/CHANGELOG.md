@@ -11,11 +11,11 @@
 - Explicit superseded/refined/withdrawn conclusion states.
 - Wavelength-resolution metric
 
-  \[
+  $$
   \mathrm{PPW}
   =
   \frac{N}{m_{\rm dom}}.
-  \]
+  $$
 
 - Wavelength-resolution statuses:
 
@@ -25,34 +25,34 @@
 
 - `resolved` resolution preset:
 
-  \[
+  $$
   N=256,\;320,\;384.
-  \]
+  $$
 
 ### Changed
 
 - Removed the fixed `m_max = 24` Fourier-fingerprint ceiling.
 - Fourier fingerprints now use the full Nyquist-safe mode range
 
-  \[
+  $$
   m_{\max}
   =
   \left\lfloor
   \frac{N}{2}
   \right\rfloor-1.
-  \]
+  $$
 
 - Physical interpretation now requires both:
 
-  \[
+  $$
   \eta_a\le0.5
-  \]
+  $$
 
   and
 
-  \[
+  $$
   \mathrm{PPW}\ge12.
-  \]
+  $$
 
 - The frozen torus-trefoil remains explicitly excluded from physical
   interpretation even when numerically converged.

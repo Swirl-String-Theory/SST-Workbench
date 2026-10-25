@@ -4,13 +4,13 @@
 
 The strict answer is:
 
-\[
+$$
 \boxed{
 \text{SST currently performs nontrivial calculations, but it has not yet produced a validated}
 \atop
 \text{physical prediction independent of its calibration inputs.}
 }
-\]
+$$
 
 Two questions must be separated.
 
@@ -25,7 +25,7 @@ The distinction is important. A numerical computation may be mathematically inde
 
 The audit supports four central conclusions:
 
-\[
+$$
 \boxed{
 \begin{aligned}
 &\text{Most constant identities are Rosetta-style rewrites of known physics.}\\
@@ -35,11 +35,11 @@ The audit supports four central conclusions:
 &\text{No current calculation independently yields }\alpha,\ m_e,\ G,\ c,\text{ or the atomic spectrum.}
 \end{aligned}
 }
-\]
+$$
 
 The current CANON itself is unusually candid about this status. It defines the primitive calibration set as
 
-\[
+$$
 \mathcal P_{\rm cal}
 =
 \left\{
@@ -47,15 +47,15 @@ The current CANON itself is unusually candid about this status. It defines the p
 v_{\circlearrowleft},\,
 \omega_c
 \right\},
-\]
+$$
 
 with
 
-\[
+$$
 v_{\circlearrowleft}=\frac{\alpha c}{2},
 \qquad
 \omega_c=\frac{m_ec^2}{\hbar},
-\]
+$$
 
 and states explicitly that these are pinned by CODATA quantities rather than derived from resolved SST fluid dynamics. It also records that \(\rho_f=7.0\times10^{-7}\,\mathrm{kg\,m^{-3}}\) presently lacks a canon-level derivation and an explicit independent calibration observable. ([SST CANON v0.8.28](sandbox:/mnt/data/SST_CANON-v0.8.28.tex))
 
@@ -63,7 +63,7 @@ That provenance matters because CODATA values are not independent symbolic primi
 
 The overall verdict is therefore:
 
-\[
+$$
 \boxed{
 \begin{array}{ll}
 \textbf{Independent mathematical calculations:} & \text{yes},\\[1mm]
@@ -72,7 +72,7 @@ The overall verdict is therefore:
 \textbf{Independent candidate dimensionless prediction:} & \text{yes, but not yet successful}.
 \end{array}
 }
-\]
+$$
 
 ## Audit framework and dependency architecture
 
@@ -91,7 +91,7 @@ A result should count as an **independent SST prediction** only if it passes all
 
 This report uses the following classification:
 
-\[
+$$
 \boxed{
 \begin{array}{ll}
 \textbf{Rosetta:}&
@@ -102,7 +102,7 @@ This report uses the following classification:
 \text{an output fixed by stated SST axioms without target reuse.}
 \end{array}
 }
-\]
+$$
 
 “Independent derivation” does not automatically mean “correct prediction.” A parameter-free calculation that disagrees with experiment remains independent, but falsified.
 
@@ -185,15 +185,15 @@ graph TD
 
 The graph shows why eliminating a symbol from the final equation is insufficient. For example, a formula for \(G\) that contains \(L_p\) has not eliminated gravitational input because
 
-\[
+$$
 L_p^2=\frac{\hbar G}{c^3}.
-\]
+$$
 
 Likewise, replacing \(\alpha\) with \(r_e\) does not derive \(\alpha\) if
 
-\[
+$$
 r_e=\frac{\alpha\hbar}{m_ec}.
-\]
+$$
 
 The current CANON recognizes this logic in its explicit labels for calibrated identities, calibrated-chain guards and non-prediction clauses. ([SST CANON v0.8.28](sandbox:/mnt/data/SST_CANON-v0.8.28.tex))
 
@@ -221,25 +221,25 @@ These relations are all implemented in the supplied script. fileciteturn0f
 
 The underlying schoolbook chain is especially clear if one defines the Bohr speed
 
-\[
+$$
 v_B=\alpha c=2v_{\circlearrowleft}.
-\]
+$$
 
 Then
 
-\[
+$$
 m_ev_Ba_0=\hbar,
 \qquad
 \lambda_{\rm dB}=2\pi a_0,
-\]
+$$
 
 and
 
-\[
+$$
 \frac{m_ev_B^2}{a_0}
 =
 \frac{e^2}{4\pi\varepsilon_0a_0^2}.
-\]
+$$
 
 Thus the SST expressions for \(a_0\), \(R_\infty\), the Coulomb scale and the Bohr speed reproduce the familiar Bohr–Coulomb structure under a change of variables. The Bohr model historically introduced quantized stationary states and related their energies and transition frequencies; the modern hydrogen spectrum additionally includes relativistic, QED, recoil and nuclear-size contributions. citeturn11search7turn11search11turn11search16
 
@@ -272,17 +272,17 @@ The CANON’s mass section confirms that its master mass expression is a synthes
 
 Likewise, the “pure geometric” branch is explicitly reduced in the CANON to
 
-\[
+$$
 \boxed{
 M_0(K)=\frac{m_e}{4}\mathcal L_{\rm tot}(K).
 }
-\]
+$$
 
 The geometry changes the dimensionless multiple, but the absolute mass scale is the measured electron mass. For the trefoil ropelength used in the CANON,
 
-\[
+$$
 M_0(3_1)\simeq4.0929\,m_e,
-\]
+$$
 
 so this branch neither predicts \(m_e\) nor reproduces it without a further kernel. ([SST CANON v0.8.28](sandbox:/mnt/data/SST_CANON-v0.8.28.tex))
 
@@ -294,45 +294,45 @@ Ropelength itself is a legitimate and nontrivial object of geometric knot theory
 
 The older topological mass script uses
 
-\[
+$$
 M_p
 =
 \rho_{\rm core}
 \left(2V_{5_2}+V_{6_1}\right)
 4\pi^2r_c^3
 \varphi^{-16},
-\]
+$$
 
-\[
+$$
 M_n
 =
 \rho_{\rm core}
 \left(V_{5_2}+2V_{6_1}\right)
 4\pi^2r_c^3
 \varphi^{-16}.
-\]
+$$
 
 With the horn-density closure,
 
-\[
+$$
 \rho_{\rm horn}
 =
 \frac{m_ec^2}{2\pi v_{\circlearrowleft}^2r_c^3},
 \qquad
 v_{\circlearrowleft}=\frac{\alpha c}{2},
-\]
+$$
 
 the dimensional prefactor reduces to
 
-\[
+$$
 \rho_{\rm horn}4\pi^2r_c^3
 =
 \frac{8\pi}{\alpha^2}m_e.
-\]
+$$
 
 Therefore
 
-\[
+$$
 \boxed{
 M_{p,n}
 =
@@ -341,53 +341,53 @@ m_e
 \varphi^{-16}
 V_{p,n}.
 }
-\]
+$$
 
 The absolute masses are consequently encoded in the calibrated electron mass and fine-structure constant. The hyperbolic volumes and golden-layer factor only provide dimensionless multipliers. The implementation and constants are contained in the supplied script. fileciteturn0file0
 
 There is, however, an independently testable residue: the neutron-to-proton ratio, because the common scale and \(\varphi^{-16}\) cancel:
 
-\[
+$$
 \frac{M_n}{M_p}
 =
 \frac{V_{5_2}+2V_{6_1}}
 {2V_{5_2}+V_{6_1}}.
-\]
+$$
 
 Using the script’s values,
 
-\[
+$$
 V_{5_2}=2.82812,
 \qquad
 V_{6_1}=3.16396,
-\]
+$$
 
 gives
 
-\[
+$$
 \left(\frac{M_n}{M_p}\right)_{\rm SST}
 =
 1.03807623.
-\]
+$$
 
 The measured ratio from the same input table is
 
-\[
+$$
 \left(\frac{M_n}{M_p}\right)_{\rm obs}
 =
 1.00137842.
-\]
+$$
 
 Thus
 
-\[
+$$
 \boxed{
 \frac{(M_n/M_p)_{\rm SST}}
 {(M_n/M_p)_{\rm obs}}-1
 =
 3.6647\%.
 }
-\]
+$$
 
 The independent part of this model is therefore falsified at the few-percent level. Calibrating one common layer factor to the proton cannot repair the neutron ratio. At least one additional isospin-dependent coefficient, topology assignment or interaction correction is required; after adding one such adjustable parameter, the two masses cease to constitute a genuine two-point prediction.
 
@@ -397,53 +397,53 @@ This is a valuable result because it isolates where the model fails: not merely 
 
 Every listed expression for \(G\) in the script contains at least one of
 
-\[
+$$
 L_p,\qquad
 t_p,\qquad
 \alpha_g,\qquad
 F_{\rm gr}^{\max}.
-\]
+$$
 
 But these satisfy
 
-\[
+$$
 L_p^2=\frac{\hbar G}{c^3},
 \qquad
 t_p^2=\frac{\hbar G}{c^5},
-\]
+$$
 
-\[
+$$
 \alpha_g=\frac{Gm_e^2}{\hbar c},
 \qquad
 F_{\rm gr}^{\max}=\frac{c^4}{4G}.
-\]
+$$
 
 Substitution therefore returns \(G=G\). This is a dimensional or algebraic consistency check, not an emergence calculation. The formulas are implemented explicitly in the supplied script. fileciteturn0file0
 
 A useful dimensional no-go statement can be made. From only
 
-\[
+$$
 m_e,\quad\hbar,\quad c,
-\]
+$$
 
 the most general gravitational constant scale is
 
-\[
+$$
 G_{\rm candidate}
 =
 \frac{\hbar c}{m_e^2}\,g_\star,
-\]
+$$
 
 where \(g_\star\) is dimensionless. Matching observation requires
 
-\[
+$$
 g_\star
 =
 \frac{Gm_e^2}{\hbar c}
 =
 \alpha_g
 \simeq1.75\times10^{-45}.
-\]
+$$
 
 Thus deriving \(G\) is mathematically equivalent to deriving the tiny dimensionless gravitational coupling \(\alpha_g\). Merely moving \(G\) into a Planck length or maximum-force symbol does not solve the problem.
 
@@ -451,30 +451,30 @@ Route I attempts a more substantive route through local horizon thermodynamics. 
 
 The v0.1.0 SST selector gives
 
-\[
+$$
 \eta_{\rm cap}
 =
 2.0700543\times10^{27}\ {\rm m^{-2}},
-\]
+$$
 
 whereas the Bekenstein–Hawking dimensionless entropy-area coefficient is
 
-\[
+$$
 \eta_{\rm BH}
 =
 \frac{c^3}{4G\hbar}
 =
 9.57018\times10^{68}\ {\rm m^{-2}}.
-\]
+$$
 
 Under the same dimensionless entropy convention,
 
-\[
+$$
 \boxed{
 \frac{\eta_{\rm BH}}{\eta_{\rm cap}}
 \simeq4.62\times10^{41}.
 }
-\]
+$$
 
 The gap is approximately \(41.7\) orders of magnitude. Moreover, the SST capacity itself depends on the conditional adjacency length \(a_\star\). Thus Route I currently does not derive \(G\); it identifies the missing physical requirement more clearly: SST needs an independently derived microscopic boundary-state density of the correct magnitude. ([Route-I v0.1.0 result summary](sandbox:/mnt/data/SST_Route_I_relative_entropy_PoC_v0.1.0/RESULT_SUMMARY_v0.1.0.md))
 
@@ -484,65 +484,65 @@ The thermodynamic route is not invalidated by this failure. Relative entropy, mo
 
 The v0.1.0 Rankine-core model defines
 
-\[
+$$
 I_K
 =
 \frac{1}{2}\rho_{\rm horn}\pi a_{\rm core}^3
 v_{\circlearrowleft}L_K.
-\]
+$$
 
 Write
 
-\[
+$$
 \chi=\frac{a_{\rm core}}{r_c}.
-\]
+$$
 
 Using the canonical horn-density closure,
 
-\[
+$$
 \rho_{\rm horn}
 =
 \frac{m_ec^2}
 {2\pi v_{\circlearrowleft}^2r_c^3},
-\]
+$$
 
 and
 
-\[
+$$
 r_c=\frac{\hbar v_{\circlearrowleft}}{m_ec^2},
-\]
+$$
 
 one obtains
 
-\[
+$$
 \rho_{\rm horn}
 =
 \frac{\hbar}
 {2\pi v_{\circlearrowleft}r_c^4}.
-\]
+$$
 
 Therefore
 
-\[
+$$
 \frac{I_K/\hbar}{L_K/r_c}
 =
 \frac{\rho_{\rm horn}\pi a_{\rm core}^3
 v_{\circlearrowleft}r_c}{2\hbar}
 =
 \boxed{\frac{\chi^3}{4}}.
-\]
+$$
 
 At the baseline choice \(\chi=1\),
 
-\[
+$$
 \frac{I_K/\hbar}{L_K/r_c}
 =
 \frac14.
-\]
+$$
 
 This shows that the reported “universal local action density” is not an independently discovered numerical constant. It is an exact consequence of four assumptions:
 
-\[
+$$
 \boxed{
 \text{Rankine solid-body profile}
 +
@@ -552,23 +552,23 @@ v_{\rm surface}=v_{\circlearrowleft}
 +
 a_{\rm core}=r_c.
 }
-\]
+$$
 
 The non-universality of total knot action is nevertheless genuine inside this model because the total action grows with knot length. The trefoil, mirror trefoil and figure-eight values are not simple reinsertions of \(\alpha\); they are geometry-dependent model outputs. ([Route-I v0.1.0 solver](sandbox:/mnt/data/SST_Route_I_relative_entropy_PoC_v0.1.0/sst_route1_resolved_knot_action_v0.1.0.py), [audit report](sandbox:/mnt/data/SST_Route_I_relative_entropy_PoC_v0.1.0/output_v0.1.0/audit_report.json))
 
 The same solver uses a Lambert-\(W\) neck closure and the local match
 
-\[
+$$
 \hbar\beta_Q=j_\phi a_\star,
 \qquad
 j_\phi=
 \frac12\rho_{\rm tube}\pi
 v_{\circlearrowleft}a_{\rm core}^3.
-\]
+$$
 
 Under the baseline equal-density closures, the entire fixed point can be reduced analytically to
 
-\[
+$$
 \boxed{
 \beta_Q(\chi)
 =
@@ -577,11 +577,11 @@ Under the baseline equal-density closures, the entire fixed point can be reduced
 \frac{\pi^2\chi^6-1}{4}
 \right].
 }
-\]
+$$
 
 Correspondingly,
 
-\[
+$$
 \boxed{
 \frac{a_\star}{r_c}
 =
@@ -589,39 +589,39 @@ Correspondingly,
 \frac{\pi^2\chi^6-1}{4}
 \right],
 }
-\]
+$$
 
 and the propagation speed reduces to
 
-\[
+$$
 \boxed{
 c_T=4v_{\circlearrowleft}\beta_Q.
 }
-\]
+$$
 
 Since
 
-\[
+$$
 v_{\circlearrowleft}=\frac{\alpha c}{2},
-\]
+$$
 
 the observable ratio is
 
-\[
+$$
 \boxed{
 \frac{c_T}{c}
 =
 2\alpha\beta_Q.
 }
-\]
+$$
 
 At \(\chi=1\),
 
-\[
+$$
 \beta_Q=4.591716\ldots,
 \qquad
 \frac{c_T}{c}=0.0670147\ldots,
-\]
+$$
 
 in agreement with the numerical artifact. ([Route-I v0.1.0 solver](sandbox:/mnt/data/SST_Route_I_relative_entropy_PoC_v0.1.0/sst_route1_resolved_knot_action_v0.1.0.py))
 
@@ -634,51 +634,51 @@ This analysis reveals the precise independence status:
 
 The sensitivity is exceptionally strong:
 
-\[
+$$
 \frac{d\ln\beta_Q}{d\ln\chi}
 =
 3+\frac{3\pi^2}{2}\chi^6.
-\]
+$$
 
 At \(\chi=1\),
 
-\[
+$$
 \boxed{
 \frac{d\ln\beta_Q}{d\ln\chi}
 \simeq17.804.
 }
-\]
+$$
 
 A one-percent change in the unresolved core-radius ratio therefore changes \(\beta_Q\) and \(c_T\) by about \(17.8\%\) locally.
 
 Indeed, extrapolating the same formula, the value
 
-\[
+$$
 \chi\simeq1.11861
-\]
+$$
 
 would force
 
-\[
+$$
 c_T=c.
-\]
+$$
 
 Thus only one unfixed scalar parameter is already sufficient to tune monometricity. This does not prove the model wrong, but it means that \(c_T=c\) cannot count as a prediction until \(\chi\) is independently selected by a vortex-core variational theorem.
 
 The nearby numerical factor \(15\) discussed in the Toroflux context does not remove this identifiability issue. The baseline value satisfies
 
-\[
+$$
 15\frac{c_T}{c}=1.00522,
-\]
+$$
 
 but the exact missing factor is approximately \(14.9221\), and ordinary multiplication of both mode stiffness and inertia by fifteen leaves the wave speed unchanged:
 
-\[
+$$
 c=
 a\sqrt{\frac{15K}{15I}}
 =
 a\sqrt{\frac KI}.
-\]
+$$
 
 A factor of fifteen would need a specifically derived asymmetric or collective coupling structure, not merely fifteen identical components.
 
@@ -686,15 +686,15 @@ A factor of fifteen would need a specifically derived asymmetric or collective c
 
 The v0.1.0 Biot–Savart diagnostic reports relative-equilibrium residuals
 
-\[
+$$
 \epsilon_{\rm ring}=3.31\times10^{-8},
-\]
+$$
 
-\[
+$$
 \epsilon_{3_1}=0.2264,
 \qquad
 \epsilon_{4_1}=0.3324.
-\]
+$$
 
 These numbers are genuine outputs of numerical geometry and a regularized Biot–Savart operator. They are not algebraically encoded in \(\alpha,m_e,G\). The ring passes the preregistered five-percent gate, while the static trefoil and figure-eight atlas shapes fail it. ([Route-I v0.1.0 audit](sandbox:/mnt/data/SST_Route_I_relative_entropy_PoC_v0.1.0/output_v0.1.0/audit_report.json))
 
@@ -704,11 +704,11 @@ That kind of calculation is scientifically legitimate. Vortex-knot velocities, e
 
 The implication for SST is sharp:
 
-\[
+$$
 \boxed{
 \text{static ideal-knot geometry cannot substitute for a dynamically certified particle state.}
 }
-\]
+$$
 
 Until a trefoil or figure-eight is shown to be a periodic or relative-periodic solution of the chosen SST action, a recurrence frequency \(\Omega_K\), Floquet spectrum and invariant action \(I_K\) cannot be assigned as physical particle properties.
 
@@ -718,74 +718,74 @@ The v0.1.1 audit tests the literal interpretation in which a flattened electron 
 
 The core circulation carries orbital action
 
-\[
+$$
 \frac{m_e\Gamma_0}{2\pi}
 =
 \hbar\frac{\alpha^2}{4}.
-\]
+$$
 
 Thus
 
-\[
+$$
 \frac{m_e\Gamma_0}{2\pi\hbar}
 =
 \frac{\alpha^2}{4}
 =
 1.33128\times10^{-5}.
-\]
+$$
 
 One Bohr-scale action quantum would require
 
-\[
+$$
 \boxed{
 N_\hbar=\frac4{\alpha^2}
 =75115.46\ldots
 }
-\]
+$$
 
 core-circulation units. This factor is not an integer and is not repaired by a multiplicity of fifteen. ([Toroflux atomic audit v0.1.1](sandbox:/mnt/data/SST_Toroflux_Atomic_Transition_Audit_v0.1.1/RESULT_SUMMARY_v0.1.1.md), [gate ledger](sandbox:/mnt/data/SST_Toroflux_Atomic_Transition_Audit_v0.1.1/output_v0.1.1/gate_ledger.csv))
 
 The minimal potential-flow model,
 
-\[
+$$
 V_{\rm eff}(r)
 =
 \frac{A}{r^2}
 -
 \frac{K}{r},
-\]
+$$
 
 has only one positive stationary radius:
 
-\[
+$$
 r_\star=\frac{2A}{K}.
-\]
+$$
 
 A hydrogenic ladder appears only after imposing
 
-\[
+$$
 \Gamma_n=n\Gamma_{\rm env},
-\]
+$$
 
 which then gives
 
-\[
+$$
 r_n\propto n^2,
 \qquad
 E_n\propto-\frac1{n^2}.
-\]
+$$
 
 The scaling is correct, but the quantization law is exactly what the model needed to derive. It is therefore an imported assumption rather than a consequence of the Toroflux deformation. ([Toroflux theorem target v0.1.1](sandbox:/mnt/data/SST_Toroflux_Atomic_Transition_Audit_v0.1.1/THEOREM_TARGET_v0.1.1.md))
 
 A refined model with a microscopic core and a distinct atomic-scale envelope remains logically open. But an independent atomic prediction would need to generate, without inserting the Bohr rules:
 
-\[
+$$
 E_{n\ell j},
 \qquad
 n,\ell,m,j,
 \qquad
 \Delta\ell=\pm1\ \text{or alternative derived selection rules},
-\]
+$$
 
 as well as fine structure, recoil, Lamb-shift and nuclear-size corrections at the appropriate accuracy. Modern hydrogen calculations and data distinguish all these contributions; reproducing only the leading Rydberg scale would not distinguish SST from a reformulation of the Bohr model. citeturn11search16
 
@@ -795,38 +795,38 @@ The precision bar is severe. For example, the electron magnetic moment tests the
 
 The strongest current candidate for a quantity not algebraically encoded in \(\alpha\) is
 
-\[
+$$
 \alpha_{\rm lead}^{-1}
 =
 \frac{8\pi}{3}\mathcal L_{3_1}.
-\]
+$$
 
 Using
 
-\[
+$$
 \mathcal L_{3_1}=16.371637,
-\]
+$$
 
 the CANON obtains
 
-\[
+$$
 \alpha_{\rm lead}^{-1}
 \simeq137.15471.
-\]
+$$
 
 Compared with
 
-\[
+$$
 \alpha^{-1}\simeq137.035999,
-\]
+$$
 
 the relative difference is
 
-\[
+$$
 \boxed{
 866.3\ {\rm ppm}.
 }
-\]
+$$
 
 The formula is genuinely \(\alpha\)-free at evaluation time. It therefore qualifies as an **independent derivation candidate**, unlike the Bohr and Rydberg rewrites. ([SST CANON v0.8.28](sandbox:/mnt/data/SST_CANON-v0.8.28.tex))
 
@@ -836,11 +836,11 @@ There is also a precision issue. The trefoil ropelength is a numerical optimizat
 
 The candidate is scientifically interesting because it passes the most basic target-exclusion gate. But its present status is:
 
-\[
+$$
 \boxed{
 \text{parameter-light geometric coincidence, not a uniquely derived fine-structure constant.}
 }
-\]
+$$
 
 ## Sensitivity and falsification ledger
 
@@ -887,24 +887,24 @@ The fastest route to one defensible SST prediction is **not** to derive another 
 
 A viable first target is:
 
-\[
+$$
 \boxed{
 \mathcal R_\Omega
 =
 \frac{\Omega_{3_1}}{\Omega_{0_1}}
 }
-\]
+$$
 
 or, alternatively,
 
-\[
+$$
 \boxed{
 \mathcal R_E
 =
 \frac{E_{3_1}}
 {E_{0_1}}
 }
-\]
+$$
 
 for dynamically certified finite-core vortex states at fixed conserved circulation, volume and dimensionless core slenderness.
 
@@ -949,7 +949,7 @@ gantt
 
 The recommended first prediction should satisfy:
 
-\[
+$$
 \boxed{
 \frac{\partial \mathcal R}
 {\partial \alpha}
@@ -962,7 +962,7 @@ The recommended first prediction should satisfy:
 =
 0.
 }
-\]
+$$
 
 It should also remain stable under at least two admissible core regularizations. If the observable changes strongly with the regulator or profile, the model must predict that profile before claiming particle relevance.
 
@@ -981,9 +981,9 @@ The highest-value near-term experiment would be a controlled comparison of topol
 
 The Toroflux/Kirchhoff-rod analogy can assist in constructing bistable deformation coordinates, twist–writhe exchange and energy barriers. The Călugăreanu–White–Fuller relation
 
-\[
+$$
 L_k=Tw+Wr
-\]
+$$
 
 is a genuine topological-geometric theorem, and Kirchhoff/Cosserat rods provide established mechanics for curvature and twist energy. But applying these tools to an electron requires a new dynamical mapping; the theorem itself does not imply the particle interpretation. citeturn10academia33turn10search9turn9search13
 
@@ -1004,7 +1004,7 @@ The external benchmark literature supports the orthodox components used by SST�
 
 The final research verdict is:
 
-\[
+$$
 \boxed{
 \begin{aligned}
 &\text{SST can already compute non-algebraic dimensionless model outputs and no-go results.}\\
@@ -1014,4 +1014,4 @@ The final research verdict is:
 &\text{dimensionless vortex-knot prediction tested out of sample.}
 \end{aligned}
 }
-\]
+$$

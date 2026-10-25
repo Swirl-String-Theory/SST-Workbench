@@ -21,10 +21,10 @@ v0.1.1 established:
 
 #### Core-resolution gate
 
-\[
+$$
 \eta_a =
 \frac{\max_j\Delta s_j}{a}.
-\]
+$$
 
 Classification:
 
@@ -49,12 +49,12 @@ than only individual eigenvectors.
 
 For every ring and trefoil mode:
 
-\[
+$$
 P_m =
 \left|
 \int q(s)e^{-2\pi i m s/L}\,ds
 \right|^2.
-\]
+$$
 
 Fingerprints are used as an independent matching observable.
 
@@ -62,11 +62,11 @@ Fingerprints are used as an independent matching observable.
 
 Left and right eigenvectors are used to compute
 
-\[
+$$
 \kappa_i =
 \frac{\|x_i\|\|y_i\|}
 {|y_i^\dagger x_i|}.
-\]
+$$
 
 Large \(\kappa_i\) flags modes whose eigenvectors may rotate strongly under
 small discretization perturbations.

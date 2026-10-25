@@ -35,65 +35,65 @@ Any `--limit` run is labelled diagnostic even when the native backend is availab
 
 The most important correction is conceptual:
 
-\[
+$$
 K_\ell(\Delta)
 =L_\ell(0)-\frac{L_\ell(-\Delta)+L_\ell(+\Delta)}{2}
-\]
+$$
 
 is a **finite symmetric-control residual**.  For a smooth same-branch continuation,
 
-\[
+$$
 K_\ell(\Delta)=O(\Delta^2).
-\]
+$$
 
 Therefore a non-zero value at the frozen `Delta=0.37` is not by itself an intrinsic action or topological invariant.
 
 v0.7.0 now treats the local wavenumber curvature
 
-\[
+$$
 C_k
 =-\frac{2K_\ell}{(\delta\hat{k})^2}
 \approx
 \frac{\partial^2 L_\ell}{\partial\hat{k}^2}
-\]
+$$
 
 as the primary **certification diagnostic**, with
 
-\[
+$$
 \delta\hat{k}=\frac{2\pi\Delta}{\hat L}.
-\]
+$$
 
 It then uses two smallest detunings for Richardson extrapolation to `delta k -> 0` before radial-resolution certification.  This removes the loop-length dependence that would be hidden if one normalized only by `Delta^2`.
 
 A second correction is equally important: the complex A029 eigenvector has an arbitrary global phase.  Therefore a real
 
-\[
+$$
 \delta\ell_{\rm SST}(t)
-\]
+$$
 
 cannot be certified from the eigenproblem alone.  v0.7.0 requires an independent predictor-clean raw modal trajectory whose complex `a(t0)` is projected onto the **exact same normalized basis hash**.  It then obtains
 
-\[
+$$
 a(t_0)=\epsilon e^{i\phi_0},
-\]
+$$
 
 so amplitude and physical phase origin are fixed together, without fitting an attosecond observable.
 
 Finally, even a certified `C_k` is not itself a physical action.  The action stage remains `NOT_RUN` until an independent physical reference provides `physical_delta_k_hat`.  Only then is
 
-\[
+$$
 K_{\rm phys}(t)
 \simeq
 -\frac12 C_k(t)(\delta\hat{k}_{\rm phys})^2
-\]
+$$
 
 converted into
 
-\[
+$$
 \delta \ell_{\rm SST}(t),
 \qquad
 \delta s_{\rm SST}(t)=\int\delta\ell_{\rm SST}\,dt.
-\]
+$$
 
 ## Ordered pipeline
 

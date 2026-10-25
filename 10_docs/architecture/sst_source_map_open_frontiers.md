@@ -829,30 +829,30 @@ L222: \section{Delay-Induced Mode Selection in the NLS}\label{sec:modes}
 L223: % ============================================================
 L225: \subsection{From Phase Oscillator to NLS}
 L227: In \cite{Iskandarani2026AIP}, the minimal phase oscillator model:
-L228: \[
+L228: $$
 L229: \dot{\phi}(t) = \omega_0 + \kappa\sin\!\left(\phi(t-\tau) - \phi(t)\right)
-L230: \]
+L230: $$
 L231: was shown to produce discrete stable modes $\Omega_n \approx 2\pi n/\tau$, with
 L232: selection governed by the stability criterion $1 + \kappa\tau\cos(\Omega\tau) > 0$.
 L234: The full NLS framework appropriate for the incompressible SST fluid is:
-L235: \[
+L235: $$
 L236: i\hbar\,\partial_t\Psi
 L237: = -\frac{\hbar^2}{2m_*}\nabla^2\Psi + g|\Psi|^2\Psi,
-L238: \]
+L238: $$
 L239: where $m_* = \rho_c V_\text{torus}$ is the effective vortex inertia and
 L240: $g = F_{\circlearrowleft}^{\max} r_c^2 / \rho_c$ encodes the cavitation nonlinearity.
 L242: Vortex solutions take the form:
-L243: \[
+L243: $$
 L244: \Psi(r,\theta,t) = f(r)\,e^{in\theta}\,e^{-i\omega_n t},
-L245: \]
+L245: $$
 L246: where $n \in \mathbb{Z}$ is the topological winding number and $f(r)$ is the
 L247: Rankine radial profile (solid-body inside $r_c$, decaying outside).
 L249: \subsection{Mode Frequencies and Mass Ladder}
 L251: Substituting the vortex ansatz, the NLS eigenvalue condition becomes:
-L252: \[
+L252: $$
 L253: \omega_n = n\cdot\frac{v_{\circlearrowleft}}{r_c} + \frac{g\rho_c}{\hbar}
 L254: = n\,\omega_c + \delta\omega, \label{eq:ladder}
-L255: \]
+L255: $$
 L256: which reproduces the discrete ladder of \cite{Iskandarani2026AIP} with spacing
 L257: $\Delta\omega = 2\pi/\tau = \omega_c$. The integer $n$ is both the knot winding
 L258: number and the phase-delay mode index.

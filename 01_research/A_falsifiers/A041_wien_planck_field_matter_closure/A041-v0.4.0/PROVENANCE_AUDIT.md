@@ -19,53 +19,53 @@ The provenance roles are deliberately separated:
 
 The legacy relation
 
-\[
+$$
 4\pi^2\rho_{\rm core}\,v_{\circlearrowleft}r_c^4\simeq h
-\]
+$$
 
 is not an independent prediction when the upstream SST definitions contain
 
-\[
+$$
 v_{\circlearrowleft}=\frac{\alpha c}{2},
 \qquad
 F_{\rm swirl}^{\max}=\frac{v_{\circlearrowleft}\hbar}{2r_c^2},
-\]
+$$
 
 and
 
-\[
+$$
 \rho_{\rm core}
 =\frac{4F_{\rm swirl}^{\max}}{\pi\alpha^2c^2r_c^2}.
-\]
+$$
 
 Substitution algebraically forces
 
-\[
+$$
 4\pi^2\rho_{\rm core}v_{\circlearrowleft}r_c^4
 =2\pi\hbar=h.
-\]
+$$
 
 Likewise, an action scale
 
-\[
+$$
 J_0=\rho\Gamma L^3
-\]
+$$
 
 becomes circular if the reveal mapping uses
 
-\[
+$$
 \rho=\rho_{\rm core},\qquad
 \Gamma=2\pi r_cv_{\circlearrowleft},\qquad
 L=r_c,
-\]
+$$
 
 because this implies \(J_0=\hbar\) under the same legacy chain. This mapping remains a **contaminated negative control** and can never establish an independent Planck-scale prediction.
 
 The pre-reveal v0.4.0 Universal-Action path therefore uses only
 
-\[
+$$
 L_{\hat{}}=1,\qquad\Gamma_{\hat{}}=1,
-\]
+$$
 
 plus dimensionless geometry, core ratio, amplitudes, time steps and target-free numerical controls. The source/payload guard rejects canonical SST constants, SI action columns and absolute targets from the blind dependency path.
 

@@ -13,13 +13,13 @@
 The current Research Track explicitly identifies Route I as thermodynamic
 gravity, writes the target structure
 
-\[
+$$
 S=\eta A,
 \qquad
 T_{\mathrm{SST}}=\frac{\hbar a}{2\pi c k_B},
 \qquad
 \delta Q=T\,dS,
-\]
+$$
 
 and states that an area law may be attacked through a line-piercing entropy
 model. It also states that the coefficient remains calibrated unless the

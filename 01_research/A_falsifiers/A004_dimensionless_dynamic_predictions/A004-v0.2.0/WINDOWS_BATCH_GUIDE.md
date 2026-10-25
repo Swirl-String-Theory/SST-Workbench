@@ -248,17 +248,17 @@ De JSON/CSV-bestanden worden per voltooide run geschreven. Start dezelfde batch 
 
 De nieuwe achtergrond is de limiet van een Rankine-vortex met oneindige radius:
 
-\[
+$$
 \mathbf u_{\rm bg}=\boldsymbol\Omega_{\rm bg}\times\mathbf r,
 \qquad
 \zeta_{\rm bg}=2\Omega_{\rm bg}.
-\]
+$$
 
 De SST-genormaliseerde waarde is:
 
-\[
+$$
 \zeta_{\rm bg}^*=\frac{1}{\pi}.
-\]
+$$
 
 ### Snelle gepaarde test
 

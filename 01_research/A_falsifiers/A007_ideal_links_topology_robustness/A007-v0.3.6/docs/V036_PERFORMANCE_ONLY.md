@@ -8,19 +8,19 @@ stencils, reduced basis, or circulation-sector semantics from v0.3.5.1.
 
 The regularized Neumann contribution is
 
-\[
+$$
 E_N(\sigma,q)=\sigma^T C(q)\sigma.
-\]
+$$
 
 v0.3.5.1 finite-differenced this scalar separately for every one of the \(2^m\)
 circulation assignments. v0.3.6 finite-differences the small coupling matrix \(C(q)\)
 **once** and then contracts its baseline, gradient and Hessian with every sector:
 
-\[
+$$
 \partial_a E_N=\sigma^T(\partial_a C)\sigma,
 \qquad
 \partial_a\partial_b E_N=\sigma^T(\partial_a\partial_b C)\sigma.
-\]
+$$
 
 This is algebraically identical and preserves all sectors in the output.
 
@@ -38,10 +38,10 @@ the refined ledger for each sector.
 
 The exact existing diagnostic functional
 
-\[
+$$
 E_{rep}=\frac1{N_{pairs}}\sum_{pairs}
 \operatorname{softplus}\!\left(\frac{D(1+\delta)-r_{ij}}{sD}\right)^2
-\]
+$$
 
 is implemented in C++17/OpenMP. The NumPy implementation remains the independent
 reference. No sparse cutoff, KD-tree approximation or changed regularizer is introduced.

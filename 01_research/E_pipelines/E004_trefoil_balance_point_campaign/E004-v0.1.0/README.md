@@ -2,9 +2,9 @@
 
 Focused prospective balance search:
 
-\[
+$$
 10\ q/h/p\ settings \times 2\ trefoil\ embeddings = 20\ runs.
-\]
+$$
 
 Embeddings:
 

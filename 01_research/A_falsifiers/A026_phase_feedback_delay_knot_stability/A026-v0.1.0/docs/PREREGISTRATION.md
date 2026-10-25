@@ -4,21 +4,21 @@
 
 For a closed vortex-knot candidate, a self-returning phase/shape mode has a loop delay
 
-\[
+$$
 \tau_m = \frac{L}{|v_{g,m}|},\qquad v_{g,m}=\frac{d\omega_m}{dk},\qquad k_m=\frac{2\pi m}{L}.
-\]
+$$
 
 The preregistered positive-gain delayed-self-feedback closure gives the weak-feedback correction
 
-\[
+$$
 \delta\sigma_m \simeq K_m\,[\cos(\Theta_m)-1],\qquad \Theta_m=\omega_m\tau_m.
-\]
+$$
 
 Therefore the dimensionless phase score
 
-\[
+$$
 D_m=1-\cos\Theta_m\in[0,2]
-\]
+$$
 
 must rank candidates toward *lower* observed perturbation growth if this mechanism contributes materially to stability.
 
@@ -42,10 +42,10 @@ For at least 8 blind candidates:
 
 Use
 
-\[
+$$
 \widehat\sigma = \sigma_0 + \kappa z,\qquad
 z=\operatorname{median}_m\{\omega_m[\cos(\Theta_m)-1]\},\quad \kappa\ge0.
-\]
+$$
 
 Fit `kappa` only on the hash-defined calibration subset. On holdout, delayed prediction must reduce RMSE by at least 10% versus `sigma_0` alone.
 

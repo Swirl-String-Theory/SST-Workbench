@@ -37,7 +37,7 @@ glad Gaussian/Lamb–Oseen-profiel;
 De route wordt verworpen wanneer één van de volgende structureel blijft gelden onder
 verfijning:
 
-\[
+$$
 \begin{aligned}
 &\text{geen twee continue inverse contacttakken},\\
 &\text{geen gepaarde primitieve 9-orbit},\\
@@ -46,4 +46,4 @@ verfijning:
 &\frac{\delta H_a}{\delta\mathbf X}\not\parallel-\kappa\mathbf n,\\
 &\text{de uitkomst verdwijnt bij core-profile- of nonlocal-holdout}.
 \end{aligned}
-\]
+$$

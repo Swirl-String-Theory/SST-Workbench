@@ -53,11 +53,11 @@ f0           = 1.2355899557047996e20 Hz
 
 The dimensionless long-wave Kelvin benchmark is
 
-\[
+$$
 \hat\omega(x)
 =-\frac12x^2\left[\ln\left(\frac{2}{x}\right)-\gamma_E+\frac14\right],
 \qquad x=|k|r_c,
-\]
+$$
 
 when \(\Gamma=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}\).
 

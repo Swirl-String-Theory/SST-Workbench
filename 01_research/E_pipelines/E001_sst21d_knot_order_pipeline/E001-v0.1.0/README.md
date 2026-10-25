@@ -34,10 +34,10 @@ r_c     = 1.40897017e-15 m
 
 so the natural core-transit time is
 
-\[
+$$
 t_c=\frac{r_c}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
    =1.28810124\times 10^{-21}\ \mathrm{s}.
-\]
+$$
 
 No CODATA mass, Newton constant, or Planck length is used by the geometry pipeline.
 

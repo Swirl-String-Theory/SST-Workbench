@@ -29,9 +29,9 @@ Each NPZ contains `x,y,z` in **meters**, `t` in **seconds**, `v` in **meters/sec
 
 Mathematical model (midpoint-segment regularized Biot-Savart):
 
-\[
+$$
 \mathbf v(\mathbf x)\approx\frac{\Gamma}{4\pi}\sum_j\frac{\Delta\boldsymbol\ell_j\times (\mathbf x-\mathbf X_j)}{(|\mathbf x-\mathbf X_j|^2+a^2)^{3/2}}
-\]
+$$
 
 where `a=core_m`, `Gamma=gamma_m2_s`, source XYZ points are scaled using `scale_m_per_unit`. Default **demonstration-only** values: `scale_m_per_unit=1 m/native-unit`, `core_m=0.8 m`, `gamma_m2_s=10 m^2/s`, time stamps `0, 0.07, 0.14 s`. These values are **artificial**, not the SST canon or PKLSA measurement calibration. The frozen repeated frames **cannot** demonstrate time-dependent Euler dynamics, stationarity, a material vortex tube or a physical separatrix.
 

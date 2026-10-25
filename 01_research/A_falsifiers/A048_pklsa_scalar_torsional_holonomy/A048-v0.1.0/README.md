@@ -4,15 +4,15 @@ This release is the first executable qualification scaffold for the SST/PKLSA hy
 
 The key discriminant is dispersion:
 
-\[
+$$
 \omega_K(k) \propto k^2
-\]
+$$
 
 for a Kelvin/LIA-like null branch versus
 
-\[
+$$
 \omega_\chi^2(k)=c_\chi^2 k^2+\Omega_0^2
-\]
+$$
 
 for a candidate scalar/torsional phase branch. A separate geometric forward model uses PKLSA centerline curvature and torsion, but **v0.1.0 does not treat that model as evidence**.
 
@@ -45,11 +45,11 @@ The blind stage contains no canonical SST constants. Anonymous synthetic case la
 
 After reveal, the canonical SST scale mapping reports
 
-\[
+$$
 \Gamma_c=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}},\qquad
 \beta_c=\frac{\Gamma_c}{4\pi}=\frac{r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}{2},\qquad
  t_c=\frac{r_c}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}.
-\]
+$$
 
 ## Run
 

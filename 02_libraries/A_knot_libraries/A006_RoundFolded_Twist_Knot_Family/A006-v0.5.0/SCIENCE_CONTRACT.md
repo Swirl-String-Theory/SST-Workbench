@@ -1,23 +1,53 @@
-# A006 v0.5.0c — force/collision qualification science contract
+# VCCR v0.2.0 — science contract and qualification gates
 
-**Scope:** KnotPlot algorithmic force effects, not physical inviscid Euler/PKLSA dynamics.
+## Claim boundary
 
-- G0: identical initial three-component XYZ bytes after numerical parsing for every arm, and immutable input SHA-256.
-- G1: controlled one-factor comparisons: BEND_OFF vs BEND_1/10/100; vs MECH_ONLY/ELEC_ONLY; vs AMECH_140_ELEC/AMECH_MATCH_ELEC (effect of initial rest length); vs AMECH_MATCH_ONLY (isolating elec); vs AMECH_MATCH_P2 (power); vs MAXDR_0005/MAXDR_0010; vs CLOSE_010/CLOSE_030. Never compare multiple simultaneous parameter changes as a single-cause attribution.
-- G2: no force order confound: `mechforce=off` whenever `amechforce=on`. `afmpower=1` for linear spring; `spring-length` uses source-derived global median edge for MATCH.
-- G3: collision mode requested and queried every checkpoint; runtime console output must be saved. `close` varies only in its own branch and always `max-dr < close`. Damped selected via GUI should be verified; we do not invent a console parameter for it.
-- G4: accurate checkpoints 0,1,8,32,128, native CSV `/I,/N,/l,/g`, `data close`, no `stop`, and native KnotPlot XYZ read per component using Component headers. Do not infer runtime from prepared scripts.
-- G5: derived metrics: maximum & 99th percentile turn, maximum curvature, shortest/median/longest edge, max/min ratio, periodic seam ratio, centroid and length; compare all three components independently. Retain crash/incomplete status and never silently fill gaps.
-- G6: do not equate a less sharp shape with topological or hydrodynamical stability. Knot identity and Milnor triple invariant remain independent gates. `symm` not activated without explicit separate qualification.
+**Verified:** v0.1.0 uniform circular-tube algebra, conditional SST reference calibration, and v0.2.0 numerical RK4 tracer conservation for a time-dependent **exact affine Euler field** with independent finite-difference momentum, divergence and vorticity checks; temporal order; intentionally broken Euler counterexample.
 
-## Interpretation warnings
+**Not verified:** finite-core vortex field, self-induced knotted Biot–Savart/Euler dynamics, material-ring extraction from native PKLSA, physical thickness, vortex reconnection, true topology invariance, shared volume across knotted species, or a physically derived Swirl Clock. No particle, gravitational or mass claims.
 
-The reference `spring-length=1.4` is about 29% shorter than typical initial bead spacing (1.968625). A linear spring whose force depends on elongation relative to rest length could therefore alter the initial force state appreciably. Actual implementation of `amech` must be confirmed by instrumented KnotPlot or source inspection before treating this as a quantitative force-law derivation.
+## Gates
 
-The experiment uses a high-resolution link of 3217 beads. `go beadlimit 4000` is required before the first `ago` and `collision fast` plus the `close` threshold do not certify link topology.
+| Gate | Requirement | This package |
+|---|---|---|
+| G0 | Original analytical state/mass/dimension regression | PASS (7 legacy tests) |
+| G1 | Unforced incompressible Euler `Du/Dt = -grad(p)/rho`, `div u=0`, independent RK4 material tracers | PASS (affine exact solution only) |
+| G2 | Broken rotation law fails physical laws | PASS (negative control rejected) |
+| G3 | Independent tracer polygons and velocities recover `A λ`, `Gamma`, `omega` and `a_eff` | PASS (affine circular + ellipse only) |
+| G4 | Native knotted finite-core Euler solution with material-particle and source identity | NOT_RUN |
+| G5 | Independently computed native circulation and vorticity flux in same flow | NOT_RUN |
+| G6 | Native grid spacing/time-step convergence incl. pressure Poisson, local transport | NOT_RUN |
+| G7 | Topological invariants / geometric thickness / component-wise no reconnection | NOT_RUN |
+| G8 | Swirl Clock internal excitation eigenfrequency from same flow | NOT_RUN |
 
-## References
+`GN0–GN7` are separate native **data integrity** gates; even `GN2 PASS` is **measurement qualification only**, not a pass of G4–G8.
 
-- R. G. Scharein, *KnotPlot Online Parameters*, https://knotplot.com/manual/parameters.html
-- R. G. Scharein, *KnotPlot Commands*, https://knotplot.com/manual/commands.html
-- R. G. Scharein, *KnotPlot Manual*, https://knotplot.com/doc/KnotPlot-Manual.pdf
+## Definitions and units
+
+- Absolute flow time: Euler integration variable `t` (benchmark time dimensionless; external native time seconds).
+- `a_eff=sqrt(A/pi)` is the **area-equivalent** radius. It is not automatically the vortex geometric reach or physical core radius.
+- Native `V_proxy = A*ell` assumes a sufficiently thin/locally straight transverse material segment. Strong curvature and transverse shear require true material-cell volume/Jacobian; reject unjustified approximations.
+- `Gamma_line=integral(u . dl)` is calculated using **measured** sampled velocity and marker polygon, not from the VCCR closure; independently supplied flux is never silently treated as verified.
+- Different knots **cannot** share a common physical volume as an Euler deduction. This is a falsifiable optional SST hypothesis, not a law.
+- Ropelength diameter convention: `R_d=L/(2*a_geo)` uses geometric thickness; `L/(2*a_core)` is physically meaningful only with measured `a_core`. Geometric thickness saturation is not assumed by new benchmark.
+- `rho_f=7e-7 kg/m^3` and `rho_core=3.8934358266918687e18 kg/m^3` must never be conflated; the benchmark does not infer density.
+
+## Native minimum evidence needed to close G4-G7
+
+1. Same **physical** closed knotted material tube and persistent marker IDs before and after, with no remesh-induced label substitution.
+2. Euler pressure, velocity, vorticity on a characterized 3D domain with boundary conditions; independent momentum, divergence and pressure–Poisson residuals.
+3. Advected transverse material loops near several axial positions and measured `A(s,t)`, `lambda(s,t)`, `Gamma_line(s,t)`, and vorticity flux integral, not recovered from each other.
+4. At least three distinct spatial resolutions and three time steps, with convergence of all residuals and parameter-independent tolerances.
+5. Full component-wise knot/link identity and minimum clearance; monitor reconnection or crossing numerically.
+6. Qualification of core geometry/profile and the correspondence of effective area radius to any physical core radius, especially at self-contact.
+
+**Falsifier:** stable, grid-converged violation of `A(s,t)*lambda(s,t)/A(s,0)=1` or `Gamma(t)/Gamma(0)=1` within a valid material Euler vortex tube, or failure of claimed independent physical radius at fixed conserved `V` after circularity/profile gates; otherwise mark unresolved rather than modifying tolerances post-hoc.
+
+## Countermodels explicitly tested
+
+- At nonzero axial strain `k`, holding angular velocity `Omega` artificially constant yields nonzero Euler momentum residual and non-conserved material circulation: G2 expected FAIL for broken model, negative-control detection PASS.
+- An initially **elliptical** material section satisfies area/volume/circulation scaling but has distinct major/minor radii: `a_eff` is not a unique physical radial boundary size.
+
+## Sources
+
+See `references.tex`. Euler/Kelvin classical fluid dynamics is established, while the specific affine test code and quantitative thresholds are new verification constructs, not discovered SST dynamics.

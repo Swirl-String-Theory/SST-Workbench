@@ -26,10 +26,10 @@ The blind stage never sees those IDs or meanings. It receives shuffled `CAND_<ha
 
 The experiment separates two causal axes:
 
-\[
+$$
 \boxed{\text{component knotting}}\qquad\text{vs.}\qquad
 \boxed{\text{collective three-component architecture}}.
-\]
+$$
 
 Reveal evaluates fixed contrasts rather than selecting the nicest candidate after seeing the results. For example, the collective Triple-Gear contribution at fixed component content is the difference between the decorated and unlinked `5_2,5_2,6_1` cases. The analogous Borromean-skeleton contrast holds `5_2,6_1,6_1` fixed.
 
@@ -71,9 +71,9 @@ The Triple-Gear proxy is generated as the standard three-component torus link `T
 
 The Borromean control is generated as the closure of the standard three-strand braid
 
-\[
+$$
 (\sigma_1^{-1}\sigma_2)^3.
-\]
+$$
 
 The self-test checks that its three pairwise linking numbers converge to zero. The three-body topology is intentionally **not** supplied to the blind scorer as a target.
 
@@ -85,21 +85,21 @@ The constructor is fail-closed: if the insertion ball, bridge clearance, final i
 
 The starter dynamics is a regularized finite-core Biot--Savart filament operator with no candidate-specific term,
 
-\[
+$$
 \mathbf u(\mathbf x)
 =\frac{1}{4\pi}\sum_j \Gamma_j
 \int_{C_j}
 \frac{d\boldsymbol\ell'\times(\mathbf x-\mathbf x')}
 {\left(|\mathbf x-\mathbf x'|^2+a^2\right)^{3/2}}.
-\]
+$$
 
 The blind calculation uses normalized geometry and dimensionless circulation. SST SI constants are not available to this stage.
 
 Eight circulation sectors are preregistered under opaque labels `Q0`--`Q7`. They are the Cartesian product of two magnitude normalizations with the four inequivalent three-component sign patterns modulo global sign reversal:
 
-\[
+$$
 (+++) ,\qquad (-++),\qquad (+-+),\qquad (++-).
-\]
+$$
 
 The first normalization uses \(|\Gamma_i|=1\) per component; the second uses \(|\Gamma_i|=1/3\), fixing total absolute circulation to unity. Thus CW/CCW assignment is not chosen to favor an architecture, and every candidate is tested under the identical eight-sector ensemble. All sectors remain in the blind ledger; post-hoc selection is forbidden.
 
@@ -119,18 +119,18 @@ Closedness, finite coordinates, common arclength resampling, no accidental compo
 
 The induced centerline velocity is fitted to the best rigid-body motion
 
-\[
+$$
 \mathbf u_i \simeq \mathbf V+\boldsymbol\Omega\times(\mathbf x_i-\mathbf x_c),
-\]
+$$
 
 and the normalized residual
 
-\[
+$$
 \epsilon_{\rm RE}
 =
 \frac{\sqrt{\langle|\mathbf u-\mathbf u_{\rm rigid}|^2\rangle}}
 {\sqrt{\langle|\mathbf u|^2\rangle}}
-\]
+$$
 
 is reported. Lower values indicate a closer relative-equilibrium candidate under this operator; no particle target enters the fit.
 
@@ -138,10 +138,10 @@ is reported. Lower values indicate a closer relative-equilibrium candidate under
 
 The same residual is recomputed with all cross-component Biot--Savart terms removed. Define
 
-\[
+$$
 \Delta_{\rm cross}
 =\epsilon_{\rm RE}^{\rm self-only}-\epsilon_{\rm RE}^{\rm full}.
-\]
+$$
 
 A positive value means collective interactions improve rigid-motion coherence under the common operator. This is a causal architecture diagnostic, not a nucleon score.
 
@@ -157,12 +157,12 @@ Pairwise Gauss-linking matrices are calculated internally at initial/final time.
 
 On common spherical sampling shells, the diagnostic
 
-\[
+$$
 \epsilon_{\rm ani}(R)
 =
 \frac{\operatorname{std}_{\Omega}|\mathbf u(R,\Omega)|^2}
 {\langle|\mathbf u(R,\Omega)|^2\rangle_{\Omega}}
-\]
+$$
 
 is measured. This does not assume that \(|\mathbf u|^2\) is Coulomb or gravity; it is only a target-free measure of how rapidly microscopic anisotropy coarse-grains away.
 

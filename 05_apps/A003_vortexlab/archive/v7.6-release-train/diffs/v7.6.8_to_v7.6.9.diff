@@ -1,0 +1,260 @@
+--- releases/v7.6.8/vortexring-lab-v7.6.8.html
++++ releases/v7.6.9/vortexring-lab-v7.6.9.html
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.8 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.8">
++<title>Superfluïde vortexlab v7.6.9 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.9">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.7">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-closure,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix">
++<meta name="vortexlab-parent" content="7.6.8">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -409,13 +409,14 @@
+   #cards.vl-cards-overlay .mcard .ms{font-size:6.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+   #spark.vl-spark-overlay{position:static!important;flex:0 0 auto;margin:0!important;padding:6px!important;display:block!important;}
+   #spark.vl-spark-overlay canvas{display:block;width:210px;height:auto;max-width:18vw;}
+-  .vl-specclock-overlay{flex:0 0 300px;width:min(320px,30vw);padding:7px;display:none;}
++  .vl-specclock-overlay{flex:0 0 300px;width:min(320px,30vw);padding:7px;display:none;overflow:hidden;contain:layout paint;}
+   .vl-specclock-overlay.active{display:block;}
+   .vl-specclock-overlay .vl-info-section-title{margin:0 2px 6px;font-size:8.5px;letter-spacing:.13em;}
+   .vl-specclock-overlay .note{font-size:8px;line-height:1.3;margin:0 0 6px;}
+   .spec-overlay-grid{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:8px;line-height:1.3;}
+   .spec-overlay-grid .k{color:var(--dim);white-space:nowrap;}
+   .spec-overlay-grid .v{text-align:right;white-space:nowrap;color:#EAF2FA;}
++  .spec-overlay-grid .v[data-spec-overlay="status"]{max-width:168px;min-height:2.6em;white-space:normal;line-height:1.3;}
+   .spec-clock-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin:8px 0 6px;align-items:center;}
+   .spec-clock-tools > .chk{margin:0;align-self:center;}
+   .spec-clock-tools > button{width:100%;}
+@@ -691,8 +692,8 @@
+       <h2>SPECULATIVE SWIRL CLOCK A↔B <span class="tag">Research Track · niet canon</span></h2>
+       <p>Deze optionele diagnose is uitsluitend beschikbaar voor twee SST-dragers in botsingsmodus en koppelt niets terug naar de filament-ODE. De veldroute meet voor iedere drager de RMS tangentiële snelheid die uitsluitend door de andere drager wordt geïnduceerd,</p>
+       <p>\[ u_i=\left[\frac{1}{L_i}\oint_{K_i}(\mathbf u_{j\to i}\!\cdot\!\hat{\mathbf t}_i)^2\,ds\right]^{1/2}. \]</p>
+-      <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele envelop \(v_i\in[|v_{\circlearrowleft}-u_i|,v_{\circlearrowleft}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een hypothesetest, geen canonieke superpositieregel.</p>
+-      <p>De onafhankelijke meetroute gebruikt de gemeten body-fasefrequentie \(\Omega_{\rm body}\) ten opzichte van een door de gebruiker vastgelegde referentietoestand: \(\eta_i^{\rm phase}=|\Omega_i|/|\Omega_{i,0}|\). Kalibratie hoort bij grote onderlinge afstand te gebeuren; stel die startafstand in met Δz_AB,0 onder MODEL · VORTEX + KERN. Een kandidaat-sluiting ontstaat pas wanneer de faseverhouding binnen de veld-envelop valt, bij toenemende resolutie convergeert, invariant is onder A↔B en niet afhangt van \(a_{\rm sim}\), displayframe of afspeelsnelheid.</p>
++      <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele bracket \(v_i\in[|v_{\circlearrowleft}-u_i|,v_{\circlearrowleft}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een ongemapte Research-Track-diagnose, geen canonieke superpositieregel.</p>
++      <p>De onafhankelijke meetroute gebruikt de gemeten body-fasefrequentie \(\Omega_{\rm body}\) ten opzichte van een door de gebruiker vastgelegde referentietoestand: \(\eta_i^{\rm phase}=|\Omega_i|/|\Omega_{i,0}|\). Kalibratie hoort bij grote onderlinge afstand te gebeuren; stel die startafstand in met Δz_AB,0 onder MODEL · VORTEX + KERN. Zolang een SST-interne fase-observable en de overdrachtswet tussen beide routes ontbreken, rapporteert de simulator alleen ruwe numerieke overlap of afwijking. Geen van beide uitkomsten is een fysische closure, bevestiging of falsificatie. Een latere kandidaat-sluiting vereist bovendien resolutieconvergentie, invariantie onder A↔B en onafhankelijkheid van \(a_{\rm sim}\), displayframe en afspeelsnelheid.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+@@ -1053,7 +1054,7 @@
+         <details class="subcoll" id="specClockPanel" style="margin-top:9px;">
+           <summary>⚠ SPECULATIVE · SWIRL CLOCK A↔B <span class="tag">NIET CANON · GEEN SOLVERKOPPELING</span></summary>
+           <div class="subcoll-body">
+-            <div class="spec-clock-warning"><b>WAARSCHUWING.</b> Dit paneel test een twee-knoop-superpositie die niet door SST Canon is afgeleid. De canonieke waarde <b>v↻ = 1.09384563×10⁶ m/s</b> wordt alleen gebruikt om een formele klok-envelop te bouwen; de wederzijdse meterschaalsnelheid en Ω<sub>body</sub> zijn diagnostische proxies. De uitkomst verandert de knoopdynamica nooit.</div>
++            <div class="spec-clock-warning"><b>WAARSCHUWING.</b> Dit paneel vergelijkt twee ongemapte proxies voor een twee-knoop-superpositie die niet door SST Canon is afgeleid. De canonieke waarde <b>v↻ = 1.09384563×10⁶ m/s</b> wordt alleen gebruikt voor een formele veldbracket; de wederzijdse meterschaalsnelheid en Ω<sub>body</sub> hebben nog geen afgeleide overdrachtswet. Ruwe overlap of afwijking is daarom geen fysische bevestiging of falsificatie. De uitkomst verandert de knoopdynamica nooit.</div>
+             <div class="spec-clock-actions">
+               <button type="button" id="bSpecClockToggle">⚠ Activeer speculative clock</button>
+               <button type="button" id="bSpecClockCalibrate" disabled>◎ Kalibreer fase bij huidige afstand</button>
+@@ -1094,16 +1095,16 @@
+               <span>afstand |r<sub>B</sub>−r<sub>A</sub>|</span><span id="specClockDistance">—</span>
+               <span>u∥ RMS · B→A / A→B</span><span id="specClockMutual">—</span>
+               <span>canonieke geïsoleerde vertraging</span><span id="specClockBaseline">—</span>
+-              <span>η<sub>A</sub><sup>field</sup> envelop</span><span id="specClockEtaA">—</span>
+-              <span>η<sub>B</sub><sup>field</sup> envelop</span><span id="specClockEtaB">—</span>
++              <span>η<sub>A</sub><sup>field</sup> formele bracket</span><span id="specClockEtaA">—</span>
++              <span>η<sub>B</sub><sup>field</sup> formele bracket</span><span id="specClockEtaB">—</span>
+               <span>η<sub>A</sub><sup>phase</sup> / η<sub>B</sub><sup>phase</sup></span><span id="specClockPhaseRates">—</span>
+-              <span>R<sub>AB</sub><sup>field</sup> envelop</span><span id="specClockFieldRatio">—</span>
++              <span>R<sub>AB</sub><sup>field</sup> formele bracket</span><span id="specClockFieldRatio">—</span>
+               <span>R<sub>AB</sub><sup>phase</sup></span><span id="specClockPhaseRatio">—</span>
+               <span>Δτ<sub>AB</sub><sup>field</sup> accumulatie</span><span id="specClockFieldLag">—</span>
+               <span>Δτ<sub>AB</sub><sup>phase</sup> accumulatie</span><span id="specClockPhaseLag">—</span>
+-              <span>closure-residu ε<sub>clock</sub></span><span id="specClockResidual">—</span>
++              <span>ruwe proxyafstand ε<sub>proxy</sub></span><span id="specClockResidual">—</span>
+             </div>
+-            <div class="note" style="margin-top:7px;"><b>Twee routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↻±u∥-envelop → dτ/dt. Fase: |Ω<sub>body</sub>| ten opzichte van een vaste referentie bij grote scheiding. De initiële axiale afstand Δz<sub>AB,0</sub> staat onder VORTEX; wijziging daarvan reset de geometrie en wist bewust de fasekalibratie. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en zonder herkalibratie per afstand.</div>
++            <div class="note" style="margin-top:7px;"><b>Twee ongemapte routes.</b> Veld: wederzijdse tangentiële Biot–Savart-snelheid → formele v↻±u∥-bracket → dτ/dt. Fase: |Ω<sub>body</sub>| ten opzichte van een vaste referentie bij grote scheiding. Zonder afgeleide interne fase-observable en overdrachtswet is de vergelijking alleen een schaal- en consistentiediagnose; zij kan geen parametercombinatie falsificeren. De initiële axiale afstand Δz<sub>AB,0</sub> staat onder VORTEX; wijziging daarvan reset de geometrie en wist bewust de fasekalibratie. <b>Canonical gate blijft open</b> totdat dezelfde verhouding volgt bij resolutieconvergentie, A↔B-wisseling, grote-afstandslimiet R<sub>AB</sub>→1, variatie van a<sub>sim</sub>, en zonder herkalibratie per afstand.</div>
+           </div>
+         </details>
+         <details class="subcoll" id="stretchGatePanel" open style="margin-top:9px;">
+@@ -1318,7 +1319,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.8 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.9 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1329,7 +1330,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.8';
++const APP_VERSION='7.6.9';
+ const APP_BASE_VERSION='7.5.3';
+ window.__vlBootComplete=false;
+ window.addEventListener('error',function vlEarlyBootstrapError(event){
+@@ -1360,7 +1361,8 @@
+   'Canon/provenance, diagnostische NaN-serialisatie en de volledige regressiematrix zijn aangescherpt',
+   'UI: topology/contactmeldingen staan onder de topbar; LIVE STABILITEIT, geometriekaarten en sparkline vormen permanente onderste simulatoroverlays',
+   'UI: GEOMETRISCHE DIAGNOSTIEK is een vaste DIAG-sectie; χ-fase/Track B, speculative swirl clock A↔B en de vortex-stretching gate staan eronder als zelfstandige collapsebles',
+-  'Speculative swirl clock: passieve twee-route closure-test met mutual tangential-flow envelope, fasekalibratie en expliciete NOT-CANON waarschuwing'
++  'Speculative swirl clock: passieve vergelijking van twee ongemapte proxies; ruwe overlap/afwijking is expliciet geen fysische closure of falsificatie',
++  'SPEC CLOCK-overlay wordt alleen bij een actieve diagnose getoond en incrementeel bijgewerkt zonder voortdurende DOM-reconstructie'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -2549,7 +2551,7 @@
+ // ================= SPECULATIVE two-knot swirl-clock diagnostic =================
+ // Dit blok is strikt passief. Het verandert Y, Gamma, dt, de topology guard of
+ // enige andere solverparameter niet. De combinatie V_HORN_SST +/- u_mutual is
+-// uitsluitend een formele Research-Track-envelop, geen afgeleide superpositiewet.
++// uitsluitend een formele Research-Track-bracket, geen afgeleide superpositiewet.
+ const SpecClock={
+   calibrated:false,sampleStride:8,stepCounter:0,dtBucket:0,
+   omegaRefA:NaN,omegaRefB:NaN,
+@@ -2567,6 +2569,12 @@
+   const vMid=Math.min(C_LIGHT*(1-1e-15),Math.hypot(V_HORN_SST,du));
+   return {vMin,vMax,vMid,etaMin:specClockEta(vMax),etaMax:specClockEta(vMin),etaMid:specClockEta(vMid)};
+ }
++function specClockProxyAssessment(phaseRatio,fieldRatioMin,fieldRatioMax){
++  if(!(Number.isFinite(phaseRatio)&&phaseRatio>0&&Number.isFinite(fieldRatioMin)&&Number.isFinite(fieldRatioMax)))
++    return{state:'open',rawOverlap:null,falsified:false};
++  const rawOverlap=phaseRatio>=fieldRatioMin&&phaseRatio<=fieldRatioMax;
++  return{state:rawOverlap?'raw-overlap':'unmapped-mismatch',rawOverlap,falsified:false};
++}
+ function specClockPrerequisites(ignoreEnabled=false){
+   if(!ignoreEnabled&&!P.specClockEnabled)return{ok:false,reason:'UIT'};
+   if(P.mode!=='botsing')return{ok:false,reason:'vereist botsingsmodus met drager A en B'};
+@@ -2624,7 +2632,7 @@
+   const fieldRatioMin=envA.etaMin/Math.max(envB.etaMax,1e-300);
+   const fieldRatioMax=envA.etaMax/Math.max(envB.etaMin,1e-300);
+   const phaseRatio=Number.isFinite(etaPhaseA)&&Number.isFinite(etaPhaseB)&&etaPhaseB>0?etaPhaseA/etaPhaseB:NaN;
+-  const inside=Number.isFinite(phaseRatio)&&phaseRatio>=fieldRatioMin&&phaseRatio<=fieldRatioMax;
++  const assessment=specClockProxyAssessment(phaseRatio,fieldRatioMin,fieldRatioMax);
+   let residual=NaN;
+   if(Number.isFinite(phaseRatio)&&phaseRatio>0){
+     if(phaseRatio<fieldRatioMin)residual=Math.abs(Math.log(phaseRatio/fieldRatioMin));
+@@ -2632,7 +2640,8 @@
+     else residual=0;
+   }
+   return{valid:true,distance:Math.hypot(b.cx-a.cx,b.cy-a.cy,b.z-a.z),uA:mA.uRms,uB:mB.uRms,envA,envB,
+-    omegaA,omegaB,etaPhaseA,etaPhaseB,fieldRatioMin,fieldRatioMax,phaseRatio,inside,residual,samplesA:mA.samples,samplesB:mB.samples};
++    omegaA,omegaB,etaPhaseA,etaPhaseB,fieldRatioMin,fieldRatioMax,phaseRatio,
++    rawOverlap:assessment.rawOverlap,closureComparable:false,falsified:false,residual,samplesA:mA.samples,samplesB:mB.samples};
+ }
+ function updateSpecClockAcceptedStep(dt,V=K4){
+   if(!P.specClockEnabled||!(dt>0))return;
+@@ -2689,10 +2698,11 @@
+   const status=document.getElementById('specClockStatus');
+   const ids=['specClockDistance','specClockMutual','specClockEtaA','specClockEtaB','specClockPhaseRates','specClockFieldRatio','specClockPhaseRatio','specClockFieldLag','specClockPhaseLag','specClockResidual'];
+   const clear=()=>ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+-  if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';return;}
+-  if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';return;}
++  const finish=m=>{syncSpecClockQuickControls();updateSpecClockOverlay(m,pre);};
++  if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';finish(null);return;}
++  if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';finish(null);return;}
+   const m=SpecClock.last;
+-  if(!m||!m.valid){clear();status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';return;}
++  if(!m||!m.valid){clear();status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';finish(m);return;}
+   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+   const envText=e=>e.etaMin.toFixed(12)+' … '+e.etaMax.toFixed(12);
+   set('specClockDistance',fmtLengthSI(m.distance));set('specClockMutual',fmtSpeed(m.uA)+' / '+fmtSpeed(m.uB));
+@@ -2709,36 +2719,55 @@
+   document.getElementById('specClockBarA').style.width=pctA+'%';document.getElementById('specClockBarB').style.width=pctB+'%';
+   document.getElementById('specClockBarValueA').textContent=ppmA.toFixed(6)+' ppm';document.getElementById('specClockBarValueB').textContent=ppmB.toFixed(6)+' ppm';
+   if(!SpecClock.calibrated){status.className='spec-clock-status warn';status.textContent='VELDROUTE ACTIEF · fase-route nog open. Kalibreer bij zo groot mogelijke A–B-afstand; herkalibreer daarna niet tijdens de afstandssweep.';}
+-  else if(m.inside){status.className='spec-clock-status good';status.textContent='VOORLOPIG INGESLOTEN · R_AB^phase ligt binnen de formele veld-envelop. Dit is slechts één finite-time datapunt; canonical gates blijven open.';}
+-  else{status.className='spec-clock-status bad';status.textContent='NIET INGESLOTEN · de faseproxy valt buiten de formele veld-envelop. Dit falsificeert deze parametercombinatie of de gekozen twee-knoop-superpositie/proxy.';}
+-  syncSpecClockQuickControls();
+-  updateSpecClockOverlay(m,pre);
++  else if(m.rawOverlap){status.className='spec-clock-status warn';status.textContent='RUWE PROXY-OVERLAP · R_AB^phase ligt numeriek binnen de formele veldbracket. Zonder afgeleide fase-observable en overdrachtswet is dit geen closure of bevestiging.';}
++  else{status.className='spec-clock-status warn';status.textContent='ONGEMAPTE PROXY-AFWIJKING · R_AB^phase ligt buiten de formele veldbracket. Dit toont dat de huidige proxy’s niet numeriek sluiten; het falsificeert geen parametercombinatie of SST-klokwet.';}
++  finish(m);
++}
++function ensureSpecClockOverlayMarkup(body){
++  if(!body||body.dataset.specOverlayReady==='1')return;
++  body.innerHTML=`<div class="note"><b>Snelle weergave.</b> Alleen zichtbaar zolang de speculative klok actief is. De proxyvergelijking is niet canoniek en niet-falsifiërend.</div>
++    <div class="spec-overlay-grid">
++      <div class="k">modus / topologie</div><div class="v" data-spec-overlay="mode">—</div>
++      <div class="k">medium / interactie</div><div class="v" data-spec-overlay="medium">—</div>
++      <div class="k">kwaliteit / a_sim</div><div class="v" data-spec-overlay="quality">—</div>
++      <div class="k">Δz_AB,0 / Δx(B)</div><div class="v" data-spec-overlay="start">—</div>
++      <div class="k">v_z A / v_z B</div><div class="v" data-spec-overlay="drift">—</div>
++      <div class="k">actuele d_AB / clearance</div><div class="v" data-spec-overlay="distance">—</div>
++      <div class="k">stopgrens</div><div class="v" data-spec-overlay="stop">—</div>
++      <div class="k">fasekalibratie / logging</div><div class="v" data-spec-overlay="calibration">—</div>
++      <div class="k">status</div><div class="v" data-spec-overlay="status">—</div>
++    </div>`;
++  body.dataset.specOverlayReady='1';
++}
++function setSpecClockOverlayValue(body,key,value){
++  const node=body.querySelector('[data-spec-overlay="'+key+'"]');
++  const next=String(value);
++  if(node&&node.textContent!==next)node.textContent=next;
+ }
+ function updateSpecClockOverlay(m,pre){
+   const panel=document.getElementById('specClockOverlay');
+   const body=document.getElementById('specClockOverlayBody');
+   if(!panel||!body)return;
+-  const active=P.mode==='botsing'||P.specClockEnabled;
++  const active=!!P.specClockEnabled;
+   panel.classList.toggle('active',active);
+-  if(!active){body.innerHTML='<div class="note">Alleen zichtbaar voor botsingsruns of wanneer de speculative klok actief is.</div>';return;}
++  panel.setAttribute('aria-hidden',active?'false':'true');
++  if(!active)return;
++  ensureSpecClockOverlayMarkup(body);
+   const ct=contactThresholdInfo();
+   const gap=Number.isFinite(lastTopologyGap)?fmtLengthSI(lastTopologyGap):'—';
+-  const status=(document.getElementById('specClockStatus')?.textContent||'—').replace(/</g,'&lt;');
++  const status=document.getElementById('specClockStatus')?.textContent||'—';
+   const dz=fmtLengthSI(initialAxialSeparation()),dx=(P.off*1000).toFixed(1).replace(/\.0$/,'')+' mm';
+   const current=Number.isFinite(m&&m.distance)?fmtLengthSI(m.distance):'—';
+   const logState=(window.ModelLog&&window.ModelLog.enabled)?'aan':'uit';
+-  body.innerHTML=`<div class="note"><b>Quick readout.</b> Gebruik dit als compacte simulatoroverlay tijdens afstandssweeps. Belangrijkste sweep-variabelen staan ook in het speculative paneel.</div>
+-    <div class="spec-overlay-grid">
+-      <div class="k">modus / topologie</div><div class="v">${P.mode} · ${P.topo}</div>
+-      <div class="k">medium / interactie</div><div class="v">${P.med} · ${P.inter}</div>
+-      <div class="k">kwaliteit / a_sim</div><div class="v">${P.qual} · ${fmtLengthSI(P.a)}</div>
+-      <div class="k">Δz_AB,0 / Δx(B)</div><div class="v">${dz} · ${dx}</div>
+-      <div class="k">v_z A / v_z B</div><div class="v">${fmtSignedMmPerSInput(P.vzA)} · ${fmtSignedMmPerSInput(P.vzB)}</div>
+-      <div class="k">actuele d_AB / clearance</div><div class="v">${current} · ${gap}</div>
+-      <div class="k">stopgrens</div><div class="v">${fmtLengthSI(ct.effective)}</div>
+-      <div class="k">fasekalibratie / logging</div><div class="v">${SpecClock.calibrated?'ja':'nee'} · ${logState}</div>
+-      <div class="k">status</div><div class="v">${status}</div>
+-    </div>`;
++  setSpecClockOverlayValue(body,'mode',P.mode+' · '+P.topo);
++  setSpecClockOverlayValue(body,'medium',P.med+' · '+P.inter);
++  setSpecClockOverlayValue(body,'quality',P.qual+' · '+fmtLengthSI(P.a));
++  setSpecClockOverlayValue(body,'start',dz+' · '+dx);
++  setSpecClockOverlayValue(body,'drift',fmtSignedMmPerSInput(P.vzA)+' · '+fmtSignedMmPerSInput(P.vzB));
++  setSpecClockOverlayValue(body,'distance',current+' · '+gap);
++  setSpecClockOverlayValue(body,'stop',fmtLengthSI(ct.effective));
++  setSpecClockOverlayValue(body,'calibration',(SpecClock.calibrated?'ja':'nee')+' · '+logState);
++  setSpecClockOverlayValue(body,'status',status);
+ }
+ 
+ function translateCarrier(which,dx,dy,dz){
+@@ -5585,8 +5614,8 @@
+   const liveBlock=document.createElement('section');liveBlock.className='vl-live-overlay vl-overlay-surface';liveBlock.setAttribute('aria-label','Live stabiliteit');
+   const liveTitle=document.createElement('div');liveTitle.className='vl-info-section-title';liveTitle.textContent='LIVE STABILITEIT';liveBlock.appendChild(liveTitle);
+   const stabilityPanel=vlNode('stabilityPanel'),stabilityAdvice=vlNode('stabilityAdvice');vlMove(stabilityPanel,liveBlock);vlMove(stabilityAdvice,liveBlock);
+-  const specOverlay=document.createElement('section');specOverlay.className='vl-specclock-overlay vl-overlay-surface';specOverlay.id='specClockOverlay';specOverlay.setAttribute('aria-label','Speculative swirl-clock overlay');
+-  const specTitle=document.createElement('div');specTitle.className='vl-info-section-title';specTitle.textContent='SPEC CLOCK QUICK';specOverlay.appendChild(specTitle);
++  const specOverlay=document.createElement('section');specOverlay.className='vl-specclock-overlay vl-overlay-surface';specOverlay.id='specClockOverlay';specOverlay.setAttribute('aria-label','Speculative swirl-clock overlay');specOverlay.setAttribute('aria-hidden','true');
++  const specTitle=document.createElement('div');specTitle.className='vl-info-section-title';specTitle.textContent='SPEC CLOCK · SNELLE WEERGAVE';specOverlay.appendChild(specTitle);
+   const specBody=document.createElement('div');specBody.id='specClockOverlayBody';specOverlay.appendChild(specBody);
+   const cards=vlNode('cards');if(cards){cards.classList.add('vl-cards-overlay','vl-overlay-surface');bottomOverlays.appendChild(cards);}
+   const spark=vlNode('spark');if(spark){spark.classList.add('vl-spark-overlay','vl-overlay-surface');bottomOverlays.appendChild(spark);}
+@@ -6405,6 +6434,13 @@
+       const scPanel=document.getElementById('specClockPanel'),eta0=specClockEta(V_HORN_SST),env0=specClockEnvelope(0);
+       add('T0p speculative swirl-clock duidelijk gelabeld en passief',!!scPanel&&/SPECULATIVE/.test(scPanel.textContent)&&/GEEN SOLVERKOPPELING/.test(scPanel.textContent),'panel='+!!scPanel);
+       add('T0q swirl-clock limieten',Math.abs(eta0-0.999993343558553)<1e-14&&Math.abs(env0.etaMin-eta0)<1e-14&&Math.abs(env0.etaMax-eta0)<1e-14,'eta0='+eta0.toPrecision(16));
++      const proxyMismatch=specClockProxyAssessment(1.01,0.999999,1.000001);
++      add('T0r ongemapte proxy-afwijking is geen fysische falsificatie',proxyMismatch.state==='unmapped-mismatch'&&proxyMismatch.rawOverlap===false&&proxyMismatch.falsified===false,JSON.stringify(proxyMismatch));
++      {const overlay=document.getElementById('specClockOverlay'),body=document.getElementById('specClockOverlayBody'),oldEnabled=P.specClockEnabled;
++       P.specClockEnabled=true;updateSpecClockOverlay(null,{ok:true});const stableNode=body?.firstElementChild;updateSpecClockOverlay(null,{ok:true});
++       const stable=!!overlay&&overlay.classList.contains('active')&&body?.firstElementChild===stableNode&&body?.dataset.specOverlayReady==='1';
++       P.specClockEnabled=false;updateSpecClockOverlay(null,{ok:false});const hidden=!overlay?.classList.contains('active')&&overlay?.getAttribute('aria-hidden')==='true';P.specClockEnabled=oldEnabled;updateSpecClockOverlay(null,{ok:true});
++       add('T0s SPEC CLOCK-overlay incrementeel en alleen actief op verzoek',stable&&hidden,'stable='+stable+' hidden='+hidden);}
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse

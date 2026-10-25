@@ -1,0 +1,76 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref}
+\title{A006 Blind Borromean Collective-Stability and Clock-Candidate Falsifier\\Version 0.1.0 -- Development / Not Certified}
+\date{22 October 2026}
+\begin{document}
+\maketitle
+\section{Question and epistemic boundary}
+We compare three vortex filament geometries, individually and in two- and three-component couplings, asking if collective interaction decreases finite-time perturbation amplification. Each individual component retains exactly its position and geometry from the triple source when it is run in isolation. Labels $5_2$ and $6_1$ belong to A006 provenance, not to independently verified knot polynomial or Milnor invariant checks. These knot-labelled compositions are not the standard three-unknot Borromean link $L6a4$. The full link isotopy remains unresolved.
+\section{Governing numerical surrogate}
+The smooth inviscid, incompressible, unforced Euler equations and vorticity equation are
+\begin{align}
+\partial_t\mathbf{u}+(\mathbf{u}\cdot\nabla)\mathbf{u}&=-\rho^{-1}\nabla p, & \nabla\cdot\mathbf{u}&=0,\\
+\partial_t\boldsymbol\omega&=\nabla\times(\mathbf{u}\times\boldsymbol\omega).
+\end{align}
+We do \emph{not} claim to solve this full three-dimensional field problem. The executable instead uses an unforced three-component regularized vortex-filament model,
+\begin{equation}
+\dot{\mathbf X}_i(s,t)=\sum_{j=1}^{3}\frac{\Gamma_j}{4\pi}\oint_{\mathcal C_j}
+\frac{d\mathbf X_j(s',t)\times\bigl(\mathbf X_i(s,t)-\mathbf X_j(s',t)\bigr)}
+{\bigl(\lVert\mathbf X_i(s,t)-\mathbf X_j(s',t)\rVert^2+a^2\bigr)^{3/2}},
+\end{equation}
+with midpoint quadrature and fourth-order Runge--Kutta time integration. The length $a$ is the declared mathematical regularization scale, not a derived physical vortex core. No artificial restoring, damping, delay, clock, feedback, or knot-preserving force is added. No reconnection occurs under this filament evolution, absent numerical intersection or singularity.
+\section{Normalization}
+From the source geometry choose $L_0=\sqrt{N^{-1}\sum_k\lVert\mathbf X_k-\overline{\mathbf X}\rVert^2}$; rescale all three components using one common $L_0$ and one common center. Normalize circulation to a sign-sector reference $|\Gamma_0|=1$ (unit convention). Then
+\begin{equation}
+\mathbf{x}^*=\frac{\mathbf X-\overline{\mathbf X}}{L_0},\qquad
+ t^*=\frac{|\Gamma_0|}{L_0^2}t,\qquad
+ \omega^*=\frac{L_0^2}{|\Gamma_0|}\omega.
+\end{equation}
+No canonical SST constants, inferred masses, fundamental clock law, or fitted oscillation frequencies enter the blind analysis.
+\section{Matched isolated-versus-linked stability test}
+For each $i\in\{1,2,3\}$, a geometry-only zero-mean sinusoidal perturbation $\delta\mathbf x_i$ is applied at initial time. Every experiment is repeated with equal opposite amplitudes $\pm\epsilon$. Its matched finite-amplitude propagation measure is
+\begin{equation}
+A_i^{(\mathcal S)}(T)=
+\frac{\lVert\mathbf x_{i,+}^{(\mathcal S)}(T)-\mathbf x_{i,-}^{(\mathcal S)}(T)\rVert_2}
+{\lVert\mathbf x_{i,+}^{(\mathcal S)}(0)-\mathbf x_{i,-}^{(\mathcal S)}(0)\rVert_2},\qquad
+\mathcal S\in\{\mathrm{isolated},\mathrm{linked}\},
+\end{equation}
+\begin{equation}
+R_i(T)=\frac{A_i^{(\mathrm{linked})}(T)}{A_i^{(\mathrm{isolated})}(T)}.
+\end{equation}
+A pre-registered \emph{diagnostic convention} flags collective suppression only when all three ratios satisfy $R_i\le 0.95$. This cannot establish orbital or nonlinear stability. Numerical resolution, topology, and holdout qualifications remain mandatory. The comparison must also be repeated over a series of horizons and perturbation amplitudes.
+\section{Feedback response and internal clock search}
+A dimensionless shape probe is
+\begin{equation}
+Q_i(t)=\frac{L_0^2}{L_i(t)}\oint_{\mathcal C_i(t)}\kappa_i(s,t)^2\,ds.
+\end{equation}
+The response operator and a candidate clock frequency are
+\begin{equation}
+\mathcal R_{ij}(\tau)=\left.\frac{\partial Q_i(t+\tau)}{\partial\epsilon_j}\right|_{\boldsymbol\epsilon=0},\qquad
+\omega_B^*=\frac{L_0^2\omega_B}{|\Gamma_0|}.
+\end{equation}
+At least five cycles are demanded even to flag a numerical frequency candidate; actual physical clock qualification additionally needs independent phase observables, spatial and temporal convergence, perturbation resilience, long-horizon stationarity, and holdout replication. Off-diagonal response does not imply an irreducible three-body force. Centerline dynamics does not resolve internal core torsion.
+\section{Gates and outcomes}
+\begin{tabular}{ll}
+\toprule
+B0 & Provenance and byte-verified three-component geometry \\
+B1 & Knot and full Brunnian/Milnor topological certification \\
+B2 & Core mesh resolution, separation, spatial/time convergence \\
+B3 & Invariants, collision guard, numerical stability \\
+B4 & Long-horizon bounded, perturbation/orbital stability \\
+B5 & Isolated, pair, triple, separated, feedback controls \\
+B6 & Clock frequency across independent observables and refinements \\
+B7 & Prelocked holdout replication \\
+B8 & Independent full field Euler / GPE comparison \\
+B9 & Intrinsic clock qualification, not SST proper time \\
+\bottomrule
+\end{tabular}
+\par\medskip
+By design B1 and B8 remain unresolved, and B9 is never promoted by this initial version. A completed numerical run means only that diagnostics were produced.
+\begin{thebibliography}{9}
+\bibitem{Guan2025} H. Guan, S. Zuccher, and X. Liu (2025), ``Topological cascade of quantum Borromean rings,'' \emph{Physics of Fluids} \textbf{37}, 024126. \url{https://doi.org/10.1063/5.0252708}.
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press. \url{https://doi.org/10.1017/CBO9780511624063}.
+\bibitem{Milnor1954} J. Milnor (1954), ``Link Groups,'' \emph{Annals of Mathematics} \textbf{59}, 177--195. \url{https://doi.org/10.2307/1969685}.
+\end{thebibliography}
+\end{document}

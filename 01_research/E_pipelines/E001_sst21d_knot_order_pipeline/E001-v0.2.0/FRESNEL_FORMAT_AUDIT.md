@@ -99,9 +99,9 @@ Thus the two index conventions are cleanly separated in this archive.
 
 At 600-point common arclength sampling, all 73 `.fseries`/`.short` pairs pass the preregistered normalized shape threshold
 
-\[
+$$
 \epsilon_{\rm pair}\le 0.10.
-\]
+$$
 
 The raw scale is not generally equal: `.short` geometries are frequently scaled relative to the Fourier coefficients. Therefore shape RMSD is scale-normalized, while length and RMS-radius ratios are reported separately.
 

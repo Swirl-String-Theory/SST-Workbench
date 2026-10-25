@@ -2,9 +2,9 @@
 
 Blind C++17/pybind11 + Python workbench for the question
 
-\[
+$$
 \boxed{\text{Is the central threaded hole a robust dynamical structure, or only a visual gap in centerline geometry?}}
-\]
+$$
 
 v0.3.0 keeps all v0.2.1 self-confinement, pressure-Poisson, thread-focusing, similarity and triple-gear gates, and adds a dedicated **Kelvin--M'Farlane Lagrangian threaded-hole gate**.
 
@@ -13,9 +13,9 @@ v0.3.0 keeps all v0.2.1 self-confinement, pressure-Poisson, thread-focusing, sim
 1. **Kelvin--M'Farlane analytic oracle** before any blind campaign.
 2. **Geometry-only hole-axis search**: the blind runner does not read knot family or private axis labels.
 3. **Co-moving flow field** with best-fit rigid translation and rotation removed:
-   \[
+   $$
    \mathbf u_{\rm rel}(\mathbf x)=\mathbf u(\mathbf x)-\mathbf U-\boldsymbol\Omega\times(\mathbf x-\mathbf c).
-   \]
+   $$
 4. **Frozen Lagrangian/streamline connectivity test** with deterministic seeds, integrated by arclength so slow flow is not misclassified merely because an arbitrary observation time was too short.
 5. Classification into `OPEN_CHANNEL`, `CAPTURED_ATMOSPHERE`, `TRANSITIONAL_PINCH`, or `VISUAL_ONLY_OR_INCOHERENT`.
 6. **Finite carrier evolution** followed by a fresh transport re-test after rigid alignment.
@@ -36,9 +36,9 @@ Each blind active/null pair has exactly the same:
 
 The only physical difference is
 
-\[
+$$
 \Gamma_{\rm thread}=0
-\]
+$$
 
 for the null versus a hidden non-zero circulation for the active condition.
 
@@ -48,34 +48,34 @@ Therefore both candidates contain the same **visible central hole**. If the acti
 
 For two straight opposite vortices at \(x=\pm a\),
 
-\[
+$$
 U=\frac{\Gamma}{4\pi a}.
-\]
+$$
 
 Kelvin/M'Farlane's carried-fluid separatrix can be written
 
-\[
+$$
 \ln N=\frac{x+b}{a},
 \qquad
 N=\frac{(x+a)^2+y^2}{(x-a)^2+y^2},
-\]
+$$
 
 or
 
-\[
+$$
 \frac{y^2}{a^2}
 =
 2\frac{x}{a}\coth\!\left(\frac{x+b}{2a}\right)
 -1-\frac{x^2}{a^2}.
-\]
+$$
 
 For \(b=0\) the oracle must recover
 
-\[
+$$
 \frac{y_s}{a}=\sqrt{3},
 \qquad
 \frac{x_{\rm edge}}{a}\approx2.087253791,
-\]
+$$
 
 and the implicit streamline residual must be numerically negligible.
 
@@ -106,9 +106,9 @@ A final `ROBUST_*` verdict additionally requires:
 
 Thus
 
-\[
+$$
 \text{geometric clearance}>0
-\]
+$$
 
 is **never** by itself a pass.
 
@@ -116,10 +116,10 @@ is **never** by itself a pass.
 
 The blinded candidate cost combines only anonymous, target-independent diagnostics:
 
-\[
+$$
 C_{\rm hole}=1-S_{\rm hole},
 \qquad 0\le S_{\rm hole}\le1,
-\]
+$$
 
 where \(S_{\rm hole}\) combines initial/final Lagrangian support, clearance persistence, perturbation robustness and class persistence. The default pair decision also includes separate geometry-collapse, class-instability and Lagrangian-incoherence costs.
 

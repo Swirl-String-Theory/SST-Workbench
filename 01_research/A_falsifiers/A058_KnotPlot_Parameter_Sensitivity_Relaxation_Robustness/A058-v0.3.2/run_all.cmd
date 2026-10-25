@@ -10,9 +10,15 @@ if /I "%~1"=="CHECK_PROBES" goto distribution
 if /I "%~1"=="QUALIFY_EXISTING" goto measurement
 if /I "%~1"=="GENERATE_MEASUREMENTS" goto measurement
 if /I "%~1"=="RUN_MEASUREMENTS" goto measurement
+if /I "%~1"=="AUDIT_SCALAR_CLOSURE" goto closure
+if /I "%~1"=="GENERATE_SCALAR_CLOSURE" goto closure
+if /I "%~1"=="RUN_SCALAR_CLOSURE" goto closure
 if /I "%~1"=="CHECK_SHORTCUT" goto shortcut
 if /I "%~1"=="SELFTEST" goto alltests
 py -3 bridge.py %*
+exit /b %ERRORLEVEL%
+:closure
+py -3 tools\scalar_export_closure.py %*
 exit /b %ERRORLEVEL%
 :measurement
 py -3 tools\native_measurement.py %*

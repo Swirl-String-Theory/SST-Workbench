@@ -4,9 +4,9 @@ Standalone Python + C++17/pybind11 research harness. It does **not** import, mod
 
 This release turns the v0.3 softening scan into a candidate-certification pipeline for the fixed four-knot matrix
 
-\[
+$$
 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2.
-\]
+$$
 
 The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it certifies numerical stationary structures and convergence diagnostics, not a physical electron model or a global photon sphere.
 
@@ -14,15 +14,15 @@ The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt
 
 v0.3 counted sampled local minima of
 
-\[
+$$
 R_F(\rho;s,\theta)
 =
 \frac{\rho}{\sqrt{1-\lVert\boldsymbol\beta\rVert^2}}.
-\]
+$$
 
 v0.4 instead solves the stationary equation directly:
 
-\[
+$$
 \boxed{
 G(\rho;s,\theta)
 =
@@ -31,15 +31,15 @@ G(\rho;s,\theta)
 \rho\,\boldsymbol\beta\cdot\partial_\rho\boldsymbol\beta
 =0.
 }
-\]
+$$
 
 Since
 
-\[
+$$
 \frac{\partial R_F}{\partial\rho}
 =
 \frac{G}{\left(1-\lVert\boldsymbol\beta\rVert^2\right)^{3/2}},
-\]
+$$
 
 a sign change from \(G<0\) to \(G>0\) identifies a local radial minimum.
 
@@ -47,9 +47,9 @@ a sign change from \(G<0\) to \(G>0\) identifies a local radial minimum.
 
 1. **Analytic Biot--Savart field Jacobian** in C++ and Python:
 
-   \[
+   $$
    J_{ij}=\frac{\partial\beta_i}{\partial x_j}.
-   \]
+   $$
 
 2. **Bracketed stationary-root solver** using a coarse radial discovery grid followed by batched bisection.
 3. **Candidate convergence certification** across at least three centerline resolutions \(N,2N,4N\).
@@ -65,7 +65,7 @@ a sign change from \(G<0\) to \(G>0\) identifies a local radial minimum.
 
 The full three-dimensional knot field still uses the regularized midpoint Rosenhead kernel
 
-\[
+$$
 \boldsymbol\beta(\mathbf x)
 =
 \frac{\beta_0}{2}
@@ -76,11 +76,11 @@ The full three-dimensional knot field still uses the regularized midpoint Rosenh
 }{
 \left(\lVert\mathbf x-\mathbf x_{i+1/2}\rVert^2+\epsilon^2\right)^{3/2}
 }.
-\]
+$$
 
 Its analytic spatial derivative is computed from
 
-\[
+$$
 \frac{\partial}{\partial x_j}
 \left(
 \frac{r_k}{Q^{3/2}}
@@ -91,7 +91,7 @@ Its analytic spatial derivative is computed from
 \frac{3r_kr_j}{Q^{5/2}},
 \qquad
 Q=\lVert\mathbf r\rVert^2+\epsilon^2.
-\]
+$$
 
 Rankine and Lamb--Oseen remain one-dimensional comparison profiles only; they are not silently substituted into the full three-dimensional knot solver.
 
@@ -137,14 +137,14 @@ python run_all_checks.py --out-dir audit_out_native --no-auto-build --require-na
 
 The native release gate includes:
 
-\[
+$$
 \begin{aligned}
 &\text{field parity}<10^{-12},\\
 &\text{Jacobian parity}<10^{-10},\\
 &\text{analytic Jacobian finite-difference check}<10^{-7},\\
 &\text{external radial benchmark error}<10^{-10}.
 \end{aligned}
-\]
+$$
 
 ## 2. Candidate atlas for all four knots
 
@@ -187,11 +187,11 @@ python run_candidate_convergence.py --knots 4_1 5_2 --epsilon 0.0019 --point-cou
 
 Weak certification requires the candidate branch to occur at at least three resolutions and satisfy
 
-\[
+$$
 E_\rho<10^{-3},\qquad
 E_{R_F}<10^{-3},\qquad
 E_\beta<10^{-3}.
-\]
+$$
 
 Strong certification uses \(10^{-4}\).
 
@@ -199,9 +199,9 @@ Strong certification uses \(10^{-4}\).
 
 The primary v0.4 scan window is
 
-\[
+$$
 0.00180\leq\epsilon/r_c\leq0.00210.
-\]
+$$
 
 ```bat
 python run_bifurcation_atlas.py --epsilon-start 0.00180 --epsilon-stop 0.00210 --epsilon-step 0.000025 --centerline-points 8192 --stations 8 --angles 16 --no-auto-build --require-native --out-dir bifurcation_atlas
@@ -219,11 +219,11 @@ python run_scale_sweep.py --scales 0.5 1.0 2.0 4.0 --epsilon 0.0019 --centerline
 
 The relevant local/non-local geometry changes with
 
-\[
+$$
 \frac{D_K}{\epsilon}
 =
 \frac{\texttt{scale\_over\_rc}}{\epsilon/r_c}.
-\]
+$$
 
 ## 6. Symmetry audit
 

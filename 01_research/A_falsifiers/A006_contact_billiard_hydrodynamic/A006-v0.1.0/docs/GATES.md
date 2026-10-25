@@ -4,17 +4,17 @@ Alle gates zijn standaard blockers. `NOT_RUN` is geen `PASS`.
 
 ## H0 — Input, discretization, and source-scale integrity
 
-\[
+$$
 \frac{\max_i \ell_i}{\min_i \ell_i}\le1.05.
-\]
+$$
 
 Wanneer de bron een gerapporteerde lengte en diameter bevat, geldt bovendien
 
-\[
+$$
 \frac{|L_{\rm sampled}-L_{\rm source}|}{L_{\rm source}}\le5\times10^{-3},
 \qquad
 \frac{|2\Delta_{\rm proxy}-D_{\rm source}|}{D_{\rm source}}\le3\times10^{-2}.
-\]
+$$
 
 Voor een bron zonder zulke metadata worden deze twee subtests als niet van toepassing behandeld.
 
@@ -51,9 +51,9 @@ resolutie-extrapolatie en een veel strenger foutbudget.
 
 Voor minstens één full-kernel core ratio:
 
-\[
+$$
 \varepsilon_{\rm RE}\le0.25.
-\]
+$$
 
 ## H6 — Hamiltonian gradient and emergent tension
 
@@ -69,9 +69,9 @@ Voor minstens één full-kernel core ratio:
 
 De gezamenlijke H5/H6-passfractie over de full-kernel core sweep moet
 
-\[
+$$
 f_{\rm pass}\ge0.60
-\]
+$$
 
 zijn. Eén geselecteerde corewaarde is dus onvoldoende.
 

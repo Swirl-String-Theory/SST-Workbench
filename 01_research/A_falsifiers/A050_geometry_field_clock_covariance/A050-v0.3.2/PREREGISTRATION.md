@@ -45,11 +45,11 @@ The dynamically selected branch is analyzed over the full horizon. Samples below
 
 The phase uses \(\phi(t)=\operatorname{unwrap}(\arg z(t))\). Report both endpoint displacement and total path length:
 
-\[
+$$
 N_{\mathrm{net}}=\frac{|\phi(t_f)-\phi(t_0)|}{2\pi},
 \qquad
 N_{\mathrm{path}}=\frac{1}{2\pi}\sum_i |\Delta\phi_i|.
-\]
+$$
 
 At least 0.25 total path cycles are required for classification.
 
@@ -79,9 +79,9 @@ A locally coherent trajectory that is neither stationary, simple quadratic drift
 
 Angular rate means
 
-\[
+$$
 \omega=\frac{d\phi}{dt},
-\]
+$$
 
 in radians per dimensionless time unit. Cycle rate is \(f=\omega/(2\pi)\).
 

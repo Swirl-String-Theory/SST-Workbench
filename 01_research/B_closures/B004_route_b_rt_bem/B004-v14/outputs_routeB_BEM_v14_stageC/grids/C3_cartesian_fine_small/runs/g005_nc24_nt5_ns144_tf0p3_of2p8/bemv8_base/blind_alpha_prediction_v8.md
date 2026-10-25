@@ -6,11 +6,11 @@ This report is alpha-blind. It does not contain or compare against observed alph
 
 BEMv8 uses
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}
 =\frac12\left[N_{\rm soft}V_{\rm soft}L_{\rm long}(3_1)
 +\Delta F_{\rm pair}(3_1/0_1)\right].
-\]
+$$
 
 The large term uses restored longitudinal scale; the finite term uses direct pair subtraction.
 

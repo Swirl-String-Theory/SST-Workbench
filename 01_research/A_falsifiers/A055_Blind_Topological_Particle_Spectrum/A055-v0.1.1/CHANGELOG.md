@@ -31,9 +31,9 @@ Scientific/statistical corrections following the first run:
 
 The corrected historical reveal-only hypothesis remains
 
-\[
+$$
 u\leftrightarrow5_2,\qquad d\leftrightarrow6_1.
-\]
+$$
 
 ## v0.1.0 — superseded screening baseline
 

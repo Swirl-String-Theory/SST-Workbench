@@ -67,9 +67,9 @@ Explicit future falsification or convergence test.
 The analytic Frechet derivative agrees with finite differences at
 approximately
 
-\[
+$$
 10^{-10}
-\]
+$$
 
 relative error in the validated baseline.
 
@@ -95,9 +95,9 @@ approximately machine precision for the baseline observables.
 
 The frozen-geometry operator respects the expected sign structure under
 
-\[
+$$
 \Gamma\rightarrow-\Gamma.
-\]
+$$
 
 ---
 
@@ -107,7 +107,7 @@ The frozen-geometry operator respects the expected sign structure under
 
 For the isotropic finite-core model,
 
-\[
+$$
 E(+,+)
 =
 E(+,-)
@@ -115,13 +115,13 @@ E(+,-)
 E(-,+)
 =
 E(-,-).
-\]
+$$
 
 Equivalently,
 
-\[
+$$
 E_h=E_s=E_{hs}=0.
-\]
+$$
 
 ### Conclusion
 
@@ -150,21 +150,21 @@ The v0.1.0 null and implementation gates remained PASS.
 For the trefoil \(N=48\rightarrow64\), scalar energy already changed by
 only approximately
 
-\[
+$$
 1.22\times10^{-3},
-\]
+$$
 
 while the eigenspectrum remained poorly converged.
 
 ### Conclusion
 
-\[
+$$
 \boxed{
 \text{energy convergence}
 \not\Rightarrow
 \text{spectral convergence}
 }
-\]
+$$
 
 ---
 
@@ -186,9 +186,9 @@ SST normal-mode spectrum.
 
 Many modes exhibit
 
-\[
+$$
 |\mathcal C_n|\approx1.
-\]
+$$
 
 The circularity observable is retained, but convergence of
 \(\mathcal C_n\) alone does not establish convergence of \(\omega_n\).
@@ -203,9 +203,9 @@ The analytic torus trefoil is not a solved relative equilibrium.
 
 Therefore
 
-\[
+$$
 \sigma_n\ne0
-\]
+$$
 
 cannot yet be interpreted as a physical instability.
 
@@ -219,15 +219,15 @@ cannot yet be interpreted as a physical instability.
 
 The self-match gives approximately
 
-\[
+$$
 M_{\rm self}=1
-\]
+$$
 
 and
 
-\[
+$$
 S_{\rm fp}=1.
-\]
+$$
 
 ### Conclusion
 
@@ -268,11 +268,11 @@ candidate bottlenecks.
 
 Define
 
-\[
+$$
 \eta_a
 =
 \frac{\max_j\Delta s_j}{a}.
-\]
+$$
 
 Measured values:
 
@@ -287,9 +287,9 @@ Measured values:
 
 None satisfy
 
-\[
+$$
 \eta_a\le0.5.
-\]
+$$
 
 ---
 
@@ -300,9 +300,9 @@ None satisfy
 The observed approximate \(1/N\) scaling places the first useful
 core-resolved campaign around
 
-\[
+$$
 N\sim256.
-\]
+$$
 
 This is a release-planning estimate, not proof of asymptotic convergence.
 
@@ -314,13 +314,13 @@ This is a release-planning estimate, not proof of asymptotic convergence.
 
 For a mode with dominant Fourier index \(m_n\), define
 
-\[
+$$
 \boxed{
 \mathrm{PPW}_n
 =
 \frac{N}{m_n}
 }
-\]
+$$
 
 where PPW is the number of sample points per dominant wavelength.
 
@@ -339,11 +339,11 @@ eigenfrequency remains affected by numerical dispersion.
 
 Several branches show approximately
 
-\[
+$$
 M_{\rm overlap}\gtrsim0.9,
 \qquad
 S_{\rm fp}\gtrsim0.99,
-\]
+$$
 
 with small changes in circularity, while frequency drift remains tens
 of percent.
@@ -361,9 +361,9 @@ not evidence that circularity itself is numerically ill-defined.
 
 Many high-circularity branches have
 
-\[
+$$
 \kappa_n\approx1.
-\]
+$$
 
 Strong non-normal sensitivity therefore does not explain the dominant
 frequency drift of those branches.
@@ -377,9 +377,9 @@ frequency drift of those branches.
 At \(N=96\), many distinct high-frequency modes were assigned the same
 maximum allowed Fourier index
 
-\[
+$$
 m=24.
-\]
+$$
 
 ### Conclusion
 
@@ -387,13 +387,13 @@ The fixed fingerprint ceiling limits high-frequency mode identity.
 
 v0.1.3 removes the ceiling and uses
 
-\[
+$$
 m_{\max}
 =
 \left\lfloor
 \frac{N}{2}
 \right\rfloor-1.
-\]
+$$
 
 ---
 
@@ -406,27 +406,27 @@ m_{\max}
 A mode is eligible for the strongest numerical convergence class only
 when both
 
-\[
+$$
 \boxed{
 \eta_a\le0.5
 }
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \mathrm{PPW}\ge12
 }
-\]
+$$
 
 are satisfied.
 
 Branches with
 
-\[
+$$
 8\le\mathrm{PPW}<12
-\]
+$$
 
 remain diagnostic.
 
@@ -441,11 +441,11 @@ mathematical theorems.
 
 The principal high-resolution ladder is
 
-\[
+$$
 \boxed{
 N=256,\;320,\;384
 }
-\]
+$$
 
 because it simultaneously targets:
 
@@ -461,15 +461,15 @@ because it simultaneously targets:
 
 The strongest future convergence claim should track one mode through
 
-\[
+$$
 N_1\rightarrow N_2\rightarrow N_3
-\]
+$$
 
 rather than relying on a single pairwise match.
 
 The desired observables are
 
-\[
+$$
 \omega_n(N),
 \qquad
 \mathcal C_n(N),
@@ -477,7 +477,7 @@ The desired observables are
 P_m(N),
 \qquad
 M_n(N_i,N_j).
-\]
+$$
 
 ---
 
@@ -488,13 +488,13 @@ M_n(N_i,N_j).
 Even if the analytic torus-trefoil spectrum eventually converges
 numerically,
 
-\[
+$$
 \boxed{
 \text{converged frozen mode}
 \ne
 \text{physical SST normal mode}
 }
-\]
+$$
 
 until a true relative-equilibrium/co-moving operator exists.
 
@@ -548,7 +548,7 @@ v0.2.0 is reserved for physical-geometry/equilibrium work:
 8. four-state \((h,s)\) mode campaign;
 9. physical observables
 
-\[
+$$
 \omega_n,
 \qquad
 \sigma_n,
@@ -556,7 +556,7 @@ v0.2.0 is reserved for physical-geometry/equilibrium work:
 \mathcal C_n,
 \qquad
 J_n=\omega_n\mathcal C_n;
-\]
+$$
 
 10. \(Z_2\times Z_2\) decomposition of physical mode observables.
 

@@ -8,17 +8,17 @@ One case is a phase field \(\varphi(t,s)\) sampled on a monotone rectangular gri
 
 For interior time indices,
 
-\[
+$$
 \varphi_{tt}(t_i,s_j)\approx
 \frac{\varphi_{i+1,j}-2\varphi_{i,j}+\varphi_{i-1,j}}{\Delta t^2}.
-\]
+$$
 
 For periodic carriers,
 
-\[
+$$
 \varphi_{ss}(t_i,s_j)\approx
 \frac{\varphi_{i,j+1}-2\varphi_{i,j}+\varphi_{i,j-1}}{\Delta s^2},
-\]
+$$
 
 with periodic indexing. Open carriers exclude the two spatial endpoints.
 

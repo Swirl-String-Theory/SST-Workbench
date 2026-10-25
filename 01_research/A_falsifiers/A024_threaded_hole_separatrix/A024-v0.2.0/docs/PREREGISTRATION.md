@@ -36,9 +36,9 @@ A failed geometry is excluded before candidate randomization.
 
 For each carrier, take the median over its tested active conditions of
 
-\[
+$$
 \Delta p = (p_c-p_s)_{\rm active}-(p_c-p_s)_{\rm null}.
-\]
+$$
 
 Negative is favorable. Apply an exact one-sided sign test across nonzero carrier medians at alpha=0.05.
 

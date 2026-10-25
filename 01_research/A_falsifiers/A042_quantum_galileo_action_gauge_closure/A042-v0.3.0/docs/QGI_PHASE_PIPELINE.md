@@ -5,14 +5,14 @@ nonlinear fringe fit.
 
 v0.2.0 implements the published structure:
 
-\[
+$$
 P(t)
 =
 P_{\rm mean}(t)
 +\frac12 V(t)\cos\phi(t),
 \qquad
 \phi(t)=c_0+c_1t+c_2t^2+c_3t^3.
-\]
+$$
 
 For raw population data:
 
@@ -27,11 +27,11 @@ For raw population data:
 
 The final specific action is
 
-\[
+$$
 \frac{h}{m}
 =
 \frac{\pi g_{\rm eff}^2}{12|c_3|}.
-\]
+$$
 
 No \(m\), \(h\), or \(\hbar\) is passed to this calculation.
 

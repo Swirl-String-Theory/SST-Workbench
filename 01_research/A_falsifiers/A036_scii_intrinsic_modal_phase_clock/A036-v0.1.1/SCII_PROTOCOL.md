@@ -9,17 +9,17 @@ SC-II does **not** require full-shape recurrence.
 The SC-II hypothesis is that a vortex structure can carry an internally generated,
 monotonically advancing modal phase
 
-\[
+$$
 \phi_{\rm sc}(t),\qquad \Omega_{\rm sc}=\dot\phi_{\rm sc},
-\]
+$$
 
 while the slow mean geometry and modal envelope may evolve.
 
 Operational decomposition:
 
-\[
+$$
 X(s,t)=X_{\rm slow}(s,t)+A(t)\Phi(s,\phi_{\rm sc}(t))+\epsilon(s,t).
-\]
+$$
 
 The primary observable is the phase of a **frozen early-discovery POD coordinate**.
 The mode is learned before the holdout is scored.
@@ -33,11 +33,11 @@ For each frozen modal coordinate `a_k(t)`:
 3. unwrap and orient the phase so the net phase direction is positive;
 4. score only the post-discovery holdout.
 
-\[
+$$
 z_k(t)=a_k^{\rm detrended}(t)+i\,\mathcal H[a_k^{\rm detrended}](t),
 \qquad
 \phi_k(t)=\operatorname{unwrap}\arg z_k(t).
-\]
+$$
 
 The primary candidate must be in the **natural** (`probe_arm=0`) channel.
 The odd ±probe channel is retained only as a diagnostic/null and can never by

@@ -2,11 +2,11 @@
 
 ## Requested parameter domain
 
-\[
+$$
 0.06125\le R_b/R_{\rm hole}\le 8,
 \qquad
 -8\le \Gamma_h/\Gamma_0\le 8.
-\]
+$$
 
 The default full grid contains 42 unique radius ratios and 65 circulation ratios, for 2730 combinations.
 

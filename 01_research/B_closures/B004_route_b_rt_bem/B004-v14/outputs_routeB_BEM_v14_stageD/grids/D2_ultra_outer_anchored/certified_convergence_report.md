@@ -6,12 +6,12 @@ BEMv14 tests whether the BEMv13 certified-length budget remains stable under mes
 
 The tested budget is
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}
 =
 \frac12\left[N_{\rm soft}V_{\rm soft}L_{\rm cert}
 +\Delta F_{\rm pair}/\mathcal N_q\right].
-\]
+$$
 
 ## Selected normalizer
 

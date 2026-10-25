@@ -4,11 +4,11 @@
 
 The numerical baseline is an incompressible inviscid regularized filament model,
 
-\[
+$$
 \dot{\mathbf X}(s_i)=\frac{\Gamma}{4\pi}\sum_j
 \frac{\Delta\mathbf X_j\times(\mathbf X_i-\mathbf X_{j+1/2})}
 {(\lVert\mathbf X_i-\mathbf X_{j+1/2}\rVert^2+a^2)^{3/2}},
-\]
+$$
 
 with adjacent singular segments omitted. This is a falsification surrogate, not a proof of a finite-core SST closure.
 
@@ -20,9 +20,9 @@ For each azimuthal/loop index `m`, four normal/binormal sine/cosine perturbation
 
 From the branch dispersion,
 
-\[
+$$
  v_g=\frac{d\omega}{dk},\quad \tau=L/|v_g|,\quad \Theta=\omega\tau.
-\]
+$$
 
 No target stability metric enters these quantities.
 
@@ -38,15 +38,15 @@ Source filenames are removed before prediction/measurement. `private_reveal/reve
 
 The primary test is dimensionless so that the phase `omega*tau` is not manufactured by an arbitrary physical scale. If a later physical mapping is used, the canonical scales are
 
-\[
+$$
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}=1.09384563\times10^6\ \mathrm{m\,s^{-1}},\qquad
 r_c=1.40897017\times10^{-15}\ \mathrm{m},
-\]
+$$
 
 and
 
-\[
+$$
 \Gamma_{\rm SST}=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}.
-\]
+$$
 
 A physical-unit extension must preserve the dimensionless phase prediction.

@@ -21,7 +21,7 @@ The expensive kernels are implemented in `cpp/native.cpp` and exposed as
 
 For component signs \(\sigma_i\in\{-1,+1\}\), the native code evaluates
 
-\[
+$$
 \mathbf u(\mathbf x)
 =
 \sum_i \frac{\sigma_i}{4\pi}
@@ -31,7 +31,7 @@ For component signs \(\sigma_i\in\{-1,+1\}\), the native code evaluates
 }{
 \left(\lVert\mathbf x-\mathbf m_{ik}\rVert^2+\epsilon^2\right)^{3/2}
 }.
-\]
+$$
 
 The Python/NumPy implementation remains an independent reference backend, not merely a wrapper around C++.
 
@@ -100,10 +100,10 @@ The top-level `run_all.cmd` and `run_all.ps1` require native execution by defaul
 
 The reconstruction convention is
 
-\[
+$$
 \mathbf r(t)=\frac{\mathbf A_0}{2}+
 \sum_{n\ge 1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 The suite checks closure through the third derivative, declared versus integrated length, coefficient power, spectral entropy and Fourier-tail sensitivity.
 
@@ -119,9 +119,9 @@ Per component:
 
 Gilbert uses diameter normalization \(D=1\). Therefore
 
-\[
+$$
 \operatorname{Rop}_{\rm standard}=\frac{L}{D/2}=2\frac{L}{D}.
-\]
+$$
 
 ### Topology and contact structure
 
@@ -145,10 +145,10 @@ For every one of the \(2^m\) circulation assignments of an \(m\)-component link:
 
 The relative-equilibrium score removes tangential reparametrization and tests the normal mismatch against
 
-\[
+$$
 \mathbf u_{\rm rigid}(\mathbf r)=
 \mathbf U+\boldsymbol\Omega\times(\mathbf r-\mathbf r_0).
-\]
+$$
 
 ### Thickness admissibility (G9)
 

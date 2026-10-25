@@ -10,27 +10,27 @@ Valideer de Hopf-rekenketen op een exact bekende configuratie met \(|Q_H|=1\), o
 
 ## Analytische configuratie
 
-\[
+$$
 z_1=\frac{2(x+iy)}{1+r^2},
 \qquad
 z_2=\frac{2z+i(r^2-1)}{1+r^2},
 \qquad
 r^2=x^2+y^2+z^2.
-\]
+$$
 
 Dan:
 
-\[
+$$
 |z_1|^2+|z_2|^2=1.
-\]
+$$
 
 Neem:
 
-\[
+$$
 \Psi_H=\begin{pmatrix}z_1\\z_2\end{pmatrix},
 \qquad
 \mathbf n_H=\Psi_H^\dagger\boldsymbol\sigma\Psi_H.
-\]
+$$
 
 ## Werkpakketten
 
@@ -44,17 +44,17 @@ Neem:
 
 ## Residuals
 
-\[
+$$
 \Delta_Q(N)=|Q_H(N)-\operatorname{round}Q_H(N)|,
-\]
+$$
 
-\[
+$$
 \Delta_{\rm gauge}=|Q_H[e^{i\chi}\Psi]-Q_H[\Psi]|,
-\]
+$$
 
-\[
+$$
 \Delta_{\rm link}=|Q_H-Lk|.
-\]
+$$
 
 ## Passcriteria
 

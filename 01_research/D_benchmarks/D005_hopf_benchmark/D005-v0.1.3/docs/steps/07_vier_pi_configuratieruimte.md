@@ -6,11 +6,11 @@ Bepaal of een fysieke \(2\pi\)-rotatie van de volledige SST-configuratie een nie
 
 Een lokale spinor voldoet algebraïsch aan:
 
-\[
+$$
 2\pi:\Psi\mapsto-\Psi,
 \qquad
 4\pi:\Psi\mapsto\Psi.
-\]
+$$
 
 Voor een fysiek vortexobject moet dit ook op configuratieruimteniveau worden bewezen.
 
@@ -20,7 +20,7 @@ Voor een fysiek vortexobject moet dit ook op configuratieruimteniveau worden bew
 
 ## Configuratieruimte
 
-\[
+$$
 \mathcal C_{\rm SST}
 =
 \frac{
@@ -28,30 +28,30 @@ Voor een fysiek vortexobject moet dit ook op configuratieruimteniveau worden bew
 }{
 \{\text{gauge, reparametrisatie en redundantie}\}
 }.
-\]
+$$
 
 Onderzoek:
 
-\[
+$$
 \pi_1(\mathcal C_{\rm SST}).
-\]
+$$
 
 ## Finkelstein–Rubinstein-route
 
 Een fermionische sector vereist typisch:
 
-\[
+$$
 \pi_1(\mathcal C_{\rm SST})\supseteq\mathbb Z_2.
-\]
+$$
 
 ## Werkpakketten
 
 1. Definieer de rotatieactie op centerline, frame, orderparameter, fase en boundary conditions.
 2. Scheid gaugeveranderingen van fysieke rotaties.
 3. Construeer:
-   \[
+   $$
    \gamma_{2\pi}(t),\qquad\gamma_{4\pi}(t).
-   \]
+   $$
 4. Zoek toegestane homotopieën naar de triviale lus.
 5. Onderzoek later ook exchange van twee identieke objecten.
 6. Bereken mogelijke guards:
@@ -63,7 +63,7 @@ Een fermionische sector vereist typisch:
 
 ## H9 passcriterium
 
-\[
+$$
 [\gamma_{2\pi}]\ne0,
 \qquad
 2[\gamma_{2\pi}]
@@ -71,7 +71,7 @@ Een fermionische sector vereist typisch:
 [\gamma_{4\pi}]
 =
 0
-\]
+$$
 
 in de relevante fundamentele groep, of een equivalent bewezen \(\mathbb Z_2\)-criterium.
 

@@ -8,44 +8,44 @@ not require inserting a physical core radius into the numerical BEM score.
 
 For physical interpretation, use the following scale separation:
 
-\[
+$$
 r_c \equiv R_{\rm horn}
-\]
+$$
 
 where \(R_{\rm horn}\) is the horn-torus / return-flow circulation radius.  Do
 not silently identify \(r_c\) with the local ideal-tube radius.  Instead write
 
-\[
+$$
 a_{\rm tube}=\frac{R_{\rm horn}}{\chi_h}=\frac{r_c}{\chi_h},
 \qquad
 \ell_K^{\rm phys}=2a_{\rm tube}L_{\rm cert}.
-\]
+$$
 
 Thus the dimensionless Route-B normalizer remains
 
-\[
+$$
 \mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2},
-\]
+$$
 
 while the physical reconstruction uses
 
-\[
+$$
 L_{\rm phys}^{2}
 =
 4a_{\rm tube}^{2}L_{\rm cert}^{2}
 =
 4\frac{r_c^2}{\chi_h^2}L_{\rm cert}^{2}.
-\]
+$$
 
 Only if \(\chi_h=\chi_h(K)\) is later made topology-dependent should a separate
 horn-effective scan be introduced,
 
-\[
+$$
 \mathcal N_{\rm eff}
 =
 M_{\max}
 \left(\frac{L_{\rm cert}}{\chi_h(K)}\right)^2 .
-\]
+$$
 
 Default BEM mode remains `certified`: do not replace \(L_{\rm cert}\) by a
 horn-effective scale in BEMv1--BEMv19 results unless an explicit
@@ -79,25 +79,25 @@ when applicable.
 
 For each knot \(K\), BEMv4 computes generalized R--T impedance eigenvalues:
 
-\[
+$$
 \Lambda_R v=\lambda \Lambda_T v.
-\]
+$$
 
 The raw spectral action at cutoff \(M\) is
 
-\[
+$$
 S_M(K)=-\sum_{j=1}^{M}\log \lambda_j(K).
-\]
+$$
 
 Using the unknot as vacuum subtraction,
 
-\[
+$$
 \Delta S_M(K/0_1)=S_M(K)-S_M(0_1).
-\]
+$$
 
 The cutoff tail is fit to
 
-\[
+$$
 \Delta S_M
 =
 S_\infty
@@ -107,15 +107,15 @@ c_1M^{-1/2}
 c_2M^{-1}
 +
 c_3M^{-3/2}.
-\]
+$$
 
 The blind Route-B working prediction is then printed as
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}
 =
 \frac12 S_\infty.
-\]
+$$
 
 No CODATA alpha appears in the script or output.
 

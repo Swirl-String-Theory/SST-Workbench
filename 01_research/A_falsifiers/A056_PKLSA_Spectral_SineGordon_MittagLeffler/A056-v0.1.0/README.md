@@ -13,42 +13,42 @@ The spectral theorem is used only as a mathematically valid analysis framework f
 
 From image 1, A056 uses the two items that have a direct operational mapping to PKLSA data:
 
-\[
+$$
 A=\int_{\sigma(A)}\lambda\,dE_\lambda
-\]
+$$
 
 as the spectral/POD decomposition framework, and
 
-\[
+$$
 \varphi_{tt}-\varphi_{xx}+\sin\varphi=0
-\]
+$$
 
 as the prototype nonlinear phase equation. The implementation fits the dimensional generalized form
 
-\[
+$$
 \varphi_{tt}-c_\varphi^2\varphi_{ss}+\omega_0^2\sin\varphi=0,
-\]
+$$
 
 where \(s\) is arclength, \([c_\varphi]=\mathrm{m\,s^{-1}}\), and \([\omega_0]=\mathrm{s^{-1}}\) when SI coordinates are supplied.
 
 From image 2, A056 uses the generalized Mittag-Leffler function
 
-\[
+$$
 E_{\alpha,\beta}(z)=\sum_{k=0}^{\infty}\frac{z^k}{\Gamma(\alpha k+\beta)}.
-\]
+$$
 
 The primary memory model is
 
-\[
+$$
 R_{\mathrm{ML}}(t)=E_{\alpha,1}\!\left[-\left(\frac{t}{\tau}\right)^\alpha\right],
 \qquad 0<\alpha\le 1.
-\]
+$$
 
 The limit \(\alpha\to1\) recovers ordinary exponential relaxation:
 
-\[
+$$
 E_{1,1}(-t/\tau)=e^{-t/\tau}.
-\]
+$$
 
 The Laplace, Cauchy–Riemann, Pell/Fermat and contracted-Bianchi rows from image 1 are deliberately **not** forced into v0.1.0 because no unique PKLSA observable or admissible closure follows from those equations alone.
 
@@ -56,30 +56,30 @@ The Laplace, Cauchy–Riemann, Pell/Fermat and contracted-Bianchi rows from imag
 
 The phase lane compares
 
-\[
+$$
 \begin{aligned}
 H_{\rm W}:&\quad \varphi_{tt}=a\varphi_{ss},\\
 H_{\rm KG}:&\quad \varphi_{tt}=a\varphi_{ss}-b\varphi,\\
 H_{\rm D}:&\quad \varphi_{tt}=a\varphi_{ss}-b\varphi-c\varphi^3,\\
 H_{\rm SG}:&\quad \varphi_{tt}=a\varphi_{ss}-b\sin\varphi.
 \end{aligned}
-\]
+$$
 
 For Sine–Gordon closure, A056 requires \(a>0\) and \(b>0\), plus predictive superiority on held-out time blocks.
 
 The ringdown lane compares
 
-\[
+$$
 R_{\exp}(t)=e^{-t/\tau},
-\]
+$$
 
-\[
+$$
 R_{\rm SE}(t)=e^{-(t/\tau)^\beta},
-\]
+$$
 
-\[
+$$
 R_{\rm bi}(t)=w e^{-t/\tau_1}+(1-w)e^{-t/\tau_2},
-\]
+$$
 
 and \(R_{\rm ML}(t)\) above. A Mittag-Leffler claim is rejected if a finite ordinary modal/relaxation model predicts equally well or better.
 

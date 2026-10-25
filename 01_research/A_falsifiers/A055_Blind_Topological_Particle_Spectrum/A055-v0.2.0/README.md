@@ -28,9 +28,9 @@ historical 5_2 / 6_1 + SM/Higgs mass-pattern reveal
 
 The historical VAM/SST quark hypothesis remains reveal-only:
 
-\[
+$$
 u\leftrightarrow5_2,\qquad d\leftrightarrow6_1.
-\]
+$$
 
 ## Critical link-sector boundary
 
@@ -46,10 +46,10 @@ This is deliberate fail-closed behavior. A future link-dynamics release must pre
 
 For each independent E011 knot provider:
 
-\[
+$$
 D_{\rm eff,raw}=\frac{L_{\rm raw}}{\mathcal R_{\rm E011}},\qquad
 \mathbf X'=\frac{\mathbf X}{D_{\rm eff,raw}}.
-\]
+$$
 
 Thus \(D_{\rm eff}=1\) and source coordinate conventions cannot masquerade as physical scale differences.
 
@@ -57,9 +57,9 @@ Thus \(D_{\rm eff}=1\) and source coordinate conventions cannot masquerade as ph
 
 For every preregistered Kelvin mode \(m\), the finest-resolution C006 positive-frequency root is tracked backward through the resolution ladder using
 
-\[
+$$
 C_{ij}=\frac12 d_\lambda+\frac12(1-O_v),
-\]
+$$
 
 with normalized eigenvalue distance \(d_\lambda\) and complex eigenvector overlap \(O_v\).
 

@@ -8,11 +8,11 @@ This is a versioned *extension* of `RoundFolded_Twist_Knot_Family_v0.2.1_TIKZ`, 
 
 For projected polar coordinates \((r,\theta)\) about the bounding-box center \(\mathbf c\), apply
 
-\[
+$$
   F_{\alpha,s}(r,\theta,z)=
   \bigl(s[R+\alpha(r-R)]\cos\theta,\;
         s[R+\alpha(r-R)]\sin\theta,\;sz\bigr),\quad 0<\alpha\le1,\;s>0,
-\]
+$$
 
 with the xy center re-added before scaling, and \(R\) the median source radius. This is an injective ambient map on the annulus occupied by the continuous source curve, provided the whole radial image stays positive. In combination with a continuous change of \(\alpha\), it gives an explicit ambient isotopy of the *smooth source geometry*, not a proof of topology preservation for the independently resampled straight-line polygonal export.
 

@@ -163,41 +163,41 @@ Added the next Step-2 test requested after the hollow-core falsification:
 
 The model removes positive cavitation work and replaces it with internal kinetic energy of a constant-density Rankine tube:
 
-\[
+$$
  v_\theta(s)=\frac{\Gamma_0}{2\pi a_0^2}s,\qquad 0\le s\le a_0.
-\]
+$$
 
 The toroidal internal energy is
 
-\[
+$$
  E_{\rm int}=\frac{\rho_{\rm sat}\Gamma_0^2 R}{8},
 \qquad
  \Xi_{\rm int}=\frac{\lambda}{8},
 \qquad
  \chi_{\rm int}=\frac{\pi^2\lambda}{2}.
-\]
+$$
 
 The first asymptotic total test uses the classic solid-core + constant-volume thin-ring constant
 
-\[
+$$
  \alpha_E=\frac74,
-\]
+$$
 
 with
 
-\[
+$$
  E\simeq\frac12\rho\Gamma^2R
  \left[\log\left(\frac{8R}{a}\right)-\alpha_E\right],
-\]
+$$
 
 or dimensionlessly
 
-\[
+$$
  \Xi_E^{\rm solid}(\lambda)
  =\frac12\lambda\,[\log(8\lambda)-\alpha_E],
  \qquad
  \chi_E=4\pi^2\Xi_E.
-\]
+$$
 
 Important guard: this is a thin-ring asymptotic formula.  Evaluating it at the horn threshold \(\lambda=1\) is a diagnostic extrapolation, not a finite-core derivation.
 

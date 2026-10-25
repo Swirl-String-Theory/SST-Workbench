@@ -4,9 +4,9 @@ The Swirl Clock is a measured set of finite-core eigenmode and transport observa
 
 For
 
-\[
+$$
 \lambda=\Re\lambda+i\Im\lambda,
-\]
+$$
 
 v0.1.2 exports:
 
@@ -36,15 +36,15 @@ v0.1.2 exports:
 
 The packet envelope can return at the predicted group delay even if its absolute carrier phase is uncertain.  Over a long loop,
 
-\[
+$$
 \delta\phi_{disp}\sim \sigma_\omega\tau_{ret}.
-\]
+$$
 
 Therefore:
 
-\[
+$$
 \text{delay valid}\centernot\Rightarrow\text{phase valid}.
-\]
+$$
 
 This separation is a core v0.1.2 integrity rule.
 
@@ -52,8 +52,8 @@ This separation is a core v0.1.2 integrity rule.
 
 For the inviscid mechanism the clean target remains
 
-\[
+$$
 \Re\lambda\rightarrow0,\qquad |\Im\lambda|>0,
-\]
+$$
 
 not arbitrary dissipative decay.

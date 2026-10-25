@@ -6,29 +6,29 @@ For dimensionless, smooth trefoil-tube initial data evolved by the 3-D incompres
 
 ## Primary observable
 
-\[
+$$
 B(t)=\int_0^t \|\boldsymbol\omega(s)\|_{L^\infty}\,ds,
 \qquad
 M_\omega(t)=\|\boldsymbol\omega(t)\|_{L^\infty}.
-\]
+$$
 
 The screening fit uses the late-window affine proxy
 
-\[
+$$
 M_\omega(t)^{-1}\approx a t+b,
 \qquad
 T_*=-b/a,
-\]
+$$
 
 only when \(a<0\). This is a **heuristic detector**, not a sufficient mathematical criterion for blow-up.
 
 ## Frozen v0.1.0 numerical validity gates
 
-\[
+$$
 \frac{|E(T)-E(0)|}{|E(0)|}<5\times10^{-3},
 \qquad
 \max_t \|\nabla\cdot\mathbf u\|_{\rm RMS}<10^{-10}.
-\]
+$$
 
 A single-run candidate additionally requires \(R^2\ge0.98\) and \(T<T_*\le1.5T\). Global escalation requires at least three numerically valid candidates and relative spread of their estimated \(T_*\) below 10%.
 

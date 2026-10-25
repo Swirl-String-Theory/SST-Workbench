@@ -4,42 +4,42 @@
 
 For each vortex channel,
 
-\[
+$$
 \frac{d\mathbf X}{dt}=\mathbf u_{\rm BS}[\mathbf X],
-\]
+$$
 
 with regularised Biot--Savart velocity. Define
 
-\[
+$$
 \Omega_\Gamma=\frac{|\Gamma|}{4\pi D^2},
 \qquad
 \hat t=\Omega_\Gamma t.
-\]
+$$
 
 Because tangential centerline velocity only relabels material markers for the geometric filament model, v0.5 evolves
 
-\[
+$$
 \frac{d\mathbf X}{d\hat t}
 =\frac{\mathbf u_\perp}{\Omega_\Gamma},
 \qquad
 \mathbf u_\perp=\mathbf u-(\mathbf u\cdot\mathbf t)\mathbf t.
-\]
+$$
 
 ## 2. Relative periodic orbit
 
 A true RPO must satisfy
 
-\[
+$$
 \phi_T(\mathbf X_0)=g\mathbf X_0,
 \qquad g\in SE(3),
-\]
+$$
 
 up to one common cyclic relabelling of both closed filaments. The recurrence metric is
 
-\[
+$$
 \epsilon_{\rm RPO}
 =\frac{\operatorname{RMS}(g^{-1}\phi_T(\mathbf X_0)-\mathbf X_0)}{D}.
-\]
+$$
 
 The same fixed group action must approximately map the endpoint vector field back to the initial one.
 
@@ -47,9 +47,9 @@ The same fixed group action must approximately map the endpoint vector field bac
 
 For a closed curve \(\gamma:S^1\to\mathbb R^3\),
 
-\[
+$$
 \gamma(s)\mapsto\gamma(s+s_0)
-\]
+$$
 
 changes the parameter origin but not the embedded curve. Hence an independent constant longitudinal offset of an entire closed axisymmetric filament cannot be a new physical state coordinate. Finite polygons are not exactly invariant under fractional interpolation, so v0.5 checks that the induced discrepancy decreases with resolution.
 
@@ -57,23 +57,23 @@ changes the parameter origin but not the embedded curve. Hence an independent co
 
 The period is divided into \(M\) segments. Around seed nodes \(\mathbf X_j^{(0)}\), corrections are represented as
 
-\[
+$$
 \mathbf X_j=\mathbf X_j^{(0)}+D\mathbf B_j\mathbf a_j,
-\]
+$$
 
 where \(\mathbf B_j\) contains preregistered transverse Fourier/Kelvin shape modes.
 
 For internal segments,
 
-\[
+$$
 \mathbf d_j=\phi_{T/M}(\mathbf X_j)-\mathbf X_{j+1}.
-\]
+$$
 
 For the closing segment,
 
-\[
+$$
 \mathbf d_{M-1}=g^{-1}\phi_{T/M}(\mathbf X_{M-1})-\mathbf X_0.
-\]
+$$
 
 The nonlinear residual uses projections of these defects onto the correction bases plus one phase condition.
 
@@ -81,17 +81,17 @@ The nonlinear residual uses projections of these defects onto the correction bas
 
 At Newton iterate \(\mathbf z_k\),
 
-\[
+$$
 \mathbf J_F(\mathbf z_k)\delta\mathbf z=-\mathbf F(\mathbf z_k).
-\]
+$$
 
 The Jacobian is never explicitly assembled. Instead,
 
-\[
+$$
 \mathbf J_F\mathbf v
 \approx
 \frac{\mathbf F(\mathbf z+h\mathbf v)-\mathbf F(\mathbf z)}{h}.
-\]
+$$
 
 Restarted GMRES solves the Newton correction equation. The line search minimizes a merit function containing both projected residual and full-state shooting defect.
 
@@ -99,18 +99,18 @@ Restarted GMRES solves the Newton correction equation. The line search minimizes
 
 Only after a confirmed RPO does v0.5 evaluate
 
-\[
+$$
 \mathbf M
 =D\!\left(g^{-1}\circ\phi_T\right)_{\mathbf X_0}
-\]
+$$
 
 by central finite differences of the complete nonlinear time-\(T\) return map. This is distinct from v0.3's frozen Jacobian exponential.
 
 The time tangent should satisfy approximately
 
-\[
+$$
 \mathbf M\mathbf F(\mathbf X_0)\approx\mathbf F(\mathbf X_0),
-\]
+$$
 
 corresponding to a neutral Floquet multiplier near unity.
 

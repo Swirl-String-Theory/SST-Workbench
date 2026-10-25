@@ -6,9 +6,9 @@ Source: robot-executed sloshing archive (Zenodo DOI 10.5281/zenodo.20039757). Ti
 
 Discrete closed-loop-free conditional predictor:
 
-\[
+$$
 \hat\eta_{n+1}=A\hat\eta_n+B\hat\eta_{n-1}+C(\Delta t)^2a_n.
-\]
+$$
 
 For each anchor `n0`, only `eta[n0-1]` and `eta[n0]` initialize the prediction, with the future measured/commanded forcing `a[n]` treated as **known exogenous input**. The recursion must not read `eta[n0+1:]`. Time in seconds; A, B, C are dimensionless.
 

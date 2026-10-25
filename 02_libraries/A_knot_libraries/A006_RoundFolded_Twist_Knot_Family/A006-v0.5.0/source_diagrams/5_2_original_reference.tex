@@ -1,0 +1,52 @@
+% Source control vertices transcribed verbatim from the user's TikZ message.
+% This file preserves the original Hobby path; separate Python source
+% uses periodic cubic splines and changes P10 y by +0.07 to regularize
+% its coincidence with P3. Do not interpret this reference drawing as a
+% certified KPC 3D model or transfer its crossing IDs without runtime audit.
+\documentclass[tikz,border=6pt]{standalone}
+% ------- TikZ Guide Lines -------
+\newcommand{\SSTGuidesPoints}[2]{% #1=basename (e.g. P), #2=last index
+  \ifsstguides
+    \foreach \i in {1,...,#2}{
+      \fill[blue] (#1\i) circle (1.2pt);
+      \node[blue,font=\scriptsize,above] at (#1\i) {\i};
+    }
+    \draw[gray!40, dashed]
+    \foreach \i [remember=\i as \lasti (initially 1)] in {2,...,#2,1} { (#1\lasti)--(#1\i) };
+  \fi
+}
+% ------- TikZ Guide Lines -------
+
+\usepackage{tikz}
+\usetikzlibrary{hobby,knots}
+\usetikzlibrary{decorations.markings}
+
+\begin{document}
+\begin{tikzpicture}[use Hobby shortcut]
+\tikzset{knot diagram/every strand/.append style={draw=black}}
+\coordinate (P1) at (2, -1.50);
+\coordinate (P2) at (1.50, 1.25);
+\coordinate (P3) at (-1.75, 1.50);
+\coordinate (P4) at (-1.25, -1.50);
+\coordinate (P5) at (0.50, -2);
+\coordinate (P6) at (-1.25, -2.25);
+\coordinate (P7) at (-2, -1.50);
+\coordinate (P8) at (-1.50, 1.25);
+\coordinate (P9) at (1.75, 1.50);
+\coordinate (P10) at (1.25, -1.50);
+\coordinate (P11) at (-0.50, -2);
+\coordinate (P12) at (1.25, -2.25);
+
+\begin{knot}[
+    consider self intersections,
+    clip width=5pt, clip radius=3pt,
+    ignore endpoint intersections=false,
+    flip crossing/.list={2,4,6,8,10,12,14,16,18},
+    % ----draft mode=crossings % uncomment to see numbers
+]
+\strand
+([closed] P1)..(P2)..(P3)..(P4)..(P5)..(P6)..(P7)..(P8)..(P9)..(P10)..(P11)..(P12);
+\end{knot}
+\SSTGuidesPoints{P}{12}
+\end{tikzpicture}
+\end{document}

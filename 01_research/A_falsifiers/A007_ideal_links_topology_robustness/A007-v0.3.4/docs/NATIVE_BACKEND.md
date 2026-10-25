@@ -29,9 +29,9 @@ Each polygon component is assigned cumulative arclength coordinates.  For self i
 minimal cyclic arclength between an evaluation vertex/segment midpoint and a source-segment midpoint
 is used.  The interaction is omitted when
 
-\[
+$$
 \Delta s_{\rm cyc}\le s_{\rm excl}.
-\]
+$$
 
 This keeps the physical exclusion window fixed as N changes.  The QM presets specify the exclusion in
 units of the Gilbert diameter D and convert to absolute source coordinates before entering the native

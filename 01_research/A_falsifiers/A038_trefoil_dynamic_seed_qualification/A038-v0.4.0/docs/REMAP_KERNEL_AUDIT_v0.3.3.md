@@ -12,11 +12,11 @@ The KAtlas v0.3.2 smoke therefore remains a valid negative diagnostic for that *
 
 v0.3.3 defines
 
-\[
+$$
 \mathbf X^-_{n+1}=\Phi_{\Delta t}^{\mathrm{RK4}}[\mathbf X_n],
 \qquad
 \mathbf X_{n+1}=\mathcal R^{(3)}_s[\mathbf X^-_{n+1}],
-\]
+$$
 
 where \(\mathcal R^{(3)}_s\) is constructed as follows:
 
@@ -32,11 +32,11 @@ No tangential velocity enters any RK4 stage.
 
 No S37C physics threshold is loosened.  The gate still requires, at minimum,
 
-\[
+$$
 D_{\max}^{\rm cadence}(N_{\max})\le D_{\rm gate},
 \qquad
 p=-\frac{d\ln D_{\max}^{\rm cadence}}{d\ln N}\ge p_{\min},
-\]
+$$
 
 plus the frozen score-span and AUC-span gates.  The legacy linear remapper is retained only as an explicit diagnostic kernel and cannot silently become the primary map.
 

@@ -18,23 +18,23 @@ Each carrier is uniformly resampled and normalized once. A small deterministic *
 
 For the material branch:
 
-\[
+$$
 a_j^2(t)\ell_j(t)=a_{j0}^2\ell_{j0},
-\]
+$$
 
 while the null branch has fixed core radius.
 
 Rigid translation, rigid rotation and tangential/reparameterization motion are removed before modal extraction. The odd normal response is
 
-\[
+$$
 \delta X_\perp^{(-)}(s,t)=\frac{X_+(s,t)-X_-(s,t)}{2\epsilon}.
-\]
+$$
 
 The first 40% of the trajectory is **discovery only**. POD/SVD learns spatial modes
 
-\[
+$$
 \delta X_\perp(s,t)=\sum_k a_k(t)\phi_k(s).
-\]
+$$
 
 Those `phi_k` are frozen. The remaining 60% is an independent holdout used for recurrence and causal gates. The fixed-core branch is projected onto the same material-discovered frozen basis.
 

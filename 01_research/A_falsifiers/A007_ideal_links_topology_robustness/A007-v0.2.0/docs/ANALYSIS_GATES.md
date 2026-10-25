@@ -9,10 +9,10 @@
 
 ## G1 — Fourier reconstruction
 
-\[
+$$
 \mathbf r(t)=\frac{\mathbf A_0}{2}
 +\sum_{n\geq1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 The first three derivatives are analytic. Periodic closure, integrated length and spectral-tail convergence are checked.
 

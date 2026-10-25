@@ -12,9 +12,9 @@ The blind population is fixed to:
 
 The corrected historical reveal-only quark hypothesis is
 
-\[
+$$
 u \leftrightarrow 5_2,\qquad d \leftrightarrow 6_1.
-\]
+$$
 
 The former `6_2/7_4` note is treated as an erroneous historical note and is not part of the blind model.
 
@@ -41,9 +41,9 @@ The embedded PD data originate from the Knot Atlas `KnotTheory`` database mirror
 
 For each opaque case, deterministic PD-derived 3D presentation embeddings are generated at a resolution ladder
 
-\[
+$$
 N\in\{40,80,160\}
-\]
+$$
 
 for the normal `basic` and `full` presets.
 
@@ -63,26 +63,26 @@ For every applicable primary feature \(X\), v0.1.1 requires both a resolution-co
 
 Between the two highest resolutions,
 
-\[
+$$
 \delta_X
 =
 \frac{|X_{160}-X_{80}|}
 {\max(|X_{160}|,|X_{80}|,10^{-15})}.
-\]
+$$
 
 The high-resolution embedding ensemble also yields
 
-\[
+$$
 CV_X=\frac{\sigma_X}{|\bar X|+10^{-15}}.
-\]
+$$
 
 A feature is qualified only when
 
-\[
+$$
 \delta_X\le \epsilon_{\rm conv},
 \qquad
 CV_X\le CV_{\max}.
-\]
+$$
 
 `basic` uses 8 embeddings/resolution with \(\epsilon_{\rm conv}=0.20\), \(CV_{\max}=0.50\).  `full` uses 16 embeddings/resolution with \(\epsilon_{\rm conv}=0.15\), \(CV_{\max}=0.35\).
 
@@ -98,9 +98,9 @@ Three independent blind distance spaces are frozen:
 
 For pair ranking, each non-negative feature is transformed without an arbitrary epsilon floor via
 
-\[
+$$
 y=\operatorname{asinh}\!\left(\frac{|X|}{\operatorname{median}(X_{>0})}\right),
-\]
+$$
 
 then z-standardized within the selected population.
 
@@ -112,21 +112,21 @@ The reveal layer contains the fixed historical `5_2/6_1` hypothesis and a frozen
 
 For a positive qualified scalar feature \(X\), a triplet is allowed one global scale \(s\):
 
-\[
+$$
 m_i \simeq sX_i,
 \qquad
 \ln s=\frac{1}{3}\sum_{i=1}^{3}(\ln m_i-\ln X_i).
-\]
+$$
 
 Its score is
 
-\[
+$$
 \epsilon_{\log}
 =
 \sqrt{\frac{1}{3}
 \sum_{i=1}^{3}
 \left[\ln(sX_i)-\ln m_i\right]^2}.
-\]
+$$
 
 No post-reveal powers, roots, offsets, \(\pi\)-factors, \(\alpha\)-factors, golden-ratio factors or manually chosen numerical floors are allowed.
 
@@ -143,14 +143,14 @@ A zero/non-positive value required by a logarithmic fit is **excluded**, never s
 
 For each valid feature/pool and target mass triplet, the total log-mass span is fixed while the middle log-position is randomized:
 
-\[
+$$
 \ln m_1=0,
 \qquad
 \ln m_2=tS,
 \qquad
 \ln m_3=S,
 \qquad t\sim U(0,1).
-\]
+$$
 
 The null search uses 10,000 preregistered deterministic pseudo-random \(t\)-values.  v0.1.1 evaluates the exact lower envelope of the candidate error quadratics, so 10,000 trials do not require 10,000 brute-force scans of all triplets.
 
@@ -215,7 +215,7 @@ v0.1.1 is still a **PD-derived screening falsifier**.  It cannot establish a Sta
 
 The intended promotion path is A055 v0.2.0:
 
-\[
+$$
 \text{same blind atlas}
 \rightarrow
 \text{PKLSA geometry}
@@ -225,4 +225,4 @@ The intended promotion path is A055 v0.2.0:
 \text{Hessian/Kelvin/Floquet}
 \rightarrow
 \text{same qualified blind/reveal protocol}.
-\]
+$$

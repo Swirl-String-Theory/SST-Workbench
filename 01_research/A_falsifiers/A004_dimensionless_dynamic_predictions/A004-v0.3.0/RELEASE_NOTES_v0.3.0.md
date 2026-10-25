@@ -8,21 +8,21 @@ The package now models a finite-radius axial vortex bundle passing through the c
 
 ### Physical tubes
 
-\[
+$$
 \Gamma_{\rm tube}=\text{fixed},
 \qquad
 \Gamma_{\rm hole}=N\Gamma_{\rm tube}.
-\]
+$$
 
 Changing \(N\) changes the physical state.
 
 ### Numerical discretization
 
-\[
+$$
 \Gamma_{\rm hole}=\text{fixed},
 \qquad
 \Gamma_{\rm tube}=\Gamma_{\rm hole}/N.
-\]
+$$
 
 Changing \(N\) refines the representation and should converge to the continuum bundle.
 

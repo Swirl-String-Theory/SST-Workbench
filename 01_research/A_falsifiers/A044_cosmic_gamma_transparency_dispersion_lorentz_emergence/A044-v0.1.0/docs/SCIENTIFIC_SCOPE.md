@@ -5,9 +5,9 @@
 
 Given published 95% confidence bounds on subluminal photon-dispersion models of the form
 
-\[
+$$
 p^2 = E^2\left[1+\left(E/E_{\rm LIV,n}\right)^n\right],\qquad n\in\{1,2\},
-\]
+$$
 
 which model classes retain a non-empty parameter interval when the Carpet 300 TeV transparency requirement is combined with pre-existing time-of-flight, Breit–Wheeler spectral and (where applicable) birefringence constraints?
 

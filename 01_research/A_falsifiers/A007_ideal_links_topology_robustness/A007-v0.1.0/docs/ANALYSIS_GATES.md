@@ -13,10 +13,10 @@ The campaign deliberately separates exact/source checks, numerical diagnostics a
 
 For each component,
 
-\[
+$$
 \mathbf r(t)=\frac{\mathbf A_0}{2}
 +\sum_{n\geq1}\left[\mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)\right].
-\]
+$$
 
 The suite evaluates the first three derivatives analytically and checks periodic closure.
 

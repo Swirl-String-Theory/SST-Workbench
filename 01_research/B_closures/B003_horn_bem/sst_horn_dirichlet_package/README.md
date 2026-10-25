@@ -4,13 +4,13 @@ Self-contained audit harness for the SST hollow-core horn-torus Dirichlet subpro
 
 This package separates the kinetic Dirichlet factor from cavitation work:
 
-\[
+$$
 \chi_K(\lambda)=\frac12\int_{\tilde\Omega_\lambda}|\tilde{\mathbf v}|^2\,d^3\xi,
 \qquad
 \chi_{\rm cav}(\lambda)=\pi^2\lambda,
 \qquad
 \chi_E^{\rm hollow}=\chi_K+\chi_{\rm cav}.
-\]
+$$
 
 Status: **research-track audit harness**. The included C++ backend is a first-pass regularized circular-ring field candidate, not a final boundary-element solution of the harmonic Neumann-period problem. It is intentionally useful because it runs all gates and can fail them explicitly.
 
@@ -64,9 +64,9 @@ The output reports:
 
 The mathematically decisive analytic guard is also included: with positive cavitation work,
 
-\[
+$$
 \chi_E^{\rm hollow,horn}=\chi_K^{\rm horn}+\pi^2>2\pi.
-\]
+$$
 
 So a total-energy hollow horn-torus cannot match \(2\pi\) without excluding cavitation work, adding a negative renormalization term, changing geometry, or replacing the hollow-core ansatz with a resolved-core model.
 

@@ -4,27 +4,27 @@ Research-track / frozen-audit package for the Route-K horn-torus exterior Neuman
 
 This package is **not** a canon proof of \(\chi_E=2\pi\). It is a reproducible numerical audit harness that separates
 
-\[
+$$
 \chi_K(\lambda)=\frac12\int_{\Omega_\lambda}|\nabla\phi_\lambda|^2\,d^3\xi,
 \qquad
 \chi_{\rm cav}(\lambda)=\pi^2\lambda,
 \qquad
 \chi_E^{\rm hollow}=\chi_K+\chi_{\rm cav}.
-\]
+$$
 
 The implemented Neumann ansatz is
 
-\[
+$$
 \mathbf v_N = \mathbf v_{\rm ring}+\nabla\psi,
-\]
+$$
 
 where `v_ring` carries the circulation and a single-layer BEM potential `psi` corrects the torus boundary condition
 
-\[
+$$
 \mathbf n\cdot\mathbf v_N\approx 0
 \quad\text{on}\quad
 \partial\mathcal T_\lambda.
-\]
+$$
 
 ## What this version regenerates
 
@@ -111,22 +111,22 @@ offset_probe                           one-sided x+eps*n exterior probe
 
 A BEM run is numerically useful only when the following are jointly stable under refinement:
 
-\[
+$$
 \epsilon_N,\quad
 \Delta\Gamma_{\rm BEM},\quad
 \chi_K(h),\quad
 \chi_K(n_{\eta},n_{\phi}),\quad
 \chi_K(n_{\rm volume}),\quad
 \epsilon\to0^+\text{ offset probe}.
-\]
+$$
 
 ## Hard analytic guard
 
 If cavitation work counts positively in inertial rest energy, the hollow horn-torus cannot realize \(\chi_E=2\pi\), because
 
-\[
+$$
 \chi_E^{\rm hollow,horn}=\chi_K^{\rm horn}+\pi^2>2\pi.
-\]
+$$
 
 Therefore the package always reports kinetic-only, cavitation, and hollow total-energy factors separately.
 

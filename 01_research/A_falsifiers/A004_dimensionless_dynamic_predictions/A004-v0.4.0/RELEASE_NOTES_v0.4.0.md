@@ -10,9 +10,9 @@
 - FFT/autocorrelation consensus diagnostics for intrinsic shape observables.
 - Continuum and fixed-total-flux discrete representations.
 - Per-run falsifier
-  \[
+  $$
   \mathcal Q_\Gamma=2\Delta\Omega_{\rm dyn}/(\Gamma/A).
-  \]
+  $$
 - Iso-family spread gate.
 - Positive solid-body extractor control.
 - Windows batches 30–34.

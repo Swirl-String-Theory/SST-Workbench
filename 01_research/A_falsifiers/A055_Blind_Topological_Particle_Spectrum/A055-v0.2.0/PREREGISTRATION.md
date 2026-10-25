@@ -26,23 +26,23 @@ Provider source bytes are hashed. E011-certified ropelength defines \(D_{\rm eff
 
 The C006 closure is used without a parameter scan:
 
-\[
+$$
 \text{offset}/D=0.25,\quad \epsilon/D=0.10,\quad
 \Gamma_+=+1,\quad \Gamma_-=-1,\quad
 \phi_{\rm channel}=\pi/2.
-\]
+$$
 
 These are method parameters and contain no SM mass or SST particle target.
 
 Quick:
-\[
+$$
 N=(24,32,40),\quad m=1,2,3.
-\]
+$$
 
 Full:
-\[
+$$
 N=(40,56,72,88),\quad m=1,\ldots,5.
-\]
+$$
 
 Branch identity requires eigenvector overlap >=0.80 and the preset eigenvalue-shift tolerance.
 
@@ -81,9 +81,9 @@ No powers, roots, \(\pi\)-factors, \(\alpha\)-factors, golden-ratio factors, off
 
 Mass-pattern effect-size gate:
 
-\[
+$$
 \epsilon_{\log}\le0.25.
-\]
+$$
 
 Null searches use 10,000 randomized intermediate log-mass positions for production. Multiple testing is corrected hierarchically over the preregistered observables and SM groups.
 

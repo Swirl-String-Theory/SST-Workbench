@@ -15,38 +15,38 @@ This folder keeps the template pattern:
 
 This is **Research Track**, not canonical physics. It implements the diagnostic split
 
-\[
+$$
 \Phi_{\rm R}(r;K)=4\Omega^2+2\Omega A_K+B_K,
-\]
+$$
 
 with
 
-\[
+$$
 \Delta_\Omega(K)=\langle\Phi_{\rm R}(+\Omega;K)-\Phi_{\rm R}(-\Omega;K)\rangle
 =4\Omega\langle A_K\rangle,
-\]
+$$
 
 and
 
-\[
+$$
 \widehat\Sigma_\Omega(K)=
 \frac{\langle\Phi_{\rm R}(+\Omega;K)+\Phi_{\rm R}(-\Omega;K)-8\Omega^2\rangle}{8\Omega^2}
 =\frac{\langle B_K\rangle}{4\Omega^2}.
-\]
+$$
 
 Canon-safe interpretation:
 
-\[
+$$
 4_1 \text{ is tested as first-order chirality-blind, not dynamically inert.}
-\]
+$$
 
 ## Baseline parameters
 
 The default nondimensional ropelength setup uses
 
-\[
+$$
 \tau=1,\qquad \epsilon_{\rm BS}=1,\qquad h=0.5,\qquad \Delta r=0.25.
-\]
+$$
 
 Generated default centerlines are scaled to the reference ropelength targets:
 

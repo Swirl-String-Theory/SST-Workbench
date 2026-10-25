@@ -29,11 +29,11 @@ but some files include an explicit `j=0` row, whereas others begin immediately a
 
 The package therefore tests both candidates,
 
-\[
+$$
 \mathbf X_\nu(t)=\sum_{r=0}^{M-1}
 \left[\mathbf A_r\cos((r+\nu)t)+\mathbf B_r\sin((r+\nu)t)\right],
 \qquad \nu\in\{0,1\},
-\]
+$$
 
 and, where a matching `.short` file exists, chooses the index origin with the lowest closed-curve Procrustes discrepancy after translation, scale, rigid rotation, cyclic phase shift, and parameter reversal are removed.
 
@@ -197,10 +197,10 @@ r_c     = 1.40897017e-15 m
 
 so
 
-\[
+$$
 t_c=\frac{r_c}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
 =1.28810124\times10^{-21}\ \mathrm{s}.
-\]
+$$
 
 ## Tests
 

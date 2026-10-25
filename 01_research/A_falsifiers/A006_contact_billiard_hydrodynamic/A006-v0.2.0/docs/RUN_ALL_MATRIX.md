@@ -13,17 +13,17 @@
 
 De hydrodynamische hoofd-sweep gebruikt in `max`
 
-\[
+$$
 \frac{a}{\Delta}
 \in
 \{0.05,0.075,0.10,0.15,0.20,0.30,0.40,0.50,0.65,0.80,1.00,1.25,1.50\},
-\]
+$$
 
 voor `full`, `local` en `nonlocal` interacties. De `extreme`-sweep vergroot dit bereik tot
 
-\[
+$$
 0.03\leq \frac{a}{\Delta}\leq 2.00.
-\]
+$$
 
 ## Experimentgroepen
 
@@ -81,8 +81,8 @@ Na een voltooide run wordt daarnaast een ZIP en `.sha256` naast de runmap geplaa
 
 De Hamiltoniaanse finite-difference-gradiënt evalueert voor ieder centerlinepunt drie centrale verschillen, waarbij iedere energie-evaluatie alle segmentparen bevat. De referentie-implementatie schaalt daarom ongeveer als
 
-\[
+$$
 T(N)\sim O(N^3).
-\]
+$$
 
 De `max`- en `extreme`-presets kunnen vele uren tot langer dan een dag kosten, afhankelijk van CPU, BLAS en filesystem. Meer samples verminderen discretisatiefouten, maar lossen de modelbeperking niet op dat slechts één Rosenhead-type finite-core-kernel wordt getest.

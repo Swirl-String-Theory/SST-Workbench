@@ -14,9 +14,9 @@ Input paths, topology names and source type are hashed and replaced by determini
 
 For RidgeRunner data the sidecar `thickness` is the preferred tube-radius estimate. For Fremlin data a curvature/doubly-critical-distance estimator is used. The numerical finite-core radius is
 
-\[
+$$
 a=0.90\,\Delta_{\rm tube}.
-\]
+$$
 
 The core event criterion is based on the evolving tube-thickness/core-radius ratio, not on an arbitrary centerline chord distance.
 

@@ -19,11 +19,11 @@ The producer receives an interaction pulse and numerical tolerances, but **never
 
 For two components, the primary topological discriminator is the Gauss linking number
 
-\[
+$$
 \operatorname{Lk}(C_1,C_2)=\frac{1}{4\pi}\oint_{C_1}\oint_{C_2}
 \frac{(\mathrm d\mathbf r_1\times\mathrm d\mathbf r_2)\cdot(\mathbf r_1-\mathbf r_2)}
 {\|\mathbf r_1-\mathbf r_2\|^3}.
-\]
+$$
 
 The blind evaluator uses only the dimensionless topology/dynamics record. SST constants and the electron rest-energy are reveal-only.
 

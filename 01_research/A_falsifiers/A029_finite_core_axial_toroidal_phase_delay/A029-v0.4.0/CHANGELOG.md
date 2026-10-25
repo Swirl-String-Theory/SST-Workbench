@@ -25,9 +25,9 @@ v0.1.2 is deliberately **not** a second confirmation attempt for the v0.1.1 phas
 
 **Changed:** the return envelope is first located on a coarse grid and then refined with bounded continuous optimization.  The optimizer tolerance is tied to
 
-\[
+$$
 |\omega|\,\Delta t \le 0.05\;\mathrm{rad}
-\]
+$$
 
 (or the stricter preset value).
 
@@ -49,9 +49,9 @@ The default phase gate requires `phase_uncertainty_rad <= 0.35 rad` and return c
 
 **Why:** phase error accumulates over the loop.  A small local dispersion-frequency error \(\sigma_\omega\) produces approximately
 
-\[
+$$
 \delta\phi_{\rm disp}\simeq \sigma_\omega\tau_{\rm return}.
-\]
+$$
 
 This is especially severe for the slow branch, where \(\tau_{\rm return}\) can be orders of magnitude larger than for the fast branch.  Delay validity and phase validity are therefore separate gates: a case may measure a good return time but still be forbidden from phase-growth statistics.
 
@@ -59,9 +59,9 @@ This is especially severe for the slow branch, where \(\tau_{\rm return}\) can b
 
 **Changed:** `carrier_phase_cycles_at_return` now records
 
-\[
+$$
 N_{\rm cyc}=\frac{|\Im\lambda|\tau_{\rm return}}{2\pi},
-\]
+$$
 
 instead of deriving a "cycle count" from the wrapped phase.
 
@@ -71,15 +71,15 @@ instead of deriving a "cycle count" from the wrapped phase.
 
 **Changed:** each eigenmode now carries an energy-weighted advective frequency
 
-\[
+$$
 \omega_{\rm adv}=\langle mV_\theta/r+kU_s\rangle_E
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{\omega_{\rm int}=\omega-\omega_{\rm adv}}.
-\]
+$$
 
 New outputs include `advective_frequency_mode_weighted`, `omega_intrinsic`, `T_intrinsic`, and `intrinsic_over_swirl_frequency_ratio`.
 
@@ -96,15 +96,15 @@ New outputs include `advective_frequency_mode_weighted`, `omega_intrinsic`, `T_i
 v0.1.2 labels CLOSED modes before reveal as:
 
 - `FAST_SWIRL_LOCKED` when
-  \[
+  $$
   0.60\le |\Im\lambda|/\Omega_{\rm swirl}\le1.40,
   \qquad |v_g|\ge0.05;
-  \]
+  $$
 - `SLOW_MODE` when
-  \[
+  $$
   |\Im\lambda|/\Omega_{\rm swirl}\le0.20,
   \qquad |v_g|\le0.05;
-  \]
+  $$
 - `OTHER_BRANCH` otherwise.
 
 **Why:** v0.1.1 showed an approximately 1:1 swirl-locked branch for negative axial flow and a near-stationary slow branch for positive axial flow.  Pooling them into one circular regression violated the assumption of one common clock law.  The numeric boundaries are broad separators around the observed gap, not fitted stability thresholds.
@@ -113,10 +113,10 @@ v0.1.2 labels CLOSED modes before reveal as:
 
 **Changed:** phase regressions and primary carrier-level closure votes use
 
-\[
+$$
 E_g=\frac{g_C-g_S}{|g_C|+|g_S|+2g_0},
 \qquad -1<E_g<1,
-\]
+$$
 
 where negative means CLOSED has lower positive growth.  The old log ratio is retained only as a diagnostic/compatibility field and no longer determines the primary closure effect gate.
 

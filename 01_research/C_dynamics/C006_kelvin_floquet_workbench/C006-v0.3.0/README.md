@@ -28,9 +28,9 @@ f0           = 1.2355899557047996e20 Hz
 
 The C006 temporal generator uses
 
-\[
+$$
 \lambda = \sigma+i\omega,
-\]
+$$
 
 where \(\operatorname{Re}\lambda=\sigma\) is the local growth/decay rate and \(\operatorname{Im}\lambda=\omega\) is the oscillation frequency in the circulation-clock normalization. This is **not** the same complex-frequency convention as a black-hole QNM problem.
 
@@ -53,19 +53,19 @@ The central rule remains:
 
 The full four-eigenvalue projected Kelvin generator is recomputed over a pre-registered trefoil spatial-resolution ladder. Eigenvalues are matched in the complex plane with one-to-one Hungarian assignment and a scale-normalized shift
 
-\[
+$$
 d(\lambda_a,\lambda_b)=
 \frac{|\lambda_a-\lambda_b|}
 {\max(|\lambda_a|,|\lambda_b|,\epsilon)}.
-\]
+$$
 
 A branch is persistent only when every successive shift lies below the frozen tolerance. This adapts the paper's idea of retaining roots that persist under increasing spectral resolution, but it does **not** call C006 roots QNMs.
 
 K15 also contains a generic quadratic-eigenvalue linearization self-test for
 
-\[
+$$
 \left(M_0+\lambda M_1+\lambda^2M_2\right)x=0.
-\]
+$$
 
 The QEP utility is implementation-ready for a future SST-derived second-order operator. It is not used to manufacture a quadratic formulation of the current first-order Kelvin generator.
 
@@ -73,9 +73,9 @@ The QEP utility is implementation-ready for a future SST-derived second-order op
 
 The frozen-local spectrum is continued over a pre-registered \(\varepsilon/D\) grid. It records branch turning points and a descriptive non-oscillatory census. For the C006 generator a mode is called `overdamped_like` only when
 
-\[
+$$
 \frac{|\operatorname{Im}\lambda|}{|\lambda|}\leq \delta_{\rm osc}.
-\]
+$$
 
 This label is descriptive only. In an incompressible inviscid model it is **not** interpreted as viscous damping. The regularization length \(\varepsilon\) is not promoted to a derived SST core radius.
 
@@ -83,9 +83,9 @@ This label is descriptive only. In an incompressible inviscid model it is **not*
 
 For every frozen spectrum the code measures the nearest partners of
 
-\[
+$$
 \lambda^*,\qquad -\lambda,\qquad -\lambda^*.
-\]
+$$
 
 The gate is diagnostic. Exact Hamiltonian quartet symmetry is not assumed because the current four-mode projection need not preserve the full conservative operator structure.
 
@@ -93,21 +93,21 @@ The gate is diagnostic. Exact Hamiltonian quartet symmetry is not assumed becaus
 
 A synthetic numerical pair
 
-\[
+$$
 A=\frac{d}{ds}+W(s),\qquad
 A^\dagger=-\frac{d}{ds}+W(s),
-\]
-\[
+$$
+$$
 H_+=AA^\dagger,\qquad H_-=A^\dagger A
-\]
+$$
 
 is used to verify the factorization/ispectrality implementation path.
 
 Separately, the C006 common/differential 2×2 blocks are tested for approximate decoupling and for a finite-dimensional intertwiner \(X\):
 
-\[
+$$
 B X-X A\approx0.
-\]
+$$
 
 Even a passing matrix pretest would not establish a Darboux transformation of SST differential operators.
 
@@ -126,9 +126,9 @@ The scalar–vector Darboux result of Batic & Dutykh is therefore not transplant
 
 Only when K6 has accepted an RPO and constructed the true relative monodromy does K20 compare local-generator predictions
 
-\[
+$$
 \mu_j^{\rm local}=\exp(\lambda_j T)
-\]
+$$
 
 with true monodromy multipliers \(\mu_j^{\rm Floquet}\). A Hungarian one-to-one match is used and the median normalized multiplier distance is reported. Agreement is a consistency test; it does not identify the two operators.
 

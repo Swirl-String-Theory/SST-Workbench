@@ -1,75 +1,97 @@
-# A006 ForceGrid v0.5.0c — `amech`, `max-dr` and `close`
+# A006 VCCR v0.2.0 — Independent Euler Qualification
 
-Incremental add-on for **A006-v0.5.0a** OR **A006-v0.5.0a plus v0.5.0b**. Does not replace v0.5.0b and does not touch canonical `Output/v050/geometry`, existing 336 campaigns or previous runtime measurements. Each arm starts from *identical* `LINK_5_5_6_BALANCED_N1024_ORIG_CPFIXED61.xyz` (1138+1055+1024=3217 beads).
+**Status:** `EXACT_AFFINE_EULER_BENCHMARK_PASS / KNOTTED_NATIVE_EULER_NOT_RUN / SST_PHYSICS_UNRESOLVED`.
 
-## Install (in existing project root)
+This is a reproducible **sidecar** built on the exact provided `A006_Volume_Circulation_CoreRadius_Closure_v0.1.0` source. The original v0.1.0 functions and the original seven tests are retained. No A006 parent sources, KnotPlot macros, ForceGrid, or `run_all.cmd` are overwritten.
 
-Extract the ZIP under `patch_staging/A006_FORCEGRID_PATCH_v0.5.0c/` and run:
+## Quick start (Windows)
 
-```bat
-py -3 patch_staging\A006_FORCEGRID_PATCH_v0.5.0c\install_patch.py --base . --check
-py -3 patch_staging\A006_FORCEGRID_PATCH_v0.5.0c\install_patch.py --base . --apply
-run_all.cmd FORCEGRID TEST
-run_all.cmd FORCEGRID PLAN
-```
-
-`BUILD` has already been performed safely by the installer. You can rerun it idempotently:
+Install NumPy (Python >=3.10):
 
 ```bat
-run_all.cmd FORCEGRID BUILD
+py -3 -m pip install -r requirements.txt
+run_vccr.cmd TEST
+run_vccr.cmd EULER --out Output\VCCR_v0.2.0\euler --case both
+run_vccr.cmd NATIVE --input examples\synthetic_native_contract_demo.json --out Output\VCCR_v0.2.0\native
+run_vccr.cmd DEMO
 ```
 
-Restart KnotPlot so newly added aliases are loaded. Run **one alias at a time** without pressing continuous GUI `go` simultaneously. They are GUI safe (no `stop`) and write independent checkpoints at 0/1/8/32/128.
+Run on macOS/Linux from the package root:
 
-## Experiments
+```bash
+python -m pip install -r requirements.txt
+python -m vccr.dispatch TEST
+python -m vccr.dispatch EULER --out Output/VCCR_v0.2.0/euler --case both
+python -m vccr.dispatch NATIVE --input examples/synthetic_native_contract_demo.json
+python -m vccr.dispatch DEMO
+```
 
-| Alias | Arm | Mech | Elec | AMECH | Bend | Changed condition |
-|---|---|---|---|---|---|---|
-| `fgB0` | BEND_OFF | yes | yes | no | off | baseline |
-| `fgB1` | BEND_1 | yes | yes | no | 1 | bend sensitivity |
-| `fgB10` | BEND_10 | yes | yes | no | 10 | bend sensitivity |
-| `fgB100` | BEND_100 | yes | yes | no | 100 | bend sensitivity |
-| `fgM` | MECH_ONLY | yes | no | no | off | isolated mech |
-| `fgE` | ELEC_ONLY | no | yes | no | off | isolated elec |
-| `fgA14` | AMECH_140_ELEC | no | yes | yes | off | linear spring, rest 1.4 |
-| `fgAM` | AMECH_MATCH_ELEC | no | yes | yes | off | linear spring, rest = measured median |
-| `fgAM0` | AMECH_MATCH_ONLY | no | no | yes | off | isolate linear amech |
-| `fgAM2` | AMECH_MATCH_P2 | no | yes | yes | off | nonlinear spring power = 2 |
-| `fgD5` | MAXDR_0005 | yes | yes | no | off | max-dr = 0.005 |
-| `fgD10` | MAXDR_0010 | yes | yes | no | off | max-dr = 0.010 |
-| `fgC10` | CLOSE_010 | yes | yes | no | off | close = 0.10 |
-| `fgC30` | CLOSE_030 | yes | yes | no | off | close = 0.30 |
+Existing v0.1.0 `analytic`, `geometry`, `trajectory`, `compare`, `saturated`, and `bounds` subcommands remain callable (see `docs/README_v0.1.0.md`). They are conditional algebraic reconstructions and **not independent Euler qualifications**.
 
-Unless explicitly varied, `close=0.20`, `max-dr=0.02`, `spring-length=1.4`, `afmpower=2`, `bencon=1`, `tinc=15`, `collision fast`, `Damped` **reset default to be confirmed by operator**. The measured median spring is calculated from the actual seed at BUILD time: approximately **1.968625 KnotPlot units**. It is a discretization-derived control, not a physics constant. Force coefficients are kept fixed; do **not** run `mech` and `amech` simultaneously during the isolation experiment.
+## New scientific evidence
 
-The source screenshots describe `symm` as an approximation to Greg Buck's symmetric energy, but this patch does not switch it on: doing so would introduce an additional, currently unqualified force law. Damped vs Undamped is also a distinct dynamical comparison and intentionally held fixed.
+`EULER` uses the exact linear, incompressible, inviscid, unforced Euler velocity field:
 
-## First pilot and collision verification
+```
+u_x = -k*x/2 - Omega(t)*y
+u_y =  Omega(t)*x - k*y/2
+u_z =  k*z
+Omega(t) = Omega0*exp(k*t)
+```
 
-Recommended order: `fgB0`, `fgAM`, `fgA14`, `fgD5`, `fgC30`. The `CLOSE_030` condition increases the collision exclusion distance and can change topological interaction; compare with `fgB0`, not with a different `amech` run. `MAXDR_0005` may simply slow numerical evolution per iteration. Thus compare at fixed iterations **and**, in a later study, similar shape displacement.
+An independent 4th-order Runge-Kutta (RK4) particle integrator advects **material rings and axial tracers**. The code reconstructs each measured cross-sectional polygon area, circulation from a velocity line integral, vorticity from sampled finite-difference velocity, axial length, and swept cell volume. **Only then** does it compare to the VCCR-predicted radius.
 
-The scripts print `collision` and `safe` per checkpoint. Save actual console readback into `Output/qualification_v050c/runs/<ARM>/COLLISION_RUNTIME.txt`; check also **Damped selected in the GUI**. The `collision fast` command is a requested setting, not independent proof of collision safety. Even `safe` is not an invariant certificate.
+The benchmark also evaluates finite-difference Euler momentum and divergence residuals at independent probe points, runs temporal refinement, tests circular and elliptical cross sections, and rejects a deliberately broken rotation law (`Omega(t)=constant` with `k>0`). The results are **dimensionless**, not calibrated Euler simulations at the canonical SST length/time scales.
 
-## Analyze
+**Important scope limitation:** the test is a local open tube in an **unbounded affine field** with uniform axial vorticity. This is a globally nonlocalized infinite-energy model, not a self-induced **finite-core vortex**, not a periodic-box Euler solve, not a closed knot, not Biot-Savart, and not a claim of stable knotted particles. It is a verification harness for material conservation under a true Euler solution.
+
+## NEW NATIVE data intake — external solver
+
+The `NATIVE` command reads a JSON export of *truly material-tagged* particles and their velocities. Required structure:
+
+```json
+{
+  "schema": "vccr.native.material.v1",
+  "source_provenance": "external_solver",
+  "frames": [
+    {
+      "t_s": 0.0,
+      "segments": [
+        {
+          "material_segment_id": "tubeA_segment0",
+          "material_marker_ids": ["m0", "m1", "... >= 12 unique labels ..."],
+          "axial_marker_ids": ["axial_low", "axial_high"],
+          "axial_points_m": [[0,0,-1],[0,0,1]],
+          "ring_positions_m": [[1,0,0], ["... same number of XYZ tuples as labels ..."]],
+          "ring_velocities_m_s": [[0,1,0],["... XYZ velocity at each material ring vertex ..."]],
+          "vorticity_flux_m2_s": 6.283185307179586
+        }
+      ]
+    },
+    {"t_s": 0.001, "segments": ["... same material IDs/marker IDs ..."]}
+  ]
+}
+```
+
+This illustrative schema fragment is **not valid literal runnable data**; use `examples/synthetic_native_contract_demo.json` for a complete valid sample. All values must be SI units. Axial and ring sample positions must come from tracked **fluid material labels**, not arbitrary XYZ bead indices after remeshing.
+
+Native loader measures: polygon area and area-equivalent radius; line-integrated velocity circulation; axial arclength; segment volume proxy; alignment/planarity; and any externally supplied vorticity flux (marked **reported, not verified**). Its output can be `PASS_MEASUREMENTS_ONLY_NOT_EULER_CERTIFICATION` but will **never certify full native Euler dynamics**, because a few snapshots cannot establish pressure/momentum residuals, mesh/time convergence, topological invariance, or finite-core field consistency.
+
+`examples/synthetic_native_contract_demo.json` is explicitly a **synthetic affine test fixture**, not a native finite-core computation. It exercises the ingestion schema only.
+
+## Installation alongside A006-v0.5.x
 
 ```bat
-run_all.cmd FORCEGRID ANALYZE
+py -3 install_sidecar.py --base "C:\workspace\projects\SST-Workbench\02_libraries\A_knot_libraries\A006_RoundFolded_Twist_Knot_Family\A006-v0.5.0" --check
+py -3 install_sidecar.py --base "C:\workspace\projects\SST-Workbench\02_libraries\A_knot_libraries\A006_RoundFolded_Twist_Knot_Family\A006-v0.5.0" --apply
 ```
 
-Output: `Output/qualification_v050c/analysis/component_metrics.csv`, `AUDIT.json`, `AUDIT.md`, and plots **only when real XYZ snapshots exist**. Native KnotPlot CSV format is `/I,/N,/l,/g`; the unsupported `/s` has been removed. The `/l` and `/g` values are multi-component sensitive in this KnotPlot build; use the per-component XYZ measures for conclusions.
+This installs only `tools/VCCR_v0.2.0/` and the distinct wrapper `run_vccr_v020.cmd`, preserving an existing v0.1.0 `run_vccr.cmd` without collision. Installer is create-only and refuses changed-file overwrites. Use `run_vccr_v020.cmd TEST` / `EULER` from parent A006. Existing `run_all.cmd` and physics modules stay untouched.
 
-Separate direct selection is supported *before preparing a campaign*:
+## Gates and falsifiable next phase
 
-```bat
-py -3 tools\force_grid_v050c.py PLAN --arms=AMECH_MATCH_ELEC,MAXDR_0005
-```
+See `SCIENCE_CONTRACT.md`, `FORMULAE_EULER.md`, and `docs/V020_RESULTS.md`. The next genuinely new physical test is a material tube that evolves in an independently converged **finite-core Euler solver with true pressure and velocity field**, followed by topological and core-clearance checks on a genuine knotted input. Not fulfilled by this release.
 
-The installer creates the complete immutable 14-arm plan; to change a previously established plan/checkpoints, use a NEW versioned experiment root instead of overwriting old results.
+## Provenance / source retention
 
-## Rollback
-
-```bat
-py -3 patch_staging\A006_FORCEGRID_PATCH_v0.5.0c\install_patch.py --base . --rollback
-```
-
-Rollback refuses to overwrite later manual edits. Only the two original dispatcher/RC files are restored; all measurements are preserved.
+The original v0.1.0 source was provided as a ZIP and has been carried forward; its seven source example XYZ files, hashes in `test_manifest.json`, code, regression tests, and original documentation in `docs/*_v0.1.0.md` are preserved. The Python code under `vccr/euler_qualification.py`, `native_qualification.py`, `dispatch.py` and the eleven new tests is the v0.2.0 addition.

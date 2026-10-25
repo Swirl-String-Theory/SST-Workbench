@@ -6,9 +6,9 @@ Blindly screen **all 35 non-trivial prime knots with 3–8 crossings** and **all
 
 The historical quark hypothesis is reveal-only:
 
-\[
+$$
 u \leftrightarrow 5_2,\qquad d \leftrightarrow 6_1.
-\]
+$$
 
 The earlier `6_2/7_4` note is explicitly treated as erroneous and is not part of the blind stage.
 
@@ -92,4 +92,3 @@ A low mass-ratio error is **not** a particle discovery. Promotion to v0.2.0 requ
 - `...-outputs_BLIND.zip`
 - `...-outputs_REVEALED.zip`
 - `...-outputs.zip`
-

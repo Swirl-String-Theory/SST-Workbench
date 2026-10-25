@@ -17,10 +17,10 @@
 
 The dimensionless solver remains the 3-D incompressible unforced Euler system on a periodic cube,
 
-\[
+$$
 \partial_t\mathbf u=\mathbb P(\mathbf u\times\boldsymbol\omega),\qquad
 \boldsymbol\omega=\nabla\times\mathbf u,\qquad \nabla\cdot\mathbf u=0,
-\]
+$$
 
 with RK4 and 2/3 de-aliasing.
 

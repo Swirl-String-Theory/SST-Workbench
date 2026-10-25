@@ -6,9 +6,9 @@ This report is alpha-blind. It does not contain or compare against observed fine
 
 BEMv16 converts the BEMv15 normalizer law into a heat-kernel/DtN proof-obligation certificate:
 
-\[
+$$
 \boxed{\mathcal N_{\rm RT}=M_{\max}L_{\rm cert}^{2}.}
-\]
+$$
 
 The result is conditional on mode-extensivity and second-order length-scale covariance.
 
@@ -52,6 +52,6 @@ The numerical search phase is now largely exhausted. The remaining issue is math
 
 ## BEMv17 target
 
-\[
+$$
 \boxed{\text{BEMv17: principal-symbol and heat-kernel coefficient derivation for }L_{\rm cert}^{2}.}
-\]
+$$

@@ -1,0 +1,89 @@
+@echo off
+setlocal EnableExtensions
+set "ADAPTER_ROOT=%~dp0"
+rem Discover ONLY the pinned v1.0.10 installation for regression integration tests.
+set "FW_WORKBENCH=C:\workspace\projects\SST-Workbench"
+if defined SST_WORKBENCH_ROOT set "FW_WORKBENCH=%SST_WORKBENCH_ROOT%"
+if not defined SST_FRAMEWORK_ROOT if exist "%FW_WORKBENCH%\06_templates\SST_Falsifier_Framework\SST_Falsifier_Framework_v1.0.10\sst_falsifier\gates.py" set "SST_FRAMEWORK_ROOT=%FW_WORKBENCH%\06_templates\SST_Falsifier_Framework\SST_Falsifier_Framework_v1.0.10"
+if /I "%~1"=="G6_UPSTREAM" goto G6UPSTREAM
+if /I "%~1"=="EULER" goto EULER
+if /I "%~1"=="UPSTREAM" goto G6UPSTREAM
+if /I "%~1"=="G6_DYNAMIC" goto G6DYNAMIC
+if /I "%~1"=="G6_SAFETY" goto G6DYNAMIC
+if /I "%~1"=="DYNAMIC_COMPLETE" goto DYNAMICCOMPLETE
+if /I "%~1"=="G6_LEGACY" goto G6LEGACY
+if /I "%~1"=="G6" goto G6DYNAMIC
+if /I "%~1"=="TEMPORAL" goto G6LEGACY
+if /I "%~1"=="G6_FULL" goto G6ALL
+if /I "%~1"=="COMPLETE" goto DYNAMICCOMPLETE
+if /I "%~1"=="QUALIFY" goto QUALIFY
+if /I "%~1"=="FULL" goto FULL
+if /I "%~1"=="DIAGNOSTIC" goto DIAGNOSTIC
+goto AUDIT
+:G6DYNAMIC
+call "%ADAPTER_ROOT%run_g6_dynamic.cmd"
+exit /b %ERRORLEVEL%
+:G6UPSTREAM
+call "%ADAPTER_ROOT%run_g6_upstream.cmd"
+exit /b %ERRORLEVEL%
+:DYNAMICCOMPLETE
+call "%ADAPTER_ROOT%run_g5_qualification.cmd"
+set "G5_EXIT=%ERRORLEVEL%"
+if "%G5_EXIT%"=="4" exit /b 4
+call "%ADAPTER_ROOT%run_g6_dynamic.cmd"
+set "G6_EXIT=%ERRORLEVEL%"
+call "%ADAPTER_ROOT%run_g6_upstream.cmd"
+set "UPSTREAM_EXIT=%ERRORLEVEL%"
+echo A003 v0.3.4 DYNAMIC_COMPLETE: G5 exit %G5_EXIT%, G6 exit %G6_EXIT%.
+if not "%G5_EXIT%"=="0" exit /b %G5_EXIT%
+if "%G6_EXIT%"=="4" exit /b 4
+if "%UPSTREAM_EXIT%"=="4" exit /b 4
+if "%UPSTREAM_EXIT%"=="2" exit /b 2
+exit /b %G6_EXIT%
+:EULER
+call "%ADAPTER_ROOT%run_euler_v034.cmd"
+exit /b %ERRORLEVEL%
+:G6LEGACY
+call "%ADAPTER_ROOT%run_g6_pklsa.cmd"
+exit /b %ERRORLEVEL%
+:G6ALL
+call "%ADAPTER_ROOT%run_g6_dynamic.cmd" --provider-topology all
+exit /b %ERRORLEVEL%
+:QUALIFY
+call "%ADAPTER_ROOT%run_g5_qualification.cmd"
+exit /b %ERRORLEVEL%
+:FULL
+call "%ADAPTER_ROOT%run_all.cmd"
+if errorlevel 1 exit /b 1
+call "%ADAPTER_ROOT%run_g5_qualification.cmd"
+exit /b %ERRORLEVEL%
+:DIAGNOSTIC
+call "%ADAPTER_ROOT%run_g5_diagnostic.cmd"
+exit /b %ERRORLEVEL%
+:AUDIT
+set "ATLAS_ROOT=%ADAPTER_ROOT%..\A003-v0.1.2"
+if defined SST_ATLAS_ROOT set "ATLAS_ROOT=%SST_ATLAS_ROOT%"
+if not "%~1"=="" set "ATLAS_ROOT=%~1"
+if not exist "%ATLAS_ROOT%\manifest.json" (
+  echo FAIL_CLOSED: Atlas ontbreekt: "%ATLAS_ROOT%\manifest.json" 1>&2
+  exit /b 2
+)
+set "SST_ATLAS_ROOT=%ATLAS_ROOT%"
+rem Explicit hypothesis only: a_star is a dimensionless source-coordinate core radius.
+set "A_STAR=0.05"
+if defined SST_A003_REFERENCE_CORE_RADIUS_UNITS set "A_STAR=%SST_A003_REFERENCE_CORE_RADIUS_UNITS%"
+if defined SST_A003_A_STAR set "A_STAR=%SST_A003_A_STAR%"
+if not "%~2"=="" set "A_STAR=%~2"
+echo A003 G4 ASSUMPTION ONLY: a_star=%A_STAR% source coordinate units.
+if /I "%SST_A003_RUN_G5%"=="1" (
+  echo G5 independent determinant screen requested; numerical evidence is NOT full certification.
+  python "%ADAPTER_ROOT%fourier_atlas_adapter.py" --atlas "%ATLAS_ROOT%" --out "%ADAPTER_ROOT%outputs" --reference-core-radius-units "%A_STAR%" --g5 --g5-resolutions BASIC --require-g5-evidence catalog
+) else (
+  echo G5 topology screen NOT_RUN; use run_g5.cmd explicitly or SST_A003_RUN_G5=1.
+  python "%ADAPTER_ROOT%fourier_atlas_adapter.py" --atlas "%ATLAS_ROOT%" --out "%ADAPTER_ROOT%outputs" --reference-core-radius-units "%A_STAR%" catalog
+)
+if errorlevel 1 exit /b 2
+python -m unittest discover -s "%ADAPTER_ROOT%tests" -v
+if errorlevel 1 exit /b 1
+echo A003_v0.3.4_GEOMETRY_QUALIFIED / G4_CONDITIONAL_ONLY / G5Q_4LEVEL_OPT_IN / G6_NOT_RUN
+exit /b 0

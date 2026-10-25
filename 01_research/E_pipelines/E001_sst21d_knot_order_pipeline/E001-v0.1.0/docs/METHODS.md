@@ -4,10 +4,10 @@
 
 For each component,
 
-\[
+$$
 \mathbf X(t)=\sum_n\left(\mathbf A_n\cos nt+\mathbf B_n\sin nt\right),
 \qquad 0\le t<2\pi.
-\]
+$$
 
 The sampled curve is then periodically resampled to uniform polygonal arclength. The original Fourier curve is not overwritten.
 

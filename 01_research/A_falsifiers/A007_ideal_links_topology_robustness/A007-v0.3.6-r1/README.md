@@ -21,17 +21,17 @@ For a component of length \(L_i\) with \(N\) samples, that implied an excluded p
 
 v0.3.4 adds native and NumPy-parity kernels that exclude by **polygonal arc length**:
 
-\[
+$$
 \Delta s_{\rm cyc}\le s_{\rm excl},
 \qquad
 s_{\rm excl}/D=\text{fixed}.
-\]
+$$
 
 Default full-preset diagnostics use
 
-\[
+$$
 (s_{\rm excl}^{E}/D,\;s_{\rm excl}^{u}/D)=(0.20,\;0.25).
-\]
+$$
 
 These values are explicit regularization choices, not CANON constants.
 
@@ -40,7 +40,7 @@ These values are explicit regularization choices, not CANON constants.
 The v0.3.2 sample-derived reference scales are removed from the default QM presets.  Terms are now
 reported in the natural diameter units
 
-\[
+$$
 L/D,
 \qquad
 D\int\kappa^2ds,
@@ -48,7 +48,7 @@ D\int\kappa^2ds,
 E_{\rm rep},
 \qquad
 E_N/D.
-\]
+$$
 
 The equal-weight hybrid profile is still only a diagnostic closure.  v0.4 is intended to scan its
 weights rather than canonize them.
@@ -73,9 +73,9 @@ python scripts\run_continuum.py `
 
 The full preset uses
 
-\[
+$$
 N=96,192,384
-\]
+$$
 
 and reports last-pair relative changes plus a Richardson estimate when the data permit one.
 
@@ -84,9 +84,9 @@ and reports last-pair relative changes plus a Richardson estimate when the data 
 If the candidate filament two-form is singular, v0.3.4 now records its SVD nullspace and the reduced
 basis coordinates dominating each null vector.  It also constructs the algebraic image-space form
 
-\[
+$$
 \Omega_Q=Q^T\Omega Q.
-\]
+$$
 
 A corresponding projected Hamiltonian spectrum can be calculated.  This is **not** automatically a
 physical gauge quotient: the null directions may be gauge, Casimir directions, or evidence of an
@@ -98,9 +98,9 @@ This is especially relevant to the Hopf baseline, where v0.3.2 found a two-dimen
 
 For full/max runs, the best sector receives a trust-limited Newton probe
 
-\[
+$$
 \delta q_N=-H^+\nabla E,
-\]
+$$
 
 followed by nonlinear line-search evaluations of the actual finite-difference gradient.  The output
 asks whether the source Fourier geometry has a nearby lower-gradient configuration in the current

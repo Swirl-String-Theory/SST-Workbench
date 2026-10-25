@@ -8,27 +8,27 @@
 
 The full native Newton--Krylov multiple-shooting run improves both its reduced and full-state diagnostics:
 
-\[
+$$
 \|F_{\rm proj}\|: 0.6442244122\rightarrow0.4559781062,
-\]
+$$
 
 and
 
-\[
+$$
 \epsilon_{\rm shoot,max}:0.3897500535\rightarrow0.3561396051.
-\]
+$$
 
 The full relative recurrence improves from the best blind seed
 
-\[
+$$
 0.4173283240D
-\]
+$$
 
 to
 
-\[
+$$
 0.3463310365D.
-\]
+$$
 
 Therefore v0.5 is not merely repeating the v0.4 scan: its nonlinear correction space moves the state toward better recurrence.
 
@@ -36,21 +36,21 @@ Therefore v0.5 is not merely repeating the v0.4 scan: its nonlinear correction s
 
 The preregistered full-state gate requires
 
-\[
+$$
 \epsilon_{\rm RPO}<0.05D,
-\]
+$$
 
 but the best corrected candidate remains
 
-\[
+$$
 \boxed{\epsilon_{\rm RPO}=0.3463310365D}.
-\]
+$$
 
 Endpoint-vectorfield compatibility is also poor:
 
-\[
+$$
 \boxed{\epsilon_f=0.7562101428}.
-\]
+$$
 
 Thus the endpoint is neither geometrically nor dynamically close enough to the initial state modulo the accepted relative symmetry.
 
@@ -58,11 +58,11 @@ Thus the endpoint is neither geometrically nor dynamically close enough to the i
 
 A pure longitudinal shift of one complete closed filament along itself is not an additional continuum geometry; it is reparametrisation. The finite-N test supports this:
 
-\[
+$$
 \epsilon_{\rm relabel}(48)=8.7731\times10^{-2},
 \qquad
 \epsilon_{\rm relabel}(96)=2.4746\times10^{-2}.
-\]
+$$
 
 The effect decreases strongly under refinement. Therefore `Delta s_+-` is **not** used as a fitted physical search coordinate in v0.5.
 

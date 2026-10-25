@@ -10,18 +10,18 @@ v0.3 established that a frozen temporal Kelvin eigenspectrum can produce a genui
 
 The primary condition is now
 
-\[
+$$
 \mathbf X(T)=g\mathbf X(0)+\mathcal O(\varepsilon_{\rm RPO}),
 \qquad g\in SE(3),
-\]
+$$
 
 modulo one common cyclic filament relabelling.
 
 Only after this condition holds may the code evaluate
 
-\[
+$$
 \mathbf M=D(g^{-1}\circ\phi_T).
-\]
+$$
 
 ## Full native reference campaign
 
@@ -29,27 +29,27 @@ All implementation/numerical prerequisites H0--H5 pass.
 
 The canonical seed gives
 
-\[
+$$
 \varepsilon_{\rm RPO}=0.7019663968,
 \qquad
 \varepsilon_f=1.2224030728,
-\]
+$$
 
 at its best eligible snapshot \(\hat T=0.21\). It is not an RPO.
 
 The best of 36 preregistered seeds is
 
-\[
+$$
 (a/D,\epsilon/D,\phi)=(0.30,0.10,\pi/2),
-\]
+$$
 
 with
 
-\[
+$$
 \varepsilon_{\rm RPO}=0.4090414924,
 \qquad
 \varepsilon_f=0.5595702741.
-\]
+$$
 
 This is an improvement over the canonical seed, but still much too large to identify a relative periodic orbit.
 
@@ -57,9 +57,9 @@ This is an improvement over the canonical seed, but still much too large to iden
 
 Raw Lagrangian filament markers showed strong tangential clustering. v0.4 therefore evolves the embedded curve in normal-flow gauge,
 
-\[
+$$
 \mathbf u_\perp=\mathbf u-(\mathbf u\cdot\mathbf t)\mathbf t.
-\]
+$$
 
 This removes a pure reparametrisation direction while preserving the geometric centerline motion. After this correction, native/Python parity remains at machine precision and RK4 convergence is clean. The negative RPO result therefore no longer depends on marker clustering.
 

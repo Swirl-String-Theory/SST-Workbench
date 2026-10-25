@@ -8,18 +8,18 @@ v1/v2 should be treated as archived shared-moment consistency checks. v3 broke t
 
 It tests the non-tautological stiffness relation
 
-\[
+$$
 I_\chi=\rho_f\int_A r_\perp^2\,dA,
-\]
+$$
 
-\[
+$$
 K_\chi=\rho_f\int_A v_\theta(r)^2 r_\perp^2\,dA,
-\]
+$$
 
-\[
+$$
 c_\chi^2=\frac{K_\chi}{I_\chi}
 =\frac{\int_A v_\theta(r)^2 r_\perp^2\,dA}{\int_A r_\perp^2\,dA}.
-\]
+$$
 
 Therefore \(c_\chi=v_{\rm swirl}\) holds only if the profile's \(r_\perp^2\)-weighted RMS speed equals \(v_{\rm swirl}\). It is not forced in v4.
 
@@ -88,15 +88,15 @@ All outputs go to `exports/`:
 
 v4 is designed to prevent tautological canonization. The safe statement is:
 
-\[
+$$
 c_\chi^2=\left\langle v_\theta^2\right\rangle_{r_\perp^2}
-\]
+$$
 
 with
 
-\[
+$$
 \left\langle v_\theta^2\right\rangle_{r_\perp^2}
 =\frac{\int_A v_\theta(r)^2 r_\perp^2\,dA}{\int_A r_\perp^2\,dA}.
-\]
+$$
 
 Only after SST independently selects an admissible core profile, or defines \(v_{\rm swirl}\) as this weighted RMS speed, may \(c_\chi=v_{\rm swirl}\) be promoted from conditional closure to a stronger physical statement.

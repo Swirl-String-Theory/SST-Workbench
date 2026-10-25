@@ -8,11 +8,11 @@ PTSA is the canonical name for the 48-candidate analytic family previously descr
 
 The 48-candidate grid is generated from
 
-\[
+$$
 \mathbf X(t)=\mathbf U[R+a\cos(3t)]\cos(2t)
 +\mathbf V[R+a\cos(3t)]\sin(2t)
 +\mathbf N[b\sin(3t)+z_0],
-\]
+$$
 
 with 3 values of `R`, 4 of radial bulge `a`, and 4 of axial weave `b`. Candidate filenames are parameter-opaque hashes. The full independent generator is preserved in the tiny bundled `vendor/SST_Knot_Library_v0.2.5.zip`.
 

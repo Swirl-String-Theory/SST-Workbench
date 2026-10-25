@@ -4,11 +4,11 @@
 
 Legacy `.fseries` files do not include an explicit harmonic index. Both interpretations are constructed:
 
-\[
+$$
 \mathbf X_0(t): j=0,1,\ldots,M-1,
 \qquad
 \mathbf X_1(t): j=1,2,\ldots,M.
-\]
+$$
 
 If a same-stem `.short` polygon exists, all curves are resampled to normalized arclength. For each candidate the package minimizes RMSD over:
 

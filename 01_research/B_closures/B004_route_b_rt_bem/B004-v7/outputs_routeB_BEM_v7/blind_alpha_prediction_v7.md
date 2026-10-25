@@ -4,15 +4,15 @@ This report is alpha-blind: it does not contain or compare against CODATA alpha.
 
 BEMv7 uses the working Route-B split
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}=\frac12\left[N_{\rm soft}V_{\rm soft}L_{\rm HK}(3_1)+\Delta_{\rm RT}^{\rm ren}(3_1/0_1)\right].
-\]
+$$
 
 This is a falsifiable component budget, not yet a theorem.
 
 ## Spectral length
 
-\[L_{\rm HK}(K)=2\pi\,A_{\rm lead}(K)/A_{\rm lead}(0_1).\]
+$$L_{\rm HK}(K)=2\pi\,A_{\rm lead}(K)/A_{\rm lead}(0_1).$$
 
 - length coefficient: `A_M`
 - length fit model: `hk+inv_sqrt+inv`

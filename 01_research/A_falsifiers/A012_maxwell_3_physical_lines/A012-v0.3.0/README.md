@@ -13,24 +13,24 @@ Maxwell's Plate VIII, Fig. 1 is treated as the historical motivation for a close
 
 For a closed vortex filament `K` and a disjoint closed probe `C`, the v0.3.0 primary gate is
 
-\[
+$$
 \oint_C \mathbf u\cdot d\boldsymbol{\ell}
 =\Gamma\,\operatorname{Lk}(C,K).
-\]
+$$
 
 The blind numerical kernel uses `Gamma_num = 1`, so the primary test is target-free:
 
-\[
+$$
 Q_C \equiv \oint_C \mathbf u\cdot d\boldsymbol{\ell}
 \stackrel{?}{=}\operatorname{Lk}(C,K).
-\]
+$$
 
 For multicomponent links the mutual-helicity gate is
 
-\[
+$$
 H_{\rm mutual}
 =2\sum_{i<j}\Gamma_i\Gamma_j\operatorname{Lk}(K_i,K_j).
-\]
+$$
 
 No self-helicity claim is made for a single centerline because a finite-core self-helicity decomposition also requires framing/twist information.
 

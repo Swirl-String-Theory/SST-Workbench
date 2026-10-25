@@ -1,0 +1,170 @@
+--- /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.2/vortexring-lab-v7.6.2.html	2026-07-15 01:44:57.941591920 +0000
++++ /mnt/data/vortexring-lab-v7.6-release-train/releases/v7.6.3/vortexring-lab-v7.6.3.html	2026-07-15 01:44:58.070839908 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.2 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.2">
++<title>Superfluïde vortexlab v7.6.3 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.3">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.1">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000">
++<meta name="vortexlab-parent" content="7.6.2">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,sst-diagnostics-grouping">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -366,6 +366,62 @@
+   .vl-topbar-status.stab-bad select{border-color:rgba(255,110,110,.88);}
+   .vl-proxy-source,.vl-preserved-sources{display:none!important;}
+ 
++
++  /* v7.5.4 UI follow-up: waarschuwingen onder de topbar en live blokken op het canvas. */
++  body.vl-dual-ui #flag{
++    position:fixed;top:calc(var(--vl-topbar-h) + 8px);left:50%;transform:translateX(-50%);
++    z-index:59;max-width:min(660px,calc(100vw - var(--vl-rail-w) - var(--vl-rail-w) - 24px));
++    box-shadow:0 10px 32px rgba(0,0,0,.38);backdrop-filter:blur(7px);
++  }
++  .vl-sim-bottom-overlays{
++    position:fixed;left:var(--vl-overlay-left,calc(var(--vl-rail-w) + var(--vl-panel-w) + 12px));
++    right:12px;bottom:10px;z-index:58;display:flex;align-items:flex-end;gap:8px;
++    min-width:0;pointer-events:none;transition:left .18s ease;
++  }
++  .vl-sim-bottom-overlays>*{pointer-events:auto;min-width:0;}
++  .vl-overlay-surface{
++    border:1px solid var(--vl-border);border-radius:9px;background:rgba(13,21,41,.92);
++    box-shadow:0 10px 34px rgba(0,0,0,.34);backdrop-filter:blur(7px);
++  }
++  .vl-live-overlay{flex:0 1 300px;width:min(300px,25vw);padding:7px;}
++  .vl-live-overlay .vl-info-section-title{margin:0 2px 6px;font-size:8.5px;letter-spacing:.13em;}
++  .vl-live-overlay .stability-panel{grid-template-columns:58px minmax(0,1fr);gap:7px;padding:6px;}
++  .vl-live-overlay .stability-gauge{width:54px;height:54px;}
++  .vl-live-overlay .stability-gauge::before{inset:6px;}
++  .vl-live-overlay .stability-gauge .sg-value{font-size:16px;}
++  .vl-live-overlay .stability-gauge .sg-unit{font-size:7px;margin-top:-14px;}
++  .vl-live-overlay .stab-title{font-size:9.5px;}
++  .vl-live-overlay .stab-summary{font-size:8px;line-height:1.3;}
++  .vl-live-overlay .stab-metrics{font-size:7.5px;gap:2px 5px;margin-top:4px;}
++  .vl-live-overlay #stabilityAdvice{margin-top:5px;padding:5px;font-size:8px;line-height:1.3;max-height:48px;overflow:auto;}
++  #cards.vl-cards-overlay{
++    position:static!important;left:auto!important;bottom:auto!important;transform:none!important;
++    flex:1 1 470px;width:min(510px,42vw);max-width:none!important;margin:0!important;padding:6px;
++    display:grid!important;grid-template-columns:repeat(5,minmax(66px,1fr));gap:6px;
++  }
++  #cards.vl-cards-overlay .mcard{min-width:0;padding:5px 4px;border-radius:6px;background:rgba(11,18,35,.64);}
++  #cards.vl-cards-overlay .mcard .ml{font-size:7px;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
++  #cards.vl-cards-overlay .mcard .mv{font-size:14px;}
++  #cards.vl-cards-overlay .mcard .ms{font-size:6.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
++  #spark.vl-spark-overlay{position:static!important;flex:0 0 auto;margin:0!important;padding:6px!important;display:block!important;}
++  #spark.vl-spark-overlay canvas{display:block;width:210px;height:auto;max-width:18vw;}
++  .vl-sst-diagnostics-group{margin-top:10px;padding:8px;border:1px solid rgba(85,214,255,.28);border-radius:9px;background:rgba(85,214,255,.025);}
++  .vl-sst-diagnostics-title{margin:0 2px 7px;font-size:8.5px;font-weight:700;letter-spacing:.13em;color:var(--vl-active);}
++  .vl-sst-diagnostics-group>details.subcoll{margin:7px 0 0!important;}
++  @media (max-width:1350px){
++    .vl-live-overlay{flex-basis:270px;width:min(270px,27vw);}
++    #cards.vl-cards-overlay{flex-basis:390px;width:min(430px,43vw);}
++    #spark.vl-spark-overlay canvas{width:180px;}
++  }
++  @media (max-width:980px){
++    .vl-sim-bottom-overlays{left:calc(var(--vl-rail-w) + 8px);right:8px;bottom:8px;overflow-x:auto;padding-bottom:2px;}
++    .vl-live-overlay{flex:0 0 260px;width:260px;}
++    #cards.vl-cards-overlay{flex:0 0 390px;width:390px;}
++    #spark.vl-spark-overlay{flex:0 0 190px;}
++    #spark.vl-spark-overlay canvas{width:176px;max-width:none;}
++    body.vl-dual-ui #flag{max-width:calc(100vw - 20px);}
++  }
++
+   .vl-dock{position:fixed;top:var(--vl-topbar-h);bottom:0;width:calc(var(--vl-rail-w) + var(--vl-panel-w));pointer-events:none;z-index:65;}
+   .vl-dock-left{left:0;}.vl-dock-right{right:0;}
+   .vl-dock-rail{position:absolute;top:0;bottom:0;width:var(--vl-rail-w);display:flex;flex-direction:column;
+@@ -927,6 +983,8 @@
+         <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cGhostRing"> Ghost Stewartson ring</label>
+         <label class="chk hidden" id="oscRow" style="margin-top:4px;"><input type="checkbox" id="cTaylorOsc"> w(t) oscillatie (Taylor)</label>
+         <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTwProxy"> transport-proxy ∫u·t̂ dt (ex-Tw_proxy)</label>
++        <section class="vl-sst-diagnostics-group" id="sstResearchDiagnostics" aria-label="SST Research-Track diagnostiek">
++          <div class="vl-sst-diagnostics-title">SST RESEARCH-TRACK DIAGNOSTIEK</div>
+         <details class="subcoll" id="chiPhasePanel" open style="margin-top:9px;">
+           <summary>SST · χ-FASE / TRACK B <span class="tag">pakket v16B.0</span></summary>
+           <div class="subcoll-body">
+@@ -991,6 +1049,7 @@
+             <div class="note" style="margin-top:7px;">Definitie: \(\sigma_{\parallel}=\hat{\mathbf t}^{\mathsf T}\mathbf S\hat{\mathbf t}\), \(\mathcal G_K=\int\langle\sigma_{\parallel}\rangle_Ldt=\ln[L(t)/L_0]\), \(\Lambda_K=\mathcal G_K/\Delta t\). De dimensieloze gate gebruikt \(\Lambda^*=\tau_{\rm ref}\Lambda_K\); een stationaire of periodiek begrensde SST-drager vereist asymptotisch \(\Lambda^*\to0\). De analytische profielreferentie gebruikt \(|\omega_h(t)|/|\omega_h(0)|=\sqrt{1+[r_ptA'(r_p)]^2}\). De axiale modus is as-regulier gemaakt met \(q(r)=(r/R_{\rm cyl})^m\), wat de exacte geadvecteerde vorm \(W=q(r)F[\theta-tA(r)]\) behoudt. Profielkoppeling bovenop Biot–Savart is een perturbatietest; alleen profiel-only is de gereduceerde exacte benchmark.</div>
+           </div>
+         </details>
++        </section>
+       </div>
+     </details>
+ 
+@@ -1154,7 +1213,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.2 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.3 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1165,7 +1224,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.2';
++const APP_VERSION='7.6.3';
+ const APP_BASE_VERSION='7.5.3';
+ const APP_PATCH_NOTES=[
+   'Topologiebehoud: contact-CFL, transient-contact bracketing en landing aan de veilige zijde van de 3a-grens; geen numerieke reconnectie of doorsnijding wordt geaccepteerd',
+@@ -1180,7 +1239,9 @@
+   'Taylor-forcing geldt uitsluitend in solo-modus en wordt vóór iedere contacttest in volle en gebisecteerde kandidaatstappen toegepast',
+   'g_a gebruikt exact a_sim; een afzonderlijke effectieve ratio verwerkt uitsluitend de expliciet gelabelde numerieke contactvloer',
+   'Planck/String-schaalprobe is passieve a_probe-metadata, strikt gescheiden van a_sim, r_kern, R_horn, stretch-gate en BEM',
+-  'Canon/provenance, diagnostische NaN-serialisatie en de volledige regressiematrix zijn aangescherpt'
++  'Canon/provenance, diagnostische NaN-serialisatie en de volledige regressiematrix zijn aangescherpt',
++  'UI: topology/contactmeldingen staan onder de topbar; LIVE STABILITEIT, geometriekaarten en sparkline vormen permanente onderste simulatoroverlays',
++  'UI: χ-fase/Track B en de vortex-stretching gate zijn expliciet gegroepeerd onder GEOMETRISCHE DIAGNOSTIEK'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -5050,7 +5111,7 @@
+     if(focus)buttons[idx].focus({preventScroll:true});
+     if(notify&&typeof onActivate==='function')onActivate(activeKey);
+   }
+-  function setOpen(value){open=!!value;dock.classList.toggle('is-open',open);try{localStorage.setItem('vortexlab.dual.'+side+'.open',open?'1':'0');}catch(_){ }}
++  function setOpen(value){open=!!value;dock.classList.toggle('is-open',open);try{localStorage.setItem('vortexlab.dual.'+side+'.open',open?'1':'0');}catch(_){ }window.vlUpdateOverlayOffsets?.();}
+   buttons.forEach((b,i)=>{
+     b.addEventListener('click',()=>{if(activeKey===specs[i].key&&open)setOpen(false);else{activate(specs[i].key);setOpen(true);window.vlEnforceDockSpace?.(side);}});
+     b.addEventListener('keydown',e=>{
+@@ -5131,9 +5192,16 @@
+   // maar is nu opvraagbaar als tab.
+   const info=document.createElement('div');info.className='vl-info-stack';
+   const oldLeft=vlNode('ui-left');if(oldLeft)while(oldLeft.firstChild)info.appendChild(oldLeft.firstChild);
+-  const cards=vlNode('cards');if(cards)info.appendChild(cards);
+-  const liveTitle=document.createElement('div');liveTitle.className='vl-info-section-title';liveTitle.textContent='LIVE STABILITEIT';info.appendChild(liveTitle);
+-  const stabilityPanel=vlNode('stabilityPanel'),stabilityAdvice=vlNode('stabilityAdvice');vlMove(stabilityPanel,info);vlMove(stabilityAdvice,info);
++
++  // Live diagnostiek blijft zichtbaar op het simulatorcanvas, los van de INFO-tab.
++  const bottomOverlays=document.createElement('div');bottomOverlays.className='vl-sim-bottom-overlays';bottomOverlays.id='vlSimBottomOverlays';
++  const liveBlock=document.createElement('section');liveBlock.className='vl-live-overlay vl-overlay-surface';liveBlock.setAttribute('aria-label','Live stabiliteit');
++  const liveTitle=document.createElement('div');liveTitle.className='vl-info-section-title';liveTitle.textContent='LIVE STABILITEIT';liveBlock.appendChild(liveTitle);
++  const stabilityPanel=vlNode('stabilityPanel'),stabilityAdvice=vlNode('stabilityAdvice');vlMove(stabilityPanel,liveBlock);vlMove(stabilityAdvice,liveBlock);
++  const cards=vlNode('cards');if(cards){cards.classList.add('vl-cards-overlay','vl-overlay-surface');bottomOverlays.appendChild(cards);}
++  const spark=vlNode('spark');if(spark){spark.classList.add('vl-spark-overlay','vl-overlay-surface');bottomOverlays.appendChild(spark);}
++  bottomOverlays.insertBefore(liveBlock,bottomOverlays.firstChild);
++  shell.appendChild(bottomOverlays);
+ 
+   // Bedieningsdelen van stabiliteit horen onder VORTEX; meetinformatie blijft onder INFO.
+   const vortexFlags=vlNode('stabGroupVortexFlags');
+@@ -5154,6 +5222,13 @@
+   const fromLeft=key=>{if(pairing||!right)return;const target=key==='info'?'diag':(key==='flow'?'core':null);if(!target)return;pairing=true;right.activate(target,false,false);right.setOpen(true);pairing=false;};
+   const fromRight=key=>{if(pairing||!left)return;const target=key==='diag'?'info':(key==='core'?'flow':null);if(!target)return;pairing=true;left.activate(target,false,false);left.setOpen(true);pairing=false;};
+   left=vlCreateDock('left',leftSpecs,'flow',fromLeft);right=vlCreateDock('right',rightSpecs,'core',fromRight);
++  window.vlUpdateOverlayOffsets=()=>{
++    const leftEdge=left?.isOpen()
++      ?'calc(var(--vl-rail-w) + var(--vl-panel-w) + 12px)'
++      :'calc(var(--vl-rail-w) + 12px)';
++    document.documentElement.style.setProperty('--vl-overlay-left',leftEdge);
++  };
++  window.vlUpdateOverlayOffsets();
+   if(left.getActive()==='info'||left.getActive()==='flow')fromLeft(left.getActive());
+   shell.append(left.dock,right.dock);document.body.appendChild(shell);
+   window.vlEnforceDockSpace=side=>{if(innerWidth<1080){if(side==='left')right.setOpen(false);else left.setOpen(false);}};

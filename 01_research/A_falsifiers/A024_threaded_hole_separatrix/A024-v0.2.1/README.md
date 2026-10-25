@@ -42,21 +42,21 @@ The default strict preregistration requires `d_min/a > 2.5`. `TWIST_6_1` is excl
 
 The induced source is
 
-\[
+$$
 S_\delta=-\rho\,\partial_i v_j\partial_jv_i\big|_{A-B},
-\]
+$$
 
 and free-space pressure is evaluated from
 
-\[
+$$
 p(\mathbf x)=-\frac{1}{4\pi}\int\frac{S(\mathbf x')}{|\mathbf x-\mathbf x'|}\,d^3x'.
-\]
+$$
 
 The blind runner fits the anonymous pair-difference profile to
 
-\[
+$$
 p_A-p_B=A+\frac{B}{r^\nu}
-\]
+$$
 
 without a gravity target. Reveal may call the candidate gravity closure surviving only if **all** are satisfied:
 

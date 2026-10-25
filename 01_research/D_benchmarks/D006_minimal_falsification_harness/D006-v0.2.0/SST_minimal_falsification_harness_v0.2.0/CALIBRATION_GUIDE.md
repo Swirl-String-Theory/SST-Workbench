@@ -6,13 +6,13 @@ needed to determine the coefficients of \(\Delta\).
 
 For every calibration row, the required equation is
 
-\[
+$$
 y_n=
 \mathscr R_{\rm micro}[\gamma_n,f_n,\Omega_{3,n}]
 -\frac{8\pi}{3}\mathcal L_{D,n}
 =
 \sum_a A_{na}c_a.
-\]
+$$
 
 Here:
 
@@ -31,15 +31,15 @@ Here:
 A free feature `length` should normally be removed from \(\Delta\), or fixed by
 the renormalization condition
 
-\[
+$$
 c_L=0.
-\]
+$$
 
 Otherwise
 
-\[
+$$
 \Delta=c_L\mathcal L_D+\cdots
-\]
+$$
 
 is degenerate with the leading coefficient \(8\pi/3\), and \(c_L\) can simply
 absorb the desired trefoil discrepancy. That would not be an independent
@@ -47,22 +47,22 @@ prediction.
 
 The recommended minimal model is therefore
 
-\[
+$$
 \Delta=
 c_\kappa I_{\kappa^2}
 +c_\Omega I_{\Omega^2}
 +c_C C_{\rm contact}.
-\]
+$$
 
 ## What `ideal_favorites.txt` contributes
 
 For each knot it provides:
 
-\[
+$$
 \mathcal L_D,\qquad
 I_{\kappa^2},\qquad
 C_{\rm contact}
-\]
+$$
 
 after Fourier reconstruction. These are the **right-hand-side features**.
 It does not provide the left-hand-side calibration values \(y_n\).

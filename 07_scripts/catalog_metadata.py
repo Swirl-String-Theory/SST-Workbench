@@ -44,7 +44,7 @@ FAMILY_HOMES: dict[str, list[str]] = {
 
 #: directories inside a family that are not versions
 NON_VERSION = {"_variants", "keys", "references", "__pycache__",
-               ".venv", ".pytest_cache", "build", "dist"}
+               ".venv", ".pytest_cache", "build", "dist", "TO_DELETE"}
 
 KIND_BY_LETTER = {
     "A_falsifiers": "falsifier",

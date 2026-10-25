@@ -19,24 +19,24 @@ Key fields:
 
 For row number `r=0,...,M-1` and inferred origin `nu`,
 
-\[
+$$
 \mathbf X(t)=\sum_{r=0}^{M-1}
 \left[\mathbf A_r\cos((r+\nu)t)+\mathbf B_r\sin((r+\nu)t)\right].
-\]
+$$
 
 The six columns are
 
-\[
+$$
 (a_x,b_x,a_y,b_y,a_z,b_z).
-\]
+$$
 
 ## `.short` representation
 
 Each numeric row is exactly
 
-\[
+$$
 (x_i,y_i,z_i).
-\]
+$$
 
 Comment lines beginning with `%`, `#`, `;`, or `//` are ignored. Decimal precision does not affect parsing.
 
@@ -59,37 +59,37 @@ Shape RMSD is scale independent. Length and radius ratios retain the source scal
 
 For a closed polygon with vertices `x_i`,
 
-\[
+$$
 L_N=\sum_i\lVert\mathbf{x}_{i+1}-\mathbf{x}_i\rVert.
-\]
+$$
 
 The discrete circumcircle curvature proxy is
 
-\[
+$$
 \kappa_i=
 \frac{2\lVert(\mathbf{x}_i-\mathbf{x}_{i-1})\times
 (\mathbf{x}_{i+1}-\mathbf{x}_i)\rVert}
 {\lVert\mathbf{x}_i-\mathbf{x}_{i-1}\rVert
  \lVert\mathbf{x}_{i+1}-\mathbf{x}_i\rVert
  \lVert\mathbf{x}_{i+1}-\mathbf{x}_{i-1}\rVert}.
-\]
+$$
 
 The sampled reach proxy is
 
-\[
+$$
 r_{\rm reach}^{\rm proxy}
 =
 \min\left(\frac{1}{\kappa_{\max}},\frac{d_{\rm nonlocal}}{2},
 \frac{d_{\rm inter}}{2}\right).
-\]
+$$
 
 The package reports
 
-\[
+$$
 \mathcal R_{\rm radius}^{\rm proxy}=\frac{L}{r_{\rm reach}^{\rm proxy}},
 \qquad
 \mathcal R_D^{\rm proxy}=\frac{L}{2r_{\rm reach}^{\rm proxy}}.
-\]
+$$
 
 These are sampled diagnostics, not exact thickness certificates.
 

@@ -1,0 +1,381 @@
+{
+  "catalog_dependencies": [
+    {
+      "catalog_ref": "02/A/A001",
+      "dependency_id": "library.geometry",
+      "role": "optional_library_provider"
+    },
+    {
+      "catalog_ref": "02/A/A002",
+      "dependency_id": "library.knot",
+      "role": "optional_library_provider"
+    },
+    {
+      "catalog_ref": "04/A/A001",
+      "dependency_id": "tool.knotplot",
+      "role": "producer_tool"
+    },
+    {
+      "catalog_ref": "04/A/A002",
+      "dependency_id": "tool.ridgerunner",
+      "role": "producer_tool"
+    },
+    {
+      "catalog_ref": "04/B/B001",
+      "dependency_id": "tool.katlas_crawler",
+      "role": "producer_tool"
+    },
+    {
+      "catalog_ref": "01/E/E006",
+      "dependency_id": "pipeline.qhp_sweep",
+      "role": "producer_pipeline"
+    },
+    {
+      "catalog_ref": "01/E/E007",
+      "dependency_id": "pipeline.qhp_generator",
+      "role": "producer_pipeline"
+    },
+    {
+      "catalog_ref": "01/E/E008",
+      "dependency_id": "pipeline.katlas_conditioning",
+      "role": "producer_pipeline"
+    },
+    {
+      "catalog_ref": "01/E/E009",
+      "dependency_id": "pipeline.ptsa",
+      "role": "source_native_generator"
+    }
+  ],
+  "description": "Production source contract for E010 PKLSA v0.3.1 on the canonical SST-Workbench layout. Catalog-ref pipelines are pinned to their current canonical version directories so doctor() can resolve them without heuristic admission.",
+  "guards": {
+    "generated_not_upstream": true,
+    "katlas_native_not_metric_3d": true,
+    "no_guessed_topology_crosswalks": true,
+    "prefer_live_registry_over_snapshot": true,
+    "quarantine_never_admitted": true,
+    "unknown_sources_audit_only": true
+  },
+  "registry": {
+    "catalog_index": "10_docs/registry/catalog_index.json",
+    "family_hierarchy": "10_docs/registry/family_hierarchy.json",
+    "migration_path_map": "10_docs/migration/path_map.csv"
+  },
+  "schema": "PKLSA-WORKBENCH-SOURCE-CONTRACT-PRODUCTION-2",
+  "sources": [
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/01_ideal/ideal_sources"
+      ],
+      "kind": "geometry_catalog",
+      "legacy_globs": [
+        "Ideal_Sources"
+      ],
+      "method_group": "gilbert_ideal",
+      "provider_group": "gilbert",
+      "required": true,
+      "role": "upstream_reference_geometry",
+      "source_id": "ideal.gilbert"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/01_ideal/ideal_12_data"
+      ],
+      "kind": "geometry_data",
+      "legacy_globs": [],
+      "method_group": "ideal_geometry",
+      "provider_group": "ideal_12_data",
+      "required": false,
+      "role": "upstream_reference_geometry",
+      "source_id": "ideal.12_data"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/02_fourier/resources_swirl"
+      ],
+      "kind": "fourier_geometry",
+      "legacy_globs": [
+        "resources_swirl",
+        "resources-swirl"
+      ],
+      "method_group": "fourier_series",
+      "provider_group": "fourier_resources_swirl",
+      "required": true,
+      "role": "upstream_or_historical_geometry",
+      "source_id": "fourier.resources_swirl"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/02_fourier/knotplot_legacy"
+      ],
+      "kind": "fourier_geometry",
+      "legacy_globs": [
+        "KnotPlot/Knots_FourierSeries"
+      ],
+      "method_group": "fourier_series",
+      "provider_group": "knotplot_fourier",
+      "required": true,
+      "role": "mirror_or_historical_geometry",
+      "source_id": "fourier.knotplot_legacy"
+    },
+    {
+      "admit_geometry": false,
+      "canonical_paths": [
+        "03_data/A_knots/03_katlas/v0.2.2"
+      ],
+      "kind": "topology_reference",
+      "legacy_globs": [
+        "Katlas_Sources_v0.2.2_Outputs"
+      ],
+      "method_group": "topology_reference",
+      "provider_group": "katlas",
+      "required": true,
+      "role": "upstream_topology_reference",
+      "source_id": "katlas.v0.2.2"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/04_knotplot"
+      ],
+      "kind": "geometry_tree",
+      "legacy_globs": [
+        "KnotPlot/knots"
+      ],
+      "method_group": "knotplot_relaxation",
+      "provider_group": "knotplot",
+      "required": true,
+      "role": "upstream_and_relaxation_geometry",
+      "source_id": "knotplot.raw"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/05_twist_knots"
+      ],
+      "kind": "geometry_data",
+      "legacy_globs": [],
+      "method_group": "twist_knot_geometry",
+      "provider_group": "twist_knots",
+      "required": false,
+      "role": "upstream_or_generated_geometry",
+      "source_id": "twist_knots"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/06_knot_library/Sources"
+      ],
+      "kind": "geometry_tree",
+      "legacy_globs": [
+        "Knot_Library/Sources"
+      ],
+      "method_group": "source_import",
+      "provider_group": "sst_knot_library",
+      "required": true,
+      "role": "library_source_evidence",
+      "source_id": "knot_library.sources"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/06_knot_library/Derived"
+      ],
+      "kind": "geometry_tree",
+      "legacy_globs": [
+        "Knot_Library/Derived"
+      ],
+      "method_group": "derived_geometry",
+      "provider_group": "sst_knot_library",
+      "required": true,
+      "role": "derived_geometry",
+      "source_id": "knot_library.derived"
+    },
+    {
+      "admit_geometry": false,
+      "canonical_paths": [
+        "03_data/A_knots/06_knot_library/Registry"
+      ],
+      "kind": "registry",
+      "legacy_globs": [
+        "Knot_Library/Registry"
+      ],
+      "method_group": "registry",
+      "provider_group": "sst_knot_library",
+      "required": true,
+      "role": "identity_provenance_registry",
+      "source_id": "knot_library.registry"
+    },
+    {
+      "admit_geometry": false,
+      "canonical_paths": [
+        "03_data/A_knots/06_knot_library/Quarantine"
+      ],
+      "kind": "quarantine",
+      "legacy_globs": [
+        "Knot_Library/Quarantine"
+      ],
+      "method_group": "quarantine",
+      "provider_group": "sst_knot_library",
+      "required": true,
+      "role": "negative_audit_evidence",
+      "source_id": "knot_library.quarantine"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/A_knots/07_knotinfo"
+      ],
+      "kind": "topology_and_geometry_reference",
+      "legacy_globs": [
+        "KnotInfo",
+        "knotinfo"
+      ],
+      "method_group": "database_reference",
+      "provider_group": "knotinfo",
+      "required": true,
+      "role": "upstream_reference",
+      "source_id": "knotinfo"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/D_generated/qhp"
+      ],
+      "kind": "generated_geometry",
+      "legacy_globs": [
+        "KnotPlot/qhp",
+        "KnotPlot/qhp_6p3",
+        "KnotPlot/qhp_extended"
+      ],
+      "method_group": "qhp",
+      "provider_group": "sst_generated",
+      "required": false,
+      "role": "generated_campaign_geometry",
+      "source_id": "generated.qhp"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/D_generated/knotplot_reference"
+      ],
+      "kind": "generated_geometry",
+      "legacy_globs": [],
+      "method_group": "knotplot_reference_export",
+      "provider_group": "sst_generated",
+      "required": false,
+      "role": "generated_reference_geometry",
+      "source_id": "generated.knotplot_reference"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/D_generated/3d",
+        "03_data/D_generated/D001_3d_exports"
+      ],
+      "kind": "generated_geometry",
+      "legacy_globs": [
+        "3D"
+      ],
+      "method_group": "3d_export",
+      "provider_group": "sst_generated",
+      "required": false,
+      "role": "generated_geometry",
+      "source_id": "generated.3d"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "03_data/D_generated/trefoil_closure"
+      ],
+      "kind": "generated_geometry",
+      "legacy_globs": [
+        "SST_Trefoil_Closure"
+      ],
+      "method_group": "trefoil_closure",
+      "provider_group": "sst_generated",
+      "required": false,
+      "role": "generated_research_geometry",
+      "source_id": "generated.trefoil_closure"
+    },
+    {
+      "admit_geometry": false,
+      "canonical_paths": [
+        "03_data/A_knots/08_linkinfo",
+        "03_data/C_reference/linkinfo"
+      ],
+      "kind": "topology_reference",
+      "legacy_globs": [
+        "linkinfo_data_complete.xls"
+      ],
+      "method_group": "database_reference",
+      "provider_group": "linkinfo",
+      "required": false,
+      "role": "optional_upstream_topology_reference",
+      "source_id": "linkinfo"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "01_research/E_pipelines/E009_ptsa_parametric_trefoil_seed_atlas/E009-v1.0.0"
+      ],
+      "catalog_ref": "01/E/E009",
+      "kind": "generated_geometry",
+      "legacy_globs": [
+        "PTSA_Parametric_Trefoil_Seed_Atlas_v1.0.0"
+      ],
+      "method_group": "ptsa_analytic_track",
+      "provider_group": "ptsa",
+      "required": true,
+      "role": "source_native_parametric_generator",
+      "source_id": "pipeline.ptsa_e009"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "01_research/E_pipelines/E008_katlas_link_geometry_conditioning/E008-v2.0.0"
+      ],
+      "catalog_ref": "01/E/E008",
+      "kind": "generated_geometry",
+      "legacy_globs": [
+        "SST_Katlas_Link_Geometry_Conditioning_v2.0.0"
+      ],
+      "method_group": "katlas_conditioning",
+      "provider_group": "sst_generated",
+      "required": false,
+      "role": "derived_from_topology_reference",
+      "source_id": "pipeline.katlas_conditioning_e008"
+    },
+    {
+      "admit_geometry": false,
+      "canonical_paths": [
+        "03_data/A_knots/04_knotplot/PKLSA_KnotPlot_Native_Census_v0.1.2"
+      ],
+      "extension_note": "Opt-in coordinates; not an independent provider or an automatically admitted evidence carrier.",
+      "kind": "geometry_catalog",
+      "legacy_globs": [],
+      "method_group": "knotplot_catalogue_and_procedural_native",
+      "provider_group": "knotplot",
+      "required": false,
+      "role": "native_geometry_baseline_opt_in_topology_identity_unverified",
+      "source_id": "knotplot.native_census.v0.1.2"
+    },
+    {
+      "admit_geometry": true,
+      "canonical_paths": [
+        "02_libraries/A_knot_libraries/A003_Fourier_Knot_Seed_Atlas/A003-v0.1.2"
+      ],
+      "independence_note": "Analytic F3/F4 seed families; no empirical or external provider independence",
+      "kind": "geometry_atlas",
+      "legacy_globs": [],
+      "method_group": "a003_fourier_torus",
+      "provider_group": "a003_analytic_seed_atlas",
+      "required": false,
+      "role": "generated_analytic_geometry_seed",
+      "source_id": "a003.fourier_torus.f3_f4.v0.1.2"
+    }
+  ]
+}

@@ -9,8 +9,8 @@ Primary validation for this release:
 
 Current automated status:
 
-\[
+$$
 \boxed{18/18\ \text{tests pass}}
-\]
+$$
 
 Wheel import and the installed-module `selftest` also pass.

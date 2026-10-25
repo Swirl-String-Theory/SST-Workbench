@@ -14,35 +14,35 @@ De letterlijke interpretatie waarin de microscopische vortexknoop zelf tot de Bo
 
 De logisch overblijvende structuur is:
 
-\[
+$$
 \boxed{
 \text{compacte topologische kern}
 +
 \text{uitgestrekte gebonden envelope-eigenmodus}.
 }
-\]
+$$
 
 ## 2. Minimale veldinhoud
 
 Neem een envelopeveld \(\Psi\) gekoppeld aan een compacte knoopbron \(K\):
 
-\[
+$$
 \Psi(\mathbf x,t)
 =
 \psi(\mathbf x)e^{-i\omega t}.
-\]
+$$
 
 Een algemene eigenvergelijking is:
 
-\[
+$$
 \mathcal H_K\psi_n
 =
 \mathcal E_n\psi_n.
-\]
+$$
 
 De operator mag niet achteraf worden gekozen om het waterstofspectrum te reproduceren. Een kandidaat is:
 
-\[
+$$
 \mathcal H_K
 =
 -\nabla\cdot A_K(\mathbf x)\nabla
@@ -52,7 +52,7 @@ V_K(\mathbf x)
 \mathcal T_K
 +
 \mathcal S_K,
-\]
+$$
 
 waar:
 
@@ -65,11 +65,11 @@ waar:
 
 Een succesvolle operator moet zonder Bohrinput genereren:
 
-\[
+$$
 E_{n\ell mj},
 \qquad
 n,\ell,m,j,
-\]
+$$
 
 plus:
 
@@ -87,21 +87,21 @@ De leading Coulombachtige \(-1/r\)-vorm alleen is onvoldoende. Ook de action qua
 
 De volgende stap is niet toegestaan als afleiding:
 
-\[
+$$
 \Gamma_n=n\Gamma_{\rm env}
 \quad\Rightarrow\quad
 r_n\propto n^2,
 \quad
 E_n\propto-n^{-2},
-\]
+$$
 
 wanneer \(\Gamma_n=n\Gamma\) slechts wordt gepostuleerd. Dat is precies de quantisatieregel die verklaard moet worden.
 
 Een echte route moet een eigenvalue condition leveren, bijvoorbeeld:
 
-\[
+$$
 \det\mathcal M(\mathcal E)=0,
-\]
+$$
 
 of een single-valuedness/topological boundary condition die discrete waarden afdwingt.
 
@@ -111,14 +111,14 @@ of een single-valuedness/topological boundary condition die discrete waarden afd
 
 Na symmetriereductie:
 
-\[
+$$
 -\frac{d}{dr}
 \left[p(r)\frac{du}{dr}\right]
 +
 q_{K\ell}(r)u
 =
 \lambda w(r)u.
-\]
+$$
 
 De functies \(p,q,w\) moeten uit de mediumactie volgen.
 
@@ -126,11 +126,11 @@ De functies \(p,q,w\) moeten uit de mediumactie volgen.
 
 Een compacte knoop kan een defect in een link/torsion field vormen. Lineariseer rond de defectachtergrond:
 
-\[
+$$
 \delta^2S_K\,\psi_n
 =
 \lambda_n\psi_n.
-\]
+$$
 
 Dan zijn de atomaire modes normale modes van de defectachtergrond.
 
@@ -138,13 +138,13 @@ Dan zijn de atomaire modes normale modes van de defectachtergrond.
 
 Wanneer de kern periodiek intern beweegt, kan de envelope een Floquetprobleem zijn:
 
-\[
+$$
 \left(\mathcal H_K(t)-i\partial_t\right)u_\alpha(t)
 =
 \varepsilon_\alpha u_\alpha(t),
 \qquad
 u_\alpha(t+T)=u_\alpha(t).
-\]
+$$
 
 ### 5.4 Topological bundle route
 
@@ -172,19 +172,19 @@ Controleer of de operator vanzelf een complete set labels en degeneracies levert
 
 Leid de koppeling aan een propagating torsion/link mode af en bereken:
 
-\[
+$$
 \langle f|\mathcal O_{\rm rad}|i\rangle.
-\]
+$$
 
 ### A5 — Preregistered spectral ratios
 
 Test eerst dimensionless verhoudingen, bijvoorbeeld:
 
-\[
+$$
 \mathcal R_{21}
 =
 \frac{E_2-E_1}{E_3-E_1},
-\]
+$$
 
 zonder absolute energiecalibratie.
 
@@ -222,12 +222,12 @@ De envelopebranch faalt wanneer:
 
 Niet meteen de volledige Lamb shift, maar een parameterarme dimensieloze bound-state ratio:
 
-\[
+$$
 \boxed{
 \mathcal R_{\rm env}
 =
 \frac{E_2-E_1}{E_3-E_1}
 }
-\]
+$$
 
 voor één vooraf afgeleide operator, gevolgd door vergelijking met een onafhankelijke numerieke of experimentele benchmark.

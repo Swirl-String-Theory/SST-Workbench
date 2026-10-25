@@ -4,7 +4,7 @@ v0.2.0 extends the v0.1.x structural result into a rotating-frame, delay-aware, 
 
 The tested architecture is
 
-\[
+$$
 \boxed{
 \mathbf u
 \rightarrow
@@ -12,22 +12,22 @@ The tested architecture is
 \rightarrow
 \Phi_{\rm bulk}
 }
-\]
+$$
 
 with two explicitly separate extensions:
 
-\[
+$$
 \boldsymbol\omega_{\rm abs}
 =\boldsymbol\omega_{\rm rel}+2\boldsymbol\Omega_p,
-\]
+$$
 
 and
 
-\[
+$$
 M_\tau(t)=\Gamma(t)-\Gamma(t-\tau),
 \qquad
 \Delta\phi=\omega\tau.
-\]
+$$
 
 ## What v0.2.0 tests
 

@@ -4,17 +4,17 @@
 
 Integreer de SST-elektroncenterline
 
-\[
+$$
 K=3_1=T(2,3)
-\]
+$$
 
 in het gevalideerde Hopfveld, zonder centerline-knooptype en Hopf-lading te identificeren.
 
 De classificatie is:
 
-\[
+$$
 \boxed{(K,Q_H)}.
-\]
+$$
 
 ## Gatekoppeling
 
@@ -24,21 +24,21 @@ De classificatie is:
 
 Centerline:
 
-\[
+$$
 K=3_1.
-\]
+$$
 
 Veld:
 
-\[
+$$
 Q_H\in\mathbb Z.
-\]
+$$
 
 Er geldt niet automatisch:
 
-\[
+$$
 K=3_1\Rightarrow Q_H=1.
-\]
+$$
 
 ## Werkpakketten
 
@@ -48,14 +48,14 @@ K=3_1\Rightarrow Q_H=1.
    ```
 2. Construeer een glad Bishop-/material frame.
 3. Registreer:
-   \[
+   $$
    Wr,\qquad Tw,\qquad SL=Wr+Tw.
-   \]
+   $$
 4. Bouw \(\Psi_{3_1}\) met de gevalideerde methode uit stap 3.
 5. Bereken onafhankelijk:
-   \[
+   $$
    K,\quad Q_H,\quad\mathcal H,\quad Wr,\quad Tw,\quad Lk.
-   \]
+   $$
 6. Test gladde vervorming, framingtwist, phase slips, near-contact, reconnection en core-profilevariatie.
 7. Maak een eventledger voor veranderingen in \(K,Q_H,\mathcal H,Wr,Tw,Lk\).
 8. Zoek voorbeelden waarin \(K\) en \(Q_H\) onafhankelijk variëren.
@@ -74,9 +74,9 @@ Een gecombineerde certificatie vereist:
 
 ### Sterke route
 
-\[
+$$
 (K,Q_H)=(3_1,1)
-\]
+$$
 
 blijft stabiel en H5–H9 sluiten.
 

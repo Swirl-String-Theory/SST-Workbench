@@ -46,11 +46,11 @@ SINGLE_PROVIDER_ONLY
 
 The available provider is still allowed to produce Kelvin/RPO diagnostics. However:
 
-\[
+$$
 N_{\rm provider}<2
 \quad\Longrightarrow\quad
 \text{particle promotion}=FAIL.
-\]
+$$
 
 This preserves useful numerical evidence without pretending that cross-provider validation occurred.
 
@@ -64,11 +64,11 @@ Every production run performs:
 
 Frozen defaults:
 
-\[
+$$
 \frac{\|f_{\rm cpp}-f_{\rm py}\|_2}{\|f_{\rm py}\|_2}\le10^{-10},
 \qquad
 \|f_{\rm cpp}-f_{\rm py}\|_\infty\le10^{-11}.
-\]
+$$
 
 If this gate fails, the BLIND campaign does not start. Silent Python fallback is prohibited in production.
 

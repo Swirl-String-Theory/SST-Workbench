@@ -30,22 +30,22 @@ Failure of (1) does not logically invalidate measurements in (2), so the DAG is 
 
 For the exact volume-preserving affine map
 
-\[
+$$
 \mathbf{F}(t)=\operatorname{diag}\!\left(e^{at},e^{-at/2},e^{-at/2}\right),
 \qquad \det\mathbf{F}=1,
-\]
+$$
 
 P0 checks the Cauchy map
 
-\[
+$$
 \boldsymbol{\omega}(t)=\mathbf{F}(t)\boldsymbol{\omega}_0,
-\]
+$$
 
 including the implication
 
-\[
+$$
 \boldsymbol{\omega}_0=0\iff \boldsymbol{\omega}(t)=0
-\]
+$$
 
 for invertible \(\mathbf F\). P1 checks material-volume conservation. P2 checks reciprocal stretching of vorticity magnitude and cross-sectional area so that vorticity flux remains fixed.
 
@@ -74,8 +74,8 @@ X0 evaluates provider robustness after the per-carrier H/P gates. For each opaqu
 
 The agreement statistic is
 
-\[
+$$
 A_{T,g}=\frac{\max_s n_s(T,g)}{N_{\mathrm{provider}}(T,g)}.
-\]
+$$
 
 The preregistered threshold is \(A_{T,g}\ge0.80\) for every eligible topology/gate comparison. This gate tests representation/provider dependence; it does not claim that topological class alone uniquely determines the dynamical observables.

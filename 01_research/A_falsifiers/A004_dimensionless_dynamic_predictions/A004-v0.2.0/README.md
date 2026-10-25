@@ -3,37 +3,37 @@
 Deze release breidt de v0.1.0-harness uit met een opgelegde achtergrondvortex met
 \(R_{\rm bg}\to\infty\). Dit is de overal geldige binnenste Rankine-tak:
 
-\[
+$$
 \mathbf u_{\rm bg}=\boldsymbol\Omega_{\rm bg}\times(\mathbf x-\mathbf x_0),
 \qquad
 \boldsymbol\zeta_{\rm bg}=2\boldsymbol\Omega_{\rm bg}.
-\]
+$$
 
 De door de gebruiker opgegeven combinatie
 
-\[
+$$
 \alpha c r_c=2v_{\circlearrowleft}r_c
-\]
+$$
 
 heeft de dimensie van circulatie, niet van vorticiteit. De fysisch consistente
 vertaling is
 
-\[
+$$
 \zeta_{\rm bg}=\frac{\alpha c r_c}{r_c^2}
 =\frac{\alpha c}{r_c}
 =\frac{2v_{\circlearrowleft}}{r_c},
 \qquad
 \Omega_{\rm bg}=\frac{v_{\circlearrowleft}}{r_c}.
-\]
+$$
 
 Wanneer de circulatie-eenheid de canonieke
 \(\Gamma_0=2\pi r_cv_{\circlearrowleft}\) is en de lengte-eenheid \(r_c\), is
 
-\[
+$$
 \zeta_{\rm bg}^*=\frac{\zeta_{\rm bg}r_c^2}{\Gamma_0}=\frac1\pi,
 \qquad
 \Omega_{\rm bg}^*=\frac1{2\pi}.
-\]
+$$
 
 **Analytische guard:** een uniforme solid-body-vorticiteit voegt alleen een
 rigide rotatie toe. Omdat de relative-equilibrium-gate vrije translatie en
@@ -54,17 +54,17 @@ finite-radius overgang of een andere niet-rigide ruimtelijke structuur.
 
 De centrale conclusie van het laatste antwoord is:
 
-\[
+$$
 \boxed{
 \text{SST kan echte niet-algebraïsche dynamische berekeningen uitvoeren,}
 \quad
 \text{maar heeft nog geen gevalideerde onafhankelijke fysieke voorspelling.}
 }
-\]
+$$
 
 Het relevante onderscheid is:
 
-\[
+$$
 \boxed{
 \text{algebraïsche herschrijving}
 \neq
@@ -72,7 +72,7 @@ Het relevante onderscheid is:
 \neq
 \text{gevalideerde fysieke voorspelling}.
 }
-\]
+$$
 
 De huidige SST-sterkte ligt vooral in:
 
@@ -83,12 +83,12 @@ De huidige SST-sterkte ligt vooral in:
 
 De huidige beperking is:
 
-\[
+$$
 \boxed{
 \text{geen bestaande berekening levert reeds onafhankelijk }
 \alpha,\ m_e,\ G,\ c\text{ of het atomaire spectrum.}
 }
-\]
+$$
 
 ## 2. De tien belangrijkste bevindingen
 
@@ -100,24 +100,24 @@ Biot--Savart-residuen, geometrische energieratio's, knot-action-ratio's, niet-li
 
 In de eerdere audit slaagde de ronde ring voor de relative-equilibrium-gate, terwijl de statische \(3_1\)- en \(4_1\)-atlasvormen faalden. De belangrijke consequentie is:
 
-\[
+$$
 \boxed{
 \text{ropelength-optimaal}
 \not\Rightarrow
 \text{dynamisch periodiek of relatief stationair}.
 }
-\]
+$$
 
 Een fysieke knooptoestand moet eerst een oplossing, relative equilibrium, periodieke baan of relative-periodic orbit van één vastgelegde dynamica zijn.
 
 ### 2.3 De geometrische \(\alpha\)-formule is de sterkste onafhankelijke constantekandidaat
 
-\[
+$$
 \alpha^{-1}_{\rm lead}
 =
 \frac{8\pi}{3}\mathcal L_{3_1}
 \approx137.15471
-\]
+$$
 
 is tijdens evaluatie \(\alpha\)-vrij en ligt circa \(866\) ppm van CODATA. Dat is interessant, maar de prefactor en correctietermen zijn nog niet uniek bepaald. De huidige CANON v0.8.34 classificeert dit terecht als een parameterlichte sub-per-mille coincidentie plus obstructieresultaat, niet als ppm-afleiding.
 
@@ -129,14 +129,14 @@ In de verhouding \(M_n/M_p\) vallen gemeenschappelijke calibraties weg. De oude 
 
 De eerder verkregen closure kan worden gereduceerd tot
 
-\[
+$$
 \beta_Q(\chi)
 =
 \frac{\chi^3}{2}
 \exp\!\left[\frac{\pi^2\chi^6-1}{4}\right],
 \qquad
 \chi=\frac{a_{\rm core}}{r_c}.
-\]
+$$
 
 Rond \(\chi=1\) is de logaritmische gevoeligheid ongeveer \(17.8\). Eén onbepaalde geometrische parameter is dus al voldoende om \(c_T\) sterk te verschuiven of zelfs op \(c\) af te stemmen. Zonder onafhankelijk variatietheorema is monometriciteit geen voorspelling.
 
@@ -144,9 +144,9 @@ Rond \(\chi=1\) is de logaritmische gevoeligheid ongeveer \(17.8\). Eén onbepaa
 
 Hoewel \(15c_T/c\) numeriek dicht bij één kan liggen, vermenigvuldigt een verzameling van vijftien identieke gekoppelde elementen normaal zowel inertie als stijfheid. Dan blijft
 
-\[
+$$
 c=a\sqrt{K/I}
-\]
+$$
 
 onveranderd. Een factor vijftien vereist een specifiek asymmetrisch of collectief koppelingsmechanisme dat uit de dynamica volgt.
 
@@ -158,13 +158,13 @@ De huidige eenvoudige boundary-state-telling mist de benodigde entropy-area-dich
 
 Een enkele canonieke core-circulatie draagt slechts een zeer klein deel van een atomaire actie-eenheid. Een Bohr-ladder ontstaat in het simpele potentiaalmodel pas nadat de gewenste circulatiequantisatie wordt opgelegd. Een mogelijke overblijvende route is daarom:
 
-\[
+$$
 \boxed{
 \text{microscopische knoopkern}
 +
 \text{afzonderlijke atomaire envelope-eigenmodus}.
 }
-\]
+$$
 
 ### 2.9 De meeste mooie constanteformules zijn Rosetta-relaties
 
@@ -174,7 +174,7 @@ De relaties voor de swirl speed, hornradius, maximale swirl force, Bohrstraal, R
 
 De snelste verdedigbare route is niet direct een nieuwe dimensionale constante, maar bijvoorbeeld:
 
-\[
+$$
 \boxed{
 \mathcal R_E(K)
 =
@@ -188,18 +188,18 @@ De snelste verdedigbare route is niet direct een nieuwe dimensionale constante, 
 =
 \frac{U_K/R_K}{U_{0_1}/R_{0_1}}.
 }
-\]
+$$
 
 Deze ratio's kunnen zo worden opgezet dat
 
-\[
+$$
 \frac{\partial\mathcal R}{\partial\alpha}
 =
 \frac{\partial\mathcal R}{\partial m_e}
 =
 \frac{\partial\mathcal R}{\partial G}
 =0.
-\]
+$$
 
 ## 3. De vijf vervolgonderzoeken
 
@@ -269,11 +269,11 @@ Het script levert nog geen:
 
 De huidige status is daarom:
 
-\[
+$$
 \boxed{
 \texttt{RESEARCH-TRACK HARNESS / DIMENSIONLESS PRE-PREDICTION STAGE}
 }
-\]
+$$
 
 ## 6. Normalisatieprotocol
 
@@ -291,7 +291,7 @@ Dit protocol fixeert bij gelijke \(\epsilon\) ook hetzelfde eenvoudige tube-volu
 
 Per topologie worden onder andere berekend:
 
-\[
+$$
 \mathcal R_E
 =
 \frac{E_K}{E_{0_1}},
@@ -300,9 +300,9 @@ Per topologie worden onder andere berekend:
 =
 \frac{\sqrt{(U_K/R_K)^2+|\Omega_K|^2}}
 {\sqrt{(U_{0_1}/R_{0_1})^2+|\Omega_{0_1}|^2}},
-\]
+$$
 
-\[
+$$
 \mathcal R_{\rm def}
 =
 \frac{\dot q_{\rm def}(K)}{\dot q_{\rm def}(0_1)},
@@ -314,7 +314,7 @@ Per topologie worden onder andere berekend:
 \mathcal R_B
 =
 \frac{\oint\kappa_K^2ds}{\oint\kappa_{0_1}^2ds}.
-\]
+$$
 
 De ring dient als interne numerieke benchmark, niet als experimentele calibratie.
 
@@ -472,13 +472,13 @@ De deep-research audit is oorspronkelijk uitgevoerd tegen een eerdere CANON-snap
 
 ## 15. Eindstatus
 
-\[
+$$
 \boxed{
 \text{SST is momenteel een falsifieerbaar onderzoeksprogramma met echte}
 \atop
 \text{niet-algebraïsche berekeningen, maar nog zonder bevestigde onafhankelijke voorspelling.}
 }
-\]
+$$
 
 De eerste serieuze kans is een robuuste, preregistreerde en extern geteste dimensieloze dynamische knoopratio.
 

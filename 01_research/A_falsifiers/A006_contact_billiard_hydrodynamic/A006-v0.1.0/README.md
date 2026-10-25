@@ -2,7 +2,7 @@
 
 Zelf-contained Python research harness voor de keten
 
-\[
+$$
 \boxed{
 \text{contactmap}
 \rightarrow
@@ -12,7 +12,7 @@ Zelf-contained Python research harness voor de keten
 \rightarrow
 \text{onafhankelijke finite-core hydrodynamische test}
 }
-\]
+$$
 
 Het pakket is ontworpen voor **SST-Workbench** en accepteert zowel Brian Gilberts
 `ideal.txt`/`ideal_favorites.txt` als KnotPlot/Ridgerunner XYZ-, TXT- en
@@ -143,9 +143,9 @@ F_gr_max    = 3.02563e43 N
 
 De standaardcirculatie is
 
-\[
+$$
 \Gamma_c=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}},
-\]
+$$
 
 en de geometrische thickness wordt standaard naar \(r_c\) geschaald. Deze mapping
 is een expliciete SST-onderzoeksaanname, geen uitkomst van de knoopgeometrie.

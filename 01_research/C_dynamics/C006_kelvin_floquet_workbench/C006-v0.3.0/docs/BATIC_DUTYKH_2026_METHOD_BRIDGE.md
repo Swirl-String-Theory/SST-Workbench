@@ -40,16 +40,16 @@ For the closed knot, a periodic Fourier representation is structurally more natu
 
 A future C006 version may open K19 and use the QEP backend if an SST derivation supplies, for two perturbation sectors,
 
-\[
+$$
 L_j(\lambda)\psi_j=0,
 \qquad j\in\{A,B\},
-\]
+$$
 
 with registered domain, boundary/periodicity conditions, finite-core closure, and normalization. At that point one can independently discretize the operators, track roots under resolution, test
 
-\[
+$$
 L_B\mathcal{A}-\mathcal{A}L_A=0,
-\]
+$$
 
 and compare the resulting local spectrum against nonlinear time-domain/Floquet behavior.
 

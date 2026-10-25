@@ -6,9 +6,9 @@ Fourteen ordered 2D control points for 5_2 and 6_1, one closed `\strand`, TikZ `
 
 Let the closed interpolation be `r(u) = (x(u),y(u))`, with `u ∈ R/Z`. For each **transverse** self-crossing solve `r(u_j) = r(v_j)` with `u_j != v_j`. For alternating knots assign the sorted encounter sequence `O,U,O,U,...`. A smooth lift is
 
-\[
+$$
  X(u) = (x(u), y(u), z(u)), \qquad z(u)=H\sum_{j=1}^{2n} \varepsilon_j \exp[-d_{S^1}(u,u_j)^2/(2w^2)],
-\]
+$$
 
 where `H=0.10`, `w=0.011`, `epsilon_j=+1` for over and `−1` for under encounters, and `d_{S^1}` is the shortest distance on the unit parameter circle. Every crossing gets an explicit nonzero height difference; independent 3D segment clearance is tested after uniform 3D arclength discretization.
 

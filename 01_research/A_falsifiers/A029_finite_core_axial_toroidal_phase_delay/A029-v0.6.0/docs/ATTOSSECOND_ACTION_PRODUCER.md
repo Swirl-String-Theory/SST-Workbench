@@ -8,46 +8,46 @@ A029 already contains finite-core eigenmodes, intrinsic/advection frequency sepa
 
 If an SST calculation supplies a physical **mass-specific Lagrangian difference**
 
-\[
+$$
 \delta\ell(t)
 \quad [\delta\ell]=\mathrm{m^2\,s^{-2}},
-\]
+$$
 
 then A029 may derive
 
-\[
+$$
 \boxed{
 \delta s(t)=\int_{t_0}^{t}\delta\ell(t')\,dt'
 }
-\]
+$$
 
 with
 
-\[
+$$
 [\delta s]=\mathrm{m^2\,s^{-1}}.
-\]
+$$
 
 For a material parcel moving in a **prescribed** incompressible-Euler pressure field, v0.5.0 also exposes the effective diagnostic
 
-\[
+$$
 \ell_{\rm eff}=\frac12|\mathbf v|^2-\frac{p}{\rho_{\!f}},
-\]
+$$
 
 so that a candidate-minus-reference trajectory can provide
 
-\[
+$$
 \delta\ell_{\rm eff}
 =\frac12\left(|\mathbf v_1|^2-|\mathbf v_0|^2\right)
 -\frac{p_1-p_0}{\rho_{\!f}}.
-\]
+$$
 
 Every term has units \(\mathrm{m^2\,s^{-2}}\). This is a **trajectory-level effective action diagnostic**, not a claim that \(\tfrac12v^2-p/\rho_{\!f}\) is the complete constrained Euler-field action. The upstream solver must still supply self-consistent pressure and enforce incompressibility. The further identification of this mechanical action difference with a quantum phase remains the SST bridge hypothesis.
 
 This is exactly the input type required by the target-blind A042-v0.3.0 bridge:
 
-\[
+$$
 \delta\phi=\frac{\delta s}{(\hbar/m)_{\rm QGI}}.
-\]
+$$
 
 ## What v0.5.0 explicitly refuses
 
@@ -64,9 +64,9 @@ are **not** converted into SI action. Doing that without a physical scale/action
 
 A stationary-channel relation
 
-\[
+$$
 \delta s=-\varepsilon\,\delta t
-\]
+$$
 
 is dimensionally valid when \(\varepsilon\) is specific energy, but remains `CONDITIONAL_SPECIFIC_ACTION` unless the contract independently certifies that this relation was derived for the SST channel being exported.
 

@@ -29,10 +29,10 @@ run_all.cmd
 
 The source atlas coordinates \(\mathbf X^*\) are dimensionless. A **user-chosen**, positive dimensionless finite-core radius \(a_*\) gives a *conditional* scale
 
-\[
+$$
 \ell_0 = \frac{r_c}{a_*},\quad r_c=1.40897017\times10^{-15}\,\mathrm m,\quad
 \mathbf X_{\rm SI}=\ell_0\mathbf X^*,\quad L_{\rm SI}=\ell_0 L_*.
-\]
+$$
 
 **Nothing in the Fourier centerline proves that \(a_*\) equals the physical vortex core radius.** In particular, assigning \(a_* = 0.05\) is an example, **not** an SST measurement or canonical dimensionless core radius. It gives \(\ell_0=2.81794034\times10^{-14}\,\mathrm{m}\) per coordinate unit.
 

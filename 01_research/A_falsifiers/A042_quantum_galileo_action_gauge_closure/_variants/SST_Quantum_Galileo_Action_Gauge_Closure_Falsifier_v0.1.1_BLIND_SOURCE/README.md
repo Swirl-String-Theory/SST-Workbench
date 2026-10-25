@@ -8,10 +8,10 @@ SST action scale was not an independent blind discovery of Planck's constant.
 The provenance audit shows that the legacy definitions already contain \(\hbar\) upstream.
 Consequently,
 
-\[
+$$
 4\pi^2\rho_{\text{core}}
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}r_c^4=h
-\]
+$$
 
 is an algebraic echo in that legacy chain.
 
@@ -49,11 +49,11 @@ and never as SST evidence.
 
 The blind stage works in action units:
 
-\[
+$$
 \Delta S_{\rm QGI}
 =
 -\frac13 m g^2T^3.
-\]
+$$
 
 It independently integrates the laboratory action and the accelerated-frame gauge
 boundary term. These gates require no Planck constant.
@@ -86,11 +86,11 @@ run_reveal.cmd
 
 A genuinely target-blind empirical inference can use measured QGI phase values:
 
-\[
+$$
 \hbar_{\rm QGI}(T)
 =
 -\frac{m g^2T^3}{3\Delta\phi_{\rm measured}(T)}.
-\]
+$$
 
 This requires actual measured/extracted phase values. v0.1.1 does not fabricate synthetic
 phase data. If no real phase dataset is supplied, the empirical gate reports:

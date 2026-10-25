@@ -14,76 +14,76 @@ The simulation/scoring path contains no user-set `tau_delay`, `feedback_delay`, 
 
 The centerline evolves with a regularized Biot–Savart filament kernel. In the primary branch the desingularization radius is a **material core variable**, not a fixed plotting parameter:
 
-\[
+$$
 \dot{\mathbf X}(s_i)=\frac{\Gamma}{4\pi}\sum_j
 \frac{\Delta\mathbf X_j\times(\mathbf X_i-\mathbf X_{j+1/2})}
 {\left(|\mathbf X_i-\mathbf X_{j+1/2}|^2+a^2\right)^{3/2}}.
-\]
+$$
 
 For each Lagrangian segment, incompressible material-tube volume conservation is imposed as
 
-\[
+$$
 a_j^2(t)\,\ell_j(t)=a_{j0}^2\,\ell_{j0},
 \qquad
  a_j(t)=a_{j0}\sqrt{\frac{\ell_{j0}}{\ell_j(t)}}.
-\]
+$$
 
 That segment-dependent \(a_j(t)\) is fed back into the next Biot–Savart/RK4 evaluation. Thus vortex stretching is part of the **dynamics**, rather than merely a recorded diagnostic. The measured line-stretch rate is
 
-\[
+$$
 \sigma_j=\frac{1}{\ell_j}(\mathbf u_{j+1}-\mathbf u_j)\cdot\hat{\mathbf t}_j
 \approx \hat{\mathbf t}^{\!T}(\nabla\mathbf u)\hat{\mathbf t},
-\]
+$$
 
 and, for an ideal incompressible material vortex tube,
 
-\[
+$$
 \frac{D\ln|\boldsymbol\omega|}{Dt}=\sigma,
 \qquad
 \frac{D\ln a}{Dt}=-\frac{\sigma}{2}.
-\]
+$$
 
 A matched **fixed-core null** repeats the extended campaign with exponent zero, \(a_j(t)=a_{j0}\). A stretch-mediated claim is not promoted if this null produces the same phase-causality result.
 
 The global breathing coordinate is based on the arclength-weighted radius of gyration
 
-\[
+$$
 q(t)=\frac{R_g(t)}{R_g(0)}-1.
-\]
+$$
 
 A matched pair has identical carrier, breathing arm and packet location, but opposite **anonymous** ripple arm. Pair differencing isolates the ripple-sensitive stretching field
 
-\[
+$$
 \Delta\sigma=\frac{\sigma_{+}-\sigma_{-}}{2}.
-\]
+$$
 
 Circular cross-correlation tracks this packet around the material coordinate. `tau_return` is the first measured full-loop crossing; it is never supplied to the dynamics.
 
 The breathing clock is required to be a coherent harmonic rather than an arbitrary Hilbert phase. Around the dominant spectral peak the code refines \(\omega_b\) and fits
 
-\[
+$$
 q(t)\simeq q_0+A_c\cos(\omega_b t)+A_s\sin(\omega_b t),
-\]
+$$
 
 so the measured return phase is
 
-\[
+$$
 \phi_{\rm ret}=\omega_b t_{\rm ret}-\operatorname{atan2}(A_s,A_c)\pmod{2\pi}.
-\]
+$$
 
 Coefficient covariance, frequency-grid resolution, and packet-return-time uncertainty are propagated into `return_phase_uncertainty_rad`; a primary-valid pair requires this to be at most \(0.25\,\mathrm{rad}\).
 
 The anonymous differential post-return acceleration is converted to a restoring response
 
-\[
+$$
 Y=-q(t_{\rm ret})\,\Delta\ddot q_{\rm post}.
-\]
+$$
 
 The primary across-carrier test is a carrier-held-out circular regression
 
-\[
+$$
 Y=\beta_0+\beta_c\cos\phi_{\rm ret}+\beta_s\sin\phi_{\rm ret}+\epsilon.
-\]
+$$
 
 ## Primary gate
 
@@ -164,17 +164,17 @@ It does **not** establish full 3-D Euler finite-core stability, a unique physica
 
 Using
 
-\[
+$$
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}=1.09384563\times10^6\ \mathrm{m\,s^{-1}},\qquad
 r_c=1.40897017\times10^{-15}\ \mathrm{m},
-\]
+$$
 
 the corresponding circulation scale is
 
-\[
+$$
 \Gamma_c=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
 =9.68361920349\times10^{-9}\ \mathrm{m^2\,s^{-1}}.
-\]
+$$
 
 The campaign itself is nondimensional because the imported KnotPlot geometries have arbitrary overall scale; this avoids smuggling an unmeasured physical size into the causality test.
 

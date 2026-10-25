@@ -8,10 +8,10 @@ The package tests the research-track consequences suggested by J. C. Maxwell's 1
 
 For an active strut/kink rigidity matrix \(A\) and non-negative multiplier vector \(\Lambda\), the package audits the first-order balance
 
-\[
+$$
 -\nabla E + A\Lambda = 0,
 \qquad \Lambda\ge 0.
-\]
+$$
 
 The default energy is polygonal length, so the C++ core writes \(b=\nabla L\) and Python solves \(A\Lambda\simeq b\). A different SST energy can be supplied in a later adapter; the current release must **not** be described as having tested an undeclared full SST energy functional.
 
@@ -19,24 +19,24 @@ The campaign covers six Maxwell/SST questions:
 
 1. **Local reciprocal force closure.** Does the fitted or solver-supplied contact-force system close at every resolved vertex rather than only in one global norm?
 2. **Rank / nullspaces.** What are \(\operatorname{rank}A\), \(\dim\ker A\), and \(\dim\ker A^{\mathsf T}\)? The positive self-stress cone
-   \[
+   $$
    \mathcal C_+=\ker A\cap\mathbb R_{\ge0}^{M}
-   \]
+   $$
    is tested by linear programming on the normalized slice \(\sum_j\lambda_j=1\).
 3. **SST force--area normalization.** The package verifies the existing v0.8.35 coherence identity
-   \[
+   $$
    F_{\rm swirl}^{\max}=\pi r_c^2\,\rho_{\rm horn}^{\rm eff}\,\lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert^2
-   \]
+   $$
    and therefore, only for a force already expressed in newtons,
-   \[
+   $$
    \frac{A^\star}{\pi r_c^2}=\frac{F}{F_{\rm swirl}^{\max}},\qquad
    A^\star=\frac{F}{\rho_{\rm horn}^{\rm eff}\lVert\mathbf v_{\!\boldsymbol{\circlearrowleft}}\rVert^2}.
-   \]
+   $$
    Length-minimization KKT multipliers are **not** silently converted into newtons.
 4. **Near-singular / pre-event diagnostic.** The package records
-   \[
+   $$
    \zeta=\frac{\sigma_{\min}^{+}(A)}{\sigma_{\max}(A)}.
-   \]
+   $$
    A small value is a conditioning warning. It is not, by itself, a Kairos event or a dynamical-instability proof.
 5. **Strict reciprocity versus redundant force representation.** Missing dual-cell incidence is reported as `UNTESTED`, not as a mechanical failure. Mechanical equilibrium can pass even when a strict Maxwell reciprocal complex is unavailable.
 6. **Projection sanity and resolution convergence.** Local closure is projected to fixed random 2-planes as a numerical consistency check, and normalized arclength contact maps are compared across a blinded resolution ladder using a symmetric Hausdorff metric on \(S^1\times S^1\).

@@ -2,17 +2,17 @@
 
 Research-track audit harness for the Separatrix Surface-Density Lift (SSDL) route:
 
-\[
+$$
 \rho_f^{\rm SSDL}
 = \frac{\Omega_{\Lambda,0}}{\ell_P}\Pi_0\Lambda_\partial^{-1}\Pi_0[\rho_\Lambda]
-\]
+$$
 
 For a spherical electron separatrix:
 
-\[
+$$
 \rho_f^{\rm SSDL}
 = \Omega_{\Lambda,0}\left(\frac{R_e}{\ell_P}\right)\rho_\Lambda.
-\]
+$$
 
 ## What this package verifies
 

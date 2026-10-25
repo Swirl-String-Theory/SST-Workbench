@@ -36,31 +36,31 @@ GRB-fitting module.  It never imports A044 observational targets.
 
 The central output is a dimensionless, provenance-qualified branch
 
-\[
+$$
 \hat k_m = \frac{2\pi m D}{L}, \qquad
 \hat\omega_m = \operatorname{Im}\hat\lambda_m ,
-\]
+$$
 
 where \(D\) and \(L\) are the E011/Gilbert source scales and
 \(\hat\lambda_m\) is extracted by the existing C006 projected temporal
 Biot–Savart generator.  The corresponding dimensional mapping, if and only if an
 independent scale contract is explicitly supplied, is
 
-\[
+$$
 \Omega_\Gamma=\frac{|\Gamma|}{4\pi D_{\rm phys}^2},
 \qquad
 k_m = \frac{\hat k_m}{D_{\rm phys}},
 \qquad
 \omega_m=\Omega_\Gamma\hat\omega_m .
-\]
+$$
 
 Then
 
-\[
+$$
 v_g = \frac{d\omega}{dk}
     = \frac{|\Gamma|}{4\pi D_{\rm phys}}
       \frac{d\hat\omega}{d\hat k}.
-\]
+$$
 
 No value of \(D_{\rm phys}\), photon energy, or \(E_{\rm LIV}\) is inferred by
 E012.  Those mappings must come from an independently justified SST contract.

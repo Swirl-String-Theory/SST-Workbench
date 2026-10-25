@@ -20,9 +20,9 @@ Its top-level physics verdict is always `NOT_APPLICABLE_WORKFLOW_VALIDATION`.
 
 The primary question is no longer “is the currently relaxed KnotPlot trefoil stable?” but:
 
-\[
+$$
 \boxed{\text{Which trefoil start shape most naturally begins as a coherent moving/rolling vortex object?}}
-\]
+$$
 
 Only after a seed is independently qualified do the stronger orbital and mechanism gates run.
 
@@ -75,18 +75,18 @@ The early score no longer rewards a low POD rank (`pod` weight is frozen to `0.0
 
 The rolling fit is
 
-\[
+$$
 \mathbf u_\perp(s) \approx \mathbf V+\boldsymbol\Omega\times(\mathbf X-\mathbf X_c),
-\]
+$$
 
 and `rolling_coherence` measures the fraction of normal velocity explained by this rigid component.
 
 ### 3. Separate spatial and temporal certification
 S30 still tests the frozen spatial ladder. New S32 reruns selected candidates with
 
-\[
+$$
 \Delta t,\quad \Delta t/2,\quad \Delta t/4
-\]
+$$
 
 at fixed spatial resolution. A case passes either by an absolute shape-error floor/tolerance or by the preregistered observed convergence order. This prevents “N-convergence” from hiding timestep error.
 
@@ -96,11 +96,11 @@ S35 reports all candidates inside a preregistered relative score band. A unique 
 ### 5. Parameterization-invariant long dynamics
 S40 uses a purely tangential segment-length feedback gauge:
 
-\[
+$$
 \alpha_{i+1}-\alpha_i=-k(\ell_i-\bar\ell),
 \qquad
 \mathbf u_{\rm mesh}=\alpha_i\hat{\mathbf t}_i.
-\]
+$$
 
 The RMS mesh speed is capped relative to physical Biot-Savart RMS speed. Shape observables are evaluated after uniform arclength resampling, cyclic parameter-origin alignment, rigid alignment and normal projection, so bead-index drift is not interpreted as physics.
 
@@ -122,9 +122,9 @@ A trajectory that later stops may still supply a near-return candidate if the re
 ### 8. Mechanism remains downstream of existence
 S60 may run only on S50 candidates. A material-core predictive effect is insufficient by itself: it must also exceed the fixed-core null by a preregistered margin. The delay is measured from the trajectories; the phase
 
-\[
+$$
 \phi=\omega_{\rm measured}\tau_{\rm measured}\pmod{2\pi}
-\]
+$$
 
 is diagnostic output only. No preferred phase or supplied feedback delay enters the dynamics.
 

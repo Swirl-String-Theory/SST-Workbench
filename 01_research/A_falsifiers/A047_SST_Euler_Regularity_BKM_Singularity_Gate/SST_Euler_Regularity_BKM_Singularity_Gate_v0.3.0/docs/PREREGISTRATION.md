@@ -16,19 +16,19 @@ Each admitted source is re-hashed and its decoded geometry must reproduce E010's
 
 ## Primary observable
 
-\[
+$$
 B(t)=\int_0^t \|\boldsymbol\omega(s)\|_{L^\infty}\,ds,
 \qquad
 M_\omega(t)=\|\boldsymbol\omega(t)\|_{L^\infty}.
-\]
+$$
 
 The late-window screening fit is
 
-\[
+$$
 M_\omega(t)^{-1}\approx a t+b,
 \qquad
 T_*=-b/a,
-\]
+$$
 
 only for \(a<0\). A single-run candidate requires \(R^2\ge0.98\) and \(T<T_*\le1.5T\). This is a numerical screening heuristic, not a sufficient mathematical blow-up criterion.
 
@@ -40,11 +40,11 @@ Global escalation requires at least three numerically valid candidate runs at th
 
 The selected config freezes its own energy threshold. BASIC uses
 
-\[
+$$
 \frac{|E(T)-E(0)|}{|E(0)|}<10^{-4},
 \qquad
 \max_t\|\nabla\cdot\mathbf u\|_{\rm RMS}<10^{-10}.
-\]
+$$
 
 The certification template tightens the energy-drift threshold to \(5\times10^{-5}\).
 

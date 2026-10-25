@@ -2,9 +2,9 @@
 
 ## Verdict
 
-\[
+$$
 \boxed{\text{D0 partially fails, while the mathematical and numerical rod project remains feasible.}}
-\]
+$$
 
 The public literature supplies energies, topology labels, figures, analytic
 axial circles and initial-field constructions, but not a complete
@@ -20,15 +20,15 @@ independent field/rod reconstruction campaign.
 
 The HSS axial solutions are completely specified analytically:
 
-\[
+$$
 \gamma_Q(\theta)=b_Q(\cos\theta,\sin\theta,0),\qquad
 b_Q=\sqrt{1+C Q^2},
-\]
+$$
 
-\[
+$$
 L_Q=2\pi b_Q,\qquad
 \alpha(s)=\frac{2\pi Q}{L_Q}s .
-\]
+$$
 
 Therefore \(Q=1,2\), and the unstable axial continuation for higher \(Q\), can
 be generated machine-readably without external files.
@@ -66,14 +66,14 @@ They also do not determine the HSS material framing.
 
 ### D0 status
 
-\[
+$$
 \boxed{
 \begin{array}{ll}
 Q=1,2\text{ axial circles} & \text{available analytically},\\
 Q=3,\dots,7\text{ HSS non-axial rods} & \text{must be regenerated or requested},\\
 Q=1,\dots,16\text{ SF final centrelines/frames} & \text{must be regenerated or requested}.
 \end{array}}
-\]
+$$
 
 The cheapest next action is a concise data request to the three HSS authors,
 followed in parallel by an independent rod reimplementation.
@@ -84,7 +84,7 @@ followed in parallel by an independent rod reimplementation.
 
 For components \(\gamma_\mu:[0,L_\mu]\to\mathbb R^3\), define
 
-\[
+$$
 \mathcal N_a
 =
 \frac12\sum_{\mu,\nu}
@@ -92,21 +92,21 @@ For components \(\gamma_\mu:[0,L_\mu]\to\mathbb R^3\), define
 \frac{\mathbf t_\mu(s)\cdot\mathbf t_\nu(s')}
 {\sqrt{|\gamma_\mu(s)-\gamma_\nu(s')|^2+a^2}}
 \,ds\,ds'.
-\]
+$$
 
 The same-component diagonal contains the local line contribution already
 represented by the HSS length, curvature and twist terms. Let
 
-\[
+$$
 d_{L_\mu}(s,s')
 =
 \min\{|s-s'|,L_\mu-|s-s'|\}
-\]
+$$
 
 be periodic arclength distance and choose a subtraction range
 \(0<\ell_{\rm sub}\le L_\mu/2\). A sharp-window baseline is
 
-\[
+$$
 \boxed{
 \mathcal N^{\rm ren}_{a,\ell_{\rm sub}}
 =
@@ -118,33 +118,33 @@ be periodic arclength distance and choose a subtraction range
 {\sqrt{d_{L_\mu}(s,s')^2+a^2}}
 \,ds\,ds' .
 }
-\]
+$$
 
 The subtraction for component \(\mu\) is
 
-\[
+$$
 L_\mu\operatorname{arsinh}\!\left(\frac{\ell_{\rm sub}}a\right).
-\]
+$$
 
 Near \(u=s'-s=0\),
 
-\[
+$$
 |\gamma(s+u)-\gamma(s)|^2
 =
 u^2-\frac{\kappa^2u^4}{12}+O(u^5),
-\]
+$$
 
-\[
+$$
 \mathbf t(s)\cdot\mathbf t(s+u)
 =
 1-\frac{\kappa^2u^2}{2}+O(u^3),
-\]
+$$
 
 so in the \(a\to0\) limit the subtracted integrand behaves as
 
-\[
+$$
 -\frac{11}{24}\kappa^2|u|+O(u^2),
-\]
+$$
 
 which is integrable.
 
@@ -163,13 +163,13 @@ analytic circle value.
 
 For a circle of major radius \(b\),
 
-\[
+$$
 \gamma(\theta)=b(\cos\theta,\sin\theta,0),\qquad L=2\pi b,
-\]
+$$
 
 the raw signed Neumann-type functional is
 
-\[
+$$
 \boxed{
 \mathcal N_a^\circ(b)
 =
@@ -180,17 +180,17 @@ the raw signed Neumann-type functional is
 (a^2+4b^2)E(m)
 \right],
 }
-\]
+$$
 
 where \(K,E\) are complete elliptic integrals and
 
-\[
+$$
 m=\frac{4b^2}{a^2+4b^2}.
-\]
+$$
 
 The sharp-window renormalized value is
 
-\[
+$$
 \boxed{
 \mathcal N_{a,\ell_{\rm sub}}^{\circ,\rm ren}(b)
 =
@@ -199,35 +199,35 @@ The sharp-window renormalized value is
 2\pi b\,
 \operatorname{arsinh}\!\left(\frac{\ell_{\rm sub}}a\right).
 }
-\]
+$$
 
 For the global periodic subtraction
 \(\ell_{\rm sub}=L/2=\pi b\),
 
-\[
+$$
 \mathcal N_{a,\rm global}^{\circ,\rm ren}
 =
 \mathcal N_a^\circ
 -
 2\pi b\,\operatorname{arsinh}\!\left(\frac{\pi b}{a}\right).
-\]
+$$
 
 As \(a/b\to0\),
 
-\[
+$$
 \mathcal N_a^\circ
 =
 2\pi b\left[\log\!\left(\frac{8b}{a}\right)-2\right]
 +o(b),
-\]
+$$
 
 and the global-subtraction limit becomes
 
-\[
+$$
 \mathcal N_{\rm global}^{\circ,\rm ren}
 \longrightarrow
 2\pi b\left[\log\!\left(\frac4\pi\right)-2\right].
-\]
+$$
 
 The supplied script compares the elliptic-integral expression to direct
 quadrature.
@@ -238,7 +238,7 @@ quadrature.
 
 For an axial circle of radius \(b\), the provisional extended model is
 
-\[
+$$
 E_Q(b;C,g)
 =
 2\pi\left[
@@ -246,56 +246,56 @@ b+\frac{1+CQ^2}{b}
 \right]
 +
 g\,\mathcal N^{\circ,\rm ren}_a(b).
-\]
+$$
 
 After \(Q=1\) fixes energy and length scales, the \(Q=2\) energy ratio alone is
 one scalar observation:
 
-\[
+$$
 y_E=\frac{E_2}{E_1}.
-\]
+$$
 
 Its Jacobian with respect to \((C,g)\) is \(1\times2\), hence
 
-\[
+$$
 \boxed{\operatorname{rank}J_E\le1.}
-\]
+$$
 
 It cannot identify two parameters.
 
 If the independent \(Q=2\) length ratio is also used,
 
-\[
+$$
 \mathbf y=
 \left(
 \frac{E_2}{E_1},
 \frac{L_2}{L_1}
 \right),
-\]
+$$
 
 the Jacobian can be rank two. For the explicit global-subtraction baseline
 
-\[
+$$
 C=0.85,\qquad g=0,\qquad a=R=1.36,
-\]
+$$
 
 the numerical Jacobian is approximately
 
-\[
+$$
 J=
 \begin{pmatrix}
 0.28419 & -0.10148\\
 0.28529 & -0.01437
 \end{pmatrix},
-\]
+$$
 
 with
 
-\[
+$$
 \det J\simeq2.49\times10^{-2},\qquad
 \operatorname{rank}J=2,\qquad
 \kappa_2(J)\simeq6.8.
-\]
+$$
 
 Thus energy plus length is locally sufficient in this specific scheme.
 
@@ -310,15 +310,15 @@ As a diagnostic only, fitting the quoted HSS/SF ratios
 \((E_2/E_1,L_2/L_1)=(1.63,1.45)\) in this baseline gives an unconstrained
 solution near
 
-\[
+$$
 C\simeq1.167,\qquad g\simeq-0.249,
-\]
+$$
 
 outside Michell's interval. Constraining
 
-\[
+$$
 1/\sqrt3<C<\sqrt3/2
-\]
+$$
 
 cannot match both ratios in this baseline. This is not yet a falsification of
 all non-local models; it is an early warning that the signed kernel and
@@ -348,9 +348,9 @@ useful but not required for the feasibility phase.
 
 For each component store:
 
-\[
+$$
 \{\mathbf x_i,\ \beta_i,\ q_i\},
-\]
+$$
 
 where \(\mathbf x_i\) are vertices, \(\beta_i\) is the material-frame angle
 relative to a discrete Bishop frame, and \(q_i\) is the component twist/Hopf
@@ -361,20 +361,20 @@ allocation.
 Hard thickness preserves component number and isotopy class. Therefore a rod
 relaxer cannot reproduce
 
-\[
+$$
 K_{3,2}\to L
-\]
+$$
 
 as a continuous relaxation. Instead minimize each sector independently and
 compare energies.
 
 For \(Q=5,6,7\), the preregistered comparison is
 
-\[
+$$
 E_{\rm link}<E_{K_{3,2}}\quad(Q=5,6),
 \qquad
 E_{K_{3,2}}<E_{\rm link}\quad(Q=7).
-\]
+$$
 
 For \(K_{5,2}\), continue the same knot sector through twist/Hopf allocations
 \(Q=8,9,10,11\) and test local stability using repeated starts and a projected
@@ -391,11 +391,11 @@ Hessian or negative-mode search.
 
 ### Feasibility verdict
 
-\[
+$$
 \boxed{
 \text{sector relaxation is feasible; catalogue reconstruction, not optimization, is the bottleneck.}
 }
-\]
+$$
 
 ---
 

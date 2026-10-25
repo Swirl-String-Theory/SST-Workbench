@@ -102,13 +102,13 @@ No damping, mutual friction, VortexLab auto-relax, target ropelength, SST partic
 
 The native kernel follows the same structural split used by VortexLab: a local-induction term plus a nonlocal Biot-Savart segment sum. For one component,
 
-\[
+$$
 \mathbf u_i = \frac{\Gamma}{4\pi}
 \left[\ln\!\left(\frac{2\sqrt{\ell_-\ell_+}}{e^{\Delta}a}\right)+c_0\right]
 \mathbf s'_i\times\mathbf s''_i
 +\frac{\Gamma}{4\pi}\sum_{j\notin\{i-1,i\}}
 \frac{d\boldsymbol\ell_j\times\mathbf r_{ij}}{|\mathbf r_{ij}|^3}.
-\]
+$$
 
 Defaults use the VortexLab GP-core convention `Delta = 0.615` and measured discretization constant `c0 = 0.1395`. Integration is RK4 with a Kelvin-wave CFL estimate and arclength redistribution as marker-gauge control.
 
@@ -128,10 +128,10 @@ For each anonymous pair, the median log-ratio across those metrics determines A/
 
 After sealing, reveal converts the anonymous score into
 
-\[
+$$
 D=\operatorname{median}_m\ln\frac{x_{\mathrm{fseries},m}+\epsilon}
 {x_{\mathrm{reference},m}+\epsilon}.
-\]
+$$
 
 `D < 0` favors `.fseries`; `D > 0` favors the reference. Aggregate evidence uses a preregistered one-sided exact sign test at `alpha = 0.05` plus a minimum median effect of 10%. Thresholds are never adjusted during reveal.
 

@@ -5,9 +5,9 @@
 This file is alpha-blind. It does not contain or compare against CODATA alpha.
 The printed quantity is a candidate prediction under the provisional map
 
-\[
+$$
 \alpha_{\rm inv,pred}^{\rm blind}=\frac12 S_{\rm ren}(K/{\rm ref}).
-\]
+$$
 
 This map is a Route-B working hypothesis, not yet a theorem.
 

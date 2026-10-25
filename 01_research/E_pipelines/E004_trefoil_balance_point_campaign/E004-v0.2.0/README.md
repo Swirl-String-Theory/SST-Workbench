@@ -53,9 +53,9 @@ run_all.cmd
 The main result we want is not the smallest positive expansion. It is an
 actual measured sign transition:
 
-\[
+$$
 E'>0\quad\rightarrow\quad E'\approx0\quad\rightarrow\quad E'<0.
-\]
+$$
 
 The analyzer reports the first valid adjacent sign bracket and interpolates
 the corresponding q/h/p point.

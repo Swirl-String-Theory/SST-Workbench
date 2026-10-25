@@ -10,16 +10,16 @@ This prevents point density, global scale, translation and rotation from decidin
 
 Given centerline velocity `v`, fit the least-squares rigid velocity
 
-\[
+$$
 \mathbf v_{\rm rigid}(\mathbf x)=\mathbf U+\boldsymbol\Omega\times(\mathbf x-\bar{\mathbf x}).
-\]
+$$
 
 The remaining tangential part is marker reparametrization and is also removed. The dimensionless initial residual is
 
-\[
+$$
 R_{\rm RE}=\frac{\|\mathbf v-\mathbf v_{\rm rigid}-\mathbf v_{\parallel}\|_{\rm RMS}}
 {\|\mathbf v\|_{\rm RMS}}.
-\]
+$$
 
 A smaller value means the initial curve is closer to pure rigid translation/rotation under the tested vortex-filament dynamics.
 

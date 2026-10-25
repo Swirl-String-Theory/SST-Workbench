@@ -12,9 +12,9 @@ Every substrate thread crosses the carrier passage and closes through a remote r
 
 A component contributes to physical contact and Kelvin-wave CFL estimates only if
 
-\[
+$$
 |\Gamma_i|>\epsilon_\Gamma.
-\]
+$$
 
 Thus null-control ghost threads with `Gamma=0` preserve blind geometry without producing false collisions or time-step restrictions. They remain advected as passive tracers.
 
@@ -28,9 +28,9 @@ Thus null-control ghost threads with `Gamma=0` preserve blind geometry without p
 
 For each recorded geometry the central portions of the thread loops define a geometry-only bundle-radius proxy. The corresponding proxy density is
 
-\[
+$$
 n_B^{\rm proxy}=\frac{N_B}{\pi R_B^2}.
-\]
+$$
 
 Active-thread density growth is compared with the identical zero-circulation passive-tracer control.
 
@@ -38,23 +38,23 @@ Active-thread density growth is compared with the identical zero-circulation pas
 
 The source
 
-\[
+$$
 S_p=-\rho\,\partial_i v_j\partial_j v_i
-\]
+$$
 
 is sampled on a finite Cartesian source grid using non-periodic derivatives. The source mean is not subtracted. Pressure is evaluated at center/shell and radial spherical samples using the open Green function
 
-\[
+$$
 p(\mathbf x)=-\frac{1}{4\pi}\int \frac{S_p(\mathbf x')}{|\mathbf x-\mathbf x'|}\,d^3x'.
-\]
+$$
 
 The source moments include
 
-\[
+$$
 Q=\int S_p\,d^3x,
 \qquad
 \mathbf D=\int \mathbf x S_p\,d^3x,
-\]
+$$
 
 plus a quadrupole diagnostic. For the induced active-minus-null field, `Q_delta > 0` is the sign required for a negative `-Q_delta/(4 pi r)` monopole tail.
 
@@ -62,9 +62,9 @@ plus a quadrupole diagnostic. For the induced active-minus-null field, `Q_delta 
 
 Before reveal, the anonymous profile `p_A(r)-p_B(r)` is fit to
 
-\[
+$$
 A+B r^{-\nu}
-\]
+$$
 
 with `nu` searched freely. Pair reversal changes only the coefficient sign. Reveal supplies the target comparison only after sealing.
 
@@ -76,9 +76,9 @@ The dedicated far-field campaign varies source-grid resolution and source-box si
 
 Symmetric beta scans are decomposed after reveal as
 
-\[
+$$
 \Delta p=A\beta+B\beta^2+C\beta^3+D\beta^4.
-\]
+$$
 
 The sign of the even quadratic coefficient is tested carrier-by-carrier.
 

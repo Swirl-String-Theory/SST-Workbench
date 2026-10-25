@@ -13,13 +13,13 @@ falsification harness because it contains:
 
 The new upgrader converts the plan into concrete rows while enforcing
 
-\[
+$$
 c_L=0
-\]
+$$
 
 and the minimal response truncation
 
-\[
+$$
 \Delta
 =
 c_\kappa I_{\kappa^2}
@@ -27,7 +27,7 @@ c_\kappa I_{\kappa^2}
 c_\Omega I_{\Omega^2}
 +
 c_C C_{\rm contact}.
-\]
+$$
 
 ## Stage 1 — generate the v2 draft
 
@@ -60,13 +60,13 @@ Fill either `value` or `R_micro` for every row.
 
 When `R_micro` is supplied, the upgrader computes
 
-\[
+$$
 \texttt{value}
 =
 \mathscr R_{\rm micro}
 -
 \frac{8\pi}{3}\mathcal L_D.
-\]
+$$
 
 Also supply:
 
@@ -112,15 +112,15 @@ microscopic results.
 
 Allowing
 
-\[
+$$
 \Delta=c_L\mathcal L_D+\cdots
-\]
+$$
 
 changes the leading coefficient into
 
-\[
+$$
 \frac{8\pi}{3}+c_L.
-\]
+$$
 
 Then \(c_L\) can absorb the trefoil discrepancy by construction. Fixing
 \(c_L=0\) is therefore a necessary renormalization condition for an independent

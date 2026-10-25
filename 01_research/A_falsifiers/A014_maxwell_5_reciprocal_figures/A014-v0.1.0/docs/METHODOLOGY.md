@@ -4,32 +4,32 @@
 
 For active constraints \(g_j(X)\), the native core uses columns
 
-\[
+$$
 A_j=\nabla_X g_j.
-\]
+$$
 
 For inferred struts,
 
-\[
+$$
 g_j=\frac12 d_j,
-\]
+$$
 
 with closest points interpolated on the two polygon segments. For kinks,
 
-\[
+$$
 g_j=\operatorname{MinRad}_j,
-\]
+$$
 
 and its local 9-coordinate gradient is evaluated by centered finite differences.
 
 For the built-in length energy,
 
-\[
+$$
 b=\nabla_X L,
 \qquad
 A\Lambda\simeq b,
 \qquad \Lambda\ge0.
-\]
+$$
 
 This corresponds to the first-order balance \(-\nabla L+A\Lambda=0\).
 

@@ -2,9 +2,9 @@
 
 The external SYCL worker includes an experimental double-single arithmetic smoke.  A scalar is represented as two FP32 values,
 
-\[
+$$
 x \approx x_{\mathrm{hi}} + x_{\mathrm{lo}}.
-\]
+$$
 
 Addition uses compensated `TwoSum`/`QuickTwoSum`; multiplication uses an FMA product residual.  The worker is compiled with precise floating-point semantics to avoid reassociation invalidating compensated transforms.
 
@@ -12,9 +12,9 @@ The A056 package uses DD32 only as a framework/backend validation lane.  CPU/Pyt
 
 The local DD32 arithmetic smoke requires
 
-\[
+$$
 \varepsilon_{\mathrm{DD32}}\le 10^{-8}
-\]
+$$
 
 and at least a factor 20 error reduction relative to ordinary FP32 for the same cancellation-sensitive test.
 

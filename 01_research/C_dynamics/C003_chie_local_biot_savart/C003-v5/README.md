@@ -23,13 +23,13 @@ Research Track numerical infrastructure. The horn-torus module is a falsificatio
 
 The strict hollow-core factors are
 
-\[
+$$
 \chi_K,
 \qquad
 \chi_{\rm cav}=\pi^2\lambda,
 \qquad
 \chi_E^{\rm hollow}=\chi_K+\chi_{\rm cav}.
-\]
+$$
 
 If cavitation work counts as inertial rest energy, the hollow horn limit \(\lambda=1\) cannot match \(2\pi\), because \(\chi_{\rm cav}(1)=\pi^2>2\pi\) before kinetic energy is added.
 
@@ -46,11 +46,11 @@ target_renormalized  : diagnostic calibrated subtraction needed to force 2*pi
 
 In \(\Xi\)-normalization,
 
-\[
+$$
 \Xi_K=\Xi_{\rm filament},\qquad
 \Xi_{\rm cav}=\lambda/4,\qquad
 \Xi_{\rm hollow}=\Xi_K+\Xi_{\rm cav}.
-\]
+$$
 
 The modes select
 

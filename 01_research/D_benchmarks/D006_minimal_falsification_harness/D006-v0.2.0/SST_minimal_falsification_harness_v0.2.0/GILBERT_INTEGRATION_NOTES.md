@@ -10,20 +10,20 @@ The package now reads the uploaded Brian Gilbert database directly
 - date: 6/11/2016 2:12:11 p.m.
 - source record for the trefoil: `3:1:1`
 - reported trefoil values:
-  \[
+  $$
   L=16.371637,\qquad D=1,\qquad \mathcal L_D=16.371637.
-  \]
+  $$
 - retained nonzero Fourier records for `3:1:1`: 183
 - highest listed Fourier mode: 250
 
 The parser uses
 
-\[
+$$
 \mathbf X(t)=\sum_n
 \left[
 \mathbf A_n\cos(nt)+\mathbf B_n\sin(nt)
 \right].
-\]
+$$
 
 ## Usability gate (`C_cont`)
 
@@ -31,9 +31,9 @@ Roughly 144 of ~250 AB records reconstruct without self-contact and with
 \(\hat\kappa_{\max}=2\) exactly (curvature-only artifacts). Before treating a
 record as ideal, require the thickness-partition score
 
-\[
+$$
 C_{\mathrm{cont}}>0.05
-\]
+$$
 
 (implemented in SST-Workbench `sst_gilbert_usability.py`). Batch loaders skip
 rejected IDs and report counts. Escape hatch for diagnostics only:
@@ -48,15 +48,15 @@ On the usable contact set (~106 knots, 3–10 crossings):
 The database coefficients are printed to finite decimal precision. For `3:1:1`
 the current reconstruction gives approximately
 
-\[
+$$
 \mathcal L_D^{\rm Fourier}\approx16.37246043,
-\]
+$$
 
 whereas the database metadata reports
 
-\[
+$$
 \mathcal L_D^{\rm metadata}=16.371637.
-\]
+$$
 
 Therefore:
 
@@ -69,16 +69,16 @@ Therefore:
 
 With the packaged defaults and automatic sampling floor:
 
-\[
+$$
 \mathcal I_{\kappa^2}
 =
 \int(D\kappa)^2\frac{ds}{D}
 \approx19.44782476,
-\]
+$$
 
-\[
+$$
 \mathcal C_{\rm contact}\approx0.18698472.
-\]
+$$
 
 These are not universal constants. They depend on:
 
@@ -95,9 +95,9 @@ physical falsification claim.
 
 The packaged batch contains 21 single-component records:
 
-\[
+$$
 0_1,\ 3_1,\ 4_1,\ 5_1,\ 5_2,\ 6_1,\ 6_2,\ 6_3,\ldots,11_2.
-\]
+$$
 
 Multi-component links are skipped because the current response functional does
 not yet contain inter-component kernels.
@@ -109,6 +109,6 @@ The database materially improves the geometry stage and eliminates the previous
 observables needed to determine the Wilson coefficients. Therefore it enables
 stronger geometry and universality tests but does not by itself predict
 
-\[
+$$
 \Delta_{3_1}\simeq-0.117284.
-\]
+$$

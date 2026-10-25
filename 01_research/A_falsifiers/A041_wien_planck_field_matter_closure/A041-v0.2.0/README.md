@@ -4,9 +4,9 @@ v0.2.0 turns the v0.1 spreadsheet-style action comparison into a **raw-geometry 
 
 ## Central falsification question
 
-\[
+$$
 \boxed{\text{Does free SST-like vortex dynamics generate an amplitude-independent, carrier-independent action spacing?}}
-\]
+$$
 
 A discrete mode spectrum by itself is explicitly insufficient. The strongest negative control is the ordinary classical expectation \(E\propto A^2\), which implies \(\Delta E/f\propto A^2\).
 

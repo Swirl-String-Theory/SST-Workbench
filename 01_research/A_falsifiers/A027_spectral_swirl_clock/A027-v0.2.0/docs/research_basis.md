@@ -4,9 +4,9 @@ The falsifier borrows the *methodological* pattern of Sun et al. (2026): resolve
 
 For SST the proposed measured relation is not assumed to be CFT. The primary blind hypothesis is only that a low-|k| ridge admits a topology-independent linear asymptote
 
-\[
+$$
 \omega(k)=a+v_{\rm eff}|k|+o(|k|),
-\]
+$$
 
 with a stable fitted \(v_{\rm eff}\). Quadratic, linear+quadratic, power-law, and (when a core radius is supplied) \(k^2\log(1/kr_c)\) competitors are evaluated. The canonical target is inaccessible to the blind fit and is compared only after the result hash is frozen.
 

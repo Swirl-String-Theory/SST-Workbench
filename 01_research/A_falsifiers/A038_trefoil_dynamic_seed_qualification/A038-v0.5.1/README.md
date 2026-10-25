@@ -30,9 +30,9 @@ S37C compares several remap intervals on the same physical RK4 plan at each reso
 
 Every operator-split trajectory also records
 
-\[
+$$
 \chi_{\rm eff}(t)=\frac{R_{\rm radial}(t)}{r_{\rm axial}(t)}.
-\]
+$$
 
 The amplitudes are extracted intrinsically from the ordered centreline using a PCA torus axis and the trefoil's \(T(2,3)\) toroidal/poloidal Fourier structure.  `chi_eff` is **diagnostic only**: it is absent from candidate scores, thresholds and promotion logic.  No target ratio is supplied to discovery.
 

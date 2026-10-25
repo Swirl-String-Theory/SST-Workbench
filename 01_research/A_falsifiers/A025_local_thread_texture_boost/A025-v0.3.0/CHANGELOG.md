@@ -22,15 +22,15 @@ Why: increasing bead count should test the geometry, not simultaneously remove a
 
 Every case now freezes a single
 
-\[
+$$
 T_{\rm final}
-\]
+$$
 
 before execution.  An outer RK4 step is subdivided when the committed bound
 
-\[
+$$
 \Delta t_{\max}=C_{\Delta s^2}\frac{\Delta s^2}{|\Gamma|}
-\]
+$$
 
 is smaller than the requested outer step.  Subcycling never changes \(T_{\rm final}\).
 
@@ -46,9 +46,9 @@ Why: v0.2 could accumulate bead clustering during multi-step evolution.  Reparam
 
 v0.3 measures the minimum knot-thread centerline clearance and normalizes it by
 
-\[
+$$
 a_{\rm knot}+a_{\rm thread}.
-\]
+$$
 
 If the cores overlap, structural covariance tests may still PASS, but dynamical bridge claims are classified `INDETERMINATE` rather than treated as evidence.
 
@@ -75,9 +75,9 @@ Why: "more vortex threads per area" is not mathematically identical to "the same
 
 v0.3 adds a closed radial-source bundle with a hidden finite source center and a committed source-distance ladder.  It tests whether
 
-\[
+$$
 D/R_g\rightarrow\infty
-\]
+$$
 
 converges monotonically to the locally parallel bundle used for Earth-/Sun-sized sources.
 

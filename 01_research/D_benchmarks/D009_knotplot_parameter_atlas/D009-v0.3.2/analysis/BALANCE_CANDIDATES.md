@@ -11,17 +11,17 @@ Baseline:
 
 Local one-factor response model:
 
-\[\Delta L \approx 1.84984\,\Delta q -28.4986\,\Delta h -31.0409\,\Delta p\]
+$$\Delta L \approx 1.84984\,\Delta q -28.4986\,\Delta h -31.0409\,\Delta p$$
 
-\[\Delta R_g \approx 0.0764612\,\Delta q -0.891066\,\Delta h -1.38528\,\Delta p\]
+$$\Delta R_g \approx 0.0764612\,\Delta q -0.891066\,\Delta h -1.38528\,\Delta p$$
 
 Solving both first-order cancellation conditions gives:
 
-\[\Delta q \approx 22.2705t,\qquad \Delta h \approx 0.356366t,\qquad \Delta p=t.\]
+$$\Delta q \approx 22.2705t,\qquad \Delta h \approx 0.356366t,\qquad \Delta p=t.$$
 
 ## Recommended first joint candidate
 
-\[\boxed{q\approx26.14,\quad hooke\approx1.178,\quad power\approx5.5}\]
+$$\boxed{q\approx26.14,\quad hooke\approx1.178,\quad power\approx5.5}$$
 
 This is the `t=0.5` point: deliberately close to the baseline so the local linear surrogate is least extrapolative.
 

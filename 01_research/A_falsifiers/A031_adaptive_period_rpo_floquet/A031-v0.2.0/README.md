@@ -48,9 +48,9 @@ If adaptive spectral results already exist, only `SPECTRAL_CONVERGED_* : PASS` c
 
 For each positive-imaginary oscillatory eigenpair:
 
-\[
+$$
 T_{pred} = 2\pi / |\Im\lambda|.
-\]
+$$
 
 `T_pred` controls **only the observation horizon**. It is never inserted into the equations of motion as a restoring frequency.
 

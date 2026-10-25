@@ -6,9 +6,9 @@ Numerical-certification release for the intrinsic modal swirl-clock programme.
 
 The primary Stage-A question is deliberately narrower than the final SST mechanism claim:
 
-\[
+$$
 \boxed{\text{Does a relaxed closed vortex centerline possess a numerically certifiable recurrent intrinsic shape mode?}}
-\]
+$$
 
 Only after such a mode survives long-horizon, mesh-quality and mesh-gauge tests does Stage B ask whether material vortex stretching and a measured delay provide a causal/core-specific mechanism.
 
@@ -61,9 +61,9 @@ Long runs print anonymous candidate progress, e.g.
 
 Regularized finite-core Biot-Savart remains the physical centerline evolution. Stage A uses a geometry-compatible global core volume law
 
-\[
+$$
 a^2(t)L(t)=a_0^2L_0,
-\]
+$$
 
 because its numerical mesh is allowed to slide tangentially and therefore bead indices are not interpreted as material parcels.
 
@@ -71,23 +71,23 @@ because its numerical mesh is allowed to slide tangentially and therefore bead i
 
 Let segment lengths be \(\ell_i\) and \(\bar\ell\) their mean. v0.2.1 constructs a periodic scalar tangential speed \(\alpha_i\) from
 
-\[
+$$
 \alpha_{i+1}-\alpha_i=-\kappa\left(\ell_i-\bar\ell\right),
-\]
+$$
 
 then applies only
 
-\[
+$$
 \mathbf u_{\rm mesh,i}=\alpha_i\hat{\mathbf t}_i.
-\]
+$$
 
 Hence the explicit numerical controller has no normal component in the continuum geometry description. Its RMS magnitude is also capped relative to the physical Biot-Savart RMS velocity and reported for audit.
 
 The certification gate remains strict:
 
-\[
+$$
 \boxed{ds_{\rm CV,max}\le0.20}.
-\]
+$$
 
 No post-hoc relaxation of this threshold is performed.
 
@@ -95,11 +95,11 @@ No post-hoc relaxation of this threshold is performed.
 
 Before any Stage-A POD or frozen-mode projection, every saved snapshot is converted to a geometry-only canonical representation:
 
-\[
+$$
 \mathbf X_i(t)
 \rightarrow
 \mathbf X(s_j,t),\qquad s_j=j/N,
-\]
+$$
 
 using uniform closed-curve arclength resampling. The arbitrary cyclic origin along the closed curve is aligned, rigid translation/rotation are removed, and only normal displacement is retained.
 
@@ -109,66 +109,66 @@ This prevents the POD basis from interpreting the deliberately introduced tangen
 
 Three matched arms are generated for each anonymous carrier:
 
-\[
+$$
 -\epsilon,\quad0,\quad+\epsilon.
-\]
+$$
 
 Two independent channels are analyzed:
 
 **Natural carrier motion**
 
-\[
+$$
 \delta\mathbf X_{\rm natural}(t)=\mathbf X_0(t)-\mathbf X_0(0).
-\]
+$$
 
 **Odd linear response**
 
-\[
+$$
 \delta\mathbf X_{\rm odd}(t)=
 \frac{\mathbf X_+(t)-\mathbf X_-(t)}{2\epsilon}.
-\]
+$$
 
 Even probe contamination is separately measured from
 
-\[
+$$
 \frac{\mathbf X_++\mathbf X_-}{2}-\mathbf X_0.
-\]
+$$
 
 ## Frozen discovery window
 
 The spatial POD basis is learned only from the absolute early interval
 
-\[
+$$
 \boxed{0\le t\le1.2}
-\]
+$$
 
 and is then frozen. Increasing the total horizon does not increase the fitting interval.
 
 BASIC Stage A:
 
-\[
+$$
 T_A=24,\qquad N_{\rm cycles}\ge4.
-\]
+$$
 
 EXTENDED:
 
-\[
+$$
 T_A=36,\qquad N_{\rm cycles}\ge6.
-\]
+$$
 
 ## Recurrence gates
 
 For a modal coordinate \(a_k(t)\), v0.2.1 requires more than a spectral peak. It tests the phase-space state
 
-\[
+$$
 \mathbf z_k=(a_k,\dot a_k)
-\]
+$$
 
 for returns at approximately
 
-\[
+$$
 T,2T,3T,4T,
-\]
+$$
 
 plus period stationarity, amplitude stationarity, low cycle-center drift, minimum modal discovery energy, minimum holdout amplitude, spectral concentration and harmonic consistency.
 
@@ -178,10 +178,10 @@ A negative dataset-wide result is allowed only when the numerical experiment has
 
 BASIC/EXTENDED defaults require:
 
-\[
+$$
 \frac{N_{\rm valid}}{N_{\rm total}}\ge0.80,
 \qquad N_{\rm valid}\ge20,
-\]
+$$
 
 and every predeclared high-information carrier must be valid.
 
@@ -199,9 +199,9 @@ The three predeclared certification-priority source patterns are the prior high-
 
 A provisional Stage-A recurrence is **not yet a PASS**. Only that carrier is replayed with mesh redistribution gains
 
-\[
+$$
 0.6\kappa_0,\qquad1.4\kappa_0.
-\]
+$$
 
 The nominal frozen spatial mode must remain recurrent in both gauges. Period, multi-return closure and amplitude must agree within predefined spreads. A surviving candidate is promoted to
 
@@ -219,9 +219,9 @@ PASS_STAGE_A_RECURRENT_SHAPE_CLOCK_MESH_GAUGE_CERTIFIED
 
 Stage B never uses tangential remeshing. It restores material segment labels and compares
 
-\[
+$$
 a_i^2\ell_i=\text{const}
-\]
+$$
 
 against fixed core radius. The Stage-A mode is frozen and reused; Stage B cannot choose a new favorable mode.
 
@@ -276,9 +276,9 @@ run_resolution.cmd
 
 uses the predeclared trio at
 
-\[
+$$
 N=64,96,128
-\]
+$$
 
 with the same `T=24`, performs mesh-gauge certification at each resolution, and compares only certified anonymous carrier/channel recurrences.
 

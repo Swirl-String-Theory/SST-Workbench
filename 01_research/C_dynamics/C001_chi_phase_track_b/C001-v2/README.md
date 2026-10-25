@@ -17,17 +17,17 @@ If the C++/pybind11 extension cannot be built, the runner automatically falls ba
 
 The local chi-sector ansatz is:
 
-\[
+$$
 \mathcal I_\chi = \rho_f \int_A r_\perp^2\,dA,
 \qquad
 \mathcal K_\chi = \rho_f v_{\rm swirl}^2 \int_A r_\perp^2\,dA.
-\]
+$$
 
 Therefore
 
-\[
+$$
 c_\chi^2=\frac{\mathcal K_\chi}{\mathcal I_\chi}=v_{\rm swirl}^2.
-\]
+$$
 
 v2 strengthens v1 by testing more than circular cross-sections:
 
@@ -37,11 +37,11 @@ v2 strengthens v1 by testing more than circular cross-sections:
 4. **Counterfactual anisotropic split diagnostic**, showing what failure would look like if inertia and stiffness did not share the same transverse moment tensor.
 5. **Horn-loop phase spectrum**, testing
 
-\[
+$$
 L_\chi=2\pi r_c
 \quad\Rightarrow\quad
 \omega_n\approx n\omega_c.
-\]
+$$
 
 6. **Finite-difference spectrum convergence**, proving that the small high-mode error is numerical dispersion, not physics.
 
@@ -58,11 +58,11 @@ L_\chi=2\pi r_c
 This is a **Research Track sanity verifier**. Passing it supports the local mechanical
 claim
 
-\[
+$$
 \chi\rightarrow U(1)_\chi,
 \qquad
 c_\chi=v_{\rm swirl},
-\]
+$$
 
 under the shared transverse-moment assumption. It does **not** prove:
 
@@ -117,17 +117,17 @@ python sst_chi_phase_v2_build.py --force
 
 A successful run should show:
 
-\[
+$$
 \max |c_\chi/v_{\rm swirl}-1| \approx 0,
-\]
+$$
 
 for all tested shapes, while the finite-difference spectrum error decreases with grid refinement.
 
 The canonical anisotropic ellipse test should remain unsplit:
 
-\[
+$$
 c_{\chi,x}/v_{\rm swirl}=c_{\chi,y}/v_{\rm swirl}=1.
-\]
+$$
 
 The counterfactual curves are intentionally non-canonical and demonstrate the falsifier:
 if stiffness and inertia do not share the same moment tensor, anisotropy produces a speed split.

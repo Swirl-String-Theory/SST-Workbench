@@ -6,21 +6,21 @@ v0.1.2.4 changes candidate detection and physical-event de-duplication only. The
 
 A sign change of the floating-point real part is not itself a physical marginal event. For each tracked branch define
 
-\[
+$$
 g(q)=|\operatorname{Re}\lambda(q)|.
-\]
+$$
 
 The preregistered effective detector floor is
 
-\[
+$$
 g_{\rm floor}=\max\!\left(10^{-8},\frac{\epsilon_{\rm machine}}{h/a}\right).
-\]
+$$
 
 A `fourier_sector_growth_transition` is emitted only when two adjacent accepted q samples straddle this floor:
 
-\[
+$$
 (g_a>g_{\rm floor})\oplus(g_b>g_{\rm floor}).
-\]
+$$
 
 The reported q is obtained by linear interpolation of `g=|Re(lambda)|` to the floor. A raw sign flip for which both endpoints satisfy `g <= g_floor` is counted in `rejected_subfloor_sign_flip_count` and cannot become a candidate.
 
@@ -36,9 +36,9 @@ Branch-local `|lambda|` minima likewise require the same dominant `|m|` at the p
 
 The real linear operator produces symmetry-related spectral partners. Before convergence clustering and the uniqueness gate, v0.1.2.4 identifies eigenvalues under
 
-\[
+$$
 z \sim z^* \sim -z \sim -z^*.
-\]
+$$
 
 For C4 sectors, residue sectors `r` and `-r mod 4` are also conjugate descriptions of the same physical `|m|` family. Thus sector 1 and sector 3 events may canonicalize to one physical event; sectors 0 and 2 are self-conjugate.
 

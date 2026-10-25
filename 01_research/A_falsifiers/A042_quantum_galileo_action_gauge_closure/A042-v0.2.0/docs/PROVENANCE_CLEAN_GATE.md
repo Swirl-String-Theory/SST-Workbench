@@ -4,37 +4,37 @@
 
 Primary branch:
 
-\[
+$$
 \{\text{QGI population},t,g_{\rm eff}\}
 \rightarrow c_3
 \rightarrow (h/m)_{\rm QGI}
-\]
+$$
 
 versus
 
-\[
+$$
 \{\mathbf x(s),\mathbf v(s)\}
 \rightarrow
 \Gamma_{\rm fluid}
 \rightarrow
 (h/M)_{\rm GF}=\Gamma_{\rm fluid}/2.
-\]
+$$
 
 Forbidden upstream dependencies on the fluid side:
 
-\[
+$$
 h,\quad\hbar,\quad m_e,\quad r_{\rm Compton/electron},\quad\alpha.
-\]
+$$
 
 The geometry carrier enters the absolute-action branch as
 
-\[
+$$
 \widehat L=L/a,
 \qquad
 h_{\rm GF}
 =
 \frac{\pi}{2}\widehat L\rho\Gamma a^3.
-\]
+$$
 
 At leading uniform-Rankine order it cancels from \(h/M\). This cancellation is a derived model
 property and is itself part of the falsifier output.

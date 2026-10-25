@@ -19,6 +19,9 @@ VERSION = 'A006_FORCE_GRID_v0.5.0c'
 
 def sha_bytes(b):return hashlib.sha256(b).hexdigest()
 def sha_file(p):return sha_bytes(Path(p).read_bytes())
+def sha_script(p):
+ raw=Path(p).read_bytes()
+ return sha_bytes(raw.replace(b"\r\n",b"\n"))
 def dump(p,obj):
  p=Path(p);p.parent.mkdir(parents=True,exist_ok=True)
  p.write_text(json.dumps(obj,indent=2,sort_keys=True,ensure_ascii=False)+'\n',encoding='utf-8')
@@ -198,7 +201,7 @@ def analyze(root):
  for name in plan['arms']:
   base=outroot/'runs'/name;expected=plan['arms'][name]
   script=root/expected['script']
-  if sha_file(script)!=expected['script_sha256']:
+  if sha_script(script)!=expected['script_sha256']:
    raise ValueError('Script changed since plan: '+str(script))
   native,status=get_native(base/'native.csv')
   points={}

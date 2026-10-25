@@ -8,13 +8,13 @@ Index: [README.md](README.md) · Corrected framing: 2026-09-08 (v2)
 
 ## 0. Gecorrigeerde statuslabels
 
-\[
+$$
 \boxed{
 \begin{aligned}
 A037 &: \texttt{INVALID\_NUMERICS / NOT\_YET\_TESTED\_2505}\\
 A034 &: \texttt{OLD\_QHP\_DYNAMIC\_GATE\_FAIL / NOT\_YET\_TESTED\_1806}
 \end{aligned}}
-\]
+$$
 
 | Family | Engineering | Oude science | Nieuwe paper gate | Promotion |
 |--------|-------------|--------------|-------------------|-----------|
@@ -62,9 +62,9 @@ Infra groen. \(K6=\texttt{SKIP}\) ⇒ geen accepted RPO ⇒ geen true Floquet-re
 
 Alle zes pairs: `INVALID_TRAJECTORY_TIMESTEP` ⇒
 
-\[
+$$
 \boxed{\text{observable mag wetenschappelijk niet beoordeeld worden}}
-\]
+$$
 
 niet “symmetry-selection hypothesis failed.”
 
@@ -77,9 +77,9 @@ niet “symmetry-selection hypothesis failed.”
 | P0005 | **10.25** | 2.95 | 0.708 |
 | P0006 | **10.53** | 6.98 | 0.750 |
 
-\[
+$$
 \boxed{\text{N=72 basic trajectory is numeriek onvoldoende opgelost.}}
-\]
+$$
 
 ### Mirror algebra (code sanity, niet physical detection)
 
@@ -88,9 +88,9 @@ Door de set: \(\Xi_H[PK]\simeq-\Xi_H[K]\), \(\Pi[PK]\simeq-\Pi[K]\); excitation 
 
 P0005: \(\mathrm{CFL}_{\max}\approx10.25\) maar \(\epsilon_{\Pi,\mathrm{odd}}\approx9.8\times10^{-16}\).
 
-\[
+$$
 \boxed{\text{mirror covariance van de code} \neq \text{gekwalificeerde fysieke transportrespons}}
-\]
+$$
 
 ### Paper-2505 nog niet uitgevoerd
 
@@ -104,9 +104,9 @@ Alleen `paper_upgrade/gate.py --selftest` + synthetic cert.
 
 588 candidates → 33 zero crossings → **0** confirmed restoring / fixed points / affine FPs.
 
-\[
+$$
 \boxed{\text{op deze sampled QHP manifold is geen gekwalificeerd restoring point gevonden.}}
-\]
+$$
 
 ### Trefoil \(3_1\)
 
@@ -129,7 +129,7 @@ Huidige on-disk certs hadden `status: PASS` / `ENERGETICALLY_ADMISSIBLE` uit **s
 
 Consumerregel (PU02b):
 
-\[
+$$
 \boxed{
 \texttt{promotion\_allowed}
 =
@@ -139,7 +139,7 @@ Consumerregel (PU02b):
 \land
 (\texttt{status}\in\{\texttt{PASS},\texttt{QUALIFIED}\})
 }
-\]
+$$
 
 ---
 
@@ -147,7 +147,7 @@ Consumerregel (PU02b):
 
 **Geen nieuwe physics.** Zie [PRODUCTION_CERTIFICATION.plan.md](PRODUCTION_CERTIFICATION.plan.md).
 
-\[
+$$
 \boxed{
 \text{PC00 Certificate Hardening}
 \rightarrow
@@ -157,7 +157,7 @@ Consumerregel (PU02b):
 \rightarrow
 \text{A038 v0.4.1}
 }
-\]
+$$
 
 (+ D006 **v0.4.1** regressions; tip is v0.4.0 niet v0.3.0)
 

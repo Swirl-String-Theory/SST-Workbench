@@ -89,10 +89,10 @@ Both datasets resolve a mixed oscillatory breathing/torsion/Kelvin mode with goo
 
 The growth penalty convention is
 
-\[
+$$
 \Delta g_f=
 \frac{g(J_{\rm decouple\,f})-g(J)}{\rho(J)}.
-\]
+$$
 
 Thus the negative values mean that, in this resolved expanded linear model, **decoupling the family reduces the worst growth rate**. The tested torsion/Kelvin/inter-family couplings therefore act destabilizing rather than providing the hypothesized balancing stabilization around these particular seeds.
 
@@ -102,9 +102,9 @@ The expanded full normalized growth is approximately `0.3279` (Fremlin) and `0.3
 
 All four BASIC phase trials for both sources reached the required shape excursion, but their best later recurrence occurred at the current peak rather than after a genuine return. The measured return ratio was therefore approximately
 
-\[
+$$
 R(T)/R_{\rm peak}=1,
-\]
+$$
 
 which fails the preregistered `rpo_return_ratio_max = 0.65` criterion.
 

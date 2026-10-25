@@ -8,13 +8,13 @@ reproduce_alpha_cell_closure.py
 
 The script evaluates a Fourier ideal-trefoil centerline, performs a Biot–Savart cutoff-energy scan, extracts the logarithmic coefficient \(A_K\), evaluates the no-contact core-radius closure
 
-\[
+$$
 \frac{a_{\rm nc}}{r_c}=\sqrt{4\pi A_K},
-\]
+$$
 
 and then computes the spherical-cell closure estimate
 
-\[
+$$
 \alpha_{\rm cell}
 =
 \frac{2}{
@@ -28,7 +28,7 @@ and then computes the spherical-cell closure estimate
 \right)
 \right]
 }.
-\]
+$$
 
 The code is intended to reproduce the numerical coefficient extraction and tables in the manuscript/supplement. It does not replace the analytic assumptions stated in the appendices.
 
@@ -146,9 +146,9 @@ alpha_cell_summary.csv
 
 `closure_summary.csv` contains the extracted \(A_K\) and the no-contact closure ratio:
 
-\[
+$$
 a_{\rm nc}/r_c=\sqrt{4\pi A_K}.
-\]
+$$
 
 `alpha_cell_summary.csv` contains the spherical-cell correction factor \(\Xi_{\rm sph}\), the effective aspect ratio \(\mathcal E_{\rm eff}\), and the predicted \(\alpha_{\rm cell}\).
 
@@ -173,24 +173,24 @@ v_core_pred_m_per_s
 
 The robust theoretical target for the trefoil Biot–Savart coefficient is:
 
-\[
+$$
 A_K \to \frac{1}{4\pi}.
-\]
+$$
 
 When this holds,
 
-\[
+$$
 a_{\rm nc}/r_c \to 1.
-\]
+$$
 
 The spherical pressure-cell factor is evaluated as
 
-\[
+$$
 \Xi_{\rm sph}
 =
 1+\frac{3}{4\mathcal L_K}
 +\frac{1}{16\mathcal L_K^2},
-\]
+$$
 
 where \(\mathcal L_K=L_K/D\) is the ideal-trefoil ropelength.
 
@@ -200,9 +200,9 @@ where \(\mathcal L_K=L_K/D\) is the ideal-trefoil ropelength.
 
 By default, the fine-structure estimate uses the theorem-limit core factor:
 
-\[
+$$
 \pi^2 A_K \to \frac{\pi}{4}.
-\]
+$$
 
 This avoids using noisy finite-resolution deviations in \(A_K\) as if they were physical.
 
@@ -234,19 +234,19 @@ For a journal submission, archive the exact version of `ideal.txt`, this script,
 
 A successful run should produce values qualitatively close to:
 
-\[
+$$
 A_K \approx \frac{1}{4\pi},
 \qquad
 a_{\rm nc}/r_c \approx 1,
-\]
+$$
 
 and
 
-\[
+$$
 \alpha_{\rm cell}^{-1}
 \approx
 137.0359992
-\]
+$$
 
 when the theorem-limit \(\pi/4\) and ideal-trefoil ropelength are used.
 

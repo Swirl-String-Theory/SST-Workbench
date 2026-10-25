@@ -8,20 +8,20 @@ action and accelerated-frame gauge description mutually consistent.
 
 The primary experimental target is
 
-\[
+$$
 \Delta\phi_{\rm QGI}(T)=-\frac{m g^2 T^3}{3\hbar},
-\]
+$$
 
 with the generalized levitation-arm result
 
-\[
+$$
 \Delta\phi(a,T)=\frac{m\,a(a-2g)}{3\hbar}T^3.
-\]
+$$
 
 For finite kick duration \(T_{\rm kick}\) and delay \(T_d\), the paper's analytical
 approximation used by this package is
 
-\[
+$$
 \Delta\phi_{\rm finite}
 =
 \frac{m g^2}{3\hbar}
@@ -30,52 +30,52 @@ T^3+T^2T_{\rm kick}
 +T(T_{\rm kick}^2+T_{\rm kick}T_d)
 -T_d(T_{\rm kick}+T_d)^2
 \right].
-\]
+$$
 
 The package independently computes the ideal laboratory-frame classical action for the
 ballistic path
 
-\[
+$$
 z(t)=\frac{g}{2}(T^2-t^2),\qquad -T\le t\le T,
-\]
+$$
 
 using
 
-\[
+$$
 L_N=\frac12m\dot z^2-mgz,
-\]
+$$
 
 and checks that
 
-\[
+$$
 \frac{S_N}{\hbar}=
 -\frac{m g^2T^3}{3\hbar}.
-\]
+$$
 
 It then checks the accelerated-frame closure through the total-derivative boundary term
 
-\[
+$$
 F(z_E,t)=-mgtz_E+\frac13mg^2t^3,
-\]
+$$
 
 for which
 
-\[
+$$
 L_N=L_E+\frac{dF}{dt}.
-\]
+$$
 
 ## SST action-scale branch
 
 The preregistered SST action quantum used in the SST branch is
 
-\[
+$$
 h_{\rm SST}
 =
 4\pi^2\rho_{\text{core}}
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}r_c^4,
 \qquad
 \hbar_{\rm SST}=\frac{h_{\rm SST}}{2\pi}.
-\]
+$$
 
 Canonical constants:
 
@@ -86,9 +86,9 @@ Canonical constants:
 
 With these values, the package should recover approximately
 
-\[
+$$
 h_{\rm SST}=6.62606951568\times10^{-34}\ {\rm J\,s},
-\]
+$$
 
 which differs from the exact SI Planck constant by about \(-9.57\times10^{-8}\)
 fractionally. This is far below the few-percent QGI prefactor sensitivity of the 2026
@@ -132,12 +132,12 @@ The shader-derived family is a **first-class dataset**.
 The package contains an independent geometry implementation of the anisotropic
 trefoil-track family
 
-\[
+$$
 \mathbf X(t)=
 \mathbf U[R+a\cos(3t)]\cos(2t)
 +\mathbf V[R+a\cos(3t)]\sin(2t)
 +\mathbf N[b\sin(3t)+z_0].
-\]
+$$
 
 The compatibility sweep contains 48 candidates:
 

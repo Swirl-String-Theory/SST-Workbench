@@ -4,9 +4,9 @@ Standalone Python + C++17/pybind11 research harness. It does **not** import, mod
 
 This release turns the v0.3 softening scan into a candidate-certification pipeline for the fixed four-knot matrix
 
-\[
+$$
 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2.
-\]
+$$
 
 The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it resolves numerical stationary structures and separately certifies convergence-qualified branches; it does not establish a physical electron model or a global photon sphere.
 
@@ -14,14 +14,14 @@ The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt
 
 v0.4.3 is a **reporting and audit-semantics release** built on the clock-safe v0.4.2 root solver. It does not change the Rosenhead field operator, the analytic Jacobian, or the stationary equation
 
-\[
+$$
 G(\rho;s,\theta)
 =
 1-\lVert\boldsymbol\beta\rVert^2
 +
 \rho\,\boldsymbol\beta\cdot\partial_\rho\boldsymbol\beta
 =0.
-\]
+$$
 
 The release closes two ambiguities found in the successful v0.4.2 campaign.
 
@@ -42,15 +42,15 @@ The release closes two ambiguities found in the successful v0.4.2 campaign.
 
 2. **Candidate fractions have unambiguous denominators.** The output distinguishes
 
-   \[
+   $$
    P_{\rm valid},\qquad P_{\rm all},\qquad P_{\rm fully\ valid},
-   \]
+   $$
 
    through `candidate_surface_fraction_valid_clock_rays`, `candidate_surface_fraction_all_rays`, and `candidate_surface_fraction_fully_clock_valid_rays`. In particular,
 
-   \[
+   $$
    0\le P_{\rm all}\le1.
-   \]
+   $$
 
 3. **Bifurcation thresholds are censored or bracketed, never guessed.** The misleading `epsilon_loss_sampled` wording is replaced by:
 
@@ -89,7 +89,7 @@ The release closes two ambiguities found in the successful v0.4.2 campaign.
 
 The full three-dimensional knot field still uses the regularized midpoint Rosenhead kernel
 
-\[
+$$
 \boldsymbol\beta(\mathbf x)
 =
 \frac{\beta_0}{2}
@@ -100,11 +100,11 @@ The full three-dimensional knot field still uses the regularized midpoint Rosenh
 }{
 \left(\lVert\mathbf x-\mathbf x_{i+1/2}\rVert^2+\epsilon^2\right)^{3/2}
 }.
-\]
+$$
 
 Its analytic spatial derivative is computed from
 
-\[
+$$
 \frac{\partial}{\partial x_j}
 \left(
 \frac{r_k}{Q^{3/2}}
@@ -115,7 +115,7 @@ Its analytic spatial derivative is computed from
 \frac{3r_kr_j}{Q^{5/2}},
 \qquad
 Q=\lVert\mathbf r\rVert^2+\epsilon^2.
-\]
+$$
 
 Rankine and Lamb--Oseen remain one-dimensional comparison profiles only; they are not silently substituted into the full three-dimensional knot solver.
 
@@ -201,14 +201,14 @@ python run_all_checks.py ^
 
 The native release gate includes:
 
-\[
+$$
 \begin{aligned}
 &\text{field parity}<10^{-12},\\
 &\text{Jacobian parity}<10^{-10},\\
 &\text{analytic Jacobian finite-difference check}<10^{-7},\\
 &\text{external radial benchmark error}<10^{-10}.
 \end{aligned}
-\]
+$$
 
 ## 2. Candidate atlas for all four knots
 
@@ -286,11 +286,11 @@ python run_candidate_convergence.py ^
 
 Weak certification requires the candidate branch to occur at at least three resolutions and satisfy
 
-\[
+$$
 E_\rho<10^{-3},\qquad
 E_{R_F}<10^{-3},\qquad
 E_\beta<10^{-3}.
-\]
+$$
 
 Strong certification uses \(10^{-4}\).
 
@@ -298,9 +298,9 @@ Strong certification uses \(10^{-4}\).
 
 The primary v0.4.3 scan window is
 
-\[
+$$
 0.00180\leq\epsilon/r_c\leq0.00210.
-\]
+$$
 
 ```bat
 python run_bifurcation_atlas.py ^
@@ -341,11 +341,11 @@ python run_scale_sweep.py ^
 
 The relevant local/non-local geometry changes with
 
-\[
+$$
 \frac{D_K}{\epsilon}
 =
 \frac{\texttt{scale\_over\_rc}}{\epsilon/r_c}.
-\]
+$$
 
 ## 6. Symmetry audit
 

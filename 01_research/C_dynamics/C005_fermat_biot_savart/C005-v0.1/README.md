@@ -15,10 +15,10 @@ Version 0.1 implements two deliberately separated levels:
 
 1. **Radial certification** for candidate Fermat-critical radii of a resolved vortex profile,
    using
-   \[
+   $$
    S(x)=\sqrt{1-\beta(x)^2},\qquad R_F(x)=\frac{x}{S(x)},\qquad
    -x\beta\beta'=1-\beta^2,
-   \]
+   $$
    where \(x=r/r_c\) and \(\beta=u/c\).
 2. **Local knot-tube scan** for torus-knot centerlines using a regularized midpoint
    Biot--Savart field. This reports local transverse minima of \(\rho/S\); it does **not**

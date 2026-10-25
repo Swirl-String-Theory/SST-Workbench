@@ -21,13 +21,13 @@ The `exports/` folder is created by the runners.
 
 Research Track numerical infrastructure.  The horn-torus module is a falsification test, not a canonized derivation.  It intentionally separates
 
-\[
+$$
 \chi_K,
 \qquad
 \chi_{\rm cav}=\pi^2\lambda,
 \qquad
 \chi_E^{\rm hollow}=\chi_K+\chi_{\rm cav}.
-\]
+$$
 
 If cavitation work counts as inertial rest energy, the hollow horn limit \(\lambda=1\) cannot match \(2\pi\), because \(\chi_{\rm cav}(1)=\pi^2>2\pi\) before kinetic energy is added.
 

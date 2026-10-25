@@ -28,15 +28,15 @@ HHI   26.135232   1.300000   5.50
 
 Checkpoints:
 
-\[
+$$
 i=\{0,25,100,500,1000,4000,10000\}.
-\]
+$$
 
 Signed geometry-response observable:
 
-\[
+$$
 E(i)=\frac12\left[\frac{L(i)-L(0)}{L(0)}+\frac{R_g(i)-R_g(0)}{R_g(0)}\right].
-\]
+$$
 
 Early response is the least-squares slope through iterations 0, 25 and 100,
 reported per 100 iterations.

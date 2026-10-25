@@ -26,15 +26,15 @@ A primary base passes the diagnostic retention gate when at least 4/5 holdouts r
 
 For the dynamically selected branch, v0.3.2 analyses the unwrapped complex-mode phase. The fitted quantity called angular phase rate is
 
-\[
+$$
 \omega = \frac{d\phi}{dt},
-\]
+$$
 
 in radians per dimensionless time unit. It is **not** cycle frequency. The corresponding cycle rate is
 
-\[
+$$
 f=\frac{\omega}{2\pi}.
-\]
+$$
 
 The diagnostic reports total phase-path length, linear and quadratic fits, BIC preference, eight local angular-rate segments, local phase linearity, piecewise normalized RMSE, and robust angular-rate sign reversals.
 

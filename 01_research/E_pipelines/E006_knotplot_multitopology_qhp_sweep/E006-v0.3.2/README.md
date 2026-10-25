@@ -62,15 +62,15 @@ file must contain exactly one closed component.
 
 Python then measures:
 
-\[
+$$
 L_0,L_1,\ldots,L_{n-1}
-\]
+$$
 
 and allocates:
 
-\[
+$$
 N_i\approx N_{\rm total}\frac{L_i}{\sum_j L_j}.
-\]
+$$
 
 This preserves the v0.3.1 length-proportional bead rule without relying on blank-line
 separation from a full-link export.
@@ -341,9 +341,9 @@ v0.3.1 no longer assumes that every component should receive the same number of 
 
 `--beads-per-component=300` defines the **total budget scale**:
 
-\[
+$$
 N_{\rm total}=N_{\rm components}\times300.
-\]
+$$
 
 Before any q/h/p script is run, the package performs one KnotPlot geometry probe per
 topology:
@@ -359,11 +359,11 @@ topology:
 
 The target allocation is:
 
-\[
+$$
 N_i \simeq N_{\rm total}\frac{L_i}{\sum_j L_j},
 \qquad
 \sum_iN_i=N_{\rm total}.
-\]
+$$
 
 Integer rounding uses a deterministic largest-remainder allocation.
 
@@ -523,14 +523,14 @@ With:
 
 the package produces 20 points along the joint q/h/p line:
 
-\[
+$$
 (q_i,h_i,p_i)
 =
 (q_{\min},h_{\min},p_{\min})
 +
 \alpha_i
 [(q_{\max},h_{\max},p_{\max})-(q_{\min},h_{\min},p_{\min})].
-\]
+$$
 
 This is the direct generalization of the q/h/p balance-ray experiments.
 
@@ -777,13 +777,13 @@ For each topology the analyzer reports:
 
 The balance observable remains:
 
-\[
+$$
 E(i)=\frac12\left[
 \frac{L(i)-L_0}{L_0}
 +
 \frac{R_g(i)-R_{g0}}{R_{g0}}
 \right].
-\]
+$$
 
 A geometric zero is still a balance surrogate, not by itself proof of restoring
 stability or TBK/RPO stability.

@@ -12,16 +12,16 @@ v0.3.1 removed the real-matrix conjugate-pair artifact and found many genuine si
 
 For component-resolved signed powers,
 
-\[
+$$
 \xi_{j,k}=\frac{\sum_c \operatorname{sgn}(\Gamma_c)(P_{jkc}^{+}-P_{jkc}^{-})}
 {\sum_c(P_{jkc}^{+}+P_{jkc}^{-})}.
-\]
+$$
 
 Under the gauge-equivalent representation change
 
-\[
+$$
 C_c(s)\rightarrow C_c(-s),\qquad \Gamma_c\rightarrow-\Gamma_c,
-\]
+$$
 
 `+k` and `-k` exchange while the circulation sign also changes. A physical circulation-relative direction must therefore leave \(\xi\) invariant.
 
@@ -29,9 +29,9 @@ C_c(s)\rightarrow C_c(-s),\qquad \Gamma_c\rightarrow-\Gamma_c,
 
 A mode is eligible when Kelvin fraction `>=0.50`, dominant-harmonic participation `>=0.50`, `|xi|>=0.60`, and `|Re(lambda)|/|Im(lambda)|<=1.0`. A sector needs at least **3** eligible modes and `|B_s|>=0.50`, where
 
-\[
+$$
 B_s=\frac{N_+-N_-}{N_++N_-}.
-\]
+$$
 
 A v0.4.0 robust anonymous candidate must keep the same circulation-relative bias sign:
 

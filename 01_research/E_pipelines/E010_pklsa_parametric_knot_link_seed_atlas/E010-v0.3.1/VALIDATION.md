@@ -23,21 +23,21 @@ The v0.3.1 tests include:
 
 The bundled `Ideal.txt.gz` `3_1` record has upstream diameter-convention reference
 
-\[
+$$
 L/D=16.371637,
-\]
+$$
 
 while the high-resolution Przybyl--Pierański target used by `B1` is
 
-\[
+$$
 L/D=16.3714672385.
-\]
+$$
 
 Their relative difference is
 
-\[
+$$
 1.04\times10^{-5},
-\]
+$$
 
 so the source reference itself is consistent with the literature benchmark.
 
@@ -49,9 +49,9 @@ For the PKLSA resolution ladder \(N=128,256,512,1024\), the hard gates give:
 
 The contextual `B1_ideal_trefoil_ropelength` is intentionally a **soft FAIL**: the current numerical reach/doubly-critical-distance estimator gives a finest recomputed
 
-\[
+$$
 Rop=17.5702443767,
-\]
+$$
 
 about \(7.32\%\) above the literature value. This is retained as an explicit estimator-calibration issue. It does **not** invalidate the upstream Gilbert geometry reference and is not hidden by using the source-provided value as the recomputed result.
 

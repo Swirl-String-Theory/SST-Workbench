@@ -4,26 +4,26 @@ Research-track / frozen-audit package for the horn-torus exterior Neumann Dirich
 
 This is **not** a canon proof of \(\chi_E=2\pi\). It is a numerical falsification/validation harness that separates:
 
-\[
+$$
 \chi_K(\lambda)=\frac12\int_{\Omega_\lambda}|\nabla\phi_\lambda|^2\,d^3\xi,
 \qquad
 \chi_{\rm cav}(\lambda)=\pi^2\lambda,
 \qquad
 \chi_E^{\rm hollow}=\chi_K+\chi_{\rm cav}.
-\]
+$$
 
 The package implements the concrete Neumann plan:
 
-\[
+$$
 \mathbf v_N = \mathbf v_{\rm ring} + \nabla\psi,
-\]
+$$
 
 where `v_ring` carries the circulation and the single-valued single-layer potential `psi` corrects the torus boundary so that
 
-\[
+$$
 \mathbf n\cdot\mathbf v_N\approx0
 \quad\text{on}\quad\partial\mathcal T_\lambda.
-\]
+$$
 
 ## Contents
 
@@ -88,9 +88,9 @@ The result dictionary reports:
 
 Even if \(\chi_K\) approaches \(2\pi\), the hollow-core total-energy benchmark cannot equal \(2\pi\) if cavitation work counts positively:
 
-\[
+$$
 \chi_E^{\rm hollow,horn}=\chi_K^{\rm horn}+\pi^2>2\pi.
-\]
+$$
 
 Therefore this package keeps kinetic-only, cavitation, and total hollow-core factors separate.
 
@@ -98,6 +98,6 @@ Therefore this package keeps kinetic-only, cavitation, and total hollow-core fac
 
 This package borrows the Route-B idea of auditable BEM kernels, mesh sweeps, and convergence certificates, but it is **not** a Steklov/zeta spectral-action solver. The target here is Route-K:
 
-\[
+$$
 \text{exterior Neumann harmonic field}\rightarrow\chi_K(\lambda)\rightarrow\lambda\to1^+.
-\]
+$$

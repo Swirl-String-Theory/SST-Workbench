@@ -60,15 +60,15 @@ Kelvin-like normal/binormal Fourier modes k = configured harmonics
 
 For a uniform arclength coordinate \(s\), Kelvin-like perturbations are generated from the local discrete Frenet frame as
 
-\[
+$$
 \phi^{N,c}_k(s)=\cos(ks)\,\mathbf n(s),\qquad
 \phi^{N,s}_k(s)=\sin(ks)\,\mathbf n(s),
-\]
+$$
 
-\[
+$$
 \phi^{B,c}_k(s)=\cos(ks)\,\mathbf b(s),\qquad
 \phi^{B,s}_k(s)=\sin(ks)\,\mathbf b(s).
-\]
+$$
 
 The torsion-sensitive lobe modes are smooth lobe-windowed binormal displacements. They are centerline perturbations intended to alter local out-of-plane curvature/torsion; they are not an independent material twist degree of freedom.
 
@@ -82,10 +82,10 @@ For family indices \(B,T,K\) denoting breathing, torsion and Kelvin families, v0
 
 A positive quantity
 
-\[
+$$
 \Delta g_T=
 \frac{\max\Re\lambda(J_{\rm decouple\,T})-\max\Re\lambda(J)}{\rho(J)} > 0
-\]
+$$
 
 means torsion coupling lowered the worst resolved growth rate. Analogous quantities are computed for breathing and Kelvin coupling, plus a completely family-block-diagonal counterfactual.
 
@@ -116,18 +116,18 @@ Floquet analysis is **gated by RPO recurrence**. Without a passing recurrence, `
 
 For a valid return after \(T\), the nonlinear return map is finite-differenced:
 
-\[
+$$
 M_{ij}
 \approx
 \frac{q_i\!\left(\Phi_T[X_0+\epsilon\phi_j]\right)
 -q_i\!\left(\Phi_T[X_0-\epsilon\phi_j]\right)}{2\epsilon}.
-\]
+$$
 
 The Floquet multipliers are
 
-\[
+$$
 \mu_i=\operatorname{eig} M.
-\]
+$$
 
 One multiplier nearest \(1\) is reported as the candidate neutral phase direction; the preregistered stability gate uses the largest remaining \(|\mu_i|\). This is a finite-dimensional projected return map, not a proof of full infinite-dimensional Euler stability.
 
@@ -188,22 +188,22 @@ The historical runners unpack and execute each archived version with its own old
 
 Normalized calculations use \(\Gamma=1\) and total centerline length \(2\pi\). Physical reporting uses
 
-\[
+$$
 \Gamma_{\rm SST}=2\pi r_c\mathbf{v}_{\!\boldsymbol{\circlearrowleft}},
-\]
+$$
 
 with
 
-\[
+$$
 r_c=1.40897017\times10^{-15}\ \mathrm{m},\qquad
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}=1.09384563\times10^6\ \mathrm{m\,s^{-1}},
-\]
+$$
 
 so
 
-\[
+$$
 \Gamma_{\rm SST}=9.68361920349\times10^{-9}\ \mathrm{m^2\,s^{-1}}.
-\]
+$$
 
 A convenience BASIC validation snapshot is included under `reference_results/v0.3.0_basic/`; it is not used as an expected-answer oracle and can be recomputed from the bundled inputs.
 

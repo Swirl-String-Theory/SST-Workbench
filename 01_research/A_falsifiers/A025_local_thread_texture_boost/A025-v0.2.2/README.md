@@ -86,7 +86,7 @@ v0.1.0 used a radial prescribed velocity proxy and a trace-free affine strain pr
 
 For a set of polygonal vortex filaments, the regularized discrete Biot--Savart field is
 
-\[
+$$
 \mathbf v(\mathbf x)
 =
 \frac{1}{4\pi}
@@ -98,11 +98,11 @@ For a set of polygonal vortex filaments, the regularized discrete Biot--Savart f
 }{
 \left(|\mathbf x-\mathbf x_{j+1/2}|^2+a_c^2\right)^{3/2}
 }.
-\]
+$$
 
 For knot/link points \(\mathbf X_i\), v0.2.2 evolves
 
-\[
+$$
 \frac{d\mathbf X_i}{dt}
 =
 \mathbf v_{\rm knot}[\mathbf X(t)](\mathbf X_i)
@@ -110,30 +110,30 @@ For knot/link points \(\mathbf X_i\), v0.2.2 evolves
 \mathbf v_{\rm threads}(\mathbf X_i,t)
 +
 \mathbf U_0.
-\]
+$$
 
 The thread geometry is source-anchored/frozen in its own co-moving frame.  Under a common boost,
 
-\[
+$$
 \mathbf T_a(t)=\mathbf T_a(0)+\mathbf U_0 t,
-\]
+$$
 
 so the complete physical system is translated, not the knot alone.
 
 Time integration uses midpoint RK2:
 
-\[
+$$
 \mathbf k_1=\mathbf F(\mathbf X_n,t_n),
-\]
+$$
 
-\[
+$$
 \mathbf k_2=\mathbf F\!\left(\mathbf X_n+\frac{\Delta t}{2}\mathbf k_1,
  t_n+\frac{\Delta t}{2}\right),
-\]
+$$
 
-\[
+$$
 \mathbf X_{n+1}=\mathbf X_n+\Delta t\,\mathbf k_2.
-\]
+$$
 
 This is genuinely nonlinear in the knot geometry because \(\mathbf v_{\rm knot}[\mathbf X(t)]\) is recomputed after the geometry changes.
 
@@ -143,15 +143,15 @@ Each local source thread has a straight outgoing leg approximately parallel to a
 
 Thus every component is a closed polygonal curve
 
-\[
+$$
 C_a:S^1\rightarrow\mathbb R^3,
-\]
+$$
 
 and its ideal line-vorticity distribution has no endpoints.  In distributional form,
 
-\[
+$$
 \nabla\cdot\boldsymbol\omega=0
-\]
+$$
 
 is therefore compatible with the filament topology.
 
@@ -163,21 +163,21 @@ v0.1.0 used a core radius proportional to bead spacing.  That changes the physic
 
 v0.2.2 instead computes a reference radius of gyration \(R_{g,\rm ref}\) from a fixed high-resolution resample of the input file and sets
 
-\[
+$$
 a_{\rm knot}=\alpha_k R_{g,\rm ref},
 \qquad
  a_{\rm thread}=\alpha_t R_{g,\rm ref}.
-\]
+$$
 
 These radii remain unchanged throughout an \(N\)-ladder.
 
 The geometric velocity/time scales are
 
-\[
+$$
 U_g=\frac{|\Gamma|}{4\pi R_{g,\rm ref}},
 \qquad
 \Delta t=f_t\frac{R_{g,\rm ref}}{U_g}.
-\]
+$$
 
 No SI calibration is inferred from dimensionless KnotPlot centerlines.
 
@@ -221,18 +221,18 @@ A bridge PASS means only that this **committed explicit filament model** produce
 
 If \(\{\mathbf n_a\}_{a=1}^M\) is the hidden direction set, exactly the same set is used for every topology.  For each geometry,
 
-\[
+$$
 R_a=rac{d_{\rm Kabsch}
 \bigl(\mathbf X_{\rm self}(T),\mathbf X_{\rm primary,a}(T)\bigr)}{R_{g,\rm ref}}.
-\]
+$$
 
 The report records
 
-\[
+$$
 \operatorname{median}(R_a),\quad
 \min R_a,\quad
 \max R_a,
-\]
+$$
 
 and the fraction above the precommitted response threshold.
 
@@ -242,13 +242,13 @@ This removes the v0.1.0 confound in which different topologies could receive unr
 
 The secondary local bundle is generated at a precommitted nonparallel angle.  It is an **Earth-like/Sun-like local geometry test**, not an astronomical SI model:
 
-\[
+$$
 \mathbf v_{\rm bg}
 =
 \mathbf v_{\rm primary}
 +
 \mathbf v_{\rm secondary}.
-\]
+$$
 
 Because the knot evolution is nonlinear, v0.2.2 does not demand that the final shape responses add linearly.
 
@@ -256,7 +256,7 @@ Because the knot evolution is nonlinear, v0.2.2 does not demand that the final s
 
 The gradient case does not create or destroy threads.  It changes circulation weights across the same closed bundle:
 
-\[
+$$
 \Gamma_a
 =
 \Gamma_{\rm th}
@@ -264,7 +264,7 @@ The gradient case does not create or destroy threads.  It changes circulation we
 0.05,
 1+g\frac{\boldsymbol\delta_a\cdot\mathbf e_g}{R_{\rm bundle}}
 \right].
-\]
+$$
 
 Thus the vorticity topology remains closed while the local vorticity/circulation density becomes nonuniform.
 
@@ -274,22 +274,22 @@ The local outgoing legs are sampled identically in the near/mid/far closure case
 
 G5 checks both
 
-\[
+$$
 \epsilon_{\rm field}
 =
 \frac{\|\mathbf v_{\rm mid}-\mathbf v_{\rm far}\|_2}
 {\max(\|\mathbf v_{\rm mid}\|_2,\|\mathbf v_{\rm far}\|_2)}
-\]
+$$
 
 and
 
-\[
+$$
 \epsilon_{\rm shape}
 =
 \frac{d_{\rm Kabsch}
 (\mathbf X_{\rm mid}(T),\mathbf X_{\rm far}(T))}
 {R_{g,\rm ref}}.
-\]
+$$
 
 Failure means the chosen finite closure is still contaminating the local result and must not be interpreted as a local source-thread prediction.
 
@@ -297,15 +297,15 @@ Failure means the chosen finite closure is still contaminating the local result 
 
 Extended:
 
-\[
+$$
 N\in\{128,256,512\}.
-\]
+$$
 
 High resolution:
 
-\[
+$$
 N\in\{256,512,1024\}.
-\]
+$$
 
 For G10, the highest-two relative change is evaluated for:
 
@@ -350,21 +350,21 @@ Resolution ladders additionally retain a full ledger under each `N.../` director
 
 The package records, but does not automatically inject into dimensionless centerline runs:
 
-\[
+$$
 \mathbf{v}_{\!\boldsymbol{\circlearrowleft}}
 =1.09384563\times10^6\ {\rm m\,s^{-1}},
-\]
+$$
 
-\[
+$$
 r_c=1.40897017\times10^{-15}\ {\rm m},
-\]
+$$
 
-\[
+$$
 \rho_{\text{core}}=3.8934358266918687\times10^{18}\ {\rm kg\,m^{-3}},
-\]
+$$
 
-\[
+$$
 \rho_{\!f}=7.0\times10^{-7}\ {\rm kg\,m^{-3}}.
-\]
+$$
 
 See `REFERENCES.tex` and `MODEL_NOTES.md`.

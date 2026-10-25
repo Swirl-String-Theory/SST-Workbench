@@ -6,7 +6,7 @@
 
 Route I probeert de keten te sluiten:
 
-\[
+$$
 \text{SST microdynamica}
 \rightarrow
 \text{lokale horizon/KMS-sector}
@@ -18,15 +18,15 @@ S_{\rm rel}
 \text{focusing}
 \rightarrow
 \text{effectieve zwaartekracht}.
-\]
+$$
 
 Wanneer \(c_T=c\) en dezelfde entropyconventie wordt gebruikt, zou gelden:
 
-\[
+$$
 G_{\rm eff}
 =
 \frac{c^3}{4\hbar\eta_A^{\rm SST}}.
-\]
+$$
 
 Het centrale probleem is dus niet alleen de formele thermodynamische brug, maar de absolute microscopische area-density \(\eta_A^{\rm SST}\).
 
@@ -49,26 +49,26 @@ Een eenvoudige binaire of laag-dimensionale cellulaire telling geeft een area-de
 
 Symbolisch:
 
-\[
+$$
 \eta_A^{\rm simple}
 \sim
 \frac{N_{\rm ch}\ln q}{a_*^2},
-\]
+$$
 
 terwijl nodig is:
 
-\[
+$$
 \eta_A^{\rm grav}
 =
 \frac{c^3}{4G\hbar}.
-\]
+$$
 
 De verhouding is enorm:
 
-\[
+$$
 \frac{\eta_A^{\rm grav}}{\eta_A^{\rm simple}}
 \gg1.
-\]
+$$
 
 Dit falsificeert de eenvoudige telling als volledige microstate-uitleg.
 
@@ -88,31 +88,31 @@ De hiërarchie mag niet worden gerepareerd door:
 
 Tel alleen fysieke boundarymoden na gauge- en Gauss-reductie:
 
-\[
+$$
 N_{\rm phys}
 =
 N_{\rm links}
 -N_{\rm gauge}
 -N_{\rm constraints}
 +N_{\rm global}.
-\]
+$$
 
 De entropy wordt:
 
-\[
+$$
 S_\Sigma
 =
 \ln\dim\mathcal H_{\Sigma,\rm phys}.
-\]
+$$
 
 ### 5.2 Entanglement/relative-entropy route
 
 Definieer niet een naïeve bitcount, maar een reduced density operator:
 
-\[
+$$
 S(\rho_\Sigma)
 =-\operatorname{Tr}\rho_\Sigma\ln\rho_\Sigma.
-\]
+$$
 
 De area law moet uit correlaties en locality volgen, niet uit een vooraf gekozen area coefficient.
 
@@ -120,7 +120,7 @@ De area law moet uit correlaties en locality volgen, niet uit een vooraf gekozen
 
 Onderzoek of een deconfined compact sector een boundary Hilbert space heeft met een extensieve lokale factor plus niet-extensieve topological correction:
 
-\[
+$$
 S(A)
 =
 \eta_A A
@@ -128,7 +128,7 @@ S(A)
 \gamma_{\rm top}
 +
 \cdots.
-\]
+$$
 
 Alleen de eerste term kan \(G\) bepalen; \(\gamma_{\rm top}\) is niet groot genoeg om een area-density-hiërarchie te repareren.
 
@@ -146,12 +146,12 @@ Een tower van fysieke sub-core modes is alleen geldig wanneer:
 
 Integreer microscopische modes uit en zoek een curvatureterm in de effectieve actie:
 
-\[
+$$
 \Gamma_{\rm eff}
 \supset
 \frac{1}{16\pi G_{\rm ind}}
 \int R\sqrt{-g}\,d^4x.
-\]
+$$
 
 Dan moet \(G_{\rm ind}\) uit het spectrum en de cutoff van de SST-microdynamica volgen, zonder Planckschaalinput.
 
@@ -172,12 +172,12 @@ Dan moet \(G_{\rm ind}\) uit het spectrum en de cutoff van de SST-microdynamica 
 
 ### B0 — Geen gravitational input
 
-\[
+$$
 \frac{\partial\eta_A^{\rm micro}}{\partial G}
 =
 \frac{\partial\eta_A^{\rm micro}}{\partial L_p}
 =0.
-\]
+$$
 
 ### B1 — Fysieke state count
 
@@ -185,9 +185,9 @@ Geen gauge-, constraint- of dubbelgetelde modes.
 
 ### B2 — Area law
 
-\[
+$$
 S(A)=\eta_AA+o(A)
-\]
+$$
 
 over meerdere geometrieën.
 
@@ -218,11 +218,11 @@ Route I faalt in de gekozen microbranch wanneer:
 
 ## 9. Verdedigbare huidige conclusie
 
-\[
+$$
 \boxed{
 \text{De thermodynamische structuur is niet uitgesloten,}
 \text{ maar de huidige eenvoudige microstate-telling is onvoldoende.}
 }
-\]
+$$
 
 Het echte target is een onafhankelijk afgeleide fysieke area-density, niet een algebraïsche herschrijving van \(G\).

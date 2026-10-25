@@ -2,19 +2,19 @@
 
 ## Status
 
-\[
+$$
 \boxed{
 \text{CLOSED-CONDITIONAL / MICROSTATE THEOREM}
 }
-\]
+$$
 
 with the separate phenomenological verdict
 
-\[
+$$
 \boxed{
 \text{INDEPENDENT CORE-SCALE PIERCINGS FAIL THE OBSERVED GR COEFFICIENT.}
 }
-\]
+$$
 
 The theorem derives \(\eta_A^{\mathrm{SST}}\) and
 \(\delta S_{\mathrm{boundary}}=S_{\mathrm{rel}}\) from an explicit boundary
@@ -27,13 +27,13 @@ long-range gravitational coupling.
 
 The current SST Research Track proposes Route I through
 
-\[
+$$
 S=\eta_A A,
 \qquad
 T_{\mathrm{SST}}=\frac{\hbar a}{2\pi c k_B},
 \qquad
 \delta Q=T\,dS,
-\]
+$$
 
 and explicitly states that a line-piercing entropy model is admissible while
 its coefficient remains calibrated until the vacuum line density is derived.
@@ -57,30 +57,30 @@ Let \(\Sigma\) be a locally planar boundary element with unit normal
 The boundary-relevant SST line fabric is a stationary ergodic collection of
 oriented curves with line-length density
 
-\[
+$$
 \mathcal L_v
 =
 \lim_{V\to\infty}
 \frac{\text{total line length in }V}{\operatorname{Vol}(V)},
 \qquad
 [\mathcal L_v]=\mathrm{m^{-2}}.
-\]
+$$
 
 Its tangent orientation probability density is \(f(\widehat{\mathbf t})\),
 normalized by
 
-\[
+$$
 \int_{S^2}f(\widehat{\mathbf t})\,d\Omega=1.
-\]
+$$
 
 ### M2 — Protected piercing alphabet
 
 Each statistically independent boundary piercing carries \(q\ge2\) protected
 labels. The entropy capacity per piercing is
 
-\[
+$$
 s_\ell=\ln q
-\]
+$$
 
 in nats.
 
@@ -89,11 +89,11 @@ in nats.
 The linear torsion excitation on a discretized horizon is represented by a
 product of equal-covariance Gaussian microstates. For cell \(j\),
 
-\[
+$$
 p_{0,j}(x)=\frac{e^{-x^2/2}}{\sqrt{2\pi}},
 \qquad
 p_{\phi,j}(x)=\frac{e^{-(x-\mu_j)^2/2}}{\sqrt{2\pi}}.
-\]
+$$
 
 This is the classical probability representation of the coherent-shift sector;
 the quantum coherent-state analogue has the same quadratic relative-entropy
@@ -105,9 +105,9 @@ A boundary response encodes the relative distinguishability information using
 an asymptotically reversible, capacity-saturating \(q\)-ary code. Thus \(D\)
 nats require
 
-\[
+$$
 \delta N=\frac{D}{\ln q}
-\]
+$$
 
 activated channels. This is an information-theoretic constitutive assumption;
 it is not yet derived from nonlinear Euler/vortex dynamics.
@@ -117,15 +117,15 @@ it is not yet derived from nonlinear Euler/vortex dynamics.
 A line element \(ds\) with tangent \(\widehat{\mathbf t}\) projects onto
 \(\Sigma\) with normal projected measure
 
-\[
+$$
 dA_\perp
 =
 |\widehat{\mathbf t}\cdot\widehat{\mathbf n}|\,ds.
-\]
+$$
 
 Averaging over the stationary line process gives the crossing density
 
-\[
+$$
 \boxed{
 n_\perp(\widehat{\mathbf n})
 =
@@ -134,59 +134,59 @@ n_\perp(\widehat{\mathbf n})
 |\widehat{\mathbf t}\cdot\widehat{\mathbf n}|
  f(\widehat{\mathbf t})\,d\Omega.
 }
-\]
+$$
 
 For isotropy,
 
-\[
+$$
 f=\frac{1}{4\pi},
 \qquad
 \left\langle|\cos\theta|\right\rangle
 =\frac12,
-\]
+$$
 
 hence
 
-\[
+$$
 \boxed{
 n_\perp=\frac{\mathcal L_v}{2}.
 }
-\]
+$$
 
 Dimensional check:
 
-\[
+$$
 [n_\perp]=[\mathcal L_v]=\mathrm{m^{-2}}.
-\]
+$$
 
 ## 4. Area-entropy-density theorem
 
 For area \(A\), ergodicity gives
 
-\[
+$$
 \frac{N_\perp(A)}{A}\longrightarrow n_\perp
-\]
+$$
 
 in probability, with relative fluctuations vanishing as
 \(N_\perp^{-1/2}\) for a Poisson benchmark.
 
 The number of protected label configurations is
 
-\[
+$$
 W(A)=q^{N_\perp(A)}.
-\]
+$$
 
 Therefore
 
-\[
+$$
 S_{\mathrm{cap}}(A)
 =\ln W(A)
 =N_\perp(A)\ln q,
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}
 =
@@ -194,11 +194,11 @@ and
 =
 n_\perp\ln q.
 }
-\]
+$$
 
 The general anisotropic result is
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}(\widehat{\mathbf n})
 =
@@ -208,23 +208,23 @@ The general anisotropic result is
 \right\rangle_f
 \ln q.
 }
-\]
+$$
 
 For isotropy,
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}
 =
 \frac{\mathcal L_v}{2}\ln q.
 }
-\]
+$$
 
 Dimensional check:
 
-\[
+$$
 [\eta_A^{\mathrm{SST}}]=\mathrm{m^{-2}},
-\]
+$$
 
 because \(\ln q\) is dimensionless.
 
@@ -232,36 +232,36 @@ because \(\ln q\) is dimensionless.
 
 For equal covariance Gaussians,
 
-\[
+$$
 D_{\mathrm{KL}}(p_{\phi,j}\Vert p_{0,j})
 =\frac{\mu_j^2}{2}.
-\]
+$$
 
 Discretize the negative horizon generator by midpoint cells
 \((U_j,\Delta U,\Delta A)\), and define the coherent microstate shift
 
-\[
+$$
 \boxed{
 \mu_j
 =
 \sqrt{4\pi(-U_j)\Delta U\Delta A}
 \;\partial_U\widehat\phi(U_j).
 }
-\]
+$$
 
 Then
 
-\[
+$$
 \frac{\mu_j^2}{2}
 =
 2\pi(-U_j)
 \left(\partial_U\widehat\phi(U_j)\right)^2
 \Delta U\Delta A.
-\]
+$$
 
 Because relative entropy is additive for product measures,
 
-\[
+$$
 \begin{aligned}
 \delta S_{\mathrm{boundary}}^{(N)}
 &:=
@@ -283,11 +283,11 @@ U_j
 \left(\partial_U\widehat\phi(U_j)\right)^2
 \Delta U\Delta A.
 \end{aligned}
-\]
+$$
 
 In the continuum limit,
 
-\[
+$$
 \boxed{
 \delta S_{\mathrm{boundary}}
 =
@@ -297,29 +297,29 @@ U\,T_{UU}\,dU\,dA
 =
 S_{\mathrm{rel}},
 }
-\]
+$$
 
 where
 
-\[
+$$
 T_{UU}
 =
 (\partial_U\widehat\phi)^2.
-\]
+$$
 
 ### Critical distinction
 
 For equal-covariance shifts,
 
-\[
+$$
 H[p_{\phi,j}]-H[p_{0,j}]=0,
-\]
+$$
 
 while
 
-\[
+$$
 D_{\mathrm{KL}}(p_{\phi,j}\Vert p_{0,j})>0.
-\]
+$$
 
 Therefore the equality above is an equality of **relative entropy**, not of the
 ordinary Shannon/von-Neumann entropy difference. This matches the Dorau--Much
@@ -331,22 +331,22 @@ additional boundary-response law below.
 
 By M4, \(S_{\mathrm{rel}}\) nats activate
 
-\[
+$$
 \delta N
 =\frac{S_{\mathrm{rel}}}{\ln q}
-\]
+$$
 
 boundary channels. Since the crossing density is \(n_\perp\),
 
-\[
+$$
 \delta A
 =\frac{\delta N}{n_\perp}
 =\frac{S_{\mathrm{rel}}}{n_\perp\ln q}.
-\]
+$$
 
 Using \(\eta_A^{\mathrm{SST}}=n_\perp\ln q\),
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}\delta A
 =
@@ -354,7 +354,7 @@ Using \(\eta_A^{\mathrm{SST}}=n_\perp\ln q\),
 =
 S_{\mathrm{rel}}.
 }
-\]
+$$
 
 This closes the requested algebraic microstate chain under M1--M4.
 
@@ -363,122 +363,122 @@ This closes the requested algebraic microstate chain under M1--M4.
 For non-overlapping effective tubes of radius \(r_c\), define the occupied
 volume fraction \(\varphi_v\le1\). Then
 
-\[
+$$
 \varphi_v
 =\pi r_c^2\mathcal L_v,
-\]
+$$
 
 so
 
-\[
+$$
 \mathcal L_v
 =\frac{\varphi_v}{\pi r_c^2}.
-\]
+$$
 
 For isotropy,
 
-\[
+$$
 \boxed{
 \eta_A^{\mathrm{SST}}
 =
 \frac{\varphi_v\ln q}{2\pi r_c^2}.
 }
-\]
+$$
 
 For the strongest minimal binary model,
 
-\[
+$$
 \varphi_v=1,
 \qquad
 q=2,
-\]
+$$
 
 and the canonical
 
-\[
+$$
 r_c=1.40897017\times10^{-15}\ \mathrm m
-\]
+$$
 
 gives
 
-\[
+$$
 \boxed{
 \eta_{A,\max}^{(r_c,q=2)}
 =5.557020457583\times10^{28}\ \mathrm{m^{-2}}.
 }
-\]
+$$
 
 Only after this derivation, use the observed Newton constant as an external
 audit target:
 
-\[
+$$
 \eta_A^{\mathrm{GR}}
 =\frac{c^3}{4\hbar G}
 =9.570182792895\times10^{68}\ \mathrm{m^{-2}}.
-\]
+$$
 
 Thus
 
-\[
+$$
 \boxed{
 \frac{\eta_A^{\mathrm{GR}}}
 {\eta_{A,\max}^{(r_c,q=2)}}
 =1.722178794544\times10^{40}.
 }
-\]
+$$
 
 Equivalently, maximal core packing would require
 
-\[
+$$
 \boxed{
 \ln q_{\mathrm{req}}
 =1.193723375858\times10^{40}
 \quad\text{nats per crossing}.
 }
-\]
+$$
 
 For fixed \(q=2\), the effective transverse channel spacing required by the
 observed coefficient is
 
-\[
+$$
 \boxed{
 \ell_{\mathrm{channel}}
 =
 \sqrt{\frac{\ln2}{\eta_A^{\mathrm{GR}}}}
 =2.691241145957\times10^{-35}\ \mathrm m.
 }
-\]
+$$
 
 This last number is an **audit output**, not an input and not an SST derivation
 of the Planck scale.
 
 Therefore:
 
-\[
+$$
 \boxed{
 \text{Independent signed }r_c\text{-scale piercings are ruled out as a complete}
 \\
 \text{microphysical explanation of the gravitational area coefficient.}
 }
-\]
+$$
 
 ## 8. Density-weighted candidate
 
 If one additionally assumes that \(\rho_{\!f}\) is a volume average of dense
 core tubes in a negligible-density background,
 
-\[
+$$
 \varphi_v
 =\frac{\rho_{\!f}}{\rho_{\mathrm{core}}}
 =1.797897875191\times10^{-25}.
-\]
+$$
 
 Then, for \(q=2\),
 
-\[
+$$
 \eta_A^{\mathrm{density}}
 =9.990955273079\times10^3\ \mathrm{m^{-2}}.
-\]
+$$
 
 This is even farther from the gravitational target. However, the interpretation
 of \(\rho_{\!f}\) as a simple volume average is not canonical and this candidate

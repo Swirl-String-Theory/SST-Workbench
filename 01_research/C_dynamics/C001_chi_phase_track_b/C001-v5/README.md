@@ -6,12 +6,12 @@ v1/v2 are archive material: they checked the arithmetic of the shared-moment ans
 
 v5 uses the non-tautological profile-derived formula:
 
-\[
+$$
 \frac{c_\chi^2}{v_{\rm ref}^2}
 =
 \frac{\int_0^1 \rho_{\rm rel}(x)f(x)^2x^3\,dx}
 {\int_0^1 \rho_{\rm rel}(x)x^3\,dx},
-\]
+$$
 
 where \(x=r/a\), \(v_\theta(r)=v_{\rm ref}f(x)\), and \(\rho_{\rm rel}(x)\) is an optional density depletion profile.
 
@@ -66,13 +66,13 @@ python sst_chi_phase_v5_build.py --force
 
 The safe Research Track statement is:
 
-\[
+$$
 c_\chi^2
 =
 \left\langle v_\theta^2\right\rangle_{r^2,\rho}
 =
 \frac{\int_A \rho(r)v_\theta(r)^2r_\perp^2\,dA}
 {\int_A \rho(r)r_\perp^2\,dA}.
-\]
+$$
 
 Then `c_chi=v_swirl` holds only if `v_swirl` is defined as this weighted RMS speed, or if SST core dynamics independently selects a profile whose weighted RMS equals the canonical speed.

@@ -18,10 +18,10 @@ Outside the vortex filament Helmholtz permits a locally potential flow in a mult
 
 A curved vortex generally self-propels. Therefore a particle candidate should not be required to have zero induced velocity; its *shape* should be stationary modulo rigid translation, rigid rotation, and tangential reparameterization:
 
-\[
+$$
 \mathbf v_{\rm ind}(\mathbf X(s))
 =\mathbf U+\boldsymbol\Omega\times[\mathbf X(s)-\mathbf X_0]+\lambda(s)\mathbf t(s).
-\]
+$$
 
 The gate minimizes the normal residual after fitting `U` and `Omega`. Failure is the main scientific falsifier in this static-centerline workbench.
 
@@ -33,9 +33,9 @@ Reversing centerline orientation reverses the unit-circulation Biot--Savart fiel
 
 For the regularized centerline kernel the package reports
 
-\[
+$$
 E=\rho\Gamma^2\,\ell_E,
-\]
+$$
 
 where `ell_E` is the computed `energy_length_reference`. The blind run does **not** decide whether `rho` should be `rho_f` or `rho_core`. Reveal reports both interpretations separately.
 
@@ -43,7 +43,7 @@ where `ell_E` is the computed `energy_length_reference`. The blind run does **no
 
 The SST research-track separation retained here is
 
-\[
+$$
 \mathcal L_{\rm torsion}
 =\frac12\rho_{\!f}|\partial_t\mathbf A|^2
 -\frac12K|\nabla\times\mathbf A|^2,
@@ -51,7 +51,7 @@ The SST research-track separation retained here is
 c_T^2=K/\rho_{\!f},
 \qquad
 Z_{\rm torsion}=\rho_{\!f}c_T.
-\]
+$$
 
 A static relaxed knot has no `A(x,t)` data, so the core--torsion impedance lemma is marked `NOT_TESTED_BY_STATIC_CENTERLINE_DATA` rather than manufactured from geometry proxies.
 

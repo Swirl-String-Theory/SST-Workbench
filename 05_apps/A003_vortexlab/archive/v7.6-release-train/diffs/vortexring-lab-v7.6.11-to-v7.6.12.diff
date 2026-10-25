@@ -1,0 +1,325 @@
+--- /mnt/data/vortexring-lab-v7.6.11.html	2026-07-15 03:53:03.691670083 +0000
++++ /mnt/data/vortexring-lab-v7.6.12.html	2026-07-15 04:02:49.097738896 +0000
+@@ -3,11 +3,11 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Superfluïde vortexlab v7.6.11 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
+-<meta name="vortexlab-version" content="7.6.11">
++<title>Superfluïde vortexlab v7.6.12 · dual-sidebar UI · ideal + fseries knopen · potential flow/Cₚ</title>
++<meta name="vortexlab-version" content="7.6.12">
+ <meta name="vortexlab-base" content="7.5.3">
+-<meta name="vortexlab-parent" content="7.6.10">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator">
++<meta name="vortexlab-parent" content="7.6.11">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.4-validator,dual-sidebar-ui,ideal-knot-catalog,fseries-knot-catalog,arclength-resampling,multicomponent-links,potential-flow-cp,tracer-three-stage-reset,tracer-20000,flag-below-topbar,bottom-simulator-overlays,flat-geometric-diagnostics,sst-diagnostics-siblings,speculative-two-knot-swirl-clock,two-route-clock-diagnostic,adjustable-initial-knot-separation,distance-sweep-control,spec-clock-quick-preset,spec-clock-quick-controls,spec-clock-overlay,model-log-text-export,model-log-tdz-hotfix,unmapped-proxy-semantics,stable-incremental-spec-overlay,free-distance-number-input,focus-safe-control-sync,bound-spec-clock-controls,far-distance-periodic-z-guard,phase-null-isolated-subtraction,single-reference-calibration-lock,stable-log-clock-bracket,differential-lag-accumulator,external-drift-cfl-bound,accepted-step-time-cap,playback-debt-reset,spec-clock-calibrate-autostart,spec-clock-safe-speed-preset">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -694,6 +694,7 @@
+       <p>\[ u_i=\left[\frac{1}{L_i}\oint_{K_i}(\mathbf u_{j\to i}\!\cdot\!\hat{\mathbf t}_i)^2\,ds\right]^{1/2}. \]</p>
+       <p>Omdat de relatieve oriëntatie tussen de canonieke interne swirl en deze externe bijdrage niet is afgeleid, wordt geen enkelvoudige totale snelheid geclaimd. In plaats daarvan toont de diagnose de formele bracket \(v_i\in[|v_{\circlearrowleft}-u_i|,v_{\circlearrowleft}+u_i]\) en projecteert die via de SST-klokansatz \(d\tau_i/dt=\sqrt{1-v_i^2/c^2}\). Dit mengt de canonieke horn-snelheid met een meterschaal-filamentdiagnose en is daarom een ongemapte Research-Track-diagnose, geen canonieke superpositieregel.</p>
+       <p>Vanaf v7.6.11 gebruikt de tweede route geen kale verhouding van twee globale body-frequenties meer. Op exact dezelfde actuele geometrie worden per drager twee snelheidsvelden geëvalueerd: het volledige veld en een geïsoleerd veld met alleen de eigen drager plus dezelfde achtergrondvoorwaarden. De directe wederzijdse fase-nullproxy is \(\delta_i=(\Omega_i^{\rm full}-\Omega_i^{\rm iso})/|\Omega_i^{\rm iso}|\). Eén verre kalibratie legt \(\delta_{i,0}\) vast, waarna \(\eta_i^{\rm phase-null}=1+\delta_i-\delta_{i,0}\). De referentie wordt daarna vergrendeld tot een geometrische reset. Dit onderdrukt gemeenschappelijke achtergrondrotatie en zelfgeïnduceerde vormdrift, maar maakt de proxy nog niet canoniek: een SST-interne fase-observable en overdrachtswet ontbreken nog steeds. De veldbracket wordt bovendien in \(\ln\eta\)-ruimte berekend en de lag wordt differentieel geïntegreerd, zodat sub-ulp verschillen nabij één niet door floating-point-cancellatie verdwijnen.</p>
++      <p><b>v7.6.12 integratorbootstrap.</b> Voorgeschreven axiale drift begrenst de CFL-stap vanaf het eerste frame. Daarnaast geldt een playback-onafhankelijke bovengrens van 0.05 s zolang SPEC CLOCK actief is. De preset en iedere geometrische Reset zetten de klokrun op 1× en pauzeren bij \(t=0\); de eerste fase-nullkalibratie start de sweep automatisch. Een wijziging van snelheid, pauzestatus of drift wist alleen onafgewerkt playback-debet en kan daardoor geen achterstallige reuzenstap meer vrijgeven.</p>
+       <h2>WEDERZIJDSE WRIJVING (T &gt; 0) <span class="tag">v7</span></h2>
+       <p>De knooppuntsnelheid volgt de Schwarz-vergelijking</p>
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+@@ -1326,7 +1327,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.6.11 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · stabiele Δlnη-bracket · uitgebreide zelftests T0–T13 · ?selftest=1.
++      v7.6.12 · basis v7.5.3 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · fase-null geïsoleerde aftrek · enkelvoudig vergrendelde referentie · eerste-stap drift-CFL · 50 ms SPEC CLOCK-tijdcap · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -1337,7 +1338,7 @@
+ <script src="./fourier_knots_data.js" onerror="void 0"></script>
+ <script>
+ "use strict";
+-const APP_VERSION='7.6.11';
++const APP_VERSION='7.6.12';
+ const APP_BASE_VERSION='7.5.3';
+ window.__vlBootComplete=false;
+ window.addEventListener('error',function vlEarlyBootstrapError(event){
+@@ -1371,7 +1372,11 @@
+   'Speculative swirl clock: passieve vergelijking van twee ongemapte proxies; ruwe overlap/afwijking is expliciet geen fysische closure of falsificatie',
+   'SPEC CLOCK-overlay wordt alleen bij een actieve diagnose getoond en incrementeel bijgewerkt zonder voortdurende DOM-reconstructie',
+   'Spec-clock quick-controls zijn werkelijk tweerichtingsgebonden; actieve numerieke invoer wordt niet langer door live synchronisatie overschreven',
+-  'Δz_AB,0 heeft vrije positieve numerieke invoer boven het sliderbereik; verre afstanden schakelen periodiek z automatisch uit'
++  'Δz_AB,0 heeft vrije positieve numerieke invoer boven het sliderbereik; verre afstanden schakelen periodiek z automatisch uit',
++  'Integratorbootstrap: voorgeschreven axiale driftsnelheden begrenzen dt_CFL al vóór de eerste RK4-stap; de eerste stap kan niet meer honderden seconden groot worden',
++  'Geaccepteerde tijdstappen hebben een playback-onafhankelijke bovengrens van 0.25 s en 0.05 s zolang SPEC CLOCK actief is',
++  'Wijzigingen van afspeelsnelheid, pauzestatus en opgelegde drift wissen uitsluitend onafgewerkt playback-debet; er wordt geen achterstallige reuzenstap ingehaald',
++  'SPEC CLOCK-preset armt gepauzeerd op 1×; één fase-nullkalibratie bij t=0 start de sweep automatisch'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+@@ -1381,6 +1386,8 @@
+ const BEM_SOURCE_MODEL='neumann-source-panel-mfs-v1';
+ const BEM_REBUILD_STEPS=8;
+ const TOPOLOGY_SWEEP_SAMPLES=12;
++const MAX_ACCEPTED_DT=0.25;             // s, algemene temporele resolutiecap
++const SPEC_CLOCK_MAX_ACCEPTED_DT=0.05;  // s, fijnere passieve klokdiagnostiek
+ // ================= dataset: ideal trefoil 3:1:1 (Gilbert, 183 modi) =================
+ const IDEAL_TREFOIL_3_1_1 = {
+   knotId: "3:1:1",
+@@ -2133,6 +2140,20 @@
+   perfWarmupUntil=performance.now()+Math.max(0,warmupMs);
+ }
+ let stepDebt=0;   // deterministische stepper: afspeel-tijddebet in seconden
++let lastT=performance.now(),frame=0;
++let playbackDebtResetReason='startup';
++function resetPlaybackDebt(reason='ui-change'){
++  stepDebt=0;
++  lastT=performance.now();
++  playbackDebtResetReason=reason;
++  resetPerformanceMeasurement(300);
++}
++function setPausedState(value,reason='pause-toggle'){
++  paused=!!value;
++  const b=document.getElementById('bPause');
++  if(b)b.textContent=paused?'Hervat':'Pauzeer';
++  resetPlaybackDebt(reason);
++}
+ const hist=[];
+ let twistProxy=null;
+ let chiArrows=[];
+@@ -2338,11 +2359,16 @@
+   P.off=0;P.w=0;P.lockVz=false;P.vzA=+0.005;P.vzB=-0.005;P.ccwA=true;P.ccwB=false;P.mirrorB=false;
+   P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=false;P.tracerWrapZ=true;P.tracerSpawnMode='inner-column';
+   P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.specClockDisplayGain=1;P.specClockEnabled=true;
++  P.accExp=0; // v7.6.12: reproduceerbare 1× sweep; nooit een geërfde hoge afspeelsnelheid
+   setInitialAxialSeparation(Math.min(0.84,initialAxialSeparationSliderMax()));
+   resetSpecClockRuntime('preset');
+-  syncUi();updateSubtitle();resetState();if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
++  syncUi();updateSubtitle();resetState();
++  SpecClock.autoStartAfterCalibration=true;
++  setPausedState(true,'spec-clock-preset-arm');
++  updateSpecClockDisplay();
++  if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
+   if(window.ModelLog){window.ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;window.ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
+-  setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, trefoil, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit, Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe.',true);
++  setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, trefoil, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit, Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe. De run staat gepauzeerd op 1×; kalibreer eenmaal bij t=0, daarna start hij automatisch.',true);
+ }
+ function applyStretchGatePreset(){
+   P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=R_HORN_SST;
+@@ -2608,7 +2634,7 @@
+   phaseNullRefA:NaN,phaseNullRefB:NaN,
+   calibrationTime:NaN,calibrationDistance:NaN,calibrationCount:0,
+   lagFieldMin:0,lagFieldMax:0,lagPhase:0,
+-  last:null,tmpV:null,tmpIsoA:null,tmpIsoB:null
++  last:null,tmpV:null,tmpIsoA:null,tmpIsoB:null,autoStartAfterCalibration:false
+ };
+ function specClockLogEta(v){
+   const q=clamp(Math.abs(v)/C_LIGHT,0,1-1e-15);
+@@ -2761,6 +2787,7 @@
+   SpecClock.phaseNullRefA=SpecClock.phaseNullRefB=NaN;
+   SpecClock.calibrationTime=SpecClock.calibrationDistance=NaN;SpecClock.calibrationCount=0;
+   SpecClock.lagFieldMin=SpecClock.lagFieldMax=SpecClock.lagPhase=0;
++  SpecClock.autoStartAfterCalibration=false;
+   SpecClock.last={valid:false,reason};updateSpecClockDisplay();
+ }
+ function calibrateSpecClockPhase(){
+@@ -2777,7 +2804,13 @@
+   if(window.ModelLog)window.ModelLog.logEvent('spec-clock-phase-null-calibration',{
+     distance:SpecClock.calibrationDistance,tPhys:SpecClock.calibrationTime,
+     deltaFracRefA:SpecClock.phaseNullRefA,deltaFracRefB:SpecClock.phaseNullRefB,
+-    omegaFullA:m0.omegaA,omegaIsoA:m0.omegaIsoA,omegaFullB:m0.omegaB,omegaIsoB:m0.omegaIsoB,locked:true});
++    omegaFullA:m0.omegaA,omegaIsoA:m0.omegaIsoA,omegaFullB:m0.omegaB,omegaIsoB:m0.omegaIsoB,locked:true,
++    autoStart:SpecClock.autoStartAfterCalibration});
++  if(SpecClock.autoStartAfterCalibration){
++    SpecClock.autoStartAfterCalibration=false;
++    setPausedState(false,'spec-clock-calibration-autostart');
++    setFlag('▶ fase-nullreferentie vergrendeld; de SPEC CLOCK-sweep is automatisch gestart op 1×.',true);
++  }
+   return true;
+ }
+ function fmtClockTime(s){
+@@ -2797,7 +2830,7 @@
+   const pre=specClockPrerequisites(),cal=document.getElementById('bSpecClockCalibrate');
+   if(cal){
+     cal.disabled=!P.specClockEnabled||!pre.ok||SpecClock.calibrated||(tPhys>1e-12&&!paused);
+-    cal.textContent=SpecClock.calibrated?'🔒 Fase-nullreferentie vergrendeld':'◎ Kalibreer fase-nullreferentie bij huidige afstand';
++    cal.textContent=SpecClock.calibrated?'🔒 Fase-nullreferentie vergrendeld':(SpecClock.autoStartAfterCalibration?'◎ Kalibreer fase-nullreferentie en start 1×':'◎ Kalibreer fase-nullreferentie bij huidige afstand');
+   }
+   const gain=document.getElementById('sSpecClockGain');if(gain)gain.value=String(P.specClockDisplayGain);
+   const vg=document.getElementById('vSpecClockGain');if(vg)vg.textContent=(P.specClockDisplayGain>=1e6?'10⁶':String(P.specClockDisplayGain))+'×';
+@@ -2838,7 +2871,7 @@
+ }
+ function ensureSpecClockOverlayMarkup(body){
+   if(!body||body.dataset.specOverlayReady==='1')return;
+-  body.innerHTML=`<div class="note"><b>Snelle weergave.</b> Alleen zichtbaar zolang de speculative klok actief is. v7.6.11 gebruikt een vergrendelde fase-nullreferentie en momentane geïsoleerde aftrek; de proxyvergelijking blijft niet-canoniek.</div>
++  body.innerHTML=`<div class="note"><b>Snelle weergave.</b> Alleen zichtbaar zolang de speculative klok actief is. v7.6.12 gebruikt een vergrendelde fase-nullreferentie en momentane geïsoleerde aftrek; de proxyvergelijking blijft niet-canoniek.</div>
+     <div class="spec-overlay-grid">
+       <div class="k">modus / topologie</div><div class="v" data-spec-overlay="mode">—</div>
+       <div class="k">medium / interactie</div><div class="v" data-spec-overlay="medium">—</div>
+@@ -3203,6 +3236,21 @@
+   // de tijdstap konden onderschatten.
+   return Math.max(u1,u2,u3,u4);
+ }
++function prescribedKinematicSpeedBound(){
++  let u=0;
++  if(P.mode==='solo'){
++    u=Math.max(u,Math.abs(effectiveW()));
++    if(P.taylorOsc&&P.taylorOsc.enabled&&!P.centerLock){
++      u=Math.max(u,Math.abs(P.taylorOsc.amplitude)*2*Math.PI/Math.max(0.5,P.taylorOsc.period));
++    }
++  }else{
++    u=Math.max(u,Math.abs(P.vzA),Math.abs(P.lockVz?P.vzA:P.vzB));
++  }
++  return u;
++}
++function acceptedStepTimeCap(){
++  return P.specClockEnabled?SPEC_CLOCK_MAX_ACCEPTED_DT:MAX_ACCEPTED_DT;
++}
+ function dtCFL(){
+   const lm=lminAll();
+   let dt=Infinity;
+@@ -3211,7 +3259,8 @@
+     const om=Math.max(1e-12,Math.abs(nu)*Math.pow(Math.PI/lm,2));
+     dt=0.5/om;
+   }
+-  dt=Math.min(dt, 0.25*lm/Math.max(1e-12,lastUmax));
++  const speedBound=Math.max(1e-12,lastUmax,prescribedKinematicSpeedBound());
++  dt=Math.min(dt,0.25*lm/speedBound);
+   const stretchRate=stretchProfileCharacteristicRate();
+   if(stretchRate>1e-12)dt=Math.min(dt,0.12/stretchRate);
+   if(bgWallInSolver()&&Math.abs(P.Om)>1e-9)dt=Math.min(dt,0.2/Math.abs(P.Om));
+@@ -3222,7 +3271,9 @@
+     const dc=contactThresholdInfo().effective,margin=Math.max(0,gap-dc);
+     if(Number.isFinite(margin))dt=Math.min(dt,0.12*Math.max(margin,0.05*dc)/Math.max(2*lastUmax,1e-12));
+   }
+-  return dt;
++  dt=Math.min(dt,acceptedStepTimeCap());
++  if(!(Number.isFinite(dt)&&dt>0))dt=acceptedStepTimeCap();
++  return Math.max(1e-6,dt);
+ }
+ function evalsPerStep(){
+   let tot=0;for(const f of dynamicFils())tot+=f.N;
+@@ -4063,7 +4114,17 @@
+   markPotentialFlowDirty();updatePotentialFlowVisual(true);
+   resetStretchGate('state-reset',true);
+   resetSpecClockRuntime('state-reset · fase-referentie opnieuw vereist');
++  if(P.specClockEnabled){
++    P.accExp=0;
++    SpecClock.autoStartAfterCalibration=true;
++    paused=true;
++    const pauseButton=document.getElementById('bPause');if(pauseButton)pauseButton.textContent='Hervat';
++    const accSource=document.getElementById('sAcc');if(accSource)accSource.value='0';
++    const accValue=document.getElementById('vAcc');if(accValue)accValue.textContent=fmtAcc(acc());
++    resetPlaybackDebt('spec-clock-reset-arm');
++  }
+   updateInitialSeparationUi();
++  updateSpecClockDisplay();
+ }
+ function taylorOscillationApplies(){
+   return P.mode==='solo'&&!P.centerLock&&P.taylorOsc.enabled&&!!Y&&!!fils.length;
+@@ -5833,9 +5894,9 @@
+ });
+ {const sepMain=document.getElementById('sSepAB');if(sepMain){sepMain.addEventListener('blur',updateInitialSeparationUi);sepMain.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sepMain.blur();}});}}
+ bindSignedRange('Off','revOff',x=>x.toFixed(0)+' mm',x=>{P.off=x*1e-3;resetState();});
+-bindSignedRange('W','revW',x=>fmtAxialMmPerS(x),x=>P.w=x*1e-3);
+-bindSignedRange('VzA','revVzA',x=>fmtAxialMmPerS(x),x=>{P.vzA=x*1e-3;if(P.lockVz){P.vzB=P.vzA;syncSignedUi('VzB','revVzB',P.vzB,y=>fmtAxialMmPerS(y));}});
+-bindSignedRange('VzB','revVzB',x=>fmtAxialMmPerS(x),x=>P.vzB=x*1e-3);
++bindSignedRange('W','revW',x=>fmtAxialMmPerS(x),x=>{P.w=x*1e-3;resetPlaybackDebt('axial-drift-change');});
++bindSignedRange('VzA','revVzA',x=>fmtAxialMmPerS(x),x=>{P.vzA=x*1e-3;if(P.lockVz){P.vzB=P.vzA;syncSignedUi('VzB','revVzB',P.vzB,y=>fmtAxialMmPerS(y));}resetPlaybackDebt('axial-drift-change');});
++bindSignedRange('VzB','revVzB',x=>fmtAxialMmPerS(x),x=>{P.vzB=x*1e-3;resetPlaybackDebt('axial-drift-change');});
+ function bindSpecClockQuickControls(){
+   const bindNumber=(id,commit)=>{
+     const input=document.getElementById(id);if(!input)return;
+@@ -5856,12 +5917,13 @@
+   });
+   bindNumber('sSpecVzA',mmps=>{
+     P.vzA=mmps*1e-3;if(P.lockVz)P.vzB=P.vzA;
++    resetPlaybackDebt('spec-clock-drift-a');
+     syncSignedUi('VzA','revVzA',P.vzA*1000,x=>fmtAxialMmPerS(x));
+     if(P.lockVz)syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
+     if(window.ModelLog)window.ModelLog.logUser('spec-clock-drift-a',{mmPerS:mmps,metresPerSecond:P.vzA,lockVz:P.lockVz});
+   });
+   bindNumber('sSpecVzB',mmps=>{
+-    P.vzB=mmps*1e-3;syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
++    P.vzB=mmps*1e-3;resetPlaybackDebt('spec-clock-drift-b');syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
+     if(window.ModelLog)window.ModelLog.logUser('spec-clock-drift-b',{mmPerS:mmps,metresPerSecond:P.vzB});
+   });
+   const setPairDrift=approach=>{
+@@ -5869,6 +5931,7 @@
+     const toward=P.zA<=P.zB?1:-1;
+     P.lockVz=false;const lock=document.getElementById('cLockVz');if(lock)lock.checked=false;
+     P.vzA=(approach?toward:-toward)*speed;P.vzB=-P.vzA;
++    resetPlaybackDebt(approach?'spec-clock-approach':'spec-clock-separate');
+     syncSignedUi('VzA','revVzA',P.vzA*1000,x=>fmtAxialMmPerS(x));
+     syncSignedUi('VzB','revVzB',P.vzB*1000,x=>fmtAxialMmPerS(x));
+     syncSpecClockQuickControls({force:true});
+@@ -5890,7 +5953,7 @@
+ bindRange('MfA',x=>x.toFixed(3),x=>{P.mfAlpha=clamp(x,0,1);});
+ bindRange('MfAp',x=>x.toFixed(4),x=>{P.mfAlphaP=clamp(x,-0.5,0.5);});
+ document.getElementById('mfTemp').addEventListener('change',e=>{applyMfTemp(e.target.value);syncUi();});
+-bindRange('Acc',()=>fmtAcc(acc()),x=>{P.accExp=x;resetPerformanceMeasurement(900);});
++bindRange('Acc',()=>fmtAcc(acc()),x=>{P.accExp=x;resetPlaybackDebt('playback-speed-change');});
+ bindRange('Diam',x=>x.toFixed(0)+' cm',x=>{
+   const newR=clamp(x/200,0.025,1.0);
+   let newH=P.Hcyl;
+@@ -5968,7 +6031,7 @@
+   }
+   updateStretchReadout();
+ });
+-document.getElementById('bPause').addEventListener('click',e=>{paused=!paused;e.target.textContent=paused?'Hervat':'Pauzeer';});
++document.getElementById('bPause').addEventListener('click',()=>setPausedState(!paused,paused?'resume':'pause'));
+ document.getElementById('bReset').addEventListener('click',resetState);
+ // v7.3.1: OVERZICHT gebruikt uitsluitend #quickControlsDock; geen tweede dynamische container.
+ document.getElementById('bResetParticles').addEventListener('click',cycleParticleReset);
+@@ -6420,7 +6483,9 @@
+       solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,
+       bundleEnabled:P.bundleEnabled,bundleProfile:P.bundleProfile,bundleSplay:P.bundleSplay,OmBundle:P.OmBundle,
+       bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMQuality:P.bundleBEMQuality,
+-      topologyGuard:P.topologyGuard,accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp,
++      topologyGuard:P.topologyGuard,accExp:P.accExp,paused,stepDebt,dtCFL:finiteOrNull(dtCFL()),acceptedStepTimeCap:acceptedStepTimeCap(),
++      prescribedKinematicSpeedBound:prescribedKinematicSpeedBound(),playbackDebtResetReason,
++      autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp,
+       stretchGateEnabled:P.stretchGateEnabled,stretchProfile:P.stretchProfile,stretchProfileApply:P.stretchProfileApply,stretchProfileOnly:P.stretchProfileOnly,
+       stretchOmega0:P.stretchOmega0,stretchBeta:P.stretchBeta,stretchGamma:P.stretchGamma,stretchSoftening:P.stretchSoftening,stretchEpsilon:P.stretchEpsilon,stretchMode:P.stretchMode,
+       specClockEnabled:P.specClockEnabled,specClockDisplayGain:P.specClockDisplayGain,
+@@ -6629,6 +6694,12 @@
+        add('T0x stabiele Δlnη-route behoudt sub-ulp veldverschil',Number.isFinite(d)&&d!==0&&dl!==0,'dη='+d.toExponential(3)+' Δln='+dl.toExponential(3));}
+       {const common=1.0,mut=2e-6,full=common+mut,iso=common,delta=(full-iso)/Math.abs(iso);
+        add('T0y fase-null geïsoleerde aftrek verwijdert gemeenschappelijke achtergrond',Math.abs(delta-mut)<1e-15,'δ='+delta.toExponential(3));}
++      {const oldMode=P.mode,oldA=P.vzA,oldB=P.vzB,oldLock=P.lockVz,oldClock=P.specClockEnabled;
++       P.mode='botsing';P.vzA=.005;P.vzB=-.005;P.lockVz=false;P.specClockEnabled=true;
++       const ub=prescribedKinematicSpeedBound(),cap=acceptedStepTimeCap();
++       add('T0z eerste-stap-CFL kent opgelegde driftsnelheid',Math.abs(ub-.005)<1e-15,'u_bound='+ub.toExponential(3));
++       add('T0aa SPEC CLOCK tijdstapcap 50 ms',Math.abs(cap-SPEC_CLOCK_MAX_ACCEPTED_DT)<1e-15,'dt_cap='+cap.toFixed(3)+' s');
++       P.mode=oldMode;P.vzA=oldA;P.vzB=oldB;P.lockVz=oldLock;P.specClockEnabled=oldClock;}
+       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
+       add('T0h relatieve drageroriëntatie',orient===-1,'s_A*s_B='+orient);
+       // T0i — v7.5: verse-startdefaults (D4 + frame-ontvlechting), bevroren bij scriptparse
+@@ -7118,7 +7189,7 @@
+ });
+ resetState();
+ updCam();
+-let lastT=performance.now(),frame=0;
++lastT=performance.now();frame=0;
+ function loop(now){
+   window.__vlBootComplete=true;
+ requestAnimationFrame(loop);
+@@ -7129,8 +7200,9 @@
+   const playAdvance=(paused||flagged)?0:acc()*stabilityThrottle*dtReal;
+   if(!paused&&!flagged){
+     // Deterministische stepper: uitsluitend volledige CFL-stappen. De
+-    // simulatiesnelheid vult alleen het stap-debet; het traject is exact
+-    // onafhankelijk van afspeelsnelheid, framerate en veiligheidsrem.
++    // simulatiesnelheid vult alleen het stap-debet. v7.6.12 begrenst dt ook
++    // vóór de eerste stap met opgelegde drift en een playback-onafhankelijke
++    // tijdcap, zodat geen honderden seconden grote bootstrapstap kan ontstaan.
+     stepDebt+=playAdvance;
+     let evals=0, advancedAbs=0, advancedSigned=0;
+     let dtNext=dtCFL();
+@@ -7181,7 +7253,7 @@
+       }
+       dtNext=dtCFL();
+     }
+-    stepDebt=Math.min(stepDebt,dtNext); // geen inhaal-explosie na pauze of framedrops
++    stepDebt=Math.min(stepDebt,dtNext); // geen inhaal-explosie na pauze, snelheid-/driftwijziging of framedrops
+     advThisFrame=advancedSigned;
+     effAccSimSum=0.98*effAccSimSum+advancedAbs;
+     effAccRealSum=0.98*effAccRealSum+dtReal;

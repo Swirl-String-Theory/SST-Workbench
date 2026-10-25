@@ -2,15 +2,15 @@
 
 A turnkey Windows/Python/C++ package to test the hypothesis:
 
-\[
+$$
 \boxed{\text{finite vortex core}+\text{axial/toroidal hybrid mode}+\text{closed propagation}\rightarrow\text{phase-dependent stability window}}
-\]
+$$
 
 with the critical constraint
 
-\[
+$$
 \boxed{\text{the delay is measured from the simulation/eigen-dispersion, never supplied as a free restoring parameter.}}
-\]
+$$
 
 ## What is genuinely finite-core here?
 
@@ -22,9 +22,9 @@ The knot/link centerline supplies closed-loop geometry: length, curvature validi
 
 For each case the active scientific condition satisfies
 
-\[
+$$
 kL+m\Theta_B=2\pi n.
-\]
+$$
 
 The matched control uses the same physical parameters but a blinded non-integer phase closure. The scorer does not know which is which.
 
@@ -32,11 +32,11 @@ The matched control uses the same physical parameters but a blinded non-integer 
 
 The finite-core eigenbranch supplies \(\omega(k)\). The code obtains
 
-\[
+$$
 v_g=d\omega/dk,
 \qquad
 \tau_g=L/|v_g|,
-\]
+$$
 
 then actually propagates a narrow packet around the periodic loop and measures \(\tau_{ret}\). The loop phase is recorded; no target phase is used.
 

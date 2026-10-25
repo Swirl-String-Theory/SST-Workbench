@@ -18,11 +18,11 @@ After blind selection is frozen, every parent-selected carrier must still belong
 
 A case is seed-certified at resolution `N` only when all configured conditions pass:
 
-\[
+$$
 \sigma/\Delta x \ge n_{\sigma,\min},
 \quad 3\sigma\kappa_{\max}\le C_\kappa,
 \quad d_{\rm periodic}/\sigma\ge C_{\rm box},
-\]
+$$
 
 and the dealiased outer spectral-energy fraction is below its threshold. BASIC freezes `(n_sigma_min,C_kappa,C_box)=(4,0.5,3)` and spectral tail `<=0.08`.
 

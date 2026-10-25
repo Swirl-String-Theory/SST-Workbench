@@ -4,9 +4,9 @@ Standalone Python + C++17/pybind11 research harness. It does **not** import, mod
 
 This release turns the v0.3 softening scan into a candidate-certification pipeline for the fixed four-knot matrix
 
-\[
+$$
 0_1,\qquad 3_1,\qquad 4_1,\qquad 5_2.
-\]
+$$
 
 The bundled centerlines are reconstructed from the uploaded `ideal_favorites.txt` Fourier database. The package remains **Research Track** software: it resolves numerical stationary structures and separately certifies convergence-qualified branches; it does not establish a physical electron model or a global photon sphere.
 
@@ -16,26 +16,26 @@ v0.5.1 is the first release that advances beyond local radial candidates. It int
 
 For the clock-only ansatz,
 
-\[
+$$
 g^{F}_{ij}(\mathbf x)=S(\mathbf x)^{-2}\delta_{ij},
 \qquad
 S(\mathbf x)=\sqrt{1-\lVert\boldsymbol\beta(\mathbf x)\rVert^2},
-\]
+$$
 
 and, using Euclidean arclength \(\ell\) with unit tangent \(\mathbf t\), the ray system is
 
-\[
+$$
 \frac{d\mathbf x}{d\ell}=\mathbf t,
 \qquad
 \frac{d\mathbf t}{d\ell}
 =-\frac{(I-\mathbf t\mathbf t^{\mathsf T})\nabla S}{S}.
-\]
+$$
 
 The analytic Biot--Savart Jacobian supplies
 
-\[
+$$
 \nabla S=-\frac{J_{\beta}^{\mathsf T}\boldsymbol\beta}{S}.
-\]
+$$
 
 ## New in v0.5.1
 
@@ -83,7 +83,7 @@ The analytic Biot--Savart Jacobian supplies
 
 The hierarchy in v0.5.1 is deliberately strict:
 
-\[
+$$
 \text{local radial minimum}
 \not\Rightarrow
 \text{resolved closed ray}
@@ -91,7 +91,7 @@ The hierarchy in v0.5.1 is deliberately strict:
 \text{convergence-certified orbit}
 \not\Rightarrow
 \text{QSM pole}.
-\]
+$$
 
 The package may therefore complete successfully while reporting zero certified closed orbits. That is a valid negative result, not a software failure. Every v0.5.1 output keeps
 
@@ -116,7 +116,7 @@ because complex-frequency wave resonances are outside this release.
 
 The full three-dimensional knot field still uses the regularized midpoint Rosenhead kernel
 
-\[
+$$
 \boldsymbol\beta(\mathbf x)
 =
 \frac{\beta_0}{2}
@@ -127,11 +127,11 @@ The full three-dimensional knot field still uses the regularized midpoint Rosenh
 }{
 \left(\lVert\mathbf x-\mathbf x_{i+1/2}\rVert^2+\epsilon^2\right)^{3/2}
 }.
-\]
+$$
 
 Its analytic spatial derivative is computed from
 
-\[
+$$
 \frac{\partial}{\partial x_j}
 \left(
 \frac{r_k}{Q^{3/2}}
@@ -142,7 +142,7 @@ Its analytic spatial derivative is computed from
 \frac{3r_kr_j}{Q^{5/2}},
 \qquad
 Q=\lVert\mathbf r\rVert^2+\epsilon^2.
-\]
+$$
 
 Rankine and Lamb--Oseen remain one-dimensional comparison profiles only; they are not silently substituted into the full three-dimensional knot solver.
 
@@ -255,14 +255,14 @@ python run_all_checks.py ^
 
 The native release gate includes:
 
-\[
+$$
 \begin{aligned}
 &\text{field parity}<10^{-12},\\
 &\text{Jacobian parity}<10^{-10},\\
 &\text{analytic Jacobian finite-difference check}<10^{-7},\\
 &\text{external radial benchmark error}<10^{-10}.
 \end{aligned}
-\]
+$$
 
 ## 2. Candidate atlas for all four knots
 
@@ -340,11 +340,11 @@ python run_candidate_convergence.py ^
 
 Weak certification requires the candidate branch to occur at at least three resolutions and satisfy
 
-\[
+$$
 E_\rho<10^{-3},\qquad
 E_{R_F}<10^{-3},\qquad
 E_\beta<10^{-3}.
-\]
+$$
 
 Strong certification uses \(10^{-4}\).
 
@@ -352,9 +352,9 @@ Strong certification uses \(10^{-4}\).
 
 The primary v0.5.1 scan window is
 
-\[
+$$
 0.00180\leq\epsilon/r_c\leq0.00210.
-\]
+$$
 
 ```bat
 python run_bifurcation_atlas.py ^
@@ -395,11 +395,11 @@ python run_scale_sweep.py ^
 
 The relevant local/non-local geometry changes with
 
-\[
+$$
 \frac{D_K}{\epsilon}
 =
 \frac{\texttt{scale\_over\_rc}}{\epsilon/r_c}.
-\]
+$$
 
 ## 6. Symmetry audit
 

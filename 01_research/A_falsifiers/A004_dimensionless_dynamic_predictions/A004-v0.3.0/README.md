@@ -4,19 +4,19 @@
 
 This release tests a trefoil embedded in a finite-radius bundle of vortex tubes that run from \(z=-\infty\) to \(z=+\infty\). The bundle radius is normally derived from the free central aperture of the knot:
 
-\[
+$$
 R_{\rm bundle}=\eta_h R_{\rm hole}^{\rm free}.
-\]
+$$
 
 The package deliberately separates two interpretations:
 
-\[
+$$
 \boxed{
 \begin{array}{ll}
 \text{physical tubes:}&\Gamma_{\rm tube}\ \text{fixed},\quad \Gamma_{\rm hole}=N\Gamma_{\rm tube},\\[1mm]
 \text{numerical discretization:}&\Gamma_{\rm hole}\ \text{fixed},\quad \Gamma_{\rm tube}=\Gamma_{\rm hole}/N.
 \end{array}}
-\]
+$$
 
 These are not equivalent experiments.
 
@@ -32,23 +32,23 @@ The included smoke tests show:
 
 At \(N=61\), the fixed-total discretization differs from the continuum field by approximately
 
-\[
+$$
 1.76\times10^{-4}
-\]
+$$
 
 in RMS background velocity and by approximately
 
-\[
+$$
 5.63\times10^{-4}
-\]
+$$
 
 in the intrinsic residual, averaged over both circulation signs.
 
 The best exploratory continuum case reduced the isolated trefoil residual by only about \(0.60\%\), leaving
 
-\[
+$$
 \epsilon_{\rm int}\simeq0.2192\gg0.05.
-\]
+$$
 
 See `VALIDATION_AXIAL_BUNDLE.md`.
 
@@ -145,16 +145,16 @@ The background tubes in v0.3.0 are:
 
 This package does not yet implement a fully coupled state
 
-\[
+$$
 \{X_K(s,t),X_1(z,t),\ldots,X_N(z,t)\}
-\]
+$$
 
 with tube bending, mutual induction, Kelvin modes or reconnection. Therefore a failure of the frozen-bundle tests does not falsify the stronger backreacting-bundle hypothesis.
 
 ## Epistemic status
 
-\[
+$$
 \boxed{[\mathrm{RESEARCH\ TRACK}]}
-\]
+$$
 
 The circulation phase is a clock-carrier diagnostic, not a derivation of proper time. No particle identification or dimensional SST constant is predicted by this package.

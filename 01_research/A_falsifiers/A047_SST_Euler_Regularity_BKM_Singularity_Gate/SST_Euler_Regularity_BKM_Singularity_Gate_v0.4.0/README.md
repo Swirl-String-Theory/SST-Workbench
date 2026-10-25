@@ -53,21 +53,21 @@ The provided snapshot of the uploaded v0.3.0 result reproduces `116 -> 8` with f
 
 For every `(geometry, N)` v0.4.0 records separately:
 
-\[
+$$
 n_\sigma=\frac{\sigma}{\Delta x},\qquad
 3\sigma\kappa_{\max},\qquad
 \frac{d_{\rm periodic}}{\sigma},
-\]
+$$
 
 plus the fraction of retained spectral energy in the outer part of the dealiased cube.
 
 Default certification thresholds are:
 
-\[
+$$
 n_\sigma\ge4,\qquad
 3\sigma\kappa_{\max}\le0.5,\qquad
 \frac{d_{\rm periodic}}{\sigma}\ge3,
-\]
+$$
 
 and spectral-tail fraction `<= 0.08`.
 
@@ -85,24 +85,24 @@ Different E010 carriers and independence groups are never pooled as resolution r
 
 The extended profile uses a fixed long window (`T=0.9` by default) only for upstream survivors. At sample times it follows a material tracer and deformation gradient
 
-\[
+$$
 \dot X=u(X,t),\qquad \dot F=M F,\qquad M=\nabla u.
-\]
+$$
 
 It evaluates:
 
-\[
+$$
 M=S-\frac12\epsilon\cdot\omega,
 \qquad
 \frac{D|\omega|}{Dt}=\alpha|\omega|,
 \quad \alpha=\xi^T S\xi,
-\]
+$$
 
 and the Cauchy relation
 
-\[
+$$
 \omega(X(a,t),t)\approx F(a,t)\omega_0(a),\qquad \det F\approx1.
-\]
+$$
 
 The pressure Hessian `H = grad grad p` is also evaluated. `F_tt = -H F` is reported as a lower-order sample-time diagnostic; it is not a hard gate in v0.4.0.
 
@@ -110,9 +110,9 @@ The pressure Hessian `H = grad grad p` is also evaluated. `F_tt = -H F` is repor
 
 The old single `1/omega_max` linear fit is retained as a diagnostic, but no longer acts alone. Across 35%, 45% and 55% trailing windows v0.4.0 compares
 
-\[
+$$
 \omega_{\max}=A(t_*-t)^{-\gamma}
-\]
+$$
 
 against exponential and nonsingular algebraic growth. Default finite-time escalation requires:
 

@@ -7,43 +7,43 @@ actually gives the internal torsional phase speed?
 
 v6 focuses on the strongest v5 candidate family:
 
-\[
+$$
 f_{a_0}(x)
 =
 x\left[a_0+(3-2a_0)x^2+(a_0-2)x^4\right],
 \qquad x=r/a_{\rm core}.
-\]
+$$
 
 This family satisfies
 
-\[
+$$
 f(0)=0,\qquad f(1)=1,\qquad f'(1)=-1,
-\]
+$$
 
 so it is regular at the axis, matches the boundary speed, and matches the
 exterior \(1/r\) slope at the boundary.
 
 For uniform density, the profile-derived torsional speed is
 
-\[
+$$
 \left(\frac{c_\chi}{v_{\rm ref}}\right)^2
 =
 4\int_0^1 f_{a_0}(x)^2 x^3\,dx
 =
 \frac{2a_0^2+13a_0+78}{105}.
-\]
+$$
 
 Therefore the closure condition \(c_\chi/v_{\rm ref}=1\) is exactly
 
-\[
+$$
 2a_0^2+13a_0-27=0,
-\]
+$$
 
 with physical positive root
 
-\[
+$$
 a_0^\star=\frac{\sqrt{385}-13}{4}\approx1.6553542176.
-\]
+$$
 
 This is close to the golden ratio \(\varphi\approx1.6180339887\), but it is not
 equal to it. At \(a_0=\varphi\), the package reports

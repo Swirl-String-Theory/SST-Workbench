@@ -32,10 +32,10 @@ not per-link or cross-resolution fitted scales.
 
 The Research-Track filament two-form is
 
-\[
+$$
 \Omega_{ab}=\sum_i\sigma_i\oint \hat{\mathbf t}_i\cdot
 (\delta\mathbf X_a\times\delta\mathbf X_b)\,ds.
-\]
+$$
 
 Rank, nullity and singular vectors are reported.  For a singular form, v0.3.3 supplies an algebraic
 image-space quotient, but does not declare kernel directions to be physical gauge modes.
@@ -44,9 +44,9 @@ image-space quotient, but does not declare kernel directions to be physical gaug
 
 For a full-rank or explicitly projected diagnostic form,
 
-\[
+$$
 \Omega\dot{\mathbf q}=H\mathbf q.
-\]
+$$
 
 Only dimensionless spectra and frequency ratios are reported.  No absolute `hbar*omega` spectrum is
 claimed without an independently derived action scale and canonical normalization.

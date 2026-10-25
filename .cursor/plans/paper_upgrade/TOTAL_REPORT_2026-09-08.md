@@ -8,13 +8,13 @@ Index: [README.md](README.md) · Corrected framing: 2026-09-08 (v2)
 
 ## 0. Gecorrigeerde statuslabels
 
-\[
+$$
 \boxed{
 \begin{aligned}
 A037 &: \texttt{INVALID\_NUMERICS / NOT\_YET\_TESTED\_2505}\\
 A034 &: \texttt{OLD\_QHP\_DYNAMIC\_GATE\_FAIL / NOT\_YET\_TESTED\_1806}
 \end{aligned}}
-\]
+$$
 
 | Family | Engineering | Oude science | Nieuwe paper gate | Promotion |
 |--------|-------------|--------------|-------------------|-----------|
@@ -62,9 +62,9 @@ Infra groen. \(K6=\texttt{SKIP}\) ⇒ geen accepted RPO ⇒ geen true Floquet-re
 
 Alle zes pairs: `INVALID_TRAJECTORY_TIMESTEP` ⇒
 
-\[
+$$
 \boxed{\text{observable mag wetenschappelijk niet beoordeeld worden}}
-\]
+$$
 
 niet “symmetry-selection hypothesis failed.”
 
@@ -77,9 +77,9 @@ niet “symmetry-selection hypothesis failed.”
 | P0005 | **10.25** | 2.95 | 0.708 |
 | P0006 | **10.53** | 6.98 | 0.750 |
 
-\[
+$$
 \boxed{\text{N=72 basic trajectory is numeriek onvoldoende opgelost.}}
-\]
+$$
 
 ### Mirror algebra (code sanity, niet physical detection)
 
@@ -88,9 +88,9 @@ Door de set: \(\Xi_H[PK]\simeq-\Xi_H[K]\), \(\Pi[PK]\simeq-\Pi[K]\); excitation 
 
 P0005: \(\mathrm{CFL}_{\max}\approx10.25\) maar \(\epsilon_{\Pi,\mathrm{odd}}\approx9.8\times10^{-16}\).
 
-\[
+$$
 \boxed{\text{mirror covariance van de code} \neq \text{gekwalificeerde fysieke transportrespons}}
-\]
+$$
 
 ### Paper-2505 nog niet uitgevoerd
 
@@ -104,9 +104,9 @@ Alleen `paper_upgrade/gate.py --selftest` + synthetic cert.
 
 588 candidates → 33 zero crossings → **0** confirmed restoring / fixed points / affine FPs.
 
-\[
+$$
 \boxed{\text{op deze sampled QHP manifold is geen gekwalificeerd restoring point gevonden.}}
-\]
+$$
 
 ### Trefoil \(3_1\)
 
@@ -119,7 +119,7 @@ Alleen `paper_upgrade/gate.py --selftest` + synthetic cert.
 Package `0.1.3` / formats `SST-QHP-*-1.3` = \(\mathbf F,J\) methode.
 Constrained \(g_{\mathcal M}, H_{\mathcal M}\) inputs bestaan niet als campaign-output ([PU02_GAPS.md](PU02_GAPS.md)).
 
-Bewaar `DYNAMIC_QHP_RESTORING = FAIL`; voeg later onafhankelijk `CONSTRAINED_ENERGY_ADMISSIBILITY = ?` toe ([PU04d](PU04d_a034_dual_branch.plan.md)).
+Bewaar `DYNAMIC_QHP_RESTORING = FAIL`; voeg later onafhankelijk `CONSTRAINED_ENERGY_ADMISSIBILITY = ?` toe ([PU04d](complete/PU04d_a034_dual_branch.plan.md)).
 
 ---
 
@@ -129,7 +129,7 @@ Huidige on-disk certs hadden `status: PASS` / `ENERGETICALLY_ADMISSIBLE` uit **s
 
 Consumerregel (PU02b):
 
-\[
+$$
 \boxed{
 \texttt{promotion\_allowed}
 =
@@ -139,15 +139,15 @@ Consumerregel (PU02b):
 \land
 (\texttt{status}\in\{\texttt{PASS},\texttt{QUALIFIED}\})
 }
-\]
+$$
 
 ---
 
 ## 6. Volgende volgorde — production-certification patchset
 
-**Geen nieuwe physics.** Zie [PRODUCTION_CERTIFICATION.plan.md](PRODUCTION_CERTIFICATION.plan.md).
+**Geen nieuwe physics.** Zie [PRODUCTION_CERTIFICATION.plan.md](almost_complete/PRODUCTION_CERTIFICATION.plan.md).
 
-\[
+$$
 \boxed{
 \text{PC00 Certificate Hardening}
 \rightarrow
@@ -157,17 +157,17 @@ Consumerregel (PU02b):
 \rightarrow
 \text{A038 v0.4.1}
 }
-\]
+$$
 
 (+ D006 **v0.4.1** regressions; tip is v0.4.0 niet v0.3.0)
 
 | Patch | Doel |
 |-------|------|
-| [PC00](PC00_certificate_contract.plan.md) | `SST-SCIENTIFIC-CERTIFICATE-1.0` + `promotable()` |
-| [PC01](PC01_d006_regression.plan.md) | parity+CFL / fake selftest / weak manifold |
-| [PC02](PC02_a037_v031.plan.md) | qual ladder + χ_ij; mirror ≠ physical response |
-| [PC03](PC03_a034_v021.plan.md) | keep dynamic FAIL + energy branch + richer labels |
-| [PC04](PC04_a038_v041.plan.md) | firewall; `BLOCKED_UPSTREAM_*` ≠ `FAIL_TREFOIL` |
+| [PC00](complete/PC00_certificate_contract.plan.md) | `SST-SCIENTIFIC-CERTIFICATE-1.0` + `promotable()` |
+| [PC01](not_done/PC01_d006_regression.plan.md) | parity+CFL / fake selftest / weak manifold |
+| [PC02](not_done/PC02_a037_v031.plan.md) | qual ladder + χ_ij; mirror ≠ physical response |
+| [PC03](not_done/PC03_a034_v021.plan.md) | keep dynamic FAIL + energy branch + richer labels |
+| [PC04](not_done/PC04_a038_v041.plan.md) | firewall; `BLOCKED_UPSTREAM_*` ≠ `FAIL_TREFOIL` |
 
 Daarna pas opnieuw: `D006 → A037 → A034 → A038 preflight`, en alleen bij promotable certs de modal/Floquet-keten.
 

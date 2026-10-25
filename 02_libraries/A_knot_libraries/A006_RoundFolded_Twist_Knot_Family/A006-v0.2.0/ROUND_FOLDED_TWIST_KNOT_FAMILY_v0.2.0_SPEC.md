@@ -6,9 +6,9 @@
 
 Use the 4-plat closure of the four-strand braid word
 
-\[
+$$
 \boxed{W_m=\sigma_2^{m}\sigma_1^{-1}\sigma_2,\quad m\in\mathbb{Z}_{\ge1}.}
-\]
+$$
 
 There are \(m+2\) designated 2D crossings and one closed strand, with the plat closure identifying endpoint pairs \((0,1)\) and \((2,3)\) on both sides. The implemented convention gives:
 
@@ -23,9 +23,9 @@ There are \(m+2\) designated 2D crossings and one closed strand, with the plat c
 
 The general normalized polynomial is
 
-\[
+$$
 \Delta_m(t)=k t^2 - (2k+(-1)^m)t + k, \quad k=\lceil m/2\rceil.
-\]
+$$
 
 **Careful:** The sign convention for Conway entries depends on the chosen rational-tangle closure. The code's actual source of truth is the explicit braid word and plat pairings, not an ambiguous bare string `C(m,2)`.
 
@@ -33,17 +33,17 @@ The general normalized polynomial is
 
 Four initial braid lanes are \(y_j=(j-\tfrac32)d_b\), \(j=0,1,2,3\), with \(d_b>0\). At each elementary braid crossing exchanging slots \(j,j+1\), parameter \(u\in[0,1]\) uses the \(C^2\) transition
 
-\[
+$$
 h(u)=6u^5-15u^4+10u^3, \quad
  y_j(u)=(1-h(u))y_j+h(u)y_{j+1},\quad
  y_{j+1}(u)=(1-h(u))y_{j+1}+h(u)y_j.
-\]
+$$
 
 The crossing lift on the two participating strands is
 
-\[
+$$
 z_\pm(u)=\pm\sigma H\sin^2(\pi u),\qquad \sigma=\pm1,
-\]
+$$
 
 with the overpassing strand selected by braid-generator sign. \(H\) is in *dimensionless coordinate units*. Plat closures are semicircular caps attached to the four ends. This produces a closed 3D polygon, with no knot `blob` inserted onto a ring.
 
@@ -51,9 +51,9 @@ with the overpassing strand selected by braid-generator sign. \(H\) is in *dimen
 
 The 4-plat rectangle \((x,y)\) is embedded into an annular sector via
 
-\[
+$$
 \boxed{\mathbf X_m(x,y,z)=((R+y)\cos\Theta_m(x),\; (R+y)\sin\Theta_m(x),\; z).}
-\]
+$$
 
 The angle map \(\Theta_m(x)\) is strictly increasing (shape-preserving PCHIP): twist crossings are clustered in the upper sector; two clasp crossings are placed near the lower sector; all four plat lanes follow nearly the same large circular carrier. We require \(R+\min y>0\) and angular range strictly less than \(2\pi\); these guarantee the 2D coordinate map is injective on the braid-and-cap strip before discretization. The values of \(\Theta_m\) are specified in `src/roundfold.py` rather than inferred from screenshots.
 

@@ -13,9 +13,9 @@ x_m,y_m,z_m,vx_m_s,vy_m_s,vz_m_s
 
 The pipeline computes
 
-\[
+$$
 \Gamma=\oint \mathbf v\cdot d\boldsymbol\ell
-\]
+$$
 
 with a closed-loop trapezoidal line integral.
 

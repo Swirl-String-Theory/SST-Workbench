@@ -10,9 +10,9 @@ The patch makes three changes:
 
 The force--area equation deliberately uses the v0.8.35 Canon notation `\rhohorn` because the existing identity in that version is
 
-\[
+$$
 F_{\rm swirl}^{\max}=\pi r_c^2\rho_{\rm horn}^{\rm eff}(v_{\!\boldsymbol{\circlearrowleft}}^\ast)^2.
-\]
+$$
 
 No dimensionless Ridgerunner/length-minimization multiplier is promoted to a force in newtons without an explicit physical normalization.
 

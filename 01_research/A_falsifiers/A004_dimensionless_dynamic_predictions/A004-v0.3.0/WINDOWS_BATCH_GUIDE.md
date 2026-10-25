@@ -38,11 +38,11 @@ batch\21_test_physical_tubes.bat
 
 Meaning:
 
-\[
+$$
 \Gamma_{\rm tube}=\text{constant},
 \qquad
 \Gamma_{\rm hole}=N\Gamma_{\rm tube}.
-\]
+$$
 
 Do not interpret increasing \(N\) as numerical convergence.
 
@@ -54,11 +54,11 @@ batch\22_test_numerical_discretization.bat
 
 Meaning:
 
-\[
+$$
 \Gamma_{\rm hole}=\text{constant},
 \qquad
 \Gamma_{\rm tube}=\Gamma_{\rm hole}/N.
-\]
+$$
 
 This must converge toward the continuum Rankine reference.
 
@@ -96,11 +96,11 @@ batch\27_run_B8_circulation_clock.bat
 
 The diagnostic clock variables are
 
-\[
+$$
 \Omega_\Gamma=\frac{\Gamma_{\rm hole}}{2\pi R_{\rm bundle}^2},
 \qquad
 \theta_\Gamma=\Omega_\Gamma t.
-\]
+$$
 
 ## 11. Full ladder
 

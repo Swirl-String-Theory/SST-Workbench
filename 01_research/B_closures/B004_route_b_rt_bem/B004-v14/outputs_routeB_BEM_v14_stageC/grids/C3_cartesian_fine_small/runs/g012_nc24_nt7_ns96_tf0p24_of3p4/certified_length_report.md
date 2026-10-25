@@ -6,12 +6,12 @@ BEMv13 uses the database `L` column as the certified longitudinal length, while 
 
 The working budget is
 
-\[
+$$
 \alpha^{-1}_{\rm pred,blind}
 =
 \frac12\left[N_{\rm soft}V_{\rm soft}L_{\rm cert}(3_1)
 +\Delta F_{\rm pair}/\mathcal N_q\right].
-\]
+$$
 
 ## Selected candidate
 

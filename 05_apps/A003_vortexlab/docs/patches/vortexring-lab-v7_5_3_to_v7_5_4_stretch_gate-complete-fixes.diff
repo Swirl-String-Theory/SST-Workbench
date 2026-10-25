@@ -1,0 +1,771 @@
+--- a/vortexring-lab-v7_5_3_stretch_gate.html
++++ b/vortexring-lab-v7_5_3_stretch_gate.html
+@@ -6,7 +6,7 @@
+ <title>Superfluïde vortexlab v7.5.3 — SST vortex-stretching gate · topology guard · 3D Neumann-BEM</title>
+ <meta name="vortexlab-version" content="7.5.3">
+ <meta name="vortexlab-base" content="7.5.2">
+-<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,v7.5.3-validator">
++<meta name="vortexlab-patch" content="sst-vortex-stretching-gate,friedlander-three-profile-benchmark,material-line-strain,topology-preserving-step-guard,auto-relax-rollback,neumann-source-panel-bem,passive-first-hit,taylor-contact,exact-gap-ratios,planck-scale-probe,regression-matrix,v7.5.3-validator">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+ <style>
+   :root{
+@@ -378,7 +378,7 @@
+       <p>\[ \mathbf u(\mathbf x_i) \;=\; \underbrace{\frac{\Gamma}{4\pi}\Big[\ln\!\frac{2\sqrt{\ell_+\ell_-}}{e^{\Delta}\,a}+c_0\Big]\;\mathbf s'\!\times\mathbf s''}_{\text{lokaal}} \;+\; \underbrace{\frac{\Gamma}{4\pi}\sum_{j\notin\{i-1,\,i\}} \frac{d\boldsymbol\ell_j\times\mathbf r_{ij}}{\left(|\mathbf r_{ij}|^2+\delta\,a^2\right)^{3/2}}}_{\text{niet-lokaal}} \;+\; w\,\hat{\mathbf z}\;\text{(solo)}, \]</p>
+       <p>De axiale superstroming \(w\,\hat{\mathbf z}\) geldt uitsluitend in <b>solo-modus</b> (één knoop). In botsing-modus gebruik je per-drager <em>v_z-drift</em> sliders i.p.v. \(w\).</p>
+       <p>met \(\delta=0\) op het eigen filament (de kernfysica zit volledig in de lokale term) en \(\delta=1\) voor de kruisterm tussen dragers. De constante \(c_0=0.1395\) is een <em>gemeten</em> discretisatieconstante van dit schema, geverifieerd universeel over \(R\in[4,10]\,\mathrm{cm}\), \(a\in[0.5,3]\,\mathrm{mm}\), \(N\in[48,256]\) en alle drie kernmodellen. Integratie: RK4 met Kelvin-golf-CFL \(\omega_{\max}\,\Delta t\le 0.5\), \(\omega=\nu k^2\), \(\nu=\tfrac{\Gamma}{4\pi}\Lambda\). RK2 is hier principieel ongeschikt: Kelvin-golven zijn zuiver dispersief en RK2 heeft geen stabiliteit op de imaginaire as.</p>
+-      <p><b>Validatie:</b> ringsnelheid vs. Kelvin-formule: \(|\text{fout}|\le 0.01\%\) voor alle kernmodellen bij \(N=48\!-\!256\) (resolutie-onafhankelijk). De rotatie wordt exact behandeld door in het meeroterende frame te integreren; \(\Omega\) legt dus géén tijdstaplimiet op.</p>
++      <p><b>Validatie:</b> ringsnelheid vs. Kelvin-formule, gemeten over alle drie kernmodellen met de huidige kalibratie: maximale relatieve fout circa \(0.070\%\) bij \(N=48\), \(0.014\%\) bij \(N=96\), en \(<0.01\%\) voor \(N\ge144\). De fout is dus klein maar aantoonbaar resolutie-afhankelijk. In het co-roterende solverframe wordt de uniforme wandrotatie analytisch door de frametransformatie behandeld; alleen met \(\boldsymbol\Omega\times\mathbf r\) expliciet in het lab-solverframe geldt de extra limiet \(\Delta t\le0.2/|\Omega|\).</p>
+ 
+       <p><b>Deterministische stepper (v6):</b> de integrator zet uitsluitend volledige CFL-stappen \(\Delta t=\Delta t_{\rm CFL}(\text{toestand})\); de <em>simulatiesnelheid</em> bepaalt via een stap-debet-accumulator alleen hoeveel van die stappen per frame worden afgespeeld. Het traject is daardoor bit-voor-bit onafhankelijk van afspeelsnelheid, framerate en veiligheidsrem. In eerdere versies werd de laatste substap op het tijdbudget afgekapt, waardoor de snelheidsknop het resultaat wél kon beïnvloeden. Uitzondering: auto-relax regulariseert per weergaveframe en verbreekt deze onafhankelijkheid; dat staat bij de knop vermeld. <b>v7.1:</b> de laatste bekende framegekoppelde toestandsmutatie (kernstraal-klem vanuit de stabiliteitsdiagnose) is verwijderd — de diagnose is nu puur. <b>v7.2:</b> contactdetectie gebruikt exacte segment-segmentafstanden (geklemde closest-point, met boog-venster \(6a\) tegen valse zelf-treffers) ná iedere geaccepteerde RK4-stap, en bij harde 3a-overschrijding wordt de first-hit binnen de stap gebisecteerd in plaats van met een volle CFL-stap gepasseerd. Tracers integreren per geaccepteerde stap met exact dezelfde tijdstap als de filamenten. Wandmarges rekenen met de búisrand (\(r+a\), \(z\pm a\)), niet de centerline. Regressieharnas: open met <code>?selftest=1</code> of de 🧪-knop; resultaten als JSON exporteerbaar.</p>
+       <h2>KERNMODELLEN</h2>
+@@ -409,7 +409,9 @@
+         <p>\(\kappa = h/m_4 = 9.969\times10^{-8}\ \mathrm{m^2\,s^{-1}}\); kernstraal \(a_0\sim 1\ \text{Å}\); \(\rho_s\approx 145\ \mathrm{kg\,m^{-3}}\) (\(T\to0\)). Historisch kernmodel: hol (Rayfield–Reif); modern: GP-achtig.</p></div>
+       <div class="card"><div class="ct kA">SST <span class="tag">CANON v0.8.20 + RESEARCH TRACK</span></div>
+         <p>\(\Gamma_0 = 2\pi R_{\rm horn}v_{\circlearrowleft} = 9.68362\times10^{-9}\ \mathrm{m^2\,s^{-1}}\); \(R_{\rm horn}=1.40897017\times10^{-15}\ \mathrm m\); \(v_{\circlearrowleft}=1.09384563\times10^{6}\ \mathrm{m\,s^{-1}}\). Canon v0.8.20 identificeert \(R_{\rm horn}\) als horn/circulatieschaal, niet als opgeloste buisdikte. In deze Research-Track interpretatie ligt een veel kleinere vaste Rankine-kern \(r_{\rm kern}\) binnen een irrotationele buitenstroming \(v_\theta=\Gamma/(2\pi r)\) voor \(r>r_{\rm kern}\); daar is de klassieke vorticiteit nul. De huidige simulator lost dat radiale profiel niet op: hij gebruikt een centerline-filament met een gekozen \(\Delta\)-closure. GP/NLSE blijft een conditionele alternatieve closure, niet “het kernmodel per Canon”.</p></div>
+-      <p><b>Schaalmodel-eerlijkheid.</b> In de sim staat \(a\) op mm-schaal; de echte kern is Å (He-II) resp. fm (SST) — dat gat is niet resolveerbaar in een filamentcode op meterschaal. \(U\) schaalt \(\propto\Gamma\) en slechts logaritmisch met \(a\); de topologische diagnostiek (Wr, Lk, \(H/\Gamma^2\)) is exact schaal-invariant. Kies je een medium, dan is \(\Gamma=n\kappa\) fysisch en staat de tijdversnelling navenant hoog.</p>
++      <div class="card"><div class="ct" style="color:#D8B4FE">STRING-THEORIE PROBE <span class="tag">PASSIEVE SCHAALTEST</span></div>
++        <p>Deze optie zet uitsluitend de afzonderlijke Rosetta-schaal \(a_{\rm probe}\) op de Plancklengte \(\ell_P\). De dynamica blijft dezelfde filament-ODE met vrije demo-circulatie. \(a_{\rm probe}\) is niet \(a_{\rm sim}\), \(r_{\rm kern}\), \(R_{\rm horn}\) of de BEM-grens en activeert geen snaaractie, compactificatie of extra dimensies. Resultaten zijn dus numerieke schaal- en interfaceproeven, geen stringtheorievoorspellingen.</p></div>
++      <p><b>Schaalmodel-eerlijkheid.</b> In de sim staat \(a_{\rm sim}\) op een numeriek resolveerbare schaal; de He-II-kern ligt rond Å, terwijl SST Canon \(R_{\rm horn}\) op fm-schaal vastlegt en de kleinere \(r_{\rm kern}\) nog niet onafhankelijk afleidt. Geen van deze schalen wordt stilzwijgend gelijkgesteld. \(U\) schaalt \(\propto\Gamma\) en slechts logaritmisch met \(a_{\rm sim}\); de topologische diagnostiek (Wr, Lk, \(H/\Gamma^2\)) is schaal-invariant.</p>
+ 
+       <h2>TAYLOR-KOLOM &amp; STEWARTSON (Research Track)</h2>
+       <p><b>Geometrie van ∂V:</b> de lokale separatrix rond de drager heeft straal \(r_{\rm cap}\), terwijl de geïdealiseerde Taylor-kolom axiaal doorloopt van \(z=-h\) tot \(z=+h\). De absolute oorsprong \((0,0,0)\) ligt in het cilindermidden en de kolomlengte is \(2h\), zodat de axiale reikwijdte veel groter kan zijn dan \(r_{\rm cap}\). De eindcaps zijn alleen fysische eindlagen wanneer de cilinder werkelijke begrenzende eindvlakken voorstelt; in het huidige volume-kader zijn ze een didactische domeinaanduiding.</p>
+@@ -418,7 +420,7 @@
+ 
+       <h2>FILAMENT-SPIN &amp; ACHTERGROND-Ω</h2>
+       <p><b>Body-frame:</b> \(\Omega_{\rm body}\) uit least-squares fit van punt-snelheden in het xy-vlak; \(\hat\chi\) = chiraliteitsrichting (trefoil/knoop). Ring: \(\mathrm{Wr}=0\), geen macroscopische spin.</p>
+-      <p><b>Achtergrond Omega koppelen</b> (optioneel, default uit): lab-frame superflow \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) met \(\Omega=P.Om\,\hat z\) — Feynman-rooster advectie. Uit wanneer co-rot frame aan.</p>
++      <p><b>Achtergrond Omega koppelen</b> (optioneel, default uit) is een solverkeuze: in het lab-solverframe wordt \(\mathbf u_{\rm bg}=\boldsymbol\Omega\times\mathbf r\) expliciet geïntegreerd; in het co-roterende solverframe is de wand in rust. Dit staat los van Absolute/Rotating als puur weergaveframe.</p>
+       <p><b>Transport-proxy</b> (v7.1, voorheen "Tw_proxy"): geïntegreerde tangentiële verplaatsing \(\int \mathbf u\cdot\hat{\mathbf t}\,dt\), dimensie <em>lengte</em>. Dit is géén twist: echte \(\mathrm{Tw}\) is dimensieloos en vereist een ribbon-framing of parallel-getransporteerd materiaalframe, dat een kale centerline niet bezit. De proxy mag daarom niet bij \(\mathrm{Wr}\) worden opgeteld; het twist-kanaal blijft in dit lab expliciet niet gerepresenteerd. <b>v7.2:</b> de uitlezing is nu het booglengte-gewogen gemiddelde \(\langle\int\mathbf u\cdot\hat{\mathbf t}\,dt\rangle_L\) — de oude kale knooppuntsom schaalde \(\propto N\) (zelfde knoop, dubbele resolutie, dubbele waarde) en deelde bovendien door \(2\pi\), een restant van de twist-claim.</p>
+ 
+       <h2>STABILITEIT &amp; AUTO-RELAX</h2>
+@@ -438,7 +440,7 @@
+       <p>\[ \dot{\mathbf s} \;=\; \mathbf v_s \;+\; \alpha\,\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\;-\;\alpha'\,\hat{\mathbf s}'\times\big[\hat{\mathbf s}'\times(\mathbf v_n-\mathbf v_s)\big], \]</p>
+       <p>met \(\mathbf v_s\) de <em>totale</em> lokale superfluïde snelheid (LIA + niet-lokale Biot–Savart + opgelegde drift; in het lab-frame met achtergrond-Ω-koppeling ook \(\boldsymbol\Omega\times\mathbf r\)) en \(\mathbf v_n\) de opgelegde normale-vloeistofsnelheid: uniform axiaal \(v_n\hat{\mathbf z}\), plus \(\boldsymbol\Omega\times\mathbf r\) wanneer de achtergrondrotatie in het lab-frame staat (de normale component co-roteert in evenwicht, zodat de azimutale \(\mathbf v_{ns}\)-bijdrage wegvalt). De wrijvingsterm zit ín de RHS van de ODE en dus binnen alle vier RK4-evaluaties; de deterministische stepper blijft bit-voor-bit afspeelsnelheid-onafhankelijk.</p>
+       <p><b>Orthodoxe consequenties</b> (LIA-exact voor een cirkelring, live geverifieerd in de HUD): in rustende normale vloeistof krimpt een ring met \(\dot R=-\alpha U\) en transleert met \((1-\alpha')U\); met tegenstroom groeit hij zodra \(v_{n\parallel}>U\) (Donnelly–Glaberson). Kelvin-golven worden gedempt met rate \(\sim\alpha\,\omega_{\rm KW}\). Bij \(\alpha\neq0\) vervalt het Kelvin-circulatietheorema op de bewegende kernlijn: energie, \(H/\Gamma^2\) en \(\mathrm{Wr}+\mathrm{Tw}\) zijn <em>niet langer</em> behouden — drift daarin is nu fysica, geen modelgrens.</p>
+-      <p><b>Coëfficiënten:</b> \(\alpha(T),\alpha'(T)\) voor He-II bij SVP (T90) uit de Donnelly-compilatie van Barenghi–Donnelly–Vinen, <i>J. Low Temp. Phys.</i> <b>52</b>, 189 (1983), tabelbereik 1.30–2.10 K; \(\alpha'\) wisselt van teken tussen 2.06 en 2.08 K. Onder 1.30 K en boven 2.10 K geen tabelwaarden — gebruik "aangepast". <b>Eerlijkheidsgrens:</b> in SST- of demo-medium zijn \(\alpha,\alpha'\) zuiver fenomenologische knoppen; er bestaat geen SST-canonwaarde voor wederzijdse wrijving en de He-II-temperatuurlabels claimen daar niets. De koppeling is één-richting: \(\mathbf v_n\) is voorgeschreven, er is geen terugreactie op de normale component en dus geen zelfconsistente twee-vloeistof-(HVBK-)dynamica. Achterwaarts integreren met \(\alpha\neq0\) integreert een anti-dissipatieve ODE en is geen fysische omkering; de sim waarschuwt hiervoor.</p>
++      <p><b>Coëfficiënten:</b> \(\alpha(T),\alpha'(T)\) voor He-II bij SVP (T90) uit de Donnelly-compilatie van Barenghi–Donnelly–Vinen, <i>J. Low Temp. Phys.</i> <b>52</b>, 189 (1983), tabelbereik 1.30–2.10 K; \(\alpha'\) wisselt van teken tussen 2.06 en 2.08 K. Onder 1.30 K en boven 2.10 K geen tabelwaarden — gebruik "aangepast". <b>Eerlijkheidsgrens:</b> in SST-, demo- en string-probe-medium zijn \(\alpha,\alpha'\) zuiver fenomenologische knoppen; er bestaat geen SST- of string-canonwaarde voor wederzijdse wrijving en de He-II-temperatuurlabels claimen daar niets. De koppeling is één-richting: \(\mathbf v_n\) is voorgeschreven, er is geen terugreactie op de normale component en dus geen zelfconsistente twee-vloeistof-(HVBK-)dynamica. Achterwaarts integreren met \(\alpha\neq0\) integreert een anti-dissipatieve ODE en is geen fysische omkering; de sim waarschuwt hiervoor.</p>
+ 
+       <h2>SST VORTEX-STRETCHING STABILITY GATE <span class="tag">v7.5.3 · Research Track</span></h2>
+       <p>Voor een materiële vortexlijn is de lokale tangentiële rek</p>
+@@ -451,7 +453,7 @@
+       <p>Daarom geeft \(A_1'(r)=0\) geen Friedlander-sheargroei, terwijl \(A_2' = 2\beta r\) en \(A_3'=-\Gamma_pr/[\pi(r^2+a_p^2)^2]\) een groeiend horizontaal-vorticiteitskanaal openen. Profiel-only schakelt filamentzelfinductie uit en vormt de gereduceerde benchmark; superpositie met Biot–Savart is alleen een gecontroleerde perturbatietest.</p>
+ 
+       <h2>NIET GEMODELLEERD</h2>
+-      <p>Reconnecties (run stopt bij onderlinge afstand \(<3a\); in LIA-modus alleen een waarschuwing, want LIA ziet de nadering niet) · wandbeelden · kern-twist · normale-vloeistof-terugreactie (\(\mathbf v_n\) is opgelegd; geen zelfconsistente twee-vloeistofdynamica, geen normale-vloeistofturbulentie) · kernvolume bij rek · echte roosterdynamica (Tkachenko-modi).</p>
++      <p>Reconnecties en lokale GP-reconnectiebruggen (de topology guard stopt vóór doorsnijding) · cilinderwandbeelden/-BEM en vortex-pinning (de Niveau-C BEM geldt uitsluitend rond de gekozen knooptube) · fysische Taylor/Stewartson-continuumdynamica · kern-twist · normale-vloeistof-terugreactie (\(\mathbf v_n\) is opgelegd; geen zelfconsistente twee-vloeistof-/HVBK-dynamica) · kernvolume bij rek · echte roosterdynamica (Tkachenko-modi) · snaardynamica of andere stringtheorie-veldvergelijkingen.</p>
+       <p class="note" style="max-width:820px;">Ingebouwd: ring 0₁, Hopf-link 2₂, ideal trefoil 3₁, figure-eight 4₁, cinquefoil 5₁ en three-twist 5₂. De trefoil gebruikt Brian Gilbert ideal <code>3:1:1</code> (183 Fourier-modi). 4₁ en 5₁ gebruiken gladde analytische parametrisaties; 5₂ gebruikt een Lissajous-representatie. Optioneel: leg <code>ideal_knots_data.js</code> naast dit bestand voor de volledige knopencatalogus.</p>
+     </div>
+ </div>
+@@ -542,6 +544,7 @@
+             <button type="button" class="seg-btn" data-med="demo">Demo</button>
+             <button type="button" class="seg-btn" data-med="he">He-II</button>
+             <button type="button" class="seg-btn active" data-med="sst">SST</button>
++            <button type="button" class="seg-btn" data-med="string">String-probe</button>
+           </div></div>
+         <div class="ctrl"><label>kernmodel <span class="v" id="vCore">Δ = ½</span></label>
+           <div class="seg" id="coreSeg">
+@@ -564,6 +567,16 @@
+         <div class="ctrl" id="coreRadiusPhysRow"><label>vaste vortexkern r_kern <span class="v" id="vRCorePhys">— (niet afgeleid)</span></label>
+           <input type="text" id="sRCorePhys" inputmode="decimal" value="" placeholder="bijv. 0.001 fm; vereist 0 < r_kern < R_horn" autocomplete="off" aria-label="Research-Track straal van de vaste rotationele vortexkern">
+           <div class="note" style="margin-top:3px;">Research-Track profielinvoer; moet kleiner zijn dan R_horn en stuurt de filamentintegrator niet. Zonder onafhankelijke afleiding blijft deze waarde bewust leeg.</div></div>
++        <div class="ctrl" id="scaleProbeRow"><label>passieve Rosetta-schaal a_probe <span class="v" id="vScaleProbe">1.409 fm</span></label>
++          <input type="text" id="sScaleProbe" inputmode="decimal" value="1.40897017 fm" autocomplete="off" aria-label="Passieve fysieke schaalprobe in meters">
++          <input type="range" id="sScaleProbeLog" min="-36" max="-9" step="0.01" value="-14.851" aria-label="Logaritme van de passieve schaalprobe in meters">
++          <select id="scaleProbePreset" aria-label="Preset voor passieve schaalprobe">
++            <option value="custom">Vrije invoer</option>
++            <option value="planck">Plancklengte ℓ_P</option>
++            <option value="sst" selected>SST R_horn</option>
++            <option value="helium">He-II · 1 Å</option>
++          </select>
++          <div class="note" style="margin-top:3px;">Metadata-only: vrije invoer accepteert o.a. <code>planck</code>, <code>1.4 fm</code> en SI-notatie. Stuurt nooit a_sim, r_kern, R_horn, BEM, contactdetectie of de filamentintegrator.</div></div>
+         <div class="core-flow-link" id="coreFlowLinkPanel">
+           <label class="chk"><input type="checkbox" id="cCoreFlowLock"> Koppel a_sim, circulatie en Ω <span style="opacity:.65">(numerieke Rankine display-similarity)</span></label>
+           <div class="core-flow-readout" id="coreFlowReadout">Vrij: a, Γ en Ω zijn onafhankelijk.</div>
+@@ -603,7 +616,7 @@
+             <input type="number" id="sVn" min="0" max="2000" step="0.0001" value="0" data-scale="log" data-log-min="0.0001">
+           </div></div>
+       </div>
+-      <div class="note" style="margin-top:4px;">Schwarz-wrijving op de kernlijn: \(\dot{\mathbf s}=\mathbf v_s+\alpha\,\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)-\alpha'\,\hat{\mathbf s}'\!\times[\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)]\). Tabelwaarden: He-II bij SVP (T90), Donnelly-compilatie van Barenghi–Donnelly–Vinen (1983); onder 1.30 K geen tabelwaarden. In SST- of demo-medium zijn α en α′ zuiver fenomenologisch — er bestaat géén SST-canonwaarde voor wederzijdse wrijving. \(v_n\) is opgelegd en uniform (één-richtingskoppeling, geen normale-vloeistof-terugreactie). Bij \(\alpha\neq0\) vervallen energie- en heliciteitsbehoud: verwacht ringkrimp \(\dot R=\alpha(v_{n\parallel}-U)\), Kelvin-golfdemping, en ringgroei zodra \(v_{n\parallel}>U\) (Donnelly–Glaberson). Achterwaarts integreren is met \(\alpha\neq0\) anti-dissipatief, geen fysische omkering.</div>
++      <div class="note" style="margin-top:4px;">Schwarz-wrijving op de kernlijn: \(\dot{\mathbf s}=\mathbf v_s+\alpha\,\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)-\alpha'\,\hat{\mathbf s}'\!\times[\hat{\mathbf s}'\!\times(\mathbf v_n-\mathbf v_s)]\). Tabelwaarden: He-II bij SVP (T90), Donnelly-compilatie van Barenghi–Donnelly–Vinen (1983); onder 1.30 K geen tabelwaarden. In SST-, demo- en string-probe-medium zijn α en α′ zuiver fenomenologisch — er bestaat géén SST- of string-canonwaarde voor wederzijdse wrijving. \(v_n\) is opgelegd en uniform (één-richtingskoppeling, geen normale-vloeistof-terugreactie). Bij \(\alpha\neq0\) vervallen energie- en heliciteitsbehoud: verwacht ringkrimp \(\dot R=\alpha(v_{n\parallel}-U)\), Kelvin-golfdemping, en ringgroei zodra \(v_{n\parallel}>U\) (Donnelly–Glaberson). Achterwaarts integreren is met \(\alpha\neq0\) anti-dissipatief, geen fysische omkering.</div>
+       </div>
+     </details>
+ 
+@@ -881,7 +894,7 @@
+             <div class="stab-summary" id="stabilitySummary">Mesh, kern/slankheid, niet-lokale afstand, domeinmarge en lengtedrift; rekencapaciteit staat apart.</div>
+             <div class="stab-metrics">
+               <span>mesh ℓmax/ℓmin</span><span id="stabMesh">—</span>
+-              <span>vrije afstand / a</span><span id="stabGap">—</span>
++              <span>g_a = d_min/a_sim</span><span id="stabGap">—</span>
+               <span>max aκ</span><span id="stabCurv">—</span>
+               <span>domeinmarge</span><span id="stabBoundary">—</span>
+               <span>lengtedrift</span><span id="stabLength">—</span>
+@@ -919,6 +932,7 @@
+             <option value="sst">⚛ SST proportioneel</option>
+             <option value="sstBundle">🧵 SST passieve cilinder · vortexbundel</option>
+             <option value="stretchGate">🧭 SST stretch-gate · 3-profielenbenchmark</option>
++            <option value="string">🧵 String-theorie schaalprobe · ℓ_P</option>
+             <option value="friction">🌡 T &gt; 0 · ringverval (He-II 1.90 K)</option>
+           </select>
+         </div>
+@@ -938,7 +952,7 @@
+       </div>
+     </details>
+     <div class="note" id="footNote">
+-      v7.5.3 · basis v7.5.2 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · zelftests T0–T10g · ?selftest=1.
++      v7.5.3 · basis v7.5.2 · SST vortex-stretching stability gate · Friedlander A₁/A₂/A₃-profielen · passieve first-hit/trials · Taylor-contact binnen iedere kandidaatstap · exact g_a plus effectieve numerieke contactratio · passieve Planck/String-schaalprobe · topology guard zonder numerieke reconnectie · Niveau-C 3D Neumann-BEM/MFS · uitgebreide zelftests T0–T13 · ?selftest=1.
+     </div>
+ </div>
+ 
+@@ -958,11 +972,18 @@
+   'R_horn, r_kern en a_sim blijven strikt gescheiden; de BEM-grens is standaard a_sim en R_horn is alleen een expliciete, numeriek doorgaans onoplosbare Research-Track hypothese',
+   'Validator en browser-smoke uitgebreid met T0l–T0n, T9j–T9m en T10a–T10g',
+   'SST Research-Track vortex-stretching gate: deterministische segmentrek per geaccepteerde CFL-stap, finite-time Λ_K en incompressibele kernradiusvoorspelling',
+-  'Drie Friedlander-profielen A1/A2/A3 met analytische vorticiteitsgroeireferentie en optionele profiel-only benchmarktransport'
++  'Drie Friedlander-profielen A1/A2/A3 met analytische vorticiteitsgroeireferentie en optionele profiel-only benchmarktransport',
++  'First-hit- en transient-contacttrials zijn passief: transport-proxy en stretch-gate worden precies eenmaal over de geaccepteerde stap bijgewerkt',
++  'Taylor-forcing geldt uitsluitend in solo-modus en wordt vóór iedere contacttest in volle en gebisecteerde kandidaatstappen toegepast',
++  'g_a gebruikt exact a_sim; een afzonderlijke effectieve ratio verwerkt uitsluitend de expliciet gelabelde numerieke contactvloer',
++  'Planck/String-schaalprobe is passieve a_probe-metadata, strikt gescheiden van a_sim, r_kern, R_horn, stretch-gate en BEM',
++  'Canon/provenance, diagnostische NaN-serialisatie en de volledige regressiematrix zijn aangescherpt'
+ ];
+ const A_SIM_EPS=1e-30;
+ const A_SIM_INPUT_FLOOR=1e-18;
+ const CONTACT_ULP_FACTOR=64;
++const PLANCK_LENGTH=1.616255e-35; // m, passieve Rosetta-schaal; nooit solverinvoer
++const HE_CORE_REF=1.0e-10;       // m, orde-grootte 1 Å; passieve Rosetta-schaal
+ const BEM_SOURCE_MODEL='neumann-source-panel-mfs-v1';
+ const BEM_REBUILD_STEPS=8;
+ const TOPOLOGY_SWEEP_SAMPLES=12;
+@@ -1186,7 +1207,7 @@
+ const KAPPA_HE  = 9.9693e-8;      // m^2/s  (h/m4)
+ const R_HORN_SST= 1.40897017e-15; // m, canonieke Compton-locked horn/circulatiestraal; geen vaste kernradius
+ const V_HORN_SST= 1.09384563e6;    // m/s, canonieke tangentiële snelheid op R_horn voor één Γ0
+-const GAMMA0_SST= 9.683619e-9;     // m^2/s, 2*pi*R_horn*V_horn (Canon v0.8.20)
++const GAMMA0_SST= 9.68361920e-9;   // m^2/s, Canon v0.8.20
+ const OMEGA_COMPTON_SST = V_HORN_SST/R_HORN_SST; // s^-1, fase-/turnoverfrequentie op R_horn; geen lokale vorticiteit
+ const BUNDLE_SOURCE_MODEL='analytic-finite-closed-loop-limit';
+ const C0        = 0.1395;         // gemeten discretisatieconstante Schwarz-schema
+@@ -1216,6 +1237,8 @@
+   coreFlowLock:false,
+   // r_kern is de nog niet canoniek afgeleide vaste/rotationele kernstraal; null = bewust onbepaald.
+   rCorePhysical:null,
++  // Losse Rosetta-schaalprobe; metadata-only en dus nooit een solver-, BEM- of contactparameter.
++  scaleProbe:R_HORN_SST,
+   centerLock:true, tracerWrapZ:true, vorticityLineColor:'#0F1A29',
+   bundleEnabled:false, bundleProfile:'parallel', bundleSplay:0.45, bundleRadiusFrac:0.72, bundleVisualLines:61, bundleSourceModel:BUNDLE_SOURCE_MODEL,
+   bundleBEMEnabled:true, bundleBoundaryMode:'asim', bundleBEMQuality:'mid',
+@@ -1227,7 +1250,7 @@
+ };
+ // v7.5: bevroren opstartdefaults voor zelftest-T0i (D4: verse start heeft de
+ // kernkoppeling uit; frames starten ontvlochten in corot/corot/none).
+-const P_DEFAULTS=Object.freeze({core:P.core,rCorePhysical:P.rCorePhysical,coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,topologyGuard:P.topologyGuard,bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,stretchGateEnabled:P.stretchGateEnabled,stretchProfileApply:P.stretchProfileApply});
++const P_DEFAULTS=Object.freeze({core:P.core,rCorePhysical:P.rCorePhysical,scaleProbe:P.scaleProbe,coreFlowLock:P.coreFlowLock,solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,topologyGuard:P.topologyGuard,bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,stretchGateEnabled:P.stretchGateEnabled,stretchProfileApply:P.stretchProfileApply});
+ // v7.5-framepredicaten. De wandadvectie u_bg=Ω×r staat alleen in het lab-
+ // solverframe met bgFlow='wall' expliciet in het snelheidsveld; in het
+ // co-roterende solverframe is de wand in rust en bestaat er geen term.
+@@ -1260,6 +1283,7 @@
+ function fmtLengthSI(m){
+   if(!Number.isFinite(m))return '—';
+   const a=Math.abs(m);if(a===0)return '0 m';
++  if(a<1e-18)return m.toExponential(6)+' m';
+   if(a<1e-15)return (m*1e18).toFixed(3)+' am';
+   if(a<1e-12)return (m*1e15).toFixed(3)+' fm';
+   if(a<1e-9)return (m*1e12).toFixed(3)+' pm';
+@@ -1271,6 +1295,7 @@
+ function parseLengthInput(str){
+   const t=String(str||'').trim().toLowerCase().replace(',','.').replace(/μ/g,'µ');
+   if(!t)return NaN;
++  if(/^(planck|plancklengte|l[_ ]?p|ℓ[_ ]?p)$/.test(t))return PLANCK_LENGTH;
+   const m=t.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(am|fm|pm|nm|um|µm|mm|cm|m)?$/i);
+   if(!m)return NaN;
+   const value=Number(m[1]);if(!Number.isFinite(value))return NaN;
+@@ -1287,6 +1312,13 @@
+   const numerical=CONTACT_ULP_FACTOR*Number.EPSILON*scale;
+   return {physical,numerical,effective:Math.max(physical,numerical),floorActive:numerical>physical};
+ }
++function gapRatios(minGap){
++  const ct=contactThresholdInfo();
++  const aPhysical=Math.max(Number.isFinite(P.a)?P.a:0,A_SIM_EPS);
++  const aEffective=Math.max(aPhysical,ct.effective/3);
++  return {physical:minGap/aPhysical,effective:minGap/aEffective,floorActive:ct.floorActive};
++}
++function finiteOrNull(value){return Number.isFinite(value)?value:null;}
+ function resolvedFixedCoreRadius(){
+   const r=Number(P.rCorePhysical);
+   return Number.isFinite(r)&&r>0&&r<R_HORN_SST?r:NaN;
+@@ -1316,13 +1348,13 @@
+     bundleEnabled:P.bundleEnabled,bundleProfile:P.bundleProfile,bundleSourceModel:P.bundleSourceModel,
+     bundleDensityMid:bundleDensityAtZ(0),bundleRadiusMid:bundleRadiusAtZ(0),
+     bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMValid:bundleBEMCache.valid,
+-    bundleBEMRadius:bundleBEMCache.radius,bundleBEMResidualVelocity:bundleBEMCache.residualVelocity,bundleBEMResidualVorticity:bundleBEMCache.residualVorticity,
++    bundleBEMRadius:finiteOrNull(bundleBEMCache.radius),bundleBEMResidualVelocity:finiteOrNull(bundleBEMCache.residualVelocity),bundleBEMResidualVorticity:finiteOrNull(bundleBEMCache.residualVorticity),
+     topologyGuard:P.topologyGuard,topologyGap:lastTopologyGap,
+     stretchGateEnabled:P.stretchGateEnabled,stretchProfile:P.stretchProfile,stretchProfileApply:P.stretchProfileApply,stretchProfileOnly:P.stretchProfileOnly,
+     stretchStatus:StretchGate.lastReport&&StretchGate.lastReport.status,stretchLambda:StretchGate.lastReport&&StretchGate.lastReport.lambda,
+     stretchLambdaStar:StretchGate.lastReport&&StretchGate.lastReport.lambdaStar,stretchG:StretchGate.lastReport&&StretchGate.lastReport.G,
+     stretchCoreRatio:StretchGate.lastReport&&StretchGate.lastReport.coreRatio,stretchProfileGain:StretchGate.lastReport&&StretchGate.lastReport.profileGain,
+-    contactThreshold:ct.effective,contactFloorActive:ct.floorActive};
++    contactThreshold:ct.effective,contactFloorActive:ct.floorActive,scaleProbe:P.scaleProbe};
+ }
+ 
+ // ================= v7.5.3 SST vortex-stretching gate / Friedlander-profielen =================
+@@ -1833,6 +1865,7 @@
+   P.Om=1.0; P.revOm=false;
+   P.nQ=1;
+   P.rCorePhysical=null;
++  P.scaleProbe=R_HORN_SST;
+   P.displayFrame='corot';P.solverFrame='corot';P.bgFlow='none';
+   P.bundleEnabled=false;P.bundleSourceModel=BUNDLE_SOURCE_MODEL;
+   // Behoud eerst de canonieke enkelvoudige circulatie Γ₀ en leid de
+@@ -1844,7 +1877,7 @@
+   disableStretchProfileCoupling();P.stretchGateEnabled=true;
+   P.mode='solo';P.topo='ring';P.inter='lia';P.qual='hoog';DELTA.gp=0.615;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+-  P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;
++  P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=R_HORN_SST;
+   P.Om=0;P.revOm=false;P.displayFrame='lab';P.solverFrame='corot';P.bgFlow='bundle';
+   P.OmBundle=1;P.revOmBundle=false;P.bundleEnabled=true;P.bundleProfile='parallel';
+   P.bundleSplay=0.45;P.bundleRadiusFrac=0.72;P.bundleVisualLines=61;
+@@ -1875,7 +1908,7 @@
+   // HUD-rij "Ṙ meting / α(v_n∥−U_K)" als live orthodoxietest.
+   P.mode='solo';P.topo='ring';P.inter='lia';P.qual='hoog';
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
+-  P.med='he';P.core='gp';P.coreFlowLock=true;DELTA.gp=0.615; // D4: expliciet, preset-context
++  P.med='he';P.core='gp';P.coreFlowLock=true;P.scaleProbe=HE_CORE_REF;DELTA.gp=0.615; // D4: expliciet, preset-context
+   if(window.ModelLog&&ModelLog.logUser)ModelLog.logUser('coreFlowLock-preset',{value:true});
+   P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
+   P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=true;
+@@ -1886,7 +1919,7 @@
+   syncCoreFlowCoupling('gamma');
+ }
+ function applyStretchGatePreset(){
+-  P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;
++  P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=R_HORN_SST;
+   P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;P.R0=0.07;P.zSolo=0;P.off=0;P.a=1.5e-3;P.nQ=10;
+   P.Om=0;P.revOm=false;P.solverFrame='corot';P.displayFrame='lab';P.bgFlow='none';P.bundleEnabled=false;
+   P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;
+@@ -1896,6 +1929,19 @@
+   P.stretchNeutralTol=0.02;P.stretchFailTol=0.10;P.accExp=0.3;
+   syncUi();updateSubtitle();
+ }
++function applyStringTheoryPreset(){
++  // Passieve schaalprobe: de solver blijft de gewone filament-ODE met vrije Γ.
++  disableStretchProfileCoupling();P.stretchGateEnabled=true;
++  P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.core='gp';DELTA.gp=0.615;
++  P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;
++  P.med='string';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=PLANCK_LENGTH;
++  P.GaDemo=0.2;P.a=1.2415e-4;P.Om=1;P.revOm=false;P.revGa=false;
++  P.displayFrame='corot';P.solverFrame='corot';P.bgFlow='none';
++  P.bundleEnabled=false;P.bundleBEMEnabled=true;P.bundleBoundaryMode='asim';
++  P.R0=0.07;P.zSolo=0;P.off=0;P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;
++  P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=true;
++  P.tracerWrapZ=true;P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;
++}
+ function acc(){ return Math.pow(10,P.accExp); }
+ const RING_QUAL={laag:48, mid:96, hoog:144};
+ function carrierN(){
+@@ -2313,7 +2359,8 @@
+   wrapFilamentCarriersZ();
+   enforceCenterLock();
+   constrainGhostRing();
+-  if(P.twistProxyEnabled) updateTwistProxy(dt,K4);
++  // Diagnostische accumulatoren worden pas na acceptatie van de eventueel
++  // gebisecteerde stap bijgewerkt. Trial-stappen blijven daardoor passief.
+   // v7.1 (B7): verplaatsingslimiet in dtCFL gebruikt de snelste van alle vier
+   // RK4-stages; voorheen alleen K1, waardoor snelle tussenstadia bij nadering
+   // de tijdstap konden onderschatten.
+@@ -2879,6 +2926,9 @@
+   const th=document.getElementById('chiThick');
+   if(th)th.textContent=(tau*1000).toFixed(2)+' mm';
+ }
++function tubeBoundaryMarginAt(x,y,z){
++  return Math.min(P.Rcyl-Math.hypot(x,y)-P.a,z-zMin()-P.a,zMax()-z-P.a);
++}
+ function computeStabilityReport(){
+   if(!Y||!fils.length)return null;
+   // v7.1 (B5): diagnose is puur — alleen meten, nooit P.a klemmen. Klemmen
+@@ -2893,17 +2943,17 @@
+     for(let k=0;k<f.N;k++){
+       const x=Y[f.off+3*k],y=Y[f.off+3*k+1],z=Y[f.off+3*k+2];
+       // v7.2: marge t.o.v. de búisrand, niet de centerline (audit #9)
+-      boundary=Math.min(boundary,P.Rcyl-Math.hypot(x,y)-P.a,z-zMin()-P.a,zMax()-z-P.a);
++      boundary=Math.min(boundary,tubeBoundaryMarginAt(x,y,z));
+     }
+   }
+   for(let i=0;i<realFils.length;i++)for(let j=i+1;j<realFils.length;j++)
+     minGap=Math.min(minGap,sampledPairGap(realFils[i],realFils[j]));
+   lmean/=Math.max(1,nm);
+-  const gapRatio=minGap/Math.max(P.a,1e-12);
++  const gaps=gapRatios(minGap),gapRatio=gaps.physical,gapRatioEffective=gaps.effective;
+   const boundaryRatio=boundary/Math.max(P.a,lmean,1e-12);
+   const lengthDrift=Math.abs(Lnow/Math.max(L0,1e-12)-1);
+   const meshScore=scoreDescending(q,1.22,2.10);
+-  const gapScore=scoreAscending(gapRatio,3.0,8.0);
++  const gapScore=scoreAscending(gapRatioEffective,3.0,8.0);
+   const curvatureScore=scoreDescending(maxAk,0.10,0.45);
+   const coreScore=scoreAscending(minLogArg,1.15,4.0);
+   const boundaryScore=scoreAscending(boundaryRatio,1.5,7.0);
+@@ -2913,13 +2963,13 @@
+   const perfRatio=perfWarming||Math.abs(tPhys)<0.15||requestedAccNow<1e-8?1:clamp(effAcc/requestedAccNow,0,1);
+   const perfScore=scoreAscending(perfRatio,0.20,0.80);
+   let modelScore=100;
+-  if(P.inter==='lia'&&gapRatio<10)modelScore=gapRatio<5?20:55;
++  if(P.inter==='lia'&&gapRatioEffective<10)modelScore=gapRatioEffective<5?20:55;
+   // De numerieke score bevat uitsluitend geldigheids-/modelcriteria. De
+   // haalbare afspeelsnelheid is een afzonderlijke computer-capaciteitsmeting.
+   let score=(0.20*meshScore+0.23*gapScore+0.17*curvatureScore+0.10*coreScore+
+     0.13*boundaryScore+0.09*lengthScore)/0.92;
+   score=Math.min(score,modelScore);
+-  if(gapRatio<3||boundary<0||minLogArg<=1)score=Math.min(score,18);
++  if(gapRatioEffective<3||boundary<0||minLogArg<=1)score=Math.min(score,18);
+   const suggestions=[];
+   if(meshScore<75)suggestions.push('verhoog kwaliteit of zet Auto-relax aan om de puntverdeling gelijkmatiger te maken');
+   if(gapScore<75)suggestions.push('vergroot de vrije afstand: verlaag kernstraal a, verminder drift/botsingssnelheid, vergroot offset of reset');
+@@ -2930,7 +2980,8 @@
+   if(!perfWarming&&perfScore<60)suggestions.push('capaciteitslimiet: verlaag de simulatiesnelheid, Γ/n, kwaliteit of het aantal particles; het CFL-traject blijft identiek');
+   if(modelScore<75)suggestions.push('LIA mist belangrijke niet-lokale interactie: kies Biot–Savart');
+   if(!suggestions.length)suggestions.push('instellingen liggen binnen de numerieke comfortzone; dit is geen bewijs van fysische stabiliteit');
+-  return {score:clamp(score,0,100),status:statusFromScore(score),q,gapRatio,minGap,maxAk,minLogArg,
++  return {score:clamp(score,0,100),status:statusFromScore(score),q,gapRatio,gapRatioEffective,
++    contactFloorActive:gaps.floorActive,minGap,maxAk,minLogArg,
+     boundary,boundaryRatio,lengthDrift,perfRatio,perfWarming,meshScore,gapScore,curvatureScore,coreScore,
+     boundaryScore,lengthScore,perfScore,modelScore,suggestions};
+ }
+@@ -2947,11 +2998,13 @@
+     ?'Achterwaartse integratie actief; Auto-relax is gepauzeerd en de numerieke veiligheidsrem blijft actief.'
+     :(P.autoRelax?'Auto-relax actief; geometrische regularisatie corrigeert langzaam.':'Passieve numerieke diagnose; paars betekent alleen een computer-capaciteitslimiet.');
+   document.getElementById('stabMesh').textContent=rep.q.toFixed(2);
+-  document.getElementById('stabGap').textContent=isFinite(rep.gapRatio)?rep.gapRatio.toFixed(1):'∞';
++  const fmtRatio=x=>!isFinite(x)?'∞':(Math.abs(x)>=1e5?x.toExponential(2):x.toFixed(1));
++  document.getElementById('stabGap').textContent=fmtRatio(rep.gapRatio)+
++    (rep.contactFloorActive?' · eff '+fmtRatio(rep.gapRatioEffective):'');
+   // v7.5 (v7.4b §B.4): g_a=d_min/a uit ditzelfde 12-frame-rapport — geen extra
+   // O(N²) per HUD-tick; exponentieel formaat op SST-schaal (g_a>1e6).
+   {const gaEl=document.getElementById('hGa');
+-   if(gaEl)gaEl.textContent=!isFinite(rep.gapRatio)?'∞':(rep.gapRatio>1e6?rep.gapRatio.toExponential(2):rep.gapRatio.toFixed(1));}
++   if(gaEl)gaEl.textContent=fmtRatio(rep.gapRatio)+(rep.contactFloorActive?' · eff '+fmtRatio(rep.gapRatioEffective):'');}
+   document.getElementById('stabCurv').textContent=rep.maxAk.toFixed(3);
+   document.getElementById('stabBoundary').textContent=(rep.boundary*1000).toFixed(1)+' mm';
+   document.getElementById('stabLength').textContent=(100*rep.lengthDrift).toFixed(1)+'%';
+@@ -3171,15 +3224,26 @@
+   rebuildStreamlines(true);
+   resetStretchGate('state-reset',true);
+ }
+-function applyTaylorOscillation(){
+-  if(P.centerLock||!P.taylorOsc.enabled||!Y||!fils.length)return;
++function taylorOscillationApplies(){
++  return P.mode==='solo'&&!P.centerLock&&P.taylorOsc.enabled&&!!Y&&!!fils.length;
++}
++function applyTaylorOscillation(atTime=tPhys){
++  if(!taylorOscillationApplies())return;
+   const st=carrierGroupStats('A');
+-  const zAnchor=(P.mode==='solo')?P.zSolo:P.zA;
+-  const zT=zAnchor+P.taylorOsc.amplitude*Math.sin(2*Math.PI*tPhys/Math.max(0.5,P.taylorOsc.period));
++  const zAnchor=P.zSolo;
++  const zT=zAnchor+P.taylorOsc.amplitude*Math.sin(2*Math.PI*atTime/Math.max(0.5,P.taylorOsc.period));
+   const dz=zT-st.z;
+   if(Math.abs(dz)<1e-9)return;
+   for(const f of carrierFilaments('A'))for(let k=0;k<f.N;k++)Y[f.off+3*k+2]+=dz;
+ }
++function advanceFilamentCandidate(dt,endTime){
++  const umax=rk4Step(dt);
++  // De kinematische Taylor-correctie hoort bij de kandidaat-eindtoestand en
++  // moet dus vóór contactdetectie en in iedere bisectietrial worden toegepast.
++  applyTaylorOscillation(endTime);
++  wrapFilamentCarriersZ();
++  return umax;
++}
+ 
+ // ================= three.js scène =================
+ const canvas=document.getElementById('c3d');
+@@ -4127,7 +4191,8 @@
+ function updateSubtitle(){
+   const topoTxt=topologyLabel();
+   const nComp=topologyComponentCount();
+-  const medTxt={demo:'demo-Γ',he:'He-II, Γ=nκ',sst:'SST, Γ=nΓ₀ [Canon 0.8.19]'}[P.med];
++  const medTxt={demo:'demo-Γ',he:'He-II, Γ=nκ',sst:'SST, Γ=nΓ₀ [Canon 0.8.20]',
++    string:'String-theorie schaalprobe · vrije Γ · geen snaardynamica'}[P.med]||P.med;
+   const coreTxt={hol:'holle kern',vast:'vaste kern',gp:'GP-kern'}[P.core];
+   const modeTxt=P.mode==='botsing'
+     ?`Twee coaxiale ${topoTxt}-dragers${nComp>1?` (${nComp} componenten per drager)`:''}, |Γ| identiek, frontaal${P.inter==='lia'?' · LIA (geen wederzijdse inductie!)':''}`
+@@ -4261,8 +4326,9 @@
+   document.getElementById('mirrorRow').classList.toggle('hidden',P.mode!=='botsing');
+   document.getElementById('lockVzRow').classList.toggle('hidden',P.mode!=='botsing');
+   document.getElementById('qualRow').classList.remove('hidden');
+-  document.getElementById('gaRow').classList.toggle('hidden',P.med!=='demo');
+-  document.getElementById('nqRow').classList.toggle('hidden',P.med==='demo');
++  const quantized=P.med==='he'||P.med==='sst';
++  document.getElementById('gaRow').classList.toggle('hidden',quantized);
++  document.getElementById('nqRow').classList.toggle('hidden',!quantized);
+   document.getElementById('cCenterline').checked=P.showCenterline;
+   document.getElementById('cCcwA').checked=P.ccwA;
+   document.getElementById('cCcwB').checked=P.ccwB;
+@@ -4288,7 +4354,7 @@
+   syncDvGeometryUi();
+   document.getElementById('cGhostRing').checked=P.ghostStewartson;
+   document.getElementById('cTaylorOsc').checked=P.taylorOsc.enabled;
+-  document.getElementById('oscRow').classList.remove('hidden');
++  document.getElementById('oscRow').classList.toggle('hidden',P.mode!=='solo');
+   [['WAl','wAl'],['WBe','wBe'],['WGa','wGa']].forEach(([id,key])=>{
+     const el=document.getElementById('s'+id);
+     if(el){el.value=P[key];document.getElementById('v'+id).textContent=P[key].toFixed(1);}});
+@@ -4310,6 +4376,15 @@
+   const rCore=resolvedFixedCoreRadius();
+   const sRC=document.getElementById('sRCorePhys');if(sRC)sRC.value=Number.isFinite(rCore)?fmtLengthSI(rCore):'';
+   const vRC=document.getElementById('vRCorePhys');if(vRC)vRC.textContent=Number.isFinite(rCore)?fmtLengthSI(rCore):'— (niet afgeleid)';
++  const sp=document.getElementById('sScaleProbe');if(sp)sp.value=fmtLengthSI(P.scaleProbe);
++  const vSP=document.getElementById('vScaleProbe');if(vSP)vSP.textContent=fmtLengthSI(P.scaleProbe);
++  const spLog=document.getElementById('sScaleProbeLog');if(spLog&&P.scaleProbe>0)
++    spLog.value=String(clamp(Math.log10(P.scaleProbe),Number(spLog.min),Number(spLog.max)));
++  const spPreset=document.getElementById('scaleProbePreset');if(spPreset){
++    const rel=(a,b)=>Math.abs(a-b)/Math.max(Math.abs(b),1e-300);
++    spPreset.value=rel(P.scaleProbe,PLANCK_LENGTH)<1e-9?'planck':
++      (rel(P.scaleProbe,R_HORN_SST)<1e-9?'sst':(rel(P.scaleProbe,HE_CORE_REF)<1e-9?'helium':'custom'));
++  }
+   syncDiagnosticToggles();
+   const gpDeltaText=DELTA.gp.toFixed(6);
+   const gpSel=document.getElementById('gpDeltaSel');if(gpSel){gpSel.value=String(DELTA.gp);gpSel.disabled=P.core!=='gp';}
+@@ -4788,12 +4863,15 @@
+   syncUi();updateSubtitle();
+ });
+ segHandler('medSeg','med',v=>{
+-  if(v===P.med&&v!=='sst')return;
++  if(v===P.med&&v!=='sst'&&v!=='string')return;
+   if(v==='sst'){
+     applySSTSimilarityPreset();
++  }else if(v==='string'){
++    P.med='string';P.core='gp';P.coreFlowLock=false;P.scaleProbe=PLANCK_LENGTH;
++    P.bundleEnabled=false;if(P.bgFlow==='bundle')P.bgFlow='none';
+   }else{
+     P.med=v;
+-    if(v==='he')P.core='hol';
++    if(v==='he'){P.core='hol';P.scaleProbe=HE_CORE_REF;}
+     P.coreFlowLock=false;
+   }
+   // Tijdversnelling blijft uitsluitend handmatig.
+@@ -4986,6 +5064,7 @@
+   else if(preset==='sst'){applySSTSimilarityPreset();syncUi();updateSubtitle();resetState();}
+   else if(preset==='sstBundle'){applySSTBundlePreset();resetState();resetParticlesToTaylorColumn();}
+   else if(preset==='stretchGate'){applyStretchGatePreset();resetState();resetParticlesToTaylorColumn();}
++  else if(preset==='string'){applyStringTheoryPreset();syncUi();updateSubtitle();resetState();}
+   else if(preset==='friction'){applyFrictionPreset();syncUi();updateSubtitle();resetState();}
+ });
+ document.getElementById('compA').addEventListener('change',e=>{P.compA=+e.target.value;resetState();});
+@@ -5086,22 +5165,20 @@
+ }
+ function transientContactWithinStep(signedDtFull,lia){
+   if(!P.topologyGuard||!Ypre)return null;
+-  const fullState=Y.slice(),sgn=Math.sign(signedDtFull)||1,full=Math.abs(signedDtFull);
+-  const oldTw=P.twistProxyEnabled;P.twistProxyEnabled=false;
++  const fullState=Y.slice(),fullK4=K4.slice(),fullUmax=lastUmax;
++  const sgn=Math.sign(signedDtFull)||1,full=Math.abs(signedDtFull),tStart=tPhys;
+   let lo=0,hi=NaN,event=null;
+-  try{
+-    for(let k=1;k<=TOPOLOGY_SWEEP_SAMPLES;k++){
+-      const f=k/TOPOLOGY_SWEEP_SAMPLES;Y.set(Ypre);rk4Step(sgn*full*f);
+-      const e=contactEvent(false);if(e&&!e.warn){hi=f;lo=(k-1)/TOPOLOGY_SWEEP_SAMPLES;event=e;break;}
+-    }
+-    if(!event){Y.set(fullState);return null;}
+-    for(let it=0;it<18&&(hi-lo)>1e-6;it++){
+-      const mid=.5*(lo+hi);Y.set(Ypre);rk4Step(sgn*full*mid);
+-      const e=contactEvent(false);if(e&&!e.warn){hi=mid;event=e;}else lo=mid;
+-    }
+-    Y.set(Ypre);lastUmax=rk4Step(sgn*full*lo);
+-    return {dt:sgn*full*lo,event:Object.assign({},event,{msg:'⛔ topology guard: tijdelijk contact binnen de RK4-stap gevonden; gestopt aan de veilige zijde. Geen doorsnijding of reconnectie toegepast.'})};
+-  }finally{P.twistProxyEnabled=oldTw;}
++  for(let k=1;k<=TOPOLOGY_SWEEP_SAMPLES;k++){
++    const f=k/TOPOLOGY_SWEEP_SAMPLES;Y.set(Ypre);advanceFilamentCandidate(sgn*full*f,tStart+sgn*full*f);
++    const e=contactEvent(false);if(e&&!e.warn){hi=f;lo=(k-1)/TOPOLOGY_SWEEP_SAMPLES;event=e;break;}
++  }
++  if(!event){Y.set(fullState);K4.set(fullK4);lastUmax=fullUmax;return null;}
++  for(let it=0;it<18&&(hi-lo)>1e-6;it++){
++    const mid=.5*(lo+hi);Y.set(Ypre);advanceFilamentCandidate(sgn*full*mid,tStart+sgn*full*mid);
++    const e=contactEvent(false);if(e&&!e.warn){hi=mid;event=e;}else lo=mid;
++  }
++  Y.set(Ypre);lastUmax=advanceFilamentCandidate(sgn*full*lo,tStart+sgn*full*lo);
++  return {dt:sgn*full*lo,event:Object.assign({},event,{msg:'⛔ topology guard: tijdelijk contact binnen de RK4-stap gevonden; gestopt aan de veilige zijde. Geen doorsnijding of reconnectie toegepast.'})};
+ }
+ 
+ // v7.2: contactdetectie op exacte segment-segmentafstand, aangeroepen na
+@@ -5143,17 +5220,23 @@
+ // 3a-drempel niet met een volle CFL-stap wordt gepasseerd.
+ let Ypre=null;
+ function bisectFirstHit(signedDtFull,lia){
+-  if(P.twistProxyEnabled)return signedDtFull; // proxy-accumulator in rk4Step is niet herstelbaar
++  const tStart=tPhys;
++  return bisectHitTime(signedDtFull,dt=>{
++    Y.set(Ypre);lastUmax=advanceFilamentCandidate(dt,tStart+dt);
++  },()=>{
++    const c=contactEvent(lia);return !!(c&&!c.warn);
++  },P.topologyGuard);
++}
++function bisectHitTime(signedDtFull,advanceFromStart,hasHardHit,landSafe=false){
+   const sgn=Math.sign(signedDtFull)||1, full=Math.abs(signedDtFull);
+   let lo=0,hi=full;
+   for(let it=0;it<16&&(hi-lo)>1e-4*full;it++){
+     const mid=.5*(lo+hi);
+-    Y.set(Ypre);rk4Step(sgn*mid);
+-    const c=contactEvent(lia);
+-    (c&&!c.warn)?hi=mid:lo=mid;
++    advanceFromStart(sgn*mid);
++    hasHardHit()?hi=mid:lo=mid;
+   }
+-  const land=P.topologyGuard?lo:hi;
+-  Y.set(Ypre);lastUmax=rk4Step(sgn*land);
++  const land=landSafe?lo:hi;
++  advanceFromStart(sgn*land);
+   return sgn*land;
+ }
+ function setFlag(msg,warnOnly){
+@@ -5180,7 +5263,7 @@
+   };
+   const userActions=[],steps=[],events=[];
+   function snapP(){
+-    return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,rHorn:R_HORN_SST,rCorePhysical:P.rCorePhysical,Om:P.Om,nQ:P.nQ,
++    return {mode:P.mode,topo:P.topo,inter:P.inter,core:P.core,med:P.med,a:P.a,rHorn:R_HORN_SST,rCorePhysical:P.rCorePhysical,scaleProbe:P.scaleProbe,Om:P.Om,nQ:P.nQ,
+       solverFrame:P.solverFrame,displayFrame:P.displayFrame,bgFlow:P.bgFlow,
+       bundleBEMEnabled:P.bundleBEMEnabled,bundleBoundaryMode:P.bundleBoundaryMode,bundleBEMQuality:P.bundleBEMQuality,
+       topologyGuard:P.topologyGuard,accExp:P.accExp,autoRelax:P.autoRelax,coreFlowLock:P.coreFlowLock,qual:P.qual,timeReverse:P.timeReverse,gpDelta:DELTA.gp,
+@@ -5219,7 +5302,7 @@
+     stepCounter++;
+     const rep=stabilityLast;
+     pushRing('steps',steps,Object.assign({tPhys,dt:extra&&extra.dt,lastUmax,effAcc,
+-      score:rep&&rep.score,gapRatio:rep&&rep.gapRatio,maxAk:rep&&rep.maxAk,
++      score:rep&&rep.score,gapRatio:rep&&rep.gapRatio,gapRatioEffective:rep&&rep.gapRatioEffective,maxAk:rep&&rep.maxAk,
+       stretchStatus:StretchGate.lastReport&&StretchGate.lastReport.status,stretchLambdaStar:StretchGate.lastReport&&StretchGate.lastReport.lambdaStar,stretchG:StretchGate.lastReport&&StretchGate.lastReport.G,
+       flagged:!!flagged,warned:!!warned},extra||{}),maxSteps);
+     updateStats();
+@@ -5255,13 +5338,15 @@
+ // P-velden worden gesnapshot en hersteld. Resultaten als JSON exporteerbaar.
+ const SelfTest=(()=>{ 
+   const PKEYS=['mode','topo','inter','core','med','qual','Om','OmBundle','GaDemo','nQ','a','w','vzA','vzB',
+-    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical',
++    'lockVz','solverFrame','displayFrame','bgFlow','mfTemp','mfAlpha','mfAlphaP','vnZ','timeReverse','coreFlowLock','rCorePhysical','scaleProbe',
+     'bundleEnabled','bundleProfile','bundleSplay','bundleBEMEnabled','bundleBoundaryMode','bundleBEMQuality','topologyGuard',
++    'centerLock','twistProxyEnabled','ghostStewartson','Rcyl','Hcyl',
+     'stretchGateEnabled','stretchProfile','stretchProfileApply','stretchProfileOnly','stretchOmega0','stretchBeta','stretchGamma','stretchSoftening','stretchEpsilon','stretchMode','stretchNeutralTol','stretchFailTol'];
+   function snap(){const o={};for(const k of PKEYS)o[k]=P[k];o.tOsc=P.taylorOsc.enabled;o.gpDelta=DELTA.gp;return o;}
+   function restore(o){for(const k of PKEYS)P[k]=o[k];P.taylorOsc.enabled=o.tOsc;DELTA.gp=o.gpDelta;syncUi();}
+   function baseline(){
+     P.mode='solo';P.topo='ring';P.med='he';P.nQ=10;P.a=1.2415e-4;P.core='gp';
++    P.scaleProbe=HE_CORE_REF;P.centerLock=true;P.twistProxyEnabled=false;P.ghostStewartson=false;P.Rcyl=.25;P.Hcyl=.5;
+     P.w=0;P.vzA=0;P.vzB=0;P.lockVz=true;P.solverFrame='corot';P.displayFrame='corot';P.bgFlow='none';
+     P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.timeReverse=false;P.taylorOsc.enabled=false;DELTA.gp=0.615;
+     P.bundleEnabled=false;P.bundleProfile='parallel';P.bundleSplay=0;P.bundleBEMEnabled=true;P.bundleBoundaryMode='asim';P.bundleBEMQuality='mid';P.topologyGuard=true;
+@@ -5303,14 +5388,24 @@
+       baseline();
+       const metaVersion=document.querySelector('meta[name="vortexlab-version"]')?.content;
+       const metaBase=document.querySelector('meta[name="vortexlab-base"]')?.content;
+-      const title=document.title;
+-      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.5.2'&&title.includes('v7.5.3'),'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+title);
++      const title=document.title,titleOk=title.includes('v'+APP_VERSION);
++      const footOk=document.getElementById('footNote')?.textContent.trim().startsWith('v'+APP_VERSION);
++      const canonTags=[...document.querySelectorAll('.tag')].filter(x=>/canon/i.test(x.textContent));
++      const visibleCanonText=[...document.querySelectorAll('p,.tag,#hSub')].map(x=>x.textContent).join(' ');
++      const canonOk=canonTags.length>0&&canonTags.every(x=>x.textContent.includes('0.8.20'))&&!visibleCanonText.includes('Canon 0.8.19');
++      add('T0 versie/provenance consistent',metaVersion===APP_VERSION&&metaBase===APP_BASE_VERSION&&APP_BASE_VERSION==='7.5.2'&&titleOk&&footOk&&canonOk,
++        'meta='+metaVersion+' runtime='+APP_VERSION+' base='+APP_BASE_VERSION+' title='+titleOk+' foot='+footOk+' canon='+canonOk);
++      const scoreText=(document.querySelector('#collDiagnostics > summary')?.textContent||'')+' '+(document.getElementById('cardE')?.parentElement?.textContent||'');
++      add('T0a scorelabel zonder energieclaim',/GEOMETRISCHE DIAGNOSTIEK|geo-score/.test(scoreText)&&!/E_eff|Eeff|𝓔/.test(scoreText),scoreText.trim());
+       const diag=buildDiagRecord(1,2,3,{R:4,z:5});
+       add('T0b diag-record ACN eindig',diag.ACN===3&&Object.values(diag).filter(v=>typeof v==='number').every(Number.isFinite),'ACN='+diag.ACN);
+       const parsed=parseLengthInput('1.40897017 fm');
+       add('T0c SI-lengteparser fm',Math.abs(parsed-R_HORN_SST)<1e-24,'a='+parsed.toExponential(9));
+-      const oldA=P.a;P.a=A_SIM_INPUT_FLOOR;const ct=contactThresholdInfo();P.a=oldA;
+-      add('T0d contactvloer eindig',Number.isFinite(ct.effective)&&ct.effective>=ct.physical&&ct.effective>=ct.numerical,'d='+ct.effective.toExponential(3));
++      const parsedPlanck=parseLengthInput('planck'),fmtPlanck=fmtLengthSI(PLANCK_LENGTH);
++      add('T0d Planck-parser en formatter',Math.abs(parsedPlanck/PLANCK_LENGTH-1)<1e-15&&!/^0(?:\.0+)?\s/.test(fmtPlanck),fmtPlanck);
++      const oldA=P.a;P.a=A_SIM_INPUT_FLOOR;const ct=contactThresholdInfo(),gr=gapRatios(1e-9);P.a=oldA;
++      add('T0o contactvloer en exact g_a',Number.isFinite(ct.effective)&&ct.effective>=ct.physical&&ct.effective>=ct.numerical&&Math.abs(gr.physical-1e9)<1,
++        'd_eff='+ct.effective.toExponential(3)+' g_a='+gr.physical.toExponential(3)+' g_eff='+gr.effective.toExponential(3));
+       const oldOm=P.Om;P.Om=0;const dim0=dimensionlessDiagnostics({R:0.07},0.01);P.Om=oldOm;
+       add('T0e dimensieloze Ω=0-guard',!Number.isFinite(dim0.chiOmega)&&!Number.isFinite(dim0.roZ)&&Number.isFinite(dim0.aOverR),'chi='+dim0.chiOmega+' Ro_z='+dim0.roZ);
+       const oldGp=DELTA.gp;setGpDelta(0.619350923,{reset:false,log:false});
+@@ -5401,14 +5496,18 @@
+        add('T10g as-reguliere modus is eindig op r=0',Object.values(u0).filter(v=>typeof v==='number').every(Number.isFinite)&&u0.ux===0&&u0.uy===0&&u0.uz===0,JSON.stringify(u0));}
+       // herstel naar baseline zodat T1–T6 niet door bundel-/stretchguards beïnvloed worden
+       P.bundleEnabled=false;P.bgFlow='none';P.bundleProfile='parallel';P.bundleSplay=0.45;P.stretchProfileApply=false;P.stretchProfileOnly=false;P.stretchProfile='rigid';
+-      // T1 — ringsnelheid vs Kelvin-formule, drie kernmodellen
++      // T1 — ringsnelheid vs Kelvin-formule, drie kernmodellen en volledige N-sweep
+       for(const core of['hol','vast','gp']){
+-        P.core=core;const N=256,R=0.07,fl=[{off:0,N,carrier:'A'}];
+-        const Yl=ring(N,R),V=new Float64Array(3*N);
+-        velocityCore(Yl,fl,V,false,{includeExternal:false});
+-        const[rad,vz]=meanRadVz(V,N);
+-        const err=Math.abs(vz-kelvinSpeed(R))/kelvinSpeed(R);
+-        add('T1 Kelvin-snelheid core='+core+' (N=256)',err<5e-4,'relfout='+err.toExponential(2));
++        P.core=core;const R=0.07,errs=[];
++        for(const N of[48,96,144,192,256]){
++          const fl=[{off:0,N,carrier:'A'}],Yl=ring(N,R),V=new Float64Array(3*N);
++          velocityCore(Yl,fl,V,false,{includeExternal:false});
++          const vz=meanRadVz(V,N)[1];errs.push([N,Math.abs(vz-kelvinSpeed(R))/kelvinSpeed(R)]);
++        }
++        const maxErr=Math.max(...errs.map(x=>x[1]));
++        const highErr=Math.max(...errs.filter(x=>x[0]>=144).map(x=>x[1]));
++        add('T1 Kelvin-snelheid core='+core+' (N=48…256)',maxErr<7.5e-4&&highErr<1e-4,
++          'max='+maxErr.toExponential(2)+' high='+highErr.toExponential(2)+' · '+errs.map(x=>x[0]+':'+x[1].toExponential(1)).join(' '));
+       }
+       P.core='gp';
+       // T1b — N-sweep (v7.4b §B.5). De fout t.o.v. de Kelvin-asymptoot stuit
+@@ -5428,6 +5527,15 @@
+       // T2 — exacte segment-segmentafstand (interieurnadering)
+       const d=Math.sqrt(segSegDist2(-1,0,0,1,0,0, 0,1e-3,-1, 0,1e-3,1));
+       add('T2 segmentafstand interieur',Math.abs(d-1e-3)<1e-12,'d='+d.toExponential(6));
++      // Bekende synthetische passage: afstand 1−|dt| raakt d*=0.2 bij |dt|=0.8.
++      function syntheticHit(sign){let tau=0;
++        return bisectHitTime(sign,dt=>{tau=Math.abs(dt);},()=>1-tau<=0.2,false);}
++      P.twistProxyEnabled=false;const hitF=syntheticHit(1),hitB=syntheticHit(-1);
++      P.twistProxyEnabled=true;const hitDiag=syntheticHit(1);P.twistProxyEnabled=false;
++      const passiveSource=!/twistProxyEnabled\)return/.test(bisectFirstHit.toString())&&
++        /advanceFilamentCandidate/.test(bisectFirstHit.toString());
++      add('T2b first-hit voor/achter + diagnose-invariant',Math.abs(hitF-0.8)<1e-4&&Math.abs(hitB+0.8)<1e-4&&hitDiag===hitF&&passiveSource,
++        'voor='+hitF.toFixed(6)+' achter='+hitB.toFixed(6)+' diag='+hitDiag.toFixed(6)+' passief='+passiveSource);
+       // T3 — topologische integertest + exacte writhe
+       {const N=128,Yh=new Float64Array(6*N);
+        for(let k=0;k<N;k++){const t=2*Math.PI*k/N;
+@@ -5439,16 +5547,20 @@
+        add('T3b ring Wr=0 (asin-conditionering ~1e-7)',Math.abs(wr)<5e-7,'Wr='+wr.toExponential(2));
+        const wt=[192,384].map(n=>gauss2(0,n,0,n,true,sampleFourierKnot(IDEAL_TREFOIL_3_1_1.coeffs,n))[0]);
+        add('T3c trefoil Wr exact (N=384)',Math.abs(Math.abs(wt[1])-3.417)<0.01,'Wr='+wt[1].toFixed(4)+' (N=192: '+wt[0].toFixed(4)+')');}
+-      // T4 — batch-invariantie van de debet-loop (algoritme-replica)
++      // T4 — debet-/framerateschema-invariantie van dezelfde volledige-CFL-logica.
+       {const N=96,fl=[{off:0,N,carrier:'A'}];
+-       function runBatched(perFrame){
+-         const Yl=ring(N,0.07,0.05,5),B=bufs(3*N);let um=0,steps=0;
+-         while(steps<24){let inFrame=0;
+-           while(inFrame<perFrame&&steps<24){um=localRK4(Yl,fl,localDt(Yl,N,um),B);steps++;inFrame++;}}
+-         return Yl;}
+-       const A1=runBatched(1),A7=runBatched(7);let eq=true;
+-       for(let i=0;i<A1.length;i++)if(A1[i]!==A7[i]){eq=false;break;}
+-       add('T4 batch-invariantie (1 vs 7 stappen/frame)',eq,eq?'bit-identiek':'afwijking');}
++       const Yseed=ring(N,0.07,0.05,5),total=24*localDt(Yseed,N,0);
++       function schedule(n){const a=new Array(n).fill(total/n),sum=a.slice(0,-1).reduce((x,y)=>x+y,0);a[n-1]=total-sum;return a;}
++       function runScheduled(frames){
++         const Yl=Yseed.slice(),B=bufs(3*N);let um=0,steps=0,debt=0,dtNext=localDt(Yl,N,um);
++         for(const advance of frames){debt+=advance;
++           while(debt+1e-15>=dtNext){um=localRK4(Yl,fl,dtNext,B);debt-=dtNext;steps++;dtNext=localDt(Yl,N,um);}
++           debt=Math.min(debt,dtNext);}
++         return{Yl,steps,debt};}
++       const A30=runScheduled(schedule(30)),A60=runScheduled(schedule(60)),A144=runScheduled(schedule(144));let eq=true;
++       for(let i=0;i<A30.Yl.length;i++)if(A30.Yl[i]!==A60.Yl[i]||A30.Yl[i]!==A144.Yl[i]){eq=false;break;}
++       add('T4 debet-invariantie (30/60/144 frames)',eq&&A30.steps===A60.steps&&A30.steps===A144.steps,
++         'stappen='+A30.steps+'/'+A60.steps+'/'+A144.steps+' '+(eq?'bit-identiek':'afwijking'));}
+       // T5 — achterwaartse round-trip, 4e-orde
+       {const N=96,fl=[{off:0,N,carrier:'A'}];
+        function rt(dt,n){const Y0=ring(N,0.07,0.05,5),Yl=Y0.slice(),B=bufs(3*N);
+@@ -5468,6 +5580,14 @@
+        const eU=Math.abs(vz-(1-P.mfAlphaP)*U0)/Math.abs(U0);
+        applyMfTemp('0');
+        add('T6 wrijving Ṙ=−αU en (1−α′)U',eR<1e-10&&eU<1e-10,'εR='+eR.toExponential(1)+' εU='+eU.toExponential(1));}
++      // T7 — visuele ghost is exact krachteloos als doel én als bron.
++      {const N=64,main=ring(N,0.07),Yg=new Float64Array(6*N);Yg.set(main);
++       const ghost=ring(N,0.11);for(let i=0;i<ghost.length;i+=3)ghost[i+2]=0.04;Yg.set(ghost,3*N);
++       const V0=new Float64Array(3*N),Vg=new Float64Array(6*N);
++       velocityCore(main,[{off:0,N,carrier:'A'}],V0,false,{includeExternal:false});
++       velocityCore(Yg,[{off:0,N,carrier:'A'},{off:3*N,N,carrier:'G',ghost:true,gammaVal:0}],Vg,false,{includeExternal:false});
++       let eq=true;for(let i=0;i<V0.length;i++)if(V0[i]!==Vg[i]){eq=false;break;}
++       add('T7 ghost aan/uit dynamisch invariant',eq,eq?'bit-identiek':'afwijking');}
+       // T8 — frame-equivalentie (v7.4b §B.2): dezelfde fysische run in
+       // solverFrame 'lab' (expliciete Ω×r-advectie) en 'corot' (wand in rust),
+       // corot-resultaat teruggeroteerd over φ=Ω·t en knooppuntsgewijs
+@@ -5489,6 +5609,33 @@
+          em=Math.max(em,Math.hypot(cph*x-sph*y-Ylab[3*k],sph*x+cph*y-Ylab[3*k+1],Ycor[3*k+2]-Ylab[3*k+2]));}
+        const Ef=em/R;
+        add('T8 frame-equivalentie E_frame<1e-6',Ef<1e-6,'E_frame='+Ef.toExponential(2)+' · φ='+ph.toFixed(3)+' rad · '+steps+' LIA-stappen · dt='+dtf.toExponential(2));}
++      // T9 — wandmarge gebruikt de tube-rand in radiale én axiale richting.
++      {P.Rcyl=0.25;P.Hcyl=0.5;P.a=1e-3;
++       const mr=tubeBoundaryMarginAt(0.20,0,0),mz=tubeBoundaryMarginAt(0,0,0.49);
++       add('T9 buis-gecorrigeerde wandmarge',Math.abs(mr-0.049)<1e-15&&Math.abs(mz-0.009)<1e-15,'rad='+mr+' ax='+mz);}
++      // T11 — a_probe is metadata: bit-identieke snelheid bij Planck- en
++      // SST-schaal. De String-probe gebruikt vrije Γ en activeert geen koppeling.
++      {const N=64,Yl=ring(N,0.07),fl=[{off:0,N,carrier:'A'}],Va=new Float64Array(3*N),Vb=new Float64Array(3*N);
++       P.bgFlow='none';P.a=1.2415e-4;P.scaleProbe=PLANCK_LENGTH;
++       velocityCore(Yl,fl,Va,false,{includeExternal:false});P.scaleProbe=R_HORN_SST;
++       velocityCore(Yl,fl,Vb,false,{includeExternal:false});
++       let eq=true;for(let i=0;i<Va.length;i++)if(Va[i]!==Vb[i]){eq=false;break;}
++       P.med='string';P.GaDemo=0.2;P.coreFlowLock=false;const gs=Gamma();
++       add('T11 a_probe passief + string-probe contract',eq&&Number.isFinite(gs)&&kappaMedium()===null,
++         (eq?'bit-identiek':'afwijking')+' Γ='+gs.toExponential(3));}
++      // T12 — Taylor-forcing is alleen solo en zit in iedere kandidaatstap.
++      {P.taylorOsc.enabled=true;P.centerLock=false;P.mode='botsing';const blocked=!taylorOscillationApplies();
++       P.mode='solo';const allowed=taylorOscillationApplies();P.taylorOsc.enabled=false;
++       const candidateOk=/applyTaylorOscillation/.test(advanceFilamentCandidate.toString())&&
++         /advanceFilamentCandidate/.test(transientContactWithinStep.toString());
++       add('T12 Taylor-forcing uitsluitend solo + contactgelokaliseerd',blocked&&allowed&&candidateOk,
++         'botsing='+(blocked?'uit':'aan')+' solo='+(allowed?'aan':'uit')+' candidate='+candidateOk);}
++      // T13 — Canon-constanten en passieve diagnostiek zijn exact/serialiseerbaar.
++      {const gammaDerived=2*Math.PI*R_HORN_SST*V_HORN_SST;
++       const diag2=buildDiagRecord(1,2,3,{R:4,z:5});
++       const numericFinite=Object.values(diag2).filter(v=>typeof v==='number').every(Number.isFinite);
++       add('T13 Canon Γ₀ + diagnostiek serialiseerbaar',Math.abs(GAMMA0_SST-9.68361920e-9)<1e-20&&Math.abs(gammaDerived/GAMMA0_SST-1)<1e-9&&numericFinite,
++         'Γ₀='+GAMMA0_SST.toExponential(9)+' afleiding='+gammaDerived.toExponential(9)+' finite='+numericFinite);}
+     }catch(err){results.push({name:'harnas-exceptie',pass:false,detail:String(err&&err.stack||err)});}
+     finally{restore(S);}
+     const rep={version:APP_VERSION,baseVersion:APP_BASE_VERSION,date:new Date().toISOString(),ms:Math.round(performance.now()-t0),
+@@ -5585,6 +5732,39 @@
+   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply();}});
+ }
+ bindRCorePhysicalInput();
++function bindScaleProbeInput(){
++  const inp=document.getElementById('sScaleProbe');
++  const slider=document.getElementById('sScaleProbeLog');
++  const preset=document.getElementById('scaleProbePreset');
++  if(!inp)return;
++  const commit=(value,source)=>{
++    if(!Number.isFinite(value)||value<=0)return false;
++    P.scaleProbe=value;
++    if(slider)slider.value=String(clamp(Math.log10(value),Number(slider.min),Number(slider.max)));
++    if(source!=='text')inp.value=fmtLengthSI(value);
++    const out=document.getElementById('vScaleProbe');if(out)out.textContent=fmtLengthSI(value);
++    if(preset&&source!=='preset'){
++      const rel=(a,b)=>Math.abs(a-b)/Math.max(Math.abs(b),1e-300);
++      preset.value=rel(value,PLANCK_LENGTH)<1e-9?'planck':
++        (rel(value,R_HORN_SST)<1e-9?'sst':(rel(value,HE_CORE_REF)<1e-9?'helium':'custom'));
++    }
++    ModelLog.logUser('scaleProbe',{value,source:source||'text',passive:true});
++    return true;
++  };
++  const applyText=()=>{
++    const value=parseLengthInput(inp.value);
++    if(!commit(value,'text'))setFlag('⚠ a_probe moet een positieve eindige lengte zijn; de vorige passieve schaal blijft actief.',true);
++    else inp.value=fmtLengthSI(P.scaleProbe);
++  };
++  inp.addEventListener('change',applyText);
++  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyText();}});
++  slider?.addEventListener('input',()=>commit(Math.pow(10,Number(slider.value)),'slider'));
++  preset?.addEventListener('change',()=>{
++    const values={planck:PLANCK_LENGTH,sst:R_HORN_SST,helium:HE_CORE_REF};
++    if(values[preset.value])commit(values[preset.value],'preset');
++  });
++}
++bindScaleProbeInput();
+ document.getElementById('cModelLog')?.addEventListener('change',e=>{ModelLog.setEnabled(e.target.checked);});
+ document.getElementById('cModelLogVerbose')?.addEventListener('change',e=>{ModelLog.setVerbose(e.target.checked);});
+ document.getElementById('bModelLogExport')?.addEventListener('click',()=>{
+@@ -5746,7 +5926,7 @@
+       if(P.bundleBEMEnabled&&bundleFlowActive())ensureBundleBEM();
+       const gapBefore=P.topologyGuard?(Number.isFinite(lastTopologyGap)?lastTopologyGap:topologyClearance()):Infinity;
+       Ypre.set(Y); // snapshot voor first-hit en transient-contact guard
+-      lastUmax=rk4Step(signedDt);
++      lastUmax=advanceFilamentCandidate(signedDt,tPhys+signedDt);
+       let dtApplied=signedDt;
+       // v7.5.3: eindcontact én tijdelijke doorsnijding binnen een verder
+       // contactvrije stap worden onderschept. Bij hard contact landt de guard
+@@ -5761,13 +5941,15 @@
+           if(transient){dtApplied=transient.dt;cev=transient.event;geometryRelanded=true;}
+         }
+       }
++      if(dtApplied!==signedDt)cev=contactEvent(lia)||cev;
++      // Precies één transportdiagnose-update, over het werkelijk geaccepteerde
++      // interval; volle en gebisecteerde trial-stappen blijven passief.
++      if(P.twistProxyEnabled)updateTwistProxy(dtApplied,K4);
+       lastTopologyGap=P.topologyGuard?(geometryRelanded?topologyClearance():gapAfter):Infinity;
+       bundleBEMStepCounter++;
+       phi+=P.Om*dtApplied;
+       if(P.bundleEnabled)bundlePhi+=P.OmBundle*dtApplied;
+       tPhys+=dtApplied;
+-      applyTaylorOscillation();
+-      wrapFilamentCarriersZ();
+       if(P.ghostStewartson) syncGhostRing();
+       updateStretchGateAcceptedStep(Ypre,Y,dtApplied);
+       // v7.2 (RP1): tracers per geaccepteerde CFL-stap, met exact dezelfde

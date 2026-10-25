@@ -7,9 +7,9 @@ coordinate by itself has phase reversals or beating.
 
 SC-IIb tests
 
-\[
+$$
 \phi_{ij}(t)=\operatorname{unwrap}\operatorname{atan2}(a_j(t),a_i(t))
-\]
+$$
 
 for discovery-frozen POD pairs.  It does **not** require full centerline
 recurrence and it does not modify the closed-shape SC-I or scalar-phase SC-II
@@ -107,9 +107,9 @@ carrier.
 SC-II uses a scalar analytic signal.  SC-IIb instead asks whether the trajectory
 actually rotates in a frozen plane:
 
-\[
+$$
 L_{ij}=a_i\dot a_j-a_j\dot a_i.
-\]
+$$
 
 A good clock therefore has a persistent sign of `L_ij`, a stable radius away
 from the origin, low phase diffusion, and predictable phase velocity.

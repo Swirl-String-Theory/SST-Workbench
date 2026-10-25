@@ -4,12 +4,12 @@
 
 The seven articles do **not** supply seven new SST laws.  They supply a coherent certification architecture.  Across acoustics, nonlinear optics, magnetic textures, quantum critical spectroscopy, acoustic analogy transport, and cosmography, the same methodological pattern recurs:
 
-\[
+$$
 \boxed{
 \text{geometry} \rightarrow \text{physical field} \rightarrow \text{constraint/closure}
 \rightarrow \text{probe operator} \rightarrow \text{phase/spectrum} \rightarrow \text{observable}
 }
-\]
+$$
 
 None of these arrows may be inferred merely because the endpoints look similar.  This is the strongest canon-level lesson of the seven-paper review.
 
@@ -29,12 +29,12 @@ None of these arrows may be inferred merely because the endpoints look similar. 
 
 **SST transfer.**  Freeze four distinct labels:
 
-\[
+$$
 \mathcal K_{\rm center},\qquad
 \mathcal K_{\omega},\qquad
 \mathcal K_{\Phi},\qquad
 \mathcal K_{\rm null}.
-\]
+$$
 
 A phase-fiber trefoil does not prove a vorticity-tube trefoil.  A central hole in a centerline or amplitude plot does not prove a threaded material-vorticity channel.
 
@@ -42,29 +42,29 @@ A phase-fiber trefoil does not prove a vorticity-tube trefoil.  A central hole i
 
 **What the source motivates and orthodox incompressible mechanics supplies.**  Pressure must be treated as a nonlocal Poisson-constrained field.  For constant-density incompressible Euler flow,
 
-\[
+$$
 \boxed{
 \nabla^2\!\left(\frac{p}{\rho_{\!f}}\right)
 =\frac12|\boldsymbol\omega|^2-S_{ij}S_{ij}
 }
-\]
+$$
 
 with
 
-\[
+$$
 S_{ij}=\frac12(\partial_j u_i+\partial_i u_j).
-\]
+$$
 
 For a free-space decaying solution,
 
-\[
+$$
 \boxed{
 \frac{p(\mathbf x)-p_\infty}{\rho_{\!f}}
 =-\frac{1}{4\pi}\int
 \frac{\frac12|\boldsymbol\omega(\mathbf x')|^2-S:S(\mathbf x')}
 {|\mathbf x-\mathbf x'|}\,d^3x'
 }
-\]
+$$
 
 with the Green function changed for bounded/periodic domains.
 
@@ -76,17 +76,17 @@ with the Green function changed for bounded/periodic domains.
 
 **SST transfer.**  For any phase-feedback-delay clock, separate
 
-\[
+$$
 \Delta\Phi_{\rm loop}
 =\Delta\Phi_{\rm dyn}+\Delta\Phi_{\rm geom}
 +\Delta\Phi_{\rm coupling}+\cdots
-\]
+$$
 
 and require
 
-\[
+$$
 \Delta\Phi_{\rm loop}=2\pi n
-\]
+$$
 
 under sampling refinement.  Vary the number of phase stations to distinguish physical modes from sampling aliases.
 
@@ -96,16 +96,16 @@ under sampling refinement.  Vary the number of phase stations to distinguish phy
 
 **SST transfer.**  Do not posit a metric first.  Linearize the chosen probe sector and derive its principal symbol.  Only then may one write schematically
 
-\[
+$$
 \mathcal P(x,k)=g_{\rm eff}^{\mu\nu}(x)k_\mu k_\nu.
-\]
+$$
 
 Separate circulation-reversal channels:
 
-\[
+$$
 O_{\rm even}=\frac{O(+\Gamma)+O(-\Gamma)}{2},\qquad
 O_{\rm odd}=\frac{O(+\Gamma)-O(-\Gamma)}{2}.
-\]
+$$
 
 Expose finite-core ratios instead of fitting them away.
 
@@ -139,16 +139,16 @@ Inputs: \(\mathbf u(\mathbf x,t)\), \(p(\mathbf x,t)\), \(\boldsymbol\omega\), c
 
 Required residuals include
 
-\[
+$$
 R_{\rm div}=\nabla\cdot\mathbf u
-\]
+$$
 
 and
 
-\[
+$$
 R_P=\nabla^2(p/\rho_{\!f})-
 \left(\frac12\omega^2-S:S\right).
-\]
+$$
 
 ### Layer 3 — phase/clock
 
@@ -207,7 +207,7 @@ The blind package deliberately returns `INDETERMINATE` rather than manufacturing
 
 The intended promotion chain is therefore
 
-\[
+$$
 \boxed{
 \text{centerline certification}
 \rightarrow
@@ -221,6 +221,6 @@ The intended promotion chain is therefore
 \rightarrow
 \text{representation invariance}
 }
-\]
+$$
 
 and not the reverse.

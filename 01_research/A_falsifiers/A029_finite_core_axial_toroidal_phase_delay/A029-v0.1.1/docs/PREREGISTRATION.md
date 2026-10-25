@@ -4,21 +4,21 @@
 
 Exact closure is
 
-\[
+$$
 k_0L+m\Theta_B=2\pi n.
-\]
+$$
 
 The matched control is symmetric:
 
-\[
+$$
 k_\pm L+m\Theta_B=2\pi(n\pm\delta).
-\]
+$$
 
 Its growth metric is
 
-\[
+$$
 g_{\rm sym}=\tfrac12[g(k_-)+g(k_+)].
-\]
+$$
 
 This is fixed before blind execution. The first-order local dispersion slope cancels in the symmetric average.
 
@@ -34,9 +34,9 @@ This is fixed before blind execution. The first-order local dispersion slope can
 
 No delay parameter is supplied. The eigenbranch gives
 
-\[
+$$
 v_g=d\omega/dk,\qquad \tau_g=L/|v_g|,
-\]
+$$
 
 and a packet return independently measures \(\tau_{ret}\).
 
@@ -44,9 +44,9 @@ and a packet return independently measures \(\tau_{ret}\).
 
 The prior v0.1.0 extended run discovered post hoc a candidate \(m=1\) phase optimum
 
-\[
+$$
 \boxed{\phi_\star=2.72\ \mathrm{rad}}.
-\]
+$$
 
 v0.1.1 freezes this before new data. It is **not used in dynamics**.
 
@@ -56,15 +56,15 @@ Primary new carriers:
 
 For each carrier, over both-valid/non-neutral \(m=1\) rows, fit
 
-\[
+$$
 y=a+b\cos(\phi_{loop}-\phi_\star).
-\]
+$$
 
 Prediction:
 
-\[
+$$
 \boxed{b<0.}
-\]
+$$
 
 The confirmatory phase gate requires at least six carrier votes and one-sided exact sign-test \(p\le0.05\).
 

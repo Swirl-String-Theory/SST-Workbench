@@ -4,32 +4,32 @@
 
 For active constraints \(g_j(X)\), the native core uses columns
 
-\[
+$$
 A_j=\nabla_X g_j.
-\]
+$$
 
 For inferred struts,
 
-\[
+$$
 g_j=\frac12 d_j,
-\]
+$$
 
 with closest points interpolated on the two polygon segments. For kinks,
 
-\[
+$$
 g_j=\operatorname{MinRad}_j,
-\]
+$$
 
 and its local 9-coordinate gradient is evaluated by centered finite differences.
 
 For the built-in length energy,
 
-\[
+$$
 b=\nabla_X L,
 \qquad
 A\Lambda\simeq b,
 \qquad \Lambda\ge0.
-\]
+$$
 
 This corresponds to the first-order balance \(-\nabla L+A\Lambda=0\).
 
@@ -70,9 +70,9 @@ The `KnotPlot/knots/final` export is treated as a geometry-plus-metadata pair. F
 
 When explicit strut sidecars are unavailable, candidate contacts are reconstructed with the preregistered two-sided shell
 
-\[
+$$
 2a(1-\varepsilon_c)\le d_{ij}\le 2a(1+\varepsilon_c),
-\]
+$$
 
 with baseline \(\varepsilon_c=10^{-4}\). The extended campaign reports sensitivity to a frozen tolerance ladder. The inferred active set is therefore an adapter estimate, not a claim that the original Ridgerunner strut list has been exactly recovered.
 
@@ -80,9 +80,9 @@ with baseline \(\varepsilon_c=10^{-4}\). The extended campaign reports sensitivi
 
 A shared-final geometry whose recorded Ridgerunner residual exceeds the preregistered threshold is still hashed, blinded, loaded, and geometrically inventoried. Its equilibrium/rank/self-stress interpretation is refused rather than counted as an SST failure. The default threshold is
 
-\[
+$$
 R_{\mathrm{RR}}\le 0.05.
-\]
+$$
 
 This separates optimizer non-convergence from physical falsification.
 
@@ -90,8 +90,8 @@ This separates optimizer non-convergence from physical falsification.
 
 For cases with baseline
 
-\[
+$$
 \sigma_{\min}^{+}/\sigma_{\max}<10^{-4},
-\]
+$$
 
 extended mode applies deterministic blinded coordinate perturbations of frozen amplitudes expressed as fractions of the declared tube radius. Rank, contact count, \(\chi_{\mathrm{KKT}}\), and the singular ratio are recomputed. This directly operationalizes Maxwell's warning that a small disfigurement can drive very large force changes or loosen a frame, while keeping the result a numerical conditioning diagnostic rather than a dynamical Kairos claim.

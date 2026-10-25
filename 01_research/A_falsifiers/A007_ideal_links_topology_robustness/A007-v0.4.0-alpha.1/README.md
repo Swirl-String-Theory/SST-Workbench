@@ -7,7 +7,7 @@ The QM campaign does not assume that a topological link is already a quantum sta
 a selected classical link background has enough mathematical structure to justify a later
 quantization attempt:
 
-\[
+$$
 \text{discrete sectors}
 \rightarrow
 \text{classical background}
@@ -17,7 +17,7 @@ quantization attempt:
 \text{candidate two-form}
 \rightarrow
 \text{linear spectrum}.
-\]
+$$
 
 
 ## v0.4.0-alpha.1 Windows native preflight
@@ -69,9 +69,9 @@ The package does not fabricate unresolved higher invariants.
 
 The fixed-core v0.2.1 relative-equilibrium residual at
 
-\[
+$$
 \epsilon/D=0.10
-\]
+$$
 
 is combined with a reduced energy-gradient test. This selects candidate backgrounds without claiming
 that the source Fourier geometry is an exact finite-core stationary solution.
@@ -94,7 +94,7 @@ Geometric derivatives are computed once and reused across all independent circul
 
 The Research-Track filament two-form is
 
-\[
+$$
 \Omega_{ab}
 =
 \sum_i \sigma_i
@@ -104,7 +104,7 @@ The Research-Track filament two-form is
 \delta\mathbf X_a\times\delta\mathbf X_b
 \right)
 \,ds.
-\]
+$$
 
 The campaign records antisymmetry, rank, nullity, singular values and a determinant/Pfaffian proxy.
 Full rank after gauge reduction is treated only as a necessary readiness condition.
@@ -113,11 +113,11 @@ Full rank after gauge reduction is treated only as a necessary readiness conditi
 
 For each declared effective energy profile,
 
-\[
+$$
 \Omega\dot{\mathbf q}=H\mathbf q,
 \qquad
 A=\Omega^{+}H.
-\]
+$$
 
 The suite reports:
 
@@ -181,14 +181,14 @@ After activation, use `python`, not `py -3`, so compilation, import and executio
 
 The shortest scientifically useful shortlist is:
 
-\[
+$$
 L2a1,
 L4a1,
 L5a1,
 L6a4,
 L6n1,
 L7n1.
-\]
+$$
 
 The `quick` preset uses a **diagonal Hessian screen**. It can rank Q1–Q2 candidates rapidly,
 but it is intentionally barred from passing Q3–Q5. Use `full` or `max` for the complete off-diagonal

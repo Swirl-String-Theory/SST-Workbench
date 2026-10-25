@@ -23,9 +23,9 @@ Measured results:
 
 Thus the independent phase extractor correctly recovers
 
-\[
+$$
 \Delta\Omega_{\rm dyn}=\frac{\Gamma/A}{2}
-\]
+$$
 
 when the geometric conditions for solid-body rotation are actually satisfied.
 
@@ -35,9 +35,9 @@ Configuration: `configs/C9_iso_gamma_area_smoke.json`.
 
 Common prescribed value:
 
-\[
+$$
 |\Gamma/A|=128.
-\]
+$$
 
 The bundle is contained inside the free central aperture. The trefoil itself therefore samples primarily the exterior field rather than the uniform-vorticity interior.
 
@@ -50,9 +50,9 @@ The bundle is contained inside the free central aperture. The trefoil itself the
 
 All four primary phase-rate measurements satisfy the extraction-quality gates. All four violate
 
-\[
+$$
 |\mathcal Q_\Gamma-1|<0.02.
-\]
+$$
 
 Moreover, at fixed \(\Gamma/A\), changing the bundle radius changes \(\mathcal Q_\Gamma\) by about 0.046–0.049. This independently violates the preregistered iso-family spread threshold of 0.02.
 
@@ -69,21 +69,21 @@ The difference is approximately \(4.6\times10^{-5}\), showing that the conclusio
 
 ## Scientific verdict
 
-\[
+$$
 \boxed{
 \text{Bundle-average }\Gamma/A\text{ is not sufficient to determine the observed trefoil clock rate}
 }
-\]
+$$
 
 within the implemented frozen straight axial-bundle model.
 
 What survives is the narrower statement:
 
-\[
+$$
 \Gamma/A=\bar\zeta,
 \qquad
 \Omega=\bar\zeta/2
-\]
+$$
 
 for material points that actually lie in a uniform-vorticity solid-body region, or for the boundary-average associated with the same contour and area.
 

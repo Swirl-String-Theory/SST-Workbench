@@ -12,27 +12,27 @@ A056 does **not** construct a phase field from a static knot curve after seeing 
 
 Phase:
 
-\[
+$$
 H_W:\;\varphi_{tt}=a\varphi_{ss},\qquad
 H_{KG}:\;\varphi_{tt}=a\varphi_{ss}-b\varphi,
-\]
+$$
 
-\[
+$$
 H_D:\;\varphi_{tt}=a\varphi_{ss}-b\varphi-c\varphi^3,\qquad
 H_{SG}:\;\varphi_{tt}=a\varphi_{ss}-b\sin\varphi.
-\]
+$$
 
 Relaxation:
 
-\[
+$$
 R_{\exp}=e^{-t/\tau},\quad
 R_{\mathrm{stretch}}=e^{-(t/\tau)^\beta},\quad
 R_{2\exp}=w e^{-t/\tau_1}+(1-w)e^{-t/\tau_2},
-\]
+$$
 
-\[
+$$
 R_{ML}=E_{\alpha,1}\!\left[-(t/\tau)^\alpha\right].
-\]
+$$
 
 The exponential limit \(E_{1,1}(-t/\tau)=e^{-t/\tau}\) is explicitly protected by requiring the fitted fractional order to lie away from \(\alpha=1\).
 

@@ -4,15 +4,15 @@
 
 The base flow is
 
-\[
+$$
 \mathbf V_0(r)=V_\theta(r)\mathbf e_\theta+U_s(r)\mathbf e_s,
-\]
+$$
 
 and perturbations are
 
-\[
+$$
 \delta q=\hat q(r)e^{i(m\theta+ks)+\lambda t}.
-\]
+$$
 
 The code solves the primitive-variable linearized incompressible-Euler generalized eigenproblem with Chebyshev radial collocation. Selected modes must be core-localized, axial/toroidal hybridized, low-residual and convergent over the preregistered radial ladder.
 
@@ -20,24 +20,24 @@ The code solves the primitive-variable linearized incompressible-Euler generaliz
 
 The finite core is local/radial; the closed knot or link supplies the global slender-tube length, curvature validity and Bishop parallel-transport holonomy \(\Theta_B\). Exact closure obeys
 
-\[
+$$
 \boxed{k_0a=\frac{2\pi n-m\Theta_B}{L/a}}.
-\]
+$$
 
 ## 3. v0.1.1 symmetric control
 
 The v0.1.0 control sampled only one non-integer offset, so an ordinary dispersion slope could mimic a closure advantage. v0.1.1 evaluates both
 
-\[
+$$
 k_-=k_0-\Delta k,\qquad k_+=k_0+\Delta k,
-\]
+$$
 
 and defines the control growth by their average. To first order in \(\Delta k\),
 
-\[
+$$
 \frac{g(k_0-\Delta k)+g(k_0+\Delta k)}2
 =g(k_0)+\frac12g''(k_0)\Delta k^2+O(\Delta k^4).
-\]
+$$
 
 The linear \(g'(k_0)\Delta k\) term is removed.
 
@@ -45,9 +45,9 @@ The linear \(g'(k_0)\Delta k\) term is removed.
 
 The tracked branch gives \(\omega(k)\), hence
 
-\[
+$$
 v_g=\frac{d\omega}{dk},\qquad \tau_g=\frac{L}{|v_g|}.
-\]
+$$
 
 A narrow packet is propagated using the measured local dispersion polynomial and the first coherent periodic return gives \(\tau_{ret}\). The return phase is an output.
 
@@ -55,11 +55,11 @@ A narrow packet is propagated using the measured local dispersion polynomial and
 
 For \(\lambda=\sigma+i\omega_\lambda\), the CLOSED case exports
 
-\[
+$$
 \Re\lambda=\sigma,\quad
 \Im\lambda=\omega_\lambda,\quad
 T_{mode}=\frac{2\pi}{|\Im\lambda|},
-\]
+$$
 
 plus \(v_g\), \(\tau_g\), \(\tau_{ret}\), \(\phi_{loop}\), the core RMS material swirl \(\Omega_{swirl}\), and \(|\Im\lambda|/\Omega_{swirl}\).
 

@@ -16,11 +16,11 @@ The executed v0.1.0 basic configuration used:
 
 Observed historical result under that old metric:
 
-\[
+$$
 \operatorname{rank}(5_2,6_1)=551/595,
 \qquad
 D=3.2892952078460436.
-\]
+$$
 
 The v0.1.0 reveal also reported:
 

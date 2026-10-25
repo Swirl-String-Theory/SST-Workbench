@@ -5,9 +5,9 @@
 
 A staged blind Python/C++17/pybind11 campaign for the **current SST question**:
 
-\[
+$$
 \boxed{\text{Which trefoil start shape most nearly begins as a coherent moving vortex object?}}
-\]
+$$
 
 The package does **not** assume that the tightest KnotPlot/Ridgerunner geometry is dynamically best. Shape selection itself is a falsifiable, blinded stage.
 
@@ -54,9 +54,9 @@ A downstream gate can never rescue a candidate rejected upstream. Source filenam
 
 The initial physical velocity is decomposed after removing tangential gauge motion. A least-squares rigid motion
 
-\[
+$$
 \mathbf u_{\perp}(s) \approx \mathbf V + \boldsymbol\Omega\times(\mathbf X-\mathbf X_c)
-\]
+$$
 
 is fitted in the normal plane. `rolling_coherence` is one minus the normal residual fraction. A good seed therefore has **substantial coherent rigid motion with little intrinsic deformation**, rather than simply having low total velocity.
 
@@ -85,9 +85,9 @@ The package computes a finite-dimensional monodromy matrix on a preregistered Fo
 ### S60 — mechanism only after existence
 Only projected-RPO candidates enter the material-core versus fixed-core test. The lag is discovered on the first half of the trajectory and tested on holdout data. The phase is then a measured output
 
-\[
+$$
 \phi = \omega_{\rm measured}\tau_{\rm measured}\pmod{2\pi},
-\]
+$$
 
 never a supplied restoring parameter.
 

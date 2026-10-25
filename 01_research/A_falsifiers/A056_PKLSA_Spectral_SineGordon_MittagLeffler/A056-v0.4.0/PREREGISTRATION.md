@@ -12,13 +12,13 @@ The observed A056-v0.3.0 filament `m=3` G2 diagnostics are a development/motivat
 
 With \(z=e^{i\varphi}\) and \(\widetilde z=z-\langle z\rangle_s\), compute circular POD and discovery/confirmation normalized non-zero-mode Fourier-power distributions. A case passes spectral G2 iff all of:
 
-\[
+$$
 \eta_3^{\rm circ}\ge0.95,
 \qquad
 \epsilon_{\rm orth}^{\rm circ}\le10^{-10},
 \qquad
 \mathcal O_F=\sum_{n\ne0}\sqrt{P_n^DP_n^C}\ge0.90.
-\]
+$$
 
 Raw-phase early/late POD overlap is recorded against its historical 0.85 reference but is non-blocking. Circular-POD early/late subspace overlap is also diagnostic. The exact Mittag-Leffler identity at \(\alpha=1\) must satisfy the registered \(10^{-12}\) numerical tolerance.
 

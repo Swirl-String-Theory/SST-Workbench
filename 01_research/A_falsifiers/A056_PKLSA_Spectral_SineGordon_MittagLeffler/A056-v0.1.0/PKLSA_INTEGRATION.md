@@ -14,7 +14,7 @@ C:\workspace\projects\SST-Workbench
 
 ## Required A056 chain
 
-\[
+$$
 \text{qualified E010 carrier}
 \rightarrow
 \text{finite-core/Euler perturbation provider}
@@ -22,7 +22,7 @@ C:\workspace\projects\SST-Workbench
 \varphi(t,s),\;R(t)
 \rightarrow
 \text{A056 blind competition}.
-\]
+$$
 
 The dynamic provider must freeze an operational definition of the phase field \(\varphi(t,s)\) before A056 scoring. Examples could be material-frame torsion phase, a Kelvin-mode phase coordinate, or another explicitly defined angular observable. A056 deliberately does not invent that mapping from geometry after seeing results.
 

@@ -243,13 +243,13 @@ This release responds directly to the first real STANDARD C++ run.
 
 - Step 4 now defaults to a fourth-order director-curvature derivative.
 - The director curvature is explicitly Helmholtz/Hodge projected:
-  \[
+  $$
   \widetilde{\mathbf b}_\perp
   =
   \widetilde{\mathbf b}
   -
   \frac{\mathbf k(\mathbf k\cdot\widetilde{\mathbf b})}{|\mathbf k|^2}.
-  \]
+  $$
 - Evidence now reports `delta_longitudinal`, raw/projected divergence, projected curl residual and separate spinor/director Hopf charges.
 - H1 and H3 distinguish `STANDARD_PASS` from `CERTIFIED_PASS` through a `qualification` field while retaining gate `status=PASS|FAIL`.
 - H3 reports three different comparisons:

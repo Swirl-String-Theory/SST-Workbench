@@ -4,9 +4,9 @@
 
 The bifurcation campaign entered a region with
 
-\[
+$$
 S^2=1-\lVert\boldsymbol\beta\rVert^2<0.
-\]
+$$
 
 The expression
 
@@ -28,9 +28,9 @@ else:
 
 The implementation goes further: discovery and refinement use the real numerator
 
-\[
+$$
 G=S^2+\rho\,\boldsymbol\beta\cdot(J_\beta\mathbf e_\rho),
-\]
+$$
 
 and never send a valid/invalid transition through the ordinary stationary-root refiner.
 

@@ -23,11 +23,11 @@ datasets/SST_Parametric_Trefoil_Seed_Atlas_v1.0.0/
 
 It contains 48 analytic trefoil candidates generated from
 
-\[
+$$
 \mathbf X(t)=\mathbf U[R+a\cos(3t)]\cos(2t)
 +\mathbf V[R+a\cos(3t)]\sin(2t)
 +\mathbf N[b\sin(3t)+z_0].
-\]
+$$
 
 The grid contains 3 values of `R`, 4 values of radial bulge `a`, and 4 values of axial weave `b`. Candidate filenames are parameter-opaque. The reveal-only manifest maps them back to the preregistered parameters. No Shadertoy renderer, SDF, or shader source is redistributed; only an independent mathematical implementation and the generated centerlines are included.
 
@@ -90,16 +90,16 @@ manual reveal only
 
 The relevant blind observables are therefore
 
-\[
+$$
 \Delta\hat E_\phi(A)
 =\frac{\hat E(X_0+A\phi)+\hat E(X_0-A\phi)}{2}-\hat E(X_0),
-\]
+$$
 
-\[
+$$
 \hat J_{f,\phi}=\frac{\Delta\hat E_\phi}{\hat f_\phi},
 \qquad
 \hat J_{\omega,\phi}=\frac{\Delta\hat E_\phi}{\hat\omega_\phi}.
-\]
+$$
 
 The energy and frequency now refer to the same frozen mode by construction.
 
@@ -107,9 +107,9 @@ The energy and frequency now refer to the same frozen mode by construction.
 
 A first non-zero FFT bin is never accepted as an intrinsic frequency. If the matched-mode spectrum is window limited or contains too few cycles, v0.3.1 increases the **dimensionless** horizon and reruns the same frozen-mode experiment:
 
-\[
+$$
 T_0\rightarrow T_1\rightarrow T_2\rightarrow\cdots
-\]
+$$
 
 until the preregistered cycle requirement is met or a fixed horizon/round cap is reached. No target value, SST constant, or SI time scale is consulted. BASIC defaults to a maximum factor of 32 and six extension rounds.
 
@@ -121,18 +121,18 @@ For an unlabelled centerline, tangential marker motion is a parametrization degr
 
 Full material-marker residual:
 
-\[
+$$
 \epsilon_{\rm RE}^{\rm full}
 =\frac{\|\mathbf u-\mathbf u_{\rm rigid}\|}{\|\mathbf u\|}.
-\]
+$$
 
 Centerline/normal residual:
 
-\[
+$$
 \epsilon_{\rm RE}^{\perp}
 =\frac{\|P_\perp(\mathbf u-\mathbf u_{\rm rigid})\|}
        {\|P_\perp\mathbf u\|}.
-\]
+$$
 
 The blind centerline gate uses `epsilon_RE_perp`. `epsilon_RE_full` remains reported for later material-labelled finite-core studies.
 
@@ -140,11 +140,11 @@ The blind centerline gate uses `epsilon_RE_perp`. `epsilon_RE_full` remains repo
 
 The solver still uses RK4 with
 
-\[
+$$
 \Delta\hat t
 \propto
 (\Delta\hat s_{\min})^2,
-\]
+$$
 
 but long trajectories no longer rely on a fixed small number of reparameterization events. A preregistered mesh trigger causes uniform-arclength redistribution when the spacing CV or edge ratio becomes too large. The solver records:
 
@@ -160,10 +160,10 @@ The scientific mesh gate uses the **maximum observed pre-redistribution** diagno
 
 Expected campaign size is fixed before scoring:
 
-\[
+$$
 N_{\rm expected}
 =N_{\rm carriers}\,N_{\rm resolutions}\,N_{\rm amplitudes}.
-\]
+$$
 
 Every slot must exist and have `row_status=OK`. Missing or failed numerical rows make
 
@@ -177,11 +177,11 @@ and downstream action claims cannot pass.
 
 Before reveal, the scientific path uses only
 
-\[
+$$
 L_{\rm hat}=1,
 \qquad
 \Gamma_{\rm hat}=1,
-\]
+$$
 
 dimensionless geometry, core fraction, perturbation amplitudes, and numerical controls. It does not use canonical SST values, SI conversion scales, `h`, `hbar`, or a target action.
 

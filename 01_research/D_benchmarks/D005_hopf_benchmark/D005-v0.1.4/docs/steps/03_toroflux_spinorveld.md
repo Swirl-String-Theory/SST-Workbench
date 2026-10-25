@@ -10,37 +10,37 @@ Primair: **H4**. Voorbereidend op H5.
 
 ## Buiscoördinaten
 
-\[
+$$
 \mathbf x(s,\rho,\varphi)=
 \mathbf X(s)+
 \rho\cos\varphi\,\mathbf e_1(s)+
 \rho\sin\varphi\,\mathbf e_2(s).
-\]
+$$
 
 Gebruik bij voorkeur een Bishop-/parallel-transportframe om singulariteiten bij \(\kappa=0\) te vermijden.
 
 ## Eerste testansatz
 
-\[
+$$
 \Psi_{m,n}=
 \begin{pmatrix}
 \cos\frac{\beta(\rho)}2\,e^{im\xi(s)}\\
 \sin\frac{\beta(\rho)}2\,e^{in\varphi}
 \end{pmatrix},
-\]
+$$
 
 met
 
-\[
+$$
 \beta(0)=\pi,\qquad
 \beta(\rho\ge\rho_{\rm out})=0.
-\]
+$$
 
 Test eerst:
 
-\[
+$$
 (m,n)\in\{(1,1),(1,2),(2,1),(2,2)\}.
-\]
+$$
 
 De mogelijke relatie \(Q_H\sim mn\) is een hypothese, geen invoer.
 

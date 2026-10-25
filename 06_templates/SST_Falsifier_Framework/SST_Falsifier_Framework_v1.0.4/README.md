@@ -44,9 +44,9 @@ SYCL DD32 / FP32x2         SCREENING_ONLY (high-precision candidate)
 
 DD32 is double-single arithmetic:
 
-\[
+$$
 x \approx x_{\rm hi}+x_{\rm lo},\qquad x_{\rm hi},x_{\rm lo}\in\mathrm{binary32}.
-\]
+$$
 
 It is **not IEEE FP64** and not an IEEE-defined `FP48` format. Its exponent range remains binary32; the nominal significand capacity is roughly 48 bits. Actual accuracy is measured against the FP64 reference on every selftest. See `docs/DD32_FP32X2.md`.
 

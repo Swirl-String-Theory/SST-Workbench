@@ -6,11 +6,11 @@ Standalone Python + C++17/pybind11 Research-Track harness. It does not import or
 
 v0.6.1 extends the v0.6.0 axial hole-bundle experiment over the requested domain
 
-\[
+$$
 0.06125\leq \frac{R_b}{R_{\rm hole}}\leq 8,
 \qquad
 -8\leq \frac{\Gamma_h}{\Gamma_0}\leq 8.
-\]
+$$
 
 The model remains a smooth coaxial central-flux plus opposite-return-flux field in a periodic axial cell. It is radially compact and divergence-free within that model. It is not yet a finite closed racetrack or toroidal vortex bundle in unbounded space.
 
@@ -18,21 +18,21 @@ The model remains a smooth coaxial central-flux plus opposite-return-flux field 
 
 v0.6.0 ranked candidates by the relative residual
 
-\[
+$$
 \epsilon_{\rm rel}
 =
 \frac{\|u-u_{\rm rigid}\|}{\|u\|}.
-\]
+$$
 
 That quantity can decrease merely because a large nearly rigid velocity is added. v0.6.1 therefore uses the absolute post-fit residual norm as the primary comparison:
 
-\[
+$$
 \mathcal G_{\rm abs}
 =
 1-
 \frac{\|u_{\rm knot}+u_{\rm bundle}-u_{\rm rigid}^{\rm best}\|}
      {\|u_{\rm knot}-u_{\rm rigid,0}^{\rm best}\|}.
-\]
+$$
 
 A candidate is marked `stabilizing=true` only when \(\mathcal G_{\rm abs}>0\). The former relative gain is retained as `relative_bundle_gain` for diagnosis. Cases that improve only the relative score are explicitly labeled `relative_only_stabilizing=true`.
 

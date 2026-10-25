@@ -13,9 +13,9 @@ Auditbasis:
 
 De migratieregel is:
 
-\[
+$$
 \boxed{\text{één C++-bron van waarheid; Node en Python zijn dunne bindings}}
-\]
+$$
 
 Niet iedere JavaScriptfunctie hoort naar C++. UI, rendering, workflowstatus, exports en benchmarkrapportage blijven in TypeScript. Alleen pure, numerieke en wetenschappelijk gezaghebbende kernels gaan naar SSTcore.
 
@@ -70,21 +70,21 @@ SSTcore bevat al sterke bouwblokken, maar is nog geen drop-in backend voor Vorte
 
 ### Vier grootste ontbrekende canonieke kernels
 
-\[
+$$
 \boxed{\text{1. VortexLab multi-filament velocity + RK4}}
-\]
+$$
 
-\[
+$$
 \boxed{\text{2. continue }C^2\text{ reach/DCSD}}
-\]
+$$
 
-\[
+$$
 \boxed{\text{3. exacte polygonale Gauss/Wr/Lk/ACN}}
-\]
+$$
 
-\[
+$$
 \boxed{\text{4. intrinsic frame + rigid-motion decomposition}}
-\]
+$$
 
 Zonder deze vier blokken kan de browsermonolith nog niet worden vervangen door SSTcore zonder numerieke of semantische regressies.
 
@@ -669,17 +669,17 @@ struct RigidMotionResult {
 ### Continuous reach
 
 - Exact circle:
-  \[
+  $$
   a_{\rm reach}=1
-  \]
+  $$
 - Twee cirkels op \(z=\pm0.4\):
-  \[
+  $$
   a_{\rm inter}=0.4
-  \]
+  $$
 - DCSD orthogonality:
-  \[
+  $$
   \epsilon_\perp < 10^{-8}
-  \]
+  $$
 - `torus_6.9`:
   limiter `INTER_COMPONENT`, reach ongeveer \(0.499878\) bij de standaard audit.
 - Ideal `3:1:1`:
@@ -693,13 +693,13 @@ Voor `torus_6.9` moeten de paarsgewijze linkingwaarden numeriek dicht bij \(-6\)
 
 Gebruik opgeslagen v7.6.25b snapshots:
 
-\[
+$$
 |x_{\rm C++}-x_{\rm JS}|
 \le
 a_{\rm tol}
 +
 r_{\rm tol}\max(|x_{\rm C++}|,|x_{\rm JS}|)
-\]
+$$
 
 Begin met per-kernel toleranties; gebruik geen algemene ruime tolerantie.
 

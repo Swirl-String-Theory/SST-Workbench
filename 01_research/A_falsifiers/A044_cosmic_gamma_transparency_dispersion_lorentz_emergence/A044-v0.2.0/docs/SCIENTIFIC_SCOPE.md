@@ -6,18 +6,18 @@ For the final published GRB 221009A data, which generic subluminal dispersion cl
 
 The paper parametrizes
 
-\[
+$$
 p^2 = E^2\left[1+\xi_n\left(\frac{E}{E_{\rm LIV,n}}\right)^n\right],\qquad \xi_n=+1,\quad n\in\{1,2\},
-\]
+$$
 
 and finds the Carpet event compatible with specific subluminal LIV frameworks under the 95% upper bounds
 
-\[
+$$
 E_{\rm LIV,1}<1.22^{+0.19}_{-0.22}\times 10^{21}\ {\rm GeV},
-\]
-\[
+$$
+$$
 E_{\rm LIV,2}<2.03^{+0.17}_{-0.22}\times 10^{13}\ {\rm GeV}.
-\]
+$$
 
 ## Primary source-derived gates
 

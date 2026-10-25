@@ -14,15 +14,15 @@ A candidate photon/eigenmode dispersion closure is admissible only if all of the
 
 Only after these gates pass may
 
-\[
+$$
  v_g(k)=\frac{d\omega}{dk}
-\]
+$$
 
 and
 
-\[
+$$
  \delta(E)=1-\frac{v_g(E)}{c}
-\]
+$$
 
 be exported to A044.
 

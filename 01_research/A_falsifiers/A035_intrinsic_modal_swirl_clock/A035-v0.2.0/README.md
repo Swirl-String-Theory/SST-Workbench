@@ -4,9 +4,9 @@
 
 This release tests a narrower and stronger question than v0.1.x:
 
-\[
+$$
 \boxed{\text{Does a relaxed vortex carrier possess a genuinely recurrent intrinsic shape mode?}}
-\]
+$$
 
 Only if that question passes does the package ask whether material vortex stretching and a measured delay are a specific causal mechanism for that recurrence.
 
@@ -65,9 +65,9 @@ Stage A is deliberately **geometry-only**. It asks whether the centerline shape 
 
 Every carrier now has:
 
-\[
+$$
 -\epsilon,\qquad 0,\qquad +\epsilon.
-\]
+$$
 
 The zero arm is new in v0.2.0.
 
@@ -77,11 +77,11 @@ This gives two independent observables.
 
 The unperturbed carrier itself:
 
-\[
+$$
 \delta\mathbf X_{\rm natural}(s,t)
 =
 \mathbf X_0(s,t)-\mathbf X_0(s,0),
-\]
+$$
 
 after rigid alignment and normal projection.
 
@@ -89,21 +89,21 @@ This channel can see a collective collapse/reversal shared by both perturbation 
 
 ### Odd linear-response channel
 
-\[
+$$
 \delta\mathbf X_{\rm odd}(s,t)
 =
 \frac{\mathbf X_+(s,t)-\mathbf X_-(s,t)}{2\epsilon}.
-\]
+$$
 
 This isolates the first-order response around the carrier.
 
 The even probe contamination is also measured:
 
-\[
+$$
 \delta\mathbf X_{\rm even}
 =
 \frac{\mathbf X_++\mathbf X_-}{2}-\mathbf X_0.
-\]
+$$
 
 A large even contribution invalidates a supposedly linear odd-response candidate.
 
@@ -123,11 +123,11 @@ independent of the total horizon.
 
 The early shape response is decomposed by POD/SVD:
 
-\[
+$$
 \delta\mathbf X_\perp(s,t)
 =
 \sum_k a_k(t)\,\boldsymbol\phi_k(s).
-\]
+$$
 
 The spatial modes \(\boldsymbol\phi_k\) are learned only before `t=1.2`, then frozen. The long holdout is projected onto those same modes.
 
@@ -139,10 +139,10 @@ Thus a longer run no longer silently redefines what the candidate mode is.
 
 Stage A adds a numerical redistribution velocity
 
-\[
+$$
 \mathbf u_{\rm mesh}=\lambda\,
 \bigl[(\mathbf X_{\rm uniform}-\mathbf X)\cdot\hat{\mathbf t}\bigr]\hat{\mathbf t}.
-\]
+$$
 
 Only its **tangential projection** is retained.
 
@@ -174,9 +174,9 @@ For that reason Stage A must not be used to claim local stretch/core causality.
 
 The default geometry-only core branch is:
 
-\[
+$$
 a^2(t)L(t)=a_0^2L_0,
-\]
+$$
 
 with a **uniform** core radius around the curve.
 
@@ -184,9 +184,9 @@ This preserves a global tube-volume-like quantity while remaining compatible wit
 
 It is not the local material law
 
-\[
+$$
 a_i^2\ell_i=\text{const}.
-\]
+$$
 
 That local law is reserved for Stage B.
 
@@ -198,17 +198,17 @@ A sinusoidal-looking Fourier peak is not sufficient.
 
 For each frozen mode, v0.2.0 estimates \(T_k\) and evaluates the phase-space state
 
-\[
+$$
 \mathbf z_k=(a_k,\dot a_k).
-\]
+$$
 
 It then measures closure at multiple returns:
 
-\[
+$$
 E_n=
 D\!\left(\mathbf z_k(t+nT_k),\mathbf z_k(t)\right),
 \qquad n=1,2,3,4.
-\]
+$$
 
 A Stage-A candidate must satisfy all of the following classes of gates:
 
@@ -244,17 +244,17 @@ Stage B uses:
 
 ### Material core
 
-\[
+$$
 a_i^2(t)\ell_i(t)=a_{i0}^2\ell_{i0}
-\]
+$$
 
 versus
 
 ### Fixed core
 
-\[
+$$
 a_i(t)=a_0.
-\]
+$$
 
 There is **no tangential remeshing** in Stage B, because the segment identities now carry material meaning.
 
@@ -262,7 +262,7 @@ The Stage-A spatial mode is frozen and reused. Stage B cannot learn a more favor
 
 The causal chain tested is:
 
-\[
+$$
 a_k
 \rightarrow
 \sigma_k
@@ -270,7 +270,7 @@ a_k
 \tau_k^{\rm measured}
 \rightarrow
 \ddot a_k(t+\tau_k).
-\]
+$$
 
 The delay is selected in the Stage-B discovery interval only and then tested unchanged in holdout. Phase/circular scrambling and zero-lag comparisons remain null tests.
 
@@ -393,16 +393,16 @@ run_resolution.cmd
 
 uses:
 
-\[
+$$
 N=64,96,128,
 \qquad T_{\rm StageA}=24
-\]
+$$
 
 with the same `dt_factor`, so
 
-\[
+$$
 \Delta t\propto\Delta s^2
-\]
+$$
 
 is retained.
 
@@ -425,7 +425,7 @@ The resolution comparison requires the same anonymous carrier and the same `natu
 
 The scientifically interesting chain is now deliberately demanding:
 
-\[
+$$
 \boxed{
 \text{multi-cycle recurrent intrinsic mode}
 \rightarrow
@@ -439,6 +439,6 @@ The scientifically interesting chain is now deliberately demanding:
 \rightarrow
 \text{material-core specificity}
 }
-\]
+$$
 
 If Stage A fails even after mesh stabilization and 4–6 complete holdout cycles, the hypothesis of a persistent intrinsic shape-clock receives a substantially stronger negative result than any v0.1.x run could provide.

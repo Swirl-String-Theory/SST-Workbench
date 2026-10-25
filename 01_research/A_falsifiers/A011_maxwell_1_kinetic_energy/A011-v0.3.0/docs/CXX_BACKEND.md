@@ -16,13 +16,13 @@ backend_version()
 
 The regularized centerline kernel is
 
-\[
+$$
 \mathbf v(\mathbf x)
 =\frac{\Gamma}{4\pi}
 \sum_j
 \frac{\Delta\boldsymbol\ell_j\times(\mathbf x-\mathbf r_{j+1/2})}
 {\left(|\mathbf x-\mathbf r_{j+1/2}|^2+a^2\right)^{3/2}}.
-\]
+$$
 
 In the default v0.3 encounter workflow, geometry is centered and normalized to `R_rms=1`, `Gamma=1`, and `a/R_rms` is specified by the preset. Therefore the resulting velocity is a **dimensionless coupling proxy**. It must not be reported as an SST physical velocity without an independently fixed geometry scale and circulation normalization.
 
