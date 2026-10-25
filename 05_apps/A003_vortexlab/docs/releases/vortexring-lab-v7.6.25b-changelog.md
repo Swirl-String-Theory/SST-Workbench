@@ -47,3 +47,10 @@ The new catalog stores full-spectrum coefficients that reconstruct the 300 sourc
 4. Then use **Volledig · knopen + links** for the catalog-wide confirmatory reach audit when runtime permits.
 
 A full interactive browser/WebGL run was not executed during packaging.
+
+## Bugfix — zero-Ω Rankine core lock (post-25b)
+
+- `syncCoreFlowCoupling` no longer silently replaces `Ω_wall=0` by `±1 rad/s` when `coreFlowLock` is active.
+- At `Ω=0` the Rankine lock unlocks automatically (UI checkbox + notice), preserving the user-chosen zero rotation.
+- `syncBundleUi` now syncs `sOmBundle` / `revOmBundle` after presets that change `OmBundle` without an input event.
+- Isolated regression: `tools/test-zero-omega-core-lock.mjs`.

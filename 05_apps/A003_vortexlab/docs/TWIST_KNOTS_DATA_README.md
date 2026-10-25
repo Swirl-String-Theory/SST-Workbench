@@ -13,20 +13,23 @@ Also deployed to the modular app:
 
 loaded from `apps/web/index.html` as `./data/twist_knot_data.js`.
 
-## Current catalog (full)
+## Current catalog (shipping thin set)
 
-The checked-in catalog is the **full multi-N / chirality set**, short Seeds, one qualification export, and corrected A006 `SEEDS` **ROUND** geometry that **replaces** legacy geometry for topologies `4_1`, `7_2`, `8_1`, `9_2`, `10_1`, `11a247`. Torus knots `3_1` / `5_1` / `7_1` / `9_1` / `11a367` carry `family: torus-knot` and `selectorLabel`. TIKZ_NATIVE SEEDS variants are **not** included.
+The checked-in catalog keeps the full multi-N / chirality **knot** set, short Seeds, one qualification export, and corrected A006 `SEEDS` **ROUND** geometry that **replaces** legacy geometry for topologies `4_1`, `7_2`, `8_1`, `9_2`, `10_1`, `11a247`. Torus knots `3_1` / `5_1` / `7_1` / `9_1` / `11a367` carry `family: torus-knot` and `selectorLabel`. TIKZ_NATIVE SEEDS variants are **not** included.
+
+**Classic links are thinned for file size (&lt;50 MB):** only profiles `FLAT` and `SOFT`, only `N=512` and `N=1024`. `BALANCED` / `TIGHT` and link N256 / N2048 are omitted from the shipping JS.
 
 | Source | Count | ID pattern |
 |--------|------:|------------|
-| `Output/v050/geometry` (minus replaced topologies) | 172 | `KNOT_*_N####_{ORIG\|MIRROR}`, `LINK_*_{PROFILE}_N####_{chir}_{CP}` |
+| Knots (`Output/v050/geometry` minus replaced topologies) | 44 | `KNOT_*_N####_{ORIG\|MIRROR}` |
+| Classic links (FLAT/SOFT × N512/1024 only) | 32 | `LINK_*_{FLAT\|SOFT}_N{0512\|1024}_{chir}_{CP}` |
 | `Output/Seeds` | 26 | `<topology>_N####` (kind=KNOT, chirality=ORIG) |
 | `SEEDS` ROUND only | 36 | `KNOT_*_N####_{ORIG\|MIRROR}_ROUND` |
 | `qualification_v050c/.../i0000128.xyz` | 1 | `QUAL_AMECH_140_ELEC_i0000128` |
 
-**Total: 235 entries** (259 − 60 legacy replaced + 36 ROUND).
+**Total: 139 entries** (235 full catalog − 96 dropped classic LINK variants). Typical pretty-print size ≈ 33 MB.
 
-UI defaults (Knot / BALANCED / ORIG / N1024 / CPFIXED61) show a short filtered list. Set every filter to **All** to browse the full catalog.
+UI defaults (Knot / FLAT / ORIG / N1024 / CPFIXED61) show a short filtered list. Set every filter to **All** to browse the shipping catalog.
 
 Canonical copies:
 
@@ -51,7 +54,7 @@ Filename patterns:
 | Knot | `KNOT_3_1_N1024_ORIG.xyz` |
 | Knot (11a) | `KNOT_11a367_N0512_MIRROR.xyz` |
 | Knot SEEDS | `KNOT_4_1_N1024_ORIG_ROUND.xyz` (TIKZ_NATIVE omitted from catalog) |
-| Link | `LINK_5_5_6_BALANCED_N1024_ORIG_CPFIXED61.xyz` |
+| Link | `LINK_5_5_6_FLAT_N1024_ORIG_CPFIXED61.xyz` |
 | Seed | `3_1_N1024.xyz` |
 | Qualification | `i0000128.xyz` (via `--id` + metadata overrides; `Component N:` headers) |
 
@@ -59,13 +62,16 @@ Native A006 coordinates are preserved (not VortexLab uniform-N300 / D=1).
 
 Qualification entries have `profile`/`cpMode` = null and appear under Link only when those filters are **All**.
 
-## Generate / refresh (full catalog)
+## Generate / refresh (shipping thin catalog)
 
 From `05_apps/A003_vortexlab/tools/catalog`:
 
 ```powershell
 python .\build_twist_knot_data.py `
   --fresh `
+  --apply-link-catalog-filter `
+  --link-profiles FLAT,SOFT `
+  --link-resolutions 512,1024 `
   --output ..\..\vortexring-lab\twist_knot_data.js `
   --scan "..\..\..\..\02_libraries\A_knot_libraries\A006_RoundFolded_Twist_Knot_Family\A006-v0.5.0\Output\v050\geometry" `
   --scan "..\..\..\..\02_libraries\A_knot_libraries\A006_RoundFolded_Twist_Knot_Family\A006-v0.5.0\Output\Seeds" `
@@ -85,10 +91,22 @@ python .\build_twist_knot_data.py `
   --scan "..\..\..\..\02_libraries\A_knot_libraries\A006_RoundFolded_Twist_Knot_Family\A006-v0.5.0\SEEDS" `
   --glob "*_ROUND.xyz"
 
+python .\build_twist_knot_data.py `
+  --prune-catalog `
+  --link-profiles FLAT,SOFT `
+  --link-resolutions 512,1024 `
+  --output ..\..\vortexring-lab\twist_knot_data.js
+
 Copy-Item ..\..\vortexring-lab\twist_knot_data.js ..\..\apps\web\data\twist_knot_data.js -Force
 ```
 
-Expect **235** entries. Pretty-print is the default; optional minify: `--compact`.
+Expect **139** entries and file size under 50 MB. Pretty-print is the default; optional minify: `--compact`.
+
+To prune an existing full catalog in place:
+
+```powershell
+python .\build_twist_knot_data.py --prune-catalog --output ..\..\apps\web\data\twist_knot_data.js
+```
 
 Legacy N1024 ORIG-only subset (29 files): use `--glob "*_N1024_*ORIG*.xyz"` on geometry alone (omit Seeds/qual/SEEDS).
 
@@ -106,12 +124,12 @@ Legacy N1024 ORIG-only subset (29 files): use `--glob "*_N1024_*ORIG*.xyz"` on g
 | Filter | Default |
 |--------|---------|
 | kind | Knot |
-| profile | BALANCED (links only) |
+| profile | FLAT (links only; BALANCED/TIGHT omitted from shipping catalog) |
 | chirality | Original |
 | N | 1024 |
 | CP | CPFIXED61 (links only) |
 
-Defaults keep the knot list short; All on every filter shows all 235 IDs.
+Defaults keep the knot list short; All on every filter shows all 139 shipping IDs.
 
 ## Scientific status
 

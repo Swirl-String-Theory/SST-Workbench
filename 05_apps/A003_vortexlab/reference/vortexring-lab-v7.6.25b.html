@@ -2662,7 +2662,15 @@ function syncCoreFlowCoupling(driver='geometry'){
   coreCouplingBusy=true;
   try{
     if(Math.abs(P.Om)<1e-12){
-      P.Om=P.revOm?-1:1;
+      // Ω=0 is a valid user choice, but the Rankine lock is then
+      // incompatible with nonzero circulation and a finite a_sim.
+      // Never silently replace Ω=0 by ±1 rad/s.
+      P.coreFlowLock=false;
+      coreFlowNotice='koppeling automatisch ontgrendeld: Ω_wall=0 is niet verenigbaar met Γ≠0 bij eindige a_sim';
+      const lock=document.getElementById('cCoreFlowLock');
+      if(lock)lock.checked=false;
+      updateCoreFlowReadout();
+      return;
     }
     const omega=Math.max(1e-12,Math.abs(P.Om));
     const q=kappaMedium();
@@ -9062,6 +9070,12 @@ function syncBundleUi(){
       :(!bi.valid?`BEM niet actief: ${bi.reason} · gevraagd=${Number.isFinite(bi.requested)?fmtLengthSI(bi.requested):'—'} · vloer=${Number.isFinite(bi.floor)?fmtLengthSI(bi.floor):'—'}`
       :(c.valid?`BEM ${c.nodes.length} panelen · grens=${bi.label}=${fmtLengthSI(c.radius)} · residu u_n=${c.residualVelocity.toExponential(2)} · residu ω_n=${c.residualVorticity.toExponential(2)} · ${BEM_SOURCE_MODEL}`:`BEM ${c.status}`));
   }
+  // A preset can change OmBundle without an input event: update both value
+  // and label, while preserving partially edited numeric input.
+  const sob=document.getElementById('sOmBundle');
+  if(sob)syncInputUnlessEditing(sob,Math.abs(P.OmBundle));
+  const rob=document.getElementById('revOmBundle');
+  if(rob)rob.checked=!!P.revOmBundle;
   const vob=document.getElementById('vOmBundle');
   if(vob)vob.textContent=Math.abs(P.OmBundle).toFixed(2)+' s⁻¹ · '+(P.revOmBundle?'CW':'CCW');
   // Wrijving×bundel: zolang geen definitie van v_n in bundelveld bestaat, blokkeren.

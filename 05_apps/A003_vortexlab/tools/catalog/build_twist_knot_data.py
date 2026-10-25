@@ -64,6 +64,11 @@ CP_MODES = ("CPFIXED61", "CPCENTER")
 KINDS = ("KNOT", "LINK")
 SEED_VARIANTS = ("ROUND", "TIKZ_NATIVE")
 
+# Default thin-catalog policy for VortexLab shipping copies (<50 MB).
+DEFAULT_LINK_PROFILES = ("FLAT", "SOFT")
+DEFAULT_LINK_RESOLUTIONS = (512, 1024)
+EXCLUDED_LINK_PROFILES = ("BALANCED", "TIGHT")
+
 TORUS_KNOT_TOPOLOGIES: dict[str, dict[str, int]] = {
     "3_1": {"p": 2, "q": 3},
     "5_1": {"p": 2, "q": 5},
@@ -383,6 +388,83 @@ def entry_matches_filters(
                 return False
 
     return True
+
+
+def parse_csv_tokens(raw: str | None) -> list[str]:
+    if raw is None or not str(raw).strip():
+        return []
+    return [part.strip().upper() for part in str(raw).split(",") if part.strip()]
+
+
+def parse_csv_ints(raw: str | None) -> list[int]:
+    tokens = parse_csv_tokens(raw)
+    values: list[int] = []
+    for token in tokens:
+        try:
+            values.append(int(token))
+        except ValueError as exc:
+            raise ValueError(f"invalid integer list token {token!r}") from exc
+    return values
+
+
+def catalog_entry_allowed(
+    entry: dict,
+    *,
+    link_profiles: tuple[str, ...] | list[str] | None = DEFAULT_LINK_PROFILES,
+    link_resolutions: tuple[int, ...] | list[int] | None = DEFAULT_LINK_RESOLUTIONS,
+) -> bool:
+    """
+    Shipping-catalog include filter.
+
+    Non-LINK entries (knots, seeds) always pass. Qualification LINKs with a null
+    profile also pass. Classic LINKs must match allowed profiles and resolutions.
+    """
+    if not isinstance(entry, dict):
+        return False
+    entry_kind = str(entry.get("kind") or "").upper()
+    if entry_kind != "LINK":
+        return True
+
+    entry_profile = entry.get("profile")
+    if entry_profile is None or str(entry_profile).strip() == "":
+        # Qualification / no-profile links stay available under UI filter All.
+        return True
+
+    profile = str(entry_profile).upper()
+    if link_profiles is not None:
+        allowed = {str(p).upper() for p in link_profiles}
+        if profile not in allowed:
+            return False
+
+    if link_resolutions is not None:
+        try:
+            resolution_n = int(entry.get("resolutionN") or -1)
+        except (TypeError, ValueError):
+            return False
+        allowed_n = {int(n) for n in link_resolutions}
+        if resolution_n not in allowed_n:
+            return False
+
+    return True
+
+
+def prune_catalog_entries(
+    database: dict,
+    *,
+    link_profiles: tuple[str, ...] | list[str] | None = DEFAULT_LINK_PROFILES,
+    link_resolutions: tuple[int, ...] | list[int] | None = DEFAULT_LINK_RESOLUTIONS,
+) -> list[str]:
+    removed: list[str] = []
+    for catalog_id in list(database):
+        entry = database.get(catalog_id)
+        if not catalog_entry_allowed(
+            entry if isinstance(entry, dict) else {},
+            link_profiles=link_profiles,
+            link_resolutions=link_resolutions,
+        ):
+            del database[catalog_id]
+            removed.append(catalog_id)
+    return removed
 
 
 def closed_edges(points: np.ndarray) -> np.ndarray:
@@ -948,11 +1030,45 @@ def main() -> int:
             "legacy geometry/Output-Seeds IDs for those topologies"
         ),
     )
+    parser.add_argument(
+        "--prune-catalog",
+        action="store_true",
+        help=(
+            "drop classic LINK entries outside --link-profiles / --link-resolutions "
+            "(default FLAT,SOFT and 512,1024); can run with no XYZ"
+        ),
+    )
+    parser.add_argument(
+        "--link-profiles",
+        default=",".join(DEFAULT_LINK_PROFILES),
+        help=(
+            "comma-separated classic LINK profiles kept by --prune-catalog / ingest "
+            f"filter (default: {','.join(DEFAULT_LINK_PROFILES)})"
+        ),
+    )
+    parser.add_argument(
+        "--link-resolutions",
+        default=",".join(str(n) for n in DEFAULT_LINK_RESOLUTIONS),
+        help=(
+            "comma-separated classic LINK N values kept by --prune-catalog / ingest "
+            f"filter (default: {','.join(str(n) for n in DEFAULT_LINK_RESOLUTIONS)})"
+        ),
+    )
+    parser.add_argument(
+        "--apply-link-catalog-filter",
+        action="store_true",
+        help=(
+            "skip ingesting classic LINK XYZ that fail --link-profiles/--link-resolutions "
+            "(also applied automatically with --prune-catalog)"
+        ),
+    )
 
     args = parser.parse_args()
     inputs = collect_inputs(args.inputs, args.scan, args.glob)
-    if not inputs and not args.relabel_torus:
-        parser.error("provide input files, use --scan, or pass --relabel-torus")
+    if not inputs and not args.relabel_torus and not args.prune_catalog:
+        parser.error(
+            "provide input files, use --scan, or pass --relabel-torus / --prune-catalog"
+        )
     meta_override_used = any(
         getattr(args, name) is not None
         for name in ("kind", "topology", "profile", "chirality", "cp_mode", "resolution_n")
@@ -963,6 +1079,18 @@ def main() -> int:
         parser.error("metadata overrides are valid only with exactly one input")
     if args.link_subdivisions < 1:
         parser.error("--link-subdivisions must be at least 1")
+
+    try:
+        link_profiles = tuple(parse_csv_tokens(args.link_profiles))
+        link_resolutions = tuple(parse_csv_ints(args.link_resolutions))
+    except ValueError as exc:
+        parser.error(str(exc))
+    if not link_profiles:
+        parser.error("--link-profiles must list at least one profile")
+    if not link_resolutions:
+        parser.error("--link-resolutions must list at least one N")
+
+    apply_link_filter = bool(args.prune_catalog or args.apply_link_catalog_filter)
 
     if str(args.max_harmonic).lower() == "full":
         max_harmonic = None
@@ -990,6 +1118,7 @@ def main() -> int:
 
     database: dict = {} if args.fresh else read_existing_database(args.output)
     changed = 0
+    skipped_link_filter = 0
     seeds_pack_topologies: set[str] = set()
 
     for input_path in inputs:
@@ -1003,6 +1132,18 @@ def main() -> int:
             id_override=args.id_override,
             overrides=overrides or None,
         )
+        if apply_link_filter and not catalog_entry_allowed(
+            entry,
+            link_profiles=link_profiles,
+            link_resolutions=link_resolutions,
+        ):
+            skipped_link_filter += 1
+            print(
+                f"skipped link catalog filter: {catalog_id} <- {input_path.name}; "
+                f"profile={entry.get('profile')}; N={entry.get('resolutionN')}"
+            )
+            continue
+
         if entry.get("seedVariant") and entry.get("topology"):
             seeds_pack_topologies.add(str(entry["topology"]))
 
@@ -1047,6 +1188,20 @@ def main() -> int:
                 f"{sorted(topologies)}"
             )
 
+    catalog_pruned = 0
+    if args.prune_catalog:
+        removed = prune_catalog_entries(
+            database,
+            link_profiles=link_profiles,
+            link_resolutions=link_resolutions,
+        )
+        catalog_pruned = len(removed)
+        if removed:
+            print(
+                f"pruned {catalog_pruned} classic LINK IDs outside profiles "
+                f"{list(link_profiles)} N={list(link_resolutions)}"
+            )
+
     relabeled = 0
     if args.relabel_torus or inputs:
         relabeled = apply_torus_labels(database)
@@ -1056,12 +1211,16 @@ def main() -> int:
     if args.dry_run:
         print(
             f"dry run: {changed} catalog entries would change; "
-            f"scanned {len(inputs)}; torus relabel {relabeled}"
+            f"scanned {len(inputs)}; skipped link filter {skipped_link_filter}; "
+            f"catalog prune {catalog_pruned}; torus relabel {relabeled}"
         )
         return 0
 
     write_javascript(args.output, database, args.compact)
-    print(f"wrote {args.output} with {len(database)} entries")
+    print(
+        f"wrote {args.output} with {len(database)} entries"
+        + (f" (skipped link filter {skipped_link_filter})" if skipped_link_filter else "")
+    )
     return 0
 
 

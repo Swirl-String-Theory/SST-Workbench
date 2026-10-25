@@ -15,10 +15,12 @@ if str(ROOT) not in sys.path:
 
 from build_twist_knot_data import (  # noqa: E402
     build_entry,
+    catalog_entry_allowed,
     collect_inputs,
     entry_matches_filters,
     parse_a006_source_name,
     parse_xyz_components,
+    prune_catalog_entries,
     resolve_name_metadata,
     write_javascript,
 )
@@ -164,6 +166,86 @@ class CollectInputsTests(unittest.TestCase):
             (b / "3_1_N1024.xyz").write_text("0 0 0\n", encoding="utf-8")
             inputs = collect_inputs([], [a, b], "*.xyz")
             self.assertEqual(len(inputs), 2)
+
+
+class CatalogIncludeFilterTests(unittest.TestCase):
+    def setUp(self):
+        self.knot = {
+            "kind": "KNOT",
+            "topology": "3_1",
+            "profile": None,
+            "resolutionN": 256,
+            "chirality": "ORIG",
+            "cpMode": None,
+        }
+        self.link_ok = {
+            "kind": "LINK",
+            "topology": "5_5_6",
+            "profile": "FLAT",
+            "resolutionN": 1024,
+            "chirality": "ORIG",
+            "cpMode": "CPFIXED61",
+        }
+        self.link_balanced = {
+            "kind": "LINK",
+            "topology": "5_5_6",
+            "profile": "BALANCED",
+            "resolutionN": 1024,
+            "chirality": "ORIG",
+            "cpMode": "CPFIXED61",
+        }
+        self.link_n256 = {
+            "kind": "LINK",
+            "topology": "5_5_6",
+            "profile": "SOFT",
+            "resolutionN": 256,
+            "chirality": "ORIG",
+            "cpMode": "CPFIXED61",
+        }
+        self.qual = {
+            "kind": "LINK",
+            "topology": "AMECH_140_ELEC",
+            "profile": None,
+            "resolutionN": 1024,
+            "chirality": "ORIG",
+            "cpMode": None,
+        }
+
+    def test_knot_passthrough_any_n(self):
+        self.assertTrue(catalog_entry_allowed(self.knot))
+
+    def test_qual_passthrough(self):
+        self.assertTrue(catalog_entry_allowed(self.qual))
+
+    def test_keeps_flat_soft_512_1024(self):
+        self.assertTrue(catalog_entry_allowed(self.link_ok))
+        soft_512 = dict(self.link_ok, profile="SOFT", resolutionN=512)
+        self.assertTrue(catalog_entry_allowed(soft_512))
+
+    def test_drops_balanced_tight(self):
+        self.assertFalse(catalog_entry_allowed(self.link_balanced))
+        tight = dict(self.link_balanced, profile="TIGHT")
+        self.assertFalse(catalog_entry_allowed(tight))
+
+    def test_drops_other_link_resolutions(self):
+        self.assertFalse(catalog_entry_allowed(self.link_n256))
+        n2048 = dict(self.link_ok, resolutionN=2048)
+        self.assertFalse(catalog_entry_allowed(n2048))
+
+    def test_prune_catalog_entries(self):
+        database = {
+            "KNOT_3_1_N0256_ORIG": self.knot,
+            "LINK_OK": self.link_ok,
+            "LINK_BALANCED": self.link_balanced,
+            "LINK_N256": self.link_n256,
+            "QUAL": self.qual,
+        }
+        removed = prune_catalog_entries(database)
+        self.assertEqual(sorted(removed), ["LINK_BALANCED", "LINK_N256"])
+        self.assertEqual(
+            sorted(database),
+            ["KNOT_3_1_N0256_ORIG", "LINK_OK", "QUAL"],
+        )
 
 
 class FilterPredicateTests(unittest.TestCase):

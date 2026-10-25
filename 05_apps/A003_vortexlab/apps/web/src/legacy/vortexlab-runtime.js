@@ -1009,8 +1009,25 @@ function syncCoreFlowCoupling(driver='geometry'){
   if(!P.coreFlowLock||coreCouplingBusy)return;
   coreCouplingBusy=true;
   try{
-    if(Math.abs(P.Om)<1e-12){
-      P.Om=P.revOm?-1:1;
+    const zOm=window.VortexLabZeroOmegaCoreLockPolicy;
+    if(zOm){
+      const lockEl=document.getElementById('cCoreFlowLock');
+      const z=zOm.applyZeroOmegaUnderCoreLock(P,{
+        lockCheckbox:lockEl||undefined,
+        setNotice:(msg)=>{coreFlowNotice=msg;},
+      });
+      if(z.handled){
+        updateCoreFlowReadout();
+        return;
+      }
+    }else if(Math.abs(P.Om)<1e-12){
+      // Fallback if policy script failed to load: never force ±1 rad/s.
+      P.coreFlowLock=false;
+      coreFlowNotice='koppeling automatisch ontgrendeld: Ω_wall=0 is niet verenigbaar met Γ≠0 bij eindige a_sim';
+      const lock=document.getElementById('cCoreFlowLock');
+      if(lock)lock.checked=false;
+      updateCoreFlowReadout();
+      return;
     }
     const omega=Math.max(1e-12,Math.abs(P.Om));
     const q=kappaMedium();
@@ -1268,7 +1285,7 @@ function readTwistFilterState(){
   const nVal=document.getElementById('twistNFilter')?.value??'1024';
   return {
     kind:document.getElementById('twistKindFilter')?.value||'KNOT',
-    profile:document.getElementById('twistProfileFilter')?.value||'BALANCED',
+    profile:document.getElementById('twistProfileFilter')?.value||'FLAT',
     chirality:document.getElementById('twistChiralityFilter')?.value||'ORIG',
     resolutionN:nVal==='ALL'?null:Number(nVal),
     cpMode:document.getElementById('twistCpFilter')?.value||'CPFIXED61'
@@ -7095,7 +7112,7 @@ initDiagnosticToggles();renderFormula();
   };
   const ideal=getIdealKnotCatalog();check(ideal,'Ideal knots');check(getFourierKnotCatalog(),'Fseries knots');check(getKnotPlotKnotCatalog(),'KnotPlot candidates');check(getTwistKnotCatalog(),'A006 twist');
   const kp=getKnotPlotKnotCatalog(),expected=['knot_3.1','knot_4.1','knot_5.1','knot_5.2','knot_6.1','knot_7.1','link_6.3.1','link_6.3.2','link_6.3.3','torus_3.3','torus_6.9'];if(kp){const a006Count=kp.ids.filter(id=>String(kp.db[id]?.family||'').startsWith('a006')||String(kp.db[id]?.sourceRole||'').startsWith('a006')).length;console.assert(expected.every(id=>kp.db[id]),'KnotPlot: volledige uniform-N300-ID-set');console.assert(!!kp.db['KNOT_3_1_N1024_ORIG'],'KnotPlot: A006 KNOT_3_1_N1024_ORIG');console.assert(a006Count===29,'KnotPlot: 29 A006 twist items');console.assert(kp.ids.length===67,'KnotPlot: 67 catalogusitems (38+29)');console.assert(String(kp.ids[0]||'').startsWith('KNOT_')||String(kp.ids[0]||'').startsWith('LINK_'),'KnotPlot: A006 IDs first');}
-  const tw=getTwistKnotCatalog();if(tw){console.assert(tw.ids.length===259,'A006 twist: 259 catalogusitems (geometry+Seeds+qual)');console.assert(!!tw.db['KNOT_3_1_N1024_ORIG'],'A006 twist: KNOT_3_1_N1024_ORIG');console.assert(!!tw.db['3_1_N1024'],'A006 twist: seed 3_1_N1024');console.assert(!!tw.db['QUAL_AMECH_140_ELEC_i0000128'],'A006 twist: qual i0000128');console.assert(twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'ORIG',resolutionN:1024,profile:'BALANCED',cpMode:'CPFIXED61'}),'A006 twist filter: knot match');console.assert(!twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'MIRROR',resolutionN:1024}),'A006 twist filter: chirality reject');}
+  const tw=getTwistKnotCatalog();if(tw){console.assert(tw.ids.length===139,'A006 twist: 139 catalogusitems (geometry+Seeds+qual; links FLAT/SOFT N512/1024)');console.assert(!!tw.db['KNOT_3_1_N1024_ORIG'],'A006 twist: KNOT_3_1_N1024_ORIG');console.assert(!!tw.db['3_1_N1024'],'A006 twist: seed 3_1_N1024');console.assert(!!tw.db['QUAL_AMECH_140_ELEC_i0000128'],'A006 twist: qual i0000128');console.assert(twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'ORIG',resolutionN:1024,profile:'FLAT',cpMode:'CPFIXED61'}),'A006 twist filter: knot match');console.assert(!twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'MIRROR',resolutionN:1024}),'A006 twist filter: chirality reject');}
   const t69=kp?.db?.['torus_6.9'];if(t69){console.assert(knotEntryComponents(t69).length===3,'torus_6.9: drie componenten');console.assert(t69.status==='relaxed-seed','torus_6.9: relaxed-seed status');console.assert(t69.torus?.p===6&&t69.torus?.q===9&&t69.torus?.componentType==='T(2,3)','torus_6.9: torusmetadata');console.assert(knotPlotLinkingAbs(t69)===6,'torus_6.9: |Lk|=6 metadata');console.assert(t69.sourceRole==='vortexlab-uniform-N300'&&t69.D===1,'torus_6.9: uniform-N300 D=1 provenance');}
   const tre=ideal?.db?.['3:1:1'];if(tre){const raw=sampleIdealComponent(knotEntryComponents(tre)[0],512);let L=0;for(let i=0;i<512;i++){const j=(i+1)%512;L+=Math.hypot(raw[3*j]-raw[3*i],raw[3*j+1]-raw[3*i+1],raw[3*j+2]-raw[3*i+2]);}console.assert(Math.abs(L-16.371637)<0.02,'ideal 3:1:1 booglengte',L);}
 })();
@@ -7898,6 +7915,12 @@ function syncBundleUi(){
       :(!bi.valid?`BEM niet actief: ${bi.reason} · gevraagd=${Number.isFinite(bi.requested)?fmtLengthSI(bi.requested):'—'} · vloer=${Number.isFinite(bi.floor)?fmtLengthSI(bi.floor):'—'}`
       :(c.valid?`BEM ${c.nodes.length} panelen · grens=${bi.label}=${fmtLengthSI(c.radius)} · residu u_n=${c.residualVelocity.toExponential(2)} · residu ω_n=${c.residualVorticity.toExponential(2)} · ${BEM_SOURCE_MODEL}`:`BEM ${c.status}`));
   }
+  // A preset can change OmBundle without an input event: update both value
+  // and label, while preserving partially edited numeric input.
+  const sob=document.getElementById('sOmBundle');
+  if(sob)syncInputUnlessEditing(sob,Math.abs(P.OmBundle));
+  const rob=document.getElementById('revOmBundle');
+  if(rob)rob.checked=!!P.revOmBundle;
   const vob=document.getElementById('vOmBundle');
   if(vob)vob.textContent=Math.abs(P.OmBundle).toFixed(2)+' s⁻¹ · '+(P.revOmBundle?'CW':'CCW');
   // Wrijving×bundel: zolang geen definitie van v_n in bundelveld bestaat, blokkeren.
