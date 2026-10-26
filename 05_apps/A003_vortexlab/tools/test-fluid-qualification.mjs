@@ -14,6 +14,10 @@ check('1e-18 m accepted exactly, without silent clipping',extreme.a===1e-18&&ext
 check('sub-ULP contact at macroscopic scale is reported',extreme.regime==='SUB_PRECISION_CORE'&&!extreme.coreContactResolvable);
 check('geometrical precision floor is explicit',Math.abs(extreme.precisionFloor-64*Number.EPSILON*0.5)<1e-30);
 check('topological threshold is not falsely resolved',extreme.effectiveContactThreshold>extreme.physicalContactThreshold);
+check('research floor constant documents 1e-18 m policy',q.A_SIM_RESEARCH_FLOOR===1e-18);
+const local=q.classifyCore({a:1.241e-15,geometryScale:0.05,minimumEdge:0.0004});
+check('local knot-scale floor allows ~fm a_sim that Rcyl=0.5 would reject',local.regime!=='SUB_PRECISION_CORE'&&local.coreContactResolvable);
+check('1e-18 m on local cm-scale remains honestly sub-precision',q.classifyCore({a:1e-18,geometryScale:0.05,minimumEdge:0.0004}).regime==='SUB_PRECISION_CORE');
 let candidate=q.classifyCore({a:1e-5,geometryScale:0.5,minimumEdge:0.0004});
 check('well-separated thin filament remains candidate, not physical certification',candidate.regime==='CANDIDATE_ONLY'&&candidate.status==='NUMERICAL_QUALIFICATION_ONLY');
 check('marginal discretization is disqualified',q.classifyCore({a:0.001,geometryScale:0.5,minimumEdge:0.001}).regime==='THIN_FILAMENT_UNQUALIFIED');
@@ -37,11 +41,15 @@ check('active runtime contains dynamic dtCFL',start>=0&&end>start);
 const context={P:{stretchProfileApply:false,stretchProfileOnly:false,core:'vast',a:1e-18,Om:0,topologyGuard:false},
   Gamma:()=>1e9,lminAll:()=>1e-5,DELTA:{vast:0.25},C0:.1395,lastUmax:1e-9,
   prescribedKinematicSpeedBound:()=>0,stretchProfileCharacteristicRate:()=>0,bgWallInSolver:()=>false,
-  bundleMaxOmega:()=>0,acceptedStepTimeCap:()=>0.25,Math,Number};
+  bundleMaxOmega:()=>0,acceptedStepTimeCap:()=>0.25,Math,Number,
+  // P6b discrete bundle is inactive in this isolated CFL extract.
+  vlDiscrete:{active:()=>false,minSegment:()=>1,report:()=>({spacing:1,omega:1,vertices:0})}};
 vm.createContext(context);vm.runInContext(runtime.slice(start,end),context);
 const raw=vm.runInContext('dtCFL()',context);
 check('actual runtime retains sub-microsecond dt',raw<1e-6&&raw>0);
 check('actual sub-microsecond CFL remains accepted at t=0',q.safeStep(raw,{simTime:0}).ok);
-check('actual runtime checks RK4-state finite before accepting candidate',runtime.includes('Y.set(Ypre);lastUmax=1e-9;stepDebt=0;'));
+check('actual runtime checks RK4-state finite before accepting candidate',
+  runtime.includes('Y.set(Ypre);vlDiscrete.restore();lastUmax=1e-9;stepDebt=0;')||
+  runtime.includes('Y.set(Ypre);lastUmax=1e-9;stepDebt=0;'));
 check('UI exposes dedicated numerical core state and wall warning',fs.readFileSync(path.join(root,'apps/web/index.html'),'utf8').includes('fluidCoreQualification')&&fs.readFileSync(path.join(root,'apps/web/index.html'),'utf8').includes('fluidFieldQualification'));
 console.log(`${count} P2 fluid and 1e-18 m qualification tests PASS`);

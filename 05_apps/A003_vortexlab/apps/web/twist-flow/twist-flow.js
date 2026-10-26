@@ -32,8 +32,9 @@
     if(el.checked!==!!checked)return dispatch(id,!!checked);
     return true;
   };
-  const inputs=['knot','modeBs','modeLia','freeTranslation','guard','core','motionMedium','demoGamma','playbackSpeed','runMotionDemo','fastPreview',
-    'displayParticles','displayStreamlines','displayKnot','density','lines','tube','reseed','play','reset'];
+  const inputs=['tubeFallbackFraction','knot','modeBs','modeLia','freeTranslation','guard','core','motionMedium','demoGamma','playbackSpeed','runMotionDemo','fastPreview',
+    'backgroundMode','backgroundOmega','backgroundSpacing','backgroundSide','backgroundNodes','backgroundLines',
+    'displayParticles','displayStreamlines','displayKnot','density','lines','tube','modelAExport','reseed','play','reset'];
   const status=(message,mode='idle')=>{
     const el=$('engineStatus');el.textContent='● '+message;el.dataset.status=mode;
     el.style.color=mode==='ok'?'#7debd0':mode==='error'?'#ffc087':'#e6c38a';
@@ -47,6 +48,56 @@
     checkbox('cTracers',which!=='displayKnot');
     checkbox('cStreamlines',which==='displayStreamlines');
     setSelected(['displayParticles','displayStreamlines','displayKnot'],which);
+  }
+  // P6a is a user interface for the PRE-EXISTING prescribed continuum-bundle
+  // provider. It does NOT introduce discrete, advected vortex filaments.
+  function syncDiscreteProvider(){
+    const m=$('backgroundMode').value;
+    const api=window.__vlDiscreteBundleAPI;
+    if(!api)return;
+    try{api.configure({mode:m==='discrete'?'discrete':'off',omega:Number($('backgroundOmega').value),
+      spacing:Number($('backgroundSpacing').value),side:Number($('backgroundSide').value),nodes:Number($('backgroundNodes').value)});}
+    catch(err){warning('Discreet rooster geweigerd: '+err.message);}
+  }
+  function updateConversion(){
+    const omega=Number($('backgroundOmega').value),d=Number($('backgroundSpacing').value);
+    const gamma=2*omega*d*d;
+    $('conversionReadout').textContent=Number.isFinite(gamma)?
+      `Γ = 2 Ω d² = ${gamma.toExponential(6)} m²/s per kern · n = ${(1/(d*d)).toExponential(4)} m⁻² · ω̄_z = ${(2*omega).toPrecision(5)} s⁻¹`:
+      'Niet-eindige waarde.';
+  }
+  function configureBackgroundBundle(mode){
+    if(!ready)return;
+    const valid=['off','coarse','bem','discrete'].includes(mode);
+    if(!valid){warning('Ongeldig achtergrondmodel.');return;}
+    if(mode!=='off' && $('motionMedium').value!=='sst'){
+      $('backgroundMode').value='off';
+      warning('Achtergrondbundel is alleen beschikbaar in SST-kandidaatmodus; demo-Γ is een afzonderlijke niet-gekalibreerde solverkeuze.');
+      mode='off';
+    }
+    if(byId('bPause')?.textContent?.trim()==='Pauzeer')click('bPause');
+    if(mode==='off'||mode==='discrete'){
+      checkbox('cBundleFlow',false);
+      checkbox('cBundleBEM',false);
+      checkbox('cSSTBundle',false);
+    }else{
+      // Standard parallel profile: no prescribed splay or oscillating profile.
+      dispatch('sBundleProfile','parallel');
+      checkbox('cBgOmega',false);
+      checkbox('cSSTBundle',true);
+      checkbox('cBundleBEM',mode==='bem');
+      dispatch('sOmBundle',Number($('backgroundOmega').value),'input');
+      dispatch('sBundleLines',Number($('backgroundLines').value),'input');
+      checkbox('cBundleFlow',true);
+    }
+    $('backgroundMode').value=mode;
+    syncDiscreteProvider();
+    $('discreteConfig').hidden=mode!=='discrete';
+    $('coarseLinesRow').hidden=mode==='discrete';
+    $('continuumCaveat').hidden=mode==='off'||mode==='discrete';
+    if(mode==='discrete'){checkbox('cCenterLock',false);$('freeTranslation').checked=true;checkbox('cTopologyGuard',true);$('guard').checked=true;checkbox('cTracerWrapZ',false);chooseSegment('interSeg','inter','bs');}
+    click('bReset'); // Never compare models on a previously evolved state.
+    updateReadouts();
   }
   function catalogEntries(){
     // Every entry is a SINGLE closed knot. Multi-component links are excluded.
@@ -107,6 +158,7 @@
   }
   /** Reuse the existing demo-medium + Γ path (no new forces). */
   function applyDemoMediumForMotion(){
+    if($('backgroundMode')?.value==='discrete')configureBackgroundBundle('off');
     $('motionMedium').value='demo';
     $('demoGammaRow').hidden=false;
     if(!chooseSegment('medSeg','med','demo'))return false;
@@ -144,6 +196,9 @@
   async function injectSharedEngine(){
     // Opt in to P4's tracer+streamline visualization; original VortexLab stays unchanged.
     window.__vlTwistFlowOverlayParticles=true;
+    window.__vlModelAIdealRequested=true; // opt-in: root VortexLab/benchmarks remain unchanged
+    window.__vlIdealTubeDisplayRequested=true; // P7.x visual-only ideal / transfer tube
+    window.__vlTubeVisualSettings={fallbackFraction:0.12};
     window.__vlTwistFlowPreviewN=0; // opt-in only: native geometry is the default
     // Fetch only the legacy CONTROL DOM. No index page is rendered or navigated to.
     // Run exactly the same script URLs as the canonical VortexLab route, in order.
@@ -207,6 +262,8 @@
     checkbox('cTopologyGuard',true);
     checkbox('cCenterLock',false);
     checkbox('cBgOmega',false);
+    checkbox('cBundleFlow',false);checkbox('cBundleBEM',false);checkbox('cSSTBundle',false);
+    if(window.__vlDiscreteBundleAPI)window.__vlDiscreteBundleAPI.configure({mode:'off'});
     for(const id of ['cDvSeparatrix','cDvColumn','cDvCaps','cDvStewartson']) checkbox(id,false);
     if(!chooseSegment('interSeg','inter','bs'))throw new Error('Biot–Savart-mode niet beschikbaar.');
     chooseSegment('visSeg','vis','tube');
@@ -253,14 +310,44 @@
       :'▶ Snelle bewegingspreview · N192 (niet gecertificeerd)';
     const a=Number(byId('sA')?.value)*1e-3;
     if(a>0&&Number.isFinite(a))$('core').value=String(a);
+    updateConversion();
+    $('discreteConfig').hidden=true;
     status('Twist Flow · gedeelde engine gereed','ok');
     updateReadouts();
     pollTimer=setInterval(updateReadouts,500);
+  }
+  function renderTubeVisual(){
+    const s=window.__vlTubeVisualDiagnostics?.();
+    const el=$('tubeVisualStatus');if(!el||!s)return;
+    const diameter=Number(s.diameterScene);
+    el.textContent=(s.source==='IDEAL'||s.source==='IDEAL_VOLUME_TRANSFER')
+      ?`${s.source==='IDEAL'?'IDEAL':'OVERDRACHT uit '+s.referenceKnotId+' (gelijke Rxy-aanname)'} · referentie-ropelength L/D=${Number(s.ropelength).toFixed(6)} · start-D=${Number(s.referenceDiameterScene).toExponential(3)} scène-m · weergegeven D≈${diameter.toExponential(3)} scène-m · ${s.previewUnqualified?'N192 PREVIEW: isotopie niet geverifieerd · ':''}lokale rek per buisring. a_sim onveranderd.`
+      :`SCHEMATISCH (${s.source||'onbekend'}) · weergegeven D≈${Number.isFinite(diameter)?diameter.toExponential(3):'—'} scène-m; geen geometrisch gecertificeerde dikte. a_sim onveranderd.`;
+  }
+  function renderModelA(snap){
+    const m=snap?.idealModelA, q=snap?.idealModelAQualification;
+    const live=['REFERENCE_ONLY','REFERENCE_TRANSFER','REFERENCE_TRANSFER_PREVIEW'].includes(m?.status);
+    const fm=v=>Number.isFinite(v)?(v/1e-15).toFixed(4)+' fm':'—';
+    const number=v=>Number.isFinite(v)?v.toFixed(6):'—';
+    const put=(id,value)=>{const node=$(id);if(node)node.textContent=value;};
+    put('modelAL0',live?fm(m.referenceContourMeters):'—');
+    put('modelALambda',live?number(m.lambda):'—');
+    put('modelACore',live?fm(m.meanCoreMeters):'—');
+    put('modelACoreRange',live?fm(m.minCoreMeters)+' – '+fm(m.maxCoreMeters):'—');
+    put('modelARadius',live?fm(m.xyRadiusMeters):'—');
+    put('modelAVolume',live?Number(m.volumeRelativeError).toExponential(2):'—');
+    const exportBtn=$('modelAExport');if(exportBtn)exportBtn.disabled=!live;
+    const disclaimer='Alle waarden zijn diagnostische schaalreconstructies uit de geaccepteerde geometrie; a_sim blijft onafhankelijk.';
+    const statusEl=$('modelAStatus');
+    if(statusEl)statusEl.textContent=live
+      ?`P7.2 ${m.version} · ${m.knotId} → ideal ${m.referenceKnotId||m.knotId} · stappen ${m.steps} · ${m.referencePoints} materiële punten · ${m.transferAssumption==='EQUAL_IDEAL_XY_FOOTPRINT'?'VERGELIJKINGSAANNAME: Rxy gelijk aan ideal-bronoriëntatie; bronisotopie niet bewezen. ':'a_ref=r_c. '}${m.previewUnqualified?'⚠ N192-preview verandert materiaaldiscretisatie / topologie niet gecertificeerd. ':''}${q?.medium==='demo'?'⚠ Demo-circulatie, geen SST-validatie. ':''}${m.tubeGeometryStatus!=='REACH_NOT_VERIFIED'?'⚠ Krimp onder ideal-referentie; reach-audit vereist. ':''}${disclaimer}`
+      :`Niet actief (${m?.status||'ONBEKEND'}). Kies een Gilbert-ideal of herkenbare trefoil/knoopklasse met één component en bijpassende ideal-referentie. Reset na wisselen.`;
   }
   function updateReadouts(){
     if(!ready||syncing)return;
     syncing=true;
     try {
+      renderTubeVisual();
       $('metricTime').textContent=textOf('hT');
       $('metricLength').textContent=textOf('cardL');
       $('metricGamma').textContent=textOf('cardGam');
@@ -270,6 +357,21 @@
       $('metricN').textContent=count?Number(count[1]).toLocaleString('nl-NL'):'—';
       $('seedStatus').textContent=t;
       $('tracerStatus').textContent=textOf('tracerBudgetInfo');
+      // Read native provider feedback; no physical readouts reconstructed here.
+      const bgMode=$('backgroundMode').value;
+      const bgControl=byId('cSSTBundle'),flowControl=byId('cBundleFlow');
+      const on=!!bgControl?.checked&&!!flowControl?.checked;
+      const nativeBundle=textOf('bundleReadout'),nativeBEM=textOf('bundleBEMReadout');
+      $('backgroundDiagnostics').textContent=!on
+        ?'Uit · onafhankelijke knoopreferentie. Geen bundelkoppeling.'
+        :`Voorgeschreven bundel, geen materiaalfilamenten. ${nativeBundle}`+
+         (bgMode==='bem'?` | Statische buisrandcorrectie: ${nativeBEM}`:' | Randcorrectie uit.')+
+         ' | Stroomlijnen: knoopperturbatie t.o.v. opgelegde Ω×r (tracers = absoluut veld).';
+      $('backgroundLinesOut').textContent=$('backgroundLines').value;
+      updateConversion();
+      if(bgMode==='discrete'){const data=snapForDiscrete();
+        $('backgroundDiagnostics').textContent=data?`Discreet TWO-WAY (open eindige kernen) · ${data.filaments} kernen, ${data.vertices} punten · Γ=${data.circulation.toExponential(4)} m²/s · minimale afstand=${Number(data.gap).toExponential(3)} m · maximale laterale beweging=${Number(data.maxTransverseDisplacement).toExponential(3)} m · ${data.modelStatus}`:'Geen discrete status';
+      }
       $('fastPreview').textContent=Number(window.__vlTwistFlowPreviewN||0)>0
         ?'↩ Native bronresolutie herstellen'
         :'▶ Snelle bewegingspreview · N192 (niet gecertificeerd)';
@@ -281,6 +383,7 @@
       if(message)warning(message);
       else if($('warning').dataset.localError!=='true')warning('');
       const snap=window.__vlTwistFlowDiagnostics?.();
+      renderModelA(snap);
       const paused=snap? snap.paused : byId('bPause')?.textContent?.trim()==='Hervat';
       const halted=!!snap?.halted;
       $('play').textContent=paused?'▶ Start':'⏸ Pauze';
@@ -331,6 +434,35 @@
       setSelected(['modeBs','modeLia'],byId('interSeg')?.querySelector('[data-inter].active')?.dataset.inter==='bs'?'modeBs':'modeLia');
     }finally{syncing=false;}
   }
+  const snapForDiscrete=()=>window.__vlDiscreteBundleAPI?.getSnapshot?.();
+  $('modelAExport').addEventListener('click',()=>{
+    const s=window.__vlTwistFlowDiagnostics?.(),m=s?.idealModelA;
+    if(!['REFERENCE_ONLY','REFERENCE_TRANSFER','REFERENCE_TRANSFER_PREVIEW'].includes(m?.status))return;
+    const payload={schema:'vortexlab.model-a.p7.2.v1',modelA:m,
+      solverTimeSeconds:s.timeSeconds,acceptedSolverSteps:s.acceptedSteps,
+      qualification:s.idealModelAQualification,
+      warnings:['MATERIAL_CORE_DIAGNOSTIC_ONLY','A_SIM_UNCHANGED','NO_FINITE_CORE_EULER_CERTIFICATION','NONIDEAL_IDENTITY_LABEL_ONLY','EQUAL_XY_FOOTPRINT_TRANSFER_NOT_PHYSICAL_MEASUREMENT'],
+      provenance:'A003-v7.6.25b-m1-TwistFlow-P7-v0.7.2'};
+    const blob=new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json'});
+    const href=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=href;a.download='A003_ModelA_P7_'+String(m.knotId).replace(/[^a-z0-9_-]+/gi,'_')+'.json';
+    a.click();setTimeout(()=>URL.revokeObjectURL(href),1000);
+  });
+  for(const id of ['backgroundSpacing','backgroundSide','backgroundNodes'])$(id).addEventListener('change',()=>{
+    updateConversion();if($('backgroundMode').value==='discrete'){if(byId('bPause')?.textContent?.trim()==='Pauzeer')click('bPause');syncDiscreteProvider();click('bReset');updateReadouts();}
+  });
+  $('backgroundMode').addEventListener('change',e=>configureBackgroundBundle(e.target.value));
+  $('backgroundOmega').addEventListener('change',e=>{
+    const v=Number(e.target.value);
+    if(!Number.isFinite(v)||v<0||v>1000){warning('Ongeldige Ω: kies 0–1000 s⁻¹.');return;}
+    if(['coarse','bem'].includes($('backgroundMode').value))dispatch('sOmBundle',v,'input');
+    if($('backgroundMode').value==='discrete'){if(byId('bPause')?.textContent?.trim()==='Pauzeer')click('bPause');syncDiscreteProvider();click('bReset');}
+    updateReadouts();
+  });
+  $('backgroundLines').addEventListener('input',e=>{
+    const v=Number(e.target.value);$('backgroundLinesOut').textContent=String(v);
+    if($('backgroundMode').value!=='off')dispatch('sBundleLines',v,'input');
+  });
   $('knot').addEventListener('change',e=>selectKnot(e.target.value));
   $('modeBs').addEventListener('click',()=>{chooseSegment('interSeg','inter','bs');updateReadouts();});
   $('modeLia').addEventListener('click',()=>{chooseSegment('interSeg','inter','lia');updateReadouts();});
@@ -347,6 +479,7 @@
     }
     // The existing model owns Γ. Do not implement or multiply any new force.
     $('demoGammaRow').hidden=!demo;
+    if(demo && $('backgroundMode').value!=='off')configureBackgroundBundle('off');
     if(demo){
       const gamma=Number($('demoGamma').value);
       if(Number.isFinite(gamma)&&gamma>0)dispatch('sGa',gamma*1000,'input');
@@ -407,7 +540,18 @@
     $(flow).addEventListener('click',()=>applyFlow(flow));
   $('density').addEventListener('input',e=>{$('densityOut').textContent=e.target.value;dispatch('sTracerCount',e.target.value,'input');});
   $('lines').addEventListener('input',e=>{$('linesOut').textContent=e.target.value;dispatch('sStreamlineCount',e.target.value,'input');});
-  $('tube').addEventListener('change',e=>chooseSegment('visSeg','vis',e.target.checked?'tube':'line'));
+  $('tube').addEventListener('change',e=>{
+    checkbox('cShowTubeThickness',!!e.target.checked);
+    chooseSegment('visSeg','vis',e.target.checked?'tube':'line');
+    renderTubeVisual();
+  });
+  $('tubeFallbackFraction').addEventListener('input',e=>{
+    const pct=Math.max(2,Math.min(30,Number(e.target.value)||12));
+    $('tubeFallbackValue').textContent=String(pct)+'%';
+    if(window.__vlTubeVisualSettings)window.__vlTubeVisualSettings.fallbackFraction=pct/100;
+    window.__vlRefreshTubeVisualization?.();
+    renderTubeVisual();
+  });
   $('reseed').addEventListener('click',()=>click('bResetParticles'));
   $('play').addEventListener('click',()=>{click('bPause');updateReadouts();});
   $('reset').addEventListener('click',()=>{click('bReset');updateReadouts();});

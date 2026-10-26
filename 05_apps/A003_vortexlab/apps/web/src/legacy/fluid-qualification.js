@@ -7,9 +7,17 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const EPS=Number.EPSILON;
+  const CONTACT_ULP_FACTOR=64;
+  // a_sim mag tot 1e-18 m als Biot–Savart-regularisatie; dat is geen claim dat
+  // Euclidean contact op die schaal in Float64 resolveerbaar is op macro-domeinen.
+  const A_SIM_RESEARCH_FLOOR=1e-18;
+  function precisionFloorFromScale(geometryScale){
+    const scale=Math.max(Number.MIN_VALUE,Math.abs(Number(geometryScale)||0));
+    return CONTACT_ULP_FACTOR*EPS*scale;
+  }
   function classifyCore({a,geometryScale,minimumEdge,maxCurvature=0,physicalRadius=null}={}){
     const scale=Math.max(Number.MIN_VALUE,Math.abs(Number(geometryScale)||0));
-    const precisionFloor=64*EPS*scale;
+    const precisionFloor=precisionFloorFromScale(scale);
     const radius=Number(a),ds=Number(minimumEdge);
     const inputValid=Number.isFinite(radius)&&radius>0;
     const edgeValid=Number.isFinite(ds)&&ds>0;
@@ -89,5 +97,6 @@
       proposedRadius:initialCoreRadius*Math.sqrt(initialLength/currentLength),
       status:'HYPOTHESIS_UNCOUPLED'};
   }
-  return {classifyCore,safeStep,allFinitePositions,wallNormalDiagnostic,divergenceDiagnostic,coreVolumeDiagnostic};
+  return {classifyCore,safeStep,allFinitePositions,wallNormalDiagnostic,divergenceDiagnostic,coreVolumeDiagnostic,
+    precisionFloorFromScale,CONTACT_ULP_FACTOR,A_SIM_RESEARCH_FLOOR};
 });

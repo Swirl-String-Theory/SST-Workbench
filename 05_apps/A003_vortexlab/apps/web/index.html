@@ -24,6 +24,7 @@
     <div id="eFormula"></div>
     <div class="hdr-btns">
       <button id="bPhys" type="button">ⓘ Fysica</button>
+      <a id="bUniversalBorromean" href="./borromean.html" title="Drie onafhankelijk selecteerbare knopen op Borromeaanse drager" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--line);border-radius:5px;background:#13233A;color:#CFE8FF;text-decoration:none;font:inherit;font-size:11px;">Borromean Builder</a>
       <a id="bCatalog" href="./catalog.html" title="Kies een knoop in de 3D-catalogus (alleen render)" style="display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--line);border-radius:5px;background:#13233A;color:#CFE8FF;text-decoration:none;font:inherit;font-size:11px;">Knoop uit catalogus</a>
     </div>
 
@@ -188,7 +189,7 @@
 
       <h2>NIET GEMODELLEERD</h2>
       <p>Reconnecties en lokale GP-reconnectiebruggen (de topology guard stopt vóór doorsnijding) · cilinderwandbeelden/-BEM en vortex-pinning (de Niveau-C BEM geldt uitsluitend rond de gekozen knooptube) · fysische Taylor/Stewartson-continuumdynamica · kern-twist · normale-vloeistof-terugreactie (\(\mathbf v_n\) is opgelegd; geen zelfconsistente twee-vloeistof-/HVBK-dynamica) · kernvolume bij rek · echte roosterdynamica (Tkachenko-modi) · snaardynamica of andere stringtheorie-veldvergelijkingen.</p>
-      <p class="note" style="max-width:820px;">Ingebouwd: ring 0₁, Hopf-link 2₂, ideal trefoil 3₁, figure-eight 4₁, cinquefoil 5₁ en three-twist 5₂. Catalogi onder <code>./data/</code>: <code>ideal_knots_data.js</code>, <code>fourier_knots_data.js</code>, <code>knotplot_knots_data.js</code> en <code>twist_knot_data.js</code> (A006 RoundFolded, filters kind/profile/chirality/N/CP). Fseries/KnotPlot/A006 zijn geometrische bronnen, geen automatische ideal/tight-certificatie.</p>
+      <p class="note" style="max-width:820px;">Ingebouwd: ring 0₁, Hopf-link 2₂, ideal trefoil 3₁, figure-eight 4₁, cinquefoil 5₁ en three-twist 5₂. Catalogi onder <code>./data/</code>: <code>ideal_knots_data.js</code>, <code>fourier_knots_data.js</code>, <code>knotplot_knots_data.js</code>, <code>twist_knot_data.js</code> (A006 RoundFolded) en <code>ruben_knot_data.js</code> (E010 Ruban torus seeds, filters embedding/B0/variant). Fseries/KnotPlot/A006/Ruban zijn geometrische bronnen, geen automatische ideal/tight-certificatie.</p>
     </div>
 </div>
 
@@ -207,15 +208,6 @@
           <div class="note" style="margin-top:3px;">Getalveld: vrije positieve afstand in mm. De slider blijft begrensd tot de actuele cilinderhoogte; een grotere afstand schakelt de periodieke z-grens automatisch uit.</div>
           <div class="core-limit-note sep-readout warn" id="sepABReadout">Alleen botsingsmodus. A en B worden symmetrisch rond hun huidige middenvlak geplaatst; de laterale offset Δx(B) blijft onafhankelijk.</div>
         </div>
-        <div class="ctrl"><label for="topoSelect">topologie</label>
-          <select id="topoSelect" aria-label="Topologie">
-            <option value="ring">Ring (0₁)</option>
-            <option value="hopf">Hopf-link (2₂ / 2²₁)</option>
-            <option value="trefoil" selected>Trefoil (3₁ · ideal Gilbert)</option>
-            <option value="figure8">Figure-eight (4₁)</option>
-            <option value="cinquefoil">Cinquefoil (5₁ · T(2,5))</option>
-            <option value="twist52">Three-twist (5₂)</option>
-          </select></div>
         <div class="ctrl" id="interRow"><label>interactie</label>
           <div class="seg" id="interSeg">
             <button type="button" class="seg-btn" data-inter="bs">Biot–Savart</button>
@@ -266,6 +258,27 @@
           <label for="twistSelect" style="margin-top:6px;">geometrie</label>
           <select id="twistSelect" aria-label="A006 twist family geometrie"><option value="">— geen A006 twist —</option></select>
         </div>
+        <div class="ctrl" id="rubenRow">
+          <label>Ruban (E010) torus family</label>
+          <div class="ctrls" style="grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+            <div><label style="font-size:10px;" for="rubenEmbeddingFilter">embedding</label>
+              <select id="rubenEmbeddingFilter" aria-label="Ruban embedding filter">
+                <option value="ALL" selected>All</option>
+              </select></div>
+            <div><label style="font-size:10px;" for="rubenB0Filter">B0</label>
+              <select id="rubenB0Filter" aria-label="Ruban B0 filter">
+                <option value="ALL" selected>All</option>
+              </select></div>
+            <div><label style="font-size:10px;" for="rubenVariantFilter">variant</label>
+              <select id="rubenVariantFilter" aria-label="Ruban variant filter">
+                <option value="baseline" selected>baseline</option>
+                <option value="perturbed">perturbed</option>
+                <option value="ALL">All</option>
+              </select></div>
+          </div>
+          <label for="rubenSelect" style="margin-top:6px;">geometrie</label>
+          <select id="rubenSelect" aria-label="Ruban E010 torus geometrie"><option value="">— geen Ruban E010 —</option></select>
+        </div>
         <div class="ctrl" id="xyzImportRow">
           <label>XYZ-import (session)</label>
           <input type="file" id="xyzFileInput" accept=".xyz,text/plain" hidden>
@@ -287,7 +300,7 @@
           </select>
         </div>
         <button type="button" id="bResetIdealKnot" class="hidden" title="Herstel uitsluitend de geselecteerde catalogusgeometrie">↺ Catalogusvorm</button>
-        <div class="note" id="idealKnotInfo">Gilbert ideal/tight, .fseries, KnotPlot, A006 twist en session .xyz-import. Twist-filters verkorten de A006-lijst; slechts één externe bron is tegelijk actief.</div>
+        <div class="note" id="idealKnotInfo">Gilbert ideal/tight, .fseries, KnotPlot, A006 twist, Ruban (E010) en session .xyz-import. Filters verkorten de lijsten; slechts één externe bron is tegelijk actief.</div>
         <div class="ctrl" id="qualRow"><label>kwaliteit</label>
           <div class="seg" id="qualSeg">
             <button type="button" class="seg-btn active" data-qual="laag">Laag</button>
@@ -360,6 +373,8 @@
         <div class="ctrl" id="coreRadiusRow"><label>numerieke buisstraal a_sim <span class="v" id="vA">1.500 mm</span></label>
           <input type="number" id="sA" min="1e-15" max="70" step="any" value="1.500"></div>
         <div class="note" id="fluidCoreQualification" aria-live="polite" style="padding:5px 8px;line-height:1.5;">Fluid qualification wordt geladen…</div>
+        <button type="button" class="secondary" id="bDomainCommaShift" disabled title="Niet nodig: contact al resolveerbaar">Decimaalverschuiving domein · schaal geometrie naar a_sim</button>
+        <div class="note" style="padding:4px 8px;line-height:1.45;opacity:.9;">Alleen eenheden herlabelen (m→nm) verandert <code>a/R</code> niet en helpt Float64 niet. Deze knop verkleint Rcyl/R0/Y bij <em>vaste</em> a_sim/Γ/Ω zodat 3a boven de contactvloer komt — tot a_sim ≥ 1e-18 m. Dat is een andere labschaal, geen SI-truc.</div>
         <div class="note" id="tubeThicknessInfo" aria-live="polite" style="padding:5px 8px;line-height:1.5;">buis: a_sim=— · display=— · r_kern=— · n=—</div>
         <div class="ctrl" id="hornRadiusRow"><label>horn/circulatiestraal R_horn <span class="v" id="vRHorn">1.409 fm</span></label>
           <input type="text" id="sRHorn" value="1.40897017 fm" readonly aria-label="Canonieke SST horn- en circulatiestraal">
@@ -585,34 +600,10 @@
           <div class="subcoll-body">
 
             <div class="spec-knot-selector" id="specKnotSelector">
-              <div class="spec-knot-selector-head"><span>🪢 TESTKNOOPSELECTIE</span><span class="tag">holdouts</span></div>
-              <div class="spec-knot-source-row">
-                <label><input type="checkbox" id="cSpecHoldoutIdeal" checked> ideal</label>
-                <label><input type="checkbox" id="cSpecHoldoutFseries" checked> fseries</label>
-                <label><input type="checkbox" id="cSpecHoldoutKnotplot" checked> KnotPlot</label>
-                <label><input type="checkbox" id="cSpecHoldoutTwist"> A006 twist</label>
-              </div>
-              <details class="spec-knot-dropdown" id="specKnotDropdown">
-                <summary id="specKnotDropdownSummary">Knopen · 3₁, 4₁, 5₂</summary>
-                <div class="spec-knot-options">
-                  <label><input type="checkbox" data-spec-knot="3_1" checked> 3₁ · trefoil · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="4_1" checked> 4₁ · figure-eight · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="5_1"> 5₁ · cinquefoil · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="5_2" checked> 5₂ · twist · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="6_1"> 6₁ · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="7_1"> 7₁ · torus · Ideal/Fseries/KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="link_6.3.1"> link_6.3.1 · 3 componenten · KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="link_6.3.2"> link_6.3.2 · 3 componenten · KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="link_6.3.3"> link_6.3.3 · 3 componenten · KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="torus_3.3"> T(3,3) · 3-componenten toruslink · KnotPlot</label>
-                  <label><input type="checkbox" data-spec-knot="torus_6.9"> T(6,9) · 3 trefoilcomponenten · KnotPlot</label>
-                </div>
-              </details>
-              <div class="spec-knot-preset-row">
-                <button type="button" id="bSpecKnotsQuick">Snel · 3₁</button>
-                <button type="button" id="bSpecKnotsCore">Kernset · 3₁/4₁/5₂</button>
-                <button type="button" id="bSpecKnotsFull">Volledig · knopen + links</button>
-                <button type="button" id="bSpecKnotsTorus69">Torus · T(6,9)</button>
+              <div class="spec-knot-selector-head"><span>VORTEXMODEL → HOLDOUT</span><span class="tag">gekoppeld</span></div>
+              <div class="note" style="margin:6px 0 4px;">Holdouts gebruiken de actieve vortexmodelkeuze uit CONFIGURATIE (topologie / Gilbert / fseries / KnotPlot / A006 / Ruban / XYZ). Geen aparte testknoopset meer.</div>
+              <div class="spec-knot-dropdown" id="specKnotDropdown" style="padding:8px 10px;">
+                <div id="specKnotDropdownSummary">Vortexmodel · —</div>
               </div>
               <div class="spec-knot-summary" id="specKnotSelectionSummary">—</div>
             </div>
@@ -714,7 +705,7 @@
                 <div class="proxy-norm-note">Gerichte test van <b>δlnR<sub>field</sub> = κ<sub>geom</sub> · δ(Ω<sub>mutual</sub>L<sub>K</sub>/v↺*)</b>. Amplitude-admissibility gebruikt N=768 en de continuumlimiet; N=128 is alleen historisch/coarse. Reach-afhankelijke kandidaten zijn ongeldig zolang de live reach/DCSD-route niet convergeert. Cross-knotmetingen zijn holdouts en selecteren geen factor.</div>
                 <div class="spec-benchmark-actions" style="margin:6px 0 7px;flex-wrap:wrap;">
                   <button type="button" id="bContinuumStart">▶ Continuüm N=128–768</button>
-                  <button type="button" id="bHoldoutStart">▶ Geselecteerde holdouts</button>
+                  <button type="button" id="bHoldoutStart">▶ Vortexmodel-holdout</button>
                   <button type="button" id="bGeomKappaStart">▶ Volledige confirmatoire suite</button>
                 </div>
                 <div class="spec-benchmark-table-wrap">
@@ -781,6 +772,8 @@
               </select>
             </div>
             <div id="specClockStatus" class="spec-clock-status bad">UIT · activeer alleen voor SST + botsingsmodus met twee dragers.</div>
+            <div class="note" id="specClockProxyDiagNote" style="margin:6px 0 4px;">Constant buiten de veldbracket is verwacht zolang fase-null en veld-envelope niet gemapt zijn. Dat is geen SST-falsificatie.</div>
+            <div class="note" id="specClockProxyDiag" style="margin:0 0 8px;font-family:ui-monospace,Consolas,monospace;">—</div>
             <div class="spec-clock-meter"><b>A</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarA"></div></div><span class="spec-clock-value" id="specClockBarValueA">—</span></div>
             <div class="spec-clock-meter"><b>B</b><div class="spec-clock-track"><div class="spec-clock-fill" id="specClockBarB"></div></div><span class="spec-clock-value" id="specClockBarValueB">—</span></div>
             <div class="stab-metrics" style="grid-template-columns:1fr 1fr;margin-top:8px;">
@@ -881,6 +874,7 @@
           <label>hoeveelheid deeltjes <span class="v" id="vTracerCount">5000</span></label>
           <input type="number" id="sTracerCount" min="0" max="20000" step="100" value="5000" inputmode="numeric">
         </div>
+        <label class="chk" style="margin-top:4px;"><input type="checkbox" id="cTracerBudgetLimit" checked> Automatische deeltjesbegrenzing bij hoge resolutie</label>
         <div class="note" id="tracerBudgetInfo" aria-live="polite">Bij hogere knoopresolutie wordt het aantal passieve tracers automatisch beperkt.</div>
         <div class="ctrl hidden" id="streamlineCountRow" style="margin-top:7px;">
           <label>hoeveelheid stroomlijnen <span class="v" id="vStreamlineCount">28</span></label>
@@ -1042,12 +1036,14 @@
 <script src="./data/fourier_knots_data.js" onerror="void 0"></script>
 <script src="./data/knotplot_knots_data.js" onerror="void 0"></script>
 <script src="./data/twist_knot_data.js" onerror="void 0"></script>
+<script src="./data/ruben_knot_data.js" onerror="void 0"></script>
 <script src="./src/legacy/xyz-import.js"></script>
 <script src="./src/legacy/native-resolution-policy.js"></script>
 <script src="./src/legacy/zero-omega-core-lock-policy.js"></script>
 <script src="./src/legacy/fluid-qualification.js"></script>
 <script src="./src/legacy/research-track-vl.js"></script>
 <script src="./src/engine-client.js"></script>
+<script src="./src/legacy/model-a-ideal-stretch.js"></script>
 <script src="./src/legacy/vortexlab-runtime.js"></script>
 </body>
 </html>

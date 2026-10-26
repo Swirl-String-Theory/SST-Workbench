@@ -27,6 +27,7 @@
     fseries: 'Fseries',
     knotplot: 'KnotPlot',
     twist: 'Twist',
+    ruben: 'Ruban',
   };
 
   function collectCatalog() {
@@ -36,6 +37,7 @@
       { source: 'fseries', ids: window.FSERIES_KNOT_IDS, db: window.FSERIES_KNOT_DB },
       { source: 'knotplot', ids: window.KNOTPLOT_KNOT_IDS, db: window.KNOTPLOT_KNOT_DB },
       { source: 'twist', ids: window.TWIST_KNOT_IDS, db: window.TWIST_KNOT_DB },
+      { source: 'ruben', ids: window.RUBEN_KNOT_IDS, db: window.RUBEN_KNOT_DB },
     ];
     for (const s of specs) {
       if (!Array.isArray(s.ids) || !s.db || typeof s.db !== 'object') continue;

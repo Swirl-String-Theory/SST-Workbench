@@ -1,17 +1,57 @@
 "use strict";
-const APP_VERSION='7.6.25b-m1-twistflow-p5-adaptive-dt';
+const APP_VERSION='7.6.25b-m1-twistflow-p7-v0.7.2-ideal-volume-transfer';
 const APP_BASE_VERSION='7.5.3';
 const VL_CLOCK_WORKFLOW_KEY='vortexlab.clock.workflow.7.6.25b';
 const VL_CLOCK_WORKFLOW_PREVIOUS_KEY='vortexlab.clock.workflow.7.6.25a';
+const VL_CLOCK_AUTO_ADVANCE_KEY='vortexlab.clock.autoAdvance.v1';
 let VL_CLOCK_ACTIVE_MODE=null;
+let VL_CLOCK_AUTO_ADVANCE_TIMER=0;
 const VL_CLOCK_RUNNER_DEFS=[
   {id:'bSpecBenchmarkStart',mode:'spec',label:'SPEC CLOCK · 10-run',step:1},
   {id:'bProxyDecompStart',mode:'decomposition',label:'Proxy-decompositie',step:2},
-  {id:'bHoldoutStart',mode:'holdout',label:'Geselecteerde holdouts',step:3},
+  {id:'bHoldoutStart',mode:'holdout',label:'Vortexmodel-holdout',step:3},
   {id:'bContinuumStart',mode:'continuum',label:'Continuüm N=128–768',step:4},
   {id:'bReachAuditStart',mode:'reach',label:'Continue reach/DCSD',step:5},
   {id:'bGeomKappaStart',mode:'full-suite',label:'Volledige Swirl-Clock suite',step:6}
 ];
+function vlClockAutoAdvanceEnabled(){
+  const cb=document.getElementById('cClockAutoAdvance');
+  if(cb)return!!cb.checked;
+  try{return sessionStorage.getItem(VL_CLOCK_AUTO_ADVANCE_KEY)==='1';}catch(_){return false;}
+}
+function vlSetClockAutoAdvance(on){
+  const enabled=!!on;
+  try{sessionStorage.setItem(VL_CLOCK_AUTO_ADVANCE_KEY,enabled?'1':'0');}catch(_){}
+  const cb=document.getElementById('cClockAutoAdvance');if(cb)cb.checked=enabled;
+  if(!enabled&&VL_CLOCK_AUTO_ADVANCE_TIMER){clearTimeout(VL_CLOCK_AUTO_ADVANCE_TIMER);VL_CLOCK_AUTO_ADVANCE_TIMER=0;}
+  vlRefreshClockRunnerWorkflowUi();
+}
+function vlNextClockRunnerDef(){
+  return VL_CLOCK_RUNNER_DEFS.find(x=>VLClockWorkflow.unlocked(x.mode)&&!VLClockWorkflow.done(x.mode))||null;
+}
+function vlStartClockRunner(mode){
+  if(mode==='spec'){SpecClockBenchmark.start();return;}
+  if(mode==='decomposition'){SpecClockProxyDecomposition.start('decomposition');return;}
+  if(mode==='holdout'){SpecClockProxyDecomposition.start('holdout');return;}
+  if(mode==='continuum'){SpecClockProxyDecomposition.start('continuum');return;}
+  if(mode==='reach'){ContinuousReachAudit.start();return;}
+  if(mode==='full-suite'){SpecClockProxyDecomposition.start('full-suite');return;}
+}
+function vlMaybeAutoAdvanceClockRunner(completedMode,pass){
+  if(VL_CLOCK_AUTO_ADVANCE_TIMER){clearTimeout(VL_CLOCK_AUTO_ADVANCE_TIMER);VL_CLOCK_AUTO_ADVANCE_TIMER=0;}
+  if(!pass||!vlClockAutoAdvanceEnabled())return;
+  const next=vlNextClockRunnerDef();
+  if(!next||next.mode===completedMode)return;
+  VL_CLOCK_AUTO_ADVANCE_TIMER=setTimeout(()=>{
+    VL_CLOCK_AUTO_ADVANCE_TIMER=0;
+    if(!vlClockAutoAdvanceEnabled()||VL_CLOCK_ACTIVE_MODE)return;
+    if(!VLClockWorkflow.unlocked(next.mode)||VLClockWorkflow.done(next.mode))return;
+    if(typeof setFlag==='function')setFlag('▶ Auto-volgende ENGINE-stap: '+next.label,true);
+    if(window.ModelLog)window.ModelLog.logEvent('clock-runner-auto-advance',{from:completedMode,to:next.mode,label:next.label});
+    vlFocusClockRunner(next.mode);
+    vlStartClockRunner(next.mode);
+  },350);
+}
 const VLClockWorkflow=(()=>{
   const defaults=()=>({spec:false,decomposition:false,holdout:false,continuum:false,reach:false});
   let state=defaults();
@@ -24,9 +64,9 @@ const VLClockWorkflow=(()=>{
   const unlocked=mode=>mode==='spec'||(mode==='decomposition'&&state.spec)||(mode==='holdout'&&state.spec&&state.decomposition)||(mode==='continuum'&&state.spec&&state.decomposition&&state.holdout)||(mode==='reach'&&state.spec&&state.decomposition&&state.holdout&&state.continuum)||(mode==='full-suite'&&state.spec&&state.decomposition&&state.holdout&&state.continuum&&state.reach);
   const done=mode=>mode==='full-suite'?state.spec&&state.decomposition&&state.holdout&&state.continuum&&state.reach:!!state[mode];
   const invalidateFrom=mode=>{const order=['spec','decomposition','holdout','continuum','reach'],i=order.indexOf(mode);if(i<0)return;for(let k=i;k<order.length;k++)state[order[k]]=false;save();};
-  const begin=mode=>{if(mode!=='full-suite')invalidateFrom(mode);VL_CLOCK_ACTIVE_MODE=mode;vlRefreshClockRunnerWorkflowUi();};
-  const complete=(mode,pass)=>{VL_CLOCK_ACTIVE_MODE=null;if(pass){if(mode==='full-suite'){state={spec:true,decomposition:true,holdout:true,continuum:true,reach:true};}else if(Object.prototype.hasOwnProperty.call(state,mode))state[mode]=true;}save();vlRefreshClockRunnerWorkflowUi();};
-  const abort=()=>{VL_CLOCK_ACTIVE_MODE=null;save();vlRefreshClockRunnerWorkflowUi();};
+  const begin=mode=>{if(mode!=='full-suite')invalidateFrom(mode);VL_CLOCK_ACTIVE_MODE=mode;if(VL_CLOCK_AUTO_ADVANCE_TIMER){clearTimeout(VL_CLOCK_AUTO_ADVANCE_TIMER);VL_CLOCK_AUTO_ADVANCE_TIMER=0;}vlRefreshClockRunnerWorkflowUi();};
+  const complete=(mode,pass)=>{VL_CLOCK_ACTIVE_MODE=null;if(pass){if(mode==='full-suite'){state={spec:true,decomposition:true,holdout:true,continuum:true,reach:true};}else if(Object.prototype.hasOwnProperty.call(state,mode))state[mode]=true;}save();vlRefreshClockRunnerWorkflowUi();vlMaybeAutoAdvanceClockRunner(mode,!!pass);};
+  const abort=()=>{VL_CLOCK_ACTIVE_MODE=null;if(VL_CLOCK_AUTO_ADVANCE_TIMER){clearTimeout(VL_CLOCK_AUTO_ADVANCE_TIMER);VL_CLOCK_AUTO_ADVANCE_TIMER=0;}save();vlRefreshClockRunnerWorkflowUi();};
   const invalidateSelection=()=>{state.holdout=false;state.continuum=false;state.reach=false;save();vlRefreshClockRunnerWorkflowUi();};
   const reason=mode=>{if(unlocked(mode))return '';if(mode==='decomposition')return 'Voer eerst SPEC CLOCK · 10-run uit met ENGINE PASS.';if(mode==='holdout')return 'Voer eerst de proxy-decompositie uit met ENGINE PASS.';if(mode==='continuum')return 'Voer eerst de geselecteerde holdouts uit met ENGINE PASS.';if(mode==='reach')return 'Voer eerst de continuümaudit uit met ENGINE PASS.';if(mode==='full-suite')return 'Voltooi eerst SPEC, decompositie, holdouts, continuüm en reach/DCSD met ENGINE PASS.';return 'Runner is nog vergrendeld.';};
   return {unlocked,done,begin,complete,abort,invalidateSelection,reason,get state(){return {...state};}};
@@ -34,7 +74,7 @@ const VLClockWorkflow=(()=>{
 function vlRefreshClockRunnerWorkflowUi(){
   const any=!!VL_CLOCK_ACTIVE_MODE;
   for(const def of VL_CLOCK_RUNNER_DEFS){const b=document.getElementById(def.id);if(!b)continue;const running=VL_CLOCK_ACTIVE_MODE===def.mode,unlocked=VLClockWorkflow.unlocked(def.mode),done=VLClockWorkflow.done(def.mode);b.disabled=any?!running:!unlocked;b.classList.toggle('runner-stop',running);b.classList.toggle('runner-locked',!unlocked&&!running);b.classList.toggle('runner-done',done&&!running);b.dataset.runnerMode=def.mode;b.textContent=running?`■ Stop · ${def.label}`:`${unlocked?(done?'✓':'▶'):'🔒'} ${def.label}`;b.title=running?'Klik om deze runner te stoppen.':(unlocked?`Stap ${def.step} · klik om te starten.`:VLClockWorkflow.reason(def.mode));}
-  const hint=document.getElementById('vlClockWorkflowHint');if(hint){if(VL_CLOCK_ACTIVE_MODE){const d=VL_CLOCK_RUNNER_DEFS.find(x=>x.mode===VL_CLOCK_ACTIVE_MODE);hint.textContent=`Actief: ${d?.label||VL_CLOCK_ACTIVE_MODE}. Alleen deze knop blijft beschikbaar als Stop.`;}else{const next=VL_CLOCK_RUNNER_DEFS.find(x=>x.mode!=='full-suite'&&!VLClockWorkflow.done(x.mode));hint.textContent=next?`Volgende vereiste stap: ${next.step}. ${next.label}. Een stap ontgrendelt pas na ENGINE PASS.`:'ENGINE-workflow inclusief reach/DCSD voltooid. De volledige Swirl-Clocksuite is ontgrendeld.';}}
+  const hint=document.getElementById('vlClockWorkflowHint');if(hint){if(VL_CLOCK_ACTIVE_MODE){const d=VL_CLOCK_RUNNER_DEFS.find(x=>x.mode===VL_CLOCK_ACTIVE_MODE);hint.textContent=`Actief: ${d?.label||VL_CLOCK_ACTIVE_MODE}. Alleen deze knop blijft beschikbaar als Stop.`+(vlClockAutoAdvanceEnabled()?' · auto-volgende aan.':'');}else{const next=vlNextClockRunnerDef();hint.textContent=next?(vlClockAutoAdvanceEnabled()?`Auto-volgende klaar: ${next.step}. ${next.label}. Start de eerste ontgrendelde stap; na ENGINE PASS volgt de keten automatisch.`:`Volgende vereiste stap: ${next.step}. ${next.label}. Een stap ontgrendelt pas na ENGINE PASS.`):'ENGINE-workflow inclusief reach/DCSD voltooid. De volledige Swirl-Clocksuite is ontgrendeld.';}}
 }
 window.__vlBootComplete=false;
 window.addEventListener('error',function vlEarlyBootstrapError(event){
@@ -334,6 +374,7 @@ function topologyLabel(){
     const kind=P.knotSource==='fseries'?'Fouriercurve'
       :P.knotSource==='knotplot'?'KnotPlot-candidate'
       :P.knotSource==='twist'?'A006 twist'
+      :P.knotSource==='ruben'?'Ruban E010'
       :P.knotSource==='xyz'?'XYZ-import'
       :'ideal knoop/link';
     return `${kind} ${P.knotKey}`;
@@ -370,7 +411,7 @@ const P = {
   ghostStewartson:false,
   taylorOsc:{enabled:false, amplitude:0.25, period:8},
   showChiArrow:false, twistProxyEnabled:false,
-  wAl:1, wBe:1, wGa:1, showTracers:true, showStreamlines:false, tracerCount:5000, streamlineCount:28, particleSize:0.003, vortexOpacity:0.58, tracerSpawnMode:'inner-column',
+  wAl:1, wBe:1, wGa:1, showTracers:true, showStreamlines:false, tracerCount:5000, tracerBudgetLimit:true, streamlineCount:28, particleSize:0.003, vortexOpacity:0.58, tracerSpawnMode:'inner-column',
   showPotentialFlow:false, potentialMode:'stream', potentialRadiusSource:'taylor', potentialRadius:0.08, potentialOpacity:0.58, potentialU:0.10,
   linkDH:false, linkVolumeRef:2*Math.PI*0.25*0.25*0.5, linkRefR:0.25, linkRefH:0.5,
   mfTemp:'0', mfAlpha:0, mfAlphaP:0, vnZ:0, revVn:false,
@@ -452,11 +493,30 @@ function formatASimInputMm(a){
   const mm=a*1e3;
   return a>=1e-6?mm.toFixed(6).replace(/0+$/,'').replace(/\.$/,''):mm.toExponential(8);
 }
+function geometryPrecisionScale(){
+  // Float64-ULP van contactafstanden volgt |Y|, niet de ongebruikte cilinderstraal.
+  // Met Y≈R0≪Rcyl was de oude Rcyl-vloer onnodig streng (SUB-RESOLUTION bij geldige 3a).
+  let peak=0;
+  if(Y&&fils&&fils.length){
+    for(const f of fils){
+      if(f.ghost)continue;
+      const o=f.off|0,N=f.N|0;
+      for(let k=0;k<N;k++){
+        const i=o+3*k;
+        peak=Math.max(peak,Math.abs(Y[i]||0),Math.abs(Y[i+1]||0),Math.abs(Y[i+2]||0));
+      }
+    }
+  }
+  if(peak>0)return peak;
+  return Math.max(1e-30,
+    Math.abs(P.R0||0),Math.abs(P.zSolo||0),Math.abs(P.zA||0),Math.abs(P.zB||0),
+    Math.abs(P.Rcyl||0),Math.abs(P.Hcyl||0));
+}
 function contactThresholdInfo(){
   const physical=3*Math.max(0,Number.isFinite(P.a)?P.a:0);
-  const scale=Math.max(1e-9,Math.abs(P.Rcyl||0),Math.abs(P.Hcyl||0),Math.abs(P.R0||0));
+  const scale=Math.max(1e-9,geometryPrecisionScale());
   const numerical=CONTACT_ULP_FACTOR*Number.EPSILON*scale;
-  return {physical,numerical,effective:Math.max(physical,numerical),floorActive:numerical>physical};
+  return {physical,numerical,effective:Math.max(physical,numerical),floorActive:numerical>physical,geometryScale:scale};
 }
 function gapRatios(minGap){
   const ct=contactThresholdInfo();
@@ -468,27 +528,103 @@ function fluidCoreState(){
   const fluid=window.VortexLabFluidQualification;
   if(!fluid)return null;
   const lm=Y&&fils.length?lminAll():NaN;
-  // Use full geometry coordinate extent for Float64 ULP, not a hidden 1 nm floor.
-  const scale=Math.max(Math.abs(P.R0||0),Math.abs(P.Rcyl||0),Math.abs(P.Hcyl||0),
-    Math.abs(P.zA||0),Math.abs(P.zB||0),Math.abs(P.zSolo||0));
-  return fluid.classifyCore({a:P.a,geometryScale:scale,minimumEdge:lm,
+  // Precisiebasis = actuele filamentcoördinaatpiek (zie geometryPrecisionScale).
+  return fluid.classifyCore({a:P.a,geometryScale:geometryPrecisionScale(),minimumEdge:lm,
     physicalRadius:P.rCorePhysical});
+}
+function ensureSubPrecisionContactPolicy(coreGate=fluidCoreState()){
+  // a_sim tot A_SIM_INPUT_FLOOR blijft geldig als BS-regularisatie. Onder de
+  // Float64-contactvloer claimen we geen fysische 3a-resolutie: Topology Guard
+  // + max(3a,vloer) is verplicht, maar de integrator wordt niet geblokkeerd.
+  if(!coreGate||coreGate.regime!=='SUB_PRECISION_CORE')return {armed:false,autoEnabled:false};
+  let autoEnabled=false;
+  if(!P.topologyGuard){
+    P.topologyGuard=true;autoEnabled=true;
+    const tg=document.getElementById('cTopologyGuard');if(tg)tg.checked=true;
+    setFlag('⚠ a_sim onder Float64-contactresolutie: Topology Guard auto-aan. '+
+      'Contact gebruikt max(3a, numerieke vloer); a_sim blijft toegestaan tot '+
+      A_SIM_INPUT_FLOOR.toExponential(0)+' m als Biot–Savart-regularisatie (geen fysische 3a-garantie). '+
+      'Tip: “decimaalverschuiving domein” verkleint Rcyl/R0/Y t.o.v. vaste a_sim zodat 3a wél resolveerbaar wordt.',true);
+  }
+  return {armed:true,autoEnabled};
+}
+// Uniforme herlabeling (alles ×10^k) verandert a/R niet en helpt Float64 niet.
+// Wél: geometrie verkleinen bij vaste a_sim/Γ/Ω — echte lab-decimaalverschuiving.
+function contactResolvableMaxGeometryScale(a=P.a){
+  const radius=Math.max(0,Number(a)||0);
+  if(!(radius>0))return 0;
+  return (3*radius)/(CONTACT_ULP_FACTOR*Number.EPSILON);
+}
+function domainCommaShiftPlan(a=P.a){
+  const currentScale=geometryPrecisionScale();
+  const maxScale=0.5*contactResolvableMaxGeometryScale(a);
+  const needed=currentScale>0&&maxScale>0&&currentScale>maxScale;
+  return {a:Number(a),currentScale,maxScale,factor:needed?maxScale/currentScale:1,needed};
+}
+function applyDomainCommaShift(reason='manual'){
+  const plan=domainCommaShiftPlan();
+  if(!plan.needed){
+    setFlag('Decimaalverschuiving niet nodig: 3a_sim ligt al boven de Float64-contactvloer bij de huidige geometrie.',true);
+    return {applied:false,...plan};
+  }
+  const f=plan.factor;
+  if(Y)for(let i=0;i<Y.length;i++)Y[i]*=f;
+  if(trArr)for(let i=0;i<trArr.length;i++)trArr[i]*=f;
+  P.Rcyl*=f;P.Hcyl*=f;P.R0*=f;P.zA*=f;P.zB*=f;P.zSolo*=f;P.off*=f;
+  // Axiale driftschaal mee (m/s); Γ en Ω blijven SI-ongewijzigd.
+  P.w*=f;P.vzA*=f;P.vzB*=f;
+  P.particleSize=Math.max(1e-9,P.particleSize*f);
+  if(Number.isFinite(L0))L0*=f;
+  if(typeof camD==='number')camD*=f;
+  if(typeof camera!=='undefined'&&camera){
+    camera.near=Math.max(1e-15,camera.near*f);
+    camera.far=Math.max(camera.near*10,camera.far*f);
+    camera.updateProjectionMatrix();
+  }
+  if(typeof updCam==='function')updCam();
+  if(P.linkDH)P.linkVolumeRef=cylinderVolume();
+  invalidateBundleBEM('domain-comma-shift');ensureBundleBEM(true);
+  rebuildVolumeEnvelope();
+  if(typeof rebuildLines==='function')rebuildLines();
+  if(typeof rebuildTubes==='function')rebuildTubes(true);
+  if(typeof rebuildStreamlines==='function')rebuildStreamlines(true);
+  if(typeof initTracers==='function')initTracers();
+  updateCoreRadiusLimit(false);
+  if(typeof syncUi==='function')syncUi();
+  lastTopologyGap=P.topologyGuard?topologyClearance():Infinity;
+  const msg='Decimaalverschuiving domein ×'+f.toExponential(3)+
+    ' (reden: '+reason+'): Rcyl/R0/Y verkleind zodat 3a_sim Float64-contactresolveerbaar is. '+
+    'a_sim, Γ en Ω ongewijzigd in SI — dit is een andere labschaal, geen eenheidsherlabeling.';
+  setFlag(msg,true);
+  if(window.ModelLog)ModelLog.logUser('domain-comma-shift',{factor:f,reason,aSim:P.a,Rcyl:P.Rcyl,R0:P.R0,maxScale:plan.maxScale});
+  updateCoreQualificationReadout();
+  return {applied:true,...plan,factor:f};
 }
 function updateCoreQualificationReadout(){
   const el=document.getElementById('fluidCoreQualification');if(!el)return;
   const q=fluidCoreState();if(!q){el.textContent='Fysicakwalificatie niet geladen';return;}
   const floor=q.precisionFloor.toExponential(2);
+  const shift=domainCommaShiftPlan();
   const status=q.regime==='SUB_PRECISION_CORE'
-    ?'SUB-RESOLUTION: 3a is kleiner dan de Float64-contactvloer'
+    ?'SUB-RESOLUTION: 3a < Float64-contactvloer — herlabelen helpt niet; verklein het domein (decimaalverschuiving) of gebruik numerieke vloer + Topology Guard'
     :q.regime==='THIN_FILAMENT_UNQUALIFIED'
     ?'ONDER-GEKWALIFICEERD: lokale kern- of krommingsverhouding'
     :q.regime==='CANDIDATE_ONLY'
     ?'NUMERIEKE KANDIDAAT: geen Euler-certificering'
     :'ONGELDIGE INVOER / GEOMETRIE';
+  const ct=contactThresholdInfo();
+  const shiftNote=shift.needed
+    ?` · domein×${shift.factor.toExponential(2)} zou 3a resolveerbaar maken (max schaal ${shift.maxScale.toExponential(2)} m)`
+    :'';
   el.textContent='Fluid qualification: '+status+' · a_sim='+P.a.toExponential(3)+
-    ' m; precisievloer='+floor+' m; contact gebruikt max(3a,vloer).'+
-    ' Vaste kern r_kern en druk/wand zijn niet door de filamentoplosser gesloten.';
+    ' m; precisievloer='+floor+' m (schaal='+ct.geometryScale.toExponential(2)+
+    ' m); contact=max(3a,vloer)'+(ct.floorActive?' · VLOER ACTIEF':'')+shiftNote+
+    '. Vaste kern r_kern en druk/wand zijn niet door de filamentoplosser gesloten.';
   el.style.color=q.regime==='CANDIDATE_ONLY'?'#a8c5da':'#ffbd6c';
+  const btn=document.getElementById('bDomainCommaShift');
+  if(btn){btn.disabled=!shift.needed;btn.title=shift.needed
+    ?`Verklein geometrie ×${shift.factor.toExponential(3)} t.o.v. vaste a_sim`
+    :'Niet nodig: contact al resolveerbaar';}
 }
 function finiteOrNull(value){return Number.isFinite(value)?value:null;}
 function resolvedFixedCoreRadius(){
@@ -654,6 +790,7 @@ function backgroundVelocityAt(x,y,z){
   if(bundleFlowActive()){
     const ub=bundleExteriorVelocityAt(x,y,z);ux+=ub.ux;uy+=ub.uy;uz+=ub.uz;
   }
+  if(vlDiscrete.active()){const db=vlDiscrete.fieldVelocity(x,y,z);ux+=db.ux;uy+=db.uy;uz+=db.uz;}
   return {ux,uy,uz};
 }
 function backgroundVelocityForFilamentPoint(px,py,pz,tx,ty,tz){
@@ -893,6 +1030,192 @@ const RING_N = 48;
 const EVAL_BUDGET = 1.5e6;   // kernel-evals per frame
 
 let Y=null, fils=[], ghostFil=null, tPhys=0, phi=0, bundlePhi=0, paused=false;
+
+// A003 Twist Flow P6b: finite open, endpoint-pinned discrete filament bundle.
+// EXPERIMENTAL: two-way regularized Biot-Savart, NOT an Euler closure.
+const vlDiscrete=(()=>{
+  const cfg={mode:'off',omega:1,spacing:0.06,side:3,nodes:17};
+  let X=new Float64Array(0),initial=new Float64Array(0),before=new Float64Array(0);
+  let trial=null,descs=[],meshes=[],drawGroup=null,lastGap=Infinity,fieldCache=null;
+  const active=()=>window.__vlTwistFlowOverlayParticles===true&&cfg.mode==='discrete'&&cfg.omega!==0&&X.length>0;
+  const gamm=()=>2*cfg.omega*cfg.spacing*cfg.spacing;
+  const valid=(v,lo,hi)=>Number.isFinite(v)&&v>=lo&&v<=hi;
+  function setup(){
+    clearVisual();descs=[];lastGap=Infinity;trial=null;fieldCache=null;
+    if(cfg.mode!=='discrete'||!Y||!fils.length){X=new Float64Array(0);initial=X;before=X;return;}
+    const N=cfg.nodes,side=cfg.side,d=cfg.spacing;
+    // Finite straight strands, pinned endpoints. No artificial closure across z.
+    const halfHeight=Math.max(2*d,Math.min(P.Hcyl,0.36));
+    X=new Float64Array(3*side*side*N);let count=0;
+    for(let iy=0;iy<side;iy++)for(let ix=0;ix<side;ix++){
+      const x=(ix-(side-1)/2)*d,y=(iy-(side-1)/2)*d;
+      const off=3*N*count;descs.push({off,N,ix,iy});count++;
+      for(let k=0;k<N;k++){
+        X[off+3*k]=x;X[off+3*k+1]=y;
+        X[off+3*k+2]=-halfHeight+2*halfHeight*k/(N-1);
+      }
+    }
+    initial=X.slice();before=X.slice();
+    render();
+  }
+  function setConfig(opts){
+    const c={...cfg,...opts};
+    if(!['off','discrete'].includes(c.mode)||!valid(c.omega,0,1000)||!valid(c.spacing,0.002,0.5)||
+      ![1,3,5].includes(c.side)||![9,17,25].includes(c.nodes))throw new Error('P6b ongeldige configuratie');
+    Object.assign(cfg,c);setup();
+    return report();
+  }
+  function segments(A,ds,open){
+    const result=[];
+    for(let j=0;j<ds.length;j++){
+      const f=ds[j],len=open?f.N-1:f.N,off=f.off;
+      for(let k=0;k<len;k++){
+        const a=off+3*k,b=off+3*((k+1)%f.N);
+        result.push({fil:j,seg:k,
+          ax:A[a],ay:A[a+1],az:A[a+2],bx:A[b],by:A[b+1],bz:A[b+2],
+          mx:(A[a]+A[b])/2,my:(A[a+1]+A[b+1])/2,mz:(A[a+2]+A[b+2])/2,
+          dx:A[b]-A[a],dy:A[b+1]-A[a+1],dz:A[b+2]-A[a+2]});
+      }
+    }
+    return result;
+  }
+  function addVelocity(px,py,pz,source,pref,a2,dest,o){
+    for(const s of source){
+      const rx=px-s.mx,ry=py-s.my,rz=pz-s.mz;
+      const den=rx*rx+ry*ry+rz*rz+a2;
+      const w=pref/(den*Math.sqrt(den));
+      dest[o]+=(s.dy*rz-s.dz*ry)*w;
+      dest[o+1]+=(s.dz*rx-s.dx*rz)*w;
+      dest[o+2]+=(s.dx*ry-s.dy*rx)*w;
+    }
+  }
+  function knotDerivative(Yk,fl,OUT){
+    if(!active())return 0;
+    const bg=segments(trial||X,descs,true),pref=gamm()/(4*Math.PI),a2=P.a*P.a;
+    let peak=0;
+    for(const f of fl){if(f.ghost)continue;for(let k=0;k<f.N;k++){
+      const o=f.off+3*k;
+      addVelocity(Yk[o],Yk[o+1],Yk[o+2],bg,pref,a2,OUT,o);
+      peak=Math.max(peak,Math.hypot(OUT[o],OUT[o+1],OUT[o+2]));
+    }}
+    return peak;
+  }
+  function backgroundDerivative(Yk,fl,B){
+    const out=new Float64Array(B.length);
+    const bs=segments(B,descs,true),nonGhost=fl.filter(f=>!f.ghost);
+    const ks=segments(Yk,nonGhost,false);
+    const knotGroups=nonGhost.map((f,idx)=>ks.filter(s=>s.fil===idx));
+    const bgPref=gamm()/(4*Math.PI),a2=P.a*P.a;
+    for(const d of descs){for(let k=1;k<d.N-1;k++){
+      const o=d.off+3*k,px=B[o],py=B[o+1],pz=B[o+2];
+      // Consistent finite-core smoothing also for local background self-action.
+      addVelocity(px,py,pz,bs,bgPref,a2,out,o);
+      for(let fi=0;fi<nonGhost.length;fi++){
+        addVelocity(px,py,pz,knotGroups[fi],filamentGamma(nonGhost[fi])/(4*Math.PI),a2,out,o);
+      }
+    }}
+    return out; // endpoints are exactly pinned: derivative zero.
+  }
+  function advance(dt){
+    // Coupled RK4: all four stages share the same instantaneous knot/background geometry.
+    const b0=X.slice(),n=Y.length;
+    const bK=[],kStages=[];
+    const deriv=(Yk,B)=>{
+      trial=B;
+      const kv=new Float64Array(n);
+      const speed=velAll(Yk,kv);
+      const bv=backgroundDerivative(Yk,allFils(),B);
+      return {kv,bv,speed:Math.max(speed,maxSpeed(bv))};
+    };
+    const p1=deriv(Y,b0);kStages.push(p1.kv);bK.push(p1.bv);
+    const sK1=addScaled(Y,p1.kv,dt/2),sB1=addScaled(b0,p1.bv,dt/2);
+    const p2=deriv(sK1,sB1);kStages.push(p2.kv);bK.push(p2.bv);
+    const sK2=addScaled(Y,p2.kv,dt/2),sB2=addScaled(b0,p2.bv,dt/2);
+    const p3=deriv(sK2,sB2);kStages.push(p3.kv);bK.push(p3.bv);
+    const sK3=addScaled(Y,p3.kv,dt),sB3=addScaled(b0,p3.bv,dt);
+    const p4=deriv(sK3,sB3);kStages.push(p4.kv);bK.push(p4.bv);
+    for(let i=0;i<n;i++)Y[i]+=dt*(p1.kv[i]+2*p2.kv[i]+2*p3.kv[i]+p4.kv[i])/6;
+    for(let i=0;i<X.length;i++)X[i]=b0[i]+dt*(p1.bv[i]+2*p2.bv[i]+2*p3.bv[i]+p4.bv[i])/6;
+    for(const d of descs)for(const i of [d.off,d.off+3*(d.N-1)]){
+      X[i]=initial[i];X[i+1]=initial[i+1];X[i+2]=initial[i+2];
+    }
+    K4.set(p4.kv);trial=null;fieldCache=null;
+    wrapFilamentCarriersZ();enforceCenterLock();constrainGhostRing();
+    return Math.max(p1.speed,p2.speed,p3.speed,p4.speed);
+  }
+  const addScaled=(A,V,f)=>{const z=new Float64Array(A.length);for(let i=0;i<A.length;i++)z[i]=A[i]+f*V[i];return z;};
+  const maxSpeed=V=>{let max=0;for(let i=0;i<V.length;i+=3)max=Math.max(max,Math.hypot(V[i],V[i+1],V[i+2]));return max;};
+  function minDistance(Yk){
+    if(!active())return Infinity;
+    const bs=segments(X,descs,true),ks=segments(Yk,fils.filter(f=>!f.ghost),false);
+    let g2=Infinity;
+    for(const a of bs){for(const b of ks){
+      g2=Math.min(g2,segSegDist2(a.ax,a.ay,a.az,a.bx,a.by,a.bz,b.ax,b.ay,b.az,b.bx,b.by,b.bz));
+    }}
+    for(let i=0;i<bs.length;i++)for(let j=i+1;j<bs.length;j++){
+      const a=bs[i],b=bs[j];if(a.fil===b.fil&&Math.abs(a.seg-b.seg)<=2)continue;
+      g2=Math.min(g2,segSegDist2(a.ax,a.ay,a.az,a.bx,a.by,a.bz,b.ax,b.ay,b.az,b.bx,b.by,b.bz));
+    }
+    lastGap=Math.sqrt(g2);return lastGap;
+  }
+  function fieldVelocity(px,py,pz){
+    if(!active())return {ux:0,uy:0,uz:0};
+    if(!fieldCache)fieldCache=segments(X,descs,true);
+    const u=new Float64Array(3);
+    addVelocity(px,py,pz,fieldCache,gamm()/(4*Math.PI),P.a*P.a,u,0);
+    return {ux:u[0],uy:u[1],uz:u[2]};
+  }
+  function allFinite(){for(const x of X)if(!Number.isFinite(x))return false;return true;}
+  function contact(){
+    if(!active())return null;
+    if(minSegment()<Math.max(1e-12,1e-3*P.a))
+      return {warn:false,msg:'⛔ P6b: ingestorte achtergrondsegmentlengte; integratie geweigerd.'};
+    const gap=minDistance(Y);
+    // This gate uses the same numerical a_sim, not a claimed physical core.
+    if(gap<contactThresholdInfo().effective)return {warn:false,msg:'⛔ P6b: contact onder effectieve contactdrempel; geen reconnectie toegestaan.'};
+    return null;
+  }
+  function snapshot(){if(active())before=X.slice();}
+  function restore(){if(active()&&before.length===X.length){X.set(before);trial=null;fieldCache=null;}}
+  function fullSnapshot(){return active()?X.slice():null;}
+  function restoreFull(v){if(v&&v.length===X.length){X.set(v);trial=null;fieldCache=null;}}
+  function maxDisplacementFromBefore(){return before.length===X.length?maxStateDisplacement(before,X):0;}
+  function minSegment(){let m=Infinity;for(const d of descs)for(let k=0;k<d.N-1;k++){
+    const a=d.off+3*k,b=a+3;m=Math.min(m,Math.hypot(X[b]-X[a],X[b+1]-X[a+1],X[b+2]-X[a+2]));
+  }return m;}
+  function clearVisual(){
+    if(!drawGroup)return;
+    for(const obj of meshes){obj.geometry.dispose();obj.material.dispose();drawGroup.remove(obj);}meshes=[];
+  }
+  function render(){
+    if(!active()&&!drawGroup)return;
+    if(!drawGroup){drawGroup=new THREE.Group();scene.add(drawGroup);}
+    if(!active()){clearVisual();drawGroup.visible=false;return;}
+    drawGroup.visible=true;
+    if(meshes.length!==descs.length){clearVisual();for(const d of descs){
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(3*d.N),3));
+      const m=new THREE.LineBasicMaterial({color:0x43c2ee,transparent:true,opacity:0.8});
+      const l=new THREE.Line(g,m);meshes.push(l);drawGroup.add(l);
+    }}
+    for(let i=0;i<descs.length;i++){
+      const d=descs[i],arr=meshes[i].geometry.attributes.position.array;
+      for(let k=0;k<3*d.N;k++)arr[k]=X[d.off+k];
+      meshes[i].geometry.attributes.position.needsUpdate=true;
+    }
+  }
+  function maxTransverseBending(){
+    let max=0;
+    for(let i=0;i<X.length;i+=3)max=Math.max(max,Math.hypot(X[i]-initial[i],X[i+1]-initial[i+1]));
+    return max;
+  }
+  function report(){return {mode:cfg.mode,omega:cfg.omega,spacing:cfg.spacing,side:cfg.side,nodes:cfg.nodes,
+    circulation:gamm(),filaments:descs.length,vertices:descs.length*cfg.nodes,
+    gap:lastGap,maxTransverseDisplacement:maxTransverseBending(),endpointPolicy:'pinned-open-finite',modelStatus:'RESEARCH_TRACK_NOT_EULER_CERTIFIED'};}
+  window.__vlDiscreteBundleAPI={configure:setConfig,getSnapshot:report,reset:setup};
+  return {active,setup,advance,knotDerivative,contact,minDistance,snapshot,restore,fullSnapshot,restoreFull,fieldVelocity,isFinite:allFinite,
+    maxDisplacementFromBefore,minSegment,render,report};
+})();
+
 let flagged="", warned=false, lastUmax=1e-9;
 let Wr0=null, L0=1;
 let K1,K2,K3,K4,TT;
@@ -1139,24 +1462,113 @@ function applyFrictionPreset(){
   P.accExp=3; // fysische krimp is µm/s-schaal; 10³× maakt hem zichtbaar
   syncCoreFlowCoupling('gamma');
 }
-function applySpecClockPreset(){
+function snapshotVortexSelection(from=P){
+  return {
+    knotSource:from.knotSource||'builtin',
+    knotKey:from.knotKey||'',
+    knotIdx:Number.isInteger(from.knotIdx)?from.knotIdx:-1,
+    topo:from.topo||'trefoil',
+    idealComponentMode:from.idealComponentMode==='single'?'single':'all',
+    compA:Number(from.compA)||1,
+    compB:Number(from.compB)||1
+  };
+}
+function applyVortexSelectionToP(sel){
+  if(!sel)return;
+  const source=sel.knotSource||'builtin';
+  P.knotIdx=Number.isInteger(sel.knotIdx)?sel.knotIdx:-1;
+  P.knotKey=sel.knotKey||'';
+  P.knotSource=source;
+  P.topo=(sel.topo&&BUILTIN_TOPOLOGIES[sel.topo])?sel.topo:'trefoil';
+  P.idealComponentMode=sel.idealComponentMode==='single'?'single':'all';
+  P.compA=Number(sel.compA)||1;
+  P.compB=Number(sel.compB)||1;
+  if(source==='ideal'&&sel.knotKey&&getIdealKnotCatalog()?.db?.[sel.knotKey]){P.knotSource='ideal';P.knotKey=sel.knotKey;}
+  else if(source==='fseries'&&sel.knotKey&&getFourierKnotCatalog()?.db?.[sel.knotKey]){P.knotSource='fseries';P.knotKey=sel.knotKey;}
+  else if(source==='knotplot'&&sel.knotKey){const key=normalizeKnotPlotId(sel.knotKey);if(getKnotPlotKnotCatalog()?.db?.[key]){P.knotSource='knotplot';P.knotKey=key;}}
+  else if(source==='twist'&&sel.knotKey&&getTwistKnotCatalog()?.db?.[sel.knotKey]){P.knotSource='twist';P.knotKey=sel.knotKey;}
+  else if(source==='ruben'&&sel.knotKey&&getRubenKnotCatalog()?.db?.[sel.knotKey]){P.knotSource='ruben';P.knotKey=sel.knotKey;}
+  else if(source==='xyz'&&ImportedXyzEntry){P.knotSource='xyz';P.knotKey=sel.knotKey||ImportedXyzEntry.sourceFile||'import.xyz';}
+  else if(source==='legacy'&&Number.isInteger(sel.knotIdx)&&Array.isArray(window.IDEAL_KNOTS)&&window.IDEAL_KNOTS[sel.knotIdx]){P.knotSource='legacy';P.knotIdx=sel.knotIdx;P.knotKey='';}
+  else if(source==='builtin'||!source){P.knotSource='builtin';P.knotKey='';P.knotIdx=-1;}
+}
+function attachVortexGeometryToScenario(sc,sel){
+  if(!sc||!sel)return sc;
+  const source=sel.knotSource||'builtin';
+  sc.topo=sel.topo||sc.topo||'trefoil';
+  sc.idealComponentMode=sel.idealComponentMode==='single'?'single':'all';
+  sc.compA=Number(sel.compA)||1;
+  sc.compB=Number(sel.compB)||1;
+  if(source==='ideal'||source==='fseries'||source==='knotplot'||source==='twist'||source==='ruben'){
+    sc.knotSource=source;
+    sc.knotKey=source==='knotplot'?normalizeKnotPlotId(sel.knotKey||''):(sel.knotKey||'');
+  }else if(source==='xyz'){
+    sc.knotSource='xyz';
+    sc.knotKey=sel.knotKey||ImportedXyzEntry?.sourceFile||'import.xyz';
+  }else{
+    sc.knotSource=null;
+    sc.knotKey='';
+  }
+  return sc;
+}
+let ClockLockedVortexSelection=null;
+function setClockLockedVortexSelection(from=P){
+  ClockLockedVortexSelection=snapshotVortexSelection(from||P);
+  return ClockLockedVortexSelection;
+}
+function clearClockLockedVortexSelection(){ClockLockedVortexSelection=null;}
+function clockRunLocksVortexSelection(){
+  return !!ClockLockedVortexSelection;
+}
+function applyLockedVortexGeometry(scOrSel){
+  const sel=scOrSel||ClockLockedVortexSelection;
+  if(!sel)return;
+  const source=sel.knotSource||(!sel.knotKey?'builtin':null);
+  if(source){
+    applyVortexSelectionToP({
+      knotSource:source,
+      knotKey:sel.knotKey||'',
+      knotIdx:sel.knotIdx,
+      topo:sel.topo||'trefoil',
+      idealComponentMode:sel.idealComponentMode,
+      compA:sel.compA,
+      compB:sel.compB
+    });
+  }else if(sel.topo&&BUILTIN_TOPOLOGIES[sel.topo]){
+    P.knotSource='builtin';P.knotKey='';P.knotIdx=-1;P.topo=sel.topo;
+    P.idealComponentMode=sel.idealComponentMode==='single'?'single':'all';
+    P.compA=Number(sel.compA)||1;P.compB=Number(sel.compB)||1;
+  }else{
+    applyVortexSelectionToP(sel);
+  }
+}
+function applySpecClockKinematicsPreset(){
+  // Clock kinematics / medium only — preserves active vortex model geometry.
   disableStretchProfileCoupling();
-  P.mode='botsing';P.topo='trefoil';P.inter='bs';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;
-  P.knotIdx=-1;P.knotKey='';P.compA=1;P.compB=1;P.R0=0.07;P.a=1.0e-3;P.nQ=1;
+  P.mode='botsing';P.inter='bs';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;
+  P.R0=0.07;P.a=1.0e-3;P.nQ=1;
   P.Om=1;P.revOm=false;P.displayFrame='lab';P.solverFrame='corot';P.bgFlow='none';P.bundleEnabled=false;
   P.off=0;P.w=0;P.lockVz=false;P.vzA=+0.005;P.vzB=-0.005;P.ccwA=true;P.ccwB=false;P.mirrorB=false;
   P.timeReverse=false;P.autoRelax=false;P.topologyGuard=true;P.centerLock=false;P.tracerWrapZ=true;P.tracerSpawnMode='inner-column';
   P.mfTemp='0';P.mfAlpha=0;P.mfAlphaP=0;P.vnZ=0;P.specClockDisplayGain=1;P.specClockEnabled=true;
-  P.accExp=0; // v7.6.13: reproduceerbare 1× sweep; nooit een geërfde hoge afspeelsnelheid
+  P.accExp=0;
   setInitialAxialSeparation(Math.min(0.84,initialAxialSeparationSliderMax()));
-  resetSpecClockRuntime('preset');
-  syncUi();updateSubtitle();resetState();
+  resetSpecClockRuntime('preset-kinematics');
+}
+function applySpecClockPreset(){
+  // Sweep-preset: kinematics/medium only — keep the current vortex-model knot.
+  const keep=snapshotVortexSelection(P);
+  applySpecClockKinematicsPreset();
+  applyVortexSelectionToP(keep);
+  syncUi();if(typeof syncKnotSel==='function')syncKnotSel();updateSubtitle();resetState();
   SpecClock.autoStartAfterCalibration=true;
   setPausedState(true,'spec-clock-preset-arm');
   updateSpecClockDisplay();
+  if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi)SpecClockProxyDecomposition.updateKnotSelectionUi();
   if(typeof resetParticlesToTaylorColumn==='function')resetParticlesToTaylorColumn();
-  if(window.ModelLog){window.ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;window.ModelLog.logEvent('spec-clock-preset',{topo:P.topo,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB});}
-  setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, trefoil, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit, Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe. De run staat gepauzeerd op 1×; kalibreer eenmaal bij t=0, daarna start hij automatisch.',true);
+  const knotLabel=(keep.knotSource&&keep.knotSource!=='builtin')?(keep.knotSource+' '+(keep.knotKey||'')):('builtin '+(keep.topo||'trefoil'));
+  if(window.ModelLog){window.ModelLog.setEnabled(true);const cb=document.getElementById('cModelLog');if(cb)cb.checked=true;window.ModelLog.logEvent('spec-clock-preset',{topo:P.topo,knotSource:P.knotSource,knotKey:P.knotKey,inter:P.inter,qual:P.qual,a:P.a,dz0:initialAxialSeparation(),off:P.off,vzA:P.vzA,vzB:P.vzB,preservedKnot:keep});}
+  setFlag('⏱ speculative swirl-clock sweep-preset actief: SST, botsing, Biot–Savart, kwaliteit hoog, topology guard aan, auto-relax uit · knoop behouden: '+knotLabel+' · Δz_AB,0='+fmtLengthSI(initialAxialSeparation())+', v_z A/B naar elkaar toe. De run staat gepauzeerd op 1×; kalibreer eenmaal bij t=0, daarna start hij automatisch.',true);
 }
 function applyStretchGatePreset(){
   P.mode='solo';P.topo='trefoil';P.inter='lia';P.qual='hoog';P.med='sst';P.core='vast';P.coreFlowLock=false;P.rCorePhysical=null;P.scaleProbe=R_HORN_SST;
@@ -1250,6 +1662,11 @@ function getTwistKnotCatalog(){
     return {ids:TWIST_KNOT_IDS,db:TWIST_KNOT_DB,source:'twist'};
   return null;
 }
+function getRubenKnotCatalog(){
+  if(typeof RUBEN_KNOT_IDS!=='undefined'&&typeof RUBEN_KNOT_DB!=='undefined')
+    return {ids:RUBEN_KNOT_IDS,db:RUBEN_KNOT_DB,source:'ruben'};
+  return null;
+}
 const KNOTPLOT_ID_ALIASES=Object.freeze({Tlink_6_9:'torus_6.9'});
 function normalizeKnotPlotId(id){return KNOTPLOT_ID_ALIASES[id]||id;}
 function knotPlotLinkingAbs(entry){
@@ -1300,11 +1717,49 @@ function resolveTwistHoldoutKey(topologyKey,filters){
   const catalog=getTwistKnotCatalog();
   return catalog?.db?.[id]?id:null;
 }
+function rubenEntryMatchesFilters(entry,filters){
+  if(!entry)return false;
+  const embedding=(filters?.embedding||'ALL').toUpperCase();
+  const variant=(filters?.variant||'ALL').toUpperCase();
+  const b0Raw=filters?.b0;
+  if(embedding!=='ALL'&&embedding!==''){
+    if(String(entry.parametricEmbedding||'').toUpperCase()!==embedding)return false;
+  }
+  if(variant!=='ALL'&&variant!==''){
+    if(String(entry.variant||'').toUpperCase()!==variant)return false;
+  }
+  if(b0Raw!==undefined&&b0Raw!==null&&String(b0Raw).toUpperCase()!=='ALL'){
+    if(Math.abs(Number(entry.B0)-Number(b0Raw))>1e-12)return false;
+  }
+  return true;
+}
+function readRubenFilterState(){
+  const b0Val=document.getElementById('rubenB0Filter')?.value??'ALL';
+  return {
+    embedding:document.getElementById('rubenEmbeddingFilter')?.value||'ALL',
+    variant:document.getElementById('rubenVariantFilter')?.value||'baseline',
+    b0:b0Val==='ALL'?null:Number(b0Val)
+  };
+}
+function populateRubenFilterOptions(){
+  const ruben=getRubenKnotCatalog();
+  const embSel=document.getElementById('rubenEmbeddingFilter');
+  const b0Sel=document.getElementById('rubenB0Filter');
+  if(!ruben||!embSel||!b0Sel)return;
+  const embeddings=[...new Set(ruben.ids.map(id=>ruben.db[id]?.parametricEmbedding).filter(Boolean))].sort();
+  const b0s=[...new Set(ruben.ids.map(id=>Number(ruben.db[id]?.B0)).filter(Number.isFinite))].sort((a,b)=>a-b);
+  const prevEmb=embSel.value||'ALL',prevB0=b0Sel.value||'ALL';
+  embSel.innerHTML='<option value="ALL">All</option>'+embeddings.map(e=>`<option value="${e}">${e}</option>`).join('');
+  b0Sel.innerHTML='<option value="ALL">All</option>'+b0s.map(b=>`<option value="${b}">${b}</option>`).join('');
+  if([...embSel.options].some(o=>o.value===prevEmb))embSel.value=prevEmb;
+  if([...b0Sel.options].some(o=>o.value===prevB0))b0Sel.value=prevB0;
+}
 function knotCatalogForSource(source){
   if(source==='ideal')return getIdealKnotCatalog();
   if(source==='fseries')return getFourierKnotCatalog();
   if(source==='knotplot')return getKnotPlotKnotCatalog();
   if(source==='twist')return getTwistKnotCatalog();
+  if(source==='ruben')return getRubenKnotCatalog();
   return null;
 }
 let ImportedXyzEntry=null;
@@ -1324,8 +1779,8 @@ function applyImportedXyzEntry(entry){
   ImportedXyzEntry=entry;
   P.knotIdx=-1;P.knotKey=entry.sourceFile||entry.knotId||'import.xyz';P.knotSource='xyz';
   P.topo='trefoil';P.idealComponentMode='all';P.compA=1;P.compB=1;
-  const topo=document.getElementById('topoSelect');if(topo)topo.value='trefoil';
   syncKnotSel();syncCompSelects();syncUi();updateSubtitle();updateXyzImportInfo();resetState();
+  if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi){SpecClockProxyDecomposition.updateKnotSelectionUi();VLClockWorkflow.invalidateSelection();}
 }
 function activeKnotEntry(){
   if(P.knotSource==='xyz')return ImportedXyzEntry;
@@ -1610,6 +2065,48 @@ function specClockProxyAssessment(phaseRatio,fieldRatioMin,fieldRatioMax,fieldLo
   const rawOverlap=pLog>=lo&&pLog<=hi;
   return{state:rawOverlap?'raw-overlap':'unmapped-mismatch',rawOverlap,falsified:false};
 }
+function specClockKnotSourceLabel(){
+  const source=P.knotSource||'builtin';
+  if(source==='ideal'&&P.knotKey)return 'ideal '+P.knotKey;
+  if(source==='fseries'&&P.knotKey)return 'fseries '+P.knotKey;
+  if(source==='knotplot'&&P.knotKey)return 'KnotPlot '+normalizeKnotPlotId(P.knotKey);
+  if(source==='twist'&&P.knotKey)return 'A006 '+P.knotKey;
+  if(source==='ruben'&&P.knotKey)return 'Ruban '+P.knotKey;
+  if(source==='xyz')return 'XYZ '+(P.knotKey||'import');
+  if(source==='legacy'&&P.knotIdx>=0)return 'legacy #'+P.knotIdx;
+  return 'builtin '+(P.topo||'trefoil');
+}
+function specClockProxyDiagnostics(m){
+  if(!m||!m.valid)return{ok:false,summary:'—',residual:null,scaleRatio:null,distance:null,knotSource:null,rawOverlap:null,falsified:false};
+  const fieldAbs=Math.max(Math.abs(m.fieldLogRatioMin||0),Math.abs(m.fieldLogRatioMax||0),1e-300);
+  const scaleRatio=Number.isFinite(m.phaseLogRatio)?Math.abs(m.phaseLogRatio)/fieldAbs:NaN;
+  const residual=Number.isFinite(m.residual)?m.residual:NaN;
+  const distance=Number.isFinite(m.distance)?m.distance:NaN;
+  const knotSource=specClockKnotSourceLabel();
+  const summary=[
+    Number.isFinite(residual)?'ε='+residual.toExponential(2):null,
+    Number.isFinite(scaleRatio)?'schaal='+(scaleRatio>=100?scaleRatio.toExponential(2):scaleRatio.toFixed(2)):null,
+    Number.isFinite(distance)?'d='+fmtLengthSI(distance):null,
+    'bron='+knotSource
+  ].filter(Boolean).join(' · ');
+  return{
+    ok:true,summary,residual:Number.isFinite(residual)?residual:null,scaleRatio:Number.isFinite(scaleRatio)?scaleRatio:null,
+    distance:Number.isFinite(distance)?distance:null,knotSource,rawOverlap:m.rawOverlap??null,falsified:false,
+    phaseLogRatio:Number.isFinite(m.phaseLogRatio)?m.phaseLogRatio:null,
+    fieldLogRatioMin:Number.isFinite(m.fieldLogRatioMin)?m.fieldLogRatioMin:null,
+    fieldLogRatioMax:Number.isFinite(m.fieldLogRatioMax)?m.fieldLogRatioMax:null
+  };
+}
+function formatSpecClockProxyStatus(m){
+  const diag=specClockProxyDiagnostics(m);
+  if(!SpecClock.calibrated){
+    return{cls:'warn',text:(tPhys>1e-12&&!paused?'PAUZEER VOOR KALIBRATIE · ':'FASE-NULLROUTE OPEN · ')+'kalibreer eenmaal bij zo groot mogelijke A–B-afstand. De referentie wordt daarna tot Reset vergrendeld.',diag};
+  }
+  if(m.rawOverlap){
+    return{cls:'warn',text:'PROXY BINNEN VELDBRACKET · numerieke overlap van fase-null met de formele veld-envelope. Geen closure of SST-bevestiging. '+diag.summary,diag};
+  }
+  return{cls:'warn',text:'PROXY BUITEN VELDBRACKET · fase-null ligt buiten de formele veld-envelope. Dit betreft alleen deze proxyrealisatie, niet een SST-parameter of klokwet. '+diag.summary,diag};
+}
 function specClockPrerequisites(ignoreEnabled=false){
   if(!ignoreEnabled&&!P.specClockEnabled)return{ok:false,reason:'UIT'};
   if(P.mode!=='botsing')return{ok:false,reason:'vereist botsingsmodus met drager A en B'};
@@ -1701,10 +2198,12 @@ function measureSpecClock(V=K4){
   }
   const fieldRateMin=specClockEtaDiffFromDeltaLogs(envA.deltaLogEtaMin,envB.deltaLogEtaMax);
   const fieldRateMax=specClockEtaDiffFromDeltaLogs(envA.deltaLogEtaMax,envB.deltaLogEtaMin);
-  return{valid:true,distance:Math.hypot(b.cx-a.cx,b.cy-a.cy,b.z-a.z),uA:mA.uRms,uB:mB.uRms,envA,envB,
+  const out={valid:true,distance:Math.hypot(b.cx-a.cx,b.cy-a.cy,b.z-a.z),uA:mA.uRms,uB:mB.uRms,envA,envB,
     omegaA,omegaB,omegaIsoA,omegaIsoB,deltaOmegaA,deltaOmegaB,deltaFracA,deltaFracB,phaseOffsetA,phaseOffsetB,etaPhaseA,etaPhaseB,
     fieldLogRatioMin,fieldLogRatioMax,fieldRatioMin,fieldRatioMax,phaseRatio,phaseLogRatio,phaseRate,fieldRateMin,fieldRateMax,
     rawOverlap:assessment.rawOverlap,closureComparable:false,falsified:false,residual,samplesA:mA.samples,samplesB:mB.samples};
+  out.diagnostics=specClockProxyDiagnostics(out);
+  return out;
 }
 function updateSpecClockAcceptedStep(dt,V=K4){
   if(!P.specClockEnabled||!(dt>0))return;
@@ -1717,6 +2216,13 @@ function updateSpecClockAcceptedStep(dt,V=K4){
       SpecClock.lagFieldMin+=m.fieldRateMin*h;SpecClock.lagFieldMax+=m.fieldRateMax*h;
     }
     if(Number.isFinite(m.phaseRate))SpecClock.lagPhase+=m.phaseRate*h;
+    if(window.ModelLog&&window.ModelLog.enabled&&m.diagnostics){
+      const key=(m.rawOverlap?'in':'out')+'|'+(m.diagnostics.scaleRatio??'')+'|'+(m.diagnostics.knotSource||'');
+      if(SpecClock._lastDiagLogKey!==key){
+        SpecClock._lastDiagLogKey=key;
+        window.ModelLog.logEvent('spec-clock-proxy-diag',m.diagnostics);
+      }
+    }
   }
   SpecClock.last=m;
 }
@@ -1752,14 +2258,15 @@ function calibrateSpecClockPhase(options={}){
   SpecClock.calibrationMode=mode;SpecClock.calibrated=true;
   SpecClock.calibrationTime=tPhys;SpecClock.calibrationDistance=m0.distance;SpecClock.calibrationCount=1;
   SpecClock.lagFieldMin=SpecClock.lagFieldMax=SpecClock.lagPhase=0;SpecClock.dtBucket=0;SpecClock.stepCounter=0;
-  SpecClock.last=measureSpecClock();updateSpecClockDisplay();
+  SpecClock.last=measureSpecClock();SpecClock._lastDiagLogKey=null;updateSpecClockDisplay();
   if(window.ModelLog)window.ModelLog.logEvent('spec-clock-phase-null-calibration',{
     distance:SpecClock.calibrationDistance,tPhys:SpecClock.calibrationTime,mode,
     projectionNull:SpecClock.projectionNull,legacyProjectionInformative:!SpecClock.projectionNull,
     deltaFracRefA:SpecClock.projectionNull?null:SpecClock.phaseNullRefA,
     deltaFracRefB:SpecClock.projectionNull?null:SpecClock.phaseNullRefB,
     omegaFullA:m0.omegaA,omegaIsoA:m0.omegaIsoA,omegaFullB:m0.omegaB,omegaIsoB:m0.omegaIsoB,locked:true,
-    autoStart:SpecClock.autoStartAfterCalibration});
+    autoStart:SpecClock.autoStartAfterCalibration,
+    proxyDiagnostics:SpecClock.last&&SpecClock.last.diagnostics||null});
   if(SpecClock.projectionNull){
     setFlag('ℹ legacy lab-z-projectie is nul/niet-informatief; intrinsieke Ω-holdoutmeting blijft geldig en wordt voortgezet.',true);
   }
@@ -1797,14 +2304,16 @@ function updateSpecClockDisplay(){
   const ids=['specClockDistance','specClockMutual','specClockEtaA','specClockEtaB','specClockOmegaFull','specClockOmegaIso','specClockDeltaOmega','specClockPhaseRates','specClockFieldRatio','specClockFieldLogRatio','specClockPhaseRatio','specClockPhaseLogRatio','specClockCalibration','specClockFieldLag','specClockPhaseLag','specClockResidual'];
   const clear=()=>ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
   const finish=m=>{syncSpecClockQuickControls();updateSpecClockOverlay(m,pre);};
-  if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';finish(null);return;}
-  if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';finish(null);return;}
+  const diagEl=document.getElementById('specClockProxyDiag');
+  if(!P.specClockEnabled){clear();status.className='spec-clock-status bad';status.textContent='UIT · activeer alleen voor SST + botsingsmodus met twee dragers.';if(diagEl)diagEl.textContent='—';finish(null);return;}
+  if(!pre.ok){clear();status.className='spec-clock-status bad';status.textContent='GEBLOKKEERD · '+pre.reason+'. Geen klokwaarde wordt geclaimd.';if(diagEl)diagEl.textContent='—';finish(null);return;}
   const m=SpecClock.last;
   if(!m||!m.valid){
     clear();
     const benchStatus=specClockBenchmarkRestoreStatus();
     if(benchStatus){status.className='spec-clock-status '+benchStatus.cls;status.textContent=benchStatus.text;}
     else{status.className='spec-clock-status warn';status.textContent='WACHT OP DETERMINISTISCHE VELDSAMPLE · '+((m&&m.reason)||'eerste geaccepteerde stappen nodig')+'.';}
+    if(diagEl)diagEl.textContent='—';
     finish(m);return;
   }
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
@@ -1827,9 +2336,9 @@ function updateSpecClockDisplay(){
   const pctA=clamp(ppmA*P.specClockDisplayGain/full*100,0,100),pctB=clamp(ppmB*P.specClockDisplayGain/full*100,0,100);
   document.getElementById('specClockBarA').style.width=pctA+'%';document.getElementById('specClockBarB').style.width=pctB+'%';
   document.getElementById('specClockBarValueA').textContent=ppmA.toFixed(6)+' ppm';document.getElementById('specClockBarValueB').textContent=ppmB.toFixed(6)+' ppm';
-  if(!SpecClock.calibrated){status.className='spec-clock-status warn';status.textContent=(tPhys>1e-12&&!paused?'PAUZEER VOOR KALIBRATIE · ':'FASE-NULLROUTE OPEN · ')+'kalibreer eenmaal bij zo groot mogelijke A–B-afstand. De referentie wordt daarna tot Reset vergrendeld.';}
-  else if(m.rawOverlap){status.className='spec-clock-status warn';status.textContent='FASE-NULLTEST BINNEN RUWE BRACKET · de geïsoleerd afgetrokken fase-nullproxy ligt numeriek binnen de formele veldbracket. Dit is nog geen closure of bevestiging.';}
-  else{status.className='spec-clock-status warn';status.textContent='FASEPROXY-NULLTEST MISLUKT · na geïsoleerde zelf- en achtergrondaftrek ligt R_AB^phase-null buiten de stabiele veldbracket. Dit verwerpt deze proxyrealisatie voor de huidige run, niet een SST-parameter of klokwet.';}
+  const proxyStatus=formatSpecClockProxyStatus(m);
+  status.className='spec-clock-status '+proxyStatus.cls;status.textContent=proxyStatus.text;
+  if(diagEl)diagEl.textContent=proxyStatus.diag.ok?proxyStatus.diag.summary:'—';
   finish(m);
 }
 function ensureSpecClockOverlayMarkup(body){
@@ -1844,6 +2353,7 @@ function ensureSpecClockOverlayMarkup(body){
       <div class="k">actuele d_AB / clearance</div><div class="v" data-spec-overlay="distance">—</div>
       <div class="k">stopgrens</div><div class="v" data-spec-overlay="stop">—</div>
       <div class="k">fase-nullreferentie / logging</div><div class="v" data-spec-overlay="calibration">—</div>
+      <div class="k">proxy-diagnostiek</div><div class="v" data-spec-overlay="proxyDiag">—</div>
       <div class="k">status</div><div class="v" data-spec-overlay="status">—</div>
     </div>`;
   body.dataset.specOverlayReady='1';
@@ -1872,6 +2382,8 @@ function updateSpecClockOverlay(m,pre){
   setSpecClockOverlayValue(body,'distance',current+' · '+gap);
   setSpecClockOverlayValue(body,'stop',fmtLengthSI(ct.effective));
   setSpecClockOverlayValue(body,'calibration',(SpecClock.calibrated?'🔒 t='+SpecClock.calibrationTime.toFixed(3)+' s':'open')+' · '+logState);
+  const diag=(m&&m.diagnostics)||specClockProxyDiagnostics(m);
+  setSpecClockOverlayValue(body,'proxyDiag',diag&&diag.ok?diag.summary:'—');
   setSpecClockOverlayValue(body,'status',status);
 }
 
@@ -2014,12 +2526,40 @@ const SpecClockProxyDecomposition=(()=>{
     'torus_6.9':{label:'T(6,9)',selectorLabel:'T(6,9) · 3 trefoilcomponenten',crossingNumber:45,knotplot:'torus_6.9',resolution:128,family:'torus-link'}
   };
   function normalizeHoldoutTopologyKey(key){return key==='Tlink_6_9'?'torus_6.9':key;}
-  function renderKnotSelectorOptions(){
-    const box=document.querySelector('#specKnotDropdown .spec-knot-options');if(!box)return;
-    box.innerHTML=Object.entries(KNOT_HOLDOUT_CATALOG).map(([key,m])=>{const sources=[m.ideal?'ideal':null,m.fseries?'fseries':null,m.knotplot?'KnotPlot':null].filter(Boolean).join('/'),checked=DEFAULT_KNOT_SELECTION.topologies.includes(key)?' checked':'';return `<label><input type="checkbox" data-spec-knot="${key}"${checked}> ${m.selectorLabel||m.label} · ${sources}</label>`;}).join('');
+  const BUILTIN_TOPO_TO_HOLDOUT={trefoil:'3_1',figure8:'4_1',cinquefoil:'5_1',twist52:'5_2'};
+  function topologyKeyFromVortexModel(from=P){
+    const source=from.knotSource||'builtin';
+    if(source==='ideal'&&from.knotKey){
+      const hit=Object.entries(KNOT_HOLDOUT_CATALOG).find(([,m])=>m.ideal===from.knotKey);
+      return hit?hit[0]:null;
+    }
+    if(source==='fseries'&&from.knotKey)return normalizeHoldoutTopologyKey(from.knotKey);
+    if(source==='knotplot'&&from.knotKey){
+      const key=normalizeKnotPlotId(from.knotKey);
+      const hit=Object.entries(KNOT_HOLDOUT_CATALOG).find(([,m])=>m.knotplot===key);
+      return hit?hit[0]:normalizeHoldoutTopologyKey(key);
+    }
+    if(source==='twist'&&from.knotKey){
+      const m=String(from.knotKey).match(/^KNOT_(.+)_N\d+_/i)||String(from.knotKey).match(/^(.+)_N\d+$/i);
+      return m?normalizeHoldoutTopologyKey(m[1]):null;
+    }
+    if(source==='ruben'&&from.knotKey){
+      const entry=getRubenKnotCatalog()?.db?.[from.knotKey];
+      return entry?.topology?normalizeHoldoutTopologyKey(entry.topology):null;
+    }
+    return BUILTIN_TOPO_TO_HOLDOUT[from.topo]||null;
   }
-  const KNOT_SELECTION_STORAGE='vortexlab.clock.holdoutSelection.v1';
-  const DEFAULT_KNOT_SELECTION={ideal:true,fseries:true,knotplot:true,twist:false,topologies:['3_1','4_1','5_2']};
+  function vortexModelHoldoutLabel(from=P){
+    const source=from.knotSource||'builtin';
+    if(source==='ideal'&&from.knotKey)return `ideal ${from.knotKey}`;
+    if(source==='fseries'&&from.knotKey)return `fseries ${from.knotKey}`;
+    if(source==='knotplot'&&from.knotKey)return `KnotPlot ${normalizeKnotPlotId(from.knotKey)}`;
+    if(source==='twist'&&from.knotKey)return `A006 twist ${from.knotKey}`;
+    if(source==='ruben'&&from.knotKey)return `Ruban E010 ${from.knotKey}`;
+    if(source==='xyz')return `XYZ ${from.knotKey||'import'}`;
+    const topo=BUILTIN_TOPOLOGIES[from.topo]||BUILTIN_TOPOLOGIES.trefoil;
+    return `builtin ${topo.label||from.topo}`;
+  }
   let scenarios=[];
   const resultCache=new Map();
   const cacheStats={hits:0,misses:0};
@@ -2027,38 +2567,67 @@ const SpecClockProxyDecomposition=(()=>{
   function cloneAnalysis(x){return typeof structuredClone==='function'?structuredClone(x):x;}
   function copyScenarios(xs){return xs.map(x=>({...x,checkpoints:[...(x.checkpoints||RESOLUTION_CHECKPOINTS)]}));}
   function readKnotSelection(){
-    let saved=null;try{saved=JSON.parse(localStorage.getItem(KNOT_SELECTION_STORAGE)||'null');}catch(_){saved=null;}
-    const ideal=document.getElementById('cSpecHoldoutIdeal')?.checked??saved?.ideal??DEFAULT_KNOT_SELECTION.ideal;
-    const fseries=document.getElementById('cSpecHoldoutFseries')?.checked??saved?.fseries??DEFAULT_KNOT_SELECTION.fseries;
-    const knotplot=document.getElementById('cSpecHoldoutKnotplot')?.checked??saved?.knotplot??DEFAULT_KNOT_SELECTION.knotplot;
-    const twist=document.getElementById('cSpecHoldoutTwist')?.checked??saved?.twist??DEFAULT_KNOT_SELECTION.twist;
-    const nodes=[...document.querySelectorAll('[data-spec-knot]')];
-    const topologies=(nodes.length?nodes.filter(x=>x.checked).map(x=>x.dataset.specKnot):(Array.isArray(saved?.topologies)?saved.topologies:DEFAULT_KNOT_SELECTION.topologies)).map(normalizeHoldoutTopologyKey);
-    return {ideal,fseries,knotplot,twist,topologies:[...new Set(topologies)].filter(k=>KNOT_HOLDOUT_CATALOG[k])};
+    const from=(clockRunLocksVortexSelection()&&ClockLockedVortexSelection)?ClockLockedVortexSelection:P;
+    const source=from.knotSource||'builtin';
+    const topologyKey=topologyKeyFromVortexModel(from);
+    const catalogMeta=topologyKey?KNOT_HOLDOUT_CATALOG[topologyKey]:null;
+    return {
+      mode:'vortex-model',
+      ideal:source==='ideal',
+      fseries:source==='fseries',
+      knotplot:source==='knotplot',
+      twist:source==='twist',
+      ruben:source==='ruben',
+      xyz:source==='xyz',
+      builtin:source==='builtin'||source==='legacy',
+      knotSource:source,
+      knotKey:from.knotKey||'',
+      topo:from.topo||'trefoil',
+      idealComponentMode:from.idealComponentMode==='single'?'single':'all',
+      compA:Number(from.compA)||1,
+      compB:Number(from.compB)||1,
+      topologies:topologyKey?[topologyKey]:[],
+      catalogMeta,
+      label:vortexModelHoldoutLabel(from),
+      locked:!!(ClockLockedVortexSelection&&clockRunLocksVortexSelection())
+    };
   }
-  function saveKnotSelection(sel){try{localStorage.setItem(KNOT_SELECTION_STORAGE,JSON.stringify(sel));}catch(_){}}
+  function saveKnotSelection(_sel){/* vortex-model coupling: no separate holdout localStorage */}
   function selectedHoldoutScenarios(){
-    const sel=readKnotSelection(),out=[];
-    for(const topologyKey of sel.topologies){const k=KNOT_HOLDOUT_CATALOG[topologyKey];if(!k)continue;
-      const resolution=Number.isFinite(k.resolution)?k.resolution:256;
-      if(sel.fseries&&k.fseries)out.push({id:`holdout-fseries-${topologyKey}`,label:`holdout · fseries ${k.fseries} · N=${resolution}`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'fseries',knotKey:k.fseries,topologyKey,embedding:'fseries',crossingNumber:k.crossingNumber,idealRopDiam:null,holdout:true,canonicalize:true});
-      if(sel.ideal&&k.ideal)out.push({id:`holdout-ideal-${k.ideal.replaceAll(':','_')}`,label:`holdout · ideal ${k.ideal} · N=${resolution}`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'ideal',knotKey:k.ideal,topologyKey,embedding:'ideal',crossingNumber:k.crossingNumber,idealRopDiam:k.idealRopDiam,holdout:true,canonicalize:true});
-      if(sel.knotplot&&k.knotplot){
-        const entry=getKnotPlotKnotCatalog()?.db?.[k.knotplot];if(entry){const componentCount=Number(entry.componentCount)||knotEntryComponents(entry).length||1,status=entry.status||'candidate',aSim=1e-3,pairwiseLinkingAbs=knotPlotLinkingAbs(entry),crossingNumber=Number.isFinite(k.crossingNumber)?k.crossingNumber:knotPlotCrossingNumber(entry,k.knotplot);
-          out.push({id:`holdout-knotplot-${topologyKey.replaceAll('.','_')}`,label:`holdout · KnotPlot ${k.knotplot} · ${status} · ${entry.normalization?.label||'uniform source'} · ${componentCount} comp · N=${resolution}/comp · a_sim=1.0 mm`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'knotplot',knotKey:k.knotplot,topologyKey,embedding:'knotplot-relaxed',candidateStatus:status,candidateFamily:entry.family||k.family||null,crossingNumber,idealRopDiam:null,aSim,componentCountExpected:componentCount,pairwiseLinkingAbs,knotplotD:finiteMetaNumber(entry.D),knotplotL:finiteMetaNumber(entry.L),sourceRole:entry.sourceRole||null,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,torus:entry.torus||null,catalogWarning:entry.warning||null,holdout:true,canonicalize:true});
-        }
+    const sel=readKnotSelection(),out=[],resolution=256,aSim=1e-3,topologyKey=sel.topologies[0]||null,catalogMeta=sel.catalogMeta||null;
+    const source=sel.knotSource;
+    if(source==='ideal'&&sel.knotKey&&getIdealKnotCatalog()?.db?.[sel.knotKey]){
+      out.push({id:`holdout-ideal-${String(sel.knotKey).replaceAll(':','_')}`,label:`holdout · ${sel.label} · N=${resolution}`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'ideal',knotKey:sel.knotKey,topologyKey,embedding:'ideal',crossingNumber:catalogMeta?.crossingNumber??null,idealRopDiam:catalogMeta?.idealRopDiam??null,holdout:true,canonicalize:true});
+    }else if(source==='fseries'&&sel.knotKey&&getFourierKnotCatalog()?.db?.[sel.knotKey]){
+      out.push({id:`holdout-fseries-${sel.knotKey}`,label:`holdout · ${sel.label} · N=${resolution}`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'fseries',knotKey:sel.knotKey,topologyKey,embedding:'fseries',crossingNumber:catalogMeta?.crossingNumber??null,idealRopDiam:null,holdout:true,canonicalize:true});
+    }else if(source==='knotplot'&&sel.knotKey){
+      const key=normalizeKnotPlotId(sel.knotKey),entry=getKnotPlotKnotCatalog()?.db?.[key];
+      if(entry){const componentCount=Number(entry.componentCount)||knotEntryComponents(entry).length||1,status=entry.status||'candidate',pairwiseLinkingAbs=knotPlotLinkingAbs(entry),crossingNumber=Number.isFinite(catalogMeta?.crossingNumber)?catalogMeta.crossingNumber:knotPlotCrossingNumber(entry,key);
+        out.push({id:`holdout-knotplot-${String(topologyKey||key).replaceAll('.','_')}`,label:`holdout · ${sel.label} · ${status} · ${componentCount} comp · N=${resolution}/comp`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'knotplot',knotKey:key,topologyKey,embedding:'knotplot-relaxed',candidateStatus:status,candidateFamily:entry.family||catalogMeta?.family||null,crossingNumber,idealRopDiam:null,aSim,componentCountExpected:componentCount,pairwiseLinkingAbs,knotplotD:finiteMetaNumber(entry.D),knotplotL:finiteMetaNumber(entry.L),sourceRole:entry.sourceRole||null,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,torus:entry.torus||null,catalogWarning:entry.warning||null,holdout:true,canonicalize:true});
       }
-      if(sel.twist){
-        const twistKey=resolveTwistHoldoutKey(topologyKey);const entry=twistKey?getTwistKnotCatalog()?.db?.[twistKey]:null;
-        if(entry){const componentCount=Number(entry.componentCount)||knotEntryComponents(entry).length||1,status=entry.status||'static-candidate',aSim=1e-3,pairwiseLinkingAbs=knotPlotLinkingAbs(entry);
-          out.push({id:`holdout-twist-${topologyKey.replaceAll('.','_')}`,label:`holdout · A006 twist ${twistKey} · ${status} · N=${entry.resolutionN} · ${componentCount} comp · a_sim=1.0 mm`,drift:0.005,ccwA:true,ccwB:false,resolution:Number(entry.resolutionN)||resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'twist',knotKey:twistKey,topologyKey,embedding:'a006-twist',candidateStatus:status,candidateFamily:entry.family||null,crossingNumber:k.crossingNumber||null,idealRopDiam:null,aSim,componentCountExpected:componentCount,pairwiseLinkingAbs,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,catalogWarning:entry.warning||null,holdout:true,canonicalize:true});
-        }
+    }else if(source==='twist'&&sel.knotKey){
+      const entry=getTwistKnotCatalog()?.db?.[sel.knotKey];
+      if(entry){const componentCount=Number(entry.componentCount)||knotEntryComponents(entry).length||1,status=entry.status||'static-candidate',pairwiseLinkingAbs=knotPlotLinkingAbs(entry);
+        out.push({id:`holdout-twist-${String(topologyKey||sel.knotKey).replaceAll('.','_')}`,label:`holdout · ${sel.label} · ${status} · N=${entry.resolutionN}`,drift:0.005,ccwA:true,ccwB:false,resolution:Number(entry.resolutionN)||resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'twist',knotKey:sel.knotKey,topologyKey,embedding:'a006-twist',candidateStatus:status,candidateFamily:entry.family||null,crossingNumber:catalogMeta?.crossingNumber||null,idealRopDiam:null,aSim,componentCountExpected:componentCount,pairwiseLinkingAbs,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,catalogWarning:entry.warning||null,holdout:true,canonicalize:true});
       }
+    }else if(source==='ruben'&&sel.knotKey){
+      const entry=getRubenKnotCatalog()?.db?.[sel.knotKey];
+      if(entry){const componentCount=Number(entry.componentCount)||knotEntryComponents(entry).length||1,status=entry.status||'static-candidate';
+        out.push({id:`holdout-ruben-${String(sel.knotKey).replaceAll('.','_')}`,label:`holdout · ${sel.label} · ${status} · N=${entry.resolutionN||512}`,drift:0.005,ccwA:true,ccwB:false,resolution:Number(entry.resolutionN)||512,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'ruben',knotKey:sel.knotKey,topologyKey,embedding:'ruban-torus',candidateStatus:status,candidateFamily:entry.family||'ruban-torus',crossingNumber:null,idealRopDiam:null,aSim,componentCountExpected:componentCount,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,catalogWarning:entry.warning||null,holdout:true,canonicalize:true});
+      }
+    }else if(source==='xyz'&&ImportedXyzEntry){
+      const comps=knotEntryComponents(ImportedXyzEntry),componentCount=comps.length||1,n0=comps[0]?.pointCount||Math.floor((comps[0]?.points?.length||0)/3)||resolution;
+      out.push({id:`holdout-xyz-${String(sel.knotKey||'import').replace(/[^\w.-]+/g,'_')}`,label:`holdout · ${sel.label} · ${componentCount} comp · N≈${n0}`,drift:0.005,ccwA:true,ccwB:false,resolution:Math.max(64,n0),checkpoints:RESOLUTION_CHECKPOINTS,knotSource:'xyz',knotKey:sel.knotKey||ImportedXyzEntry.sourceFile||'import.xyz',topo:sel.topo,topologyKey,embedding:'session-xyz',componentCountExpected:componentCount,holdout:true,canonicalize:true});
+    }else{
+      const topo=sel.topo||'trefoil';
+      out.push({id:`holdout-builtin-${topo}`,label:`holdout · ${sel.label} · N=${resolution}`,drift:0.005,ccwA:true,ccwB:false,resolution,checkpoints:RESOLUTION_CHECKPOINTS,knotSource:null,knotKey:'',topo,topologyKey,embedding:'builtin',crossingNumber:catalogMeta?.crossingNumber??null,idealRopDiam:catalogMeta?.idealRopDiam??null,holdout:true,canonicalize:true});
     }
     return out;
   }
   function scenarioSetForMode(mode){
-    const core=copyScenarios(CORE_SCENARIOS),continuum=copyScenarios(CONTINUUM_SCENARIOS),holdouts=copyScenarios(selectedHoldoutScenarios());
+    const lock=ClockLockedVortexSelection||snapshotVortexSelection(P);
+    const inject=list=>copyScenarios(list).map(sc=>attachVortexGeometryToScenario(sc,lock));
+    const core=inject(CORE_SCENARIOS),continuum=inject(CONTINUUM_SCENARIOS),holdouts=copyScenarios(selectedHoldoutScenarios());
     if(mode==='continuum')return continuum;
     if(mode==='holdout')return holdouts;
     if(mode==='full-suite')return [...core,...continuum.filter(x=>x.id!=='baseline'),...holdouts];
@@ -2066,23 +2635,11 @@ const SpecClockProxyDecomposition=(()=>{
   }
   function formatEta(seconds){seconds=Math.max(1,Math.round(seconds));if(seconds<60)return `≈ ${seconds} s`;const m=Math.floor(seconds/60),r=seconds%60;return `≈ ${m}m ${String(r).padStart(2,'0')}s`;}
   function updateKnotSelectionUi(){
-    const sel=readKnotSelection();saveKnotSelection(sel);const labels=sel.topologies.map(k=>KNOT_HOLDOUT_CATALOG[k]?.label).filter(Boolean),planned=selectedHoldoutScenarios(),sources=[...new Set(planned.map(sc=>sc.knotSource==='knotplot'?'KnotPlot':sc.knotSource==='twist'?'A006 twist':sc.knotSource))],count=planned.length,snaps=count*RESOLUTION_CHECKPOINTS.length,etaSeconds=planned.reduce((sum,sc)=>{const components=Math.max(1,Number(sc.componentCountExpected)||1),resolution=Math.max(1,Number(sc.resolution)||256),complexity=components*components*(resolution/256)**2;return sum+RESOLUTION_CHECKPOINTS.length*10*complexity;},0);
-    const summary=document.getElementById('specKnotDropdownSummary');if(summary)summary.textContent='Knopen · '+(labels.join(', ')||'geen');
-    const info=document.getElementById('specKnotSelectionSummary');if(info)info.textContent=`${sources.join(' + ')||'geen toepasbare bron'} · ${count} holdoutscenario’s · ${snaps} snapshots · holdout-run ${formatEta(etaSeconds||1)}`;
-  }
-  function applyKnotSelectionPreset(name){
-    const sets={quick:['3_1'],core:['3_1','4_1','5_2'],full:Object.keys(KNOT_HOLDOUT_CATALOG),torus69:['torus_6.9']},chosen=sets[name]||sets.core;
-    document.querySelectorAll('[data-spec-knot]').forEach(x=>x.checked=chosen.includes(x.dataset.specKnot));const a=document.getElementById('cSpecHoldoutIdeal'),f=document.getElementById('cSpecHoldoutFseries'),k=document.getElementById('cSpecHoldoutKnotplot'),t=document.getElementById('cSpecHoldoutTwist');if(name==='torus69'){if(a)a.checked=false;if(f)f.checked=false;if(k)k.checked=true;if(t)t.checked=false;}else{if(a)a.checked=true;if(f)f.checked=true;if(k)k.checked=true;}updateKnotSelectionUi();VLClockWorkflow.invalidateSelection();
+    const sel=readKnotSelection(),planned=selectedHoldoutScenarios(),sourceLabel=sel.knotSource==='knotplot'?'KnotPlot':sel.knotSource==='twist'?'A006 twist':sel.knotSource==='ruben'?'Ruban E010':(sel.knotSource||'builtin'),count=planned.length,snaps=count*RESOLUTION_CHECKPOINTS.length,etaSeconds=planned.reduce((sum,sc)=>{const components=Math.max(1,Number(sc.componentCountExpected)||1),resolution=Math.max(1,Number(sc.resolution)||256),complexity=components*components*(resolution/256)**2;return sum+RESOLUTION_CHECKPOINTS.length*10*complexity;},0);
+    const summary=document.getElementById('specKnotDropdownSummary');if(summary)summary.textContent='Vortexmodel · '+(sel.label||'geen');
+    const info=document.getElementById('specKnotSelectionSummary');if(info)info.textContent=count?`${sourceLabel} · ${count} holdoutscenario · ${snaps} snapshots · holdout-run ${formatEta(etaSeconds||1)}`:`geen toepasbare holdout voor huidige vortexmodelkeuze`;
   }
   function bindKnotSelector(){
-    renderKnotSelectorOptions();
-    let saved=null;try{saved=JSON.parse(localStorage.getItem(KNOT_SELECTION_STORAGE)||'null');}catch(_){saved=null;}
-    if(saved){const migrated=(saved.topologies||[]).map(normalizeHoldoutTopologyKey),a=document.getElementById('cSpecHoldoutIdeal'),f=document.getElementById('cSpecHoldoutFseries'),k=document.getElementById('cSpecHoldoutKnotplot'),t=document.getElementById('cSpecHoldoutTwist');if(a)a.checked=saved.ideal!==false;if(f)f.checked=saved.fseries!==false;if(k)k.checked=saved.knotplot!==false;if(t)t.checked=!!saved.twist;document.querySelectorAll('[data-spec-knot]').forEach(x=>x.checked=migrated.includes(x.dataset.specKnot));}
-    for(const node of document.querySelectorAll('#cSpecHoldoutIdeal,#cSpecHoldoutFseries,#cSpecHoldoutKnotplot,#cSpecHoldoutTwist,[data-spec-knot]'))node.addEventListener('change',()=>{updateKnotSelectionUi();VLClockWorkflow.invalidateSelection();});
-    document.getElementById('bSpecKnotsQuick')?.addEventListener('click',()=>applyKnotSelectionPreset('quick'));
-    document.getElementById('bSpecKnotsCore')?.addEventListener('click',()=>applyKnotSelectionPreset('core'));
-    document.getElementById('bSpecKnotsFull')?.addEventListener('click',()=>applyKnotSelectionPreset('full'));
-    document.getElementById('bSpecKnotsTorus69')?.addEventListener('click',()=>applyKnotSelectionPreset('torus69'));
     updateKnotSelectionUi();
   }
   let active=false,index=-1,current=null,currentCanonicalization=null,checkpointIndex=0,results=[],gates=[],snapshot=null,calibrationRaw=null,launchMode='decomposition',benchmarkVisualState=null;
@@ -2533,11 +3090,22 @@ const SpecClockProxyDecomposition=(()=>{
     if(window.ModelLog)window.ModelLog.logEvent('proxy-decomposition-checkpoint',{scenarioId:a.scenarioId,tPhys:a.tPhys,digest:a.digest,pure:a.purity,phase:a.shapley.phaseLog});render();
   }
   function configureScenario(sc){
-    applySpecClockPreset();P.Rcyl=.25;P.Hcyl=.5;P.linkDH=false;P.vzA=sc.drift;P.vzB=-sc.drift;P.lockVz=false;P.ccwA=sc.ccwA;P.ccwB=sc.ccwB;P.mirrorB=false;
-    P.knotIdx=-1;P.knotKey='';P.knotSource='builtin';P.idealComponentMode='all';P.compA=1;P.compB=1;
-    if(sc.knotSource){const catalog=knotCatalogForSource(sc.knotSource);if(!catalog?.db?.[sc.knotKey])throw new Error(`holdout-knoop ontbreekt: ${sc.knotSource} ${sc.knotKey}`);P.knotSource=sc.knotSource;P.knotKey=sc.knotKey;P.topo='trefoil';}
+    applySpecClockKinematicsPreset();
+    P.Rcyl=.25;P.Hcyl=.5;P.linkDH=false;P.vzA=sc.drift;P.vzB=-sc.drift;P.lockVz=false;P.ccwA=sc.ccwA;P.ccwB=sc.ccwB;P.mirrorB=false;
+    applyLockedVortexGeometry(sc||ClockLockedVortexSelection);
+    if(sc.knotSource==='xyz'){
+      if(!ImportedXyzEntry)throw new Error('holdout-knoop ontbreekt: session XYZ-import');
+      P.knotSource='xyz';P.knotKey=sc.knotKey||ImportedXyzEntry.sourceFile||'import.xyz';P.topo=sc.topo||P.topo||'trefoil';
+    }else if(sc.knotSource){
+      const catalog=knotCatalogForSource(sc.knotSource);if(!catalog?.db?.[sc.knotKey])throw new Error(`holdout-knoop ontbreekt: ${sc.knotSource} ${sc.knotKey}`);
+      P.knotSource=sc.knotSource;P.knotKey=sc.knotKey;P.topo=sc.topo&&BUILTIN_TOPOLOGIES[sc.topo]?sc.topo:'trefoil';
+      if(sc.idealComponentMode==='single')P.idealComponentMode='single';
+      if(Number.isFinite(sc.compA))P.compA=sc.compA;if(Number.isFinite(sc.compB))P.compB=sc.compB;
+    }else if(sc.topo&&BUILTIN_TOPOLOGIES[sc.topo]){
+      P.topo=sc.topo;P.knotSource='builtin';P.knotKey='';P.knotIdx=-1;
+    }
     P.bundleEnabled=false;P.bgFlow='none';P.bundleBEMEnabled=true;P.qual='hoog';if(Number.isFinite(sc.aSim))P.a=sc.aSim;proxyDecompResolutionOverride=sc.resolution;setInitialAxialSeparation(.84);rebuildVolumeEnvelope();resetState();currentCanonicalization=canonicalizeHoldoutGeometry(sc);
-    SpecClock.autoStartAfterCalibration=false;P.accExp=Math.log10(16);syncUi();updateSubtitle();resetPlaybackDebt('proxy-decomposition-scenario-arm');
+    SpecClock.autoStartAfterCalibration=false;P.accExp=Math.log10(16);syncUi();if(typeof syncKnotSel==='function')syncKnotSel();updateSubtitle();updateKnotSelectionUi();resetPlaybackDebt('proxy-decomposition-scenario-arm');
     if(!calibrateSpecClockPhase({mode:sc.knotSource?'intrinsic-holdout':'legacy-z',allowProjectionNull:!!sc.knotSource}))throw new Error('fase-nullkalibratie geweigerd');calibrationRaw=captureRawSnapshot();const cps=scenarioCheckpoints(sc);if(cps[0]!==0)throw new Error('eerste decompositiecheckpoint moet t=0 zijn');checkpointIndex=0;analyzeCheckpoint();checkpointIndex=1;
     setPausedState(false,'proxy-decomposition-scenario-start');
   }
@@ -2688,7 +3256,7 @@ const SpecClockProxyDecomposition=(()=>{
 
   }
   function restoreConfiguration(){
-    proxyDecompResolutionOverride=0;if(!snapshot)return;const p=clone(snapshot.P),visualBefore=benchmarkVisualState;Object.assign(P,p);P.taylorOsc=clone(p.taylorOsc||{enabled:false,amplitude:.25,period:8});rebuildVolumeEnvelope();syncUi();updateSubtitle();resetState();P.accExp=p.accExp;syncUi();setPausedState(snapshot.paused,'proxy-decomposition-restore');const ps=el('presetSelect');if(ps&&snapshot.presetValue)ps.value=snapshot.presetValue;logBenchmarkVisualRestore('proxy-decomposition',visualBefore);benchmarkVisualState=null;
+    proxyDecompResolutionOverride=0;clearClockLockedVortexSelection();if(!snapshot)return;const p=clone(snapshot.P),visualBefore=benchmarkVisualState;Object.assign(P,p);P.taylorOsc=clone(p.taylorOsc||{enabled:false,amplitude:.25,period:8});rebuildVolumeEnvelope();syncUi();if(typeof syncKnotSel==='function')syncKnotSel();updateSubtitle();resetState();P.accExp=p.accExp;syncUi();setPausedState(snapshot.paused,'proxy-decomposition-restore');const ps=el('presetSelect');if(ps&&snapshot.presetValue)ps.value=snapshot.presetValue;logBenchmarkVisualRestore('proxy-decomposition',visualBefore);benchmarkVisualState=null;updateKnotSelectionUi();
   }
   function complete(){
     active=false;pending=false;current=null;completedAt=new Date().toISOString();evaluate();const engine=worst(gates.filter(g=>g.group==='ENGINE').map(g=>g.status)),research=worst(gates.filter(g=>g.group==='RESEARCH').map(g=>g.status));
@@ -2699,9 +3267,10 @@ const SpecClockProxyDecomposition=(()=>{
     if(active)return;if(SpecClockBenchmark.active){setFlag('⚠ stop eerst de gewone SPEC CLOCK-benchmark.',true);return;}
     launchMode=mode==='normalization'?'normalization':mode==='transfer'?'transfer-law':mode==='length'?'length-identification':mode==='continuum'?'continuum':mode==='holdout'?'holdout':(mode==='geom-kappa'||mode==='continuum-holdout'||mode==='full-suite')?'full-suite':'decomposition';
     if(!VLClockWorkflow.unlocked(launchMode)){const reason=VLClockWorkflow.reason(launchMode);setFlag('⚠ '+reason,true);setStatus('VERGRENDELD · '+reason,'warn');vlRefreshClockRunnerWorkflowUi();return;}
-    scenarios=scenarioSetForMode(launchMode);if(!scenarios.length){setFlag('⚠ selecteer minstens één knoopbron en één knoop voor de holdoutrun.',true);setStatus('GEEN SCENARIO’S · pas de knoopselectie bovenaan CLOCK aan.','warn');return;}
-    LastProxyDecompositionSummary=null;LastSpecClockBenchmarkSummary=null;updateSpecClockDisplay();clearTimeout(timer);snapshot={P:clone(P),paused,presetValue:el('presetSelect')?.value||''};benchmarkVisualState=suppressBenchmarkVisuals('proxy-decomposition');results=[];gates=[];index=-1;current=null;checkpointIndex=0;pending=false;aborted=false;lastError=null;active=true;VLClockWorkflow.begin(launchMode);startedAt=new Date().toISOString();completedAt=null;
-    if(window.ModelLog){window.ModelLog.setEnabled(true);window.ModelLog.logEvent('proxy-decomposition-start',{schema:SCHEMA,launchMode,knotSelection:readKnotSelection(),cacheEntries:resultCache.size,scenarios,checkpointPlan:Object.fromEntries(scenarios.map(sc=>[sc.id,scenarioCheckpoints(sc)]))});}
+    setClockLockedVortexSelection(P);
+    scenarios=scenarioSetForMode(launchMode);if(!scenarios.length){clearClockLockedVortexSelection();setFlag('⚠ selecteer minstens één knoopbron en één knoop voor de holdoutrun.',true);setStatus('GEEN SCENARIO’S · pas de knoopselectie bovenaan CLOCK aan.','warn');return;}
+    LastProxyDecompositionSummary=null;LastSpecClockBenchmarkSummary=null;updateSpecClockDisplay();clearTimeout(timer);snapshot={P:clone(P),paused,presetValue:el('presetSelect')?.value||''};benchmarkVisualState=suppressBenchmarkVisuals('proxy-decomposition');results=[];gates=[];index=-1;current=null;checkpointIndex=0;pending=false;aborted=false;lastError=null;active=true;VLClockWorkflow.begin(launchMode);startedAt=new Date().toISOString();completedAt=null;updateKnotSelectionUi();
+    if(window.ModelLog){window.ModelLog.setEnabled(true);window.ModelLog.logEvent('proxy-decomposition-start',{schema:SCHEMA,launchMode,knotSelection:readKnotSelection(),lockedVortexSelection:ClockLockedVortexSelection,cacheEntries:resultCache.size,scenarios,checkpointPlan:Object.fromEntries(scenarios.map(sc=>[sc.id,scenarioCheckpoints(sc)]))});}
     const messages={normalization:'START · normalisatieschalen op de korte proxy-suite…','transfer-law':'START · dimensieloze transferwetten op de korte proxy-suite…','length-identification':'START · L/v↺*-lengteklassen op de korte proxy-suite…',continuum:'START · uitsluitend trefoil-resolutieladder N=128–768…',holdout:'START · uitsluitend geselecteerde canonicalized knoopholdouts…','full-suite':'START · volledige confirmatoire proxy + continuüm + geselecteerde holdouts…',decomposition:'START · korte proxy-decompositie zonder continuüm- of holdoutherhaling…'};
     setStatus(messages[launchMode]||messages.decomposition,'running');render();startScenario();
   }
@@ -2757,7 +3326,7 @@ const SpecClockProxyDecomposition=(()=>{
     const ok=CHANNELS.every(c=>Math.abs(s.phi[c]-coeff[c])<1e-12)&&Math.abs(s.residual)<1e-12&&poseErr<1e-7&&fitErr<1e-9&&fit.reconstructionRel<1e-12&&Number.isFinite(ss.full)&&ss.relativeResidual<1e-10&&pipelineErr<1e-12&&zeroSafe.score<=1&&Math.abs(ix.interaction-7)<1e-12&&normalizationFinite&&normalizationError<1e-12&&transferFinite&&transferDimensions&&canonicalVChar&&lengthFinite&&lengthIdentityScore<=1&&geomFinite&&idealAudit.pass&&continuumSyntheticPass&&holdoutCatalogs&&holdoutDefinitions&&visualPolicyAudit&&runtimeSmokePass&&!!document.getElementById('specKnotSelector');
     return {schema:SCHEMA,channels:CHANNELS.slice(),normalizations:NORMALIZATIONS.map(n=>n.id),ok,residual:s.residual,poseError:poseErr,rigidFitError:fitErr,pipelineResidual:ss.residual,pipelineError:pipelineErr,zeroSafeScore:zeroSafe.score,interactionIdentityError:Math.abs(ix.interaction-7),normalizationError,normalizationFinite,transferFinite,transferDimensions,canonicalVChar,lengthFinite,lengthIdentity,lengthIdentityScore,lengthCandidates:LENGTH_CANDIDATES.map(l=>l.id),transferLaws:TRANSFER_LAWS.map(l=>l.id),geomKappas:GEOM_KAPPA_CANDIDATES.map(k=>k.id),geomFinite,idealConventionAudit:idealAudit,continuumSynthetic,continuumSyntheticPass,holdoutCatalogs,holdoutDefinitions,visualPolicyAudit,runtimeSmokePass,runtimeSmoke};
   }
-  return {start,stop,bind,render,frameTick,capAcceptedDt,afterAcceptedStep,reportObject,selfTest,readKnotSelection,selectedHoldoutScenarios,scenarioSetForMode,get active(){return active;},get launchMode(){return launchMode;},get resolutionOverride(){return proxyDecompResolutionOverride;}};
+  return {start,stop,bind,render,frameTick,capAcceptedDt,afterAcceptedStep,reportObject,selfTest,readKnotSelection,selectedHoldoutScenarios,scenarioSetForMode,updateKnotSelectionUi,get active(){return active;},get launchMode(){return launchMode;},get resolutionOverride(){return proxyDecompResolutionOverride;}};
 })();
 
 
@@ -2805,7 +3374,8 @@ const SpecClockBenchmark=(()=>{
     updateButtons();
   }
   function baseConfigure(sc){
-    applySpecClockPreset();
+    applySpecClockKinematicsPreset();
+    applyLockedVortexGeometry(sc||ClockLockedVortexSelection);
     // Vaste benchmarkgeometrie: cilinderdiameter 0.50 m, standaard totale hoogte 1.0 m of extra hoog 5.0 m.
     P.Rcyl=0.25;P.Hcyl=sc.halfHeight;P.linkDH=false;
     P.vzA=sc.drift;P.vzB=-sc.drift;P.lockVz=false;
@@ -2816,7 +3386,9 @@ const SpecClockBenchmark=(()=>{
     resetState();
     SpecClock.autoStartAfterCalibration=false;
     P.accExp=Math.log10(sc.speed);
-    syncUi();updateSubtitle();resetPlaybackDebt('spec-benchmark-scenario-arm');
+    syncUi();if(typeof syncKnotSel==='function')syncKnotSel();updateSubtitle();
+    if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi)SpecClockProxyDecomposition.updateKnotSelectionUi();
+    resetPlaybackDebt('spec-benchmark-scenario-arm');
     if(!calibrateSpecClockPhase())throw new Error('fase-nullkalibratie geweigerd');
     firstDt=NaN;
     setPausedState(false,'spec-benchmark-scenario-start');
@@ -2908,12 +3480,14 @@ const SpecClockBenchmark=(()=>{
     addGate('RESEARCH','closure','Fase-null binnen formele veldbracket',closure?'PASS':'FAIL',{phaseLogRatio:base?.phaseLogRatio,fieldMin:base?.fieldLogMin,fieldMax:base?.fieldLogMax,scaleRatio},'FAIL verwerpt alleen de huidige proxyrealisatie; niet SST, parameters of een klokwet.');
   }
   function restoreConfiguration(){
+    clearClockLockedVortexSelection();
     if(!snapshot)return;
     const p=clone(snapshot.P),visualBefore=benchmarkVisualState;Object.assign(P,p);P.taylorOsc=clone(p.taylorOsc||{enabled:false,amplitude:0.25,period:8});
-    rebuildVolumeEnvelope();syncUi();updateSubtitle();resetState();
+    rebuildVolumeEnvelope();syncUi();if(typeof syncKnotSel==='function')syncKnotSel();updateSubtitle();resetState();
     // resetState armt een actieve SPEC CLOCK-run veilig; herstel daarna alleen het gewenste afspeeltempo en pauzestatus.
     P.accExp=p.accExp;syncUi();setPausedState(snapshot.paused,'spec-benchmark-restore');
     const preset=el('presetSelect');if(preset&&snapshot.presetValue)preset.value=snapshot.presetValue;logBenchmarkVisualRestore('spec-benchmark',visualBefore);benchmarkVisualState=null;
+    if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi)SpecClockProxyDecomposition.updateKnotSelectionUi();
   }
   function complete(){
     active=false;current=null;pending=false;completedAt=new Date().toISOString();evaluate();
@@ -2933,8 +3507,11 @@ const SpecClockBenchmark=(()=>{
     if(SpecClockProxyDecomposition.active){setFlag('⚠ stop eerst de proxy-decompositiebenchmark.',true);return;}
     LastSpecClockBenchmarkSummary=null;LastProxyDecompositionSummary=null;updateSpecClockDisplay();
     clearTimeout(timer);snapshot={P:clone(P),paused,presetValue:el('presetSelect')?.value||''};benchmarkVisualState=suppressBenchmarkVisuals('spec-benchmark');
+    const locked=setClockLockedVortexSelection(P);
+    for(const sc of scenarios)attachVortexGeometryToScenario(sc,locked);
     results=[];gates=[];index=-1;current=null;pending=false;aborted=false;active=true;VLClockWorkflow.begin('spec');startedAt=new Date().toISOString();completedAt=null;
-    if(window.ModelLog){window.ModelLog.setEnabled(true);window.ModelLog.logEvent('spec-benchmark-start',{schema:SCHEMA,scenarioCount:scenarios.length});}
+    if(window.ModelLog){window.ModelLog.setEnabled(true);window.ModelLog.logEvent('spec-benchmark-start',{schema:SCHEMA,scenarioCount:scenarios.length,lockedVortexSelection:locked});}
+    if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi)SpecClockProxyDecomposition.updateKnotSelectionUi();
     setStatus('START · reproduceerbare configuratie wordt opgebouwd…','running');render();startScenario();
   }
   function stop(reason='gebruiker'){
@@ -3040,7 +3617,7 @@ const ContinuousReachAudit=(()=>{
   };
   function setStatus(text,kind='warn'){const e=el('reachAuditStatus');if(e){e.textContent=text;e.classList.remove('good','warn','bad','running');e.classList.add(kind);} }
   function setProgress(v){const e=el('reachAuditProgress');if(e)e.style.width=(100*Math.max(0,Math.min(1,v))).toFixed(2)+'%';}
-  function selection(){const shared=SpecClockProxyDecomposition.readKnotSelection?.();if(shared)return {ideal:!!shared.ideal,fseries:!!shared.fseries,knotplot:!!shared.knotplot,topologies:[...(shared.topologies||[])]};const topologies=[...document.querySelectorAll('[data-spec-knot]:checked')].map(x=>x.dataset.specKnot);return {ideal:!!el('cSpecHoldoutIdeal')?.checked,fseries:!!el('cSpecHoldoutFseries')?.checked,knotplot:!!el('cSpecHoldoutKnotplot')?.checked,topologies};}
+  function selection(){const shared=SpecClockProxyDecomposition.readKnotSelection?.();if(shared)return {ideal:!!shared.ideal,fseries:!!shared.fseries,knotplot:!!shared.knotplot,twist:!!shared.twist,ruben:!!shared.ruben,knotSource:shared.knotSource||'builtin',knotKey:shared.knotKey||'',topologies:[...(shared.topologies||[])]};return {ideal:P.knotSource==='ideal',fseries:P.knotSource==='fseries',knotplot:P.knotSource==='knotplot',twist:P.knotSource==='twist',ruben:P.knotSource==='ruben',knotSource:P.knotSource||'builtin',knotKey:P.knotKey||'',topologies:[]};}
   function circle(n,R=1,z=0,transform=false){const p=new Float64Array(3*n);for(let i=0;i<n;i++){const t=2*Math.PI*i/n;let x=R*Math.cos(t),y=R*Math.sin(t),zz=z;if(transform){const X=.36*x-.48*y+.8*zz+2,Y=.8*x+.6*y-1,Z=-.48*x+.64*y+.6*zz+.5;x=X;y=Y;zz=Z;}p[3*i]=x;p[3*i+1]=y;p[3*i+2]=zz;}return p;}
   function geometrySpecs(){const sel=selection(),res=profiles[profile]||profiles.standard,maxN=res[res.length-1],specs=[
     {id:'analytic-circle',source:'analytic',label:'unit circle · exact',resolutions:res,knownReach:1,build:n=>[vlBuildExactCircleCurve(n)]},
@@ -3048,11 +3625,19 @@ const ContinuousReachAudit=(()=>{
     {id:'analytic-circle-transform',source:'analytic',label:'unit circle · rigid transform',resolutions:[maxN],knownReach:1,build:n=>[vlBuildExactCircleCurve(n,1,0,true)]},
     {id:'analytic-two-circles',source:'analytic',label:'two circles · gap 0.8',resolutions:[maxN],knownReach:.4,knownLimiter:'INTER_COMPONENT',build:n=>[vlBuildExactCircleCurve(n,1,-.4),vlBuildExactCircleCurve(n,1,.4)]}
   ];
-    for(const key of sel.topologies){const m=catalog[key];if(!m)continue;
-      if(sel.ideal&&m.ideal){const entry=getIdealKnotCatalog()?.db?.[m.ideal];if(entry){const D=finiteMetaNumber(entry.D);specs.push({id:'ideal-'+m.ideal.replaceAll(':','_'),source:'ideal',label:m.ideal,resolutions:res,knownReach:Number.isFinite(D)?D/2:null,metadataD:Number.isFinite(D)?D:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}}
-      if(sel.fseries&&m.fseries){const entry=getFourierKnotCatalog()?.db?.[m.fseries];if(entry)specs.push({id:'fseries-'+m.fseries,source:'fseries',label:m.fseries,resolutions:res,knownReach:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}
-      if(sel.knotplot&&m.knotplot){const entry=getKnotPlotKnotCatalog()?.db?.[m.knotplot];if(entry)specs.push({id:'knotplot-'+m.knotplot.replaceAll('.','_'),source:'knotplot',knotKey:m.knotplot,label:m.knotplot,resolutions:res,knownReach:null,metadataD:Number.isFinite(finiteMetaNumber(entry.D))?finiteMetaNumber(entry.D):null,candidateStatus:entry.status||'candidate',candidateFamily:entry.family||null,sourceRole:entry.sourceRole||null,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,torus:entry.torus||null,pairwiseLinkingAbs:knotPlotLinkingAbs(entry),componentCountExpected:Number(entry.componentCount)||knotEntryComponents(entry).length,curveRoute:'native uniform polygon → periodic C2 spline',build:n=>knotEntryComponents(entry).map(c=>vlBuildKnotPlotReachCurve(entry,c,n))});}
-    }return specs;
+    if(sel.ideal&&sel.knotKey){const entry=getIdealKnotCatalog()?.db?.[sel.knotKey];if(entry){const D=finiteMetaNumber(entry.D);specs.push({id:'ideal-'+String(sel.knotKey).replaceAll(':','_'),source:'ideal',label:sel.knotKey,resolutions:res,knownReach:Number.isFinite(D)?D/2:null,metadataD:Number.isFinite(D)?D:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}}
+    else if(sel.fseries&&sel.knotKey){const entry=getFourierKnotCatalog()?.db?.[sel.knotKey];if(entry)specs.push({id:'fseries-'+sel.knotKey,source:'fseries',label:sel.knotKey,resolutions:res,knownReach:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}
+    else if(sel.knotplot&&sel.knotKey){const key=normalizeKnotPlotId(sel.knotKey),entry=getKnotPlotKnotCatalog()?.db?.[key];if(entry)specs.push({id:'knotplot-'+key.replaceAll('.','_'),source:'knotplot',knotKey:key,label:key,resolutions:res,knownReach:null,metadataD:Number.isFinite(finiteMetaNumber(entry.D))?finiteMetaNumber(entry.D):null,candidateStatus:entry.status||'candidate',candidateFamily:entry.family||null,sourceRole:entry.sourceRole||null,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,torus:entry.torus||null,pairwiseLinkingAbs:knotPlotLinkingAbs(entry),componentCountExpected:Number(entry.componentCount)||knotEntryComponents(entry).length,curveRoute:'native uniform polygon → periodic C2 spline',build:n=>knotEntryComponents(entry).map(c=>vlBuildKnotPlotReachCurve(entry,c,n))});}
+    else if(sel.twist&&sel.knotKey){const entry=getTwistKnotCatalog()?.db?.[sel.knotKey];if(entry)specs.push({id:'twist-'+String(sel.knotKey).replaceAll('.','_'),source:'twist',knotKey:sel.knotKey,label:sel.knotKey,resolutions:res,knownReach:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}
+    else if(sel.ruben&&sel.knotKey){const entry=getRubenKnotCatalog()?.db?.[sel.knotKey];if(entry)specs.push({id:'ruben-'+String(sel.knotKey).replaceAll('.','_'),source:'ruben',knotKey:sel.knotKey,label:sel.knotKey,resolutions:res,knownReach:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}
+    else{
+      for(const key of sel.topologies||[]){const m=catalog[key];if(!m)continue;
+        if(m.ideal){const entry=getIdealKnotCatalog()?.db?.[m.ideal];if(entry){const D=finiteMetaNumber(entry.D);specs.push({id:'ideal-'+m.ideal.replaceAll(':','_'),source:'ideal',label:m.ideal,resolutions:res,knownReach:Number.isFinite(D)?D/2:null,metadataD:Number.isFinite(D)?D:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}}
+        if(m.fseries){const entry=getFourierKnotCatalog()?.db?.[m.fseries];if(entry)specs.push({id:'fseries-'+m.fseries,source:'fseries',label:m.fseries,resolutions:res,knownReach:null,build:n=>knotEntryComponents(entry).map(c=>vlBuildFourierCurve(c.coeffs||c,n))});}
+        if(m.knotplot){const entry=getKnotPlotKnotCatalog()?.db?.[m.knotplot];if(entry)specs.push({id:'knotplot-'+m.knotplot.replaceAll('.','_'),source:'knotplot',knotKey:m.knotplot,label:m.knotplot,resolutions:res,knownReach:null,metadataD:Number.isFinite(finiteMetaNumber(entry.D))?finiteMetaNumber(entry.D):null,candidateStatus:entry.status||'candidate',candidateFamily:entry.family||null,sourceRole:entry.sourceRole||null,sourceSha256:entry.sourceSha256||null,normalization:entry.normalization||null,torus:entry.torus||null,pairwiseLinkingAbs:knotPlotLinkingAbs(entry),componentCountExpected:Number(entry.componentCount)||knotEntryComponents(entry).length,curveRoute:'native uniform polygon → periodic C2 spline',build:n=>knotEntryComponents(entry).map(c=>vlBuildKnotPlotReachCurve(entry,c,n))});}
+      }
+    }
+    return specs;
   }
   function solveComponents(components){const splines=components.map(c=>c&&typeof c.eval==='function'?c:vlBuildPeriodicSpline(c)),curv=splines.map(vlContinuousCurvatureLimit),self=splines.map(sp=>vlContinuousPairDistance(sp,sp,true));let inter=[];for(let i=0;i<splines.length;i++)for(let j=i+1;j<splines.length;j++){const r=vlContinuousPairDistance(splines[i],splines[j],false);if(r)inter.push({...r,i,j});}
     const cBest=curv.map((x,i)=>({...x,i})).sort((a,b)=>a.radius-b.radius)[0],sBest=self.map((x,i)=>x?({...x,i}):null).filter(Boolean).sort((a,b)=>a.distance-b.distance)[0]||null,iBest=inter.sort((a,b)=>a.distance-b.distance)[0]||null;
@@ -3066,7 +3651,14 @@ const ContinuousReachAudit=(()=>{
     add('ENGINE','G1','rigid-transform invariance',trans?.knownRelativeError<1e-8?'PASS':'FAIL',{row:trans},'Translatie en rotatie mogen de reach niet wijzigen.');
     add('ENGINE','G2','inter-component anchor',inter?.knownRelativeError<5e-4&&inter?.limiter==='INTER_COMPONENT'?'PASS':'FAIL',{row:inter},'Twee congruente cirkels op z=±0.4 hebben inter-component reach 0.4.');
     const maxOrth=Math.max(0,...results.map(r=>r.orthResidual||0));add('ENGINE','G3','DCSD orthogonaliteitsresidu',maxOrth<1e-8?'PASS':'FAIL',{maxOrthResidual:maxOrth,acceptanceLimit:5e-9,gateLimit:1e-8},'Doubly-critical oplossingen moeten de twee tangent-orthogonaliteitsvoorwaarden sluiten; rank-deficiënte families gebruiken gedempte least-squares in plaats van een ontkoppelde fallback.');
-    const sel=selection(),expectedSources=[];for(const key of sel.topologies){const m=catalog[key];if(!m)continue;if(sel.ideal&&m.ideal)expectedSources.push('ideal:'+m.ideal);if(sel.fseries&&m.fseries)expectedSources.push('fseries:'+m.fseries);if(sel.knotplot&&m.knotplot)expectedSources.push('knotplot:'+m.knotplot);}const catalogRows=results.filter(r=>['ideal','fseries','knotplot'].includes(r.source)),represented=new Set(catalogRows.map(r=>r.source+':'+(r.knotKey||r.label))),missingSources=expectedSources.filter(x=>!represented.has(x));add('ENGINE','G4a','geselecteerde catalogusgeometrieën uitgevoerd',expectedSources.length?(missingSources.length?'FAIL':'PASS'):'NOT_APPLICABLE',{expectedSources,missingSources,catalogResultCount:catalogRows.length,selection:sel},'Iedere geselecteerde bron/geometriecombinatie moet werkelijk in de audit voorkomen; een gedeeltelijke of analytische-only terugval is FAIL.');
+    const sel=selection(),expectedSources=[];
+    if(sel.ideal&&sel.knotKey)expectedSources.push('ideal:'+sel.knotKey);
+    else if(sel.fseries&&sel.knotKey)expectedSources.push('fseries:'+sel.knotKey);
+    else if(sel.knotplot&&sel.knotKey)expectedSources.push('knotplot:'+normalizeKnotPlotId(sel.knotKey));
+    else if(sel.twist&&sel.knotKey)expectedSources.push('twist:'+sel.knotKey);
+    else if(sel.ruben&&sel.knotKey)expectedSources.push('ruben:'+sel.knotKey);
+    else{for(const key of sel.topologies||[]){const m=catalog[key];if(!m)continue;if(m.ideal)expectedSources.push('ideal:'+m.ideal);if(m.fseries)expectedSources.push('fseries:'+m.fseries);if(m.knotplot)expectedSources.push('knotplot:'+m.knotplot);}}
+    const catalogRows=results.filter(r=>['ideal','fseries','knotplot','twist','ruben'].includes(r.source)),represented=new Set(catalogRows.map(r=>r.source+':'+(r.knotKey||r.label))),missingSources=expectedSources.filter(x=>!represented.has(x));add('ENGINE','G4a','geselecteerde catalogusgeometrieën uitgevoerd',expectedSources.length?(missingSources.length?'FAIL':'PASS'):'NOT_APPLICABLE',{expectedSources,missingSources,catalogResultCount:catalogRows.length,selection:sel},'Iedere geselecteerde bron/geometriecombinatie moet werkelijk in de audit voorkomen; een gedeeltelijke of analytische-only terugval is FAIL.');
     const kpExpected=expectedSources.filter(x=>x.startsWith('knotplot:')),kpLast=[];for(const key of kpExpected.map(x=>x.slice(9))){const rows=results.filter(r=>r.source==='knotplot'&&r.knotKey===key).sort((a,b)=>a.N-b.N),r=rows.at(-1);if(r)kpLast.push(r);}const kpMissing=kpExpected.map(x=>x.slice(9)).filter(key=>!kpLast.some(r=>r.knotKey===key)),kpMetaOk=kpLast.every(r=>r.sourceRole==='vortexlab-uniform-N300'&&r.curveRoute==='native uniform polygon → periodic C2 spline'&&Number.isFinite(r.componentCountExpected)&&r.componentCountExpected===r.componentCount),torus69=kpLast.find(r=>r.knotKey==='torus_6.9'),torus69Ok=!torus69||(torus69.torus?.p===6&&torus69.torus?.q===9&&torus69.componentCount===3&&torus69.pairwiseLinkingAbs===6);add('ENGINE','G4b','KnotPlot uniform-N300 identiteit + routeprovenance',kpExpected.length?(!kpMissing.length&&kpMetaOk&&torus69Ok?'PASS':'FAIL'):'NOT_APPLICABLE',{expected:kpExpected,missing:kpMissing,metadataRouteOk:kpMetaOk,torus69IdentityOk:torus69Ok,rows:kpLast.map(r=>({knotKey:r.knotKey,status:r.candidateStatus,family:r.candidateFamily,componentCount:r.componentCount,D:r.metadataD,sourceRole:r.sourceRole,curveRoute:r.curveRoute,torus:r.torus,pairwiseLinkingAbs:r.pairwiseLinkingAbs}))},'KnotPlot-audits gebruiken de native uniform-N300-centerline met periodieke C²-spline. torus_6.9 moet T(6,9), drie T(2,3)-componenten en |Lk|=6 rapporteren.');
     const idealExpected=expectedSources.some(x=>x.startsWith('ideal:')),idealLast=[];for(const id of new Set(results.filter(r=>r.source==='ideal').map(r=>r.id))){const rows=results.filter(r=>r.id===id).sort((a,b)=>a.N-b.N),r=rows.at(-1);if(r)idealLast.push(r);}const maxIdealDcsd=Math.max(0,...idealLast.map(r=>r.idealDcsdRelativeError||0)),g4Status=idealExpected?(idealLast.length?(maxIdealDcsd<.005?'PASS':'FAIL'):'FAIL'):'NOT_APPLICABLE';add('ENGINE','G4','Gilbert D versus continue DCSD',g4Status,{applicable:idealExpected,expectedIdealCount:expectedSources.filter(x=>x.startsWith('ideal:')).length,maxRelativeError:idealLast.length?maxIdealDcsd:null,rows:idealLast},'D=1 wordt als onafhankelijke diameteranker op de continue DCSD-tak gecontroleerd; zonder uitgevoerde Ideal-rows is deze gate FAIL wanneer Ideal-data was geselecteerd.');
     const kpDiameterDiagnostics=kpLast.filter(r=>Number.isFinite(r.metadataD)&&Number.isFinite(r.reach)).map(r=>({knotKey:r.knotKey,status:r.candidateStatus,D:r.metadataD,reachProxy:r.reach,diameterOverTwoReach:r.metadataD/(2*r.reach),limiter:r.limiter,route:r.curveRoute}));add('RESEARCH','R42','KnotPlot D=1 versus discrete C²-reachproxy','INFO',{rows:kpDiameterDiagnostics},'D=1 is de normalisatie van de Ridgerunner-polishprovenance. De uniform-N300 C²-splinewaarde is alleen een VortexLab-discrete proxy en kan D of een global-tight certificaat niet vervangen.');
@@ -3396,7 +3988,8 @@ function carrierMeanSelfVz(components){
 }
 function velAll(Yv,OUT){
   const lia=(P.inter==='lia');
-  return velocityCore(Yv,allFils(),OUT,lia);
+  const u=velocityCore(Yv,allFils(),OUT,lia);
+  return vlDiscrete.active()?Math.max(u,vlDiscrete.knotDerivative(Yv,allFils(),OUT)):u;
 }
 function wrapFilamentCarriersZ(){
   if(!P.tracerWrapZ||P.centerLock||!Y||!fils.length)return;
@@ -3476,6 +4069,7 @@ function nativeVelocityOptions(){
   };
 }
 function rk4Step(dt){
+  if(vlDiscrete.active())return vlDiscrete.advance(dt);
   if(nativeSolverAdmissible()){
     try{
       const eng=window.VortexLabEngine;
@@ -3527,7 +4121,7 @@ function acceptedStepTimeCap(){
   return P.specClockEnabled?SPEC_CLOCK_MAX_ACCEPTED_DT:MAX_ACCEPTED_DT;
 }
 function dtCFL(){
-  const lm=lminAll();
+  const lm=vlDiscrete.active()?Math.min(lminAll(),vlDiscrete.minSegment()):lminAll();
   let dt=Infinity;
   if(!(P.stretchProfileApply&&P.stretchProfileOnly)){
     const nu=(Math.abs(Gamma())/(4*Math.PI))*(Math.log(2*lm/(Math.exp(DELTA[P.core])*P.a))+C0);
@@ -3536,6 +4130,7 @@ function dtCFL(){
   }
   const speedBound=Math.max(1e-12,lastUmax,prescribedKinematicSpeedBound());
   dt=Math.min(dt,0.25*lm/speedBound);
+  if(vlDiscrete.active()){const b=vlDiscrete.report();dt=Math.min(dt,0.1*b.spacing/speedBound,0.1/Math.max(1e-12,Math.abs(b.omega)));}
   const stretchRate=stretchProfileCharacteristicRate();
   if(stretchRate>1e-12)dt=Math.min(dt,0.12/stretchRate);
   if(bgWallInSolver()&&Math.abs(P.Om)>1e-9)dt=Math.min(dt,0.2/Math.abs(P.Om));
@@ -3553,6 +4148,7 @@ function dtCFL(){
   return dt;
 }
 function evalsPerStep(){
+  if(vlDiscrete.active()){const b=vlDiscrete.report().vertices;return 4*(b+dynamicFils().reduce((n,f)=>n+f.N,0))**2;}
   let tot=0;for(const f of dynamicFils())tot+=f.N;
   const lia=(P.inter==='lia');
   const n=dynamicFils().length;
@@ -4386,6 +4982,7 @@ function resetState(){
   updateCoreQualificationReadout();
   K1=new Float64Array(Y.length);K2=new Float64Array(Y.length);
   K3=new Float64Array(Y.length);K4=new Float64Array(Y.length);TT=new Float64Array(Y.length);
+  vlDiscrete.setup();
   tPhys=0;phi=0;bundlePhi=0;flagged="";warned=false;lastUmax=1e-9;
   twistFlowAcceptedSteps=0;
   twistFlowReferenceStart=(Y&&Y.length>=3)?[Y[0],Y[1],Y[2]]:null;
@@ -4412,6 +5009,51 @@ function resetState(){
   syncTracerBudget(); // reallocate passive tracers only if native N changes the budget
   rebuildStreamlines(true);
   markPotentialFlowDirty();updatePotentialFlowVisual(true);
+  // P7.2 reference-transfer: only catalog-labeled single-component embeddings.
+  // Comparison scale for nonideal curves is their equal XY footprint relative to
+  // Gilbert ideal. Topology labels are NOT independent isotopy certification.
+  // Never modify P.a, Gamma, P.R0, Y, or contact/safety conditions.
+  if(window.__vlModelAIdealRequested===true && window.VLModelAIdealStretch){
+    const api=window.VLModelAIdealStretch;
+    const current=activeKnotEntry(),f=fils.find(f=>!f.ghost);
+    const topologyKey=api.topologyFromSource(P.knotSource,P.knotKey,P.topo);
+    const matched=/^(\d{1,2})_(\d{1,3})$/.exec(topologyKey||'');
+    const idealKey=matched?`${matched[1]}:1:${matched[2]}`:null;
+    const idealReference=idealKey?getIdealKnotCatalog()?.db?.[idealKey]:null;
+    let ref=null;
+    if(idealReference&&idealReference.ideal===true&&knotEntryComponents(idealReference).length===1){
+      let xyOverL=NaN;
+      if(P.knotSource!=='ideal'){
+        // A sampled ideal embedding is the dimensional anchor; not a solver input.
+        try {
+          const raw=sampleIdealComponent(knotEntryComponents(idealReference)[0],512);
+          let xx=0,yy=0,length=0;
+          for(let i=0;i<raw.length/3;i++){xx+=raw[3*i];yy+=raw[3*i+1];}
+          xx/=raw.length/3;yy/=raw.length/3;
+          let r=0;
+          for(let i=0;i<raw.length/3;i++){
+            const j=(i+1)%(raw.length/3);
+            r=Math.max(r,Math.hypot(raw[3*i]-xx,raw[3*i+1]-yy));
+            length+=Math.hypot(raw[3*j]-raw[3*i],raw[3*j+1]-raw[3*i+1],raw[3*j+2]-raw[3*i+2]);
+          }
+          xyOverL=r/length;
+        }catch(_){xyOverL=NaN;}
+      }
+      ref={ideal:true,L:idealReference.L,D:idealReference.D,knotId:idealKey,
+        topologyKey,xyOverL};
+    }
+    window.VLModelAIdealStretch.reset({
+      points:f?Y.subarray(f.off,f.off+3*f.N):null,
+      source:P.knotSource,previewN:Number(window.__vlTwistFlowPreviewN||0),
+      solo:P.mode==='solo'&&fils.filter(f=>!f.ghost).length===1,
+      autoRelax:!!P.autoRelax,
+      metadata:{ideal:P.knotSource==='ideal'&&current?.ideal===true,
+        L:current?.L,D:current?.D,knotId:P.knotKey||P.topo,
+        componentCount:current?knotEntryComponents(current).length:(P.knotSource==='builtin'&&P.topo==='trefoil'?1:0)},
+      reference:ref
+    });
+    if(vlTwistIsTubeDisplay())rebuildTubes(true);
+  }
   resetStretchGate('state-reset',true);
   resetSpecClockRuntime('state-reset · fase-referentie opnieuw vereist');
   if(P.specClockEnabled){
@@ -4839,9 +5481,11 @@ function dynamicFilamentNodeCount(){
   return Y&&fils.length?fils.reduce((sum,f)=>sum+(f.ghost?0:f.N),0):0;
 }
 function budgetedTracerCount(){
+  const requested=Math.max(0,Math.min(TRACER_COUNT_MAX,Math.round(P.tracerCount||0)));
+  if(P.tracerBudgetLimit===false)return requested;
   const policy=window.VortexLabResolutionPolicy;
   return policy?policy.effectiveTracerCount(P.tracerCount,dynamicFilamentNodeCount())
-    :Math.max(0,Math.min(TRACER_COUNT_MAX,Math.round(P.tracerCount||0)));
+    :requested;
 }
 function tracerCount(){
   return trArr ? Math.floor(trArr.length/3) : budgetedTracerCount();
@@ -4851,9 +5495,16 @@ function updateTracerBudgetLabel(){
   const visible=tracerCount();
   e.textContent=visible===P.tracerCount?String(visible):`${visible} zichtbaar / ${P.tracerCount} gevraagd`;
   const hint=document.getElementById('tracerBudgetInfo');
-  if(hint)hint.textContent=visible<P.tracerCount
-    ?`Automatische bescherming: ${dynamicFilamentNodeCount()} vortexpunten; passieve tracers beperkt tot ${visible}. De ingestelde waarde ${P.tracerCount} blijft bewaard.`
-    :'Bij hogere vortexresolutie wordt uitsluitend het aantal passieve tracers automatisch verminderd.';
+  const limitCb=document.getElementById('cTracerBudgetLimit');if(limitCb)limitCb.checked=P.tracerBudgetLimit!==false;
+  if(hint){
+    if(P.tracerBudgetLimit===false){
+      hint.textContent='Automatische deeltjesbegrenzing uit. Gevraagde hoeveelheid tot '+TRACER_COUNT_MAX.toLocaleString('nl-NL')+' wordt gebruikt; bij hoge vortexresolutie kan dit zwaar zijn.';
+    }else if(visible<P.tracerCount){
+      hint.textContent=`Automatische bescherming: ${dynamicFilamentNodeCount()} vortexpunten; passieve tracers beperkt tot ${visible}. De ingestelde waarde ${P.tracerCount} blijft bewaard.`;
+    }else{
+      hint.textContent='Bij hogere vortexresolutie wordt uitsluitend het aantal passieve tracers automatisch verminderd (zet de checkbox uit om dit te negeren).';
+    }
+  }
 }
 function syncTracerBudget(){
   if(!trArr||tracerCount()!==budgetedTracerCount())initTracers();
@@ -5024,6 +5675,17 @@ function fieldVelocityAt(px,py,pz,segs){
   const ubg=backgroundVelocityAt(px,py,pz);ux+=ubg.ux;uy+=ubg.uy;uz+=ubg.uz;
   return {ux,uy,uz,speed:Math.hypot(ux,uy,uz)};
 }
+// Instantane stroomlijnvisualisatie: bij actieve parallele bundelkoppeling
+// trekken we het opgelegde continuum Ω×r van het lab-veld af. Absolute
+// stroomlijnen collapsen dan tot horizontale cirkels en verbergen de
+// knoop+BEM-perturbatie. Tracers/filamenten blijven het absolute veld volgen.
+function streamlineVelocityAt(px,py,pz,segs){
+  const v=fieldVelocityAt(px,py,pz,segs);
+  if(!bundleFlowActive())return v;
+  const ub=bundleVelocityProfileAt(px,py,pz,true);
+  const ux=v.ux-ub.ux,uy=v.uy-ub.uy,uz=v.uz-ub.uz;
+  return {ux,uy,uz,speed:Math.hypot(ux,uy,uz)};
+}
 // P2 independent pass/fail diagnostics; do not impose a fake pressure/wall force.
 let lastFluidQualificationReport=null;
 function updateFluidQualificationPanel(){
@@ -5054,12 +5716,12 @@ function traceStreamline(seed,sign,segs,steps,ds){
   let x=seed.x,y=seed.y,z=seed.z;
   for(let k=0;k<steps;k++){
     if(!insideCylinder(x,y,z))break;
-    const v1=fieldVelocityAt(x,y,z,segs);
+    const v1=streamlineVelocityAt(x,y,z,segs);
     if(v1.speed<1e-10)break;
     pts.push(new THREE.Vector3(x,y,z));speeds.push(v1.speed);
     const h=sign*ds/v1.speed;
     const mx=x+0.5*h*v1.ux,my=y+0.5*h*v1.uy,mz=z+0.5*h*v1.uz;
-    const vm=fieldVelocityAt(mx,my,mz,segs);
+    const vm=streamlineVelocityAt(mx,my,mz,segs);
     if(vm.speed<1e-10)break;
     x+=sign*ds*vm.ux/vm.speed;
     y+=sign*ds*vm.uy/vm.speed;
@@ -5200,6 +5862,49 @@ function displayTubeRadii(){
   };
 }
 function tubesWanted(){return P.vis==='tube'||!!P.showTubeThickness;}
+// P7.1: visual-only ideal tube geometry. Do not feed any radius into P.a,
+// core contact, Biot–Savart or numerical safety. Opt-in only on /twist-flow/.
+const vlTwistSolidTubeMats=[
+  new THREE.MeshStandardMaterial({color:0xFFAE45,emissive:0x563312,emissiveIntensity:0.25,roughness:0.46,metalness:0.06,side:THREE.DoubleSide}),
+  new THREE.MeshStandardMaterial({color:0x55D6FF,emissive:0x164763,emissiveIntensity:0.25,roughness:0.46,metalness:0.06,side:THREE.DoubleSide})
+];
+let vlTubeRenderDiagnostics={status:'OFF'};
+function vlTwistIsTubeDisplay(){return window.__vlIdealTubeDisplayRequested===true;}
+function vlTwistFallbackRadius(f){
+  const settings=window.__vlTubeVisualSettings||{};
+  const fraction=Math.max(0.02,Math.min(0.30,Number(settings.fallbackFraction)||0.12));
+  if(!f||!Y)return {radius:Math.max(P.a,1e-5),fraction};
+  let cx=0,cy=0;
+  for(let j=0;j<f.N;j++){cx+=Y[f.off+3*j];cy+=Y[f.off+3*j+1];}
+  cx/=f.N;cy/=f.N;
+  let rxy=0;
+  for(let j=0;j<f.N;j++)rxy=Math.max(rxy,Math.hypot(Y[f.off+3*j]-cx,Y[f.off+3*j+1]-cy));
+  return {radius:Math.max(rxy,1e-12)*fraction,fraction,rxy};
+}
+// THREE.TubeGeometry samples by equal arclength (getPointAt); its ring vertices
+// are modified radially in display space using material stretching radii.
+function vlRescaleTubeRings(geo,curve,radii,segments,radialSegments){
+  const pos=geo.getAttribute('position'),p=new THREE.Vector3();
+  if(!pos||radii.length!==segments+1)throw Error('P7.1: tube radius/profile segment mismatch');
+  for(let i=0;i<=segments;i++){
+    curve.getPointAt(i/segments,p);
+    const radius=radii[i];
+    if(!Number.isFinite(radius)||radius<=0)throw Error('P7.1: invalid material radius');
+    for(let j=0;j<=radialSegments;j++){
+      const idx=i*(radialSegments+1)+j;
+      pos.setXYZ(idx,p.x+(pos.getX(idx)-p.x)*radius,
+        p.y+(pos.getY(idx)-p.y)*radius,
+        p.z+(pos.getZ(idx)-p.z)*radius);
+    }
+  }
+  pos.needsUpdate=true;
+  geo.computeVertexNormals();
+  geo.computeBoundingSphere();
+  return geo;
+}
+window.__vlRefreshTubeVisualization=()=>{if(vlTwistIsTubeDisplay()&&typeof rebuildTubes==='function')rebuildTubes(true);};
+window.__vlTubeVisualDiagnostics=()=>({...vlTubeRenderDiagnostics});
+
 function updateTubeThicknessHud(){
   const el=document.getElementById('tubeThicknessInfo');if(!el)return;
   const r=displayTubeRadii();
@@ -5207,7 +5912,9 @@ function updateTubeThicknessHud(){
   const dTxt=Number.isFinite(r.aDisplay)?fmtLengthSI(r.aDisplay):'—';
   const kTxt=Number.isFinite(r.rKern)?fmtLengthSI(r.rKern):'—';
   const floorNote=r.floorActive?` · ⚠ displayFloor=${fmtLengthSI(r.floorMeters)} ≠ a_sim`:'';
-  el.textContent=`buis: a_sim=${aTxt} · display=${dTxt} · r_kern=${kTxt} · n=${Number(r.nQ).toLocaleString('nl-NL')}${floorNote}`;
+  el.textContent=vlTwistIsTubeDisplay()
+    ?`buis (P7.1 weergave): ${vlTubeRenderDiagnostics.status||'—'} · a_sim=${aTxt} [solver, onafhankelijk]`
+    :`buis: a_sim=${aTxt} · display=${dTxt} · r_kern=${kTxt} · n=${Number(r.nQ).toLocaleString('nl-NL')}${floorNote}`;
 }
 let sepObjs=[], capDiscs=[], capRings=[], colSils=[], alphaObjs=[];
 let stewartsonTorus=null, stewartsonArrows=null;
@@ -5351,11 +6058,39 @@ function rebuildTubes(force){
   tubeObjs=[];coreTubeObjs=[];betaObjs=[];flowObjs=[];
   const radii=displayTubeRadii();
   const tr=Number.isFinite(radii.aDisplay)?radii.aDisplay:Math.max(Number(P.a)||0,1e-5);
-  const mats=[P.tubeMat==='solid'?matSolidA:matHolA,P.tubeMat==='solid'?matSolidB:matHolB];
+  const twistDisplay=vlTwistIsTubeDisplay();
+  const mats=twistDisplay?vlTwistSolidTubeMats:
+    [P.tubeMat==='solid'?matSolidA:matHolA,P.tubeMat==='solid'?matSolidB:matHolB];
   fils.forEach((f,i)=>{
     try{
       const curve=new DynCurve(f);
-      tubeObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,tr,8,true),mats[i%2]));
+      let geometry;
+      if(twistDisplay&&!f.ghost){
+        const material=window.VLModelAIdealStretch;
+        const profile=(i===0&&material?.isActiveStatus(material.snapshot()?.status))
+          ?material.tubeProfile(Y.subarray(f.off,f.off+3*f.N),f.N):null;
+        if(profile){
+          geometry=vlRescaleTubeRings(new THREE.TubeGeometry(curve,f.N,1,12,true),
+            curve,profile.radiiScene,f.N,12);
+          vlTubeRenderDiagnostics={status:profile.source==='IDEAL_VOLUME_TRANSFER'?'IDEAL REFERENTIEVOLUME → andere embedding':'IDEAL L/ropelength + lokale rek',
+            source:profile.source==='IDEAL_VOLUME_TRANSFER'?'IDEAL_VOLUME_TRANSFER':'IDEAL',
+            knotId:material.snapshot().knotId,referenceKnotId:profile.referenceKnotId,
+            topologyKey:profile.topologyKey,transferAssumption:profile.transferAssumption,
+            previewUnqualified:profile.previewUnqualified,ropelength:profile.referenceRopelength,
+            diameterScene:profile.diameterSceneMean,referenceDiameterScene:profile.referenceDiameterScene,
+            minRadiusScene:profile.minRadiusScene,maxRadiusScene:profile.maxRadiusScene,
+            numericalRadiusScene:P.a,solverUnchanged:true};
+        }else{
+          const fb=vlTwistFallbackRadius(f);
+          geometry=new THREE.TubeGeometry(curve,f.N,fb.radius,12,true);
+          vlTubeRenderDiagnostics={status:'SCHEMATISCHE dikte (geen gecertificeerde ropelength)',
+            source:P.knotSource||'unknown',diameterScene:2*fb.radius,
+            fractionOfKnotRxy:fb.fraction,numericalRadiusScene:P.a,solverUnchanged:true};
+        }
+      }else{
+        geometry=new THREE.TubeGeometry(curve,f.N,tr,8,true);
+      }
+      tubeObjs.push(new THREE.Mesh(geometry,mats[i%2]));
       filGrp.add(tubeObjs[tubeObjs.length-1]);
       if(Number.isFinite(radii.rKern)&&radii.rKern>0){
         coreTubeObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,radii.rKern,6,true),coreTubeMat));
@@ -5698,8 +6433,8 @@ function updateIdealKnotInfo(){
   if(reset)reset.classList.toggle('hidden',!entry);
   if(!note)return;
   if(!entry){
-    const ni=getIdealKnotCatalog()?.ids?.length||0,nf=getFourierKnotCatalog()?.ids?.length||0,nk=getKnotPlotKnotCatalog()?.ids?.length||0,nt=getTwistKnotCatalog()?.ids?.length||0;
-    note.textContent=`Ingebouwde geometrie actief. Externe catalogi: ${ni} Gilbert, ${nf} fseries, ${nk} KnotPlot, ${nt} A006 twist. Optioneel: session .xyz-import. Fseries/KnotPlot/A006/XYZ zijn geometrische bronnen, niet automatisch ideal/tight.`;
+    const ni=getIdealKnotCatalog()?.ids?.length||0,nf=getFourierKnotCatalog()?.ids?.length||0,nk=getKnotPlotKnotCatalog()?.ids?.length||0,nt=getTwistKnotCatalog()?.ids?.length||0,nr=getRubenKnotCatalog()?.ids?.length||0;
+    note.textContent=`Ingebouwde geometrie actief. Externe catalogi: ${ni} Gilbert, ${nf} fseries, ${nk} KnotPlot, ${nt} A006 twist, ${nr} Ruban E010. Optioneel: session .xyz-import. Fseries/KnotPlot/A006/Ruban/XYZ zijn geometrische bronnen, niet automatisch ideal/tight.`;
     return;
   }
   const comps=knotEntryComponents(entry);
@@ -5711,12 +6446,12 @@ function updateIdealKnotInfo(){
   const modes=comps.map(c=>{const q=c.coeffs||[];return `${q.length} termen / I_max ${q.reduce((m,v)=>Math.max(m,Math.abs(Number(v.I)||0)),0)}`;});
   const L0=finiteMetaNumber(entry.L),componentLengths=comps.map(c=>finiteMetaNumber(c.L)).filter(Number.isFinite);
   const L=Number.isFinite(L0)?L0:(componentLengths.length===comps.length?componentLengths.reduce((a,b)=>a+b,0):NaN);
-  const isKnotPlot=P.knotSource==='knotplot',isTwist=P.knotSource==='twist',isFs=!isKnotPlot&&!isTwist&&(P.knotSource==='fseries'||entry.ideal===false);
-  const source=isKnotPlot?'knotplot_knots_data.js (KnotPlot XYZ→Fourier)':isTwist?'twist_knot_data.js (A006)':isFs?'fourier_knots_data.js (.fseries)':'ideal_knots_data.js (Brian Gilbert)';
-  const status=isKnotPlot?`${entry.status||'candidate'}; uniform-N300 VortexLab-centerline, polishprovenance apart; niet als zelfstandige globale ideal/tight, fysieke diameter of ropelength-minimum gecertificeerd`:isTwist?`${entry.status||'static-candidate'}; A006 RoundFolded twist-family; niet ideal/tight-gecertificeerd`:isFs?'compacte gesloten Fouriercurve; niet als tight/ideal gecertificeerd':'tight/ideal brongeometrie; nog geen stationaire Euler-, GP/NLSE- of SST-oplossing';
-  const indexInfo=isFs&&Number.isInteger(entry.harmonicStart)?` · harmonische eerste regel j=${entry.harmonicStart}`:isKnotPlot&&Number.isFinite(entry.checkpointSteps)?` · checkpoint ${entry.checkpointSteps} stappen`:'';
+  const isKnotPlot=P.knotSource==='knotplot',isTwist=P.knotSource==='twist',isRuben=P.knotSource==='ruben',isFs=!isKnotPlot&&!isTwist&&!isRuben&&(P.knotSource==='fseries'||entry.ideal===false);
+  const source=isKnotPlot?'knotplot_knots_data.js (KnotPlot XYZ→Fourier)':isTwist?'twist_knot_data.js (A006)':isRuben?'ruben_knot_data.js (E010 Ruban)':isFs?'fourier_knots_data.js (.fseries)':'ideal_knots_data.js (Brian Gilbert)';
+  const status=isKnotPlot?`${entry.status||'candidate'}; uniform-N300 VortexLab-centerline, polishprovenance apart; niet als zelfstandige globale ideal/tight, fysieke diameter of ropelength-minimum gecertificeerd`:isTwist?`${entry.status||'static-candidate'}; A006 RoundFolded twist-family; niet ideal/tight-gecertificeerd`:isRuben?`${entry.status||'static-candidate'}; Ruban E010 parametric torus seed N${entry.resolutionN||512}; niet ideal/tight- of dynamics-gecertificeerd`:isFs?'compacte gesloten Fouriercurve; niet als tight/ideal gecertificeerd':'tight/ideal brongeometrie; nog geen stationaire Euler-, GP/NLSE- of SST-oplossing';
+  const indexInfo=isFs&&Number.isInteger(entry.harmonicStart)?` · harmonische eerste regel j=${entry.harmonicStart}`:isKnotPlot&&Number.isFinite(entry.checkpointSteps)?` · checkpoint ${entry.checkpointSteps} stappen`:isRuben&&entry.parametricEmbedding?` · ${entry.parametricEmbedding} · B0=${entry.B0} · ${entry.variant||'baseline'}`:'';
   const warning=entry.warning?` · WAARSCHUWING bron: ${entry.warning}`:'';
-  const kindLabel=isKnotPlot?'KnotPlot':isTwist?'A006 twist':isFs?'Fseries':'Ideal';
+  const kindLabel=isKnotPlot?'KnotPlot':isTwist?'A006 twist':isRuben?'Ruban E010':isFs?'Fseries':'Ideal';
   note.textContent=`${kindLabel} ID: ${entry.knotId||P.knotKey||knotLabel(P.knotIdx)} · Conway: ${entry.conway||'—'} · componenten: ${comps.length} · bronlengte L: ${Number.isFinite(L)?L.toFixed(6):'niet opgegeven'} · Fourier: ${modes.join(' + ')}${indexInfo} · modus: ${P.idealComponentMode==='all'?'volledig object':'één component'} · bron: ${source} · status: ${status}${warning}.`;
 }
 function syncCompSelects(){
@@ -5747,7 +6482,6 @@ function syncSignedUi(sliderId,revId,val,fmtVal){
 }
 function syncUi(){
   syncSeg('modeSeg','mode',P.mode);
-  document.getElementById('topoSelect').value=P.topo;
   syncSeg('interSeg','inter',P.inter);
   syncSeg('coreSeg','core',P.core);
   syncSeg('medSeg','med',P.med);
@@ -5805,6 +6539,7 @@ function syncUi(){
   const sPS=document.getElementById('sParticleSize');if(sPS)sPS.value=(1000*P.particleSize).toFixed(1);
   const vPS=document.getElementById('vParticleSize');if(vPS)vPS.textContent=(1000*P.particleSize).toFixed(1)+' mm';
   const sTC=document.getElementById('sTracerCount');if(sTC)sTC.value=String(P.tracerCount);
+  const cTBL=document.getElementById('cTracerBudgetLimit');if(cTBL)cTBL.checked=P.tracerBudgetLimit!==false;
   updateTracerBudgetLabel();
   const sSC=document.getElementById('sStreamlineCount');if(sSC)sSC.value=String(P.streamlineCount);
   const vSC=document.getElementById('vStreamlineCount');if(vSC)vSC.textContent=String(P.streamlineCount);
@@ -5924,8 +6659,8 @@ function prepareDualSidebarGroups(){
   const bgNote=document.querySelector('#collParams > .coll-body > .btns .note');if(bgNote)flowFlags.appendChild(bgNote);
 
   // RECHTS · VORTEX
-  vlMoveControl('modeSeg',vortex);vlMoveControl('sSepAB',vortex);vlMoveControl('topoSelect',vortex);
-  ['knotRow','fseriesRow','knotplotRow','twistRow','xyzImportRow','idealComponentModeRow','compRow','bResetIdealKnot','idealKnotInfo'].forEach(id=>{const el=document.getElementById(id);if(el)vortex.appendChild(el);});
+  vlMoveControl('modeSeg',vortex);vlMoveControl('sSepAB',vortex);
+  ['knotRow','fseriesRow','knotplotRow','twistRow','rubenRow','xyzImportRow','idealComponentModeRow','compRow','bResetIdealKnot','idealKnotInfo'].forEach(id=>{const el=document.getElementById(id);if(el)vortex.appendChild(el);});
   const paramFlags=document.querySelector('#collParams > .coll-body > .btns');
   if(paramFlags){
     ['ccwARow','ccwBRow','mirrorRow','lockVzRow'].forEach(id=>{const el=document.getElementById(id);if(el)vortexFlags.appendChild(el);});
@@ -6296,10 +7031,16 @@ function vlFocusClockRunner(mode){
 }
 function initSpecClockRunnerHub(){
   const selector=vlNode('specKnotSelector'),panel=selector?.parentElement;if(!selector||!panel||vlNode('vlClockRunnerHub'))return;
-  const hub=document.createElement('details');hub.id='vlClockRunnerHub';hub.className='spec-clock-runner-hub';hub.open=true;hub.innerHTML='<summary>▶ TESTRUNNERS · VERPLICHTE ENGINE-VOLGORDE</summary><div class="spec-clock-runner-grid" id="vlClockRunnerGrid"><div class="spec-clock-workflow-hint" id="vlClockWorkflowHint"></div></div>';
+  const hub=document.createElement('details');hub.id='vlClockRunnerHub';hub.className='spec-clock-runner-hub';hub.open=true;hub.innerHTML='<summary>▶ TESTRUNNERS · VERPLICHTE ENGINE-VOLGORDE</summary><div class="spec-clock-runner-grid" id="vlClockRunnerGrid"><label class="chk spec-clock-auto-advance" for="cClockAutoAdvance"><input type="checkbox" id="cClockAutoAdvance"> automatisch naar de volgende test</label><div class="spec-clock-workflow-hint" id="vlClockWorkflowHint"></div></div>';
   selector.insertAdjacentElement('afterend',hub);const grid=vlNode('vlClockRunnerGrid'),hint=vlNode('vlClockWorkflowHint');
   for(const def of VL_CLOCK_RUNNER_DEFS){const b=vlNode(def.id);if(!b)continue;b.classList.add('runner-primary');b.addEventListener('click',()=>vlFocusClockRunner(def.mode));grid.insertBefore(b,hint);}
   for(const id of ['bSpecBenchmarkStop','bProxyDecompStop']){const b=vlNode(id);if(b)b.hidden=true;}
+  const auto=vlNode('cClockAutoAdvance');
+  if(auto&&auto.dataset.bound!=='1'){
+    auto.dataset.bound='1';
+    try{auto.checked=sessionStorage.getItem(VL_CLOCK_AUTO_ADVANCE_KEY)==='1';}catch(_){}
+    auto.addEventListener('change',()=>vlSetClockAutoAdvance(auto.checked));
+  }
   vlRefreshClockRunnerWorkflowUi();
 }
 const VL_BOTTOM_WIDGET_STORAGE='vortexlab.bottomWidgets.v1';
@@ -6651,7 +7392,6 @@ segHandler('modeSeg','mode',v=>{
   if(v==='solo'&&P.topo==='ring'&&P.knotIdx<0&&!P.knotKey)P.topo='trefoil';
   syncUi();resetState();
 });
-document.getElementById('topoSelect').addEventListener('change',e=>{const v=e.target.value;if(v===P.topo&&!P.knotKey&&P.knotIdx<0)return;P.topo=v;P.knotIdx=-1;P.knotKey='';P.knotSource='builtin';P.idealComponentMode='all';ImportedXyzEntry=null;syncKnotSel();syncUi();updateXyzImportInfo();resetState();});
 segHandler('interSeg','inter',v=>{if(v===P.inter)return;P.inter=v;syncUi();resetState();});
 segHandler('coreSeg','core',v=>{if(v===P.core)return;P.core=v;syncUi();updateSubtitle();});
 segHandler('qualSeg','qual',v=>{if(v===P.qual)return;P.qual=v;resetState();});
@@ -6694,6 +7434,12 @@ document.getElementById('bLinkDH').addEventListener('click',()=>{
 });
 document.getElementById('bPause').addEventListener('click',()=>setPausedState(!paused,paused?'resume':'pause'));
 document.getElementById('bReset').addEventListener('click',resetState);
+document.getElementById('bDomainCommaShift')?.addEventListener('click',()=>{
+  const r=applyDomainCommaShift('ui');
+  if(window.ModelLog)ModelLog.logUser('ui:click:bDomainCommaShift',r);
+});
+window.__vlApplyDomainCommaShift=applyDomainCommaShift;
+window.__vlDomainCommaShiftPlan=domainCommaShiftPlan;
 // v7.3.1: OVERZICHT gebruikt uitsluitend #quickControlsDock; geen tweede dynamische container.
 document.getElementById('bResetParticles').addEventListener('click',cycleParticleReset);
 document.getElementById('cCoRot').addEventListener('change',e=>{
@@ -6720,6 +7466,11 @@ document.getElementById('cTracers').addEventListener('change',e=>{
   P.showTracers=e.target.checked;
   if(trPts)trPts.visible=P.showTracers&&(!P.showStreamlines||window.__vlTwistFlowOverlayParticles===true);
   rebuildStreamlines(true);
+});
+document.getElementById('cTracerBudgetLimit')?.addEventListener('change',e=>{
+  P.tracerBudgetLimit=!!e.target.checked;
+  if(window.ModelLog)window.ModelLog.logUser('tracerBudgetLimit',{enabled:P.tracerBudgetLimit,requested:P.tracerCount,visible:budgetedTracerCount(),nodes:dynamicFilamentNodeCount()});
+  syncTracerBudget();
 });
 document.getElementById('cStreamlines').addEventListener('change',e=>{
   P.showStreamlines=e.target.checked;
@@ -6913,12 +7664,13 @@ document.getElementById('compA').addEventListener('change',e=>{P.compA=+e.target
 document.getElementById('compB').addEventListener('change',e=>{P.compB=+e.target.value;resetState();});
 document.getElementById('idealComponentMode').addEventListener('change',e=>{P.idealComponentMode=e.target.value==='single'?'single':'all';syncCompSelects();syncUi();resetState();});
 document.getElementById('bResetIdealKnot').addEventListener('click',()=>{if(activeKnotEntry())resetState();});
-// Externe catalogi: Gilbert ideal/tight, .fseries, KnotPlot en A006 twist staan bewust in afzonderlijke dropdowns.
+// Externe catalogi: Gilbert ideal/tight, .fseries, KnotPlot, A006 twist en Ruban E010 staan bewust in afzonderlijke dropdowns.
 function syncKnotSel(){
   const idealSel=document.getElementById('knotSelect');
   const fsSel=document.getElementById('fseriesSelect');
   const kpSel=document.getElementById('knotplotSelect');
   const twSel=document.getElementById('twistSelect');
+  const rbSel=document.getElementById('rubenSelect');
   if(idealSel){
     if(P.knotSource==='ideal'&&P.knotKey)idealSel.value=`ideal|${P.knotKey}`;
     else if(P.knotSource==='legacy'&&P.knotIdx>=0)idealSel.value=`legacy|${P.knotIdx}`;
@@ -6927,6 +7679,7 @@ function syncKnotSel(){
   if(fsSel)fsSel.value=P.knotSource==='fseries'&&P.knotKey?`fseries|${P.knotKey}`:'';
   if(kpSel){if(P.knotSource==='knotplot')P.knotKey=normalizeKnotPlotId(P.knotKey);kpSel.value=P.knotSource==='knotplot'&&P.knotKey?`knotplot|${P.knotKey}`:'';}
   if(twSel)twSel.value=P.knotSource==='twist'&&P.knotKey?`twist|${P.knotKey}`:'';
+  if(rbSel)rbSel.value=P.knotSource==='ruben'&&P.knotKey?`ruben|${P.knotKey}`:'';
 }
 function applyCatalogSelection(source,key){
   P.knotIdx=-1;P.knotKey='';P.knotSource='builtin';
@@ -6935,13 +7688,14 @@ function applyCatalogSelection(source,key){
   else if(source==='fseries'&&getFourierKnotCatalog()?.db?.[key]){P.knotSource='fseries';P.knotKey=key;}
   else if(source==='knotplot'){key=normalizeKnotPlotId(key);if(getKnotPlotKnotCatalog()?.db?.[key]){P.knotSource='knotplot';P.knotKey=key;}}
   else if(source==='twist'&&getTwistKnotCatalog()?.db?.[key]){P.knotSource='twist';P.knotKey=key;}
+  else if(source==='ruben'&&getRubenKnotCatalog()?.db?.[key]){P.knotSource='ruben';P.knotKey=key;}
   else if(source==='legacy'){
     const idx=parseInt(key,10);
     if(Number.isInteger(idx)&&Array.isArray(window.IDEAL_KNOTS)&&window.IDEAL_KNOTS[idx]){P.knotIdx=idx;P.knotSource='legacy';}
   }
   P.topo='trefoil';P.idealComponentMode='all';P.compA=1;P.compB=1;
-  const topo=document.getElementById('topoSelect');if(topo)topo.value='trefoil';
   syncKnotSel();syncCompSelects();syncUi();updateSubtitle();updateXyzImportInfo();resetState();
+  if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi){SpecClockProxyDecomposition.updateKnotSelectionUi();VLClockWorkflow.invalidateSelection();}
 }
 function populateTwistSelect(preserveSelection){
   const twSel=document.getElementById('twistSelect');
@@ -6966,7 +7720,33 @@ function populateTwistSelect(preserveSelection){
   else if(P.knotSource==='twist'&&P.knotKey){
     const want=`twist|${P.knotKey}`;
     if([...twSel.options].some(o=>o.value===want))twSel.value=want;
-    else{P.knotSource='builtin';P.knotKey='';}
+    else if(!clockRunLocksVortexSelection()){P.knotSource='builtin';P.knotKey='';}
+  }
+}
+function populateRubenSelect(preserveSelection){
+  const rbSel=document.getElementById('rubenSelect');
+  if(!rbSel)return;
+  const previous=preserveSelection?rbSel.value:'';
+  const ruben=getRubenKnotCatalog();
+  const groups=['<option value="">— geen Ruban E010 —</option>'];
+  if(ruben){
+    const filters=readRubenFilterState();
+    const matched=ruben.ids.filter(id=>rubenEntryMatchesFilters(ruben.db[id],filters));
+    const opts=matched.map(id=>{
+      const k=ruben.db[id],L=finiteMetaNumber(k.L);
+      const short=k.parametricEmbedding||id;
+      const extras=[`B0=${k.B0}`,k.variant,k.topology].filter(Boolean).join(' · ');
+      const label=`${short}${extras?' · '+extras:''}${Number.isFinite(L)?' · L='+L.toFixed(2):''}`;
+      return `<option value="ruben|${id}">${label}</option>`;
+    });
+    groups.push(`<optgroup label="RUBAN E010 FILTER (${matched.length}/${ruben.ids.length})">${opts.join('')||'<option disabled>geen match voor huidige filters</option>'}</optgroup>`);
+  }else groups.push('<optgroup label="CATALOGUSSTATUS"><option disabled>ruben_knot_data.js niet geladen</option></optgroup>');
+  rbSel.innerHTML=groups.join('');
+  if(previous&&[...rbSel.options].some(o=>o.value===previous))rbSel.value=previous;
+  else if(P.knotSource==='ruben'&&P.knotKey){
+    const want=`ruben|${P.knotKey}`;
+    if([...rbSel.options].some(o=>o.value===want))rbSel.value=want;
+    else if(!clockRunLocksVortexSelection()){P.knotSource='builtin';P.knotKey='';}
   }
 }
 (function initKnots(){
@@ -6974,9 +7754,11 @@ function populateTwistSelect(preserveSelection){
   const fsRow=document.getElementById('fseriesRow'),fsSel=document.getElementById('fseriesSelect');
   const kpRow=document.getElementById('knotplotRow'),kpSel=document.getElementById('knotplotSelect');
   const twRow=document.getElementById('twistRow'),twSel=document.getElementById('twistSelect');
+  const rbRow=document.getElementById('rubenRow'),rbSel=document.getElementById('rubenSelect');
   if(!idealRow||!idealSel||!fsRow||!fsSel||!kpRow||!kpSel)return;
   idealRow.classList.remove('hidden');fsRow.classList.remove('hidden');kpRow.classList.remove('hidden');
   if(twRow)twRow.classList.remove('hidden');
+  if(rbRow)rbRow.classList.remove('hidden');
   const ideal=getIdealKnotCatalog(),fseries=getFourierKnotCatalog(),knotplot=getKnotPlotKnotCatalog();
 
   const idealGroups=['<option value="builtin|">— geen Gilbert-catalogus (gebruik topologie hierboven) —</option>'];
@@ -7054,8 +7836,28 @@ function populateTwistSelect(preserveSelection){
     document.getElementById(id)?.addEventListener('change',()=>{
       populateTwistSelect(true);
       syncKnotSel();
-      if(document.getElementById('cSpecHoldoutTwist')?.checked){
-        document.getElementById('cSpecHoldoutTwist').dispatchEvent(new Event('change'));
+      if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi){
+        SpecClockProxyDecomposition.updateKnotSelectionUi();
+        VLClockWorkflow.invalidateSelection();
+      }
+    });
+  }
+  populateRubenFilterOptions();
+  populateRubenSelect(false);
+  if(rbSel){
+    rbSel.addEventListener('change',()=>{
+      if(!rbSel.value){if(P.knotSource==='ruben')applyCatalogSelection('builtin','');return;}
+      const sep=rbSel.value.indexOf('|'),source=sep>=0?rbSel.value.slice(0,sep):'ruben',key=sep>=0?rbSel.value.slice(sep+1):rbSel.value;
+      applyCatalogSelection(source,key);
+    });
+  }
+  for(const id of ['rubenEmbeddingFilter','rubenB0Filter','rubenVariantFilter']){
+    document.getElementById(id)?.addEventListener('change',()=>{
+      populateRubenSelect(true);
+      syncKnotSel();
+      if(typeof SpecClockProxyDecomposition!=='undefined'&&SpecClockProxyDecomposition.updateKnotSelectionUi){
+        SpecClockProxyDecomposition.updateKnotSelectionUi();
+        VLClockWorkflow.invalidateSelection();
       }
     });
   }
@@ -7110,9 +7912,10 @@ initDiagnosticToggles();renderFormula();
     console.assert(catalog.ids.every(id=>catalog.db[id]&&knotEntryComponents(catalog.db[id]).every(c=>(c.coeffs||[]).every(q=>Number.isFinite(Number(q.I))&&q.A?.length===3&&q.B?.length===3&&q.A.concat(q.B).every(Number.isFinite)))),`${label}: eindige 3D Fouriercoëfficiënten`);
     console.log(`[${label}] catalogusadapter OK`,catalog.ids.length);
   };
-  const ideal=getIdealKnotCatalog();check(ideal,'Ideal knots');check(getFourierKnotCatalog(),'Fseries knots');check(getKnotPlotKnotCatalog(),'KnotPlot candidates');check(getTwistKnotCatalog(),'A006 twist');
+  const ideal=getIdealKnotCatalog();check(ideal,'Ideal knots');check(getFourierKnotCatalog(),'Fseries knots');check(getKnotPlotKnotCatalog(),'KnotPlot candidates');check(getTwistKnotCatalog(),'A006 twist');check(getRubenKnotCatalog(),'Ruban E010');
   const kp=getKnotPlotKnotCatalog(),expected=['knot_3.1','knot_4.1','knot_5.1','knot_5.2','knot_6.1','knot_7.1','link_6.3.1','link_6.3.2','link_6.3.3','torus_3.3','torus_6.9'];if(kp){const a006Count=kp.ids.filter(id=>String(kp.db[id]?.family||'').startsWith('a006')||String(kp.db[id]?.sourceRole||'').startsWith('a006')).length;console.assert(expected.every(id=>kp.db[id]),'KnotPlot: volledige uniform-N300-ID-set');console.assert(!!kp.db['KNOT_3_1_N1024_ORIG'],'KnotPlot: A006 KNOT_3_1_N1024_ORIG');console.assert(a006Count===29,'KnotPlot: 29 A006 twist items');console.assert(kp.ids.length===67,'KnotPlot: 67 catalogusitems (38+29)');console.assert(String(kp.ids[0]||'').startsWith('KNOT_')||String(kp.ids[0]||'').startsWith('LINK_'),'KnotPlot: A006 IDs first');}
   const tw=getTwistKnotCatalog();if(tw){console.assert(tw.ids.length===139,'A006 twist: 139 catalogusitems (geometry+Seeds+qual; links FLAT/SOFT N512/1024)');console.assert(!!tw.db['KNOT_3_1_N1024_ORIG'],'A006 twist: KNOT_3_1_N1024_ORIG');console.assert(!!tw.db['3_1_N1024'],'A006 twist: seed 3_1_N1024');console.assert(!!tw.db['QUAL_AMECH_140_ELEC_i0000128'],'A006 twist: qual i0000128');console.assert(twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'ORIG',resolutionN:1024,profile:'FLAT',cpMode:'CPFIXED61'}),'A006 twist filter: knot match');console.assert(!twistEntryMatchesFilters(tw.db['KNOT_3_1_N1024_ORIG'],{kind:'KNOT',chirality:'MIRROR',resolutionN:1024}),'A006 twist filter: chirality reject');}
+  const rb=getRubenKnotCatalog();if(rb){console.assert(rb.ids.length===168,'Ruban E010: 168 catalogusitems (84 baseline + 84 perturbed)');console.assert(!!rb.db['RUBEN_T_2_3_B0800_N512'],'Ruban E010: RUBEN_T_2_3_B0800_N512');console.assert(!!rb.db['RUBEN_T_2_3_B0800_N512_eps01'],'Ruban E010: perturbed eps01');console.assert(rubenEntryMatchesFilters(rb.db['RUBEN_T_2_3_B0800_N512'],{embedding:'T_2_3',b0:0.08,variant:'baseline'}),'Ruban filter: baseline match');console.assert(!rubenEntryMatchesFilters(rb.db['RUBEN_T_2_3_B0800_N512'],{variant:'perturbed'}),'Ruban filter: variant reject');}
   const t69=kp?.db?.['torus_6.9'];if(t69){console.assert(knotEntryComponents(t69).length===3,'torus_6.9: drie componenten');console.assert(t69.status==='relaxed-seed','torus_6.9: relaxed-seed status');console.assert(t69.torus?.p===6&&t69.torus?.q===9&&t69.torus?.componentType==='T(2,3)','torus_6.9: torusmetadata');console.assert(knotPlotLinkingAbs(t69)===6,'torus_6.9: |Lk|=6 metadata');console.assert(t69.sourceRole==='vortexlab-uniform-N300'&&t69.D===1,'torus_6.9: uniform-N300 D=1 provenance');}
   const tre=ideal?.db?.['3:1:1'];if(tre){const raw=sampleIdealComponent(knotEntryComponents(tre)[0],512);let L=0;for(let i=0;i<512;i++){const j=(i+1)%512;L+=Math.hypot(raw[3*j]-raw[3*i],raw[3*j+1]-raw[3*i+1],raw[3*j+2]-raw[3*i+2]);}console.assert(Math.abs(L-16.371637)<0.02,'ideal 3:1:1 booglengte',L);}
 })();
@@ -7139,7 +7942,7 @@ function topologyClearance(){
   for(const f of active)g=Math.min(g,dminSelf(f));
   for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++)
     g=Math.min(g,Math.sqrt(pairGapExact2(active[i],active[j],g*g)));
-  return g;
+  return vlDiscrete.active()?Math.min(g,vlDiscrete.minDistance(Y)):g;
 }
 function maxStateDisplacement(A,B){let d=0;for(let i=0;i<Math.min(A.length,B.length);i+=3)d=Math.max(d,Math.hypot(B[i]-A[i],B[i+1]-A[i+1],B[i+2]-A[i+2]));return d;}
 function topologyStepMayTunnel(g0,g1,dmax){
@@ -7148,19 +7951,19 @@ function topologyStepMayTunnel(g0,g1,dmax){
 }
 function transientContactWithinStep(signedDtFull,lia){
   if(!P.topologyGuard||!Ypre)return null;
-  const fullState=Y.slice(),fullK4=K4.slice(),fullUmax=lastUmax;
+  const fullState=Y.slice(),fullBg=vlDiscrete.fullSnapshot(),fullK4=K4.slice(),fullUmax=lastUmax;
   const sgn=Math.sign(signedDtFull)||1,full=Math.abs(signedDtFull),tStart=tPhys;
   let lo=0,hi=NaN,event=null;
   for(let k=1;k<=TOPOLOGY_SWEEP_SAMPLES;k++){
-    const f=k/TOPOLOGY_SWEEP_SAMPLES;Y.set(Ypre);advanceFilamentCandidate(sgn*full*f,tStart+sgn*full*f);
+    const f=k/TOPOLOGY_SWEEP_SAMPLES;Y.set(Ypre);vlDiscrete.restore();advanceFilamentCandidate(sgn*full*f,tStart+sgn*full*f);
     const e=contactEvent(false);if(e&&!e.warn){hi=f;lo=(k-1)/TOPOLOGY_SWEEP_SAMPLES;event=e;break;}
   }
-  if(!event){Y.set(fullState);K4.set(fullK4);lastUmax=fullUmax;return null;}
+  if(!event){Y.set(fullState);vlDiscrete.restoreFull(fullBg);K4.set(fullK4);lastUmax=fullUmax;return null;}
   for(let it=0;it<18&&(hi-lo)>1e-6;it++){
-    const mid=.5*(lo+hi);Y.set(Ypre);advanceFilamentCandidate(sgn*full*mid,tStart+sgn*full*mid);
+    const mid=.5*(lo+hi);Y.set(Ypre);vlDiscrete.restore();advanceFilamentCandidate(sgn*full*mid,tStart+sgn*full*mid);
     const e=contactEvent(false);if(e&&!e.warn){hi=mid;event=e;}else lo=mid;
   }
-  Y.set(Ypre);lastUmax=advanceFilamentCandidate(sgn*full*lo,tStart+sgn*full*lo);
+  Y.set(Ypre);vlDiscrete.restore();lastUmax=advanceFilamentCandidate(sgn*full*lo,tStart+sgn*full*lo);
   return {dt:sgn*full*lo,event:Object.assign({},event,{msg:'⛔ topology guard: tijdelijk contact binnen de RK4-stap gevonden; gestopt aan de veilige zijde. Geen doorsnijding of reconnectie toegepast.'})};
 }
 
@@ -7195,6 +7998,7 @@ function contactEvent(lia){
       return{warn:false,msg:'⛔ componentcontact bereikt; gestopt vóór doorsnijding. Geen reconnectie toegepast.'+suffix};
     }
   }
+  const dc=vlDiscrete.contact();if(dc)return dc;
   return null;
 }
 // v7.2: first-hit-bisectie. Ypre bevat de toestand vóór de stap; Y staat ná
@@ -7205,7 +8009,7 @@ let Ypre=null;
 function bisectFirstHit(signedDtFull,lia){
   const tStart=tPhys;
   return bisectHitTime(signedDtFull,dt=>{
-    Y.set(Ypre);lastUmax=advanceFilamentCandidate(dt,tStart+dt);
+    Y.set(Ypre);vlDiscrete.restore();lastUmax=advanceFilamentCandidate(dt,tStart+dt);
   },()=>{
     const c=contactEvent(lia);return !!(c&&!c.warn);
   },P.topologyGuard);
@@ -7468,7 +8272,7 @@ const SelfTest=(()=>{
        const wasOpen=sparkWidget?.open;if(sparkWidget)sparkWidget.open=false;const closedHidden=!!sparkWidget&&!!spark&&getComputedStyle(spark).display==='none';summary?.click();const closedClickOpens=!!sparkWidget?.open;summary?.click();const openClickStaysOpen=!!sparkWidget?.open;summary?.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));const doubleClickCloses=!sparkWidget?.open;if(sparkWidget)sparkWidget.open=!!wasOpen;
        add('T0e24c SPARK/HUD click-drag-collapse interactie',dragBound&&closedHidden&&closedClickOpens&&openClickStaysOpen&&doubleClickCloses,'dragBound='+dragBound+' hidden='+closedHidden+' clickOpen='+closedClickOpens+' clickStay='+openClickStaysOpen+' dblClose='+doubleClickCloses);}
       {const defs=VL_CLOCK_RUNNER_DEFS.map(x=>document.getElementById(x.id)),flex=getComputedStyle(document.getElementById('vlClockRunnerGrid')).display==='flex',legacyHidden=document.getElementById('bSpecBenchmarkStop')?.hidden&&document.getElementById('bProxyDecompStop')?.hidden;
-       add('T0e24d runner-flex, één toggle per test en workflow-locks',defs.every(Boolean)&&flex&&legacyHidden&&VLClockWorkflow.unlocked('spec')&&VL_CLOCK_RUNNER_DEFS[1]?.step===2,'defs='+defs.filter(Boolean).length+' flex='+flex+' legacyHidden='+legacyHidden);}
+       add('T0e24d runner-flex, één toggle per test en workflow-locks',defs.every(Boolean)&&flex&&legacyHidden&&VLClockWorkflow.unlocked('spec')&&VL_CLOCK_RUNNER_DEFS[1]?.step===2&&!!document.getElementById('cClockAutoAdvance')&&typeof vlMaybeAutoAdvanceClockRunner==='function','defs='+defs.filter(Boolean).length+' flex='+flex+' legacyHidden='+legacyHidden+' autoAdvance='+!!document.getElementById('cClockAutoAdvance'));}
       {const sample={parameters:{tracerCount:0,showTracers:false,showStreamlines:false,showPotentialFlow:false}},proof={tracerCount:0,showTracers:false,showStreamlines:false,showPotentialFlow:false};
        add('T0e25 D14 bewijsveld semantiek',Object.keys(proof).every(k=>sample.parameters[k]===proof[k]),JSON.stringify(proof));}
       {const overlay=document.getElementById('specClockOverlay'),body=document.getElementById('specClockOverlayBody'),oldEnabled=P.specClockEnabled;
@@ -7512,8 +8316,8 @@ const SelfTest=(()=>{
       {const oldSummary=LastSpecClockBenchmarkSummary;LastSpecClockBenchmarkSummary={state:'completed',engine:'PASS',research:'FAIL'};
        const restored=specClockBenchmarkRestoreStatus();LastSpecClockBenchmarkSummary=oldSummary;
        add('T0ac benchmarkverdict overleeft veilige sessierestore',restored?.cls==='warn'&&/ENGINE PASS/.test(restored.text)&&/RESEARCH PROXY FAIL/.test(restored.text)&&/handmatige sessie/.test(restored.text),restored?.text||'geen status');}
-      {const t=SpecClockProxyDecomposition.selfTest(),box=document.getElementById('proxyDecompBox'),knotplotSelect=document.getElementById('knotplotSelect'),torus69Node=document.querySelector('[data-spec-knot="torus_6.9"]'),option=document.querySelector('#presetSelect option[value="specClockProxyDecomposition"]'),normOption=document.querySelector('#presetSelect option[value="specClockNormalizationBenchmark"]'),transferOption=document.querySelector('#presetSelect option[value="specClockTransferLawBenchmark"]'),lengthOption=document.querySelector('#presetSelect option[value="specClockLengthBenchmark"]'),geomOption=document.querySelector('#presetSelect option[value="specClockGeomKappaBenchmark"]'),normRows=document.getElementById('proxyNormRows'),transferRows=document.getElementById('proxyTransferRows'),lengthRows=document.getElementById('proxyLengthRows'),geomRows=document.getElementById('proxyGeomKappaRows'),auditRows=document.getElementById('idealConventionAuditRows'),continuumRows=document.getElementById('proxyContinuumRows'),crossRows=document.getElementById('proxyCrossKnotRows'),clockResize=document.querySelector('#vl-right-clock .vl-pane-resizer'),roadmap=document.getElementById('sstRoadmapPanel');
-       add('T0ad proxy-decompositie + intrinsieke holdouts + resizebare CLOCK + roadmap',!!box&&!!knotplotSelect&&!!torus69Node&&!!option&&!!normOption&&!!transferOption&&!!lengthOption&&!!geomOption&&!!normRows&&!!transferRows&&!!lengthRows&&!!geomRows&&!!auditRows&&!!continuumRows&&!!crossRows&&!!clockResize&&!!roadmap&&t.ok&&t.channels.length===5&&t.normalizations.length===7&&t.transferLaws.length===11&&t.lengthCandidates.length===10&&t.geomKappas.length===11&&t.idealConventionAudit.pass&&t.continuumSyntheticPass&&t.holdoutCatalogs&&t.holdoutDefinitions&&t.runtimeSmokePass&&t.schema.endsWith('/2.1'),'schema='+t.schema+' residual='+t.residual+' zeroSafe='+t.zeroSafeScore+' interactionErr='+t.interactionIdentityError+' normErr='+t.normalizationError+' transferDim='+t.transferDimensions+' lengthIdentity='+t.lengthIdentity+' resize='+!!clockResize+' roadmap='+!!roadmap+' runtimeSmoke='+t.runtimeSmokePass);} 
+      {const t=SpecClockProxyDecomposition.selfTest(),box=document.getElementById('proxyDecompBox'),knotplotSelect=document.getElementById('knotplotSelect'),specKnotSelector=document.getElementById('specKnotSelector'),vortexHoldoutCoupled=!!specKnotSelector&&!document.querySelector('[data-spec-knot]')&&!!SpecClockProxyDecomposition.readKnotSelection&&SpecClockProxyDecomposition.readKnotSelection()?.mode==='vortex-model'&&!!getKnotPlotKnotCatalog()?.db?.['torus_6.9'],option=document.querySelector('#presetSelect option[value="specClockProxyDecomposition"]'),normOption=document.querySelector('#presetSelect option[value="specClockNormalizationBenchmark"]'),transferOption=document.querySelector('#presetSelect option[value="specClockTransferLawBenchmark"]'),lengthOption=document.querySelector('#presetSelect option[value="specClockLengthBenchmark"]'),geomOption=document.querySelector('#presetSelect option[value="specClockGeomKappaBenchmark"]'),normRows=document.getElementById('proxyNormRows'),transferRows=document.getElementById('proxyTransferRows'),lengthRows=document.getElementById('proxyLengthRows'),geomRows=document.getElementById('proxyGeomKappaRows'),auditRows=document.getElementById('idealConventionAuditRows'),continuumRows=document.getElementById('proxyContinuumRows'),crossRows=document.getElementById('proxyCrossKnotRows'),clockResize=document.querySelector('#vl-right-clock .vl-pane-resizer'),roadmap=document.getElementById('sstRoadmapPanel');
+       add('T0ad proxy-decompositie + intrinsieke holdouts + resizebare CLOCK + roadmap',!!box&&!!knotplotSelect&&vortexHoldoutCoupled&&!!option&&!!normOption&&!!transferOption&&!!lengthOption&&!!geomOption&&!!normRows&&!!transferRows&&!!lengthRows&&!!geomRows&&!!auditRows&&!!continuumRows&&!!crossRows&&!!clockResize&&!!roadmap&&t.ok&&t.channels.length===5&&t.normalizations.length===7&&t.transferLaws.length===11&&t.lengthCandidates.length===10&&t.geomKappas.length===11&&t.idealConventionAudit.pass&&t.continuumSyntheticPass&&t.holdoutCatalogs&&t.holdoutDefinitions&&t.runtimeSmokePass&&t.schema.endsWith('/2.1'),'schema='+t.schema+' residual='+t.residual+' zeroSafe='+t.zeroSafeScore+' interactionErr='+t.interactionIdentityError+' normErr='+t.normalizationError+' transferDim='+t.transferDimensions+' lengthIdentity='+t.lengthIdentity+' resize='+!!clockResize+' roadmap='+!!roadmap+' runtimeSmoke='+t.runtimeSmokePass+' vortexHoldout='+vortexHoldoutCoupled);} 
       {const oldD=LastProxyDecompositionSummary;LastProxyDecompositionSummary={state:'completed',engine:'PASS',research:'FAIL',snapshots:49};const restored=specClockBenchmarkRestoreStatus();LastProxyDecompositionSummary=oldD;
        add('T0ae decompositieverdict overleeft sessierestore',restored?.cls==='warn'&&/PROXY-DECOMPOSITIE.*VOLTOOID/.test(restored.text)&&/49 passieve snapshots/.test(restored.text),restored?.text||'geen status');}
       P.ccwA=true;P.ccwB=false;const orient=relativeCarrierOrientationSign();
@@ -7931,10 +8735,10 @@ function syncBundleUi(){
   }
 }
 
-document.getElementById('cSSTBundle')?.addEventListener('change',e=>{P.bundleEnabled=e.target.checked;invalidateBundleBEM('bundle-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
-document.getElementById('cBundleBEM')?.addEventListener('change',e=>{P.bundleBEMEnabled=e.target.checked;invalidateBundleBEM('bem-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
-document.getElementById('sBundleBoundaryMode')?.addEventListener('change',e=>{P.bundleBoundaryMode=e.target.value;invalidateBundleBEM('boundary-mode');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
-document.getElementById('sBundleBEMQuality')?.addEventListener('change',e=>{P.bundleBEMQuality=e.target.value;invalidateBundleBEM('quality');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
+document.getElementById('cSSTBundle')?.addEventListener('change',e=>{P.bundleEnabled=e.target.checked;invalidateBundleBEM('bundle-toggle');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();});
+document.getElementById('cBundleBEM')?.addEventListener('change',e=>{P.bundleBEMEnabled=e.target.checked;invalidateBundleBEM('bem-toggle');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();});
+document.getElementById('sBundleBoundaryMode')?.addEventListener('change',e=>{P.bundleBoundaryMode=e.target.value;invalidateBundleBEM('boundary-mode');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();});
+document.getElementById('sBundleBEMQuality')?.addEventListener('change',e=>{P.bundleBEMQuality=e.target.value;invalidateBundleBEM('quality');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();});
 document.getElementById('cBundleFlow')?.addEventListener('change',e=>{
   if(e.target.checked){
     if(P.bgFlow==='wall'){
@@ -7949,7 +8753,7 @@ document.getElementById('cBundleFlow')?.addEventListener('change',e=>{
   }
   if(P.bgFlow==='bundle'&&P.bundleProfile!=='parallel')
     setFlag('⚠ splay-koppeling gebruikt een kinematische Ω(z)-ansatz; geen bewezen stationair Euler/SST-evenwicht.',true);
-  invalidateBundleBEM('flow-toggle');ensureBundleBEM(true);rebuildLattice();syncBundleUi();
+  invalidateBundleBEM('flow-toggle');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();
 });
 document.getElementById('sBundleProfile')?.addEventListener('change',e=>{
   P.bundleProfile=e.target.value;
@@ -7963,13 +8767,13 @@ document.getElementById('sBundleProfile')?.addEventListener('change',e=>{
     const z=document.getElementById('cTracerWrapZ');if(z)z.checked=false;
     setFlag('⚠ monotone splay is niet periodiek in z; periodieke z-grens is daarom uitgezet.',true);
   }
-  invalidateBundleBEM('profile');ensureBundleBEM(true);rebuildLattice();syncBundleUi();
+  invalidateBundleBEM('profile');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();
 });
-document.getElementById('sBundleSplay')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleSplay=clamp(x,0,1.4);invalidateBundleBEM('splay');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
-document.getElementById('sBundleRadiusFrac')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleRadiusFrac=clamp(x,0.10,0.93);invalidateBundleBEM('bundle-radius');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
+document.getElementById('sBundleSplay')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleSplay=clamp(x,0,1.4);invalidateBundleBEM('splay');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();}});
+document.getElementById('sBundleRadiusFrac')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleRadiusFrac=clamp(x,0.10,0.93);invalidateBundleBEM('bundle-radius');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();}});
 document.getElementById('sBundleLines')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.bundleVisualLines=clamp(Math.round(x),7,121);rebuildLattice();syncBundleUi();}});
-document.getElementById('sOmBundle')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.OmBundle=x;invalidateBundleBEM('omega');ensureBundleBEM(true);rebuildLattice();syncBundleUi();}});
-document.getElementById('revOmBundle')?.addEventListener('change',e=>{P.revOmBundle=e.target.checked;invalidateBundleBEM('omega-sign');ensureBundleBEM(true);rebuildLattice();syncBundleUi();});
+document.getElementById('sOmBundle')?.addEventListener('input',e=>{const x=Number(e.target.value);if(Number.isFinite(x)){P.OmBundle=x;invalidateBundleBEM('omega');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();}});
+document.getElementById('revOmBundle')?.addEventListener('change',e=>{P.revOmBundle=e.target.checked;invalidateBundleBEM('omega-sign');ensureBundleBEM(true);rebuildLattice();rebuildStreamlines(true);syncBundleUi();});
 function bindStretchNumber(id,key,scale=1,integer=false){
   const el=document.getElementById(id);if(!el)return;
   el.addEventListener('input',e=>{let v=Number(e.target.value);if(!Number.isFinite(v))return;if(integer)v=Math.round(v);P[key]=v*scale;
@@ -8047,11 +8851,8 @@ requestAnimationFrame(loop);
         '. Geen kunstmatige vergroting; toestand behouden.');
       stepDebt=0;dtNext=Infinity;
     }
-    const coreGate=fluidCoreState();
-    if(coreGate?.regime==='SUB_PRECISION_CORE'&&!P.topologyGuard){
-      setFlag('⛔ Kernschaal onder numerieke contactresolutie: activeer Topology Guard. a_sim is als parameter toegestaan, maar contact kan niet op fysieke 3a worden gegarandeerd.');
-      stepDebt=0;dtNext=Infinity;
-    }
+    // Sub-precisie a_sim (tot 1e-18 m): niet hard stoppen; TG + numerieke vloer.
+    ensureSubPrecisionContactPolicy(fluidCoreState());
     const lia=(P.inter==='lia');
     // Overlay-only soft warn: full BS at native N exceeds the interactive frame budget.
     // Does not change physics outside Twist Flow; UI owns LIA+preview+demo switching.
@@ -8066,10 +8867,10 @@ requestAnimationFrame(loop);
       const signedDt=timeDir*dtNext;
       if(P.bundleBEMEnabled&&bundleFlowActive())ensureBundleBEM();
       const gapBefore=P.topologyGuard?(Number.isFinite(lastTopologyGap)?lastTopologyGap:topologyClearance()):Infinity;
-      Ypre.set(Y); // snapshot voor first-hit en transient-contact guard
+      Ypre.set(Y);vlDiscrete.snapshot(); // snapshot voor first-hit en transient-contact guard
       lastUmax=advanceFilamentCandidate(signedDt,tPhys+signedDt);
-      if(!Number.isFinite(lastUmax)||!window.VortexLabFluidQualification?.allFinitePositions(Y)){
-        Y.set(Ypre);lastUmax=1e-9;stepDebt=0;
+      if(!Number.isFinite(lastUmax)||!window.VortexLabFluidQualification?.allFinitePositions(Y)||!vlDiscrete.isFinite()){
+        Y.set(Ypre);vlDiscrete.restore();lastUmax=1e-9;stepDebt=0;
         setFlag('⛔ RK4 numerieke veiligheid: niet-eindige snelheid of coördinaten; vorige geldige toestand hersteld.');
         break;
       }
@@ -8081,14 +8882,14 @@ requestAnimationFrame(loop);
       if(cev&&!cev.warn){
         dtApplied=bisectFirstHit(signedDt,lia);geometryRelanded=true;
       }else if(P.topologyGuard){
-        gapAfter=topologyClearance();const dmax=maxStateDisplacement(Ypre,Y);
+        gapAfter=topologyClearance();const dmax=Math.max(maxStateDisplacement(Ypre,Y),vlDiscrete.active()?vlDiscrete.maxDisplacementFromBefore():0);
         if(topologyStepMayTunnel(gapBefore,gapAfter,dmax)){
           const transient=transientContactWithinStep(signedDt,lia);
           if(transient){dtApplied=transient.dt;cev=transient.event;geometryRelanded=true;}
         }
       }
-      if(!Number.isFinite(dtApplied)||!window.VortexLabFluidQualification?.allFinitePositions(Y)){
-        Y.set(Ypre);stepDebt=0;
+      if(!Number.isFinite(dtApplied)||!window.VortexLabFluidQualification?.allFinitePositions(Y)||!vlDiscrete.isFinite()){
+        Y.set(Ypre);vlDiscrete.restore();stepDebt=0;
         setFlag('⛔ De contact-bisectie leverde niet-eindige coördinaten/tijd op; toestand teruggezet.');
         break;
       }
@@ -8114,6 +8915,11 @@ requestAnimationFrame(loop);
       tPhys+=dtApplied;
       if(P.ghostStewartson) syncGhostRing();
       updateStretchGateAcceptedStep(Ypre,Y,dtApplied);
+      if(window.__vlModelAIdealRequested===true && window.VLModelAIdealStretch){
+        const f=fils.find(f=>!f.ghost);
+        if(f&&window.VLModelAIdealStretch.isActiveStatus(window.VLModelAIdealStretch.snapshot().status))
+          window.VLModelAIdealStretch.observe(Y.subarray(f.off,f.off+3*f.N));
+      }
       updateSpecClockAcceptedStep(dtApplied,K4);
       tracerDtAccum+=dtApplied;
       if(Math.abs(dtApplied)>0)twistFlowAcceptedSteps++;
@@ -8315,6 +9121,7 @@ requestAnimationFrame(loop);
     drawSpark();
   }
   frame++;
+  vlDiscrete.render();
   const w=canvas.clientWidth,h=canvas.clientHeight;
   if(canvas.width!==w||canvas.height!==h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
   updCam();renderer.render(scene,camera);
@@ -8323,6 +9130,9 @@ requestAnimationFrame(loop);
 // Other VortexLab clients remain unmodified unless the dedicated Twist Flow page opts in.
 window.__vlTwistFlowDiagnostics=()=>({
   paused:!!paused, halted:!!flagged, flag:String(flagged||''),
+  idealModelA:window.__vlModelAIdealRequested===true ? window.VLModelAIdealStretch?.snapshot()||null : null,
+  idealModelAQualification:{geometrySource:String(P.knotSource),numericalCoreMeters:P.a,physicalCoreCoupled:false,
+    medium:String(P.med),autoRelax:!!P.autoRelax,previewN:Number(window.__vlTwistFlowPreviewN||0)},
   timeSeconds:Number(tPhys), acceptedSteps:twistFlowAcceptedSteps,
   pendingSeconds:Number(stepDebt), nextStepSeconds:Number(dtCFL()),
   gamma:Number(Gamma()), acceleration:Number(acc()),
@@ -8343,7 +9153,7 @@ window.__vlTwistFlowDiagnostics=()=>({
   stepsPerFrameEstimate:Number(EVAL_BUDGET)/Math.max(1,Number(evalsPerStep())),
   totalVertices:fils.filter(f=>!f.ghost).reduce((sum,f)=>sum+f.N,0),
   tracerEnabled:!!P.showTracers, streamlineEnabled:!!P.showStreamlines,
-  tracerCount:tracerCount(), solverFrame:String(P.solverFrame)
+  tracerCount:tracerCount(), solverFrame:String(P.solverFrame),discreteBundle:vlDiscrete.report()
 });
 function fmtSpeed(v){
   const av=Math.abs(v);

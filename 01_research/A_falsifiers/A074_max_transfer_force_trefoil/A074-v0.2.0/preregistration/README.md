@@ -1,0 +1,1 @@
+BLIND. Protocol thresholds and four scale regimes fixed in configs/study.json. No free gravitational comparison parameter in source. Framework FREEZE blocked until registry ID and second provenance family are resolved.

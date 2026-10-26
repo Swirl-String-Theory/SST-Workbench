@@ -23,6 +23,7 @@ eq(policy.nativeComponentPoints(multi.entry,multi.entry.components[1],1,'xyz'),1
 const a006={pointsPerComponent:[1024,2048]};
 eq(policy.nativeComponentPoints(a006,{I:1,pointCount:1024},0,'twist'),1024,'A006 native 1024 from converted XYZ metadata');
 eq(policy.nativeComponentPoints(a006,{I:2},1,'knotplot'),2048,'KnotPlot converted XYZ component count');
+eq(policy.nativeComponentPoints({pointsPerComponent:[512]},{I:1,pointCount:512},0,'ruben'),512,'Ruban E010 native 512 from converted XYZ metadata');
 eq(policy.nativeComponentPoints(a006,{pointCount:1024},0,'ideal'),null,'ideal/Fourier quality mode unchanged');
 eq(policy.effectiveTracerCount(5000,96),5000,'legacy low-N tracers unchanged');
 eq(policy.effectiveTracerCount(5000,288),5000,'legacy N288 tracers unchanged');

@@ -1,0 +1,284 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Does any topology-admissible finite-width Euler trefoil initialized from Gilbert 3:1:1 support a stationary/relative-stationary stable state and a finite mechanically transferred force threshold that remains knot-size independent?",
+  "objective": "Adversarially distinguish relative-equilibrium, bounded finite-time perturbations, solver consistency, and actual load-to-failure. Separate full-fluid shear loading from knot-transferred reaction force.",
+  "null_hypothesis": "H0: Within preregistered seed/core/shape family no verified stable relative equilibrium and no finite intrinsic knot load threshold. Short-time shape persistence does not reject H0.",
+  "alternative_hypothesis": "H1: A validated relative equilibrium or relative periodic orbit remains stable to independent perturbations, preserves 3_1 topology, has a converged externally measured knot-mediated failure force, and that force limit does not vary with geometric knot scale under a fixed independently justified protocol.",
+  "assumptions": [
+    "3D incompressible inviscid Euler on periodic cube 6m per side, no viscosity; imposed balanced shear forcing for load studies only",
+    "Initial vorticity is compact-C2 mollified closed-curve tangent distribution, projected divergence-free; Fourier truncation produces noncompact tails",
+    "Numerics are pseudo-spectral rotational and independent convective Euler forms with 2/3 de-aliasing and RK4",
+    "Rigid fit removes translation, rotation, tangential marker gauge, but a marker residual does not prove stationary distributed-vorticity flow",
+    "No target force constants or G enter discovery code; physical SST values not scaled into model normalized units",
+    "3_1 topological and material core identification during evolution not independently qualified; source independence unverified"
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "three-dimensional velocity",
+      "si_unit": "m/s",
+      "dimensions": "L/T"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "vorticity curl(u)",
+      "si_unit": "1/s",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "p",
+      "meaning": "Euler pressure",
+      "si_unit": "Pa",
+      "dimensions": "M/(L T2)"
+    },
+    {
+      "symbol": "f",
+      "meaning": "volumetric-force-per-mass acceleration",
+      "si_unit": "m/s^2",
+      "dimensions": "L/T2"
+    },
+    {
+      "symbol": "Gamma",
+      "meaning": "nominal initial circulation",
+      "si_unit": "m^2/s",
+      "dimensions": "L2/T"
+    },
+    {
+      "symbol": "a",
+      "meaning": "finite-width initial core support radius",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "F_half",
+      "meaning": "external force integral on positive half periodic box, NOT transmitted knot force",
+      "si_unit": "N",
+      "dimensions": "M L/T2"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "three-dimensional incompressible Euler with declared load",
+      "latex": "\\partial_t\\mathbf u+\\mathbf u\\cdot\\nabla\\mathbf u=-\\nabla p/\\rho+\\mathbf f,\\quad\\nabla\\cdot\\mathbf u=0",
+      "inputs": [
+        "u",
+        "p",
+        "rho",
+        "f"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "m/s^2 on every momentum-equation term"
+    },
+    {
+      "id": "E2",
+      "purpose": "Euler equivalent rotational and advective projected forms",
+      "latex": "\\partial_t\\mathbf u=\\mathcal P[\\mathbf u\\times\\boldsymbol\\omega+\\mathbf f],\\quad\\boldsymbol\\omega=\\nabla\\times\\mathbf u",
+      "inputs": [
+        "u",
+        "omega",
+        "f"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "m/s^2"
+    },
+    {
+      "id": "E3",
+      "purpose": "pressure Poisson equation",
+      "latex": "\\nabla^2 p=-\\rho\\partial_i u_j\\partial_j u_i+\\rho\\nabla\\cdot\\mathbf f",
+      "inputs": [
+        "u",
+        "f",
+        "rho"
+      ],
+      "outputs": [
+        "p"
+      ],
+      "dimensional_check": "kg/(m^3 s^2) both sides"
+    },
+    {
+      "id": "E4",
+      "purpose": "finite-width vorticity initial condition",
+      "latex": "\\boldsymbol\\omega_0(\\mathbf x)=\\Gamma\\oint K_a(\\mathbf x-\\mathbf X(s))\\,d\\mathbf X(s)",
+      "inputs": [
+        "Gamma",
+        "a",
+        "X"
+      ],
+      "outputs": [
+        "omega"
+      ],
+      "dimensional_check": "(m^2/s)(1/m^3)(m)=1/s"
+    },
+    {
+      "id": "E5",
+      "purpose": "balanced sine shear full-fluid external load and integral",
+      "latex": "\\mathbf f=A\\sin(2\\pi z/B)\\mathbf e_x,\\quad F_{\\rm half}=\\rho A B^3/\\pi",
+      "inputs": [
+        "A",
+        "B",
+        "rho"
+      ],
+      "outputs": [
+        "f",
+        "F_half"
+      ],
+      "dimensional_check": "kg/m^3 *m/s^2*m^3 =N"
+    },
+    {
+      "id": "E6",
+      "purpose": "normal-plane relative equilibrium",
+      "latex": "\\varepsilon_{\\rm rel}=\\min_{\\mathbf U,\\boldsymbol\\Omega}\\|P_\\perp[\\mathbf u(\\mathbf X)-\\mathbf U-\\boldsymbol\\Omega\\times(\\mathbf X-\\mathbf X_c)]\\|/\\|P_\\perp\\mathbf u(\\mathbf X)\\|",
+      "inputs": [
+        "X",
+        "u"
+      ],
+      "outputs": [
+        "epsilon_rel"
+      ],
+      "dimensional_check": "dimensionless"
+    },
+    {
+      "id": "E7",
+      "purpose": "nonlinear finite-time separation from independent geometric perturbations",
+      "latex": "G(T)=\\|\\mathbf u_\\delta(T)-\\mathbf u_0(T)\\|_2/\\|\\mathbf u_\\delta(0)-\\mathbf u_0(0)\\|_2",
+      "inputs": [
+        "u_delta",
+        "u0"
+      ],
+      "outputs": [
+        "growth"
+      ],
+      "dimensional_check": "dimensionless"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "initial relative equilibrium residual",
+      "equation_refs": [
+        "E6"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "pressure Poisson closure residual",
+      "equation_refs": [
+        "E3"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O3",
+      "definition": "spatial RMS velocity perturbation growth",
+      "equation_refs": [
+        "E7"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O4",
+      "definition": "full-fluid external load half cell",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "N"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Check exact Gilbert Fourier seed source SHA and geometry",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Deposit finite-width vorticity; solve spectral Euler with pressure Poisson crosscheck, rotational/advective parity",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Target-free 9-case search over core radius and z aspect then independent 330-trial topology-constrained exploration, compare held-out grids",
+      "formula_refs": [
+        "E6"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S4",
+      "operation": "Independent plus/minus z2/x3 material curve perturbations and time-domain separation relative to control",
+      "formula_refs": [
+        "E7"
+      ],
+      "gate": "G4"
+    },
+    {
+      "id": "S5",
+      "operation": "Local native CPP parity on full Euler solver, not copied framework kernel",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G5"
+    },
+    {
+      "id": "S6",
+      "operation": "Fixed physical final time, grid and dt refinement, separate single-source versus second provenance family",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G7"
+    },
+    {
+      "id": "S7",
+      "operation": "Balanced 3D shear load, monitor force injection and momentum flux; do not call a maximum until convergence and a stable knot reaction",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G8"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "No candidate with relative equilibrium error <=0.05 within prespecified geometry search and independent grid",
+      "conclusion_if_met": "FAIL_POSITIVE_EQUILIBRIUM_HYPOTHESIS_WITHIN_SEARCH"
+    },
+    {
+      "id": "F2",
+      "criterion": "No measured knot-specific threshold: external shear is not a knot clamp/transducer",
+      "conclusion_if_met": "UNRESOLVED_FOR_PHYSICAL_FORCE_LIMIT"
+    },
+    {
+      "id": "F3",
+      "criterion": "Core underresolved or spatial/temporal convergence missing",
+      "conclusion_if_met": "UNRESOLVED_PHYSICAL_STABILITY"
+    }
+  ],
+  "edge_cases": [
+    "B-periodic domain changes global topology and pressure reference",
+    "Projecting vorticity changes compact support slightly",
+    "Material tracers do not certify knotted vorticity ridges",
+    "Shear forcing pumps energy: energy conservation must only be scored for unforced runs",
+    "Numerical filter enforces a cutoff and is not explicit molecular viscosity",
+    "Finite-time bounded perturbation may mask late instability",
+    "Ideal Fourier centerline has minimum ropelength, not force-balance"
+  ],
+  "predictions": [
+    "If a qualified force ceiling is intrinsic, it must survive changes in grid, kernel, load geometry, time horizon, and knot size at controlled circulation",
+    "If scale invariance follows Euler similarity only, force scales as rho Gamma squared and cannot by itself establish an ultimate ceiling"
+  ]
+}

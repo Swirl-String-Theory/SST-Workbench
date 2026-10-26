@@ -5,7 +5,7 @@
   else root.VortexLabResolutionPolicy = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   'use strict';
-  const XYZ_DERIVED_SOURCES = new Set(['xyz', 'twist', 'knotplot']);
+  const XYZ_DERIVED_SOURCES = new Set(['xyz', 'twist', 'knotplot', 'ruben']);
   function positiveVertexCount(value) {
     const x = Number(value);
     return Number.isSafeInteger(x) && x >= 4 ? x : null;

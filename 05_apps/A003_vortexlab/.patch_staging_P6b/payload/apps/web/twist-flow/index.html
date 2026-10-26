@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TwistKnot Flow Lab · SST Workbench</title>
+  <meta name="description" content="Zelfstandige interface voor stroming rondom één twistknoop, met gedeelde A003-filament-engine.">
+  <link rel="stylesheet" href="../styles/vortexlab.css">
+  <link rel="stylesheet" href="./twist-flow.css">
+  <script src="./twist-flow.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity">
+      <div class="emblem">◉</div>
+      <div><div class="eyebrow">SST WORKBENCH / A003</div><h1>TwistKnot <span>Flow Lab</span></h1></div>
+    </div>
+    <div class="top-actions"><div id="engineStatus" role="status" class="engine-status">● Engine laden</div><a href="../index.html" target="_blank" rel="noopener">Open volledig VortexLab ↗</a></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Twist-flow-besturing">
+      <section class="intro">
+        <span class="section-index">01 / GEOMETRIE</span>
+        <h2>Eén knoop. Eén stromingsveld.</h2>
+        <p>Selecteer één gesloten knoop uit A006 twist, KnotPlot relaxed of de ideal-kandidaten. De gedeelde engine berekent de stroming en blijft fysisch ongewijzigd.</p>
+        <label for="knot">Knoop uit A006, KnotPlot of ideal-catalogus</label>
+        <select id="knot" disabled><option>Catalogus laden…</option></select>
+        <div id="seedStatus" class="micro">Native puntental en bronstatus verschijnen hier.</div>
+      </section>
+      <section class="controls">
+        <span class="section-index">02 / DYNAMICA</span>
+        <div class="segmented" role="group" aria-label="Berekeningsmodel">
+          <button class="selected" id="modeBs" disabled type="button">Biot–Savart</button>
+          <button id="modeLia" disabled type="button">LIA</button>
+        </div>
+        <div class="field-row"><span>Centrum laten bewegen</span><input id="freeTranslation" type="checkbox" checked disabled aria-label="Vrije translatie"></div>
+        <div class="field-row"><span>Topology guard</span><input id="guard" type="checkbox" checked disabled aria-label="Topology guard"></div>
+        <label for="core">Numerieke kernstraal <i>a</i><sub>sim</sub> (meter)</label>
+        <div class="unit-input"><input id="core" type="number" min="1e-30" max="0.07" step="any" value="0.00012415" disabled><span>m</span></div>
+        <div id="coreStatus" class="micro">De kernradius is een numerieke parameter, geen gemeten fysieke SST-kern.</div>
+        <label for="motionMedium">Circulatie / fysieke interpretatie</label>
+        <select id="motionMedium" disabled>
+          <option value="sst">SST-kandidaat · Γ=nΓ₀ (SST-kandidaat)</option>
+          <option value="demo">Zichtbare demo · vrije Γ, niet SST-gevalideerd</option>
+        </select>
+        <div id="demoGammaRow" hidden>
+          <label for="demoGamma">Demo-circulatie Γ (m²/s)</label>
+          <input id="demoGamma" class="unit-input" type="number" min="0.0002" max="1" step="any" value="0.0002" disabled>
+        </div>
+        <label for="playbackSpeed">Gewenste afspeelsnelheid</label>
+        <select id="playbackSpeed" disabled>
+          <option value="0">1×</option><option value="1">10×</option>
+          <option value="2" selected>100×</option><option value="3">1.000×</option>
+          <option value="4">10.000×</option>
+        </select>
+        <button type="button" class="secondary wide" id="runMotionDemo" disabled>▶ Bewegingsdemo starten (LIA + vrije Γ)</button>
+        <button type="button" class="secondary wide" id="fastPreview" disabled>▶ Snelle bewegingspreview · N192 (niet gecertificeerd)</button>
+        <div id="motionDiagnostics" class="micro">Geen geaccepteerde integratiestappen. De visualisatie kan ook bij pauze stroomlijnen tekenen.</div>
+      </section>
+      <section class="controls" id="backgroundBundlePanel">
+        <span class="section-index">03 / PARALLELLE ACHTERGRONDKERNEN</span>
+        <label for="backgroundMode">Bundelmodel · experimenteel</label>
+        <select id="backgroundMode" disabled>
+          <option value="off">Uit · geïsoleerde knoop (referentie)</option>
+          <option value="coarse">Grofkorrelig bundelveld · gekoppeld aan knoop</option>
+          <option value="discrete">Discreet rooster · wederzijdse inductie (P6b, experimenteel)</option>
+          <option value="bem">Grofkorrelig + statische buisrandcorrectie (BEM)</option>
+        </select>
+        <label for="backgroundOmega">Opgelegde achtergrondrotatie Ω (s⁻¹)</label>
+        <input class="background-number" type="number" id="backgroundOmega" min="0" max="1000" step="any" value="1" disabled>
+        <div id="discreteConfig" class="discrete-config" hidden>
+          <label for="backgroundSpacing">Roosterafstand d (meter)</label>
+          <input class="background-number" type="number" id="backgroundSpacing" min="0.002" max="0.5" step="any" value="0.06" disabled>
+          <label for="backgroundSide">Rooster: kernen per zijde</label>
+          <select id="backgroundSide" disabled><option value="1">1 × 1</option><option value="3" selected>3 × 3</option><option value="5">5 × 5 (langzamer)</option></select>
+          <label for="backgroundNodes">Discretisatie: punten per kern</label>
+          <select id="backgroundNodes" disabled><option value="9">9</option><option value="17" selected>17</option><option value="25">25</option></select>
+          <div id="conversionReadout" class="micro" role="status">Γ = 2 Ω d²</div>
+          <div class="micro warn">P6b: eindige open filamenten met vastgepinde uiteinden en geregulariseerde tweewegs-Biot–Savart. Geen periodieke Euler-oplossing, druksluiting of bewezen zelfconfinement. Bron- en knoopcontacten blokkeren de simulatie.</div>
+        </div>
+        <div id="coarseLinesRow"><label for="backgroundLines">Getekende bundellijnen <output id="backgroundLinesOut">21</output></label>
+        <input type="range" id="backgroundLines" min="7" max="121" step="1" value="21" disabled></div>
+        <div id="backgroundDiagnostics" class="micro" role="status">Uit: de knoop heeft geen opgelegde vortexbundel.</div>
+        <div class="micro warn" id="continuumCaveat">Continuümstatus: opgelegde continuum-vorticiteit; de getekende lijnen zijn geen individueel meegerekende vortexfilamenten. BEM (randelementenmethode) modelleert de knooptube als uitsluitingsgrens; dit is <strong>geen</strong> bewezen vrije Euler-koppeling. Wederzijdse filamentbuiging en dynamische terugwerking ontbreken.</div>
+      </section>
+      <section class="controls">
+        <span class="section-index">04 / STROMING</span>
+        <div class="segmented" role="group" aria-label="Veldvisualisatie">
+          <button id="displayParticles" class="selected" disabled type="button">Tracers</button>
+          <button id="displayStreamlines" disabled type="button">Tracers + lijnen</button>
+          <button id="displayKnot" disabled type="button">Alleen knoop</button>
+        </div>
+        <label for="density">Gewenst aantal deeltjes <output id="densityOut">250</output></label>
+        <input type="range" id="density" min="0" max="5000" step="50" value="250" disabled>
+        <label for="lines">Aantal stroomlijnen <output id="linesOut">8</output></label>
+        <input type="range" id="lines" min="4" max="48" step="4" value="8" disabled>
+        <div class="field-row"><span>Vortexbuis zichtbaar</span><input id="tube" type="checkbox" checked disabled></div>
+        <button type="button" class="secondary wide" id="reseed" disabled>↺ Tracers opnieuw verdelen</button>
+        <div id="tracerStatus" class="micro">Tracerbudget schaalt automatisch mee met het aantal vortexpunten.</div>
+      </section>
+      <section class="actions">
+        <button id="play" type="button" class="primary" disabled>▶ Start</button>
+        <button id="reset" type="button" class="secondary" disabled>↺ Reset</button>
+      </section>
+      <div class="disclaimer">Stroomlijnen zijn instantane veldlijnen en verplaatsen zelf geen deeltjes. De snelle N192-preview kan de knoopklasse veranderen en mag niet als gevalideerde fysica worden gebruikt. De knoop en tracers bewegen alleen als de numerieke tijdsintegratie daadwerkelijk stappen accepteert. Een hogere gevraagde afspeelsnelheid heft de rekenlast bij 1024 punten niet op.<div style="margin-top:6px">MODELSTATUS · Vrije-filament Biot–Savart / lokale inductiebenadering (LIA). Geen volledige Euler-druksluiting of gesloten cilinderrandvoorwaarden. A006-geometrieën zijn kandidaten, geen gecertificeerde ideale knopen.</div></div>
+    </aside>
+    <main class="viewport" aria-label="Driedimensionale stromingssimulatie">
+      <div id="engineMount" class="engine-mount" role="region" aria-label="TwistKnot 3D-simulatie"></div>
+      <div id="engineLoading" class="engine-loading" role="status">Gedeelde vortex-engine en knoopcatalogus laden…</div>
+      <div class="canvas-overlay overlay-top"><div class="eyebrow">TWIST FIELD / 3D VIEW</div><div class="subtle">Sleep om te draaien · scroll om in te zoomen</div></div>
+      <div id="warning" class="warning" hidden role="alert"></div>
+      <div class="readouts" aria-label="Live diagnostiek">
+        <div class="metric"><span>Simulatietijd</span><strong id="metricTime">—</strong></div>
+        <div class="metric"><span>Filamentpunten</span><strong id="metricN">—</strong></div>
+        <div class="metric"><span>Relatieve lengte L/L₀</span><strong id="metricLength">—</strong></div>
+        <div class="metric"><span>Circulatie Γ</span><strong id="metricGamma">—</strong></div>
+        <div class="metric"><span>Afstand / kern</span><strong id="metricGap">—</strong></div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

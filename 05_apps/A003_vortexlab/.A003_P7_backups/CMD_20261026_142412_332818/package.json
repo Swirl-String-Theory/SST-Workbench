@@ -1,0 +1,28 @@
+{
+  "name": "vortexlab-modular",
+  "version": "7.6.25b-m1-fluidqual-p2",
+  "private": true,
+  "description": "Parity-safe modular extraction of VortexLab v7.6.25b",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "start:physics": "node tools/physics-server.mjs",
+    "start:native": "node tools/start-native.mjs",
+    "verify": "node tools/verify-parity.mjs",
+    "check": "node --check apps/web/src/legacy/vortexlab-runtime.js && node --check apps/web/src/legacy/native-resolution-policy.js && node --check apps/web/src/engine-client.js && npm run test:native && npm run test:fluid && npm run test:physics && npm run test:twist-flow && npm run verify",
+    "test:native": "node tools/test-native-resolution.mjs && node tools/test-native-runtime.mjs && node tools/test-parse-xyz.mjs && node tools/test-catalog-geometry.mjs",
+    "test:catalog": "node tools/test-catalog-geometry.mjs",
+    "test:fluid": "node tools/test-fluid-qualification.mjs && node tools/test-twist-flow-cfl-p5.mjs",
+    "test:physics": "node tools/test-physics-parity.mjs",
+    "test:twist-flow": "node --check apps/web/twist-flow/twist-flow.js && node tools/test-twist-flow.mjs && node tools/test-twist-flow-motion-p4.mjs && node tools/test-twist-flow-current-motion.mjs && node tools/test-tube-probe-motion.mjs"
+  },
+  "dependencies": {
+    "sst-core": "file:../../../SSTcore"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

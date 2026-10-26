@@ -1,0 +1,60 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,bm,longtable,booktabs,hyperref}
+\newcommand{\swirlarrow}{\mathchoice{\scriptstyle\boldsymbol{\circlearrowleft}}{\scriptstyle\boldsymbol{\circlearrowleft}}{\scriptscriptstyle\boldsymbol{\circlearrowleft}}{\scriptscriptstyle\boldsymbol{\circlearrowleft}}}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{Trefoil Maximum Transferable Force: Three-Dimensional Euler Follow-Up\\Development Preregistration, v0.2.0}
+\author{SST-Workbench -- scientific development instance}
+\date{26 October 2026}
+\begin{document}\maketitle
+\section{Status and scope}
+\textbf{DEVELOPMENT, NOT FROZEN, NOT PHYSICALLY CERTIFIED.} Shared framework v1.0.10 must be externally pinned and checked. The Gilbert ideal.txt Fourier trefoil 3:1:1 is the only available qualified geometry source. The candidate search is a bounded numerical search, not a theorem of nonexistence. The knot is evolved as a three-dimensional initially distributed vorticity field, not a moving line-filament closure.
+\section{Question and hypotheses}
+Determine whether a closed three-dimensional trefoil Euler flow admits a relative equilibrium and survives independent nonlinear perturbations under a known force, and only subsequently whether a true knot-mediated transferable-force limit exists which is insensitive to overall size. The null is that the available geometries exhibit no certified stable state or force ceiling; Euler similarity alone produces no universal maximum force.
+\section{Governing equations and dimensional audit}
+\begin{align}
+\partial_t\mathbf u+(\mathbf u\cdot\nabla)\mathbf u&=-\frac{1}{\rho}\nabla p+\mathbf f,&\nabla\cdot\mathbf u&=0,\\
+\boldsymbol\omega&=\nabla\times\mathbf u,&
+\partial_t\mathbf u&=\mathcal P[\mathbf u\times\boldsymbol\omega+\mathbf f],\\
+\nabla^2p&=-\rho\,\partial_i u_j\,\partial_j u_i+\rho\nabla\cdot\mathbf f,\\
+\boldsymbol\omega_0(\mathbf x)&=\Gamma\oint_{3_1}K_a(\mathbf x-\mathbf X(s))\,d\mathbf X(s).
+\end{align}
+The compact $C^2$ initial kernel is $K_a\propto(1-|\mathbf r|^2/a^2)^3$ for $|\mathbf r|<a$ and zero otherwise, normalized on the Cartesian grid. Projection and spectral truncation modify strict compactness. $[\Gamma K_a\,dX]=\mathrm{s}^{-1}$ and $[\rho\nabla^2p/\rho]=\mathrm{kg\,m^{-3}\,s^{-2}}$ in the pressure equation.
+\section{Balanced full-fluid loading}
+\begin{equation}
+\mathbf f(\mathbf x)=A\sin(2\pi z/B)\mathbf e_x,\qquad F_{\mathrm{half}}=\frac{\rho A B^3}{\pi}.
+\end{equation}
+Here $B=6\,\mathrm{m}$ and $A$ is a prescribed acceleration in $\mathrm{m/s^2}$. The positive- and negative-half forces balance; this is a shear forcing of the entire periodic fluid, not force mechanically attached to the knot. The expression has unit Newton. The excess shear momentum flux across the $z=0$ section is a separate response observable, not a breaking threshold.
+\section{Relative equilibrium and stability}
+\begin{equation}
+\epsilon_{\mathrm{rel}}=\frac{\lVert P_{\perp}(\mathbf u(\mathbf X)-\mathbf U-\boldsymbol\Omega\times(\mathbf X-\mathbf X_c))\rVert_2}{\lVert P_{\perp}\mathbf u(\mathbf X)\rVert_2},
+\qquad G(T)=\frac{\lVert\mathbf u_{\delta}(T)-\mathbf u_0(T)\rVert_2}{\lVert\mathbf u_{\delta}(0)-\mathbf u_0(0)\rVert_2}.
+\end{equation}
+Candidate threshold $\epsilon_{\mathrm{rel}}<0.05$ is fixed before evaluation; finite-time bounded $G(T)$ alone never qualifies nonlinear stability. The independent deformation modes are $\delta z=\pm0.01\cos(2s)$ and $\delta x=\pm0.01\sin(3s)$ in metres. The full run fixes $T=0.4\,\mathrm s$, $\Delta t=0.0125\,\mathrm s$, and grids $N=32,48,64$; the explicitly limited local pilot fixes $T=0.1\,\mathrm s$ on the same grids. These are distinct scopes and may not be pooled for certification.
+\section{Blind scientific gates}
+\begin{longtable}{lp{0.77\linewidth}}\toprule
+G0 & Frozen framework integrity (not locally executed).\\
+G1 & Gilbert Fourier 3:1:1 provenance, no manufactured independent source.\\
+G2 & Three-dimensional divergence, pressure-Poisson residual, rotational-versus-convective consistency.\\
+G3 & Relative-equilibrium search and held-out grid (hard candidate limit 0.05).\\
+G4 & Two independent signed initial-geometry perturbations (diagnostic if G3 fails).\\
+G5 & True native C++ double-precision *Euler solver* parity; old shared framework backend parity is insufficient.\\
+G6 & GPU screening (disabled until scientific native implementation exists).\\
+G7 & Convergence, source-independence, topology, regularization and long-time audit.\\
+G8 & A localized, knot-specific force transducer and actual force-to-failure threshold.\\
+G9 & Independent reveal, contingent on qualified earlier gates.\\
+\bottomrule\end{longtable}
+\section{Current interpretation}
+The pilot's failure to identify a candidate is a negative result within the scanned geometry and discretization family, not a general nonexistence theorem. Finite-time preservation of material marker topology or energy cannot substitute for a smooth, qualified stable relative equilibrium. A size-invariant value proportional to $\rho\Gamma^2$ follows from Euler similarity and cannot by itself be declared a universal force maximum.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+\IfFileExists{AUTO_GATE_LEDGER.tex}{\input{AUTO_GATE_LEDGER.tex}}{}
+\begin{thebibliography}{9}
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press, doi:10.1017/CBO9780511624063.
+\bibitem{HouLi2008} T. Y. Hou and R. Li (2008), ``Numerical study of nearly singular solutions of the 3-D incompressible Euler equations,'' \emph{Communications in Partial Differential Equations} 33, 933--954; preprint \url{https://arxiv.org/abs/physics/0608126}.
+\bibitem{Zhao2021} X. Zhao, Z. Yu, J.-B. Chapelier and C. Scalo (2021), ``Direct numerical and large-eddy simulation of trefoil knotted vortices,'' \emph{Journal of Fluid Mechanics}; \url{https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/direct-numerical-and-largeeddy-simulation-of-trefoil-knotted-vortices/D93B390FA456B1DD79FE6A642084EB08}.
+\bibitem{Gibbons2002} G. W. Gibbons (2002), ``The Maximum Tension Principle in General Relativity,'' \emph{Foundations of Physics} 32, 1891--1901, doi:10.1023/A:1022370717626.
+\end{thebibliography}\end{document}

@@ -78,6 +78,28 @@ if (manifest.patch?.id === 'native-xyz-resolution-tracer-budget-p1') {
       !p.twistFlowP5Preserved) {
     console.error('FAIL P6 tube/probe/motion provenance'); failed = true;
   } else console.log('PASS P6 tube thickness + a_probe UX + Twist Flow interactive motion');
+} else if (['twist-flow-p7-ideal-reference-material-stretch','twist-flow-p7-ideal-ropelength-tube-render','twist-flow-p7-ideal-volume-transfer'].includes(manifest.patch?.id)) {
+  const p=manifest.patch;
+  const extra=[
+    ['P7 ideal Model A', 'apps/web/src/legacy/model-a-ideal-stretch.js', p.modelAModuleSha256],
+    ['P7 Twist HTML', 'apps/web/twist-flow/index.html', p.p7TwistHtmlSha256],
+    ['P7 Twist JS', 'apps/web/twist-flow/twist-flow.js', p.p7TwistJsSha256],
+    ['P7 Twist CSS', 'apps/web/twist-flow/twist-flow.css', p.p7TwistCssSha256],
+    ['P7 base HTML', 'apps/web/index.html', p.p7RootHtmlSha256]
+  ];
+  for(const [label,path,hash] of extra){
+    const actual=sha(await readFile(path)),ok=actual===hash;
+    console.log(`${ok?'PASS':'FAIL'} ${label} ${actual}`); failed ||= !ok;
+  }
+  if(p.parentPatchId!=='tube-probe-motion-p6' ||
+     p.p6RuntimeSha256!=='c9ccfd3ee0f7cdb8d9d703ed61c31e01da40e95181bb610428694da89da77392' ||
+     p.patchedRuntimeSha256!==manifest.extractedRuntimeSha256 || !p.numericKernelsUnchanged ||
+     p.physicalCoreCoupled!==false ||
+     (p.id==='twist-flow-p7-ideal-volume-transfer'
+       ? !(p.idealVolumeTransfer && p.nonidealIdentityUncertified && p.equalXYScaleIsAssumption && p.idealOnly===false)
+       : !p.idealOnly)){
+    console.error('FAIL P7 exact source base / research-track qualification');failed=true;
+  }else console.log('PASS P7 version/base P6 chain; diagnostic-only material-radius qualification');
 } else if (manifest.inlineRuntimeSha256 !== manifest.extractedRuntimeSha256) {
   console.error('FAIL extracted runtime differs from original inline runtime'); failed = true;
 }
