@@ -35,6 +35,7 @@ check('actual active dtCFL numerical value is not rounded',()=>{
   const start=source.indexOf('function dtCFL(){'),end=source.indexOf('function evalsPerStep(){',start);
   assert(start>=0&&end>start);
   const context={P:{stretchProfileApply:false,stretchProfileOnly:false,core:'vast',a:1e-18,Om:0,topologyGuard:false},
+    vlDiscrete:{active:()=>false},
     Gamma:()=>1e9,lminAll:()=>1e-5,DELTA:{vast:0.25},C0:0.1395,lastUmax:1e-9,
     prescribedKinematicSpeedBound:()=>0,stretchProfileCharacteristicRate:()=>0,bgWallInSolver:()=>false,
     bundleMaxOmega:()=>0,acceptedStepTimeCap:()=>0.25,Math,Number};

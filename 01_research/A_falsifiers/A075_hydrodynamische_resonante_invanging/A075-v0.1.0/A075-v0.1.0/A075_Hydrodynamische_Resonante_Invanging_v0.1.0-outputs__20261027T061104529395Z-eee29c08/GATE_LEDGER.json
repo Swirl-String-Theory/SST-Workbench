@@ -1,0 +1,306 @@
+{
+  "definitions": [
+    {
+      "enabled": true,
+      "gate_id": "G0",
+      "question": "Is the frozen protocol valid?",
+      "requires": []
+    },
+    {
+      "enabled": true,
+      "gate_id": "G1",
+      "question": "Are the A021 and A032 methodology files byte-qualified?",
+      "requires": [
+        "G0"
+      ]
+    },
+    {
+      "enabled": true,
+      "gate_id": "G2",
+      "question": "Do numerical no-loss, far-separation and short-time refinement controls pass?",
+      "requires": [
+        "G1"
+      ]
+    },
+    {
+      "enabled": true,
+      "gate_id": "G3",
+      "question": "Does fully coupled dynamics demonstrate actual long-time local excitation capture?",
+      "requires": [
+        "G2"
+      ]
+    },
+    {
+      "enabled": true,
+      "gate_id": "G4",
+      "question": "Does an independent preregistered held-out initial-state family confirm actual long-time capture?",
+      "requires": [
+        "G3"
+      ]
+    },
+    {
+      "enabled": false,
+      "gate_id": "G5",
+      "question": "Does a strict native C++ solver certify parity with Python reference?",
+      "requires": [
+        "G4"
+      ]
+    },
+    {
+      "enabled": false,
+      "gate_id": "G6",
+      "question": "Does GPU screening reproduce certified CPU behavior?",
+      "requires": [
+        "G5"
+      ]
+    },
+    {
+      "enabled": false,
+      "gate_id": "G7",
+      "question": "Do independent geometry/source families replicate the capture result?",
+      "requires": [
+        "G6"
+      ]
+    },
+    {
+      "enabled": true,
+      "gate_id": "G8",
+      "question": "Does a full 3D incompressible Euler provider close pressure-Poisson and energy flux?",
+      "requires": [
+        "G3"
+      ]
+    },
+    {
+      "enabled": true,
+      "gate_id": "G9",
+      "question": "Private reveal if physically and numerically qualified",
+      "requires": [
+        "G8"
+      ]
+    }
+  ],
+  "execution_policy": "FULL_DIAGNOSTIC",
+  "ledger_sha256": "53e572473e73cff1a146ca704cb8639ddd253b3f8391e48803ad939de7cba8fe",
+  "records": [
+    {
+      "actual_backend": "python-fp64",
+      "allows_dependent_claim": true,
+      "authority": "SOFTWARE_ONLY",
+      "blocked_by": [],
+      "execution_status": "EXECUTED",
+      "gate_id": "G0",
+      "metrics": {
+        "actual_mode": "BASIC",
+        "framework_version": "1.0.10"
+      },
+      "prerequisite_statuses": {},
+      "qualification": "QUALIFIED",
+      "question": "Is the frozen protocol valid?",
+      "reason": "Framework verified the frozen protocol before science evaluation",
+      "requested_backend": null,
+      "status": "PASS"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": true,
+      "authority": "SOURCE_PROVENANCE",
+      "blocked_by": [],
+      "execution_status": "EXECUTED",
+      "gate_id": "G1",
+      "metrics": {
+        "A021": "b615595589551dafbcabddc223e554abeb6ab5a02a064fa96522af73d533e3e9",
+        "A032": "e78411ee0a3a0cd770bd8293e117f44b1908bd419877b5163d5df21b71b9da0e"
+      },
+      "prerequisite_statuses": {
+        "G0": "PASS"
+      },
+      "qualification": "QUALIFIED",
+      "question": "Are the A021 and A032 methodology files byte-qualified?",
+      "reason": "Byte-level A021/A032 source README SHA-256 admissibility",
+      "requested_backend": null,
+      "status": "PASS"
+    },
+    {
+      "actual_backend": "python-numpy-fp64",
+      "allows_dependent_claim": true,
+      "authority": "REDUCED_MODEL_ONLY",
+      "blocked_by": [],
+      "execution_status": "EXECUTED",
+      "gate_id": "G2",
+      "metrics": {
+        "dt_diff_max": 0.0001,
+        "energy_drift_limit": 0.02,
+        "far_to_near_max": 0.03,
+        "fixed_final_time_s": 1.0,
+        "held_out_long_time_not_run": true,
+        "impulse_drift_limit": 0.02,
+        "mutual_null_to_near_ratio": 0.001295866181088046,
+        "n_diff_max": 0.05,
+        "physical_capture_fraction_not_measured": true,
+        "relative_impulse_drift": 0.0006147967763002576,
+        "relative_total_energy_drift": 0.00030644516607354557,
+        "spatial_refinement_final_energy_difference": 0.00017178936788224517,
+        "temporal_refinement_final_energy_difference": 3.0206017186752207e-10
+      },
+      "prerequisite_statuses": {
+        "G1": "PASS"
+      },
+      "qualification": "QUALIFIED",
+      "question": "Do numerical no-loss, far-separation and short-time refinement controls pass?",
+      "reason": "Only short-run regularized filament no-loss, weak-coupling and refinement screening; NOT physical capture",
+      "requested_backend": null,
+      "status": "PASS"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": "NOT_PHYSICALLY_EVALUABLE",
+      "blocked_by": [],
+      "execution_status": "EXECUTED",
+      "gate_id": "G3",
+      "metrics": {
+        "late_window_periods": 0,
+        "measured_receiver_self_energy_change": -0.1552195807022425,
+        "physical_capture_fraction": null
+      },
+      "prerequisite_statuses": {
+        "G2": "PASS"
+      },
+      "qualification": "UNRESOLVED",
+      "question": "Does fully coupled dynamics demonstrate actual long-time local excitation capture?",
+      "reason": "No incoming finite-energy wavepacket, late post-encounter window, or full control-volume flux; no evidence of capture",
+      "requested_backend": null,
+      "status": "UNRESOLVED"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": "NOT_EXECUTED",
+      "blocked_by": [
+        "G3"
+      ],
+      "execution_status": "EXECUTED",
+      "gate_id": "G4",
+      "metrics": {
+        "independent_capture_holdout_count": 0
+      },
+      "prerequisite_statuses": {
+        "G3": "UNRESOLVED"
+      },
+      "qualification": "DIAGNOSTIC_ONLY",
+      "question": "Does an independent preregistered held-out initial-state family confirm actual long-time capture?",
+      "reason": "No independent capture demonstration to replicate; not a positive holdout result",
+      "requested_backend": null,
+      "status": "UNRESOLVED"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": null,
+      "blocked_by": [
+        "G4"
+      ],
+      "execution_status": "DISABLED",
+      "gate_id": "G5",
+      "metrics": {},
+      "prerequisite_statuses": {
+        "G4": "UNRESOLVED"
+      },
+      "qualification": "NOT_APPLICABLE",
+      "question": "Does a strict native C++ solver certify parity with Python reference?",
+      "reason": "Disabled by framework profile",
+      "requested_backend": null,
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": null,
+      "blocked_by": [
+        "G5"
+      ],
+      "execution_status": "DISABLED",
+      "gate_id": "G6",
+      "metrics": {},
+      "prerequisite_statuses": {
+        "G5": "NOT_APPLICABLE"
+      },
+      "qualification": "NOT_APPLICABLE",
+      "question": "Does GPU screening reproduce certified CPU behavior?",
+      "reason": "Disabled by framework profile",
+      "requested_backend": null,
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": null,
+      "blocked_by": [
+        "G6"
+      ],
+      "execution_status": "DISABLED",
+      "gate_id": "G7",
+      "metrics": {},
+      "prerequisite_statuses": {
+        "G6": "NOT_APPLICABLE"
+      },
+      "qualification": "NOT_APPLICABLE",
+      "question": "Do independent geometry/source families replicate the capture result?",
+      "reason": "Disabled by framework profile",
+      "requested_backend": null,
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": "NOT_EVALUABLE",
+      "blocked_by": [
+        "G3"
+      ],
+      "execution_status": "EXECUTED",
+      "gate_id": "G8",
+      "metrics": {
+        "full_3d_euler": false,
+        "m5_selected": false,
+        "m_scan": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "pressure_poisson": false,
+        "volume_flux": false
+      },
+      "prerequisite_statuses": {
+        "G3": "UNRESOLVED"
+      },
+      "qualification": "DIAGNOSTIC_ONLY",
+      "question": "Does a full 3D incompressible Euler provider close pressure-Poisson and energy flux?",
+      "reason": "Full Euler provider and unconstrained azimuthal mode analysis are not implemented; cannot certify capture",
+      "requested_backend": null,
+      "status": "UNRESOLVED"
+    },
+    {
+      "actual_backend": null,
+      "allows_dependent_claim": false,
+      "authority": null,
+      "blocked_by": [
+        "G8"
+      ],
+      "execution_status": "DEFERRED",
+      "gate_id": "G9",
+      "metrics": {},
+      "prerequisite_statuses": {
+        "G8": "UNRESOLVED"
+      },
+      "qualification": "DEFERRED",
+      "question": "Private reveal if physically and numerically qualified",
+      "reason": "Reveal is a separate, commitment-verified phase and is not executed during blind runs.",
+      "requested_backend": null,
+      "status": "DEFERRED"
+    }
+  ],
+  "schema": "SST-GATE-LEDGER-2"
+}

@@ -1,0 +1,174 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=19mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable,array,graphicx,xcolor}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A077 -- Electron Layer \& Leapfrogging Unknots\\\large Falsification Protocol and Report -- v0.1.1}
+\author{SST-Workbench -- mathematical research track}
+\date{28 October 2026}
+\begin{document}
+\maketitle
+\noindent\fcolorbox{black}{gray!8}{\parbox{0.96\linewidth}{\textbf{SCIENTIFIC STATUS: DEVELOPMENT / DIAGNOSTIC ONLY.} Numerical ring-parity and a three-dimensional finite-width periodic Euler pilot do not prove an electron, quantized orbital layers, material vortex-tube stability, or spin $1/2$. Original A077-v0.1.0 remains unmodified.}}
+
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, and status}
+Catalog family \texttt{A077\_Electron\_Layer\_Leapfrogging}; version \texttt{A077-v0.1.1}. This release is a new, standalone instance produced by the official Framework v1.1.0 generator, with an embedded hash-verified source snapshot. Its parent is A077-v0.1.0, whose runtime source had two missing files in a prior distribution; the new instance is generated from clean, complete release sources instead of copying a compromised snapshot. This project implements a reduced circular-filament control and an optional, separate periodic Fourier--Galerkin Euler pilot. Numerical evidence is not physical validation.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Falsifiable scientific question and objectives}
+Do unforced, mutually induced coaxial closed ring filaments exhibit resolution-consistent overtaking events without requiring discrete energy levels? Does adding an independent azimuthal (toroidal) velocity component to a finite-width, meridional (poloidal) periodic Euler flow generate an additional, demonstrable dynamical invariant or a physically derived spinorial response? \emph{The second question remains unresolved by this first finite-width pilot.} Vertical ring-order permutations are never labeled electron levels $N\to N\pm1$.
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses and decision rules}
+$H_0$: continuous classical ring coordinates, circulation-sign reversal, and smooth Euler velocity fields generate no intrinsically quantized spectrum or $2\pi$ sign-flipping spinor by themselves. $H_1$: a continuum-qualified material carrier yields independently stable, discrete intrinsic states and a non-postulated spinor-state representation whose $2\pi$ holonomy is $-1$ and whose $4\pi$ holonomy is $+1$. In v0.1.1, classical rank swaps are measured but do not test $H_1$. Absent independent physical representation, \texttt{G8 = UNRESOLVED}; a trivial $2\pi$ periodicity test of an ordinary vector field is not a spinor test.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions, applicability and excluded regimes}
+The target fluid is incompressible, inviscid and unforced with universal evolution time $t$. \emph{Reduced-ring model:} ring centrelines are constrained to circles, cross-section follows an imposed $a_i^2R_i$ proxy, the mutual induction kernel is softened, and the self-speed uses a thin-core closure. No stretching, field pressure or nonaxisymmetric modes are resolved. \emph{Finite-width field pilot:} periodic cube, smooth core-scale data, Fourier--Galerkin $2/3$ de-aliasing, Leray projection and fourth-order Runge--Kutta (RK4). Vorticity is resolved on the chosen spectral grid but no topological/material core is identified and no continuum convergence is certified. Thin-core near-contact, unbounded-domain extrapolation, spinorial topology, photon emission and atmospheric plasma dynamics are outside the validated domain.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Notation, units and dimensional consistency}
+\begin{center}\small\begin{tabular}{llll}\toprule
+Symbol & Quantity & SI unit & Dimension\\\midrule
+$R_i,z_i,a_i$ & ring radius, axial position, core proxy & m & $L$\\
+$\Gamma_i$ & signed circulation & m$^2$ s$^{-1}$ & $L^2T^{-1}$\\
+$\rhoF$ & effective fluid density & kg m$^{-3}$ & $ML^{-3}$\\
+$t,\,t_0$ & absolute evolution time, chosen time scale & s & $T$\\
+$\mathbf u,\boldsymbol\omega$ & velocity, vorticity & m s$^{-1}$, s$^{-1}$ & $LT^{-1}$, $T^{-1}$\\
+$E,H$ & kinetic energy, kinematic helicity & J, m$^4$ s$^{-2}$ & $ML^2T^{-2},L^4T^{-2}$\\
+$\delta_s$ & sampled surface clearance & m & $L$\\\bottomrule\end{tabular}\end{center}
+Conditional SST scaling, \emph{not a fitted electron prediction}: $R_0=\rc=1.40897017\times10^{-15}\,$m, $\lVert\vswirl\rVert=1.09384563\times10^6\,$m s$^{-1}$, $\Gamma_0=2\pi R_0\lVert\vswirl\rVert$ and $t_0=R_0^2/\Gamma_0$. The ring code runs with $R/R_0$, $z/R_0$ and $t/t_0$; the Euler pilot is separately dimensionless with length $R_0$ and an explicitly chosen reference velocity, and no universal clock conversion is assumed.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Exact equations and derived measurements}
+\paragraph{E1 -- regularized mutual induction.} For circular source $\mathbf X_j(\varphi)=(R_j\cos\varphi,R_j\sin\varphi,z_j)$,
+\begin{equation}
+\mathbf u_{i\gets j}=\frac{\Gamma_j}{4\pi}\int_0^{2\pi}
+\frac{\mathbf X'_j(\varphi)\times(\mathbf x_i-\mathbf X_j(\varphi))}{(\lVert\mathbf x_i-\mathbf X_j(\varphi)\rVert^2+a_j^2)^{3/2}}\,d\varphi,\quad i\ne j.
+\end{equation}
+This defined softened kernel is a proxy, not a resolved finite-core Euler Green function. $[\Gamma X'r/r^3]=L/T$.
+\paragraph{E2 -- slender-core closure and E3 -- imposed core-volume proxy.}
+\begin{align}
+U_i^{\rm self}&=\frac{\Gamma_i}{4\pi R_i}\left[\log\left(\frac{8R_i}{a_i}\right)-\frac14\right],\\
+a_i(t)^2R_i(t)&=a_i(0)^2R_i(0),\qquad
+\dot R_i=\sum_{j\ne i}u_{R,i\gets j},\quad \dot z_i=U_i^{\rm self}+\sum_{j\ne i}u_{z,i\gets j}.
+\end{align}
+The coefficient $1/4$ is a model convention. $[U_i]=L/T$; $[a_i^2R_i]=L^3$.
+\paragraph{E4--E6 -- crossings, surface clearance and refined root times.}
+\begin{align}
+\Delta z(t)&=z_2(t)-z_1(t),\qquad \Delta z(t_c)=0\text{ with a sign change},\\
+\delta_s(t)&=\sqrt{(R_1-R_2)^2+(z_1-z_2)^2}-(a_1+a_2),\\
+\Delta z_H(s)&=(2s^3-3s^2+1)f_0+(s^3-2s^2+s)hf'_0\\
+&\quad+(-2s^3+3s^2)f_1+(s^3-s^2)hf'_1,\quad s=(t-t_0)/h.
+\end{align}
+The crossing estimator solves $\Delta z_H(s)=0$ only for sign-changing sampled brackets. This cubic interpolation is not exact RK4 dense output; root times require independent time-step convergence. An observed positive $\delta_s$ is a sampled circular-tube clearance proxy, not a guarantee of continuum core disjointness.
+\paragraph{E7--E9 -- finite-width periodic Euler pilot.}
+\begin{align}
+\partial_t\mathbf u&=\mathcal P_{\mathcal K}(\mathbf u\times\boldsymbol\omega),\quad
+\boldsymbol\omega=\nabla\times\mathbf u,\quad\nabla\cdot\mathbf u=0,\\
+\mathbf u(0)&=\mathcal P_{\mathcal K}\left[\nabla\times(A_{\varphi}\mathbf e_{\varphi})+v_{\varphi}\mathbf e_{\varphi}\right],\\
+E&=\frac{\rhoF}{2}\int |\mathbf u|^2\,d^3x,\qquad
+H=\int\mathbf u\cdot\boldsymbol\omega\,d^3x.
+\end{align}
+The smooth Gaussian toroidal seed has independently specified meridional and azimuthal velocity amplitudes; $v_\varphi$ is not a new circulation quantum. $\mathcal P_{\mathcal K}$ is the divergence-free Fourier projection with spectral cutoff. Dimensions are $[\partial_t\mathbf u]=[\mathbf u\times\boldsymbol\omega]=LT^{-2}$, $[E]=ML^2T^{-2}$, $[H]=L^4T^{-2}$. The spectral pilot uses normalized coordinates and diagnostics. Its discretized dynamics do not establish the continuum vorticity-knot topology.
+\paragraph{Automatic equation register.}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{The equation-to-code register is generated from the frozen science contract.}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Equation-to-code sequence and source mapping}
+\begin{enumerate}
+\item Load and hash \texttt{configs/pilot.json} and its four disclosed analytic sign controls.
+\item Evaluate E1--E3 using \texttt{science/ring\_model.py}, write complete time series with all 401 samples of each case and conditional SI conversion.
+\item Compute E4--E6 in \texttt{science/diagnostics.py}: bracketed cubic Hermite event roots, minimum centreline/core clearance, and three-level angular and temporal refinements at identical final time.
+\item Independently execute native C++ via \texttt{native/cpp/native.cpp} and compare with Python, recording compiled module hash, source hash and common input hash. The Framework rechecks execution and numeric parity under G10.
+\item Optionally, separately run \texttt{python -m science.euler\_field} using \texttt{configs/euler\_pilot.json}, generating three finite-width velocity-field cases: azimuthal amplitude $0$, $+b$, and $-b$.
+\item Record Euler energy, helicity, enstrophy, divergence, step size and spectral-grid configuration. Require future independent full spatial/temporal/core-width studies before any physical stability claim.
+\item Preserve G3, G4 and G8 as unresolved. Any future reveal is a distinct private, preregistered operation, never part of diagnostics.
+\end{enumerate}
+
+% SST-REPORT-SECTION:SOURCES
+\section{Provenance, sources and independence}
+The four ring controls are deterministic analytic input conditions, not four independent laboratory datasets. The ring quadrature and timestep levels are numerical refinements, not independent source families. The Euler Galerkin module is an independent \emph{model class} from the reduced filament, not an independently validated material vortex-tube solver. No E010 knot atlas is copied into this instance, no physical electron mass/charge targets are used to fit the kernels, and no private reveal data enter public blind archives. The self-contained Framework v1.1.0 runtime source is pinned with its exact 142-file SHA-256 inventory; the frozen protocol has its own byte-exact manifest and commitments.
+
+% SST-REPORT-SECTION:GATES
+\section{Gate dependency graph and scientific ceilings}
+\small\begin{longtable}{p{.12\linewidth}p{.62\linewidth}p{.18\linewidth}}\toprule Gate & Test and qualifying evidence & Max authority now\\\midrule\endhead
+G0 & Official frozen protocol and embedded source snapshot & TECHNICAL\\
+G1 & Analytic source/control hashes & TECHNICAL\\
+G2 & Angle/time refinement, Hermite events, checks; no continuum Euler & PROXY-ONLY\\
+G3 & Blind, held-out intrinsic spectral quantization & UNRESOLVED\\
+G4 & Independent full-field finite-core continuum confirmation & UNRESOLVED\\
+G5 & Executed native pybind11 ring kernel parity, independent of G4 & NUMERIC-ONLY\\
+G6 & GPU science kernel, only if actually executed & NOT APPLICABLE\\
+G7 & External source-family replication & NOT APPLICABLE\\
+G8 & Euler continuum, intrinsic layers and spinorial bundle & UNRESOLVED\\
+G9 & Commitment-verified private reveal after qualified gates & DEFERRED\\
+G10 & Framework two-of-three executed backends plus numerical parity & NUMERIC-ONLY\\\bottomrule\end{longtable}\normalsize
+G5 and G10 require only G2: actual numerical parity must not be causally blocked by unrelated physical G4. G8 continues to depend on genuinely independent physical G3/G4/G7. A G10 PASS is not a physical G8 PASS; the framework separates observed status from evidence qualification. The additional physical subtests P01--P07 are described by raw diagnostics and research limitations, not promoted to substitute framework gates.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical refinements and predeclared thresholds}
+For $t_f/t_0=5$ and reference same-sign pair $R=(1,0.8)$, $z=(-.15,+.15)$, $\Gamma=(+1,+1)$ and initial $a/R=.1$:
+\begin{itemize}
+\item Angular quadrature levels $n_\varphi=(48,96,192)$ at 400 RK4 steps.
+\item Temporal levels $(200,400,800)$ steps at $n_\varphi=96$.
+\item Relative end-state tolerances $2\times10^{-2}$ (angular), $10^{-2}$ (temporal); both crossing counts must agree and maximum paired root shift $\leq 2\times10^{-3}$ in $t/t_0$.
+\item Sampled clearance $\delta_s>0$ is a separate domain check; its failure blocks a non-contact physical interpretation, even if the proxy numerical gate passes.
+\item Euler pilot uses $(n,L,t_f,\Delta t)=(24,8,.02,.002)$ and only illustrates short-time bounded Galerkin evolution; no spatial, temporal or core convergence is certified. A future physical gate requires $n$-refinement and $\Delta t$-refinement at fixed physical end time, \emph{plus} width, box and nonaxisymmetric perturbation studies.
+\end{itemize}
+Small endpoint differences and exact machine-level conservation can result from the Fourier--Galerkin truncation; neither establishes a physical restoring force, self-confinement or stable particle state.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority, cross-checks and Windows build}
+The Python NumPy binary64 code is the numerical reference. The independent native C++17 pybind11 ring kernel is accepted only after a genuine compile/execution, signed compiled binary/source hashes and $\ell_2$ parity $\leq10^{-10}$. Framework G10 further requires at least two real scientific categories from Python/C++/GPU. Intel Arc XPU and NVIDIA CUDA are a single GPU category, not two. Hardware preflight is not scientific execution. A missing C++/GPU implementation keeps FULL/CERTIFY unqualified; no silent Python fallback. DD32/FP32x2 remains \texttt{SCREENING\_ONLY}. The optional periodic Euler pilot is currently Python-only, so native ring parity does not certify the independent field solver.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blinding, private keys, and reveal isolation}
+The protocol contains no target-tuned electron mass, electric charge, Planck constant, measured spin projection, or discovered energy-level labels. The Framework creates new private opaque-ID and reveal-nonce bytes for this \emph{new} version; they are stored under \texttt{private/}, never in a BLIND ZIP. The blind manifest, ledger, and source hashes are immutable once frozen. Reveal is blocked unless the independent scientific gate and commitment policy qualify it. Repeated BASIC/FULL/CERTIFY runs have unique identities and retain older outputs. The distributed source archive is private because it contains generated private credentials.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Null model, multiplicity and interpretation controls}
+The deterministic reduced-model trajectories have \emph{no stochastic null ensemble}. Counting RK4 timesteps, sign configurations or grid levels as independent replicates is prohibited. The trial is not a statistical discovery of quantum levels; no $p$-values or multiple-testing claims are made. Future discrete-mode studies require blinded held-out parameters, a preregistered operator and continuum/finite-core null, familywise correction if multiple candidate modes are searched, and independent source confirmation.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Measured results and automatic immutable run provenance}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{Automatic results will be inserted from the Framework execution without changing this preregistered scientific report.}
+\IfFileExists{ring_traces.pdf}{\begin{center}\includegraphics[width=.92\linewidth]{ring_traces.pdf}\end{center}}{}
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Scientific interpretation, falsifiers and minimal experiments}
+\textbf{ORTHODOX:} Euler circulation transport and Biot--Savart velocity reconstruction are classical conditional results. \textbf{DERIVED UNDER ASSUMPTIONS:} ring trajectory roots, clearance proxies and spectral Euler short-time diagnostics are numerical statements within their explicitly discretized models. \textbf{SPECULATIVE--RESEARCH--TRACK:} identification of CW/CCW, ring order, independent toroidal/meridional velocity, jet/sprite morphology or leapfrogging phases with electron spin-$1/2$ or physical quantum layers. A real velocity vector field is single-valued under a $2\pi$ spatial rotation; that does \emph{not} supply $\Psi(2\pi)=-\Psi(0)$ for a derived physical state, nor the exchange sign of two identical fermions. Future minimal tests: (i) fixed-time spatial/time/core refinement for the field pilot, (ii) helicity and link invariants on genuine disjoint material tubes, (iii) independent survival/repetition of internal modes, (iv) configuration-space rotation and braid loop analysis without assuming a spinorial bundle. No sprite/giant-jet ionization or electromagnetic emission is modeled.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Exact execution, outputs and stop criteria}
+\begin{verbatim}
+cd /d <EXTRACTED_A077-v0.1.1>
+python -m pytest -q tests
+run_all.cmd BACKEND_PREFLIGHT
+run_all.cmd FREEZE
+run_all.cmd BASIC
+run_all.cmd FULL
+run_all.cmd CERTIFY
+python -m science.euler_field ^
+  --config configs/euler_pilot.json ^
+  --output A077_euler_pilot_v0.1.1-outputs
+\end{verbatim}
+In \texttt{A077-v0.1.1} the Framework writes \texttt{electron\_layer\_leapfrogging\_v0.1.1-outputs/}, preserving earlier runs and publishing an immutable run-specific BLIND ZIP and its SHA-256 sidecar in the parent. Source archive must be extracted into \emph{new} version directory only. Halt physical certification on failed source hashes, absent native science backend, Euler-grid/core nonconvergence, missing evidence, frozen protocol mutation, core contact, or missing spinorial state definition. No user hardware result is claimed in advance.
+
+\section{References}
+\begin{thebibliography}{9}
+\bibitem{Helmholtz1858} H. Helmholtz (1858), ``On Integrals of the Hydrodynamical Equations Which Express Vortex Motion,'' \emph{Journal f\"ur die reine und angewandte Mathematik} 55, 25--55. DOI: \url{https://doi.org/10.1515/crll.1858.55.25}.
+\bibitem{Saffman1992} P. G. Saffman (1992), \emph{Vortex Dynamics}, Cambridge University Press. DOI: \url{https://doi.org/10.1017/CBO9780511624063}.
+\bibitem{Davila2024} J. D\'avila, M. del Pino, M. Musso, J. Wei (2024), ``Leapfrogging vortex rings for the three-dimensional incompressible Euler equations,'' \emph{Communications on Pure and Applied Mathematics} 77, 3843--3957. DOI: \url{https://doi.org/10.1002/cpa.22199}.
+\bibitem{Niemi2005} A. J. Niemi (2005), ``Exotic Statistics of Leapfrogging Vortex Rings,'' \emph{Physical Review Letters} 94, 124502. DOI: \url{https://doi.org/10.1103/PhysRevLett.94.124502}.
+\bibitem{FinkelsteinRubinstein1968} D. Finkelstein and J. Rubinstein (1968), ``Connection between Spin, Statistics, and Kinks,'' \emph{Journal of Mathematical Physics} 9, 1762--1779. DOI: \url{https://doi.org/10.1063/1.1664510}.
+\bibitem{Orszag1971} S. A. Orszag (1971), ``On the elimination of aliasing in finite-difference schemes by filtering high-wavenumber components,'' \emph{Journal of the Atmospheric Sciences} 28, 1074. DOI: \url{https://doi.org/10.1175/1520-0469(1971)028<1074:OTEOAI>2.0.CO;2}.
+\bibitem{Dekker1971} T. J. Dekker (1971), ``A Floating-Point Technique for Extending the Available Precision,'' \emph{Numerische Mathematik} 18, 224--242. DOI: \url{https://doi.org/10.1007/BF01397083}.
+\end{thebibliography}
+\end{document}

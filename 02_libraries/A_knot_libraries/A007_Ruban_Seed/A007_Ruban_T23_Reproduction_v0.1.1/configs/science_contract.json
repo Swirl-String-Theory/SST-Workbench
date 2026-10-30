@@ -1,0 +1,38 @@
+{
+  "status": "DEVELOPMENT_UNFROZEN",
+  "framework_template": "v1.1.0_RC2",
+  "model": "Ruban 2018 dimensionless regularized filament equation",
+  "equations": [
+    {
+      "id": "E1",
+      "math": "X_t = 1/2 integral(X_beta(source) cross (X(target)-X(source)) / (distance^2+delta^2)^(3/2) d beta) + lambda_tilde/2*(X_beta cross X_beta_beta)/|X_beta|^3",
+      "implementation": "ruban_falsifier/model.py:RubanModel.velocity",
+      "gate": "G2"
+    },
+    {
+      "id": "E2",
+      "math": "Classical RK4; periodic trapezoid quadrature, spectral derivatives; adaptive CFL-like imaginary-axis local-induction step bound",
+      "implementation": "ruban_falsifier/model.py,runner.py",
+      "gate": "G2"
+    },
+    {
+      "id": "E3",
+      "math": "relative energy drift=|H(t)-H(0)|/|H(0)|",
+      "implementation": "ruban_falsifier/runner.py",
+      "gate": "G2"
+    },
+    {
+      "id": "E4",
+      "math": "operational reproduction: t>=300 and |dz|>=1200 with all numerical gates passed",
+      "implementation": "ruban_falsifier/runner.py",
+      "gate": "G3"
+    }
+  ],
+  "primary_hypothesis": "B0=0.154 yields persistent operational evolution in Ruban model at fixed Lambda and delta",
+  "scope_exclusions": [
+    "no native C++",
+    "no 3D Euler",
+    "no internal core twist",
+    "no background lattice"
+  ]
+}

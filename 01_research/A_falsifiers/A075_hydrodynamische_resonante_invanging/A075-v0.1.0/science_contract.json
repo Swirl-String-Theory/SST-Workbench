@@ -1,0 +1,247 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can fully coupled, finite-core closed vorticity lines retain an incoming excitation energy for a preregistered long late interval without dissipative terms, imposed velocity matching or selected angular symmetry?",
+  "objective": "Negative-control-first screening of mutual vortex-ring dynamics. Report resolved energy redistribution and distinguish it from genuine trapping, 3D Euler closure, and photon absorption.",
+  "null_hypothesis": "H0: observed receiver self-energy response does not establish persistent localized excess energy over four interaction time scales with scale-refined convergence; an unresolved run cannot reject H0.",
+  "alternative_hypothesis": "H1: a fully coupled, well-resolved ring pair exhibits long-lived localized incoming-excitation energy above the preregistered null, across fixed physical times, insensitive to sampling and angular mode selection.",
+  "assumptions": [
+    "Incompressible, inviscid constant density, no reconnection",
+    "Finite-width line-centered Rosenhead-Moore regularization is a model closure, not full 3D Euler",
+    "Both closed rings are fully back-reacting by the same Biot-Savart kernel",
+    "No artificial damping, velocity matching, wall, preferred azimuthal m, or forcing",
+    "Long-term capture requires full surface flux and material-volume diagnostics not available in v0.1.0"
+  ],
+  "symbols": [
+    {
+      "symbol": "Gamma",
+      "meaning": "circulation",
+      "si_unit": "m^2/s",
+      "dimensions": "L^2/T"
+    },
+    {
+      "symbol": "a",
+      "meaning": "regularization radius",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "rho_f",
+      "meaning": "effective constant mass density",
+      "si_unit": "kg/m^3",
+      "dimensions": "M/L^3"
+    },
+    {
+      "symbol": "H_a",
+      "meaning": "regularized filament energy proxy",
+      "si_unit": "J",
+      "dimensions": "ML^2/T^2"
+    },
+    {
+      "symbol": "T",
+      "meaning": "absolute evolution time",
+      "si_unit": "s",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "f_ret",
+      "meaning": "late-time retention statistic",
+      "si_unit": "1",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Regularized midpoint Biot-Savart evolution",
+      "latex": "\\dot{\\mathbf x}_i=\\frac{1}{4\\pi}\\sum_j\\Gamma_j\\frac{\\Delta\\boldsymbol\\ell_j\\times(\\mathbf x_i-\\mathbf m_j)}{(|\\mathbf x_i-\\mathbf m_j|^2+a^2)^{3/2}}",
+      "inputs": [
+        "centerlines",
+        "Gamma",
+        "a"
+      ],
+      "outputs": [
+        "velocity"
+      ],
+      "dimensional_check": "(L^2/T) L L / L^3 = L/T"
+    },
+    {
+      "id": "E2",
+      "purpose": "Regularized filament Hamiltonian proxy",
+      "latex": "H_a=\\frac{\\rho_f}{8\\pi}\\sum_{ij}\\frac{\\Gamma_i\\Gamma_j\\,\\Delta\\boldsymbol\\ell_i\\cdot\\Delta\\boldsymbol\\ell_j}{\\sqrt{|\\mathbf m_i-\\mathbf m_j|^2+a^2}}",
+      "inputs": [
+        "rho_f",
+        "Gamma",
+        "segments",
+        "a"
+      ],
+      "outputs": [
+        "H_a"
+      ],
+      "dimensional_check": "(M/L^3)(L^4/T^2)(L^2/L)= ML^2/T^2"
+    },
+    {
+      "id": "E3",
+      "purpose": "Receiver self-energy change proxy",
+      "latex": "\\Delta H_R(t)=H_{RR}(t)-H_{RR}(0)",
+      "inputs": [
+        "H_RR(t)",
+        "H_RR(0)"
+      ],
+      "outputs": [
+        "delta_H_R"
+      ],
+      "dimensional_check": "energy minus energy (J)"
+    },
+    {
+      "id": "E4",
+      "purpose": "Relative conservation drift",
+      "latex": "\\epsilon_H=\\max_t|H_a(t)-H_a(0)|/\\max(|H_a(0)|,\\epsilon_0)",
+      "inputs": [
+        "H_a(t)",
+        "H_a(0)"
+      ],
+      "outputs": [
+        "epsilon_H"
+      ],
+      "dimensional_check": "ratio of energies (1)"
+    },
+    {
+      "id": "E5",
+      "purpose": "Late-window retention ratio (requires qualified flux)",
+      "latex": "f_{ret}=\\frac{\\langle E_{loc}^{excess}\\rangle_{t\\in[T_1,T_2]}}{E_{incoming}^{excess}(0)}",
+      "inputs": [
+        "E_loc_excess",
+        "E_incoming_excess"
+      ],
+      "outputs": [
+        "f_ret"
+      ],
+      "dimensional_check": "energy / energy = 1"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "Total H_a and self/cross contributions versus time",
+      "equation_refs": [
+        "E2",
+        "E4"
+      ],
+      "unit": "J"
+    },
+    {
+      "id": "O2",
+      "definition": "Receiver H_RR drift proxy, NOT physical captured energy",
+      "equation_refs": [
+        "E3"
+      ],
+      "unit": "J"
+    },
+    {
+      "id": "O3",
+      "definition": "True late retention fraction is unmeasured in v0.1.0",
+      "equation_refs": [
+        "E5"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "Verify frozen protocol and imported reference checksums",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "Construct two independent coaxial closed line samples without imposing mode m=5",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "Integrate both moving rings with explicit RK4 and the same finite-core regularized kernel; fixed absolute final time",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S4",
+      "operation": "Measure H_a, H_RR, H_LL, H_RL and energy conservation at each snapshot",
+      "formula_refs": [
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S5",
+      "operation": "Test far-separated mutual coupling as null",
+      "formula_refs": [
+        "E2"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S6",
+      "operation": "Probe temporal and spatial refinement separately at same final time",
+      "formula_refs": [
+        "E1",
+        "E2"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S7",
+      "operation": "Reserve long-window retention criterion; do not infer from H_RR",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S8",
+      "operation": "Hold-out and native/third-party parity are not available and must not produce positive claims",
+      "formula_refs": [
+        "E5"
+      ],
+      "gate": "G4"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "If any energy drift exceeds registered 0.02 in normalized control or non-finite values occur, numerical gate G2 FAIL (invalid physics inference).",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F2",
+      "criterion": "If a qualified full-field late local-energy measurement shows f_ret <0.5 in held-out cases, claim of persistent capture fails within tested regime.",
+      "conclusion_if_met": "FAIL"
+    },
+    {
+      "id": "F3",
+      "criterion": "If source-hash parity fails, reject source qualification and block downstream claim.",
+      "conclusion_if_met": "FAIL"
+    }
+  ],
+  "edge_cases": [
+    "Cross-linking at near-core contact halts; no silent reconnection",
+    "A simple leapfrog exchange is not lasting capture",
+    "Finite-core smoothing changes dynamics; no convergence claims without core-resolution ladder",
+    "Azimuthal m=5 never preselected",
+    "Line energy partition is not physical control-volume energy"
+  ],
+  "predictions": [
+    "Regularized ring self-motion and mutual effects observable for nearby coaxial rings",
+    "Cross energy decreases with sufficiently large separation",
+    "A true captured mode would require sustained localized excess energy after incoming wavepacket encounter; untested here"
+  ]
+}

@@ -1,0 +1,69 @@
+--- qualified/docs/DD32_FP32X2.md
++++ drive_working/docs/DD32_FP32X2.md
+@@ -6,9 +6,9 @@
+ 
+ Each device scalar is represented as
+ 
+-\[
++$$
+ x \approx x_{\mathrm{hi}} + x_{\mathrm{lo}},\qquad x_{\mathrm{hi}},x_{\mathrm{lo}}\in \mathrm{binary32}.
+-\]
++$$
+ 
+ The preferred names are **DD32**, **FP32x2**, or **double-single**. The pair has binary32 exponent range and a nominal significand capacity around 48 bits; effective accuracy must be measured, not inferred from that nominal count.
+ 
+@@ -25,18 +25,18 @@
+ 
+ The regularized kernel remains
+ 
+-\[
++$$
+ \mathbf v(\mathbf x)=\frac{\Gamma}{4\pi}\sum_s
+ \frac{\Delta\boldsymbol\ell_s\times(\mathbf x-\mathbf m_s)}
+ {\left(\|\mathbf x-\mathbf m_s\|^2+a^2\right)^{3/2}}.
+-\]
++$$
+ 
+ Coordinates are transported from Python to the worker as binary64. The worker host splits each coordinate as
+ 
+-\[
++$$
+ x_{\rm hi}=\operatorname{float}(x),\qquad
+ x_{\rm lo}=\operatorname{float}(x-x_{\rm hi}),
+-\]
++$$
+ 
+ then sends float-only `(hi,lo)` data to the device. Results return as `(hi,lo)` and are recombined in host binary64 for transport to NumPy.
+ 
+@@ -54,19 +54,19 @@
+ 
+ The v1.0.6 backend selftest requires:
+ 
+-\[
++$$
+ \max \epsilon_{v,\mathrm{DD32}}\le 10^{-8},
+-\]
++$$
+ 
+-\[
++$$
+ \epsilon_{Jd,\mathrm{DD32}}\le 2\times10^{-6},
+-\]
++$$
+ 
+ and
+ 
+-\[
++$$
+ \frac{\epsilon_{\mathrm{FP32}}}{\max(\epsilon_{\mathrm{DD32}},\epsilon_{\rm floor})}\ge 20
+-\]
++$$
+ 
+ for every DD32 velocity smoke scenario and the deterministic directional finite-difference stress test.
+ 
+@@ -83,4 +83,4 @@
+ 
+ ## Windows oneAPI 2026 linker note (v1.0.6)
+ 
+-`-fp-model=precise` can make the Windows host link depend on Intel's dynamic compiler math library `libmmd.lib`.  Merely finding `icpx.exe` or calling `setvars.bat` is not treated as sufficient evidence that the linker search path is complete.  The v1.0.6 builder verifies the effective `LIB`; when `libmmd.lib` is absent, it searches the active compiler-local `lib` tree, prepends the resolved directory to `LIB`, and records `libmmd_path` in build provenance.
++`-fp-model=precise` can make the Windows host link depend on Intel's dynamic compiler math library `libmmd.lib`.  Merely finding `icpx.exe` or calling `setvars.bat` is not treated as sufficient evidence that the linker search path is complete.  The v1.0.6 builder verifies the effective `LIB`; when `libmmd.lib` is absent, it searches the active compiler-local `lib` tree, prepends the resolved directory to `LIB`, and records `libmmd_path` in build provenance.

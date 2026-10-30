@@ -1,0 +1,40 @@
+[project]
+id = "__CATALOG_ID__"
+name = "__NAME__"
+version = "__VERSION__"
+package = "experiment"
+profile = "__PROFILE__"
+framework_version = "1.1.1"
+
+[blind]
+enabled = true
+policy_file = "blind_policy.json"
+
+[report]
+tex = "report/FALSIFIER_REPORT.tex"
+require_complete_before_freeze = true
+compile_pdf = true
+pdf_required = true
+publish_to_instance_parent = true
+
+[run]
+seed = 123456789
+
+# At least two independent executed scientific implementations from py / cpp / gpu.
+# intel means Intel Arc through torch.xpu; cuda is an explicit opt-in.
+[auto_backends]
+enabled = true
+minimum_science_backends = 2
+require_minimum = true
+
+[gpu]
+provider = "intel"
+precision = "dd32"
+# No fallback to FP32: a missing native DD32 worker BLOCKS GPU scientific execution.
+# Switch to "cuda" to use NVIDIA CUDA; never fall back implicitly.
+
+[atlas]
+enabled = true
+version = "E010-v0.4.0"
+bridge_version = "v0.1.0"
+require_for_run = false

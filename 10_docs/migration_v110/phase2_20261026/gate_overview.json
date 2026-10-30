@@ -1,0 +1,165 @@
+{
+  "schema": "SST-PHASE2-GATE-OVERVIEW-1",
+  "created_utc": "2026-10-26T17:32:15.886093+00:00",
+  "checks": [
+    {
+      "id": "FRAMEWORK_RC2_AUTHENTICITY",
+      "status": "PASS",
+      "evidence": "framework_integrity.json",
+      "detail": "Exact frozen ZIP digest; 110 internal manifest entries verified."
+    },
+    {
+      "id": "FRAMEWORK_INSTALLED_BYTES",
+      "status": "FAIL_EXPLAINED_FORMATTING_DRIFT",
+      "evidence": "framework/DD32_FP32X2.diff",
+      "detail": "Authentic source found; installed document still differs. Historical manifest unchanged."
+    },
+    {
+      "id": "REGISTRY_CANONICAL_IDENTITIES",
+      "status": "PASS_WITH_OPEN_NONPILOT_ITEMS",
+      "evidence": "registry_reconciliation.json",
+      "detail": "73 canonical A families; 25 FAMILY files created, 7 updated; two preserved noncanonical locations."
+    },
+    {
+      "id": "PKLSA_RAW_AND_GEOMETRY_HASHES",
+      "status": "PASS",
+      "evidence": "geometry_hashes.jsonl",
+      "detail": "4497/4497 records; 2282 distinct raw files; 2312 active-view records. All finite; source-stability rehash passed."
+    },
+    {
+      "id": "A011_GEOMETRY_NATIVE_PARITY",
+      "status": "PASS",
+      "evidence": "a011_geometry_parity.log",
+      "detail": "4 targeted tests, Python 3.14.3 and existing C++17 backend; no automatic rebuild."
+    },
+    {
+      "id": "A054_E011_E013_BINDINGS",
+      "status": "PASS_INPUT_INTEGRITY_ONLY",
+      "evidence": "a054_provider_dependencies.json",
+      "detail": "47/47 anchors and 13/13 historical manifests match; exactly one enabled A054 member."
+    },
+    {
+      "id": "A054_RUNTIME_ADMISSION",
+      "status": "BLOCKED_PATCH_REQUIRED",
+      "evidence": "A054_DATASET_ADMISSION.json",
+      "detail": "Current locator v1.0.6; runtime omits E013 self/E011-binding checks; L2a1 has one provider."
+    },
+    {
+      "id": "A065_SEALS_AND_COMMITMENT",
+      "status": "PASS_INTEGRITY_ONLY",
+      "evidence": "a065_seals.json",
+      "detail": "D01/D02/D03 seals, seven files and global bindings match; no private targets opened."
+    },
+    {
+      "id": "A065_EXISTING_V110_BRIDGE",
+      "status": "PASS_STATIC_CHECKS_ONLY",
+      "evidence": "a065_framework_static_tests.log",
+      "detail": "Existing bridge pins v1.0.10; three static regressions pass, no solver execution."
+    },
+    {
+      "id": "PILOT_INSTALLED_SOURCE_BYTES",
+      "status": "FAIL_EXPLAINED_FORMATTING_DRIFT",
+      "evidence": "pilot_source_archive_comparisons.json",
+      "detail": "A054: two Markdown files. A065: two Markdown files and CRLF/LF-only report_tex.py. Internally verified source ZIPs preserved as references."
+    },
+    {
+      "id": "MIGRATED_EXECUTION",
+      "status": "NOT_RUN",
+      "detail": "No successor versions created or migrated."
+    },
+    {
+      "id": "SCIENTIFIC_CERTIFICATION",
+      "status": "NOT_RUN",
+      "detail": "No scientific gate promoted; geometry integrity and software tests are not physical qualification."
+    },
+    {
+      "id": "SCHEDULED",
+      "status": "DISABLED",
+      "detail": "No schedule created, activated or changed."
+    }
+  ],
+  "pilots": {
+    "A011": {
+      "resolved": [
+        "PKLSA raw/geometry hash audit",
+        "Explicit geometry-only admission contract",
+        "Targeted geometry and native parity"
+      ],
+      "remaining": [
+        "FRAMEWORK_INSTALLED_BYTE_DRIFT",
+        "NEW_INSTANCE_AND_ADAPTER_NOT_QUALIFIED",
+        "PHYSICAL_INPUT_ADMISSION_UNRESOLVED"
+      ],
+      "patches": [
+        "P01",
+        "P05",
+        "P07"
+      ],
+      "migration_gate": "BLOCKED",
+      "migrated_execution_gate": "NOT_RUN",
+      "scientific_gate": "NOT_RUN",
+      "new_version_allowed": false,
+      "admission_contract": "A011_DATASET_ADMISSION.json"
+    },
+    "A054": {
+      "resolved": [
+        "Canonical registry and latest source version",
+        "E011 anchor and E013 historical manifest integrity",
+        "Only one enabled member",
+        "Contract/implementation commitment regressions"
+      ],
+      "remaining": [
+        "FRAMEWORK_INSTALLED_BYTE_DRIFT",
+        "A054_SOURCE_BYTE_DRIFT",
+        "FRAMEWORK_LOCATOR_V106",
+        "RUNTIME_E013_SELF_AND_E011_BINDING_CHECKS_MISSING",
+        "L2A1_ONE_PROVIDER",
+        "NEW_INSTANCE_NOT_QUALIFIED"
+      ],
+      "patches": [
+        "P01",
+        "P02",
+        "P04",
+        "P07"
+      ],
+      "migration_gate": "BLOCKED",
+      "migrated_execution_gate": "NOT_RUN",
+      "scientific_gate": "NOT_RUN",
+      "new_version_allowed": false,
+      "admission_contract": "A054_DATASET_ADMISSION.json"
+    },
+    "A065": {
+      "resolved": [
+        "Canonical registry and latest source version",
+        "D01/D02/D03 seals and global commitment",
+        "Fremlin raw/geometry source hashes",
+        "Existing v1.0.10 bridge identified and static-tested"
+      ],
+      "remaining": [
+        "FRAMEWORK_INSTALLED_BYTE_DRIFT",
+        "A065_SOURCE_BYTE_DRIFT",
+        "FRESH_SUCCESSOR_COMMITMENT_AND_SMOKE_NOT_QUALIFIED",
+        "PHYSICAL_HELDOUT_SOURCE_UNRESOLVED"
+      ],
+      "patches": [
+        "P01",
+        "P03",
+        "P06",
+        "P07"
+      ],
+      "migration_gate": "BLOCKED",
+      "migrated_execution_gate": "NOT_RUN",
+      "scientific_gate": "NOT_RUN",
+      "new_version_allowed": false,
+      "admission_contract": "A065_DATASET_ADMISSION.json"
+    }
+  },
+  "scheduling_enabled": false,
+  "new_falsifier_versions_created": [],
+  "scientific_status_promoted": false,
+  "queue_sha256": "3272b70f16585e31cf66e66904e3b4976f3ad223d1ef65e483b712b90823c523",
+  "registry_hashes": {
+    "10_docs/registry/family_hierarchy.json": "3b714f894550e416087a5d857a3383b5fa511414658943a2454fe4cdcc99d098",
+    "10_docs/registry/catalog_index.json": "eba5dde0f27c9495813114f975ab81f7f5b2538303f13dc48db0bed1d4fe2cd7"
+  }
+}

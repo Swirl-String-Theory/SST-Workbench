@@ -1,0 +1,43 @@
+[project]
+id = "A076"
+name = "finite_core_spectral_abc"
+version = "v0.1.0"
+package = "experiment"
+profile = "gpu"
+framework_version = "1.1.0"
+
+[blind]
+enabled = true
+policy_file = "blind_policy.json"
+
+[report]
+tex = "report/FALSIFIER_REPORT.tex"
+require_complete_before_freeze = true
+compile_pdf = true
+pdf_required = true
+publish_to_instance_parent = true
+
+[run]
+seed = 123456789
+
+# At least two independent executed scientific implementations from py / cpp / gpu.
+# intel means Intel Arc through torch.xpu; cuda is an explicit opt-in.
+[auto_backends]
+enabled = true
+minimum_science_backends = 2
+numeric_tolerance_cpp = 1e-10
+numeric_tolerance_gpu = 1e-4
+require_minimum = true
+
+[gpu]
+provider = "intel"
+# Switch to "cuda" to use NVIDIA CUDA; never fall back implicitly.
+
+[atlas]
+enabled = true
+version = "E010-v0.4.0"
+bridge_version = "v0.1.0"
+require_for_run = false
+
+[sources]
+multilibrary_required = true

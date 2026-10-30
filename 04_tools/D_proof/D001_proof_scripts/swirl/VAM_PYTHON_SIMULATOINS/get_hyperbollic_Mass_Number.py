@@ -10,10 +10,9 @@ import IPython.display as display
 
 # Files
 files = [
-    "./knots/4_1/knot.4_1.fseries",
-    "./knots/4_1/knot.4_1d.fseries",
-    "./knots/4_1/knot.4_1p.fseries",
-    "./knots/4_1/knot.4_1z.fseries",
+    "./fseries/knot.4_1.fseries",
+    "./fseries/knot.5_2.fseries",
+    "./fseries/knot.6_1.fseries",
 ]
 
 # Load helper from previous cell context (redefine if needed)
@@ -226,5 +225,5 @@ df = pd.DataFrame(rows)
 display.display("Fourier-series-derived invariants (prototype)", df)
 
 # Save CSV
-out_path = "VAM_Fseries/knots/4_1/fseries_4_1_results.csv"
+out_path = "VAM_Fseries/fseries/fseries_4_1_results.csv"
 df.to_csv(out_path, index=False)

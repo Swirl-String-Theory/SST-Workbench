@@ -1,0 +1,45 @@
+{
+  "schema":"SST-SCIENCE-CONTRACT-2",
+  "research_question":"For a dimensionless finite-core periodic ring, does the resolved |m|=2 growth/oscillation boundary (A) disappear under mesh refinement, (B) converge to a finite dimensionless spectral ratio, or (C) extend into a reproducible coupled multimode and topology-dependent hierarchy?",
+  "objective":"Adversarially evaluate three nonexclusive nested levels: A no qualified spectral transition in the declared ring model; B a converged sector-specific finite critical ratio; C multiple dynamically qualified, independently supported coupled/topology scales. Strictly separate a spectral boundary from preferred spacing or Euler equilibrium.",
+  "null_hypothesis":"No qualifying dimensionless spectral scale exists at the declared C4 sector and numerical tolerances; observed crossings may result from discretization, regularization, image truncation or non-equilibrium linearization.",
+  "alternative_hypothesis":"The physically identified m=2 mode exhibits a stable real-to-imaginary transition at the same finite q across high-N, image-shell and finite-difference ladders; stronger C requires independent coupled evolution and multiple scales.",
+  "assumptions":["Incompressible regularized finite-core Biot-Savart filament model, not a proved smooth Euler solution.","The cubic periodic lattice has C4 rather than continuous SO(2) rotational symmetry.","Dimensionless a=1, circulation Gamma=1, R/a=4; no SI, SST target or fitted particle constants.","PKLSA E010 v0.4.0 geometry, if supplied, is source-qualified but has no implied dynamic stability.","The predeclared q interval is motivated by earlier blind internally observed transitions; this is a confirmatory numerical scope, not an independent discovery sample."],
+  "symbols":[
+    {"symbol":"a","meaning":"finite-core regularization length","si_unit":"numerical U_L","dimensions":"L"},
+    {"symbol":"Gamma","meaning":"filament circulation","si_unit":"numerical U_L^2/U_T","dimensions":"L^2 T^-1"},
+    {"symbol":"L","meaning":"periodic cell separation","si_unit":"numerical U_L","dimensions":"L"},
+    {"symbol":"q","meaning":"logarithmic separation ratio log(L/a)","si_unit":"1","dimensions":"1"},
+    {"symbol":"lambda","meaning":"linearized perturbation eigenvalue","si_unit":"numerical U_T^-1","dimensions":"T^-1"}
+  ],
+  "equations":[
+    {"id":"E1","purpose":"dimensionless scale input","latex":"q=\\ln(L/a)","inputs":["L","a"],"outputs":["q"],"dimensional_check":"L/a is dimensionless"},
+    {"id":"E2","purpose":"finite-core induced velocity","latex":"\\mathbf v(\\mathbf x)=\\frac{\\Gamma}{4\\pi}\\sum_j\\frac{\\Delta\\mathbf l_j\\times(\\mathbf x-\\mathbf m_j)}{(\\|\\mathbf x-\\mathbf m_j\\|^2+a^2)^{3/2}}","inputs":["Gamma","filament segments","a","probe position"],"outputs":["velocity"],"dimensional_check":"Gamma L2/T times 1/L yields L/T"},
+    {"id":"E3","purpose":"linearized Fourier-sector eigenproblem","latex":"J_m(q)u_m=\\lambda_m(q)u_m","inputs":["ring Jacobian","Fourier basis","q"],"outputs":["eigenvalues","eigenvectors"],"dimensional_check":"J and lambda both T^-1"},
+    {"id":"E4","purpose":"resolved-growth detector","latex":"g_m=|\\Re\\lambda_m|,\\quad g_{\\rm floor}=\\max(10^{-8},\\epsilon_{\\rm mach}/h)","inputs":["lambda","finite difference h","machine epsilon"],"outputs":["growth transition flag"],"dimensional_check":"all numerical rates scaled by Gamma/a^2"},
+    {"id":"E5","purpose":"continuum critical ratio","latex":"C_m=\\exp(q_{\\star,m})","inputs":["q_star"],"outputs":["L_star/a"],"dimensional_check":"dimensionless"}
+  ],
+  "observables":[
+    {"id":"O1","definition":"resolved real/imaginary m=2 eigenpair across q and N","equation_refs":["E3","E4"],"unit":"numerical U_T^-1"},
+    {"id":"O2","definition":"critical separation ratio with its discrete search bracket","equation_refs":["E1","E5"],"unit":"1"},
+    {"id":"O3","definition":"image-shell, core-kernel, and finite-difference robustness and independent C4 leakage","equation_refs":["E2","E3"],"unit":"1"},
+    {"id":"O4","definition":"PKLSA original geometry rigid-motion residual and optional equal-final-time temporal diagnostic","equation_refs":["E2"],"unit":"1"}
+  ],
+  "steps":[
+    {"id":"S1","operation":"Validate pinned ring source and, when provided, E010/adapter raw hashes without target matching","formula_refs":["E1","E2"],"gate":"G1"},
+    {"id":"S2","operation":"Scan Fourier C4 blocks and canonical eigenpairs with resolved growth floor; retain raw cases and q brackets","formula_refs":["E3","E4"],"gate":"G3"},
+    {"id":"S3","operation":"Converge N=64/96/128/160/192, image-shell 2/3, three h values, and core-model diagnostics separately","formula_refs":["E1","E3","E5"],"gate":"G4"},
+    {"id":"S4","operation":"Check possible physical time evolution and preference of spacing; unresolved until explicitly implemented","formula_refs":["E2","E3"],"gate":"G5"},
+    {"id":"S5","operation":"Load and audit original E010 component arrays; compute rigid-motion residual and optional equal-final-time numerical trajectory diagnostic","formula_refs":["E2"],"gate":"G6"},
+    {"id":"S6","operation":"Compare two independent E010 provider source groups and detect dynamically confirmed multiple length scales; unresolved without full tests","formula_refs":["E2","E5"],"gate":"G8"},
+    {"id":"S7","operation":"Actually execute Python and compiled C++ or GPU static ring sub-kernel on shared hashed inputs and record numerical parity","formula_refs":["E2"],"gate":"G10"}
+  ],
+  "falsification_criteria":[
+    {"id":"F1","criterion":"Reject a proposed m=2 continuum scale if the same physical mode fails high-N location tolerances (N160-N192 <=0.005) after successful quality gates; unresolved if required data absent","conclusion_if_met":"REJECTED_WITHIN_SCOPE_OR_UNRESOLVED"},
+    {"id":"F2","criterion":"B_SPECTRAL_ONLY requires a real-to-imaginary physical m=2 transition with image-shell, FD and high-N gates, full-field dynamical selection still UNRESOLVED","conclusion_if_met":"B_SPECTRAL_ONLY"},
+    {"id":"F3","criterion":"C requires at least two distinct converged length scales with demonstrated coupling, two provenance-independent source groups and both spatial/temporal dynamic convergence; no automatic promotion","conclusion_if_met":"C_HIERARCHY_SUPPORTED"}
+  ],
+  "edge_cases":["A nonpromotion is not evidence for hypothesis A without an exhaustive converged negative search","Sub-floor sign flips and conjugate partners are not independent candidates","Multiple finite-sector roots alone do not establish hierarchy or nonlinear scale attraction","Same analytic PKLSA source group never counts as two providers","Full-field spectral abscissa positive forbids blanket stability claim","One additional graphics processor does not count as a third scientific backend category"],
+  "predictions":["A/B fate discriminated by monotonic same-m high-N roots under fixed criteria","C must exhibit additional independently qualified scales rather than generic Fourier frequencies","No physical SI scale is inferred from dimensionless units"],
+  "dataset_pin":{"ring_source_version":"v0.1.2.4","q_followup_interval":[2.47,2.59],"atlas_version":"E010-v0.4.0","adapter_version":"v0.1.0","external_physical_constants_used":[],"external_target_values_used":[]}
+}

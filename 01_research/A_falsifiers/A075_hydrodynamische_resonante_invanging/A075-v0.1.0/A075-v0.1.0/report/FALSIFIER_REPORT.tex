@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=21mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A075 v0.1.0\\Hydrodynamische resonante invanging\\\large Falsification protocol and execution report}
+\author{SST-Workbench | Framework 1.0.10}
+\date{27 October 2026 | Development-only}
+\begin{document}
+\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification and status}
+Catalog A075; family \texttt{hydrodynamische\_resonante\_invanging}; version v0.1.0. The frozen framework is the unmodified shared v1.0.10 runtime, loaded through \texttt{framework\_bootstrap.py}. Results are a \emph{regularized filament-model screening}, not a qualified full three-dimensional (3D) Euler solution or photon model.
+% SST-REPORT-SECTION:QUESTION
+\section{Question and objective}
+Can two or more completely coupled, closed vorticity filaments sustain a lasting excess of incoming-excitation energy in a receiver without damping, imposed speed matching, or a preferred azimuthal mode? This first release checks the necessary numerical conservation and far-separation controls and explicitly leaves the central energy-capture claim unresolved.
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Competing hypotheses}
+$H_0$: the short-run change of the receiver self-Hamiltonian is ordinary conservative energy redistribution; a capture fraction is not defined without a resolved local-energy flux and post-encounter window. $H_1$: a bona fide finite-energy incoming perturbation exhibits reproducible excess local energy at late time with spatial and temporal convergence and a qualified full-fluid mechanism provider. A short-run numerical PASS cannot establish $H_1$.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and limitations}
+Constant-density, incompressible inviscid fluid background; two backreacting closed, co-axial centerlines; smoothing radius $a>0$; no reconnection, external forcing, imposed speed matching, damping or imposed azimuthal perturbation. Regularized filament kinematics is not the complete 3D Euler partial differential equation with pressure-Poisson closure. Effective finite-core structure is prescribed rather than resolved. No atomic material response, Maxwell coupling or optical absorption is modeled.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols and SI dimensional checks}
+\begin{center}\begin{tabular}{lll}\toprule
+Symbol & Interpretation & SI units\\\midrule
+$\Gamma$ & circulation & $\mathrm{m^2\,s^{-1}}$\\
+$a$ & regularization length & $\mathrm m$\\
+$\rhoF$ & effective fluid density & $\mathrm{kg\,m^{-3}}$\\
+$H_a$ & Hamiltonian proxy & $\mathrm J$\\
+$t$ & absolute parameter time & $\mathrm s$\\\bottomrule\end{tabular}\end{center}
+The induced-velocity kernel has dimensions $\Gamma\ell^2/\ell^3=\mathrm{m\,s^{-1}}$. The Hamiltonian kernel has $\rhoF\Gamma^2\ell^2/\ell=\mathrm{kg\,m^2\,s^{-2}}$.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Equations and measured observables}
+\begin{align}
+\dot{\mathbf x}_i&=\frac{1}{4\pi}\sum_j\Gamma_j\frac{\Delta\boldsymbol\ell_j\times(\mathbf x_i-\mathbf m_j)}{(|\mathbf x_i-\mathbf m_j|^2+a^2)^{3/2}},\\
+H_a&=\frac{\rhoF}{8\pi}\sum_{ij}\frac{\Gamma_i\Gamma_j\,\Delta\boldsymbol\ell_i\cdot\Delta\boldsymbol\ell_j}{\sqrt{|\mathbf m_i-\mathbf m_j|^2+a^2}},\\
+H_a&=H_{RR}+H_{LL}+H_{RL},\\
+\epsilon_H&=\max_t\frac{|H_a(t)-H_a(0)|}{\max(|H_a(0)|,\epsilon_0)}.
+\end{align}
+Only $H_{RR}(t)-H_{RR}(0)$ is recorded as a \emph{receiver self-energy proxy}; it is not the trapped incoming energy. A qualified $f_{ret}$ additionally requires a physical control-volume energy-flux calculation.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm: equation-to-code mapping}
+Build two closed rings with $N=24$ or 32 segments, smoothing radius $a=0.22$ in normalized SI-compatible units, $\Gamma_R=\Gamma_L=1\,\mathrm{m^2s^{-1}}$, $\rhoF=1\,\mathrm{kgm^{-3}}$. Integrate both centerlines with explicit fourth-order Runge--Kutta to a fixed final time $T=1\,\mathrm s$ at $\Delta t=0.05$ and $0.025\,\mathrm s$. Test $H_a$ and impulse, a far-separation control, and independent spatial/temporal refinement. No late-time capture status is assigned.
+% SST-REPORT-SECTION:SOURCES
+\section{Source provenance and independence}
+\texttt{source\_evidence/A021\_README.md} documents permissible mode decomposition and the requirement that a relative periodic orbit leave and return before claiming recurrence. \texttt{source\_evidence/A032\_README.md} specifies the regularized midpoint kernel, matching Hamiltonian proxy, conservation diagnostics, and observation-window caution. These are \emph{method references}, not independent physical confirmations. Both bytes and SHA-256 values are retained and checked at runtime.
+% SST-REPORT-SECTION:GATES
+\section{Preregistered gates and stop conditions}
+G0 frozen protocol; G1 source-hash parity; G2 combined reference no-loss (energy and impulse drift below 2\%), far-separation cross-energy below 3\% of near case, temporal difference below 0.01\% and spatial difference below 5\%; G3 long-time physical capture (unresolved); G4 independent holdout (unresolved, but attempted); G5 native C++ parity (disabled by profile); G6 GPU screening (disabled); G7 multilibrary replication (disabled); G8 full Euler and pressure-energy flux (unresolved); G9 private reveal withheld. Measured statuses never imply physical certification.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerical convergence strategy}
+Fixed absolute end time across all resolution ladders; separate $\Delta t$ and $N$ controls; record $H_{RR}$, $H_{LL}$ and $H_{RL}$, total energy and Kelvin impulse. Production needs finite-core width convergence, controlled arclength remeshing, independent initial-state holdouts and sufficiently long observation windows. A short-run PASS is explicitly diagnostic only.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend qualification}
+Python with NumPy binary64 is the only executed solver for v0.1.0. The framework's prior C++ or Intel SYCL parity must never be represented as parity of this solver. Complete Euler certification requires a separate provider; G8 remains unresolved.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blinding and reveal integrity}
+All source-visible method documents are public. Private reveal data, nonce and forbidden terms remain outside public blind archives. The framework freezes a public commitment and emits uniquely identified run artifacts. Physical claims are not determined from concealed target labels. G9 must remain withheld.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistics and falsification criteria}
+Null response is quantified by a far-separated two-ring control. The measured self-energy change is reported but cannot substitute for local capture; no capture-statistic null distribution has been qualified. Frozen numerical thresholds are declared above and never adjusted after outcomes. A lasting absorption claim requires direct late-time $f_{ret}$, independent holdouts, correct control-volume flux, and convergence.
+% SST-REPORT-SECTION:RESULTS
+\section{Machine-generated results}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{No results yet. The framework creates the automatic table after the first run.}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation and forbidden promotions}
+A successfully conserved regularized filament Hamiltonian is necessary numerical screening only, not evidence of physical absorption. A fivefold azimuthal mode is not presupposed. Incompressible Euler permits no unmodeled reconnection. This report does not establish an atomic clock, photon identity, or stable quantum excitation.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproducibility, runtime commands and source code}
+Use \texttt{run\_all.cmd FREEZE}, \texttt{run\_all.cmd BASIC}, then \texttt{run\_all.cmd FULL} with the pinned canonical Framework v1.0.10. The standard output root is instance-local and uniquely versioned; previous runs are archived. Generated source and output manifests contain SHA-256 checksums. Local offline command: \texttt{python -m pytest -q tests} (environment needs NumPy and pytest).
+\begin{thebibliography}{9}
+\bibitem{Saffman1992} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge University Press (1992).
+\bibitem{A021} SST-Workbench A021-v0.4.0, \emph{Trefoil Lobe Self-Confinement}, README and method notes (internal source).
+\bibitem{A032} SST-Workbench A032-v0.1.0, \emph{Kelvin--Joule Transient Energy}, README and method notes (internal source).
+\end{thebibliography}
+\end{document}

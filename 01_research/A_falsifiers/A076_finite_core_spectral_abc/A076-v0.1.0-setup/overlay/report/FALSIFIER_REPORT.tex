@@ -1,0 +1,134 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,hyperref}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{@@CATALOG-ID@@ --- Blinde A/B/C-toets van spectrale schaalselectie\\
+\large Finite-core ring, Fourier-sectoren en PKLSA-knoopgeometrie}
+\author{SST-Workbench / Falsifier Framework v1.1.0}
+\date{Preregistratie van @@VERSION@@; geen fysische bevestiging}
+\begin{document}
+\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identificatie, afbakening en status}
+Deze falsifier vergelijkt drie mogelijke uitkomsten in een dimensionless finite-core model:
+(A) de numerieke kritieke schaal houdt geen stand bij verfijning;
+(B) een specifieke $|m|=2$-spectrale grens convergeert naar een eindige verhouding $L/a$;
+(C) meerdere onafhankelijk geconvergeerde en aantoonbaar gekoppelde dynamische schalen bestaan in een model met meerdere modi of knoop-topologieen.
+Deze uitkomsten zijn \emph{niet automatisch exclusief}: een spectrale B-grens is geen bewijs voor een vrije dynamisch gekozen celafstand; de aanvullende C-claim heeft strengere voorwaarden.
+Het v0.1.2.4-ringmodel is als ongewijzigde referentiekernel opgenomen. De PKLSA Universal Atlas Adapter v0.1.0 ontsluit E010 v0.4.0 via gecontroleerde bestanden. De eerste release bevat een kwantitatieve ringtoets en een PKLSA-dynamiekpilot, maar geen reeds gevalideerde knoop-hierarchie.
+
+% SST-REPORT-SECTION:QUESTION
+\section{Onderzoeksvraag en doelen}
+Ontstaat een bijzondere dimensieloze verhouding door de spectrale structuur van een geregulariseerde gesloten ring onder periodieke hydrodynamische interactie, zonder invoer van een bekende doelconstante? Blijft deze verhouding aanwezig bij $N\rightarrow\infty$, verschillende image-shells en finite-difference stappen? Geeft de onafhankelijke PKLSA-geometrie later een robuuste multi-schaal-uitbreiding?
+
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Hypothesen en claimniveaus}
+$H_A$: een schijnbare kritieke $m=2$-grens wordt niet bevestigd na adequate ruimtelijke, differentiaal- en modelverfijning. \emph{Geen gevonden grens} in een beperkte scan is niet voldoende voor $H_A$.
+$H_B$: de $m=2$-eigenwaarde gaat bij een eindige $q_\star$ aantoonbaar van een reeel groei-/vervalpaar naar een imaginair oscillatiepaar, en de locatie is convergent onder vooraf geregistreerde controleparameters.
+$H_C$: naast B bestaan ten minste twee onderscheiden schalen waarvoor onderling gekoppelde, dynamisch convergerende modi en brononafhankelijke topologie-/embeddingcontroles zijn aangetoond.
+B wordt uitsluitend \texttt{B\_SPECTRAL\_ONLY} genoemd totdat een vrije, volledige niet-lineaire Euler-evenwichtstoets de voorkeur voor die schaal aantoont. C is pas ondersteund bij een onafhankelijk mechanisme, niet door toevallige verschillende Fourierfrequenties.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Aannamen en beperkingen}
+De gestandaardiseerde ring heeft $a=1$, $\Gamma=1$ en $R/a=4$. De circulaire ring bezit in een kubisch periodieke image-lattice slechts discrete $C_4$-symmetrie. Linearisatie vindt plaats rond de voorgeschreven ring, niet noodzakelijk een exacte vrije Euler-relatieve-evenwichtsoplossing.
+De geteste kernregularisatie is een gekozen constitutieve numerieke kernel. Herparametrisatie, reconnection, materiaalvortexdynamica en een fysische compressibiliteitswet vallen buiten de bewezen afbakening. De historisch gevonden $q\simeq2.52$ is \emph{geen target} in de detector; het nieuwe interval is alleen een vooraf gemotiveerd blinde confirmatory follow-up. Er worden geen SST-waarden of gemeten SI-ankers in de solver geladen.
+
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbolen en dimensiecontrole}
+\begin{longtable}{p{0.14\linewidth}p{0.59\linewidth}p{0.18\linewidth}}\toprule
+Symbol & Betekenis & Afmetingen \\ \midrule
+$a$ & Kerngrootte / regulator, numerieke lengte-eenheid & $L$ \\
+$\Gamma$ & Circulatie & $L^2T^{-1}$ \\
+$R$ & Ringstraal & $L$ \\
+$L$ & Afstand tussen periodieke beelden & $L$ \\
+$q$ & $\ln(L/a)$ & dimensieloos \\
+$J$ & Lineaire geprojecteerde snelheid-naar-displacement-Jacobiaan & $T^{-1}$ \\
+$\lambda_m$ & Eigenwaarde in de $m$-sector & $T^{-1}$ \\
+$h$ & Genormaliseerde differentiestap & $L$ \\ \bottomrule\end{longtable}
+Alle numerieke tijdseenheden volgen uit $T_0=a^2/\Gamma$; $\lambda T_0$ is dimensieloos. Zij zijn geen absolute seconde zonder onafhankelijke kalibratie.
+
+% SST-REPORT-SECTION:EQUATIONS
+\section{Operatoren, symmetrie en meetbare gevolgen}
+De scalair geparametriseerde celafstand wordt gedefinieerd door
+\begin{equation}q=\ln(L/a),\qquad L/a=e^q.\label{eq:q}\end{equation}
+De segmentmatig geregulariseerde Biot--Savart-som is
+\begin{equation}
+\mathbf v(\mathbf x)=\frac{\Gamma}{4\pi}\sum_j\frac{\Delta\mathbf l_j\times(\mathbf x-\mathbf m_j)}{\bigl(\|\mathbf x-\mathbf m_j\|^2+a^2\bigr)^{3/2}},\label{eq:bs}
+\end{equation}
+waarbij de periodieke interactie als een eindig aantal expliciete image-shells wordt opgeteld. De Fourier-projectie van de lineaire operator levert
+\begin{equation}
+J(q)u_j=\lambda_j(q)u_j,\qquad m\equiv r\pmod{4},\quad r\in\{0,1,2,3\}.\label{eq:eig}
+\end{equation}
+Voor iedere gevolgde branch geldt $g_j=|\operatorname{Re}\lambda_j|$ met
+\begin{equation}
+g_{\mathrm{floor}}=\max(10^{-8},\epsilon_{\mathrm{mach}}/(h/a)).\label{eq:floor}
+\end{equation}
+Een reeel groei-/vervalpaar dat naar een imaginair paar overgaat is een specifieke \emph{sectorale spectrale overgang}; daaruit volgt niet dat $\max_j\operatorname{Re}\lambda_j\le0$.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algoritme en onafhankelijke berekeningspaden}
+De oorspronkelijke v0.1.2.4-Jacobiaan wordt voor dezelfde $m$-sector op verschillende $N$ berekend, zonder oude doelwaarden als selectiebias. De software bewaart per geval alle eigenwaarden, modegewichten, overlap, residualen, $C_4$-leakage en de kandidaatselectie. De eigenparen $\{z,z^*,-z,-z^*\}$ worden waar numeriek verantwoord eenmaal gecanonicaliseerd. De detector wijst sub-floor tekenwisselingen af.
+De nieuwe E010-datasetpilot gebruikt de originele gehashte componenten, meet statische koppeling tussen meerdere componenten en toetst de relatieve vormresidu na de best passende translatie/rotatie. De pilot maakt geen cirkel-Fourierlabels voor algemene knopen. Het onafhankelijke framework G10 controleert een daadwerkelijk op Python en C++ (of XPU/CUDA) berekende \emph{statische Biot--Savart-subkernel}. G10 is nadrukkelijk geen onafhankelijke verificatie van de volledige Jacobiaanspectra.
+
+% SST-REPORT-SECTION:SOURCES
+\section{Herkomst en toelaatbaarheid van brongeometrie}
+De ring is een analytisch voorgeschreven synthetisch numeriek controleobject. Het oude selectorprogramma en de C++-bron zijn als vaste referentie meegeleverd; veranderde bronhashes vereisen een nieuwe versie. De optionele PKLSA-route mag alleen de gepinde Atlas Adapter v0.1.0 en E010 v0.4.0-consumer-export gebruiken. Elke bron heeft originele componenthashes, exportmanifest, topologie-ID, embedding en source-provider identificatie. Twee afgeleiden uit dezelfde analytische bron vormen \emph{geen} onafhankelijke bronreplicatie. Een resample van 512 naar 4096 punten is geen nieuw onafhankelijke geometrie.
+
+% SST-REPORT-SECTION:GATES
+\section{Gates, stopregels en beslismatrix}
+\begin{longtable}{p{0.09\linewidth}p{0.67\linewidth}p{0.15\linewidth}}\toprule
+Gate & Vraag & Evidentielaag \\ \midrule
+G0--G2 & Bron-/protocolhash, dimensionele en geometrische geldigheid & Verplicht \\
+G3 & Resolved $m=2$-branch, niet enkel floating-point tekenflip & Kandidaat \\
+G4 & $N$-ladder, image-shells, $h$-ladder, core-model-controle & Spectraal \\
+G5 & Niet-lineaire voorkeur voor $L_\star$, zelfstabiel evenwicht & Fysisch \\
+G6 & PKLSA-tijdintegratie \emph{en} separate ruimtelijke convergentie & Fysisch \\
+G7 & Twee onafhankelijke providers/embeddings met geldige provenance & Bronnen \\
+G8 & Twee onafhankelijke convergente, gekoppelde schalen & Hierarchie \\
+G10 & Twee uitvoerende, numeriek vergeleken backendcategorieen & Technisch \\ \bottomrule\end{longtable}
+De strenge high-resolution intervalgate is $|q^{(160)}_\star-q^{(192)}_\star|\le0.005$. Een verschil tussen $N=96,128,160,192$ wordt expliciet gerapporteerd. Een ontbrekende gate is \texttt{UNRESOLVED} en mag niet tot een fysische A-claim leiden. Een beperkte \texttt{A\_SUPPORTED\_WITHIN\_GRID\_SCOPE}-diagnose vereist volledige, kwaliteitsgeslaagde scans bij $N=160$ en $N=192$, zonder gedetecteerde $|m|=2$-overgang. Dit is geen globaal non-existentiebewijs. \texttt{G10 PASS} geeft geen toestemming om G5--G8 te promoveren.
+
+% SST-REPORT-SECTION:NUMERICS
+\section{Resolutie, foutbudget en numerieke stabiliteit}
+De researchconfiguratie gebruikt $N=64,96,128,160,192$, $2.47\le q\le2.59$, $\Delta q=0.01$, shells $S=2,3$, $h/a=3\cdot10^{-4},10^{-4},3\cdot10^{-5}$ en aparte kernmodelgevoeligheid. De quick-configuratie is uitsluitend software-diagnostiek. De resolutie van een gedetecteerde overgang kan nooit nauwkeuriger worden geclaimd dan het gebruikte bracket; geinterpoleerde $q$-decimalen zijn geen fysische precisie.
+Een geslaagde core-modelgevoeligheid is iets anders dan dezelfde modelvergelijking: verschillende regularisatievormen vertegenwoordigen afzonderlijke hypothesen. Het mathematische bestaan van een eigenwaardegrens, de dynamische stabiliteit en een fysische intermediaire schaal hebben afzonderlijke stopcriteria.
+
+% SST-REPORT-SECTION:BACKENDS
+\section{Backendautoriteit en 2-uit-3-uitvoering}
+Het zelfdragende Falsifier Framework v1.1.0 accepteert alleen werkelijk uitgevoerde Python/NumPy dubbelprecisie, native C++17/pybind11 en een Intel XPU of NVIDIA CUDA-implementatie. Twee grafische kaarten tellen samen als een \emph{enkele} GPU-categorie. G10 vereist ten minste Python plus een andere categorie met identieke inputhash en gemeten relatieve afwijking onder vooraf ingestelde tolerantie. Indien slechts een categorie beschikbaar is, is de technische certificatie geblokkeerd, niet de fysische hypothese ontkracht. De kopie van de Fourier-referentiekernel heeft haar eigen native bouwpad; ontbrekende bibliotheken leiden uitsluitend tot diagnostische Pythonmodus en kunnen geen G4-certificering sluiten.
+
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindheid, selectie en anti-contaminatie}
+SST-doelconstanten, massaverhoudingen, vooraf gewenste lengtes en labels zijn verboden als solverinput. Het interval wordt gemotiveerd door de voorgaande \emph{blinde interne} m=2-transition-analyse, niet door enig extern target. Bronselectie uit de atlas is vooraf gepind met hash en wordt niet na een resultaat geretuned. De framework-commitments, aparte BLIND/REVEALED-archieven en immutable rapporttekst blijven van kracht; een REVEAL is in deze campagne niet geautoriseerd.
+
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistische interpretatie en selectie-effecten}
+De primaire berekeningen zijn deterministische eigenwaardeberekeningen, geen steekproeven uit een stochastische verdeling. De observatie dat $m=2$ na een verkennende run geselecteerd is, vormt \emph{post-selection} en beperkt de zelfstandigheid van een confirmation claim. Extra maxima/minima worden niet samengevoegd tot schijnreplicaties. Geen $p$-waarden of significante onafhankelijke experimenten worden verondersteld. De gecombineerde uitspraak A/B/C is een gekoppelde beslisstructuur met expliciete epistemische status.
+
+% SST-REPORT-SECTION:RESULTS
+\section{Automatisch ingevoegde resultaten en ongewijzigde raw data}
+De onveranderde gevalsoutputs staan in \texttt{abc\_science/case\_*.json}; de samenvatting in \texttt{abc\_science/ABC\_VERDICT.json}. Bronmanifests, door het framework gemeten backend-pariteit, resultatenledger, voortgangslog, rapportage en uitvoerarchief worden verifieerbaar gepubliceerd. Een numerieke \texttt{PASS} of \texttt{FAIL} wordt zonder bewijs nooit een kwalificatie van de volledige Euler-fysica.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{Geen uitvoer ingelezen.}}
+
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Falsifieerbaarheid, confounders en minimale vervolgstappen}
+Als $m=2$ bij hogere resoluties geen herkenbare grens meer bezit, sterft deze numerieke kandidaat onder de geteste voorwaarden. Als de grens convergeert, ontstaat een \emph{dimensionless sectorale spectral scale} maar geen intrinsiek gekozen materiele roosterafstand. Voor C moeten meerdere autonome lengtes een bewezen dynamische interactie bezitten; enkel meerdere Fourier-modes, artificiele periodisering of reconstructie uit een voorgeschreven kernstraal kunnen dat niet leveren.
+Belangrijke confounders: finite-core-constitutieve keuze, oneigenlijke linearisatie rond een niet-stationaire achtergrond, foutieve C4-mode-identificatie, ontbrekende reconnectioncontrole, algemene niet-normale eigenwaardegevoeligheid en pseudo-onafhankelijke E010-bronnen. Een positieve C-status is in deze release uitdrukkelijk niet op basis van alleen de PKLSA-pilot bereikbaar.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproduceerbaarheid, ledger, PDF en archivering}
+De creator maakt met de lokaal aanwezige v1.1.0 (bij voorkeur RC2) framework-template een \emph{nieuwe} zelfstandige instantiemap. Daarna wordt de gedocumenteerde wetenschappelijke overlay toegepast en volledig getest \emph{voordat} \texttt{FREEZE} de protocollen vastzet. De uitvoervolgorde is \texttt{BACKEND\_PREFLIGHT}, \texttt{ATLAS\_VERIFY} indien van toepassing, \texttt{FREEZE}, \texttt{BASIC}, \texttt{FULL}; bij kwalificatie kan \texttt{CERTIFY} worden overwogen, nooit automatisch \texttt{REVEAL}. Output en rapport blijven per run uniek; elk ZIP-resultaat heeft een SHA-256-bestand. Een ReportLab-fallback is alleen diagnostisch. De volledige bron-/outputhashketen moet overeenkomen voordat wetenschappelijke interpretatie wordt vrijgegeven.
+\begin{thebibliography}{5}
+\bibitem{Helmholtz} H. Helmholtz, 1858, integralen van hydrodynamische vortexbeweging, \emph{J. Reine Angew. Math.} 55.
+\bibitem{Saffman} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge Univ. Press, 1992.
+\bibitem{Kato} T. Kato, \emph{Perturbation Theory for Linear Operators}, Springer, 1995.
+\bibitem{SSTSelector} SST-Workbench, \emph{Independent Finite-Core Spectral Selector v0.1.2.4}, bevroren projectreferentiekernel en numerieke data.
+\bibitem{Atlas} SST-Workbench, \emph{E010 v0.4.0 Combined Atlas; PKLSA Universal Atlas Adapter v0.1.0}, gehashte datasetcontracten, 2026.
+\end{thebibliography}
+\end{document}

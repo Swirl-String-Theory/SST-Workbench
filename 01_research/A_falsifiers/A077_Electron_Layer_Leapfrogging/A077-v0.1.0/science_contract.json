@@ -1,0 +1,44 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Do two interacting finite-core regularized unknot rings exhibit convergent axial rank swaps, and does an independent toroidal/poloidal/full-Euler extension require nonclassical spinorial rotational response?",
+  "objective": "Quantify ring-order changes and circulation-sign effects in a reduced axisymmetric model; block physical layer and electron-spin claims pending full 3D Euler and configuration-space analysis.",
+  "null_hypothesis": "Classical leapfrogging yields continuous coordinates/rank exchanges; no implied spin-1/2, quantized energy layers, or electron identity.",
+  "alternative_hypothesis": "A subsequently qualified finite-core Euler carrier independently generates robust discrete internal classes and a non-imposed 2pi/4pi sign holonomy.",
+  "assumptions": [
+    "Incompressible inviscid unforced continuum is the intended physical domain; currently executed model is an axisymmetric reduced proxy.",
+    "Finite smooth core is parameterized by cutoff a, with imposed proxy volume a^2 R = constant.",
+    "Local time is absolute substrate t; no Swirl-Clock conversion or energy quantization is assumed.",
+    "A rotation returning an ordinary field after 2pi is not a spinorial proof; spinor holonomy needs separate derivation."
+  ],
+  "symbols": [
+    {"symbol":"R_i","meaning":"ring major radius","si_unit":"m","dimensions":"L"},
+    {"symbol":"z_i","meaning":"axial center height","si_unit":"m","dimensions":"L"},
+    {"symbol":"a_i","meaning":"core smoothing radius","si_unit":"m","dimensions":"L"},
+    {"symbol":"Gamma_i","meaning":"signed circulation","si_unit":"m^2/s","dimensions":"L^2 T^-1"},
+    {"symbol":"t","meaning":"absolute substrate time","si_unit":"s","dimensions":"T"}
+  ],
+  "equations": [
+    {"id":"E1","purpose":"regularized mutual induction quadrature","latex":"u_i = (Gamma_j / 4pi) integral (d ell_j cross (x_i-x_j)) /(abs(x_i-x_j)^2+a_j^2)^(3/2)","inputs":["R_i","z_i","R_j","z_j","Gamma_j","a_j"],"outputs":["dot_R_i","dot_z_i"],"dimensional_check":"(L^2/T)(L)(L)/(L^3)=L/T"},
+    {"id":"E2","purpose":"thin-core self speed","latex":"U_self=Gamma_i/(4pi R_i)[log(8R_i/a_i)-1/4]","inputs":["Gamma_i","R_i","a_i"],"outputs":["dot_z_i"],"dimensional_check":"(L^2/T)/L=L/T"},
+    {"id":"E3","purpose":"conditional core-area closure","latex":"a_i(t)^2 R_i(t)=a_i(0)^2 R_i(0)","inputs":["a_i","R_i"],"outputs":["a_i(t)"],"dimensional_check":"L^3=L^3"},
+    {"id":"E4","purpose":"rank crossing observable","latex":"Delta_z=z_2-z_1; events are sign crossings of Delta_z","inputs":["z_1","z_2","t"],"outputs":["n_cross","crossing_times"],"dimensional_check":"Delta_z has dimensions L"}
+  ],
+  "observables": [
+    {"id":"O1","definition":"crossing count as geometric rank swaps, not energy levels","equation_refs":["E4"],"unit":"1"},
+    {"id":"O2","definition":"relative spatial quadrature and temporal RK4 endpoint differences","equation_refs":["E1","E2"],"unit":"1"},
+    {"id":"O3","definition":"independent C++ double precision parity","equation_refs":["E1","E2","E3"],"unit":"1"}
+  ],
+  "steps": [
+    {"id":"S1","operation":"Generate analytic identical-axis circular ring initial data and hash config","formula_refs":["E1"],"gate":"G1"},
+    {"id":"S2","operation":"Run Python NumPy FP64 reduced ODE with RK4","formula_refs":["E1","E2","E3"],"gate":"G2"},
+    {"id":"S3","operation":"Compare independent native C++ output if truly executed","formula_refs":["E1","E2"],"gate":"G5"},
+    {"id":"S4","operation":"Record geometric rank swaps; refuse energy level inference","formula_refs":["E4"],"gate":"G3"}
+  ],
+  "falsification_criteria": [
+    {"id":"F1","criterion":"Fail reduced-model numerical adequacy when angular-quadrature relative difference > 0.02 or temporal difference > 0.01","conclusion_if_met":"FAIL"},
+    {"id":"F2","criterion":"No physical spin-1/2 confirmation without derived sign-changing 2pi holonomy and 4pi return","conclusion_if_met":"UNRESOLVED"},
+    {"id":"F3","criterion":"Any order crossings alone count only as geometric ordering","conclusion_if_met":"NO_QUANTUM_LAYER_CLAIM"}
+  ],
+  "edge_cases": ["Core overlap breaks reduced model", "Gamma_pol=0 makes chi undefined", "Finite box and background rotation change symmetries", "Ring geometry may fail slender-core approximation"],
+  "predictions": ["Circulation sign reversal reverses instantaneous induced velocities", "Same-signed rings can undergo repeated axial rank swaps in scanned reduced regimes", "Axial rank crossings need not correlate with discrete intrinsic energy levels"]
+}

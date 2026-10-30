@@ -1,0 +1,99 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=21mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,hyperref}
+\usepackage[T1]{fontenc}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A999 -- E010 Cross-Backend Integration Control\\Frozen Software Validation Protocol}
+\author{SST-Workbench / Framework v1.1.0}
+\date{Numerical integration control; no physical certification}
+\begin{document}\maketitle
+% SST-REPORT-SECTION:IDENTIFICATION
+\section{Identification, scope, status}
+This document preregisters the A999 template-integration control. The sole purpose is to verify E010 v0.4.0 geometry intake, a local self-contained runtime, independent execution records from Python, native C++/pybind11, and one chosen graphics processor (Intel XPU by default, optional NVIDIA CUDA), numerical comparisons, automatic reporting, and immutable packaging. A technical PASS is not an SST physical claim. The frozen \texttt{CONTROL\_PIN.json} pins the exact source record and export manifest. No physical SI calibration exists.
+% SST-REPORT-SECTION:QUESTION
+\section{Research question and objective}
+Can a verified single-component historical E010 seed, with a fixed periodic-midpoint Biot--Savart discretization and fixed query locations, produce mutually consistent observables through at least two independently executed implementation categories? This is a software validation question, not a test of fluid equilibrium or knot stability.
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Null and alternative hypotheses}
+Null $H_0$: at least one demanded implementation is unavailable, produces incompatible outputs, changes the pinned input identity, or exceeds its parity threshold. Alternative $H_1$: Python executes plus at least one additional implementation and each executed independent backend meets the appropriate relative error bound. Passing $H_1$ does not reject a hydrodynamic physical null hypothesis. Missing hardware is UNRESOLVED rather than a physical FAIL.
+% SST-REPORT-SECTION:ASSUMPTIONS
+\section{Assumptions and limits}
+This is a static one-filament calculation in the native numerical coordinate system. It assumes closed periodic indexing and uses eight query positions away from the nominal string. The displayed data originate from one historical source record, not independent geometry providers. The 512 vertices or other exported resolution are accepted as represented; neither isotopy nor convergence has been checked. A changed mesh, radius or scale requires a new control version.
+% SST-REPORT-SECTION:SYMBOLS
+\section{Symbols, units and dimensional audit}
+\begin{longtable}{p{0.17\linewidth}p{0.57\linewidth}p{0.16\linewidth}}\toprule
+Symbol & Definition & Numerical units \\ \midrule
+$\mathbf{x}_j$ & Vertex of the exported closed filament & coordinate $U_L$ \\
+$\mathbf{q}_k$ & Query position, $k=1,\ldots,8$ & $U_L$ \\
+$\Gamma$ & Prescribed circulation, $1$ & $U_L^2/U_T$ \\
+$a$ & Core regularization, $0.04\max_j\|\mathbf{x}_j-\bar{\mathbf{x}}\|$ & $U_L$ \\
+$\mathbf{v}_k$ & Discrete induced velocity & $U_L/U_T$ \\ \bottomrule\end{longtable}
+Units are formal numerical $U_L,U_T$, \emph{not} metres or seconds. Each segment term $\Delta\mathbf{l}\times\mathbf{r}/(\|\mathbf{r}\|^2+a^2)^{3/2}$ has dimensions $U_L^{-1}$, yielding $U_L/U_T$ after multiplication by circulation.
+% SST-REPORT-SECTION:EQUATIONS
+\section{Mathematical operator and observables}
+The exact discrete operator is the fixed periodic-midpoint regularized Biot--Savart formula
+\begin{equation}
+\mathbf{v}(\mathbf{q})=\frac{\Gamma}{4\pi}\sum_{j=0}^{N-1}
+\frac{(\mathbf{x}_{j+1}-\mathbf{x}_{j})\times
+[\mathbf{q}-\frac{1}{2}(\mathbf{x}_{j}+\mathbf{x}_{j+1})]}
+{\left(\left\|\mathbf{q}-\frac{1}{2}(\mathbf{x}_{j}+\mathbf{x}_{j+1})\right\|^2+a^2\right)^{3/2}},\qquad \mathbf{x}_N=\mathbf{x}_0.
+\label{eq:E1}
+\end{equation}
+The numerical comparison uses
+\begin{equation}
+\epsilon_b=\frac{\|\mathbf{V}_b-\mathbf{V}_{\mathrm{Py64}}\|_2}{\|\mathbf{V}_{\mathrm{Py64}}\|_2},\qquad
+\mathbf{V}_b\in\mathbb{R}^{24};\quad \|\mathbf{V}_{\mathrm{Py64}}\|_2>10^{-30}.
+\label{eq:E2}
+\end{equation}
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{}
+% SST-REPORT-SECTION:ALGORITHM
+\section{Algorithm and code mapping}
+First verify the E010 exported dataset and its manifest digest, record ID and component count. Then form the centroid and maximum vertex distance, calculate eight preregistered relative query positions and $a=0.04R$, and evaluate Eq.~\eqref{eq:E1} on Python float64. C++/pybind11 float64 is independently compiled and executed if available. Intel XPU or NVIDIA CUDA executes a @@GPU_PRECISION_TEXT@@ variant if available. The framework hashes each source and result file and refuses mismatched input identities. The G10 integration gate checks the actual measured parities. No Euler evolution step is performed.
+% SST-REPORT-SECTION:SOURCES
+\section{Source provenance and independent evidence}
+Source E010 v0.4.0 is a historical trefoil sample exported by the PKLSA Universal Atlas Adapter v0.1.0. The original export keeps provenance, geometry, raw-source hashes, and a guarded scientific admission field \texttt{NOT\_GRANTED}. This test uses one record, not independent measurements. The input export is included in the generated instance and its manifest is pinned before freezing. No remote catalog or historical falsifier is modified.
+% SST-REPORT-SECTION:GATES
+\section{Gate definitions and decision rules}
+\begin{longtable}{p{0.12\linewidth}p{0.57\linewidth}p{0.21\linewidth}}\toprule
+Gate & Requirement & Expected technical outcome \\ \midrule
+G0 & Frozen protocol integrity checked by runner & PASS \\
+G1 & Exact pinned E010 readback with finite single filament & PASS \\
+G2 & Nonzero, finite $8\times3$ Python reference & PASS \\
+G10 & At least two implementation categories, including Python; each extra backend within its tolerance & PASS / FAIL / UNRESOLVED \\ \bottomrule\end{longtable}
+G10 does not depend on experimental or source-independent stability gates. An implementation availability failure cannot masquerade as an executed scientific kernel. The frozen framework exit status distinguishes blocked execution from invalid physical hypotheses.
+% SST-REPORT-SECTION:NUMERICS
+\section{Numerics, tolerances and limitations}
+Python and C++ use IEEE float64; the selected GPU uses @@GPU_PRECISION_TEXT@@. Preregistered tolerance is $\epsilon_{\mathrm{cpp}}<10^{-10}$ and $\epsilon_{\mathrm{gpu}}<@@GPU_TOL_LATEX@@$, with a strict nonzero Python reference. No spatial or temporal convergence has been measured. The regularization ratio $a/R=0.04$ is a diagnostic choice, not an experimentally calibrated vortex core. This release control is not an Euler benchmark.
+% SST-REPORT-SECTION:BACKENDS
+\section{Backend authority and no-fallback policy}
+Python is the numerical reference; native C++ is an independent implementation; GPU @@GPU_PRECISION_TEXT@@ is numerical screening only. The framework records machine-checked source hashes, numeric output arrays, device types, compiled binary digests where applicable, and a shared input SHA-256. Intel XPU is the default. CUDA is an explicit opt-in separate environment; two graphics cards still count as just one GPU category. G10 fails if measured parity exceeds the frozen threshold, and execution certification remains distinct from physical inference.
+% SST-REPORT-SECTION:BLINDNESS
+\section{Blindness and reveal}
+This is a publicly defined numerical software control. There are no undisclosed physical targets, fitted particle labels, or private reveal mappings. Existing instance nonce and commitment infrastructure remains enabled to preserve framework regression coverage; \emph{no REVEAL phase is requested}. Externally supplied dataset IDs are not randomized or promoted to independent evidence. No private reveal metadata is put in the blind ZIP.
+% SST-REPORT-SECTION:STATISTICS
+\section{Statistical model and selection effects}
+The computation is deterministic: one geometrical record, one fixed set of eight query positions and one specified core parameter. There are no statistical trials, $p$-values, confidence intervals or multiplicity adjustments. This prevents claims of stochastic significance. Historical record selection does not represent an unbiased sample or independent replication. No hyperparameter retuning is permitted after the protocol freeze.
+% SST-REPORT-SECTION:RESULTS
+\section{Automatically measured results and reproducibility}
+The immutable data and numeric parity records appear in the run's \texttt{AUTO\_BACKEND\_MATRIX.json} and independent science evidence manifest. The generated gate ledger is included below without modifying this frozen protocol. Both diagnostic FAIL and incomplete evidence must be retained rather than omitted.
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\emph{Run results are inserted automatically after execution.}}
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Interpretation, falsifiers and minimal follow-up}
+A G10 PASS is only evidence that the chosen software paths performed the same discretized numerical calculation within registered tolerances. G10 FAIL identifies a numerical discrepancy requiring independent debugging. Missing hardware or an invalid source pin yields UNRESOLVED. This test cannot establish finite-core convergence, dynamical self-confinement, trefoil equilibrium, physical source independence, SI calibration, or conservation of fluid invariants. A true physical falsifier requires separate preregistered hypotheses, a time integrator, spatial and temporal convergence, and independent controls.
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Reproduction and artifact contract}
+A generated instance contains a frozen copy of the framework runtime, a guarded E010 consumer export and hashed C++/Python/GPU code. Execute in the environment compatible with the requested provider:\par
+\texttt{run\_all.cmd FREEZE}\par
+\texttt{run\_all.cmd FULL}\par
+\texttt{run\_all.cmd REPORT\_ONLY} (optional independent rendition).\par
+The complete run emits the gate ledger, backend evidence, immutable manifests, a published PDF and a blind ZIP with a SHA-256 sidecar. Historical output directories are never overwritten.
+\section{Bibliography}
+\begin{thebibliography}{2}
+\bibitem{BS} J.-B. Biot and F. Savart (1820), historical derivation of induced magnetic fields; numerical \emph{vortex-filament} analogy is strictly classical and regularized.
+\bibitem{SSTAtlas} SST-Workbench (2026), E010-v0.4.0 Combined Seed Atlas and PKLSA Universal Atlas Adapter v0.1.0, project dataset/consumer contracts.
+\end{thebibliography}
+\end{document}

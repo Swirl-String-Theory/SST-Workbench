@@ -32,7 +32,7 @@
     if(el.checked!==!!checked)return dispatch(id,!!checked);
     return true;
   };
-  const inputs=['tubeFallbackFraction','knot','modeBs','modeLia','freeTranslation','guard','core','motionMedium','demoGamma','playbackSpeed','runMotionDemo','fastPreview',
+  const inputs=['useNumericalTubeRadius','tubeFallbackFraction','knot','modeBs','modeLia','freeTranslation','guard','core','motionMedium','demoGamma','playbackSpeed','runMotionDemo','fastPreview',
     'backgroundMode','backgroundOmega','backgroundSpacing','backgroundSide','backgroundNodes','backgroundLines',
     'displayParticles','displayStreamlines','displayKnot','density','lines','tube','modelAExport','reseed','play','reset'];
   const status=(message,mode='idle')=>{
@@ -198,6 +198,7 @@
     window.__vlTwistFlowOverlayParticles=true;
     window.__vlModelAIdealRequested=true; // opt-in: root VortexLab/benchmarks remain unchanged
     window.__vlIdealTubeDisplayRequested=true; // P7.x visual-only ideal / transfer tube
+    window.__vlNumericalTubeDisplayRequested=false; // explicitly selectable visual-only radius
     window.__vlTubeVisualSettings={fallbackFraction:0.12};
     window.__vlTwistFlowPreviewN=0; // opt-in only: native geometry is the default
     // Fetch only the legacy CONTROL DOM. No index page is rendered or navigated to.
@@ -320,6 +321,15 @@
     const s=window.__vlTubeVisualDiagnostics?.();
     const el=$('tubeVisualStatus');if(!el||!s)return;
     const diameter=Number(s.diameterScene);
+    if(s.status==='RENDER_ERROR'){
+      el.textContent=`⚠ Buisweergave mislukt voor component ${s.component}: ${s.message}`;
+      return;
+    }
+    if(window.__vlNumericalTubeDisplayRequested===true){
+      const a=Number(s.numericalRadiusScene);
+      el.textContent=`NUMERIEKE BUISWEERGAVE · getekende radius a_sim=${Number.isFinite(a)?a.toExponential(5):'ongeldig'} scène-m · geen fysische kerncertificering; Model A is nu alleen als diagnostiek zichtbaar.`;
+      return;
+    }
     el.textContent=(s.source==='IDEAL'||s.source==='IDEAL_VOLUME_TRANSFER')
       ?`${s.source==='IDEAL'?'IDEAL':'OVERDRACHT uit '+s.referenceKnotId+' (gelijke Rxy-aanname)'} · referentie-ropelength L/D=${Number(s.ropelength).toFixed(6)} · start-D=${Number(s.referenceDiameterScene).toExponential(3)} scène-m · weergegeven D≈${diameter.toExponential(3)} scène-m · ${s.previewUnqualified?'N192 PREVIEW: isotopie niet geverifieerd · ':''}lokale rek per buisring. a_sim onveranderd.`
       :`SCHEMATISCH (${s.source||'onbekend'}) · weergegeven D≈${Number.isFinite(diameter)?diameter.toExponential(3):'—'} scène-m; geen geometrisch gecertificeerde dikte. a_sim onveranderd.`;
@@ -544,6 +554,12 @@
     checkbox('cShowTubeThickness',!!e.target.checked);
     chooseSegment('visSeg','vis',e.target.checked?'tube':'line');
     renderTubeVisual();
+  });
+  $('useNumericalTubeRadius').addEventListener('change',e=>{
+    window.__vlNumericalTubeDisplayRequested=!!e.target.checked;
+    window.__vlRefreshTubeVisualization?.();
+    renderTubeVisual();
+    updateReadouts();
   });
   $('tubeFallbackFraction').addEventListener('input',e=>{
     const pct=Math.max(2,Math.min(30,Number(e.target.value)||12));

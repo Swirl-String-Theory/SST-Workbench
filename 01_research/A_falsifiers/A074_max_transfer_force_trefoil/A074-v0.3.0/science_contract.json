@@ -1,0 +1,225 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "For the v0.2.0 frozen Gilbert 3:1:1 trefoil candidate, is a full distributed-vorticity 3-D incompressible Euler relative equilibrium found and spatially/time/finite-core qualified, without changing the initial candidate between search and pilot?",
+  "objective": "P1 frozen same-seed handoff; P2 full-field rigid-motion residual in Euler omega; P3 temporal/spatial/finite-core convergence only. No physical stability, force-limit or gravitational claims in v0.3.0.",
+  "null_hypothesis": "H0: the pinned candidate fails to exhibit a discretization-qualified full-field relative equilibrium within the specified resolution range (residual > 0.05).",
+  "alternative_hypothesis": "H1: the pinned candidate has full-field relative-equilibrium residual <= 0.05 and numerical convergence on spatially well resolved cores and nonlocal gaps.",
+  "assumptions": [
+    "Incompressible inviscid periodic Euler, constant density, no body forcing in P1-P3",
+    "Finite-width vorticity generated from periodicized compact C2 tube convolution and solenoidal Fourier projection; periodic image and de-aliasing artifacts documented",
+    "Gilbert 3:1:1 seed and v0.2.0 candidate immutable for this study; model units are SI but not canonical SST physical scales",
+    "Rigid rotation is not globally periodic on a periodic cube: fitted rotating frame is a local diagnostic, not a certified global relative equilibrium",
+    "No stability / load-to-failure tests, no GR or c4/G target in blind code",
+    "Two genuinely executed independent backends required by Framework 1.1.0; pure Python only is diagnostic"
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "velocity",
+      "si_unit": "m/s",
+      "dimensions": "L/T"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "vorticity",
+      "si_unit": "1/s",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "Gamma",
+      "meaning": "initial circulation",
+      "si_unit": "m^2/s",
+      "dimensions": "L^2/T"
+    },
+    {
+      "symbol": "a",
+      "meaning": "core support radius",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "p",
+      "meaning": "pressure",
+      "si_unit": "Pa",
+      "dimensions": "M/(L T^2)"
+    },
+    {
+      "symbol": "U",
+      "meaning": "uniform rigid-frame translation",
+      "si_unit": "m/s",
+      "dimensions": "L/T"
+    },
+    {
+      "symbol": "Omega",
+      "meaning": "rigid-frame angular velocity",
+      "si_unit": "rad/s",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "Romega",
+      "meaning": "full vorticity relative-stationarity residual",
+      "si_unit": "1",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "3D incompressible Euler",
+      "latex": "\\partial_t\\mathbf u+ (\\mathbf u\\cdot\\nabla)\\mathbf u=-\\nabla p/\\rho,\\quad\\nabla\\cdot\\mathbf u=0",
+      "inputs": [
+        "u",
+        "p",
+        "rho"
+      ],
+      "outputs": [
+        "u"
+      ],
+      "dimensional_check": "All momentum terms in m s^-2"
+    },
+    {
+      "id": "E2",
+      "purpose": "unforced vorticity evolution",
+      "latex": "\\partial_t\\boldsymbol\\omega=\\nabla\\times(\\mathbf u\\times\\boldsymbol\\omega),\\quad\\boldsymbol\\omega=\\nabla\\times\\mathbf u",
+      "inputs": [
+        "u",
+        "omega"
+      ],
+      "outputs": [
+        "omega"
+      ],
+      "dimensional_check": "Both sides s^-2"
+    },
+    {
+      "id": "E3",
+      "purpose": "six parameter full field relative equilibrium fit",
+      "latex": "\\mathcal R=\\frac{\\min_{\\mathbf U,\\boldsymbol\\Omega}\\|\\partial_t\\boldsymbol\\omega+(\\mathbf U+\\boldsymbol\\Omega\\times\\mathbf r)\\cdot\\nabla\\boldsymbol\\omega-\\boldsymbol\\Omega\\times\\boldsymbol\\omega\\|_{L^2}}{\\|\\partial_t\\boldsymbol\\omega\\|_{L^2}}",
+      "inputs": [
+        "omega",
+        "u",
+        "U",
+        "Omega"
+      ],
+      "outputs": [
+        "Romega"
+      ],
+      "dimensional_check": "Numerator and denominator s^-2 m^3/2, ratio dimensionless"
+    },
+    {
+      "id": "E4",
+      "purpose": "finite core cell budget",
+      "latex": "\\mathcal N_a=a/\\Delta x,\\quad \\mathcal N_g=(d_{\\min}-2a)/\\Delta x,\\quad\\Delta x=B/N",
+      "inputs": [
+        "a",
+        "B",
+        "N"
+      ],
+      "outputs": [
+        "Ncore",
+        "Ngap"
+      ],
+      "dimensional_check": "both cell counts dimensionless"
+    },
+    {
+      "id": "E5",
+      "purpose": "energy conservation of unforced Euler and temporal convergence",
+      "latex": "E(t)=\\frac{\\rho}{2}\\int_{\\Omega}|\\mathbf u|^2\\,dV,\\quad \\delta_E=\\frac{E(T)-E(0)}{E(0)}",
+      "inputs": [
+        "rho",
+        "u"
+      ],
+      "outputs": [
+        "E",
+        "deltaE"
+      ],
+      "dimensional_check": "E in kg m^2 s^-2, drift dimensionless"
+    }
+  ],
+  "observables": [
+    {
+      "id": "O1",
+      "definition": "same seed + selection + input SHA-256 and finite core gap at all grids",
+      "equation_refs": [
+        "E4"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O2",
+      "definition": "full Euler distributed vorticity rotating/translating relative frame residual",
+      "equation_refs": [
+        "E2",
+        "E3"
+      ],
+      "unit": "1"
+    },
+    {
+      "id": "O3",
+      "definition": "spatial, temporal and finite-core grid discrepancy for fixed final T",
+      "equation_refs": [
+        "E4",
+        "E5"
+      ],
+      "unit": "1"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "operation": "load pinned exact v0.2 selection and original Gilbert trefoil geometry, verify hashes at each grid and avoid re-optimizing on validation grids",
+      "formula_refs": [
+        "E4"
+      ],
+      "gate": "G1"
+    },
+    {
+      "id": "S2",
+      "operation": "construct divergence-free finite width vorticity and projected Euler RHS and solve 6-parameter least squares for full-field stationarity",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S3",
+      "operation": "evolve unforced Euler to fixed absolute time 0.1s using CFL-limited RK4 on ascending resolutions; independent dt halving at n48",
+      "formula_refs": [
+        "E1",
+        "E4",
+        "E5"
+      ],
+      "gate": "G7"
+    }
+  ],
+  "falsification_criteria": [
+    {
+      "id": "F1",
+      "criterion": "No full-field R<=0.05 in admissible core+gap-resolved grids, within pinned candidate",
+      "conclusion_if_met": "FAIL_WITHIN_FIXED_CANDIDATE_ONLY"
+    },
+    {
+      "id": "F2",
+      "criterion": "Core radius <8 cells or nonlocal free gap <3 cells",
+      "conclusion_if_met": "UNRESOLVED_CORE"
+    },
+    {
+      "id": "F3",
+      "criterion": "Only one of Python/C++/GPU executed genuine numerical implementation",
+      "conclusion_if_met": "UNRESOLVED_2_OF_3"
+    }
+  ],
+  "edge_cases": [
+    "Initial vorticity Fourier projection has noncompact tails",
+    "Numerical continuity of nonlinear Euler is not proven by a small divergence residual",
+    "Rigid rotation not a periodic symmetry of this cube",
+    "Topological fidelity not checked by material markers alone",
+    "Near-contact gaps smaller than one grid cell",
+    "No arbitrary source data rerandomization after v0.2 selection"
+  ],
+  "predictions": [
+    "If a solution exists within this specific geometry, full-field residual will decrease to <= 5% on resolved grids",
+    "If no equilibrium at pinned parameters, high residual persists as resolution improves; other geometries remain open"
+  ]
+}

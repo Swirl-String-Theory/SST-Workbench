@@ -1,0 +1,1 @@
+A054-v0.6.0 is a cross-falsifier member (`stage=30`) and supersedes v0.5.0 for future E013 state-selection runs. Do not overwrite or delete A054-v0.4.0-r3 or A054-v0.5.0; their outputs remain frozen historical records and are not scientific inputs to v0.6.0.

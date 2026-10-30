@@ -14,11 +14,11 @@ gridsize = 1
 num_field_points = 5  # Number of points in the plane around each coil segment
 field_radius = 0.2  # Radius of the circular magnetic field lines
 # Define coil parameters
-turns = 12  # Number of turns in the helical coil
+turns = 2  # Number of turns in the helical coil
 height = 1  # Height of the coil
 points_per_turn = 288  # Resolution of the coil
-R, r = 0.5, 0.5  # Major and minor radius of the torus
-num_turns = 12  # Total Rodin turns per phase
+R, r = 1, 0.154  # Major and minor radius of the torus
+num_turns = 2  # Total Rodin turns per phase
 time_steps = 100  # Number of frames in animation
 omega = 2 * np.pi * 1  # Angular frequency (1 Hz)
 scaling_factor = 0.1  # Scale factor for E-field visualization
@@ -27,9 +27,9 @@ theta = np.linspace(0, 2 * np.pi, points_per_turn)  # Angle around the central r
 phi = np.linspace(0, 2 * np.pi, points_per_turn)  # Angle around the tube
 Theta, Phi = np.meshgrid(theta, phi)
 # Compute torus coordinates
-X = (R + r * np.cos(Phi)) * np.cos(Theta)
-Y = (R + r * np.cos(Phi)) * np.sin(Theta)
-Z = r * np.sin(Phi)
+X = (R + r * np.cos(3*Phi)) * np.cos(3*Theta)
+Y = (R + r * np.cos(3*Phi)) * np.sin(3*Theta)
+Z = r * np.sin(3*Phi)
 # Define a 3D grid for visualization
 x_range = np.linspace(-gridsize, gridsize, 9)
 y_range = np.linspace(-gridsize, gridsize, 9)
@@ -75,7 +75,7 @@ def get_coil(type = "helical"):
     t = np.linspace(0, 2 * np.pi * turns, points_per_turn)
 
     # Define a helical spiral through the center hole
-    num_helix_turns = 72  # Number of turns of the spiral
+    num_helix_turns = 3  # Number of turns of the spiral
     helix_theta = np.linspace(0, num_turns*2 * np.pi, points_per_turn*4)  # More resolution
     helix_phi = num_helix_turns * helix_theta  # Wraps 3 times around r per full revolution of R
 

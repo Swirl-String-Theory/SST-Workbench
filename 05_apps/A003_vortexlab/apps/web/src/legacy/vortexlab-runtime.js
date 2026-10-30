@@ -4492,7 +4492,7 @@ function updateCoreRadiusLimit(clampValue=true){
     ?` Expertmodus: 3a=${fmtLengthSI(ct.physical)} ligt onder de numerieke afstandsvloer ${fmtLengthSI(ct.numerical)}; contactdetectie gebruikt de numerieke vloer.`
     :'';
   const note=document.getElementById('coreLimitNote');
-  if(note)note.textContent=`Geometrische tube-reach ≈ ${maxMm.toFixed(3)} mm (kromming / doubly-critical zelfafstand). Dit is de zelfcontactgrens; de slanke filamentbenadering wordt al ruim vóór deze grens rood.${floorNote}`;
+  if(note)note.textContent=`Geometrische tube-reach ≈ ${maxMm.toFixed(3)} mm (kromming / doubly-critical zelfafstand). Dit is de zelfcontactgrens; de slanke filamentbenadering wordt al ruim vóór deze grens rood.${wasClamped?' ⚠ a_sim is begrensd op geometrische maximumstraal; de gevraagde waarde is niet overgenomen.':''}${floorNote}`;
   updateCoreQualificationReadout();
   syncHybridNumberInputs();
 }
@@ -4984,6 +4984,7 @@ function resetState(){
   K3=new Float64Array(Y.length);K4=new Float64Array(Y.length);TT=new Float64Array(Y.length);
   vlDiscrete.setup();
   tPhys=0;phi=0;bundlePhi=0;flagged="";warned=false;lastUmax=1e-9;
+  window.__vlHudDiagnosticCache=null; // avoid stale visual-frame velocities after geometry reset
   twistFlowAcceptedSteps=0;
   twistFlowReferenceStart=(Y&&Y.length>=3)?[Y[0],Y[1],Y[2]]:null;
   twistFlowReferenceTravel=0;
@@ -5869,7 +5870,7 @@ const vlTwistSolidTubeMats=[
   new THREE.MeshStandardMaterial({color:0x55D6FF,emissive:0x164763,emissiveIntensity:0.25,roughness:0.46,metalness:0.06,side:THREE.DoubleSide})
 ];
 let vlTubeRenderDiagnostics={status:'OFF'};
-function vlTwistIsTubeDisplay(){return window.__vlIdealTubeDisplayRequested===true;}
+function vlTwistIsTubeDisplay(){return window.__vlIdealTubeDisplayRequested===true&&window.__vlNumericalTubeDisplayRequested!==true;}
 function vlTwistFallbackRadius(f){
   const settings=window.__vlTubeVisualSettings||{};
   const fraction=Math.max(0.02,Math.min(0.30,Number(settings.fallbackFraction)||0.12));
@@ -5902,7 +5903,7 @@ function vlRescaleTubeRings(geo,curve,radii,segments,radialSegments){
   geo.computeBoundingSphere();
   return geo;
 }
-window.__vlRefreshTubeVisualization=()=>{if(vlTwistIsTubeDisplay()&&typeof rebuildTubes==='function')rebuildTubes(true);};
+window.__vlRefreshTubeVisualization=()=>{if(typeof rebuildTubes==='function')rebuildTubes(true);};
 window.__vlTubeVisualDiagnostics=()=>({...vlTubeRenderDiagnostics});
 
 function updateTubeThicknessHud(){
@@ -5914,7 +5915,7 @@ function updateTubeThicknessHud(){
   const floorNote=r.floorActive?` · ⚠ displayFloor=${fmtLengthSI(r.floorMeters)} ≠ a_sim`:'';
   el.textContent=vlTwistIsTubeDisplay()
     ?`buis (P7.1 weergave): ${vlTubeRenderDiagnostics.status||'—'} · a_sim=${aTxt} [solver, onafhankelijk]`
-    :`buis: a_sim=${aTxt} · display=${dTxt} · r_kern=${kTxt} · n=${Number(r.nQ).toLocaleString('nl-NL')}${floorNote}`;
+    :`buis: a_sim=${aTxt} · display=${dTxt} · r_kern=${kTxt} · n=${Number(r.nQ).toLocaleString('nl-NL')}${floorNote}${vlTubeRenderDiagnostics.status==='RENDER_ERROR'?' · ⚠ RENDER_ERROR: '+vlTubeRenderDiagnostics.message:''}`;
 }
 let sepObjs=[], capDiscs=[], capRings=[], colSils=[], alphaObjs=[];
 let stewartsonTorus=null, stewartsonArrows=null;
@@ -6053,12 +6054,18 @@ function rebuildTubes(force){
     updateTubeThicknessHud();
     return;
   }
-  meshFrame++;if(!force&&meshFrame%2!==0)return;
+  meshFrame++;
+  // Rendering-only budget: rebuilding a full N4096 TubeGeometry every second
+  // frame can stall playback. A change to the numeric radius invokes force=true.
+  const tubeNodes=fils.reduce((n,f)=>n+f.N,0);
+  const tubeRebuildCadence=tubeNodes>2048?24:tubeNodes>512?8:2;
+  if(!force&&meshFrame%tubeRebuildCadence!==0)return;
   tubeObjs.forEach(disposeObj);coreTubeObjs.forEach(disposeObj);betaObjs.forEach(disposeObj);flowObjs.forEach(disposeObj);
   tubeObjs=[];coreTubeObjs=[];betaObjs=[];flowObjs=[];
   const radii=displayTubeRadii();
   const tr=Number.isFinite(radii.aDisplay)?radii.aDisplay:Math.max(Number(P.a)||0,1e-5);
   const twistDisplay=vlTwistIsTubeDisplay();
+  vlTubeRenderDiagnostics={status:twistDisplay?'MODEL_A':'NUMERICAL_RADIUS',numericalRadiusScene:P.a};
   const mats=twistDisplay?vlTwistSolidTubeMats:
     [P.tubeMat==='solid'?matSolidA:matHolA,P.tubeMat==='solid'?matSolidB:matHolB];
   fils.forEach((f,i)=>{
@@ -6104,7 +6111,11 @@ function rebuildTubes(force){
         flowObjs.push(new THREE.Mesh(new THREE.TubeGeometry(curve,f.N,tr*1.6,12,true),flowMat));
         filGrp.add(flowObjs[flowObjs.length-1]);
       }
-    }catch(e){}
+    }catch(e){
+      const detail=String(e&&e.message||e);
+      vlTubeRenderDiagnostics={status:'RENDER_ERROR',component:i,message:detail};
+      console.error('[VortexLab] Buisweergave mislukt (zonder solvermutatie)',{component:i,error:e});
+    }
   });
   if(ghostFil){
     try{
@@ -6738,10 +6749,15 @@ function initNumberSteppers(){
         const count=Math.max(1,Math.round(Math.abs(multiplier)));
         for(let i=0;i<count;i++) direction>0?input.stepUp():input.stepDown();
       }catch(_err){
-        const step=Number(input.step)||1;
         const current=Number(input.value)||0;
         const lo=input.min===''?-Infinity:Number(input.min);
         const hi=input.max===''? Infinity:Number(input.max);
+        // HTML step="any" cannot use stepUp/stepDown. Never jump 1 unit
+        // (1 mm for a_sim) into the geometry cap: use a local bounded nudge.
+        const explicitStep=Number(input.step);
+        const span=hi-lo;
+        const step=Number.isFinite(explicitStep)&&explicitStep>0?explicitStep:
+          (Number.isFinite(span)&&span>0?Math.max(span/200,Math.abs(current)*0.01,1e-12):Math.max(Math.abs(current)*0.01,1e-12));
         input.value=String(clamp(current+Math.sign(direction)*step*multiplier,lo,hi));
       }
       publish();
@@ -8992,12 +9008,21 @@ requestAnimationFrame(loop);
   rebuildStreamlines(false);
   updatePotentialFlowVisual(false);
   updateIndicators(tPhys);
-  let bodyStates=[];
-  if(Y&&fils.length){
+  // Visual HUD only: O(N^2) velocity evaluation every animation frame used
+  // to starve the actual solver on large imported knots. Do not change solver
+  // steps, their CFL bound or the dynamics; throttle diagnostic sampling alone.
+  const hudN=fils.reduce((n,f)=>n+(f.ghost?0:f.N),0);
+  const hudVelocityCadence=hudN>2048?90:hudN>512?30:hudN>256?6:1;
+  const hudGaussCadence=hudN>2048?120:hudN>512?30:3;
+  if(!window.__vlHudDiagnosticCache)window.__vlHudDiagnosticCache={bodyStates:[],frame:-999,n:-1};
+  const hudCache=window.__vlHudDiagnosticCache;
+  if(Y&&fils.length&&(frame-hudCache.frame>=hudVelocityCadence||hudCache.n!==hudN)){
     if(!lastFrameVel||lastFrameVel.length!==Y.length) lastFrameVel=new Float64Array(Y.length);
     velAll(Y,lastFrameVel);
-    bodyStates=fils.map(f=>bodyFrameState(f,lastFrameVel));
+    hudCache.bodyStates=fils.map(f=>bodyFrameState(f,lastFrameVel));
+    hudCache.frame=frame;hudCache.n=hudN;
   }
+  const bodyStates=hudCache.bodyStates;
   updateChiArrows(bodyStates);
   if((stabilityFrame++%12)===0){
     const rep=computeStabilityReport();if(rep)updateStabilityDisplay(rep);
@@ -9006,7 +9031,7 @@ requestAnimationFrame(loop);
     updateSpecClockDisplay();
     if((frame%120)<12)updateFluidQualificationPanel();
   }
-  if(frame%3===0&&!flagged){
+  if(frame%hudGaussCadence===0&&!flagged){
     const Ga=Gamma();
     let Wr=0,Lk=0,ACNpass=0; // v7.2: één exacte passage levert Wr, Lk én ACN; ghost uitgesloten
     for(const f of fils){if(f.ghost)continue;

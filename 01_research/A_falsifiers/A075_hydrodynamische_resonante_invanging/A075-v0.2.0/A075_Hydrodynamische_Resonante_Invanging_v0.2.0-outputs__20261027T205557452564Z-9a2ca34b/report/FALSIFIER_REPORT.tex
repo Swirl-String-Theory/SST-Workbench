@@ -1,0 +1,120 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}
+\usepackage[dutch]{babel}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,graphicx,xcolor,hyperref,fancyhdr,lastpage}
+\hypersetup{hidelinks}\definecolor{main}{HTML}{173249}\definecolor{sub}{HTML}{176A75}
+\newcommand{\rhoF}{\rho_{\!f}}\newcommand{\rc}{r_c}\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\color{sub}A075-v0.2.0 | Falsifier Framework v1.0.10}\fancyhead[R]{\small 27 oktober 2026}
+\fancyfoot[C]{\small Pagina \thepage\ van \pageref{LastPage}}\setlength{\headheight}{15pt}
+\title{\textcolor{main}{A075-v0.2.0}\\Hydrodynamische energie-invanging\\\large Driedimensionale Euler-dynamica, knoopgeometrie en operationele klok}
+\author{SST-Workbench | Framework v1.0.10 adaptor (lokale runstatus in framework-ledger)}
+\date{27 oktober 2026 | \textbf{DEVELOPMENT ONLY}}
+% SST-REPORT-SECTION:IDENTIFICATION
+\begin{document}\maketitle
+\begin{abstract}
+De onderzoeksvraag is of een vrij evoluerende, volledig gekoppelde wervelstructuur na verstrooiing extra lokale energie kan behouden gedurende veel eigen klokcycli, terwijl de lokale fluxbalans en numerieke convergentie sluiten. Deze release introduceert een zelfstandige, driedimensionale, periodieke Fourier--Galerkin-Eulerreferentie, met een finite-core-vorticiteitsinitialisatie, onafhankelijke ontvanger-zonder-broncontrole en twee onafhankelijke resolutierichtingen. Er zijn geen gefitte snelheids-, resonantie- of dempingsparameters. De uitgevoerde \texttt{PREVIEW} is bewust ondergeresolveerd en toont geen bronvertrek of onafhankelijke klok. \textbf{Fysische conclusie: UNRESOLVED.} De originele preview is zonder lokale Framework-FREEZE uitgevoerd. De latere lokale FREEZE- en gate-uitkomsten staan uitsluitend in de automatische framework-ledger.
+\end{abstract}
+% SST-REPORT-SECTION:QUESTION
+% SST-REPORT-SECTION:HYPOTHESES
+\section{Exacte vraag en falsifieerbare nulhypothese}
+\begin{quote}\emph{Kan een vrij evoluerende, volledig gekoppelde wervelstructuur na verstrooiing een positieve lokale energietoename behouden gedurende vele eigen klokcycli, terwijl de energiefluxbalans sluit en het resultaat numeriek convergeert?}\end{quote}
+\textbf{$H_0$:} zolang bronvertrek, lange klokduur en onafhankelijke ruimtelijke, temporele en kern-convergentie ontbreken, is invanging niet aangetoond.\\
+\textbf{$H_1$:} een uit onafhankelijke geometrie en vooraf gekozen parameters verkregen, positieve minimumretentie na geverifieerd vertrek over minstens 100 robuuste ontvangerperioden, met sluitende energieflux in een voldoende opgelost Euler-volume.
+De eis van honderd cycli is hier een \emph{vooraf ingestelde operationele verificatiegrens}, geen nieuwe natuurconstante.
+% SST-REPORT-SECTION:ASSUMPTIONS
+% SST-REPORT-SECTION:SYMBOLS
+% SST-REPORT-SECTION:EQUATIONS
+% SST-REPORT-SECTION:ALGORITHM
+\section{Volledige veldvergelijkingen en druk}
+Met constante dichtheid $\rhoF$, absolute evolutietijd $t$ en vorticiteit $\boldsymbol\omega=\nabla\times\mathbf{u}$:
+\begin{align}
+\nabla\cdot\mathbf{u}&=0, &
+\partial_t\mathbf{u}+\mathbf{u}\cdot\nabla\mathbf{u}&=-\nabla p/\rhoF,\\
+\partial_t\mathbf{u}&=\mathbb{P}(\mathbf{u}\times\boldsymbol\omega), &
+\Delta\left(\frac p{\rhoF}+\frac{|\mathbf{u}|^2}2\right)&=\nabla\cdot(\mathbf{u}\times\boldsymbol\omega).
+\end{align}
+\noindent$\mathbb{P}$ is de divergente-vrije Lerayprojector. De initi\"ele drie gesloten kernen worden gedeponeerd als vorticiteitslijnen en door een expliciet vermelde Gauss-kern gladgemaakt. Het daaropvolgende 3D-veld volgt Fourier--Galerkin-Euler met tweederde-dealiasing en vierde-orde Runge--Kutta. \textbf{Geen cirkelgeometrie wordt tijdens evolutie opgelegd.} Deze numerieke benadering is geen bewijs van voortbestaan van drie afzonderlijke materiële tubes bij eindige roosterbreedte. De periodieke rand zorgt voor beeldinteracties en vereist een afzonderlijke domeinlengtestudie.
+% SST-REPORT-SECTION:SOURCES
+\section{Knoopconfiguraties en invoerherkomst}
+\begin{center}\begin{tabular}{lll}\toprule
+Test & Receiver 2 & Geometrische autoriteit\\\midrule
+$0_1$ & circulaire unknot & analytische testgeometrie\\
+$3_1$ & torustrefoil $T(2,3)$ & analytische embedding; niet ideaal\\
+$5_2$ & twistknoop & alleen originele \texttt{KNOT\_5\_2\_N2048\_ORIG.xyz}\\
+$6_1$ & twistknoop & alleen originele \texttt{KNOT\_6\_1\_N2048\_ORIG.xyz}\\\bottomrule
+\end{tabular}\end{center}
+In elk geval blijven de eerste ontvanger $0_1$ en de inkomende bron $0_1$. Alle drie hebben eindige, initieel gladde vorticiteitsbreedte. De twee externe twistknopen ontbreken in de geleverde omgeving en worden daarom niet gesimuleerd, noch vervangen door verzonnen knopen. Bij geladen invoerbestanden worden de oorspronkelijke bytes met SHA-256 vastgelegd; de topologische identiteit vereist vervolgens een afzonderlijke verificatie.
+\section{Lokale energie, flux en controle zonder donor}
+De lokale energiedichtheid en het volledige Eulerfluxveld luiden
+\begin{equation}
+ e=\frac{\rhoF}{2}|\mathbf{u}|^2,\qquad
+\partial_t e+\nabla\cdot[(e+p)\mathbf{u}]=0.
+\end{equation}
+Voor een \emph{meebewegend maar vormvast} zacht venster $W(\mathbf{x}-\mathbf{X}(t))$ met venstersnelheid $\mathbf w=\dot{\mathbf X}$:
+\begin{equation}
+\boxed{\frac{d}{dt}\int W e\,dV=\int\nabla W\cdot\bigl[(e+p)\mathbf{u}-e\mathbf{w}\bigr]\,dV.}
+\end{equation}
+Het venster volgt een passieve referentiemarker van de \emph{controle zonder donor}; exact hetzelfde venster wordt voor de run met bron gebruikt. Dit voorkomt dat verschillende vensterposities een schijnbare verandering maken. \textbf{Het venster is geen volledig vervormend materieel volume.} Flux wordt vergeleken met $dE_W/dt$ en bij toekomstige kwalificatie verfijnd in $\Delta x$, $\Delta t$ en de vensterrandbreedte.
+\begin{equation}
+\Delta E_W(t)=E_W^{(\mathrm{bron})}(t)-E_W^{(\mathrm{controle})}(t),\qquad
+\eta_{\mathrm{floor}}=\frac{\inf_{t\in W_{\mathrm{laat}}}\Delta E_W(t)}{E_{\mathrm{donor,isolated}}}.
+\end{equation}
+\textbf{Een positieve waarde bij begin of binnen een kort venster is geen absorptie}: de inkomende kern kan nog binnen het venster zijn, de ontvangende geometrie kan zijn verplaatst en de energie omvat interferentiekruistermen. $\eta_{\mathrm{floor}}$ is daarom pas een \emph{retentiemaat} na apart bronvertrek, latetime-klok- en fluxgate.
+\section{Absolute tijd en ontvanger-eigenklok}
+Een klok wordt niet vooraf ge\"identificeerd met de absolute evolutietijd. Eerst moet een onafhankelijk, stabiel periodiek ontvangstsignaal $q_A(t)$ worden gemeten. Zijn uitgepakte fase $\theta_A(t)$ geeft
+\begin{equation}
+ N_A[t_1,t_2]=\frac{\theta_A(t_2)-\theta_A(t_1)}{2\pi},\qquad
+ \Delta\tau_A=\int_{t_1}^{t_2}\frac{d\tau_A}{dt}\,dt.
+\end{equation}
+Er is \emph{geen} automatische klokvalidatie op basis van enkele maxima. Deze release vereist bronvertrek, meer dan honderd gekwalificeerde ontvangercycli en robuuste piekperioden onder resolutieverandering. Een optisch-fotonmodel, atoomidentiteit of intrinsieke PKLSA-klok wordt niet aangenomen.
+% SST-REPORT-SECTION:NUMERICS
+% SST-REPORT-SECTION:STATISTICS
+% SST-REPORT-SECTION:RESULTS
+\section{Numerieke uitvoering: echt uitgevoerde PREVIEW}
+De onderstaande getallen komen uit het zelfstandig uitgevoerde veldmodel, \emph{niet} uit een authentieke Framework-FREEZE. De genormaliseerde eenheden zijn consequent interpreteerbaar als SI-schaalwaarden; er is geen atomair constante-fit gebruikt.
+\begin{center}\begin{tabular}{lrr}\toprule
+Diagnostiek & $0_1$ & $3_1$\\\midrule
+Roostercellen per as (grof / fijner) & 24 / 32 & 24 / 32\\
+Fysieke eindtijd (s) & 1.20 & 1.20\\
+Kernbreedte per grof roosterpunt & 1.32 & 1.32\\
+Maximale CFL-waarde & 0.07037 & 0.08188\\
+Relatieve globale energiedrift & 1.955e-11 & 5.727e-11\\
+Fluxbudgetresidu / beginenergie & 5.122e-05 & 5.857e-05\\
+Ruimtelijke verschilmaat / donorenergie & 0.00389 & 0.01271\\
+Temporele verschilmaat / donorenergie & 4.306e-06 & 9.908e-06\\
+Gekwalificeerde klokperioden & geen & geen\\\bottomrule
+\end{tabular}\end{center}
+De geringe globale energiedrift is een noodzakelijke conserveringscontrole, maar de kernbreedte op het grove rooster is slechts 1.32 rasterstappen; \textbf{beide previewcases zijn dus ondergeresolveerd}. De lokale controleverandering is \emph{niet} een post-exit absorptiemeting. Bronvertrek werd niet gemeten. De onbekende fysische uitkomst is geen negatieve of positieve ontdekking.
+% SST-REPORT-SECTION:GATES
+% SST-REPORT-SECTION:BACKENDS
+% SST-REPORT-SECTION:BLINDNESS
+% SST-REPORT-SECTION:REPRODUCIBILITY
+\section{Wetenschappelijke gates, stopcriteria en framework-integratie}
+\begin{longtable}{@{}p{10mm}p{25mm}p{111mm}@{}}\toprule
+Gate & Status & Reden en minimale vervolgeis\\\midrule\endfirsthead\toprule Gate & Status & Reden\\\midrule\endhead
+G0 & NOT RUN & Authentieke Framework v1.0.10 FREEZE is op dit systeem niet gedraaid. Nieuwe private commitment vereist.\\
+G1 & PASS & A021/A032-methodologiebytes afzonderlijk tegen SHA-256 gecontroleerd.\\
+G2 & UNRESOLVED & Tijd- en ruimterefinement aanwezig, maar kern onvoldoende opgelost; derde niveau en core- en domeinconvergentie ontbreken.\\
+G3 & UNRESOLVED & Geen bewezen bronvertrek, geen robuuste eigenklok en geen honderd-cycli-retentie.\\
+G4 & NOT RUN & Geen vooraf geregistreerde onafhankelijke blind-holdout.\\
+G5/G6 & NOT RUN & Geen native C++/pybind11- of SYCL/device-pariteit voor deze provider.\\
+G7 & BLOCKED & De originele $5_2$/$6_1$ geometriebestanden ontbreken; onafhankelijke topologiecontrole nodig.\\
+G8 & UNRESOLVED & Periodiek Euler-veld bestaat, maar finite-core-, venster-, domein- en topologieconvergentie ontbreken.\\
+G9 & WITHHELD & Geen fysieke statuspromotie of private reveal.\\\bottomrule\end{longtable}
+\noindent\textbf{Exacte gebruikersvolgorde op Windows:} \texttt{python -m pytest -q tests}; \texttt{run\_all.cmd FREEZE}; \texttt{run\_all.cmd BASIC}; \texttt{run\_all.cmd FULL}. Zonder de gedeelde Framework-installatie kan uitsluitend \texttt{python run\_preview.py --profile PREVIEW} worden uitgevoerd. Die stand-alone run is geen Framework-gatevalidatie en kan geen nieuwe frozen protocol-IDs uitgeven. De originele A075-v0.1.0 bestanden en outputs blijven ongewijzigd.
+% SST-REPORT-SECTION:INTERPRETATION
+\section{Eindantwoord}
+\begin{quote}\textbf{UNRESOLVED.} De huidige data bewijzen geen langdurige invanging in een volledig convergente driedimensionale Eulerstroming. De nieuwe release biedt wel een werkelijke 3D-veldprovider, no-donorcontrole, druk-energieboekhouding, reproduceerbare knoopselectie en aparte temporele/ruimtelijke vergelijkingen. De niet-opgeloste bronvertrek-, klok-, kern-, domein- en holdoutgates verhinderen iedere positieve fysische claim.\end{quote}
+\section{Automatisch vastgelegde registratie en gate-uitkomsten}
+Onderstaande gegevens worden uitsluitend tijdens een echte Framework-uitvoering gegenereerd.
+Bij afwezigheid van bestanden is geen framework-gate uitgevoerd.
+\IfFileExists{AUTO_SCIENCE_CONTRACT.tex}{\input{AUTO_SCIENCE_CONTRACT.tex}}{\par\textit{Science-contract: niet aanwezig in deze renderer.}}
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{\par\textit{Run-resultaten: niet aanwezig in deze renderer.}}
+\begin{thebibliography}{9}
+\bibitem{Saffman} P. G. Saffman, \emph{Vortex Dynamics}, Cambridge University Press (1992).
+\bibitem{A021} A021-v0.4.0, Trefoil Lobe Self-Confinement, SST-Workbench methodedossier; bijgevoegd als bytes en SHA-256.
+\bibitem{A032} A032-v0.1.0, Kelvin--Joule Transient Energy, SST-Workbench methodedossier; bijgevoegd als bytes en SHA-256.
+\bibitem{A075} A075-v0.1.0 en afzonderlijke Hamiltoniaanse drieringspilot, verkennende modellen; geen complete Eulerkwalificatie.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,170 @@
+--- v1.0.7/report.py
++++ v1.0.10/report.py
+@@ -20,7 +20,36 @@
+     s = str(s)
+     repl = {"\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#",
+             "_": r"\_", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}"}
+-    return "".join(repl.get(ch, ch) for ch in s)
++    unicode_tex = {
++        "↔": r"\ensuremath{\leftrightarrow}", "→": r"\ensuremath{\rightarrow}",
++        "←": r"\ensuremath{\leftarrow}", "≤": r"\ensuremath{\leq}",
++        "≥": r"\ensuremath{\geq}", "±": r"\ensuremath{\pm}",
++        "×": r"\ensuremath{\times}", "−": r"\ensuremath{-}",
++        "∞": r"\ensuremath{\infty}", "≈": r"\ensuremath{\approx}",
++        "≠": r"\ensuremath{\neq}", "∇": r"\ensuremath{\nabla}",
++        "∂": r"\ensuremath{\partial}", "∈": r"\ensuremath{\in}",
++        "α": r"\ensuremath{\alpha}", "β": r"\ensuremath{\beta}",
++        "γ": r"\ensuremath{\gamma}", "δ": r"\ensuremath{\delta}",
++        "Δ": r"\ensuremath{\Delta}", "φ": r"\ensuremath{\varphi}",
++        "θ": r"\ensuremath{\theta}", "μ": r"\ensuremath{\mu}",
++        "ρ": r"\ensuremath{\rho}", "σ": r"\ensuremath{\sigma}",
++        "τ": r"\ensuremath{\tau}", "ω": r"\ensuremath{\omega}",
++        "Ω": r"\ensuremath{\Omega}", "π": r"\ensuremath{\pi}",
++        "κ": r"\ensuremath{\kappa}", "λ": r"\ensuremath{\lambda}",
++        "ε": r"\ensuremath{\epsilon}", "°": r"\ensuremath{^\circ}",
++        "↻": r"\ensuremath{\circlearrowright}", "↺": r"\ensuremath{\circlearrowleft}",
++        "–": "--", "—": "---", "“": "``", "”": "''", "’": "'",
++    }
++    return "".join(unicode_tex.get(ch, repl.get(ch, ch)) for ch in s)
++
++
++def latex_breakable(value: Any) -> str:
++    """Safely permit wrapping long opaque gate IDs and machine-generated text."""
++    raw = str(value)
++    if len(raw) == 64 and all(ch in "0123456789abcdefABCDEF" for ch in raw):
++        return r"\allowbreak{}".join(raw[i:i+12] for i in range(0,64,12))
++    return (latex_escape(value).replace(r"\_", r"\_\allowbreak{}")
++            .replace("/", r"/\allowbreak{}").replace("-", r"-\allowbreak{}"))
+ 
+ 
+ def validate_report(path: str | Path, *, require_complete: bool = True) -> list[str]:
+@@ -80,38 +109,74 @@
+     env=_load_optional(out/"ENVIRONMENT_PUBLIC.json")
+     backend=_load_optional(out/"BACKEND_MANIFEST.json")
+     src=_load_optional(out/"SOURCE_MANIFEST.json")
+-    output=_load_optional(out/"OUTPUT_MANIFEST.json")
++    evidence=_load_optional(out/"SCIENCE_EVIDENCE_MANIFEST.json")
++    run_identity=_load_optional(out/"RUN_ID.json")
+     lines=[r"% AUTO-GENERATED. Do not edit.", r"\subsection*{Automatic run provenance}", r"\begin{longtable}{p{0.28\linewidth}p{0.64\linewidth}}",
+            r"\toprule", r"Field & Recorded value \\", r"\midrule"]
+     rows=[
+-        ("Protocol bundle SHA-256", frozen.get("bundle_sha256","unavailable")),
++        ("Run ID",run_identity.get("run_id","unavailable")),
++        ("Run phase",("REVEALED" if (out/"RUN_SUMMARY_REVEALED.json").exists() else "BLIND")),
++        ("Protocol bundle SHA-256 (byte exact)", frozen.get("bundle_sha256","unavailable")),
++        ("Portable protocol diagnostic SHA-256", frozen.get("portable_bundle_sha256", "unavailable")),
+         ("Framework schema", frozen.get("schema","unavailable")),
+         ("Python", env.get("python","unavailable")),
+         ("Platform", env.get("platform","unavailable")),
+-        ("Output manifest SHA-256", output.get("manifest_sha256","unavailable")),
++        ("Science evidence SHA-256", evidence.get("manifest_sha256", "unavailable")),
++        ("Final output manifest", "See OUTPUT_MANIFEST.json (finalized after PDF and report metadata)"),
+     ]
+-    for a,b in rows: lines.append(f"{latex_escape(a)} & {latex_escape(b)} \\\\")
+-    lines += [r"\bottomrule", r"\end{longtable}", r"\subsubsection*{Gate ledger}", r"\begin{longtable}{llll}", r"\toprule", r"Gate & Status & Question & Reason \\", r"\midrule"]
++    for a,b in rows: lines.append(f"{latex_escape(a)} & {latex_breakable(b)} \\\\")
++    lines += [r"\bottomrule", r"\end{longtable}", r"\subsubsection*{Gate ledger}", r"\begingroup\small\setlength{\tabcolsep}{3pt}\begin{longtable}{p{0.07\linewidth}p{0.19\linewidth}p{0.31\linewidth}p{0.29\linewidth}}", r"\toprule", r"Gate & Status & Question & Reason \\", r"\midrule"]
++    for rec in ledger.get("records", []):
++        gate = latex_breakable(rec.get("gate_id", ""))
++        status = latex_breakable(rec.get("status", ""))
++        question = latex_breakable(rec.get("question", ""))
++        reason = latex_breakable(rec.get("reason", ""))
++        row = (r"{\ttfamily\scriptsize " + gate + "} & "
++               + r"{\ttfamily\footnotesize " + status + "} & "
++               + question + " & " + reason + " " + "\\\\")
++        lines.append(row)
++    lines += [r"\bottomrule",r"\end{longtable}\endgroup"]
++    lines += [r"\subsubsection*{Scientific qualification (separate from measured gate outcomes)}",
++              r"\begingroup\small\setlength{\tabcolsep}{3pt}\begin{longtable}{p{0.13\linewidth}p{0.37\linewidth}p{0.38\linewidth}}",
++              r"\toprule", r"Gate & Evidence qualification & Blocking prerequisites \\", r"\midrule"]
+     for rec in ledger.get("records",[]):
+-        lines.append("{} & {} & {} & {} \\\\".format(*(latex_escape(rec.get(k,"")) for k in ("gate_id","status","question","reason"))))
+-    lines += [r"\bottomrule", r"\end{longtable}", r"\subsubsection*{Backend manifest}", r"\begin{verbatim}", json.dumps(backend,indent=2,sort_keys=True), r"\end{verbatim}", r"\subsubsection*{Source manifest}", r"\begin{verbatim}", json.dumps(src,indent=2,sort_keys=True), r"\end{verbatim}"]
++        q=latex_breakable(rec.get("qualification", "LEGACY_UNCLASSIFIED"))
++        blockers=latex_breakable(", ".join(rec.get("blocked_by",[])) or "none")
++        lines.append(latex_breakable(rec.get("gate_id","")) + " & " + q + " & " + blockers + " " + "\\\\")
++    lines += [r"\bottomrule",r"\end{longtable}\endgroup"]
++    import textwrap
++    def wrapped_json(obj: dict) -> str:
++        # Display-only wrapping; exact JSON remains in machine-readable manifest files.
++        lines = json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=True).splitlines()
++        return "\n".join("\n".join(textwrap.wrap(line, width=77, drop_whitespace=False,
++                    replace_whitespace=False, break_long_words=True, break_on_hyphens=False) or [""])
++                          for line in lines)
++    lines += [r"\subsubsection*{Backend manifest}",
++              r"\begingroup\footnotesize\begin{verbatim}", wrapped_json(backend),
++              r"\end{verbatim}\endgroup", r"\subsubsection*{Source manifest}",
++              r"\begingroup\footnotesize\begin{verbatim}", wrapped_json(src),
++              r"\end{verbatim}\endgroup"]
+     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+     Path(out_path).write_text("\n".join(lines)+"\n", encoding="utf-8")
+ 
+ 
+-def _latex_engine() -> tuple[str, list[str]] | None:
++def _latex_engine(preferred: str | None = None) -> tuple[str, list[str]] | None:
+     """Return an available LaTeX command without shell indirection."""
+     import shutil
+-    latexmk=shutil.which("latexmk")
+-    if latexmk:
+-        return latexmk,["-pdf","-interaction=nonstopmode","-halt-on-error"]
+-    pdflatex=shutil.which("pdflatex")
+-    if pdflatex:
+-        return pdflatex,["-interaction=nonstopmode","-halt-on-error"]
++    import os
++    wanted = (preferred or os.getenv("SST_LATEX_ENGINE") or "auto").lower()
++    if wanted not in {"auto", "latexmk", "pdflatex", "xelatex", "lualatex"}:
++        raise ValueError(f"unsupported TeX engine: {wanted}")
++    candidates = ["latexmk", "pdflatex", "xelatex", "lualatex"] if wanted == "auto" else [wanted]
++    for engine in candidates:
++        executable = shutil.which(engine)
++        if executable:
++            args = ["-pdf"] if engine == "latexmk" else []
++            return executable, args + ["-interaction=nonstopmode", "-halt-on-error"]
+     return None
+ 
+ 
+-def compile_report_pdf(tex_path: str | Path, destination_pdf: str | Path, *, strict: bool = False) -> dict[str, Any]:
++def compile_report_pdf(tex_path: str | Path, destination_pdf: str | Path, *, strict: bool = False, engine: str | None = None) -> dict[str, Any]:
+     """Compile a falsifier TeX report and publish a clean PDF outside the output tree.
+ 
+     The TeX file is compiled with its own directory as the working directory so
+@@ -125,7 +190,7 @@
+         msg=f"report TeX not found: {tex}"
+         if strict: raise FileNotFoundError(msg)
+         return {"success":False,"status":"SKIP","error":msg,"tex":str(tex),"destination":str(dest)}
+-    eng=_latex_engine()
++    eng=_latex_engine(engine)
+     if eng is None:
+         msg="no LaTeX engine found (latexmk or pdflatex)"
+         if strict: raise RuntimeError(msg)
+@@ -154,17 +219,21 @@
+             if strict: raise RuntimeError(msg)
+             return {"success":False,"status":"FAIL","error":msg,"engine":exe,"tex":str(tex),"destination":str(dest)}
+         dest.parent.mkdir(parents=True,exist_ok=True)
+-        shutil.copy2(built,dest)
++        # x-mode is atomic: existing report evidence must never be overwritten.
++        with dest.open("xb") as dst_fh, built.open("rb") as src_fh:
++            shutil.copyfileobj(src_fh,dst_fh)
+         return {"success":True,"status":"PASS","engine":exe,"tex":str(tex),"destination":str(dest),"size_bytes":dest.stat().st_size}
+ 
+ 
+-def publish_instance_report(instance_root: str | Path, tex_path: str | Path, *, strict: bool = False) -> dict[str, Any]:
+-    """Publish ``<version-folder>_FALSIFIER_REPORT.pdf`` beside the instance folder.
+-
+-    Example:
+-      ...\\A056-v0.2.0\\A056-v0.2.0-outputs\\BLIND\\A056_FALSIFIER_REPORT.tex
+-      -> ...\\A056-v0.2.0_FALSIFIER_REPORT.pdf
++def publish_instance_report(instance_root: str | Path, tex_path: str | Path, *,
++                            strict: bool = False, destination: str | Path | None = None,
++                            engine: str | None = None) -> dict[str, Any]:
++    """Publish an immutable run-scoped PDF beside the instance folder.
++
++    The framework runner always supplies a deterministic run+phase destination.
++    Direct standalone callers without a destination receive a fresh unique suffix.
+     """
++    from .output_policy import new_run_id, report_path
+     root=Path(instance_root).resolve()
+-    destination=root.parent/f"{root.name}_FALSIFIER_REPORT.pdf"
+-    return compile_report_pdf(tex_path,destination,strict=strict)
++    dest=Path(destination) if destination is not None else report_path(root,new_run_id(),"BLIND")
++    return compile_report_pdf(tex_path,dest,strict=strict,engine=engine)

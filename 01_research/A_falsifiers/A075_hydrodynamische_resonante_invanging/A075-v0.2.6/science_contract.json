@@ -1,0 +1,356 @@
+{
+  "schema": "SST-SCIENCE-CONTRACT-2",
+  "research_question": "Can a source-free, fully 3D Euler vorticity-field receiver, composed of closed finite-core rings/knots, retain additional local kinetic energy through an independently observed post-source-exit interval spanning many receiver clock cycles, while local energy flux and convergence close?",
+  "objective": "Adversarial falsification: 3D periodic Euler screening with separate controls for conservative energy, pressure, comoving control volume, explicit 0_1/3_1/5_2/6_1 embeddings, and strong non-promotion of short run proxies.",
+  "null_hypothesis": "H0: no independent qualification of source departure, positive late minimum energy above no-donor control across many cycles and convergent energy-flux closure.",
+  "alternative_hypothesis": "H1: all preregistered post-exit late-time, core, spatial, time, periodic-box, clock and no-donor controls pass in an independent holdout.",
+  "assumptions": [
+    "Periodic, constant-density incompressible Euler equation in absolute time t; no viscosity/damping/forcing after t0",
+    "3D Fourier-Galerkin 2/3-dealiased reference dynamics without imposed geometry symmetry",
+    "Initial smooth finite-width vorticity of closed curves, source topology cannot be inferred from a file name",
+    "0_1 analytic, 3_1 analytic T(2,3) not an ideal-knot seed, 5_2 and 6_1 require authenticated XYZ",
+    "Window moving by passive center marker is translating fixed-shape volume, NOT material volume",
+    "Short PREVIEW cannot qualify post-exit energy absorption or intrinsic clocks",
+    "The adaptive time-step caps protect finite mesh displacement and vorticity rotation proxy but do not themselves guarantee 3D Euler convergence or physical core fidelity."
+  ],
+  "symbols": [
+    {
+      "symbol": "u",
+      "meaning": "3D incompressible velocity",
+      "si_unit": "m/s",
+      "dimensions": "L/T"
+    },
+    {
+      "symbol": "omega",
+      "meaning": "curl u",
+      "si_unit": "s^-1",
+      "dimensions": "1/T"
+    },
+    {
+      "symbol": "p",
+      "meaning": "hydrodynamic pressure",
+      "si_unit": "Pa",
+      "dimensions": "M/(L T^2)"
+    },
+    {
+      "symbol": "rho",
+      "meaning": "density",
+      "si_unit": "kg/m^3",
+      "dimensions": "M/L^3"
+    },
+    {
+      "symbol": "a",
+      "meaning": "finite initial Gaussian vorticity width",
+      "si_unit": "m",
+      "dimensions": "L"
+    },
+    {
+      "symbol": "t",
+      "meaning": "absolute evolution parameter",
+      "si_unit": "s",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "tau_A",
+      "meaning": "operational receiver clock time, only after peak qualification",
+      "si_unit": "s",
+      "dimensions": "T"
+    },
+    {
+      "symbol": "E_W",
+      "meaning": "kinetic energy under common moving window",
+      "si_unit": "J",
+      "dimensions": "M L^2/T^2"
+    },
+    {
+      "symbol": "eta_floor",
+      "meaning": "minimum late excess divided by isolated donor kinetic energy",
+      "si_unit": "1",
+      "dimensions": "1"
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "purpose": "Euler and incompressibility",
+      "latex": "\\partial_t\\mathbf{u}=\\mathbb{P}(\\mathbf{u}\\times\\boldsymbol\\omega),\\ \\nabla\\cdot\\mathbf{u}=0,\\ \\boldsymbol\\omega=\\nabla\\times\\mathbf{u}",
+      "inputs": [
+        "u",
+        "omega"
+      ],
+      "outputs": [
+        "du/dt"
+      ],
+      "dimensional_check": "L/T^2"
+    },
+    {
+      "id": "E2",
+      "purpose": "Pressure-Poisson recovery",
+      "latex": "\\Delta(p/\\rho+|\\mathbf{u}|^2/2)=\\nabla\\cdot(\\mathbf{u}\\times\\boldsymbol\\omega)",
+      "inputs": [
+        "u",
+        "omega"
+      ],
+      "outputs": [
+        "p"
+      ],
+      "dimensional_check": "1/T^2"
+    },
+    {
+      "id": "E3",
+      "purpose": "Local energy balance translating fixed-shape window",
+      "latex": "\\frac{d}{dt}\\int W e\\,dV=\\int\\nabla W\\cdot[(e+p)\\mathbf{u}-e\\mathbf{w}]\\,dV,\\quad e=\\rho|\\mathbf{u}|^2/2",
+      "inputs": [
+        "u",
+        "p",
+        "W",
+        "w"
+      ],
+      "outputs": [
+        "E_W",
+        "flux"
+      ],
+      "dimensional_check": "J/s"
+    },
+    {
+      "id": "E4",
+      "purpose": "Matched donor versus no-donor windows",
+      "latex": "\\Delta E_W(t)=E_W^{\\rm donor}(t)-E_W^{\\rm control}(t)",
+      "inputs": [
+        "window energy"
+      ],
+      "outputs": [
+        "delta E"
+      ],
+      "dimensional_check": "J"
+    },
+    {
+      "id": "E5",
+      "purpose": "Only post-exit retentive floor",
+      "latex": "\\eta_{\\rm floor}=\\inf_{t\\in W_{\\rm late}}\\Delta E_W(t)/E_{\\rm in}",
+      "inputs": [
+        "verified source exit",
+        "late window",
+        "isolated donor E"
+      ],
+      "outputs": [
+        "eta_floor"
+      ],
+      "dimensional_check": "1"
+    },
+    {
+      "id": "E6",
+      "purpose": "Separate absolute time and local receiver clock cycles",
+      "latex": "N_A=\\frac{\\theta_A(t_2)-\\theta_A(t_1)}{2\\pi}",
+      "inputs": [
+        "receiver phase"
+      ],
+      "outputs": [
+        "cycles"
+      ],
+      "dimensional_check": "1"
+    }
+  ],
+  "observables": [
+    {
+      "name": "global_energy_drift",
+      "definition": "Relative maximum global kinetic-energy drift",
+      "unit": "1"
+    },
+    {
+      "name": "window_energy_flux_residual",
+      "definition": "Trapezoidal moving-window energy ledger residual divided by initial global energy",
+      "unit": "1"
+    },
+    {
+      "name": "retention_floor",
+      "definition": "Lower bound on excess window energy over preregistered post-exit interval",
+      "unit": "1"
+    },
+    {
+      "name": "clock_cycles",
+      "definition": "Independent receiver oscillation cycles in late window",
+      "unit": "1"
+    },
+    {
+      "name": "knot_geometry_hash",
+      "definition": "SHA256 of user XYZ when applicable",
+      "unit": "hash"
+    }
+  ],
+  "steps": [
+    {
+      "id": "S01",
+      "operation": "Freeze authentic Framework v1.1.0 protocol locally before scientific runs",
+      "formula_refs": [
+        "E1"
+      ],
+      "gate": "G0"
+    },
+    {
+      "id": "S02",
+      "operation": "Run baseline without donor and matched donor run with identical precommitted control-window trajectory",
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S03",
+      "operation": "Repeat at half timestep holding the absolute physical final time and geometry fixed",
+      "formula_refs": [
+        "E1",
+        "E3",
+        "E4"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S04",
+      "operation": "Repeat at finer grid spacing holding the physical core radius and final time fixed",
+      "formula_refs": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "gate": "G2"
+    },
+    {
+      "id": "S05",
+      "operation": "Check periodic box, core profile, source exit by material transport, and independent clock qualification",
+      "formula_refs": [
+        "E3",
+        "E5",
+        "E6"
+      ],
+      "gate": "G3"
+    },
+    {
+      "id": "S06",
+      "operation": "Execute independent held-out initial conditions and source-qualified knot geometries after locked gates",
+      "formula_refs": [
+        "E4",
+        "E5",
+        "E6"
+      ],
+      "gate": "G4"
+    }
+  ],
+  "falsification_criteria": [
+    "No physical PASS without independently detected source departure and nonzero time separation",
+    "No physical PASS unless late window >100 qualified receiver clock cycles with eta_floor statistically positive and greater than error budget",
+    "Fail on nonconvergent spatial/temporal/core/box scaling, diverging energy, or unresolved flux",
+    "No promotion of a knot label without source hash and independent knot verification",
+    "Never infer photon absorption or full ring topology dissolution from local energy transfer",
+    "Numerical energy drift is reported as signed per-iteration truncation error, separated from physical moving-volume energy flux. CPU/GPU software parity alone cannot certify long-time capture."
+  ],
+  "edge_cases": [
+    "Underresolved initial core a/dx < 3",
+    "Window receives donor near field before exit",
+    "Oscillator peaks not robust or count < 4",
+    "Periodic replica interacts with material structure",
+    "Knot XYZ missing; no implicit synthetic 5_2/6_1",
+    "Numerical reconnection may occur despite inviscid governing PDE"
+  ],
+  "predictions": [
+    "A valid absorbing regime would maintain positive late minimal excess after source has demonstrably departed",
+    "Resonance, if any, should be predictable from independent receiver Floquet modes rather than tuned after capture",
+    "A counterexample occurs when any fully converged receiver returns energy or loses late excess"
+  ],
+  "a075_execution_policy": {
+    "schema": "A075-FROZEN-EXECUTION-MATRIX-v0.2.6",
+    "permitted_modes": [
+      "PREVIEW",
+      "BASIC",
+      "EXTENDED",
+      "FULL"
+    ],
+    "grid_choices": [
+      16,
+      24,
+      32,
+      40,
+      48,
+      56,
+      64,
+      72,
+      80,
+      88,
+      96,
+      104,
+      112,
+      120,
+      128,
+      136,
+      144,
+      152,
+      160,
+      168,
+      176,
+      184,
+      192,
+      200,
+      208,
+      216,
+      224,
+      232,
+      240,
+      248,
+      256
+    ],
+    "grid_up_must_exceed_grid": true,
+    "max_threads": 64,
+    "allowed_backends": [
+      "cpu-scipy-fft",
+      "cpu-numpy-reference",
+      "cpp-hybrid",
+      "arc-xpu",
+      "torch-cpu-reference"
+    ],
+    "arc_sycl_status": "NOT_SUPPORTED_FOR_3D_EULER_BY_SHARED_FRAMEWORK_v1.1.0",
+    "scope": "exploratory numerical refinement, no physics status promotion from one run",
+    "time_dt_must_divide_fixed_t_end": false,
+    "require_runtime_ledger": true,
+    "backend_matrix_selectors": [
+      "py",
+      "cpp",
+      "gpu",
+      "numpy",
+      "torchcpu"
+    ],
+    "cpu_compiler": "Framework v1.1.0 build_pybind, native OpenMP kernel only",
+    "gpu_euler": "PyTorch XPU spectral and pressure solver; runtime availability+precision/parity required, no SYCL worker mislabeling",
+    "adaptive_timestep": {
+      "enabled_by_default": true,
+      "dt_cap_user_override": true,
+      "controller": "min(dt_cap, CFL*dx/Umax, core_shift*sigma/Umax, omega_angle/omega_max, remaining_t)",
+      "max_shift_cells": 0.15,
+      "core_sigma_shift_max": 0.15,
+      "vorticity_turn_proxy_max": 0.12,
+      "fixed_end_time_across_refinements": true,
+      "no_posthoc_tuning_to_favor_capture": true,
+      "failure_on_timestep_floor": true,
+      "numerical_energy_matrix_each_step": true
+    },
+    "cpu_native_scope": "C++ performs full-grid nonlinear cross product; FFT and Leray operator remain SciPy (hybrid, no independent full solver).",
+    "gpu_precision_rule": "FP32 outputs are screening only; parity against CPU-FP64 and device identity required.",
+    "optional_boundary_diagnostics": {
+      "default_enabled": false,
+      "flags": [
+        "--domain-study",
+        "--domain-study-only",
+        "--domains"
+      ],
+      "model": "TRIPLY_PERIODIC_FOURIER",
+      "free_space_solver": false,
+      "required_same_physical_dx": true,
+      "required_same_initial_core_width": true,
+      "required_same_final_time": true,
+      "required_three_or_more_boxes": true,
+      "output_qualification": "PERIODIC_BOX_SENSITIVITY_ONLY",
+      "physics_status_promotion": false
+    }
+  }
+}

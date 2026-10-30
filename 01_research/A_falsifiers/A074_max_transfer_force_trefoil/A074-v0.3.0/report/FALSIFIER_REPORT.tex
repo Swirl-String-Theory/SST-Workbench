@@ -1,0 +1,129 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable}
+\usepackage[hidelinks]{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\newcommand{\vswirl}{\mathbf{v}_{\!\boldsymbol{\circlearrowleft}}}
+\newcommand{\rhoF}{\rho_{\!f}}
+\newcommand{\rhoE}{\rho_{\!E}}
+\newcommand{\rhoM}{\rho_{\!m}}
+\newcommand{\rc}{r_c}
+\title{A074 --- Finite-core Euler Trefoil Relative Equilibrium\\Qualification P1--P3}
+\author{SST-Workbench / independent numerical test}
+\date{v0.3.0 --- 29 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+This preregistered test assesses one exact Gilbert trefoil seed under full three-dimensional Euler vorticity evolution. It isolates candidate handoff, a full-field relative equilibrium residual, and independent spatial/temporal finite-core resolution. It does not claim knot stability, a transferred force ceiling, or gravitational emergence.
+\end{abstract}
+
+% SST-REPORT-SECTION:IDENTIFICATION
+
+\section{Identification, scope and status}
+
+A074-v0.3.0 is a development-only qualification tranche. It imports the Gilbert trefoil 3:1:1 and the fixed A074-v0.2.0 candidate. Framework 1.1.0 RC2 is source-validated but not hardware-canonically certified. These tests cannot establish stability, transferred force or gravitational emergence.
+
+% SST-REPORT-SECTION:QUESTION
+
+\section{Single falsifiable question}
+
+Does the immutable A074-v0.2.0 selected trefoil have a small full three-dimensional Euler vorticity relative-equilibrium residual when translation and rotation are optimized, and is the result spatially and temporally convergent with a resolved material core and nonlocal gap?
+
+% SST-REPORT-SECTION:HYPOTHESES
+
+\section{Competing hypotheses and permitted conclusions}
+
+The null asserts that this single pinned geometric candidate has no numerically qualified Euler relative equilibrium with relative residual at most 0.05 in the declared parameter-free grid study. The alternative requires that threshold, spatial convergence, independently converged time integration, and adequate core and inter-core-gap resolution. Other embeddings are outside scope.
+
+% SST-REPORT-SECTION:ASSUMPTIONS
+
+\section{Explicit assumptions and limitations}
+
+An inviscid, constant-density, incompressible fluid occupies a periodic cube of side 6 model metres. The initial field is a finite-support vorticity deposition projected solenoidal in spectral space. Projected Fourier components have noncompact tails and periodic images. A rigidly rotating reference frame is not globally periodic, so a fitted rotation is a localized diagnostic only.
+
+% SST-REPORT-SECTION:SYMBOLS
+
+\section{Symbols, units and dimensional consistency}
+
+The velocity field $\mathbf u$ is measured in m/s, the vorticity $\boldsymbol\omega=\nabla\times\mathbf u$ in $\mathrm{s}^{-1}$, the nominal circulation $\Gamma$ in $\mathrm{m}^2/\mathrm{s}$, and core radius $a$ in m. The translation $\mathbf U$ has units m/s and angular rate $\boldsymbol\Omega$ has units $\mathrm{s}^{-1}$. All residual ratios are dimensionless.
+
+% SST-REPORT-SECTION:EQUATIONS
+
+\section{Equations and target-free observables}
+
+The main equations are
+\begin{equation}
+\partial_t\mathbf u+(\mathbf u\cdot\nabla)\mathbf u=-\rho^{-1}\nabla p,\qquad \nabla\cdot\mathbf u=0.
+\end{equation}
+The independent full-field residual is
+\begin{equation}
+\mathcal R_\omega=\frac{\min_{\mathbf U,\boldsymbol\Omega}\|\partial_t\boldsymbol\omega+(\mathbf U+\boldsymbol\Omega\times\mathbf r)\cdot\nabla\boldsymbol\omega-\boldsymbol\Omega\times\boldsymbol\omega\|_{L^2}}{\|\partial_t\boldsymbol\omega\|_{L^2}}.
+\end{equation}
+The numerator and denominator both have units $\mathrm{s}^{-2}\mathrm{m}^{3/2}$. The two refinement indicators are $N_a=a/\Delta x$ and $N_g=(d_{\min}-2a)/\Delta x$, both dimensionless.
+
+% SST-REPORT-SECTION:ALGORITHM
+
+\section{Exact algorithm and code mapping}
+
+P1 reads the pinned source JSON, verifies matching geometry parameters and the nonoverlapping core geometry, generates one resampled and adjusted marker curve, and computes a byte-exact SHA-256 identity for that curve. P2 deposits the same marker on each grid, obtains the Euler field, computes the spectral vorticity time derivative, and minimizes a six-parameter Gram system. P3 evolves the same unforced initial field to a fixed physical final time and halves the timestep independently.
+
+% SST-REPORT-SECTION:SOURCES
+
+\section{Source provenance and independence}
+
+The single Gilbert Fourier trefoil 3:1:1 comes from the original ideal-knot record and is distributed as an unmodified copied geometry JSON from A074-v0.2.0. The selected search parameters come from the user-provided EQUILIBRIUM\_SEARCH.json, preserved byte-for-byte. Grid refinements are not independent samples or source replications. The KnotPlot trefoil and E010 atlas were not independently admitted for this tranche.
+
+% SST-REPORT-SECTION:GATES
+
+\section{Qualification gates and stop criteria}
+
+G1 checks the P1 hash, geometry and exact pinned selection. G2 checks pressure Poisson and divergence numerical algebra, but a small value is not a convergence certificate. G3 tests whether the fitted full-field residual is at most 0.05 on resolved grids. P3 is always scored separately in the P1--P3 summary; Framework G7 is reserved for independent cross-source replication and is automatically NOT\_APPLICABLE for this single-source experiment. The runtime 2-of-3 gate remains blocked unless two real implementations execute. Force and physical stability remain explicitly outside these gates.
+
+% SST-REPORT-SECTION:NUMERICS
+
+\section{Numerical convergence, resolution and error budget}
+
+The quick numerical sequence is 32, 48 and 64 cells per side. The extended sequence is 96, 128 and 192, with 288 and 384 as optionally permitted refinements. With $a=0.28$ model metres and cube length $B=6$, each grid must resolve $a/\Delta x\geq 8$ and the nonlocal free gap $(d_{\min}-2a)/\Delta x\geq3$. A fixed $T=0.1$ s and a Courant limit of 0.20 are enforced. Time-step halving is evaluated at 48 cubed cells.
+
+% SST-REPORT-SECTION:BACKENDS
+
+\section{Independent numerical backends and certification}
+
+The current genuine scientific implementation is Python with NumPy Fourier transforms in FP64 arithmetic. A historical pybind11 regularized Biot--Savart template cannot be counted as an independent full-field Euler implementation, and Intel XPU availability is not scientific execution. Framework 1.1.0 requires two executed backends and valid source/input/evidence hashes. If this requirement is not met, FULL intentionally exits with code 3 while preserving diagnostic results.
+
+% SST-REPORT-SECTION:BLINDNESS
+
+\section{Blindness, leakage and reveal protocol}
+
+No target gravitational force, cosmological parameter or force-ceiling comparison is used to construct the candidate, evaluate the Euler residual, or choose grid levels. The private reveal material is not needed for P1--P3; target reveal must remain disabled. Hashes of the candidate and code are recorded. A post hoc alteration of the candidate or acceptance threshold requires a new version, not a rerun of the frozen trial.
+
+% SST-REPORT-SECTION:STATISTICS
+
+\section{Statistics and negative-result semantics}
+
+This is a deterministic numerical convergence study, not a population inference exercise. No claim of independent randomized statistical samples is made. A residual above the threshold on coarse unresolved grids is a restricted negative diagnostic, not proof of mathematical nonexistence. A small marker-curve growth or small residual alone cannot demonstrate a nonlinear stable Euler knot. Any absent grid or backend is explicitly not run.
+
+% SST-REPORT-SECTION:RESULTS
+
+\section{Results and recorded evidence}
+
+The actual measured results are produced by experiment/qualification.py and stored as P1\_CANDIDATE\_IDENTITY.json, P2\_P3\_GRID\_N.json and P1\_P3\_QUALIFICATION\_SUMMARY.json. These files distinguish status from scientific authority. No result is inserted into the frozen preregistration before the corresponding run. A separate scientific report captures the completed local screening without promoting physical stability.
+
+\IfFileExists{AUTO_RESULTS.tex}{\input{AUTO_RESULTS.tex}}{}
+
+% SST-REPORT-SECTION:INTERPRETATION
+
+\section{Interpretation, alternatives and falsifiers}
+
+If the full-field vorticity residual remains above the registered threshold after core, gap, spatial, and temporal convergence, the fixed A074-v0.2.0 candidate is rejected as a relative equilibrium within this periodic Euler setting. This cannot exclude an alternative Fourier embedding, a background-supported equilibrium, a more complex core profile, or a nonperiodic domain. No maximum transferable force is inferred.
+
+% SST-REPORT-SECTION:REPRODUCIBILITY
+
+\section{Reproducibility, code versions and future scope}
+
+Run tests with run\_tests.cmd, local P1--P3 qualification using run\_qualification.cmd, and the extended campaign using run\_qualification\_extended.cmd. The Framework v1.1.0 source snapshot is embedded locally and checked fail-closed. Output artifacts carry source hashes, candidate hashes and gate statuses. P4 perturbation stability, P5 force transfer and P6 gravitational comparison are deliberately deferred.
+
+\section*{Reproducibility note}
+All future physical interpretations require a new version with resolved geometry, a certified independent numerical implementation, and a separately preregistered force transducer. The current artifact is development-only.
+\end{document}
